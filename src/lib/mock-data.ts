@@ -1,0 +1,100 @@
+import type { Contest, LeaderboardEntry, WalletSummary } from "./types";
+
+export const activeContests: Contest[] = [
+  {
+    _id: "demo-ufc-302",
+    title: "UFC 302: Makhachev vs Poirier",
+    slug: "ufc-302-makhachev-vs-poirier",
+    sport: "mma",
+    type: "token",
+    status: "upcoming",
+    eventName: "Main Card · 5 Fights",
+    venue: "T-Mobile Arena, Las Vegas",
+    startsAt: new Date(Date.now() + 28 * 3600_000).toISOString(),
+    lockAt: new Date(Date.now() + 27.5 * 3600_000).toISOString(),
+    entryFee: 10,
+    prizePool: 1258420,
+    entries: 125842,
+    matchup: { fighterA: "Islam Makhachev", fighterB: "Dustin Poirier" },
+  },
+  {
+    _id: "demo-davis-roach",
+    title: "Gervonta Davis vs Lamont Roach",
+    slug: "gervonta-davis-vs-lamont-roach",
+    sport: "boxing",
+    type: "shadow",
+    status: "upcoming",
+    eventName: "WBA Lightweight World Championship",
+    venue: "Fantasy Shadow Fight Arena",
+    startsAt: new Date(Date.now() + 12 * 3600_000).toISOString(),
+    lockAt: new Date(Date.now() + 11.5 * 3600_000).toISOString(),
+    entryFee: 5,
+    prizePool: 500000,
+    entries: 98710,
+    matchup: { fighterA: "Gervonta Davis", fighterB: "Lamont Roach" },
+  },
+  {
+    _id: "demo-glory-93",
+    title: "Glory 93: Heavyweight Grand Prix",
+    slug: "glory-93-heavyweight-grand-prix",
+    sport: "kickboxing",
+    type: "free",
+    status: "upcoming",
+    eventName: "Kickboxing Grand Prix",
+    startsAt: new Date(Date.now() + 50 * 3600_000).toISOString(),
+    lockAt: new Date(Date.now() + 49 * 3600_000).toISOString(),
+    entryFee: 0,
+    prizePool: 120000,
+    entries: 64231,
+  },
+  {
+    _id: "demo-bkfc-63",
+    title: "BKFC 63: Kansas City",
+    slug: "bkfc-63-kansas-city",
+    sport: "bare_knuckle",
+    type: "sponsored",
+    status: "upcoming",
+    eventName: "Bare Knuckle Main Card",
+    startsAt: new Date(Date.now() + 70 * 3600_000).toISOString(),
+    lockAt: new Date(Date.now() + 69 * 3600_000).toISOString(),
+    entryFee: 1,
+    prizePool: 75000,
+    entries: 32176,
+  },
+];
+
+export const leaderboard: LeaderboardEntry[] = [
+  { rank: 1, displayName: "Kelly", score: 2986, payout: 1000 },
+  { rank: 2, displayName: "Tasha", score: 2261, payout: 500 },
+  { rank: 3, displayName: "Shane O.", score: 1878, payout: 250 },
+  { rank: 4, displayName: "Wajih ul Hassan", score: 1566, payout: 100 },
+  { rank: 5, displayName: "TheGhost", score: 1347, payout: 0 },
+];
+
+export const walletSummary: WalletSummary = {
+  tokenBalance: 15250,
+  withdrawableBalance: 2450,
+  promoCreditBalance: 850,
+  lifetimeWinnings: 12780,
+  transactions: [
+    { type: "PROMOTION", description: "Signup Bonus", amount: "+500 Credits", balanceAfter: "850 Credits", status: "Completed" },
+    { type: "TOKENS", description: "Token Purchase", amount: "+5,000 Tokens", balanceAfter: "15,250 Tokens", status: "Completed" },
+    { type: "CONTEST ENTRY", description: "UFC 302: Main Card", amount: "-500 Tokens", balanceAfter: "10,250 Tokens", status: "Completed" },
+    { type: "PRIZE AWARDED", description: "UFC 301: Top 10 Finish", amount: "+1,250 Tokens", balanceAfter: "10,750 Tokens", status: "Completed" },
+  ],
+  payouts: [
+    { date: "May 10, 2025", method: "Bank Transfer", amount: "$100.00", status: "Completed" },
+    { date: "Apr 28, 2025", method: "PayPal", amount: "$75.00", status: "Completed" },
+  ],
+};
+
+export const scoringGlossary = [
+  ["HP", "Hit Prediction", "Predict total significant strikes landed by your fighter.", "100 pts"],
+  ["BP", "Bonus Pick", "Predict a bonus for KO/TKO or submission.", "75 pts"],
+  ["TP", "Total Points", "Max points available per fight.", "250 pts"],
+  ["RW", "Right Winner", "Correct fight winner.", "50 pts"],
+  ["KO", "Knockout / TKO", "Predict a KO/TKO finish.", "75 pts"],
+  ["ST", "Submission", "Predict a submission finish.", "75 pts"],
+  ["KI", "Decision", "Predict if fight goes to decision.", "25 pts"],
+  ["KN", "Correct Round", "Predict the correct round of finish.", "25 pts"],
+];

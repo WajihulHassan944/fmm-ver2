@@ -1,0 +1,33 @@
+{
+  "name": "fantasymmadness-v2-frontend",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Fantasy MMAdness V2 frontend - Next.js + TypeScript client UI.",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "next": "^15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.0",
+    "socket.io-client": "^4.8.1",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.4",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17"
+  }
+}
