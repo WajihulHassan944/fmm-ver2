@@ -1,0 +1,161 @@
+.visitorsAnalyticsWrapper {
+  width: calc(100% - 230px);
+  margin-left: 230px;
+  padding: 40px 20px;
+  background: url('/Assets/backgroundupdated.png') center/cover no-repeat;
+  background-blend-mode: overlay;
+  background-color: rgba(0,0,0,0.3);
+  min-height: 100vh;
+  padding-bottom: 0;
+}
+
+.analyticsHeader {
+  width:100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+    box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.05), /* soft inner shadow */
+    0 5px 15px rgba(0, 0, 0, 0.2);       /* existing outer shadow */
+
+  margin-bottom: 30px;
+}
+
+.analyticsHeader h1 {
+  font-family: 'UfcSansRegular';
+  color: #d20a0a;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.dropdown {
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-family: 'UfcSansRegular';
+  cursor: pointer;
+}
+
+.metricsCards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.metricCard {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.05), /* soft inner shadow */
+    0 5px 15px rgba(0, 0, 0, 0.2);       /* existing outer shadow */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 300px;
+}
+
+.metricCard span {
+  font-size: 17px;
+  color: #444;
+  font-family: 'UfcSansRegular';
+}
+
+.metricCard h3 {
+  font-size: 22px;
+  margin-top: 5px;
+  color: #d20a0a;
+}
+
+.metricCard.active {
+  border: 2px solid #d20a0a;
+  box-shadow: 0 0 10px rgba(210,10,10,0.3);
+}
+
+.graphSection {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+    box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.05), /* soft inner shadow */
+    0 5px 15px rgba(0, 0, 0, 0.2);       /* existing outer shadow */
+
+  margin-bottom: 30px;
+  height: 400px;
+}
+
+.resetButtons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.resetButtons button {
+  padding: 10px 18px;
+  font-family: 'UfcSansRegular';
+  font-size: 14px;
+  color: #d20a0a;
+  background: #fff;
+  border: 1px solid #d20a0a;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.resetButtons button:nth-of-type(2){
+  background: #d20a0a;
+  color: #fff;
+}
+
+.resetButtons button:hover{
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+@media (max-width: 768px) {
+  .visitorsAnalyticsWrapper {
+    width: 100%;
+    margin-left: 0;
+    padding: 20px 10px;
+    padding-top: 130px;
+    background-size: cover;
+  }
+
+  .analyticsHeader {
+    flex-direction: column;
+    align-items:center;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+  }
+
+  .analyticsHeader h1 {
+    font-size: 20px;
+  }
+
+  .dropdown {
+    width: 100%;
+  }
+
+  .metricsCards {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .metricCard {
+    width: 100%;
+  }
+
+  .graphSection {
+    padding: 20px 15px;
+    height: 300px;
+  }
+
+  .resetButtons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .resetButtons button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+
+.FightersContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    padding-top:160px;
+    background-color: #ffffff;
+    gap:10px;
+    padding-bottom: 70px;
+}
+.FightersContainer .FightersTitle{
+    color: #333333;
+    font-style: italic;
+    font-size: 2.9666666667rem;
+    margin-bottom: 0.5rem;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    font-weight: 900;
+    line-height: 1.2;
+    color: #333333;
+    margin: 0.67em 0;
+}
+.FightersContainer .fightersWrapParent{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap:50px;
+}
+.FightersContainer .fightersWrapParent .fighterItem{
+    width:350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: #ffffff;
+    color: #777777;
+    box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.15), 0 3px 7px 0 rgba(0, 0, 0, 0.15);
+}
+.fighterItem .fighterImagePart{
+    width:100%;
+    height: 230px;
+    background-color: black;
+}
+.fighterItem .fighterImagePart img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    
+}
+.fighterItem .fighterContentPart{
+    padding:15px;
+}
+.fighterItem .fighterContentPart h2{
+    width: fit-content;
+    background: #e30613 linear-gradient(270deg, #e30613, #c50511);
+    font-size: 0.7777777778rem;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    color: #ffffff;
+    border-radius: 0.8333333333rem;
+    padding: 0.3222222222rem 0.8333333333rem;
+    margin-bottom: 1.1111111111rem;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    }
+.fighterItem .fighterContentPart h1{
+    color: #333333;
+    font-size: 1.3333333333rem;
+    font-weight: 900;
+    font-style: italic;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    margin-bottom: 1.1111111111rem;
+   
+}
+.fighterItem .fighterContentPart p{
+    font-size: 0.8888888889rem;
+    line-height: 1.6;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    margin-bottom: 1.1111111111rem;
+}

@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@400&display=swap');
+
+.leagues-members-wrapper {
+    width: 100%;
+    height: 125vh;
+	background-color:black;
+	display:flex;
+	flex-direction:column;
+	justify-content:flex-start;
+	align-items:center;
+	background-image: url(/Assets/promotional/leagueoneu.png);
+	background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+	position:relative;
+	padding:20px;
+	padding-top:40%;	
+    margin-top: 100px;
+}
+.user-league-wrap{
+	display:flex;
+	align-items:center;
+	gap:35px;
+	margin-bottom:20px;
+}
+.member-rank{
+	height:50px;
+	width:45px;
+	background:#000;
+	color:red;
+	text-align:center;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+ font-family: 'League Spartan', sans-serif;	
+font-size:25px;
+}
+.user-league-wrap h1{
+	font-family: 'Baloo Tamma 2', sans-serif;
+	color:#450101;
+	font-weight:600;
+}
+.user-league-wrap h2{
+ font-family: 'League Spartan', sans-serif;	
+ font-size:21px;
+}
+
+.users-of-leagues{
+	width:100%;
+	max-width:800px;
+	display:flex;
+	flex-wrap:wrap;
+	justify-content:center;
+	align-items:center;
+	gap:20%;
+}
+
+
+
+
+@media(max-width:768px){
+	
+.leagues-members-wrapper {
+    width: 100%;
+    height: 110vh;
+	justify-content:flex-start;
+	align-items:flex-start;
+	background-image: url(/Assets/promotional/mobile.png);
+	padding:20px;
+	padding-top:150%;	
+}
+
+.users-of-leagues{
+	
+	justify-content:flex-start;
+	
+}
+
+.user-league-wrap h1{
+	font-size:28px;
+}
+}
+
+
+.league-backward-forward-buttons{
+    padding-right: 0;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.league-backward-forward-buttons .left-icon, .league-backward-forward-buttons .right-icon{
+    background: #000;
+}
+.left-icon.disabled,
+.right-icon.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}

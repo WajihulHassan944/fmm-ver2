@@ -1,0 +1,7222 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300@300@400@500@600@700@800@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+@font-face {
+  font-family: 'UFCSans-condensedmed';
+  src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: condensed;
+}
+@font-face {
+  font-family: 'UFCSansMedium';
+  src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: condensed;
+}
+@font-face {
+  font-family: 'UFCSansCondensedBold';
+  src: url('/Fonts/UFCSans-CondensedBold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: condensed;
+}
+@font-face {
+  font-family: 'Edosz';
+  src: url('/Assets/affiliateDashboard/edosz.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+    
+
+@font-face {
+  font-family: 'UfcSansRegular';
+  src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+:root {
+  --quote-bg-color: #f7f7f7;
+  --dot-color: #bbb;
+  --dot-active-color: #333;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+}
+.imgWrapLeague{
+  z-index: 1 !important;
+}
+.fightsWrap{
+  z-index: 0 !important;
+}
+.fightItem{
+  z-index: 0 !important;
+}
+.admin-header{
+  z-index: 99999 !important;
+}
+
+.home-arrow-circle{
+  position: absolute;
+  top: 127px;
+  left: 70px;
+  cursor: pointer;
+  font-size: 24px;
+   color: #007bff;
+}
+.home-arrow-circle-forum{
+left:30px;
+top:147px;
+}
+.homeup-arrow-circle{
+  position: absolute;
+  top: 127px;
+  left: 70px;
+  cursor: pointer;
+  font-size: 24px;
+   color: #007bff;
+}
+
+.dashboard-arrow-circle{
+  position: absolute;
+  top: 127px;
+  left: 35px;
+  cursor: pointer;
+  font-size: 24px;
+   color: #007bff;
+   z-index: 999999;
+}
+.homecreateacc-arrow-circle{
+
+  position: absolute;
+  top: 97px;
+  left: 70px;
+  cursor: pointer;
+  font-size: 24px;
+   color: #007bff;   
+}
+
+  .fightItemOne .transformed-div h1{
+    padding-right: 10px ;
+    font-size: 18px !important ;
+   
+   }
+
+   
+.fightItemOne .transformed-div .transformedFighterNames{
+  font-size: 15px !important;
+}
+.playpause{
+position: fixed;
+bottom: 20px;
+right: 20px;
+z-index: 1000;
+width:40px;
+height:40px;
+border-radius: 50%;
+cursor: pointer;
+}
+
+@media (max-width: 767px){
+  
+  .fightItemOne .transformed-div .transformedFighterNames{
+      font-size: 8px !important;
+      font-family:  system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
+  }    
+  .home-arrow-circle{
+      top: 107px;
+   }
+   
+.home-arrow-circle-forum{
+left:30px;
+top:142px;
+}
+   .homeup-arrow-circle{
+      top: 90px;
+   }
+   
+.homecreateacc-arrow-circle{
+
+  top: 37px;
+  left: 20px;
+  font-size: 20px;
+}
+.loginbackarrow{
+  top:100px;
+}
+
+.dashboard-arrow-circle{
+  top: 37px;
+  left: 17px;
+  font-size: 21px;
+  z-index: 1;
+ }
+}
+/* Portrait orientation */
+@media only screen and (device-width: 414px) and (device-height: 896px) and (orientation: portrait) {
+  .upcomingFights .transformed-div-two-partOne h1 , .pendingFights .transformed-div-two-partOne
+  , .completedFights .transformed-div-two-partOne {
+    margin-top: -3px;
+  }
+  
+  .upcomingFights .transformed-div-two-partTwo,  .pendingFights .transformed-div-two-partTwo 
+  ,  .completedFights .transformed-div-two-partTwo  {
+    margin-top: -8px;
+  }
+}
+
+/* Landscape orientation */
+@media only screen and (device-width: 896px) and (device-height: 414px) and (orientation: landscape) {
+  .upcomingFights .transformed-div-two-partOne h1 , .pendingFights .transformed-div-two-partOne{
+    margin-top: -3px;
+  }
+  
+  .upcomingFights .transformed-div-two-partTwo,  .pendingFights .transformed-div-two-partTwo {
+    margin-top: -3px;
+  }
+}
+
+
+
+.videoContainer {
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.responsiveVideo {
+  width: 100%;
+  max-width:600px;
+  height: auto;
+}
+input{
+  padding: 10px;
+  border: 3px solid #ccc;
+  border-radius: 3px;
+}
+
+
+/* Remove underline from weekday abbreviations */
+abbr[title] {
+  text-decoration: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Header css customsection */
+.header {
+    background-color: rgba(0, 0, 0, 1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 40px;
+    width: 100%;
+    position: fixed;
+    z-index: 9;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
+   
+  }
+  .logoimg {
+    width: 80px;
+  }
+  .logoimg .logoimageactual {
+    width: 100%;
+    height: 100%;
+  }
+  .anchorlinks {
+    color: #e3e3e3;
+    font-family: 'Bungee', sans-serif;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 200;
+    letter-spacing: 0px;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin: 0 20px;
+    padding-bottom: 10px;
+    position: relative; /* For positioning the ::after pseudo-element */
+  }
+  
+.anchorlinks::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px; /* Fixed height of the border */
+  background-color: #d20a0a; /* Border color */
+  transform: scaleY(0); /* Start with 0 scale (invisible) */
+  transform-origin: bottom; /* Originates from the bottom */
+  transition: transform 0.3s ease; /* Smooth transition */
+}
+.anchorlinks:hover{
+  color:#fff;
+}
+.anchorlinks:hover::after {
+  transform: scaleY(1); /* Full scale on hover */
+}
+  
+  .sideLinkswrap {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .sideLinkswrap .joinNowBtn{
+    background: linear-gradient(216.01deg, #d20a0a 26.18%, #9e0808 93.27%);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    font-size: 22px;
+    outline: none;
+    padding: 12px 24px;
+    text-align: center;
+    width: 165px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
+
+  }
+  /* Container styles */
+.scrolling-text-container {
+  position: fixed;
+  width: 100%;
+  background: linear-gradient(216.01deg, #d20a0a 26.18%, #9e0808 93.27%);
+  color: #fff;
+  font-family: 'UFCSans-condensedmed';
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  padding: 10px 0;
+  overflow: hidden; /* Hide anything outside the container */
+  z-index: 9;
+}
+
+/* Inner container styles */
+.scrolling-text-inner {
+  display: flex;
+  white-space: nowrap;
+  font-size: 22px;
+  font-weight: 500;
+  animation: var(--direction) var(--marquee-speed) linear infinite;
+}
+
+/* Text container styles */
+.scrolling-text {
+  display: flex;
+}
+
+/* Text item styles */
+.scrolling-text-item {
+  padding: 0 5px; /* Space between repeated text */
+}
+/* Keyframes for scrolling left */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Keyframes for scrolling right */
+@keyframes scroll-right {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Pause the animation when a user hovers over it */
+.scrolling-text-container:hover .scrolling-text-inner {
+  animation-play-state: paused;
+}
+
+  .sideLinks {
+    color: #d2d2d2;
+    font-family: 'Bungee', sans-serif;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 200;
+    letter-spacing: 0px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .sideLinks i {
+    margin-right: 5px;
+    font-size: 28px;
+    font-weight: 100;
+  }
+  .activeLink {
+    color: #d20a0a;
+  }
+  .menuIconFont {
+    display: none;
+  }
+  .mobileMenu {
+    visibility: hidden;
+    opacity: 0;
+    flex-direction: column;
+    justify-content: flex-start; /* Align items at the top */
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* Only 100vh should be visible */
+    max-height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transform: translateY(-100%);
+    overflow: hidden; /* Prevent scrolling outside */
+    display: flex;
+}
+
+/* Inner scrollable container */
+.menuContent {
+    height: 120vh; /* Total content height */
+    width: 100%;
+    overflow-y: auto; /* Allow internal scrolling */
+    padding-bottom: 20vh; /* Ensures proper spacing */
+}
+
+/* Mobile menu active state */
+.mobileMenu.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    z-index: 999999;
+}
+/* Close menu icon */
+  .closeMenuIcon {
+    position: absolute;
+    top: 40px;
+    right: 25px;
+    font-size: 30px;
+    color: #fff;
+    font-weight: 100;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  /* Mobile-specific styling */
+  @media (max-width: 767px) {
+    .menuIconFont {
+      display: block;
+    }
+    .menuIconFont i {
+      color: #fff;
+      font-size: 30px;
+      z-index: 1001;
+    }
+    .anchorLinksWrapper,
+    .sideLinkswrap {
+      display: none;
+    }
+    .mobileMenu.active .anchorLinksWrapper,
+    .mobileMenu.active .sideLinkswrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .mobileMenu .logoimg {
+      margin-bottom: 40px;
+    }
+    .mobileMenu .anchorlinks,
+    .mobileMenu .sideLinks {
+      color: #fff;
+      font-size: 20px;
+      margin: 15px 0;
+      text-align: center;
+    }
+  }
+  
+  .admin-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 230px;
+    background-color: black;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    padding: 15px 0;
+    overflow: auto;
+}
+
+/* For WebKit-based browsers (Chrome, Safari) */
+.admin-header::-webkit-scrollbar {
+    width: 3px; /* Adjust scrollbar width to 5px */
+}
+
+.admin-header::-webkit-scrollbar-track {
+    background: black; /* Background of the scrollbar track */
+}
+
+.admin-header::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* Scrollbar color */
+    border-radius: 10px; /* Rounded edges */
+}
+
+/* For Firefox */
+.admin-header {
+    scrollbar-width: thin; /* Thin scrollbar */
+    scrollbar-color: #ccc black; /* Scrollbar color: #ccc, Track color: black */
+}
+
+.anchorLinksWrapperAdmin{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.anchorLinksWrapperAdmin h1{
+    color: #ffc000;
+    font-family: UFCSans, Arial Narrow, Arial, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+}
+.anchorLinksWrapperAdmin .anchorlinksAdmin{
+    color: #fff;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0px;
+    text-transform: capitalize;
+    text-decoration: none;
+    margin:10px 0;
+}
+.sideLinksAdmin{
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0px;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin:10px 0;
+}
+.matchHeading{
+    margin-top:40px;
+}
+
+
+.topheadercheckbox{
+    width:20px;
+    height: 20px;
+    position: absolute;
+    left:300px;
+    z-index: 99999;
+    top:40px;
+}
+
+
+
+
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+}
+
+
+.adminLogo{
+  display: none;
+}
+
+.menuIconFontAdmin{
+ display: none;
+}
+.fightsubmenu{
+  position: relative;
+}
+.fightsubmenu .submenu{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:15px;
+  position: absolute;
+  top: 61px; /* Adjust to set the submenu below "Fights" */
+  left: -88%;
+  background-color: rgba(0, 0, 0, 1);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+  padding: 15px 0;
+  padding-top:20px;
+  z-index: 1000;
+  width: 200px;
+  border-top:5px solid red;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Open submenu with animation */
+.fightsubmenu .submenuOpen {
+  animation: fadeInDown 0.3s ease forwards; /* Slide and fade in */
+}
+
+/* Close submenu with animation */
+.fightsubmenu .submenuClosedclass {
+  opacity: 0;
+  animation: fadeOutUp 0.3s ease; /* Slide and fade out */
+}
+.fightsubmenu .submenu .submenuLink{
+    color:#fff;
+    text-decoration: none;
+    font-size: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #ccc;
+}
+
+@media (max-width: 767px){
+.activeAdmin{
+  display: flex;
+}
+.activeNotAdmin{
+  display: none;
+}
+.adminLogo{
+  position: absolute;
+  top:15px;
+  left: 30px;
+  display: block;
+}
+.adminLogo img{
+  width: 70px;
+}
+
+.menuIconFontAdmin{
+  display: block;
+  position: fixed;
+  top:30px;
+  right: 30px;
+  color: #fff;
+  font-size: 30px;
+  z-index: 1001;
+}
+}
+
+
+
+.activeLinkAdmin {
+  color: #fff !important;
+  background-color: #800020;
+  text-align: center;
+  padding:8px 20px;
+  border-radius: 8px;
+}
+
+/* Keyframes for animations */
+@keyframes fadeInPopup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}@keyframes bounceIn {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+
+@keyframes fadeInText {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Popup animation */
+.container-promotion-absolute-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 550px;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1000; /* Ensure it's above other content */
+  background-image: url(/Assets/imagesss.jpeg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.85);
+  animation: fadeInPopup 0.8s ease-out;
+}
+
+/* Close button styles */
+.container-promotion-absolute-center .close-button {
+  position: absolute;
+  top: 5px;
+  right: -70px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ccc;
+  border-radius: 50%;
+}
+.container-promotion-absolute-center .close-button:hover {
+  color: #ff4d4d;
+}
+
+/* Image animation */
+.imgpromotionContainer {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  overflow-y: hidden;
+  padding-top:50px;
+}
+.container-promotion-absolute-center img {
+  max-height: 200px;
+  margin-top: 60px;
+  animation: bounceIn 1.2s ease-out infinite;
+  animation-delay: 0s; /* No initial delay */
+  animation-iteration-count: infinite; /* Loop forever */
+  animation-timing-function: ease-out; /* Smooth transition */
+  animation-fill-mode: forwards; /* Keep final state */
+  animation-duration: 2xs;
+  z-index: 1;
+  margin-bottom: 20px;
+}
+/* Signup button with WhatsApp gradient background */
+.container-promotion-absolute-center .signup-button {
+  padding: 14px 30px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff; /* White text */
+  background: linear-gradient(45deg, #128C7E, #075E54, #25D366, #34B7F1); /* WhatsApp gradient */
+  background-size: 300% 300%; /* Ensures smooth gradient transitions */
+  border: none;
+  border-radius: 20px; /* Rounded corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  cursor: pointer;
+  transition: background-position 0.5s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  animation: gradientAnimation 5s ease infinite; /* Gradient animation */
+  z-index: 9;
+}
+
+/* Hover effect */
+.container-promotion-absolute-center .signup-button:hover {
+  transform: translateY(-2px); /* Slight lift effect */
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+}
+
+/* Focus effect for accessibility */
+.container-promotion-absolute-center .signup-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.4); /* Focus ring matching teal green */
+}
+
+/* Gradient animation */
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+
+/* Text animation */
+.container-promotion-absolute-center p {
+  width: 80%;
+  text-align: center;
+  color: #fff;
+  margin-top: 15px;
+  font-family: 'UfcSansRegular';
+  font-size: 20px;
+  animation: fadeInText 1s ease-out 0.5s; /* Delayed fade-in */
+  animation-fill-mode: both; /* Ensures the animation stays at the final state */
+}
+
+
+.affiliateAccountShow{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:10px;
+}
+.affiliate-image{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border:2px solid #ccc;
+  padding: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.affiliate-image img{
+  width: 90%;
+  object-position: top;
+  object-fit: cover;
+  border-radius: 50%;
+  
+}
+
+.affiliateAccountShow h3{
+  color: #ccc;
+  font-family: 'Bungee', sans-serif;
+  font-weight: 100;
+}
+@media (max-width: 767px) {
+  .container-promotion-absolute-center {
+    width: 95%;
+    height: auto;
+    max-width: none;
+    border-radius: 6px;
+    font-size: 14px; /* Adjust font size for better readability */
+    background-position: center;
+    background-size: cover;
+  }
+
+  .container-promotion-absolute-center .close-button {
+    top: -10px;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .imgpromotionContainer{
+    width: 100%;
+    height:120px;
+    overflow-y: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .container-promotion-absolute-center img{
+    max-height: 200px;
+    overflow: hidden;
+    margin-top:70px;
+  }
+  .container-promotion-absolute-center .signup-button {
+    padding: 8px 20px;
+    font-size: 14px;
+   
+  }
+
+  .container-promotion-absolute-center p {
+    width: 100%;
+    margin-top: 15px;
+    font-size: 13px;
+  }
+  .affiliateAccountShow{
+    display: none;
+  }
+.affiliateAccountShowMob{
+  display: flex;
+}
+}
+
+.mobileMenu{
+  padding-top: 20px;
+}
+.mobileMenu .mobileAnchorLinks{
+  font-family: 'UFCSans';
+  margin:5px 0;
+}
+
+
+
+
+/*Home another css */
+  
+@media (max-width: 767px){
+  
+  .homeFirstAnother{
+    min-height: 100vh;
+    width:100%;
+    overflow: hidden;
+  }
+  .homeFirstAnother h1{
+    font-size: 30px;
+    line-height: 60px;
+    margin-top:85px;
+  }
+  .homeFirstAnother h2{
+    font-size: 35px;
+    line-height: 59px;
+    width: 300px;
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  .video-embed-wrapperAnother {
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    margin: 0 auto; /* Center the video on the page */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center;
+  }
+  
+  .video-embed-wrapperAnother iframe {
+    width: 100%;
+    height: 450px; /* Adjust the height as needed */
+   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+  
+  .homeFirstAnother{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)), url("/Assets/Homepage/imgone.png");
+    background-size: cover;
+    background-position: center 50px;
+    background-repeat: no-repeat;
+    flex-direction: column;
+    padding-top: 140px;
+    padding-bottom: 70px;
+   
+  }
+  .homeFirstAnother h1{
+      text-transform: uppercase;
+      text-align: center;
+      margin-top:75px;
+      font-size: 6rem; /* Adjust size as needed */
+      font-weight: bold;
+      font-family: 'UFCSansCondensedBold';
+      background: linear-gradient(to right, yellow, orange, red);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.8); 
+    
+  }
+  .homeFirstAnother h3{
+    color: #fff;
+      font-size: 5.4rem;
+      text-align: center;
+      font-family: 'UFCSansCondensedBold';
+        text-transform: uppercase;
+      -webkit-text-shadow: 6px 5px 6px #201e1f;
+      -moz-text-shadow: 6px 5px 6px #201e1f;
+      -o-text-shadow: 6px 5px 6px #201e1f;
+      text-shadow: 6px 5px 6px #201e1f;
+  
+  }
+  .homeFirstAnother h2{
+    color:#F80110;
+    font-size: 4.5rem;
+    text-align: center;
+    font-family: 'UFCSansCondensedBold';
+      text-transform: uppercase;
+    -webkit-text-shadow: 6px 5px 6px #201e1f;
+    -moz-text-shadow: 6px 5px 6px #201e1f;
+    -o-text-shadow: 6px 5px 6px #201e1f;
+    text-shadow: 6px 5px 6px #201e1f;
+    margin-top:9px;
+  }
+  
+  .homeSecondSectionAnother{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding:80px 0;
+    background-image: url(/Assets/Homepage/imagefour.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+  .homeSecondSectionAnother h1{
+   color:#16B4CA;
+      font-size: 65px;
+      text-align: center;
+      font-family: 'UFCSans-condensedmed';
+        text-transform: uppercase;
+   margin-bottom: 40px;
+   letter-spacing: normal;
+  }
+  
+  .homeSecondSectionAnother h1 span{
+    color: #16B4CA;
+  }
+  .video-embed-wrapperAnother {
+    width: 100%;
+    max-width: 800px; 
+    margin: 0 auto; 
+    text-align: center;
+  }
+  
+  .video-embed-wrapperAnother iframe {
+    width: 100%;
+    height: 450px; 
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  @media (max-width: 767px){
+    
+    .homeFirstAnother{
+      
+      min-height: 100vh;
+      width:100%;
+      overflow: hidden;
+      padding-top:140px;
+    }
+    .homeFirstAnother h1{
+      font-size: 40px;
+      line-height: 60px;
+      margin-top:85px;
+    }
+    
+    .homeFirstAnother h3{
+      font-size: 30px;
+      line-height: 60px;
+    }
+    .homeFirstAnother h2{
+      font-size: 25px;
+      line-height: 59px;
+      width: 300px;
+      margin-bottom: 140px;
+      }
+    
+  
+  
+      
+  .video-embed-wrapperAnother {
+    margin:0; /* Center the video on the page */
+    }
+  
+  .video-embed-wrapperAnother iframe {
+    width: 100%;
+    height: 200px; /* Adjust the height as needed */
+  }
+  
+    }  
+  
+  
+  
+  .homeThirdSectionAnother{
+    width:100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 90px;
+    margin-top: 30px;
+  }
+  .homeThirdSectionAnother .subHomeThird{
+    width: 80%;
+    background-color: #F80110;
+      border-radius: 25px;
+      color: #FFF;
+      padding: 4em 3em;
+      box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap:20px;
+      text-align: center;
+  }
+  .homeThirdSectionAnother .subHomeThird h1{
+    color: #fff;
+      font-size: 45px;
+      text-align: center;
+      font-family: 'UFCSans-condensedmed';
+      text-transform: capitalize;
+      letter-spacing: normal;
+  }
+  
+  .homeThirdSectionAnother .subHomeThird p{
+    color: #fff;
+    font-family: 'UfcSansRegular';
+    font-size: 20px;
+  }
+  .homeThirdSectionAnother button{
+    font-family: "UFCSansCondensedBold";
+    background: transparent;
+    border:2px solid #fff;
+    border-radius: 30px;
+    padding: 10px 20px;
+    color:#fff;
+    cursor: pointer;
+    font-size: 22px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
+    margin-top: 20px;
+  }
+  
+  
+  /* Mobile responsiveness for .homeThirdSectionAnother */
+  @media (max-width: 768px) {
+    .homeThirdSectionAnother {
+      margin-bottom: 50px; /* Adjust margin for smaller screens */
+    }
+    .homeThirdSectionAnother .subHomeThird {
+      width: 90%; /* Expand width to fit smaller screens */
+      padding: 2em 1.5em; /* Reduce padding */
+      gap: 15px; /* Adjust gap for smaller layout */
+    }
+    .homeThirdSectionAnother .subHomeThird h1 {
+      font-size: 30px; /* Reduce font size for headings */
+    }
+    .homeThirdSectionAnother .subHomeThird p {
+      font-size: 16px; /* Reduce font size for paragraph */
+    }
+    .homeThirdSectionAnother button {
+      font-size: 18px; /* Adjust button font size */
+      padding: 8px 16px; /* Adjust padding for buttons */
+    }
+  }
+  
+  /* Additional query for extra small devices */
+  @media (max-width: 480px) {
+    .homeThirdSectionAnother .subHomeThird {
+      padding: 1.5em 1em; /* Further reduce padding */
+    }
+    .homeThirdSectionAnother .subHomeThird h1 {
+      font-size: 24px; /* Further reduce heading size */
+    }
+    .homeThirdSectionAnother .subHomeThird p {
+      font-size: 14px; /* Further reduce paragraph font size */
+    }
+    .homeThirdSectionAnother button {
+      font-size: 16px; /* Reduce button font size further */
+      padding: 6px 12px; /* Adjust button padding for extra small devices */
+    }
+  }
+  
+  
+  .homeFourthAnother{
+    background-image: url(/Assets/Homepage/imgsix.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .text-fourth{
+    max-width: 500px;
+    margin-right: 12%;
+  }
+  .homeAnotherHeading{
+    text-align: center;
+    font-size: 4rem; /* Adjust size as needed */
+    font-weight: bold;
+    font-family: 'UFCSansCondensedBold';
+    background: linear-gradient(to right, yellow, orange, red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+   }
+   .text-fourth p{
+    color: #fff;
+    font-family: 'UfcSansRegular';
+    font-size: 20px;
+  text-align: center;
+  line-height: 1.5;
+   }
+  
+   .homeFourthAnotherPatTwo{
+    background-image: url(/Assets/Homepage/imgeight.png);
+  }
+   @media (max-width: 768px) {
+    .homeFourthAnother {
+      height: 60vh; /* Reduce height for smaller screens */
+      justify-content: center; /* Center-align content for mobile */
+      align-items: center; /* Adjust alignment */
+      padding: 20px; /* Add padding for spacing */
+    }
+  
+    .text-fourth {
+      max-width: 90%; /* Adjust max-width to fit smaller screens */
+      margin-right: 5%; /* Reduce right margin */
+      margin-left: 5%; /* Add left margin for balance */
+    }
+  
+    .homeFourthAnotherPatTwo{
+   min-height: 100vh;
+    }
+  }
+  
+  .playNowLink{
+    font-family: 'UFCSansCondensedBold';
+    background: linear-gradient(to right, rgba(255, 235, 59, 0.8), rgba(255, 152, 0, 0.8), rgba(244, 67, 54, 0.8));
+  
+    color:#fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 20px;
+    transition: 0.5s ease;
+   }
+  
+   .playNowLink:hover {
+    background: linear-gradient(to right, rgba(244, 67, 54, 0.9), rgba(255, 152, 0, 0.9), rgba(255, 235, 59, 0.9));
+    color: #000; /* Change text color for contrast */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+    transform: scale(1.1); /* Slightly enlarge the button */
+  }
+  
+  
+  
+   
+  .homeFifthAnother{
+    background-image: url(/Assets/Homepage/imagefive.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .text-fifth{
+    max-width: 500px;
+    margin-left: 12%;
+  }
+  .text-fifth h1{
+    text-align: center;
+    font-size: 4rem; /* Adjust size as needed */
+    font-weight: bold;
+    font-family: 'UFCSansCondensedBold';
+    background: linear-gradient(to right, yellow, orange, red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+   }
+   .text-fifth p{
+    color: #fff;
+    font-family: 'UfcSansRegular';
+    font-size: 20px;
+  text-align: center;
+  line-height: 1.5;
+   }
+  
+   @media (max-width: 768px) {
+    .homeFifthAnother {
+      height: 60vh; /* Reduce height for smaller screens */
+      justify-content: center; /* Center-align content for better display on mobile */
+      align-items: flex-start; /* Adjust alignment */
+      padding: 20px; /* Add padding for better spacing */
+    }
+  
+    .text-fifth {
+      max-width: 90%; /* Adjust max-width to fit smaller screens */
+      margin-left: 5%; /* Reduce left margin for smaller screens */
+      margin-right: 5%;
+    }
+  }
+  
+  .homeFifthAnotherPartTwo{
+    background-image: url(/Assets/Homepage/imgseven.png);
+    min-height: 100vh;
+  }
+  
+  
+  
+  .contactWrapperHomeAnother{
+    display: flex;
+    flex-direction: column;
+    gap:20px;
+    width:100%;
+    justify-content: center;
+    align-items: center;
+  }
+  .contactWrapperHomeAnother h2{
+    text-align: center;
+    font-size: 4rem; /* Adjust size as needed */
+    font-weight: bold;
+    font-family: 'UFCSansCondensedBold';
+    background: linear-gradient(to right, yellow, orange, red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+  }
+  .contactWrapperHomeAnother form{
+    display: flex;
+    flex-direction: column;
+    gap:15px;
+    width:90%;
+    max-width: 500px;
+  }
+  .contactWrapperHomeAnother form textarea, 
+  .contactWrapperHomeAnother form input{
+    padding:10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  .contactWrapperHomeAnother form button{
+    font-family: 'UFCSansCondensedBold';
+    background: linear-gradient(to right, rgba(255, 235, 59, 0.8), rgba(255, 152, 0, 0.8), rgba(244, 67, 54, 0.8));
+  
+    color:#fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 21px;
+    transition: 0.5s ease;
+    border: none;
+    outline: none;
+    width:200px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  
+  .contactWrapperHomeAnother form button:hover{
+    background: linear-gradient(to right, rgba(244, 67, 54, 0.9), rgba(255, 152, 0, 0.9), rgba(255, 235, 59, 0.9));
+    color: #000; /* Change text color for contrast */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+   
+  }
+
+
+
+
+
+
+
+  /* How to play */
+    
+.howtoplay-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: black;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.01)), url("/Assets/banner.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding-top:150px;
+  padding-bottom: 50px;
+  
+}
+.howtoplay-updated{
+background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),url(/Assets/affiliateDashboard/one.png);
+background-position: center 0;
+position:relative;
+overflow: hidden;
+}
+
+
+.howtoplay-updated .four{
+position:absolute;
+top:30%;
+transform:rotate(10deg);
+left:-120px;
+width:100%;
+max-width:200px;
+z-index:1;
+
+height: 30%;
+}
+
+
+.howtoplay-updated .five{
+position:absolute;
+top:-10px;
+right:-100px;
+width:100%;
+max-width:200px;
+
+height: 30%;
+transform:rotate(180deg);
+z-index:1;
+}
+
+
+.howtoplay-updated .six{
+position:absolute;
+width:100%;
+bottom:-170px;
+left:-100px;
+max-width:450px;
+z-index:2;
+
+height: 75%;
+}
+
+.howtoplay-updated .seven{
+position:absolute;
+width:80%;
+max-width:900px;
+bottom:-830px;
+right:-20%;
+
+height: 160%;
+}
+
+
+
+
+
+
+
+
+
+
+
+.howtoplay-wrapper h1 {
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-stretch: condensed; /* Condensed style */
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 40px;
+  line-height: 2.5rem;
+  color: #fff;
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+  margin-top: 20px;
+}
+
+.howtoplay-wrapper h2 {
+font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+font-stretch: condensed; /* Condensed style */
+margin-bottom: 0;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+font-size: 30px;
+line-height: 2.5rem;
+color: #fff;
+text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+margin-top: 20px;
+}
+
+.howtoplay-wrapper h1:nth-of-type(1){
+font-size: 65px;
+  
+}
+.howtoplay-wrapper p{
+  max-width: 700px;
+  margin-top:20px;
+  color: #fff;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 700;
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+  text-align: center;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+.howtoplay-wrapper ul{
+max-width: 700px;
+margin-top:20px;
+color: #fff;
+font-size: 18px;
+line-height: 26px;
+font-weight: 700;
+text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+
+font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+@media (max-width: 767px){
+
+.howtoplay-wrapper{
+padding:150px 20px 50px; 
+}
+.howtoplay-wrapper h1 {
+font-size: 35px;
+}
+
+.howtoplay-wrapper h1:nth-of-type(1){
+font-size: 45px;
+
+}
+.howtoplay-wrapper .btn-grad{
+width:100%;
+margin:15px 0;
+}
+}
+
+
+.playForFreeBtns{
+padding: 8px 30px;
+color: #fff;
+background-color: red;
+border: 1px solid #ccc;
+outline: none;
+margin-bottom: 15px;
+width: 180px;
+border-radius: 5px;
+}
+
+.playForFreeBtns:nth-of-type(1){
+margin-top: 20px;
+}
+
+
+/*Login */
+.login-wrapper{
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/Assets/RING1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  
+}
+.loginCard{
+  width:420px;
+  background-size: cover;
+  padding:20px 40px;
+  background-image: url(/Assets/BlackredBackground.png);
+  background-repeat: no-repeat;
+  border:3px solid #ccc;
+  border-radius:20px;
+  margin-top:100px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.9);
+  z-index: 0;
+  padding-bottom: 30px;
+}
+.loginCard img{
+  width:110px;
+  margin-top:20px;
+}
+.login-wrapper .loginCard h1{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size: 23px;
+color:#fff;
+margin:15px 0;
+}
+.loginCard form{
+  width:100%;
+  margin-bottom: 20px;
+}
+.loginCard form input{
+  width:100%;
+  border-radius:15px;
+  margin-bottom: 15px;
+}
+.loginCard .btn-grad{
+  width: 50%;
+  
+}
+
+.loginCard h2{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size: 25px;
+color:#fff;
+margin-bottom: 10px;
+ 
+}
+.loginCard .loginNavLink{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size: 23px;
+color:#fff;
+text-decoration: none;
+background: transparent;
+border: none;
+outline: none;
+cursor: pointer;
+}
+
+.toFlexDiv {
+display: flex;
+justify-content: space-between;
+align-items: center;
+width: inherit;
+}
+
+.toFlexDiv .recaptcha-container {
+flex-basis: 40%;
+transform: scale(0.70); /* Adjust the scale to reduce height */
+transform-origin: left; /* Ensure scaling is from the left */
+ /* Optional: Add some space between the ReCAPTCHA and the button */
+ margin-left: 4px;
+}
+
+.toMakeColumn{
+flex-basis: 60%;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap:7px;
+}
+
+.toMakeColumn .btn-grad {
+margin-left: -120px;
+width:100px;
+height:36px;
+display: flex;
+justify-content: center;
+align-items: center;
+text-align: center;
+font-size: 20px;
+}
+.toMakeColumn p{
+color: #fff;
+text-align: center;
+width:200px;
+margin-left: -125px;
+font-family: Bahnschrift Condensed;
+font-size: 16px;
+}
+
+.custom-google-button {
+font-size: 16px;
+color: #fff;
+background-color: #4285f4;
+padding: 10px 20px;
+border-radius: 4px;
+border: none;
+cursor: pointer;
+transition: background-color 0.3s;
+box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.custom-google-button:hover {
+background-color: #357ae8;
+}
+
+.custom-google-button:disabled {
+background-color: #ccc;
+cursor: not-allowed;
+}
+
+
+
+.google-login-wrapper {
+width: 200px;  /* Makes the Google button full width */
+display: flex;
+justify-content: center;
+align-items: center;
+margin-bottom: 20px;
+text-align: center;
+padding-left: auto;
+padding-right: auto;
+}
+
+.google-login-wrapper > div {
+width: 50%; 
+}
+
+.login-form-footer{
+display: flex;
+gap:10px;
+justify-content: center;
+align-items: center;
+}
+@media (max-width: 767px){
+.google-login-wrapper {
+  width: 120px;  /* Makes the Google button full width */
+  margin-bottom: 20px;
+ }
+.login-wrapper{
+  overflow-x: hidden;
+}
+.loginCard{
+  width:340px;
+  padding:20px 20px;
+  margin-top:50px;
+}
+.loginCard img{
+  width:120px;
+  margin-top:20px;
+}
+.login-wrapper .loginCard h1{
+ font-size: 24px;
+margin:15px 0;
+}
+.loginCard .btn-grad{
+  width: 50%;
+  
+}
+
+.loginCard h2{
+font-size: 23px;
+}
+.loginCard .loginNavLink{
+font-size: 23px;
+}
+
+.toFlexDiv .recaptcha-container {
+flex-basis: 30%;
+transform: scale(0.60); /* Adjust the scale to reduce height */
+ margin-left: 4px;
+}
+
+
+.loginCard form{
+margin-bottom: 10px;
+}
+.toFlexDiv{
+margin-top:-20px;
+margin-bottom: 10px;
+}
+
+
+
+
+
+
+
+.toMakeColumn{
+flex-basis: 60%;
+gap:7px;
+}
+
+.toMakeColumn .btn-grad {
+margin-left: -150px;
+width:90px;
+height:32px;
+font-size: 16px;
+}
+.toMakeColumn p{
+color: #fff;
+text-align: center;
+width:200px;
+margin-left: -160px;
+font-family: Bahnschrift Condensed;
+font-size: 14px;
+}
+}
+
+
+
+
+
+/* Threads */
+
+/* Container for the thread list */
+.thread-list-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 130px;
+  padding-bottom: 70px;
+  background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png); /* Black background */
+  width: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh; /* Full-screen height */
+}
+
+/* Forum heading styling */
+.thread-list-container h1 {
+ color: #fff;
+  font-size: 45px;
+  line-height: 79px;
+  text-align: center;
+  padding: 27px 0;
+  width: 1120px;
+  font-family: 'Bungee', sans-serif;
+  text-transform: uppercase;
+  -webkit-text-shadow: 6px 5px 6px #201e1f;
+  -moz-text-shadow: 6px 5px 6px #201e1f;
+  -o-text-shadow: 6px 5px 6px #201e1f;
+  text-shadow: 6px 5px 6px #201e1f;
+  margin-bottom: 10px;
+}
+
+/* Thread item styling */
+.thread-item {
+  background-color: rgba(0,0,0,0.8); /* Dark grey background */
+  margin-bottom: 20px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%; /* Make it stretch to the container width */
+  max-width: 700px; /* Set a max-width for responsiveness */
+  max-height: 300px; /* Max height of each thread item */
+  overflow: hidden; /* Hide overflow to handle text overflow */
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Adjust the hover effect */
+.thread-item:hover {
+  background-color: #333333; /* Slightly lighter grey on hover */
+  transform: translateY(-5px); /* Lift effect */
+}
+.toFlex{
+  display: flex;
+  gap: 30px;
+  padding-bottom: 10px;
+}
+.create-thread-btn{
+  padding:10px 30px;
+  border:none;
+  outline: none;
+  background-color:#d30c23;
+  color:#fff;
+  font-family: sans-serif;
+  border-radius: 5px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  margin-bottom: 30px;
+  font-family: 'Bungee', sans-serif;
+ 
+}
+/* Thread title with size adjustments */
+.thread-title {
+  font-size: 19px;
+  font-weight: 200;
+  color: #fff; /* Red for the title */
+  margin-bottom: 10px;
+  white-space: nowrap; /* Prevent title overflow */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis if title is too long */
+  width: 100%;
+  background-color: #720e0c;
+  font-family: 'Bungee', sans-serif;
+  padding:7px;
+  
+}
+
+/* Thread metadata (posted by, date) */
+.thread-meta {
+  font-size: 1.0rem;
+  color: #999; /* Light grey for metadata */
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 7px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Thread body text (limited height) */
+.thread-body {
+  font-size: 1.1rem;
+  color: #f0f0f0;
+  margin-bottom: 15px;
+  max-height: 100px; /* Limit the body text to avoid overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 7px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Thread views and replies */
+.thread-views, .thread-replies {
+  font-size: 1.1rem;
+  color: #ccc;
+  margin-bottom: 5px;
+  padding-left: 7px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Thread likes */
+.thread-likes {
+  font-size: 1.1rem;
+  color: #ff3b3b; /* Red for likes */
+  margin-bottom: 5px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+
+.adminSideThreadsContainer{ 
+width: calc(100% - 230px);
+margin-left: 230px;   
+display: flex;
+flex-direction: column;
+justify-content: flex-start;
+align-items: center;
+padding-top: 110px; 
+ background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png);
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+min-height: 100vh; 
+}
+.forum-heading{
+  color: #fff;
+  margin-bottom: 20px;
+}
+.no-posts-message{
+  color:#fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Container for the thread list */
+.thread-list-container-updated {
+display: flex;
+flex-direction: column;
+padding-top: 170px;
+padding-bottom: 70px;
+width: 100%;
+padding-left: 72px;
+padding-right: 30px;
+min-height: 100vh; /* Full-screen height */
+background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.7)),url(/Assets/backone.png);
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+}
+
+/* Forum heading styling */
+.thread-list-container-updated h1 {
+font-size: 60px;
+margin-bottom: 10px;
+font-family: 'UfcSansRegular', Arial, sans-serif;color: #16B4CA;
+}
+
+
+/* Thread item styling */
+.thread-item-updated {
+margin-bottom: 20px;
+cursor: pointer;
+width: 100%; /* Make it stretch to the container width */
+overflow: hidden; /* Hide overflow to handle text overflow */
+transition: transform 0.3s ease, background-color 0.3s ease;
+display: flex;
+justify-content: left;
+align-items: left;
+gap:20px;
+max-width: 800px;
+background: #fff;
+padding:20px;
+box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+.respondbtn{
+padding: 0.5rem 1.75rem;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
+  color:#fff;
+border:none;
+background: #F80110;
+border-radius: 20px;
+outline:none;
+}
+.thread-item-updated .userImage{
+width:130px;
+height: 130px;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+.thread-item-updated .userImage img{
+width:100%;
+height:100%;
+object-fit: cover;
+}
+/* Adjust the hover effect */
+.thread-item:hover {
+background-color: #333333; /* Slightly lighter grey on hover */
+transform: translateY(-5px); /* Lift effect */
+}
+.toFlex-updated{
+display: flex;
+gap: 30px;
+
+margin-top:10px;
+}
+.create-thread-btn-updated{
+padding:10px 30px;
+border:none;
+outline: none;
+background-color:#d30c23;
+color:#fff;
+font-family: sans-serif;
+border-radius: 5px;
+box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+margin-bottom: 30px;
+font-family: 'Bungee', sans-serif;
+width:200px;
+
+
+}
+/* Thread title with size adjustments */
+.thread-title-updated {
+font-size: 27px;
+margin-top: 10px;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+color: #000;
+
+}
+.toFlexHeading{
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+position: relative;
+}
+.toFlexHeading .communityRulesIcon {
+  position: absolute;
+  top: 70px;
+  right: 16px;
+}
+
+.toFlexHeading .communityRulesIcon i {
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+}
+
+.toFlexHeading .communityRulesIcon::after {
+  content: "Community Rules & Regulations"; /* Tooltip text */
+  display: none;
+  position: absolute;
+  bottom: -5px; /* Adjust depending on your layout */
+  right: 30px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toFlexHeading .communityRulesIcon:hover::after {
+  display: block;
+}
+
+
+/* Thread metadata (posted by, date) */
+.thread-meta-updated {
+font-size: 22px;
+margin-bottom: 10px;
+
+font-family: 'UfcSansRegular', Arial, sans-serif;
+color: #e2211c;
+}
+body{
+  overflow-x: hidden !important;
+}
+/* Thread body text (limited height) */
+.thread-body-updated {
+font-size: 20px;
+margin-bottom: 5px;
+font-family: sans-serif;
+}
+
+/* Thread views and replies */
+.thread-views-updated, .thread-replies-updated {
+font-size: 21px;
+margin-bottom: 5px;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Thread likes */
+.thread-likes-updated {
+font-size: 21px;
+color: #16B4CA; /* Red for likes */
+margin-bottom: 5px;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+
+.adminSideThreadsContainer{ 
+width: calc(100% - 230px);
+margin-left: 230px;    
+
+}
+
+.no-posts-message-updated{
+color:#fff;
+}
+
+
+
+
+
+
+/* Mobile-specific styling */
+@media (max-width: 767px){
+
+/* Container for the thread list */
+.thread-list-container-updated {
+  padding-top: 140px;
+  padding-bottom: 70px;
+  padding-left: 10px;
+  padding-right: 10px;
+ }
+
+/* Forum heading styling */
+.thread-list-container-updated h1 {
+  font-size: 30px;
+ }
+
+
+/* Thread item styling */
+.thread-item-updated {
+  margin-bottom: 20px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap:20px;
+  padding:20px;
+  }
+.respondbtn{
+  padding: 0.5rem 1.75rem;
+    border-radius: 20px;
+ }
+.thread-item-updated .userImage{
+  width:130px;
+  height: 130px;
+    
+}
+.thread-item-updated .userImage img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+}
+/* Adjust the hover effect */
+.thread-item:hover {
+  background-color: #333333; /* Slightly lighter grey on hover */
+  transform: translateY(-5px); /* Lift effect */
+}
+.toFlex-updated{
+  display: flex;
+  gap: 20px;
+  margin-top:10px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Thread title with size adjustments */
+.thread-title-updated {
+  font-size: 26px;
+  
+}
+.toFlexHeading{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+/* Thread metadata (posted by, date) */
+.thread-meta-updated {
+  font-size: 21px;
+}
+
+/* Thread body text (limited height) */
+.thread-body-updated {
+  font-size: 19px;
+  
+}
+
+/* Thread views and replies */
+.thread-views-updated, .thread-replies-updated {
+  font-size: 16px;
+  
+}
+
+/* Thread likes */
+.thread-likes-updated {
+  font-size: 16px;
+}
+
+}
+
+
+
+
+
+
+
+
+/* create accound */
+
+
+
+
+.createAccount{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  width: 100%;
+background-color: black;  
+padding-top:30px;
+
+
+}
+.registerCard{
+  flex-basis: 50%;
+  padding: 20px;
+  padding-left: 50px;
+  color:#ccc;
+  font-family: 'Trebuchet MS', sans-serif;
+
+  margin-top: 120px;
+margin-bottom: 100px;   
+}
+.input-group span{
+color:red;
+margin-left: 8px;
+
+}
+.input-group label{
+margin-bottom: 10px;
+}
+.registerCard h1{
+font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+font-stretch: condensed; /* Condensed style */
+margin-bottom: 30px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+font-size: 45px;
+line-height: 2.5rem;
+color: #fff;
+text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+}
+.input-wrap-one{
+  width:100%;
+  display: flex;
+  gap:20px;
+  margin-bottom: 15px;
+}
+.input-wrap-one .input-group{
+flex-basis: 50%;
+  display: flex;
+  flex-direction: column;
+
+}
+.input-wrap-one .input-group input{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+
+
+
+
+.input-wrap-two{
+  width:100%;
+  
+  display: flex;
+  align-items: center;
+  gap:20px;
+  margin-bottom: 15px;;
+}
+.input-wrap-two .input-group{
+flex-basis: 90%;
+  display: flex;
+  flex-direction: column;
+
+}
+.input-wrap-two .input-group input{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+.checking {
+  display: flex;
+  align-items: center;
+  background-color: #eee;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 3px solid #ccc;
+  border-radius: 3px;
+  color:#333;
+  font-weight: 700;
+}
+
+.custom-radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-radio-label input {
+  display: none;
+}
+
+.custom-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #777;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  transition: border-color 0.2s;
+  background-color: #fff;
+}
+
+.custom-radio.checked {
+  border-color: green;
+}
+
+.custom-radio.checked:after {
+  content: '\f00c'; /* Font Awesome check mark */
+  font-family: FontAwesome;
+  color: green;
+  font-size: 12px;
+}
+
+
+
+.backgrounfImg{
+  flex-basis: 50%;
+  margin-top:-280px;
+
+}
+.backgrounfImg img{
+  width: 80%;
+}
+
+
+
+
+.fa-refresh{
+margin-top:24px;
+margin-left: 6px;
+font-size: 29px;
+font-weight: 100;
+
+}
+
+
+.termsConditions{
+margin-top:27px;
+margin-bottom: 23px;
+padding: 15px 10px;
+background-color: #fff;
+border: 3px solid #ccc;
+border-radius: 3px;
+color:rgb(69, 65, 65);
+max-height: 20vh;
+overflow: auto;
+}
+.termsConditions h2{
+margin-bottom: 5px;
+}
+       
+       
+       
+.btn-grad {
+background-color: #720e0c;
+margin-top: 10px;
+width: 100%;
+padding: 10px 0;
+text-align: center;
+text-transform: uppercase;
+transition: 0.5s;
+color: white;            
+font-size: 25px;
+border-radius: 10px;
+font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+font-stretch: condensed; /* Condensed style */
+outline: none;
+border: 1px solid #ccc;
+text-align: center;
+ 
+}
+
+
+.affiliateLink {
+color: #16B4CA;
+position: absolute;
+top: 180px;
+right: 30px;
+font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+font-size: 22px;
+cursor: pointer;
+text-align: center;
+}
+
+.affiliateLink::before {
+position: absolute;
+top: 1.5px;
+left: -20px;
+content: '→'; /* Unicode for a right arrow */
+color: #fff; /* Set the desired color */
+font-size: 19px; /* Adjust size as needed */
+animation: blinkText 2s steps(1, end) infinite; /* Adjust timing as needed */
+
+}
+@keyframes blinkText {
+0%, 100% {
+  visibility: visible;
+}
+50% {
+  visibility: hidden;
+}
+}
+
+/* Stop animation on hover */
+.affiliateLink:hover {
+animation: none;
+visibility: visible; /* Ensure it's visible when hovered */
+}
+.affiliateLinkppp{
+color: #fff;
+position: absolute;
+top: 150px;
+right: 110px;
+font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+font-size: 22px;
+cursor: pointer;
+text-align: center;
+}
+.affiliateCreateAccount{
+background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png);
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+}
+
+
+@media (max-width: 767px){
+
+.affiliateLinkppp{
+top: 150px;
+right: 130px;
+font-size: 14px;
+}
+.registerCard{
+flex-basis: 100%;
+padding: 20px;
+padding-left:20px;
+margin-top: 200px;
+margin-bottom: 100px;   
+}
+
+.backgrounfImg{
+flex-basis: 0%;
+display: none;
+}
+
+.affiliateLink {
+top: 180px;
+right: 30px;
+font-size: 22px;
+}
+
+.registerCard h1{
+  margin-bottom: 30px;
+  letter-spacing: 0.5px;
+  font-size: 32px;
+  margin-top:15px;
+  text-align: center;
+  line-height: 2.5rem;
+  }
+  
+
+}
+
+.gloveInCreateAccnt{
+height: 70%;
+}
+
+
+
+/* membership: */
+
+.membership-wrapper{
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image: url('/Assets/RING1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  
+}
+.member-header{
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  height: 40px;
+  margin-top:120px;
+  padding-left: 170px;
+  padding-right: 50px;
+}
+.member-header-image{
+  position: absolute;
+  top:-15px;
+  left:80px;
+  width: 70px;
+  height: 70px;
+  
+  border:2px solid #fff;
+  border-radius: 50%;
+  
+}
+.member-header img{
+  width:fit-content;
+  height:100%;
+  object-fit: cover;
+  border-radius: 50%;
+
+}
+.member-header h3{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size:22px;  
+}
+.mermbership-cards{
+  width:100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top:70px;
+  gap:20px;
+}
+
+.cardone{
+  display: flex;
+  flex-direction: column;
+  width:300px;
+}
+.cardone .cardHeading{
+  width:100%;
+  text-align: center;
+  
+  font-size:20px;
+  padding:10px 0;
+  color:#fff;
+  background-color: #5b5b5b;
+  border-radius:10px;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size:22px;  
+}
+.cardone .cardprice{
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: center;
+  border-radius:10px;
+  margin:5px 0;
+  color:#fff;
+  overflow: hidden;
+  position: relative;
+  background-color: #720e0c;
+  border:2px solid gray;
+  padding: 10px 0;
+gap:10px;
+
+
+}
+.cardone .cardprice .ribbon{
+  position: absolute;
+  top:11px;
+  right: -20px;
+  width:100px;
+  height:15px;
+  text-align: center;
+  background-color: #fff;
+  color:#720e0c;
+  transform: rotate(38deg); 
+  font-size:14px;
+  
+}
+
+.cardone .cardprice h1{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size: 40px;
+}
+.cardone .cardprice h2{
+  font-size: 15px;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  margin-top:-7px;
+  
+}
+.cardone ,.cardprice p{
+  margin-top:5px;
+}
+.cardone .card-features{
+  background-image: linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.7)),url(/Assets/boxing-victory.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width:100%;
+  padding:30px 0;
+  border-radius:20px;
+  border:2px solid gray;
+  min-height: 165px;
+}
+
+.card-features li{
+  color:#fff;
+  text-align: left;
+  margin-left: 80px;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size:13px;
+  margin-bottom: 5px;  
+}
+.cardone .btn-grad{
+  width:100%;
+}
+
+
+
+@media (max-width: 767px){
+  
+.member-header{
+  height: 35px;
+  padding-left: 80px;
+  padding-right: 20px;
+}
+.member-header-image{
+  top:-10px;
+  left:20px;
+  width: 55px;
+  height: 55px; 
+}
+.member-header img{
+  width:100%;
+}
+.member-header h3{
+  font-size:16px;  
+}
+
+.mermbership-cards{
+  margin-top:70px;
+  gap:50px;
+  flex-direction: column;
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/*dashboard*/
+
+.userdashboard{
+  min-height: 100vh;
+  display: flex;
+
+  background-image: linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.2)),url('/Assets/RING3.png');
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  flex-direction: column;
+  
+}
+.fightItem{
+  margin-bottom: 30px;
+  cursor: pointer;
+  transition: 0.4s;
+  
+}
+
+.fightItem:hover{
+  transform: scale(1.02);
+  
+}
+.fightsWrap{
+   width:100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top:15px;
+  gap:30px;
+  padding-bottom: 100px;
+  overflow-x: hidden;
+  flex-wrap: wrap;
+}
+.fightscontainer{
+  flex-basis: 25%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  
+}
+.fightscontainer .fightsheadingone , .fightscontainer .fightsheadingthree , .fightscontainer .fightsheadingtwo {
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size:24px;
+margin-bottom: 10px;  
+color: #eee;
+text-align: center;
+padding:10px 0;
+width:100%;
+border:3px solid #ccc;
+border-radius: 30px;
+text-transform:uppercase;
+padding-top: 12px;
+margin-bottom: 20px;
+}
+
+.upcomingFights .fightsheadingone{
+  background-color: #5e0a0a;
+}
+.completedFights .fightsheadingtwo{
+  background-color: #0b4c80;
+}
+.pendingFights .fightsheadingthree{
+  background-color: #0d8c17;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.upcomingFights .fightItemOne{
+  display: flex;
+  gap:7px;
+}
+
+
+
+.upcomingFights .transformed-div {
+  height: 50px;
+  width: 250px;
+  background-color: #fff;
+  position: relative;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  display: flex;
+  align-items: center;
+  
+}
+.upcomingFights .fightItemOne .transformed-div h1{
+  text-transform: uppercase;
+  color: #d30c23;
+  margin-left: 46%;
+
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+
+  font-size: 15px;
+  }
+  .upcomingFights .transformed-div-two {
+  height: 50px;
+  width: 200px;
+  background-color: #decf00;
+  clip-path: polygon(6% 0, 100% 0, 95% 100%, 0 100%);
+  margin-left: -15px;
+  display: flex;
+  flex-direction: column;
+  padding-left: 28px;
+  padding-top: 5px;
+  gap:1px;
+}
+.upcomingFights .transformed-div-two-partOne{
+  display: flex;
+  gap: 10px;
+}
+
+.upcomingFights .transformed-div-two-partOne h1{
+  font-size: 19px;
+  text-transform: uppercase;
+  color: black;
+
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+}
+.upcomingFights .transformed-div-two-partTwo{
+  display: flex;
+  gap: 10px;
+}
+
+.upcomingFights .transformed-div-two-partTwo h1{
+  font-size: 15px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #388218;
+}
+
+.upcomingFights .transformed-div-two-partTwo p{
+  font-size: 15px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 900;
+  text-transform: uppercase;
+  color: black;
+}
+
+
+
+
+.upcomingFights .fightItemTwo{
+  display: flex;
+
+}
+.upcomingFights .transformed-div-three {
+  height: 46px;
+  width: 280px;
+  background-color: #c5c5c5;
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  }
+  .upcomingFights  .transformed-div-three p{
+      
+      font:bold 14px / 15px 'Trebuchet Ms', sans-serif;
+      text-shadow: none;
+  
+  }
+  .upcomingFights .transformed-div-four {
+      height: 46px;
+      width: 120px;
+      background-color: #c5c5c5;
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding-right: 20px;
+  }
+  .upcomingFights .transformed-div-four h1{
+  font-size: 19px;
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+  text-transform: uppercase;
+  color: #d30c23;
+  }
+  .upcomingFights .transformed-div-four p{
+  font-size: 18px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 900;
+  
+  }
+
+  .upcomingFights  .fightItem .fightersImages{
+      position: absolute;
+      top:-5px;
+      left:-12px;
+      display: flex;
+      gap:2px;
+  }
+  .upcomingFights  .fighterOne{
+      width:60px;
+      height: 60px;
+      border-radius:50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border:3px solid blue;
+      background-color: #fff;
+      
+  }
+  .upcomingFights  .fighterOne img{
+      width:100%;
+      object-fit: cover;
+      border-radius: 50%;
+      height: 100%;
+      
+      
+  }
+  
+  
+  .upcomingFights .fighterTwo{
+      width:60px;
+      height: 60px;
+      border-radius:50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border:3px solid red;
+      
+      background-color: #fff;
+  
+      
+  }
+  .upcomingFights .fighterTwo img{
+      width:100%;
+      object-fit: cover;
+      border-radius: 50%;
+      height: 100%;
+      
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+.completedFights .fightItemOne{
+  display: flex;
+  gap:7px;
+}
+
+
+
+.completedFights .transformed-div {
+  height: 50px;
+  width: 250px;
+  background-color: #878787;
+  position: relative;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  display: flex;
+  align-items: center;
+  
+}
+.completedFights .fightItemOne .transformed-div h1{
+  text-transform: uppercase;
+  color: #fff;
+  margin-left: 46%;
+
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+
+  font-size: 15px;
+  }
+  .completedFights .transformed-div-two {
+  height: 50px;
+  width: 200px;
+  background-color: #ffffff;
+  clip-path: polygon(6% 0, 100% 0, 100% 100%, 0 100%);
+  margin-left: -15px;
+  display: flex;
+  flex-direction: column;
+  padding-left: 28px;
+  padding-top: 5px;
+  gap:1px;
+}
+.completedFights .transformed-div-two-partOne{
+  display: flex;
+  gap: 10px;
+}
+
+.completedFights .transformed-div-two-partOne h1{
+  font-size: 19px;
+  text-transform: uppercase;
+  color: black;
+
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+}
+.completedFights .transformed-div-two-partTwo{
+  display: flex;
+  gap: 10px;
+}
+
+.completedFights .transformed-div-two-partTwo h1{
+  font-size: 15px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #388218;
+}
+
+.completedFights .transformed-div-two-partTwo p{
+  font-size: 15px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 900;
+  text-transform: uppercase;
+  color: black;
+}
+
+
+
+
+.completedFights .fightItemTwo{
+  display: flex;
+
+}
+.completedFights .transformed-three {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+
+  .completedFights .transformed-three   .transformedDivBox{
+      height: 46px;
+      width: 45px;
+      background-color: #c5c5c5;
+      margin-right: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+  }
+  .completedFights .transformed-three .transformedDivBox:last-of-type {
+      height: 46px;
+      width: 65px;
+      font-size: 13px;
+  }
+  
+ .transformed-five{
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  padding-left: 50px;
+ }
+ 
+  .transformed-five   .transformedDivBox{
+  height: 40px;
+  width: 45px;
+  background-color: #ebebeb;
+  margin-right: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+ 
+ 
+ 
+  .completedFights .transformed-div-four {
+      height: 46px;
+      width: 120px;
+      background-color: #c5c5c5;
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding-right: 20px;
+  }
+  .completedFights .transformed-div-four h1{
+  font-size: 19px;
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+  text-transform: uppercase;
+  color: #d30c23;
+  }
+  .completedFights .transformed-div-four p{
+  font-size: 18px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 900;
+  
+  }
+
+  .completedFights  .fightItem .fightersImages{
+      position: absolute;
+      top:-5px;
+      left:-12px;
+      z-index: 1;
+      display: flex;
+      gap:2px;
+  }
+  .completedFights  .fighterOne{
+      width:60px;
+      height: 60px;
+      border-radius:50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border:3px solid blue;
+      
+background-color: #fff;
+      
+  }
+  .completedFights  .fighterOne img{
+      width:100%;
+      object-fit: cover;
+      border-radius: 50%;
+      height: 100%;
+      
+      
+  }
+  
+  
+  .completedFights .fighterTwo{
+      width:60px;
+      height: 60px;
+      border-radius:50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border:3px solid red;
+      
+background-color: #fff;
+  
+      
+  }
+  .completedFights .fighterTwo img{
+      width:100%;
+      object-fit: cover;
+      border-radius: 50%;
+      height: 100%;
+      
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  .pendingFights .fightItemOne{
+  display: flex;
+  gap:7px;
+}
+
+
+
+.pendingFights .transformed-div {
+  height: 50px;
+  width: 250px;
+  background-color: #6f942f;
+  position: relative;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  display: flex;
+  align-items: center;
+  
+}
+.pendingFights .fightItemOne .transformed-div h1{
+  text-transform: uppercase;
+  color: #fff;
+  margin-left: 46%;
+
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+
+  font-size: 15px;
+  }
+  .pendingFights .transformed-div-two {
+  height: 50px;
+  width: 200px;
+  background-color: #ffffff;
+  clip-path: polygon(6% 0, 100% 0, 100% 100%, 0 100%);
+  margin-left: -15px;
+  display: flex;
+  flex-direction: column;
+  padding-left: 28px;
+  padding-top: 5px;
+  gap:1px;
+}
+.pendingFights .transformed-div-two-partOne{
+  display: flex;
+  gap: 10px;
+}
+
+.pendingFights .transformed-div-two-partOne h1{
+  font-size: 19px;
+  text-transform: uppercase;
+  color: black;
+
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+}
+.pendingFights .transformed-div-two-partTwo{
+  display: flex;
+  gap: 10px;
+}
+
+.pendingFights .transformed-div-two-partTwo h1{
+  font-size: 15px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #388218;
+}
+
+.pendingFights .transformed-div-two-partTwo p{
+  font-size: 15px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 900;
+  text-transform: uppercase;
+  color: black;
+}
+
+
+
+
+.pendingFights .fightItemTwo{
+  display: flex;
+
+}
+.pendingFights .transformed-three {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+
+  .pendingFights .transformed-three   .transformedDivBox{
+      height: 46px;
+      width: 45px;
+      background-color: #c5c5c5;
+      margin-right: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+  }
+  .pendingFights .transformed-three   .transformedDivBox:last-of-type {
+      height: 46px;
+      width: 65px;
+  }
+  .pendingFights .transformed-five{
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  padding-left: 50px;
+ }
+ 
+ .pendingFights   .transformedDivBox{
+  height: 40px;
+  width: 45px;
+  background-color: #ebebeb;
+  margin-right: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+ 
+ 
+ 
+.pendingFights .transformed-div-four {
+      height: 46px;
+      width: 120px;
+      background-color: #c5c5c5;
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding-right: 20px;
+  }
+  .pendingFights .transformed-div-four h1{
+  font-size: 19px;
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  font-stretch: condensed; /* Ensure condensed style is applied */
+  
+  text-transform: uppercase;
+  color: #d30c23;
+  }
+  .pendingFights .transformed-div-four p{
+  font-size: 18px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+
+  font-weight: 900;
+  
+  }
+
+  .pendingFights  .fightItem .fightersImages{
+      position: absolute;
+      top:-5px;
+      left:-12px;
+      z-index: 1;
+      display: flex;
+      gap:2px;
+  }
+  .pendingFights  .fighterOne{
+      width:60px;
+      height: 60px;
+      border-radius:50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border:3px solid blue;
+      
+background-color: #fff;
+      
+  }
+  .pendingFights  .fighterOne img{
+      width:100%;
+      object-fit: cover;
+      border-radius: 50%;
+      height: 100%;
+      
+      
+  }
+  
+  
+  .pendingFights .fighterTwo{
+      width:60px;
+      height: 60px;
+      border-radius:50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border:3px solid red;
+      
+background-color: #fff;
+  
+      
+  }
+  .pendingFights .fighterTwo img{
+      width:100%;
+      object-fit: cover;
+      border-radius: 50%;
+      height: 100%;
+      
+  }
+  
+
+
+
+
+
+
+  @media (max-width: 767px){
+  .fightwalletWrap .fightWallet h2{
+          font-size: 18px;
+      }
+
+      .fightsWrap{
+         align-items: center;
+         gap:40px;
+         flex-wrap: nowrap;
+         flex-direction: column;
+         margin-top: 50px;
+
+     }
+     .fightscontainer{
+         flex-basis: 100%;
+         
+     }
+     .fightscontainer .fightsheadingone {
+       font-size:20px;
+     padding:8px 0;
+     width:88%;
+     padding-top: 12px;
+     }
+     .fightscontainer .fightsheadingthree {
+      font-size:20px;
+    padding:8px 20px;
+    width:100%;
+    padding-top: 12px;
+    }
+  .fightscontainer .fightsheadingtwo {
+      font-size:20px;
+    padding:10px 30px;
+    width:100%;
+    padding-top: 12px;
+    }
+
+
+
+
+
+    
+    .upcomingFights .transformed-div {
+  height: 40px;
+  width: 170px;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  
+}
+
+.upcomingFights .fightItemOne{
+  display: flex;
+  gap:0;
+}
+
+.upcomingFights .fightItemOne .transformed-div h1{
+  margin-left: 45%;
+  font-size: 13px;
+  }
+  .upcomingFights .transformed-div-two {
+  height: 40px;
+  width: 170px;
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  margin-left: -3px;
+  padding-left: 20px;
+  padding-top: 3px;
+  gap:1px;
+}
+.upcomingFights .transformed-div-two-partOne{
+  display: flex;
+  gap: 10px;
+}
+
+.upcomingFights .transformed-div-two-partOne h1{
+  font-size: 17px; 
+}
+.upcomingFights .transformed-div-two-partTwo{
+  gap: 10px;
+}
+
+.upcomingFights .transformed-div-two-partTwo h1{
+  font-size: 14px;
+}
+
+.upcomingFights .transformed-div-two-partTwo p{
+  font-size: 14px;
+  font-weight: 900;
+ }
+
+
+
+ .upcomingFights .transformed-div-three {
+  height: 41px;
+  width: 220px;
+  margin-right: 10px;
+  padding-left: 10px;
+  }
+  .upcomingFights .transformed-div-four {
+      height: 41px;
+      width: 80px;
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+      padding-right: 20px;
+      margin-left: -5px;
+  }
+  .upcomingFights .transformed-div-four h1{
+  font-size: 15px;
+  }
+  .upcomingFights .transformed-div-four p{
+  font-size: 14px;
+  font-weight: 900;
+  }
+
+
+
+  .upcomingFights .fightItem .fightersImages{
+  position: absolute;
+  top:-4px;
+  left:-8px;
+  z-index: 1;
+  display: flex;
+  gap:2px;
+}
+.upcomingFights .fighterOne{
+  width:40px;
+  height: 40px;
+  
+}
+
+
+.upcomingFights .fighterTwo{
+  width:40px;
+  height: 40px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.completedFights{
+  margin-top:50px;
+}
+.completedFights .fightItemOne{
+  display: flex;
+  gap:7px;
+}
+
+.completedFights .transformed-div {
+  height: 40px;
+  width: 170px;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  
+}
+.completedFights .fightItemOne .transformed-div h1{
+  margin-left: 45%;
+  font-size: 13px;
+}
+.completedFights .transformed-div-two {
+      height: 40px;
+      width: 170px;
+      clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+      padding-left: 20px;
+      padding-top: 3px;
+      gap:1px;
+  
+}
+.completedFights .transformed-div-two-partOne{
+  display: flex;
+  gap: 10px;
+}
+
+.completedFights .transformed-div-two-partOne h1{
+  font-size: 17px;    
+}
+.completedFights .transformed-div-two-partTwo{
+  display: flex;
+  gap: 10px;
+}
+
+.completedFights .transformed-div-two-partTwo h1{
+  font-size: 14px;
+}
+
+.completedFights .transformed-div-two-partTwo p{
+  font-size: 13px;
+  font-weight: 900;
+}
+
+
+
+
+.completedFights .fightItemTwo{
+  display: flex;
+
+}
+.completedFights .transformed-three {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+
+  .completedFights .transformed-three   .transformedDivBox{
+      height: 33px;
+      width: 32px;
+      margin-right: 3px;
+      font-size:13px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+  }
+  .completedFights .transformed-three   .transformedDivBox:last-of-type {
+      height: 33px;
+      width: 45px;
+  }
+  .completedFights .transformed-five{
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  padding-left: 35px;
+ }
+ 
+ .completedFights   .transformedDivBox{
+  height: 33px;
+  width: 32px;
+  margin-right: 3px;
+  
+  font-size:13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+ 
+ 
+ 
+.completedFights .transformed-div-four {
+  height: 33px;
+  width: 80px;
+  clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+  padding-right: 20px;
+  padding-top:5px;
+  }
+  .completedFights .transformed-div-four h1{
+      font-size: 15px;
+  }
+
+  .completedFights .transformed-div-four p{
+      font-size: 14px;
+      font-weight: 900;
+  }
+
+
+  .completedFights  .fightItem .fightersImages{
+      position: absolute;
+      top:-4px;
+      left:-8px;
+      z-index: 1;
+      display: flex;
+      gap:2px;
+  }
+  .completedFights  .fighterOne{
+  width:40px;
+  height: 40px;
+  }
+  
+  
+  .completedFights .fighterTwo{
+      width:40px;
+  height: 40px;
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.pendingFights{
+  margin-top:50px;
+}
+.pendingFights .fightItemOne{
+  display: flex;
+  gap:7px;
+}
+
+.pendingFights .transformed-div {
+  height: 40px;
+  width: 170px;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  
+}
+.pendingFights .fightItemOne .transformed-div h1{
+  margin-left: 45%;
+  font-size: 13px;
+}
+  .pendingFights .transformed-div-two {
+      height: 40px;
+      width: 170px;
+      clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+      padding-left: 20px;
+      padding-top: 3px;
+      gap:1px;
+  
+}
+.pendingFights .transformed-div-two-partOne{
+  display: flex;
+  gap: 10px;
+}
+
+.pendingFights .transformed-div-two-partOne h1{
+  font-size: 17px;    
+}
+.pendingFights .transformed-div-two-partTwo{
+  display: flex;
+  gap: 10px;
+}
+
+.pendingFights .transformed-div-two-partTwo h1{
+  font-size: 14px;
+}
+
+.pendingFights .transformed-div-two-partTwo p{
+  font-size: 13px;
+  font-weight: 900;
+}
+
+
+
+
+.pendingFights .fightItemTwo{
+  display: flex;
+
+}
+.pendingFights .transformed-three {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+
+  .pendingFights .transformed-three   .transformedDivBox{
+      height: 33px;
+      width: 32px;
+      margin-right: 3px;
+      font-size:13px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+  }
+  .pendingFights .transformed-three   .transformedDivBox:last-of-type {
+      height: 33px;
+      width: 45px;
+  }
+  .pendingFights .transformed-five{
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  padding-left: 35px;
+ }
+ 
+ .pendingFights   .transformedDivBox{
+  height: 33px;
+  width: 32px;
+  margin-right: 3px;
+  
+  font-size:13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+ 
+ 
+ 
+.pendingFights .transformed-div-four {
+  height: 33px;
+  width: 80px;
+  clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+  padding-right: 20px;
+  padding-top:5px;
+  }
+  .pendingFights .transformed-div-four h1{
+      font-size: 15px;
+  }
+
+  .pendingFights .transformed-div-four p{
+      font-size: 14px;
+      font-weight: 900;
+  }
+
+
+  .pendingFights  .fightItem .fightersImages{
+      position: absolute;
+      top:-4px;
+      left:-8px;
+      z-index: 1;
+      display: flex;
+      gap:2px;
+  }
+  .pendingFights  .fighterOne{
+  width:40px;
+  height: 40px;
+  }
+  
+  
+  .pendingFights .fighterTwo{
+      width:40px;
+  height: 40px;
+  }
+  
+
+      
+}
+
+.fightItem {
+  position: relative;
+}
+
+.removeButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  z-index: 10;
+  display: none; /* Hidden by default */
+}
+
+.fightItem:hover .removeButton {
+  display: block; /* Show button on hover */
+}
+
+
+.transformedDivBoxLast{
+  height: 40px;
+  width: 115px;
+  margin-right: 3px;
+  font-size:13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  color: black;
+
+}
+
+.transformed-Six{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 82.5%;
+  text-align: center;
+  background-color: #fff;
+  margin-left: 50px;
+  height: 40px;
+  padding:10px;
+ }
+
+
+ .blink-text {
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.shareYourExperience{
+  position: fixed;
+  bottom: 15px;
+  left: 20px;
+  display: flex;
+  gap:10px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.shareYourExperience i{
+  color: #decf00;
+  font-size: 28px;
+}
+.shareYourExperience h1{
+  color: #fff;
+  font-size: 25px;
+  font-family: 'UfcSansRegular';
+  font-weight: 600;
+ }
+ .popup-overlay-dashboard {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-dashboard {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.popup-dashboard h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.popup-dashboard textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: none;
+}
+
+.popup-actions-dashboard {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.popup-actions-dashboard button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popup-actions-dashboard button:first-child {
+  background-color: #4caf50;
+  color: white;
+}
+
+.popup-actions-dashboard button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+
+
+
+
+
+
+
+
+/* home */
+  
+.no-hover iframe {
+}
+
+.homeSecond{
+display: flex;
+justify-content: flex-start;
+align-items: center;
+flex-direction: column;
+width: 100%;
+min-height: 50vh;
+background-color: black;
+gap:40px;
+}
+.homeSecond .second-main-heading{
+font-size: 40px;
+line-height: 60px;
+color: #2d1e22;
+text-transform: uppercase;
+text-align: center;
+
+font-family: 'UFCSans', Arial, sans-serif;
+font-weight: bold; /* Ensure bold weight is applied */
+font-style: normal; /* Ensure normal style is applied */
+font-stretch: condensed; /* Ensure condensed style is applied */
+font-style: italic;
+background-color: #ffc000;
+padding: 20px;
+margin-bottom: 10px;
+
+}
+.homeSecond .fightswrap{
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+position: relative;
+gap:30px;
+
+} 
+.fightItem{
+display: flex;
+flex-direction: column;
+gap:5px;
+position: relative;
+
+}
+.fightItemOne{
+display: flex;
+
+}
+.transformed-div {
+height: 50px;
+width: 450px;
+background-color: #fff;
+position: relative;
+clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+display: flex;
+align-items: center;
+
+}
+.fightItemOne .transformed-div h1{
+text-transform: uppercase;
+color: #d30c23;
+margin-left: 33%;
+
+font-family: 'UFCSans', Arial, sans-serif;
+font-weight: bold; /* Ensure bold weight is applied */
+font-style: normal; /* Ensure normal style is applied */
+font-stretch: condensed; /* Ensure condensed style is applied */
+
+
+font-size: 24px;
+}
+.transformed-div-two {
+height: 50px;
+width: 450px;
+background-color: #cbcbcb;
+clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+margin-left: -15px;
+display: flex;
+flex-direction: column;
+padding-left: 28px;
+padding-top: 5px;
+gap:1px;
+}
+.transformed-div-two-partOne{
+display: flex;
+gap: 10px;
+}
+
+.transformed-div-two-partOne h1{
+font-size: 21px;
+text-transform: uppercase;
+color: black;
+
+font-family: 'UFCSans', Arial, sans-serif;
+font-weight: bold; /* Ensure bold weight is applied */
+font-style: normal; /* Ensure normal style is applied */
+font-stretch: condensed; /* Ensure condensed style is applied */
+
+}
+.transformed-div-two-partTwo{
+display: flex;
+gap: 10px;
+}
+
+.transformed-div-two-partTwo h1{
+font-size: 17px;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+
+font-weight: 700;
+text-transform: uppercase;
+color: #388218;
+}
+
+.transformed-div-two-partTwo p{
+font-size: 17px;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+
+font-weight: 900;
+text-transform: uppercase;
+color: black;
+}
+
+
+
+
+.fightItemTwo{
+display: flex;
+}
+.transformed-div-three {
+height: 46px;
+width: 600px;
+background-color: #c5c5c5;
+margin-right: 10px;
+display: flex;
+align-items: center;
+padding-left: 10px;
+}
+.transformed-div-three p{
+    
+    font:bold 14px / 15px 'Trebuchet Ms', sans-serif;
+    text-shadow: none;
+
+}
+.noMatch{
+  font:bold 14px / 15px 'Trebuchet Ms', sans-serif;
+  color:#fff;
+  font-size: 18px;
+}
+.transformed-div-four {
+    height: 46px;
+    width: 200px;
+    background-color: #c5c5c5;
+    clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-right: 20px;
+}
+.transformed-div-four h1{
+font-size: 19px;
+font-family: 'UFCSans', Arial, sans-serif;
+font-weight: bold; /* Ensure bold weight is applied */
+font-style: normal; /* Ensure normal style is applied */
+font-stretch: condensed; /* Ensure condensed style is applied */
+
+text-transform: uppercase;
+color: #d30c23;
+}
+.transformed-div-four p{
+font-size: 18px;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+
+font-weight: 900;
+
+}
+
+
+
+.fightItem .fightersImages{
+position: absolute;
+top:-12px;
+left:-17px;
+z-index: 1;
+display: flex;
+gap:2px;
+}
+.fighterOne{
+width:75px;
+height: 75px;
+border-radius:50%;
+display: flex;
+justify-content: center;
+align-items: center;
+overflow: hidden;
+border:3px solid blue;
+
+}
+.fighterOne img{
+width:100%;
+object-fit: cover;
+border-radius: 50%;
+height: 100%;
+
+
+}
+
+
+.fighterTwo{
+width:75px;
+height: 75px;
+border-radius:50%;
+display: flex;
+justify-content: center;
+align-items: center;
+overflow: hidden;
+border:3px solid red;
+
+
+}
+.fighterTwo img{
+width:100%;
+object-fit: cover;
+border-radius: 50%;
+height: 100%;
+
+}
+
+
+.fightswrap .fightItem:nth-of-type(1) .transformed-div-two {
+background-color: #decf00;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.homeThird{
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+min-height: 70vh;
+background-color: black;
+padding: 70px 0;
+}
+.homeThird .thirdHeadingOne{
+font-size: 32px;
+line-height: 60px;
+color: #c0c0c0;
+font-family: 'Trebuchet MS', sans-serif;
+font-weight: bold;
+text-transform: uppercase;
+-webkit-text-shadow: 6px 5px 6px #201e1f;
+-moz-text-shadow: 6px 5px 6px #201e1f;
+-o-text-shadow: 6px 5px 6px #201e1f;
+text-shadow: 6px 5px 6px #201e1f;
+text-align: center;
+
+}
+
+.homeThird h2{
+font-size: 28px;
+line-height: 60px;
+color: #c0c0c0;
+font-family: 'Trebuchet MS', sans-serif;
+font-weight: bold;
+text-transform: uppercase;
+-webkit-text-shadow: 6px 5px 6px #201e1f;
+-moz-text-shadow: 6px 5px 6px #201e1f;
+-o-text-shadow: 6px 5px 6px #201e1f;
+text-shadow: 6px 5px 6px #201e1f;
+text-align: center;
+
+}
+.homeThird h2 span{
+color: #388218;
+font-family: 'UfcSansRegular', Arial, sans-serif;
+
+}
+.leaderboardHeading{
+width:100%;
+text-align: center;
+border-bottom: 2px solid #c0c0c0;
+display: flex;
+justify-content: center;
+align-items: center;
+margin-top: 15px;
+margin-top:20px;
+}
+.leaderboardHeading h3{
+border-radius: 15px 15px 0 0;
+border:2px solid #c0c0c0;
+width:200px;
+padding:10px;
+background-color: rgb(8, 8, 105);
+
+
+
+font-size: 22px;
+color: #c1ce11;
+font-family: 'Trebuchet MS', sans-serif;
+font-weight: bold;
+text-transform: uppercase;
+}
+
+.homeThird .controls{
+display: flex;
+justify-content: center;
+align-items: center;
+gap:25px;
+margin: 20px 0;;
+}
+.homeThird .controls h5{
+font-size: 22px;
+line-height: 60px;
+color: #c0c0c0;
+font-family: 'UFCSans', Arial, sans-serif;
+font-weight: bold; /* Ensure bold weight is applied */
+font-style: normal; /* Ensure normal style is applied */
+font-stretch: condensed; /* Ensure condensed style is applied */
+text-transform: uppercase;
+-webkit-text-shadow: 6px 5px 6px #201e1f;
+-moz-text-shadow: 6px 5px 6px #201e1f;
+-o-text-shadow: 6px 5px 6px #201e1f;
+text-shadow: 6px 5px 6px #201e1f;
+text-align: center;
+}
+.homeThird .controls .active{
+color: #e19500;
+}
+
+.leaderboardItemsWrap{
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap:25px;
+}
+.leaderboardItem{
+position: relative;
+height: 50px;
+width: 650px;
+background-color: #c5c5c5;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-radius: 15px;
+border:1px solid gray;
+padding-left: 70px;
+padding-right: 15px;
+}
+.leaderboardItem .leaderboard-item-image{
+width:70px;
+height: 70px;
+border-radius:50%;
+display: flex;
+justify-content: center;
+align-items: center;
+overflow: hidden;
+border:3px solid #fff;
+position: absolute;
+top:-13px;
+left: -10px;;
+
+
+}
+.leaderboardItem .leaderboard-item-image img{
+width:100%;
+object-fit: cover;
+border-radius: 50%;
+height: 100%;
+
+}
+.leaderboardItem h1{
+font-size: 18px;
+color: black;
+
+font-family: 'UfcSansRegular', Arial, sans-serif;
+
+text-transform: uppercase;
+
+
+}
+.btn-grad{
+cursor: pointer;
+}
+
+@media (max-width: 767px){
+
+.homeFirst{
+min-height: 100vh;
+width:100%;
+overflow: hidden;
+}
+.homeFirst h1{
+font-size: 30px;
+line-height: 60px;
+margin-top:85px;
+}
+.homeFirst h2{
+font-size: 35px;
+line-height: 59px;
+width: 300px;
+}
+
+
+
+
+
+
+
+
+
+
+
+.homeSecond{
+min-height: 40vh;
+gap:40px;
+}
+.homeSecond .second-main-heading{
+font-size: 38px;
+padding:10px 20px;
+
+}
+.homeSecond .fightswrap{
+gap:30px;
+
+} 
+.transformed-div {
+height: 40px;
+width: 170px;
+clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+
+}
+.fightItemOne .transformed-div h1{
+margin-left: 45%;
+font-size: 13px;
+}
+.transformed-div-two {
+height: 40px;
+width: 170px;
+clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+margin-left: 0px;
+padding-left: 20px;
+padding-top: 3px;
+gap:1px;
+}
+.transformed-div-two-partOne{
+display: flex;
+gap: 10px;
+}
+
+.transformed-div-two-partOne h1{
+font-size: 17px; 
+}
+.transformed-div-two-partTwo{
+gap: 10px;
+}
+
+.transformed-div-two-partTwo h1{
+font-size: 14px;
+}
+
+.transformed-div-two-partTwo p{
+font-size: 14px;
+font-weight: 900;
+}
+
+
+
+.transformed-div-three {
+height: 41px;
+width: 220px;
+margin-right: 10px;
+padding-left: 10px;
+}
+.transformed-div-four {
+    height: 41px;
+    width: 80px;
+    clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+    padding-right: 20px;
+    margin-left: 0px;
+}
+.transformed-div-four h1{
+font-size: 15px;
+}
+.transformed-div-four p{
+font-size: 14px;
+font-weight: 900;
+}
+
+
+
+.fightItem .fightersImages{
+position: absolute;
+top:-4px;
+left:-8px;
+display: flex;
+gap:2px;
+}
+.fighterOne{
+width:40px;
+height: 40px;
+
+}
+
+
+.fighterTwo{
+width:40px;
+height: 40px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.homeThird{
+min-height: 70vh;
+padding: 70px 0;
+}
+.homeThird .thirdHeadingOne{
+font-size: 26px;
+}
+
+.homeThird h2{
+font-size: 25px;
+}
+.leaderboardHeading{
+margin-top: 15px;
+margin-top:20px;
+}
+.leaderboardHeading h3{
+font-size: 21px;
+}
+
+.leaderboardItemsWrap{
+gap:27px;
+}
+.leaderboardItem{
+height: 45px;
+width: 320px;
+padding-left: 70px;
+padding-right: 15px;
+}
+
+.leaderboardItem h1{
+font-size: 16px;
+}
+
+.toRemove{
+display: none;
+}
+}
+
+
+
+
+
+
+
+.homeFourth{
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("/Assets/RING2.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+flex-direction: column;
+}
+
+.video-embed-wrapper {
+width: 100%;
+max-width: 800px; /* Adjust as needed */
+margin: 0 auto; /* Center the video on the page */
+border-radius: 10px; /* Rounded corners */
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+text-align: center;
+}
+
+
+.video-embed-wrapper iframe {
+width: 100%;
+height: 450px; /* Adjust the height as needed */
+border-radius: 8px; /* Optional: rounded corners on the iframe */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.faq-section {
+background: transparent;
+min-height: 75vh;
+padding: 10vh 0 0;
+padding-bottom:0px;
+background-color: #000000;
+}
+.faq-title h2 {
+position: relative;
+margin-bottom: 45px;
+display: inline-block;
+font-weight: 600;
+line-height: 1;
+color:#fff;
+}
+.faq-title h2::before {
+content: "";
+position: absolute;
+left: 50%;
+width: 60px;
+height: 2px;
+background: #E91E63;
+bottom: -25px;
+margin-left: -30px;
+}
+#accordion{
+max-width:50%;
+}
+.faq-title p {
+padding: 0 190px;
+margin-bottom: 10px;
+}
+.faqsss{
+display:flex;
+justify-content:center;
+align-items:center;
+}
+.faq {
+background: transparent;
+box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.06);
+border-radius: 4px;
+}
+
+.faq .card {
+border: none;
+background: none;
+
+}
+
+.faq .card .card-header {
+padding: 0px;
+border: none;
+background: red;
+-webkit-transition: all 0.3s ease 0s;
+-moz-transition: all 0.3s ease 0s;
+-o-transition: all 0.3s ease 0s;
+transition: all 0.3s ease 0s;
+margin-bottom:20px;
+clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+
+
+}
+
+.faq .card .card-header:hover {
+color:#fff;  padding-left: 10px;
+}
+.faq .card .card-header .faq-title {
+width: 100%;
+text-align: left;
+padding: 0px;
+padding-left: 30px;
+padding-right: 30px;
+font-weight: 400;
+font-size: 17.5px;
+letter-spacing: 1px;
+color: #d2d2d2;
+text-decoration: none !important;
+-webkit-transition: all 0.3s ease 0s;
+-moz-transition: all 0.3s ease 0s;
+-o-transition: all 0.3s ease 0s;
+transition: all 0.3s ease 0s;
+cursor: pointer;
+padding-top: 20px;
+padding-bottom: 20px;
+
+font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.faq .card .card-header .faq-title .badge {
+display: inline-block;
+width: 20px;
+height: 20px;
+line-height: 21px;
+float: left;
+-webkit-border-radius: 100px;
+-moz-border-radius: 100px;
+border-radius: 100px;
+text-align: center;
+background: #fff;
+color: #000000;
+font-size: 12px;
+margin-right: 20px;
+margin-top:1.5px;
+}
+
+.faq .card .card-body {
+padding: 30px;
+padding-left: 35px;
+padding-bottom: 16px;
+font-weight: 400;
+font-size: 16px;
+color: #6F8BA4;
+line-height: 28px;
+letter-spacing: 1px;
+border-top: 1px solid #F3F8FF;
+}
+
+.faq .card .card-body p {
+margin-bottom: 14px;
+font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.faq .card .collapse.show {
+display: block;
+}
+
+.faq .card .collapse {
+display: none;
+}
+
+
+@media (max-width: 991px) {
+.faq {
+margin-bottom: 30px;
+}
+.faq .card .card-header .faq-title {
+line-height: 26px;
+margin-top: 10px;
+}
+}
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-Bold.woff2') format('woff2');
+font-weight: bold;
+font-style: normal;
+}
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-CondensedBold.woff2') format('woff2');
+font-weight: bold;
+font-style: normal;
+font-stretch: condensed;
+}
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+font-weight: 500;
+font-style: normal;
+font-stretch: condensed;
+}
+
+
+
+@font-face {
+font-family: 'UfcSansRegular';
+src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+font-weight: normal;
+font-style: normal;
+}
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-RegularOblique.woff2') format('woff2');
+font-weight: normal;
+font-style: oblique;
+}
+
+
+.homeFirst{
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)), url("/Assets/boxing-victory.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+flex-direction: column;
+padding-top: 170px;
+padding-bottom: 70px;
+
+}
+.homeFirst h1{
+font-size: 60px;
+line-height: 60px;
+color: #fff;
+font-family: 'Bungee', sans-serif;
+text-transform: uppercase;
+text-align: center;
+margin-top:85px;
+}
+.homeFirst h2{
+color: #d30c23;
+font-size: 60px;
+line-height: 79px;
+text-align: center;
+padding: 27px 0;
+width: 1120px;
+font-family: 'Bungee', sans-serif;
+text-transform: uppercase;
+-webkit-text-shadow: 6px 5px 6px #201e1f;
+-moz-text-shadow: 6px 5px 6px #201e1f;
+-o-text-shadow: 6px 5px 6px #201e1f;
+text-shadow: 6px 5px 6px #201e1f;
+margin-bottom: 100px;
+}
+
+
+
+
+
+
+
+.homeFourth{
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("/Assets/RING2.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+flex-direction: column;
+}
+
+.video-embed-wrapper {
+width: 100%;
+max-width: 800px; /* Adjust as needed */
+margin: 0 auto; /* Center the video on the page */
+border-radius: 10px; /* Rounded corners */
+box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+text-align: center;
+}
+
+.video-embed-wrapper iframe {
+width: 100%;
+height: 450px; /* Adjust the height as needed */
+border-radius: 8px; /* Optional: rounded corners on the iframe */
+}
+
+
+
+
+
+
+
+
+
+@media (max-width: 767px){
+
+.homeFirst{
+
+min-height: 100vh;
+width:100%;
+overflow: hidden;
+padding-top:140px;
+}
+.homeFirst h1{
+font-size: 30px;
+line-height: 60px;
+margin-top:85px;
+}
+.homeFirst h2{
+font-size: 35px;
+line-height: 59px;
+width: 300px;
+margin-bottom: 140px;
+}
+
+
+
+
+.video-embed-wrapper {
+margin:0; /* Center the video on the page */
+border-radius: 10px; /* Rounded corners */
+}
+
+.video-embed-wrapper iframe {
+width: 100%;
+height: 200px; /* Adjust the height as needed */
+border-radius: 8px; /* Optional: rounded corners on the iframe */
+}
+
+}  
+
+
+.thirdHomePageSection{
+width:100%;
+display: flex;
+justify-content: center;
+align-items: center;
+position: relative;
+flex-direction: column;
+min-height: 75vh;
+background-image: linear-gradient(rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url(/Assets/homeThirdBackground.jpeg);
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+padding:20px 0;
+}
+.thirdHomePageSection .moneyone{
+width:100px;
+position: absolute;
+top:10%;
+right:15%;
+transform: rotate(30deg);
+}
+
+.thirdHomePageSection .moneytwo{
+width:100px;
+position: absolute;
+top:50%;
+left:5%;
+}
+.thirdHomePageSection h1{
+font-size: 50px;
+line-height: 60px;
+color: #fff;
+font-family: 'Bungee', sans-serif;
+text-transform: uppercase;
+text-align: center;
+-webkit-text-shadow: 6px 5px 6px #201e1f;
+-moz-text-shadow: 6px 5px 6px #201e1f;
+-o-text-shadow: 6px 5px 6px #201e1f;
+text-shadow: 6px 5px 6px #201e1f;
+
+}
+
+
+.thirdHomePageSection h2{
+color: #d30c23;
+font-size:50px;
+line-height: 79px;
+text-align: center;
+padding: 27px 0;
+width: 1120px;
+font-family: 'Bungee', sans-serif;
+text-transform: uppercase;
+-webkit-text-shadow: 6px 5px 6px #201e1f;
+-moz-text-shadow: 6px 5px 6px #201e1f;
+-o-text-shadow: 6px 5px 6px #201e1f;
+text-shadow: 6px 5px 6px #201e1f;
+
+}
+.thirdHomePageSection p{
+text-align: center;
+color: #fff;
+font-family: 'UfcSansRegular';
+font-size: 24px;}
+
+.thirdHomePageSection button{
+padding: 14px 30px;
+font-size: 22px;
+font-weight: bold;
+color: #fff; /* White text */
+background: linear-gradient(45deg, #128C7E, #075E54, #25D366, #34B7F1); /* WhatsApp gradient */
+background-size: 300% 300%; /* Ensures smooth gradient transitions */
+border: none;
+border-radius: 20px; /* Rounded corners */
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+cursor: pointer;
+transition: background-position 0.5s ease, box-shadow 0.3s ease, transform 0.3s ease;
+animation: gradientAnimation 5s ease infinite; /* Gradient animation */
+z-index: 9;
+margin-top: 20px;  
+}
+
+/* General media query for small devices */
+@media (max-width: 768px) {
+.thirdHomePageSection {
+padding: 10px 0;
+min-height: 60vh; /* Adjust height for smaller screens */
+
+}
+
+.thirdHomePageSection .moneyone,
+.thirdHomePageSection .moneytwo {
+display: none;
+}
+
+
+.thirdHomePageSection h1 {
+font-size: 32px; /* Reduce heading size */
+line-height: 40px;
+}
+
+.thirdHomePageSection h2 {
+font-size: 32px; /* Reduce subheading size */
+line-height: 50px;
+width: 90%; /* Reduce width for smaller screens */
+padding: 20px 0;
+}
+
+.thirdHomePageSection p {
+font-size: 16px; /* Adjust paragraph font size */
+padding: 10px;
+}
+}
+
+/* Media query for extra-small devices */
+@media (max-width: 480px) {
+.thirdHomePageSection {
+min-height: 50vh;
+}
+
+.thirdHomePageSection h1 {
+font-size: 24px; /* Further reduce heading size */
+line-height: 30px;
+}
+
+.thirdHomePageSection h2 {
+font-size: 24px; /* Further reduce subheading size */
+line-height: 35px;
+padding: 15px 0;
+}
+
+.thirdHomePageSection p {
+font-size: 14px; /* Smaller font size for paragraphs */
+}
+
+.thirdHomePageSection .moneyone,
+.thirdHomePageSection .moneytwo {
+display: none;
+}
+
+}
+
+
+
+
+/* fight costing customsection */
+
+.fightCosting{
+  min-height: 100vh;
+  display: flex;
+  background-image: linear-gradient(rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url('/Assets/RING3.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  flex-direction: column;
+  
+}
+.fightDetailsContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:15px;
+  margin-top:1px;
+}
+.fightDetailsContainer .fightDetailsContainerFirstHeading{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  font-size:26px;
+  color: #eee;
+  text-transform:uppercase;
+
+}
+
+.fightDetailsContainer .fightDetailsContainerFirstHeading span{
+  color:#e4c707;
+}
+.fightDetailsContainer .fightersImagesInFightDetails{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:20px;
+}
+.fightersImagesInFightDetails h1{
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:condensed; /* Condensed style */
+  font-size:24px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+ 
+}
+.fightCosting .imgWrapFights{
+  width:100px;
+  height:100px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border:none;
+}
+.fightCosting .imgWrapFights img{
+  width:100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+
+
+/* Specific styles for the first image */
+.fightCosting .imgWrapFights:nth-of-type(2) img {
+  border: 3px solid red;
+}
+
+/* Specific styles for the second image */
+.fightCosting .imgWrapFights:nth-of-type(1) img {
+  border: 3px solid blue;
+}
+
+
+
+.fightDetailsContainer .fightTypeInFightDetails{
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  font-size:26px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+}
+.fightDetailsContainer .fightDetailsPot{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:5px;
+}
+.fightDetailsContainer .fightDetailsPot h1, .fightDetailsContainer .fightDetailsPot p{
+  font-style:normal; /* Condensed style */
+  font-size:24px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+}
+.fightDetailsContainer .beiginningTimeFight{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:5px;
+
+}
+.fightDetailsContainer .beiginningTimeFight h1 , 
+.fightDetailsContainer .beiginningTimeFight p{
+  font-style:normal; /* Condensed style */
+  font-size:24px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+}
+
+.fightDetailsContainer .makeGreen{
+  color:#38b90c;
+}
+
+
+
+
+
+
+.fightwalletWrap{
+  width:100%;
+  display: flex;
+  justify-content: right;
+  align-items: right;
+  color: #ccc;
+  margin-top:20px;
+  padding-right: 20px;
+  cursor: pointer;
+  z-index: 999999;
+}
+
+
+.fightwalletWrap .fightWallet h1{
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+.fightwalletWrap .fightWallet h2{
+  padding: 7px 10px;
+  border:2px solid #ccc;
+}
+
+.fightwalletWrap .fightWallet h2 span{
+  padding: 2px 10px;
+  background-color: #fff;
+  color:black;
+}
+
+
+.note{
+  color:#e4c707;
+  font-style: italic;
+  margin-top:100px;
+  margin-bottom: 50px;
+  
+  font:bold italic 14px / 15px 'Trebuchet Ms', sans-serif;
+  font-size: 17px;
+}
+
+
+
+@media (max-width: 767px){
+  
+  .fightwalletWrap{
+      width:100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #ccc;
+      margin-top:20px;
+      padding-right: 0;
+      padding-left: 45px;
+  }
+  
+  
+  .fightwalletWrap .fightWallet h1{
+      font-size: 18px;
+      margin-bottom: 5px;
+  }
+  .fightwalletWrap .fightWallet h2{
+      padding: 7px 10px;
+      font-size: 18px;
+  }
+  
+  .fightwalletWrap .fightWallet h2 span{
+      padding: 2px 10px;
+      background-color: #fff;
+      color:black;
+  }
+  
+
+
+  .fightDetailsContainer{
+      padding:0 2px;
+  }    
+  .fightDetailsContainer .btn-grad{
+      width:50%;
+  }
+.fightDetailsContainer .fightersImagesInFightDetails{
+ margin-top: 20px;
+  
+}
+
+.fightDetailsContainer .fightersImagesInFightDetails h1{
+  font-size: 20px;
+}
+
+.fightCosting .imgWrapFights{
+  width:85px;
+  height:85px;
+}
+.fightDetailsContainer .fightTypeInFightDetails{
+  font-size:17px;
+  }
+.fightDetailsContainer .fightDetailsPot h1, .fightDetailsContainer .fightDetailsPot p{
+  font-size:20px;
+ }
+.fightDetailsContainer .beiginningTimeFight h1 , 
+.fightDetailsContainer .beiginningTimeFight p{
+  font-size:18px;
+  }
+
+
+
+
+  }
+
+
+
+  /* fight costing updated customsection */
+  
+
+.fightCostingUpdated{
+  min-height: 100vh;
+  display: flex;
+  background-image: linear-gradient(rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url('/Assets/newFightDetails/two.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  flex-direction: column;
+  padding-bottom: 70px;
+  
+}.fightCostingUpdated .fightHeading {
+  font-family: 'Saira Stencil One', sans-serif;
+  font-size: 56px;
+  color: #fff;
+  margin: 0;
+  text-shadow: 2px 2px 4px #000; /* Right bottom shadow */
+  text-transform: capitalize;
+}
+
+.fightCostingUpdated .fightSubHeading {
+  font-family: 'Saira Stencil One', sans-serif;
+  color: #fff;
+  margin-top: -20px;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px #000; /* Right bottom shadow */
+  text-transform: capitalize;
+}
+
+.fightDetailsContainerUpdated{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:10px;
+  margin-top: -70px;
+  
+}
+
+.fightDetailsContainerUpdated .fightersImagesInFightDetailsUpdated{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:70px;
+}
+.fightersImagesInFightDetailsUpdated .vsImg{
+  width:75px;
+}
+.imgWrapFightsUpdated{
+  width:190px;
+  height:190px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border:5px solid #fff;
+  position: relative;
+}
+.imgWrapFightsUpdated img{
+  width:100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.imgWrapFightsUpdated h1{
+  position: absolute;
+  bottom: -20px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  width: 165px;
+  text-align: center;
+  background-color: #c20700;
+  padding: 10px 0;
+  overflow: hidden;
+  border-radius: 20px;
+  color:#ffffff;
+  text-transform: capitalize;
+}
+.fightTypeInFightDetailsUpdated {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  color: #ffffff;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 20px 80px;
+  line-height: 1.6;
+  margin-top: 60px;
+  position: relative;
+
+  background-color: #c20700;
+}
+
+.fightTypeInFightDetailsUpdated::before,
+.fightTypeInFightDetailsUpdated::after {
+  content: '';
+  background-image: url('https://media-public.canva.com/W1V7w/MADf5kW1V7w/3/s2-1.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 60px; /* Adjust as needed */
+  height: 60px; /* Adjust as needed */
+  position: absolute;
+  top: 50%; /* Vertically center */
+  transform: translateY(-50%); /* Ensure perfect vertical centering */
+
+}
+
+.fightTypeInFightDetailsUpdated::before {
+  left: -20px; /* Position on the left */
+  transform: translateY(-50%); /* Ensure it's vertically centered */
+  top:60%;
+}
+
+.fightTypeInFightDetailsUpdated::after {
+  right: -20px; /* Position on the right */
+  transform: translateY(-50%) rotate(180deg); /* Center vertically and rotate */
+  top:35%;
+}
+
+
+.fightDetailsBtn{
+  border:none;
+  outline: none;
+  background: transparent;
+  font-family: 'Saira Stencil One', sans-serif;
+  font-style: italic;
+  font-size: 28px;
+  cursor: pointer;
+  padding:5px 20px;
+  background-color: #c20700;
+  color: #fff;
+ margin-top:20px;
+ box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  border-radius: 20px;
+}
+.fightDetailsBtn:hover{
+  color: #c20700;
+  background-color: transparent;
+}
+
+
+
+@media (max-width: 767px){
+
+  .fightTypeInFightDetailsUpdated::before {
+      left: -20px; /* Position on the left */
+      transform: translateY(-50%); /* Ensure it's vertically centered */
+      top:60%;
+    }
+    
+    .fightTypeInFightDetailsUpdated::after {
+      right: -20px; /* Position on the right */
+      transform: translateY(-50%) rotate(180deg); /* Center vertically and rotate */
+      top:35%;
+    }
+    
+  .fightCostingUpdated{
+      min-height: 100vh;
+      display: flex;
+      background-image: linear-gradient(rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url('/Assets/newFightDetails/two.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      width: 100%;
+      text-align: center;
+      flex-direction: column;
+      padding-bottom: 70px;
+      
+  }.fightCostingUpdated .fightHeading {
+      font-size: 36px;
+      margin: 0;
+      }
+  
+  .fightCostingUpdated .fightSubHeading {
+      margin-top: -10px;
+      margin-bottom: 20px;
+      }
+  
+  .fightDetailsContainerUpdated{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap:10px;
+      margin-top: 1px;
+      
+  }
+  
+  .fightDetailsContainerUpdated .fightersImagesInFightDetailsUpdated{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap:30px;
+  }
+  .imgWrapFightsUpdated{
+      width:100px;
+      height:100px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border:3px solid #fff;
+      position: relative;
+  }
+  .imgWrapFightsUpdated img{
+      width:100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+  }
+  .imgWrapFightsUpdated h1{
+      position: absolute;
+      bottom: -12px;
+      font-family: 'Inter Tight';
+      font-size: 12px;
+      font-weight: 700;
+      width:110px;
+      text-align: center;
+      background-color: #c20700;
+      padding: 5px 0;
+      overflow: hidden;
+      border-radius: 20px;
+    
+  }.fightTypeInFightDetailsUpdated {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 20px 38px;
+      line-height: 1.6;
+      margin-top: 60px;
+      position: relative; /* Allows positioning of child elements */
+      width:100%;
+      overflow-x: hidden;
+    }
+    
+}
+
+
+
+/* make predictions customsection */
+.makePredictions{
+  background-image: linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('/Assets/RING3.png');
+}
+.flexColumn{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:10px;
+}
+.makePredictions .fightersImagesInFightDetails{
+  margin-top:20px;
+  gap:90px;
+}
+
+.makePredictions .fightersImagesInFightDetails h1{
+  font-size:30px;
+}
+.makePredictions .fightersImagesInFightDetails .fightTypeInFightDetails{
+  font-size: 24px;
+}
+
+.makePredictions .roundsWrapper{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  
+}
+
+.makePredictions .roundsWrapper .roundActual{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:15px;
+  width:330px;
+  margin:40px;
+}
+.makePredictions .roundsWrapper .roundActual .roundHeading{
+  width:90%;
+  text-align: center;
+  border-bottom: 2px solid #c0c0c0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  }
+
+.makePredictions .roundsWrapper .roundActual .roundHeading h1{
+  border-radius: 15px 15px 0 0;
+  border:2px solid #c0c0c0;
+  width:150px;
+  padding:5px 10px;
+  background-color: rgb(8, 8, 105);
+  font-size: 18px;
+  color: #c1ce11;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.makePredictions .roundInputWrap{
+  width:100%;
+  border:2px solid #c0c0c0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:8px;
+  padding:10px 0;
+}
+.makePredictions .roundInputWrap .roundInput{
+  display: flex;
+  justify-content: space-between;
+ width:100%;
+ padding:0 15px;
+}
+.roundinput-image .roundInputImgWrap{
+  width:35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #fff;
+  padding: 5px;
+}
+.roundinput-image .roundInputImgWrap img{
+  width: 100%;
+  object-fit: cover;
+  height: 100%;
+
+}
+.roundinput-image h2{
+  color:#fff;
+  font-size: 15px;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  
+}
+.roundInputDivOne{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:10px;
+}
+.roundInputDivOne input{
+  width:80px;
+  height: 35px;
+  border-radius: 30px;
+  
+}
+.fa-caret-left{
+  font-size:40px;
+  color:#2189e1;
+}
+
+.fa-caret-right{
+  font-size:40px;
+  color:#d91610;
+}
+
+
+.roundInputSpecial{
+  width:100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+
+
+
+
+
+
+@media (max-width: 767px){
+  .makePredictions .fightDetailsContainer{
+      margin-top:20px !important;
+  }
+  .makePredictions .fightTypeInFightDetails, .beiginningTimeFight{
+      font-size: 22px !important;
+  }
+  .makePredictions .btn-grad{
+      width: 80%;
+      margin-bottom: 50px;
+  }
+}
+
+
+
+/* finished fight userboard completed customsection */
+.finishedFightUserBoard .leaderboardHeading h3{
+  width:250px;
+}
+.roundResultsWrapper{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width:100%;
+  gap:25px;
+  margin-top:30px;
+}
+.roundResultsWrapper .roundResultDiv{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width:51%;
+  background-color: #c5c5c5;
+  border-radius: 15px;
+  border:1px solid gray;
+  padding: 5px;
+}
+.roundResultsWrapper .roundResultDiv h1{
+  font-size: 19px;
+  font-family: 'UFCSans', Arial, sans-serif;
+  font-weight: bold; /* Ensure bold weight is applied */
+  font-style: normal; /* Ensure normal style is applied */
+  
+  text-transform: uppercase;
+ 
+}
+.roundResultsWrapper .roundResultDiv .line{
+  width:100%;
+  height:1px;
+  background-color: rgba(0,0,0,0.5);
+  margin:1px 0;
+}
+.roundResultsWrapper .roundResultDiv .scoresWrapper{
+  display: flex;
+  gap:7px;
+  justify-content: center;
+  align-items: center;
+}
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+}
+/* Common styles for h2 */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound h2 {
+  font-family: 'Trebuchet MS', sans-serif;
+  text-shadow: none;
+  font-size: 17px;
+  margin-bottom: 0;
+}
+
+/* Common styles for h2 */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound h3 {
+  font-family: 'Trebuchet MS', sans-serif;
+  text-shadow: none;
+  font-size: 17px;
+  margin-top:21px;
+  margin-bottom: 9px;
+  color:black;
+}
+
+/* For all even .scoresOfRound elements */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound:nth-child(even) h2 {
+  color: #d91610;
+}
+
+/* For all odd .scoresOfRound elements */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound:nth-child(odd) h2 {
+  color: #2189e1;
+}
+
+/* For all even .scoreBox elements */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound:nth-child(even) .scoreBox {
+  border: 2px solid #2189e1;
+}
+
+/* For all odd .scoreBox elements */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound:nth-child(odd) .scoreBox {
+  border: 2px solid #d91610;
+}
+
+/* Common styles for .scoreBox */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound .scoreBox {
+  width: 45px;
+  height: 35px;
+  margin-top: -10px;
+  background-color: #fff;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Common styles for .scoreBox */
+.roundResultsWrapper .roundResultDiv .scoresWrapper .scoresOfRound .scoreBoxSpecial {
+  width: 85px;
+  height: 35px;
+  background-color: #fff;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border:1.5px solid black;
+}
+.winnerDiv{
+  width:55%;
+  display: flex;
+  justify-content: space-between;
+  
+}
+.winnerSuDivbOne{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:8px;
+
+}
+.winnerSuDivbOne .winnerImg{
+  width:70px;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border:2px solid blue;
+}
+.winnerSuDivbOne .winnerImg img{
+  width:100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.winnerDetails{
+  text-align: left;
+}
+.winnerDetails h1{
+  margin:0;
+  color: #ffc000;
+  font-size: 22px;
+  font-family: 'Trebuchet MS', sans-serif;
+  text-shadow: none;
+  margin-top:20px;
+  
+}
+
+.winnerDetails h2{
+  margin:0;
+  color: #fff;
+  font-size: 16px;
+  font-family: 'Trebuchet MS', sans-serif;
+  text-shadow: none;
+  margin-top:-15px;
+  
+}
+.winnerSibDivTwo h1{
+  color: #fff;
+  font-size: 18px;
+  font-family: 'Trebuchet MS', sans-serif;
+  text-shadow: none;
+  margin-top: 30px;
+}
+
+.winnerSibDivTwo h2{
+  
+  color: #ffc000;
+  font-size: 18px;
+  font-family: 'Trebuchet MS', sans-serif;
+  text-shadow: none;
+  margin-top:-5px;
+}
+
+
+.finishedFightUserBoard iframe{
+  width:560px;
+  height:315px;
+}
+
+
+
+
+
+
+@media (max-width: 767px){
+  .finishedFightUserBoard .fightwalletWrap{
+      flex-direction: column-reverse;
+      gap:20px;
+  }
+  .finishedFightUserBoard .fightTypeInFightDetails{
+      font-size: 22px !important;
+  }
+  
+.finishedFightUserBoard iframe{
+  width:340px;
+  height:315px;
+  margin: 20px 0;
+}
+
+.roundResultsWrapper{
+  width:100%;
+  gap:25px;
+  margin-top:30px;
+}
+.roundResultsWrapper .roundResultDiv{
+  width:95%;
+  padding: 5px;
+}
+.roundResultsWrapper .roundResultDiv .scoresWrapper{
+  justify-content: flex-start;
+  align-items: flex-start;
+  width:100%;
+  margin-bottom: 5px;
+  overflow: auto;
+  
+}
+
+
+.winnerDiv{
+  width:95%;    
+}
+.winnerDetails h1{
+  font-size: 19px;
+  margin-top:24px;
+}
+
+.winnerDetails h2{
+  font-size: 15px;
+  margin-top:-15px;
+  
+}
+.winnerSibDivTwo h1{
+  font-size: 18px;
+  margin-top: 34px;
+}
+
+}
+
+
+
+/* globalleaderboard customsection */
+.global-leaderboard .homeThird{
+  background-color: transparent;
+  margin-top:-90px;
+}
+
+@media (max-width: 767px){
+  .global-leaderboard .homeThird{
+      margin-top:-30px;
+  }
+    
+}
+
+
+
+
+/* fightcosting customsection */
+
+
+
+.fightDetails{
+  min-height: 100vh;
+  display: flex;
+  background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url('/Assets/GLOVES2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  flex-direction: column;
+  color:rgb(6, 6, 71)
+  
+}
+.fightDetailsContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:15px;
+  margin-top:1px;
+}
+.fightDetailsContainer .fightDetailsContainerFirstHeading{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  font-size:26px;
+  color: #eee;
+  text-transform:uppercase;
+
+}
+
+.fightDetailsContainer .fightDetailsContainerFirstHeading span{
+  color:#e4c707;
+}
+.fightDetailsContainer .fightersImagesInFightDetails{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:20px;
+}
+.fightersImagesInFightDetails h1{
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:condensed; /* Condensed style */
+  font-size:24px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+ 
+}
+.imgWrapFights{
+  width:100px;
+  height:100px;
+  border-radius: 50%;
+  border:2px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.imgWrapFights img{
+  width:100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.fightDetailsContainer .fightTypeInFightDetails{
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  font-size:26px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+}
+.fightDetailsContainer .fightDetailsPot{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:5px;
+}
+.fightDetailsContainer .fightDetailsPot h1, .fightDetailsContainer .fightDetailsPot p{
+  font-style:normal; /* Condensed style */
+  font-size:24px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+}
+.fightDetailsContainer .beiginningTimeFight{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:5px;
+
+}
+.fightDetailsContainer .beiginningTimeFight h1 , 
+.fightDetailsContainer .beiginningTimeFight p{
+  font-style:normal; /* Condensed style */
+  font-size:24px;
+  color: #eee;
+  text-transform:uppercase;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+}
+
+.fightDetailsContainer .makeGreen{
+  color:#38b90c;
+}
+
+
+
+
+
+
+.fightwalletWrap{
+  width:100%;
+  display: flex;
+  justify-content: right;
+  align-items: right;
+  color: #ccc;
+  margin-top:20px;
+  padding-right: 20px;
+}
+
+
+.fightwalletWrap .fightWallet h1{
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+.fightwalletWrap .fightWallet h2{
+  padding: 7px 10px;
+  border:2px solid #ccc;
+}
+
+.fightwalletWrap .fightWallet h2 span{
+  padding: 2px 10px;
+  background-color: #ccc;
+  color:black;
+}
+
+.promobtn{
+  width: 14%;
+}
+@media (max-width: 767px){
+.specialtextmine{
+ width:300px;
+ overflow: auto;
+}
+}
+
+
+
+
+/* fight leaderboard customsection */
+.fightLeaderboard .fightDetails{
+  background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png);
+
+}
+.fightLeaderboard .fightwalletWrap{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+.totalPoints{
+  margin-left: 100px;
+}
+.fightLeaderboard .totalPoints h1{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 25px;
+  
+}
+.fightLeaderboard .homeThird{
+  margin-top: 10px;
+}
+.fightLeaderboard .fightersImagesInFightDetails{
+  margin-top:10px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:50px;
+}
+
+
+
+
+
+
+
+
+
+.videoWrapper{
+  width: 100%;
+  max-width: 800px;
+  
+  height: 430px;
+}
+.videoWrapper iframe{
+  width: 100%;
+  height: 100%;
+}
+
+
+.control-relative{
+  position: relative;
+  
+}
+
+.control-relative .spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 25px; /* Set this to your desired container height */
+  width: 25px; /* Set this to your desired container width */
+  position: absolute;
+  top:50%;
+  right: -100px;
+  transform: translateY(-50%);
+}
+
+.spin-circle {
+  width: 25px; /* Diameter of the spinner */
+  height: 25px;
+  border: 4px solid rgba(0, 0, 0, 0); /* Outer border with a light color */
+  border-top: 4px solid #3498db; /* Top border with the spinning color */
+  border-radius: 50%; /* Make it circular */
+  animation: spin 1s linear infinite; /* Continuous spinning animation */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+@media (max-width: 767px){
+  .fightLeaderboard .fightwalletWrap{
+      flex-direction: column-reverse;
+      gap:20px;
+  }
+  
+  .totalPoints{
+      text-align: center !important;
+  }
+   .fightTypeInFightDetails{
+      font-size: 22px !important;
+      text-align: center !important;
+  }
+   .totalPoints h1{
+      font-size: 22px !important;
+      text-align: center !important;
+  }
+ 
+.control-relative .spinner {
+  right: -20px;
+}
+ 
+
+}
+
+
+
+
+/* fight leaderboard updated customsection */
+
+.fightLeaderboardUpdated .fightDetails{
+  background-image: url(/Assets/newFightDetails/nine.jpg);
+
+}
+
+.totalPointsUpdatedTwo{
+  margin:50px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex-direction: column;
+}.totalPointsUpdatedTwo h1 {
+  padding: 5px;
+  margin-bottom: 25px;
+
+  /* Adjusted box-shadow to only be at the bottom */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 
+              0 15px 25px rgba(255, 69, 0, 0.5); /* Fiery glow focused on the bottom */
+  
+  width: 28%;
+  font-family: 'Saira Stencil One', sans-serif;
+  font-size: 56px;
+  color: #fff;
+  text-shadow: 2px 2px 4px #000; /* Right bottom shadow */
+  text-transform: capitalize;
+  border-radius: 5px;
+  letter-spacing: 1px;
+  /* Adjusted background gradient with reduced opacity */
+  background: linear-gradient(90deg, rgba(230, 81, 0, 0.3), rgba(255, 152, 0, 0.3), rgba(255, 87, 34, 0.3)); 
+  background-clip: padding-box;
+}
+
+
+.totalPointsUpdatedTwo h2{
+  font-size: 16px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: 3px;
+ 
+}
+.fightLeaderboardUpdatedTwoParent{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  height: 80vh;
+  position: relative;
+}
+.imgWrapFightsUpdatedTwo{
+  width:150px;
+  height:150px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border:5px solid #fff;
+  position: relative;
+}
+
+.imgWrapFightsUpdatedTwo img{
+  width:100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  
+}
+.imgWrapFightsUpdatedTwo h1{
+  padding: 5px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 
+              0 15px 25px rgba(255, 69, 0, 0.5); 
+  font-family: 'Saira Stencil One', sans-serif;
+  font-size: 25px;
+  font-weight: 100;
+  color: #fff;
+  text-shadow: 2px 2px 4px #000; 
+  text-transform: capitalize;
+  border-radius: 5px;
+  background: linear-gradient(180deg, rgba(255, 69, 0, 0.4), rgba(255, 165, 0, 0.4), rgba(255, 110, 0, 0.4)); /* Fiery gradient with opacity */
+  background-clip: padding-box;
+  width:250px;
+  position: absolute;
+  bottom: -70px;
+}
+
+.fightLeaderboardUpdatedTwoParent .itemImgOne {
+  position: absolute;
+  left: 120px;
+  top: 40%; /* Center vertically */
+  transform: translateY(-40%); /* Adjust position to the center */
+}
+
+.fightLeaderboardUpdatedTwoParent .itemImgTwo {
+  position: absolute;
+  right: 120px;
+  top: 40%; /* Center vertically */
+  transform: translateY(-40%); /* Adjust position to the center */
+}
+.fightLeaderboardUpdatedTwoParent .itemThree{
+  position: absolute;
+  bottom: 30px;
+  left:50%;
+  transform: translateX(-50%);
+}
+.itemThree h1{
+  font-family: 'Saira Stencil One', sans-serif;
+  font-size: 56px;
+  color: #fff;
+  text-shadow: 2px 2px 4px #000;
+  font-style: italic; 
+ 
+}
+
+.leaderboardItemUpdated{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 600px;
+  padding: 15px;
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5), /* Subtle shadow */
+              0 15px 25px rgba(255, 69, 0, 0.6); /* Fiery glow */
+              background: linear-gradient(180deg, rgba(255, 69, 0, 0.4), rgba(255, 165, 0, 0.4), rgba(255, 110, 0, 0.4)); /* Fiery gradient with opacity */
+              background-blend-mode: overlay; /* Ensures a smooth blend */
+
+
+}
+
+.leaderboardItemUpdated h1{
+  font-family: 'Saira Stencil One', sans-serif;
+  font-size: 24px;
+  font-weight: 100;
+  color: #fff;
+  text-shadow: 2px 2px 4px #000; /* Right bottom shadow */
+  text-transform: capitalize;
+  letter-spacing: 1px;
+ 
+}
+
+.leaderboardItemUpdated img{
+  width: 70px;
+  border-radius: 5px;
+}
+
+
+
+.leaderboardItemsWrapUpdatedTwo{
+  height: 35vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.videoWrapperUpdatedTwo{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ 
+}
+.videoWrapperUpdatedTwo iframe{
+width:90%;
+  max-width: 550px;
+ height: 300px;
+}
+
+@media (max-width: 767px){
+  .totalPointsUpdatedTwo h1 {
+      padding: 5px;
+      width: 80%;
+      font-size: 36px;
+    }
+
+    .imgWrapFightsUpdatedTwo{
+      width:100px;
+      height:100px;
+      border:3px solid #fff;
+     }
+  
+.imgWrapFightsUpdatedTwo h1{
+  font-size: 17px;
+  width:150px;
+  bottom: -50px;
+}
+
+.fightLeaderboardUpdatedTwoParent .itemImgOne {
+  position: absolute;
+  left: 30px;
+  top: 70px; /* Center vertically */
+}
+
+.fightLeaderboardUpdatedTwoParent .itemImgTwo {
+  position: absolute;
+  right: 30px;
+  top: 70px;
+}
+
+
+.leaderboardItemUpdated{
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px;
+  
+
+}
+
+.leaderboardItemUpdated h1{
+  font-size: 17px;
+  margin-left: 15px;
+ 
+}
+
+.leaderboardItemUpdated img{
+  width: 60px;
+ 
+}
+    
+ 
+
+.leaderboardItemsWrapUpdatedTwo{
+  margin-top:120px;
+  height: 35vh;
+  align-items: flex-start;
+  justify-content: flex-start;
+ }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* membership checkout */
+
+.membership-chackout-wrapper{
+  min-height: 100vh;
+  display: flex;
+
+  background-image: url('/Assets/RING1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  text-align: center;
+  flex-direction: column;
+  
+}
+
+.cardCoupon{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size:22px;  
+text-align: left;
+color: #eee;
+margin-top:15px;   
+}
+.membership-chackout-wrapper .mermbership-cards{
+  width:100%;
+  display: flex;
+  
+  align-items: flex-start;
+  margin-top:70px;
+  gap:50px;
+  padding-bottom: 100px;
+}
+
+
+.billingInformation{
+  width:300px;
+  
+}
+.billingInformation h2{
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+font-size:24px;
+margin-bottom: 10px;  
+text-align: left;
+color: #eee;
+}
+.billingInformation .input-group{
+  display: flex;
+  flex-direction: column;
+  
+  text-align: left;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.billingInformation .input-group label{
+  margin-bottom: 3px;
+  color:#eee;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */
+  
+}
+.billingInformation .input-group input{
+  border-radius:10px;
+  height: 35px;
+}
+.input-group-state input{
+  width:30%;
+}
+
+.input-group-zipcode input{
+  width:45%;
+}
+.billingInformation .subcardbtnone{
+  padding: 5px 10px;
+  background-color: black;
+  color: #fff;
+  border:none;
+  outline: none;
+  margin-left: 55%;
+}
+.submitcardbtn {
+  position: relative; /* Ensures the button is positioned in relation to its container */
+  padding: 10px 20px;
+  background-color: black;
+  color: #fff;
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  cursor: pointer;
+  height: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  text-align: center;
+  vertical-align: middle;
+  z-index: 999999; /* High z-index to ensure it's above other elements */
+}
+
+
+.input-group h3{
+  margin-bottom: 3px;
+  color:#eee;
+  font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+  font-style:normal; /* Condensed style */   
+}
+.input-group-select .select-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.input-group-select .select-container select{
+  border:none;
+  outline: none;
+  height: 35px;
+  padding: 0 5px;
+  border:2px solid #ccc;
+  border-radius:10px;
+  flex-basis:45%;
+}
+.checkboxCreditCard{
+  width:20px;
+  height: 20px;
+  margin-top:-5px;
+}
+.cardaimg{
+  width:380px;
+  top:0;
+  left:0;
+  margin-top:-30px;
+}
+
+
+
+
+
+
+
+
+@media (max-width: 767px){
+.membership-chackout-wrapper .mermbership-cards{
+  align-items: center;
+  gap:50px;
+} 
+.cardaimg{
+  width: 300px;
+}
+}
+
+
+@media(max-width:768px){
+.adminSideThreadsContainer{ 
+width: 100%;
+margin-left: 0;     
+}
+.thread-item {
+margin: 20px;
+}
+
+
+}
+a[href*="chatbase.co"] {
+  display: none !important;
+}
+.ml-1{
+  display: none !important;
+}
+
+
+
+.unjoinLeagues{
+  position: relative;
+}
+.unjoinLeagues .unjoinLeaguebtn{
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.unjoinLeagues .unjoinLeaguebtn:hover{
+  background-color: #0b4c80;
+}
+
+
+
+.bot-wrapper-blogs {
+  margin-left: 230px;
+  padding: 0.5rem 1rem;
+  min-height: 82vh;
+  background-color: #000; /* fallback in case image fails */
+}
+.bot-wrapper-social{
+ margin-left: 230px;
+  padding: 0.5rem 1rem;
+  min-height: 82vh;
+  background-color: #000;  
+}
+.bot-background {
+  background-image: url(/Assets/RING3.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 3rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+}
+@media(max-width:768px){
+  
+.bot-wrapper-blogs, .bot-wrapper-social {
+  margin-left:0;
+  padding: 0;
+  padding-top: 100px;
+
+ }
+}
+.readMoreBtn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #d90429; /* Vivid red */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(217, 4, 41, 0.3);
+  transition: all 0.3s ease;
+}
+
+.readMoreBtn:hover {
+  background-color: #a60321; /* Deeper red on hover */
+  box-shadow: 0 6px 12px rgba(166, 3, 33, 0.4);
+  transform: translateY(-2px);
+}
+
+.readMoreBtn:active {
+  background-color: #7d0219;
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(125, 2, 25, 0.3);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.bot-wrapper-blogs {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  margin-left: 230px;
+  padding: 50px;
+  padding-right: 14%;
+}
+
+.bg-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.chat-box-blogs {
+  width: 100%;
+  max-width: 750px;
+  height: 85vh;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  z-index: 2;
+  margin: 0;
+}
+.header{
+   z-index: 9;
+   background: #000 !important;
+}
+.header-ai-blogs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e2e2;
+  background: #fff;
+}
+
+.bot-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.bot-intro h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.bot-intro p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.chat-history {
+  flex: 1;
+  margin-top: 20px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.message {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: #d7f0ff;
+  color: #000;
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 80%;
+  text-align: right;
+}
+
+.bot-message {
+  align-self: flex-start;
+  background-color: #f2f2f2;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 80%;
+  text-align: left;
+}
+
+.chat-input-blogs-ai {
+  display: flex;
+  gap: 10px;
+  border-top:  1px solid #e2e2e2;
+  padding-top: 10px;
+  background: #fff;
+}
+
+.chat-input-blogs-ai input {
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.chat-input-blogs-ai button {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #3f3f47;
+  transform: rotate(-20deg);
+  padding: 0 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+
+
+.download-btn{
+  padding: 8px 15px;
+  border: none;
+  outline: none;
+  color: #fff;
+  background: red;
+  border-radius: 5px;
+}
+
+
+
+
+
+
+.poster-form-wrapped{
+  width: 100%;
+  padding-left: 230px;
+  padding-top: 100px;
+  background-image: url(/Assets/chatroom.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+.poster-form-container {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.poster-form-container form{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.poster-title {
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.icon {
+  margin-right: 8px;
+  vertical-align: middle;
+  margin-top: 5px;
+  font-size: 30px;
+  color: #007bff;
+}
+
+.text-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.custom-file-upload {
+  display: inline-flex;
+  align-items: center;
+  background-color: #eee;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.submit-button {
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-message {
+  color: green;
+  margin-top: 15px;
+  line-height: 1.6;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.links {
+  margin-top: 10px;
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+@media(max-width:768px){
+  
+.poster-form-wrapped{
+  padding-left: 0;
+  padding-top: 110px;
+ }
+
+}
+
+.tweet-form {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.form-button {
+  padding: 10px 20px;
+  background: #1d9bf0;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  border-radius: 5px;
+}
+
+.form-button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.form-result {
+  margin-top: 20px;
+  color: green;
+}
+
+.tweet-preview {
+  background: #f5f8fa;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}

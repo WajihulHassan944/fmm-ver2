@@ -1,0 +1,110 @@
+.featuredSection {
+  background-color: #fff;
+  padding: 60px 10%;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: 'UFCsans';
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+.spearationLine{
+    height: 5px;
+    width: 100px;
+    border-radius: 70px;
+    background: red;
+    margin-bottom: 50px;
+}
+/* Grid version layout */
+.sponsorGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding:0 10%;
+  gap: 30px;
+}
+
+/* Updated sponsor card design */
+.sponsorCard {
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+  width: 300px;
+}
+
+.sponsorCard:hover {
+  transform: scale(1.02);
+}
+
+.sponsorLogoWrapper {
+  width: 100px;
+  height: 100px;
+  background-color: #fff;
+  border: 2px solid #d90429;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.sponsorLogo {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+.sponsorContent {
+  text-align: center;
+}
+
+.sponsorHeadline {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #d90429;
+}
+
+.sponsorDescription {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.sponsorLink {
+  font-size: 14px;
+  color: #d90429;
+  font-weight: bold;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.sponsorLink:hover {
+  border-color: #d90429;
+}
+
+
+@media(max-width:768px){
+    
+.sectionTitle {
+  font-size: 22px;
+ }
+
+.spearationLine{
+    height: 4px;
+    width: 80px;
+}
+}

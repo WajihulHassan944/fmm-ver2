@@ -1,0 +1,338 @@
+.adminAddBlog {
+  background-color: transparent;
+  color: #fff;
+  flex-direction: column;
+  gap:30px;
+  align-items: center;
+  padding: 50px 0;
+}
+
+.adminAddBlog-title {
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.adminAddBlog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.adminAddBlog-form input[type="text"],
+.adminAddBlog-form input[type="file"],
+.adminAddBlog-form textarea {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: #fff;
+  padding: 0.75rem;
+  transition: border-color 0.3s;
+}
+
+.adminAddBlog-form input[type="text"]::placeholder,
+.adminAddBlog-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.adminAddBlog-form input:focus,
+.adminAddBlog-form textarea:focus {
+  outline: none;
+  border-color: #4f46e5; /* Indigo */
+}
+
+.adminAddBlog-headerImage,
+.adminAddBlog-sectionImage {
+  margin-top: 0.5rem;
+}
+
+.adminAddBlog-section {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.adminAddBlog-sectionTitle {
+  color: #fff;
+}
+
+.adminAddBlog-heading input,
+.adminAddBlog-heading textarea {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  width: 50%;
+}
+
+.adminAddBlog-heading input::placeholder,
+.adminAddBlog-heading textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.adminAddBlog-addHeading,
+.adminAddBlog-addSection,
+.adminAddBlog-submit {
+  font-weight: 600;
+  transition: background-color 0.3s;
+  width: 200px;
+  padding: 10px 0;
+  border:none;
+  outline: none;
+  border-radius: 5px;
+}
+
+.adminAddBlog-addHeading:hover {
+  background-color: #2563eb; /* darker blue */
+}
+
+.adminAddBlog-addSection:hover {
+  background-color: #15803d; /* darker green */
+}
+
+.adminAddBlog-submit {
+  background-color: #1f2937; /* dark gray */
+  color: #fff;
+}
+.adminAddBlog-heading{
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:20px;
+}
+
+.adminAddBlog-section {
+display: flex;
+flex-wrap: wrap;
+width: 100%;
+flex-direction: column;
+gap:20px; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.blogsContainerAdmin {
+  padding: 1.5rem;
+  color: white;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 70px;
+}
+.blogsContentActual{
+  max-width: 800px;
+  width: 100%;
+}
+.blogsContainerAdmin .blogsHeaderAdmin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+ 
+}
+
+.blogsContainerAdmin .blogsTitleAdmin {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.blogsContainerAdmin .deleteAllBtn {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.blogsContainerAdmin .deleteAllBtn:hover {
+  background-color: #b91c1c;
+}
+
+.blogsContainerAdmin .blogsListAdmin {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.blogsContainerAdmin .blogItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.blogsContainerAdmin .blogLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.blogsContainerAdmin .blogIndex {
+  font-weight: 600;
+}
+
+.blogsContainerAdmin .blogTitle {
+  text-decoration: underline;
+  color: #ccc;
+}
+
+.blogsContainerAdmin .deleteBtn {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.blogsContainerAdmin .deleteBtn:hover {
+  background-color: #dc2626;
+}
+
+.blogsContainerAdmin .blogsLoading,
+.blogsContainerAdmin .blogsEmpty {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.adminBlogDetails {
+  padding: 2rem;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
+padding-top: 70px;
+  flex-direction: column;
+  text-align: left;
+  align-items: flex-start;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  justify-content: center;
+  background-image: linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url(/Assets/banner.png);
+  background-attachment: fixed;
+}
+
+.adminBlogDetails-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #e0e0e0;
+}
+
+.adminBlogDetails-description {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: #c4c4c4;
+}
+
+.adminBlogDetails-header {
+  margin-bottom: 2rem;
+}
+
+.adminBlogDetails-headerText {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.adminBlogDetails-headerImage {
+  width: 100%;
+  max-height: 400px;
+}
+
+.adminBlogDetails-section {
+  margin-bottom: 2rem;
+ }
+
+.adminBlogDetails-sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.adminBlogDetails-sectionContent {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #d4d4d4;
+}
+
+.adminBlogDetails-sectionImage {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.adminBlogDetails-heading {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-left: 4px solid #6366f1;
+  border-radius: 0.5rem;
+}
+
+.adminBlogDetails-headingTitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #f3f4f6;
+  margin-bottom: 0.25rem;
+}
+
+.adminBlogDetails-headingContent {
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.adminBlogDetails-loading,
+.adminBlogDetails-empty {
+  text-align: center;
+  font-size: 1.25rem;
+  padding: 2rem;
+  color: #ccc;
+}

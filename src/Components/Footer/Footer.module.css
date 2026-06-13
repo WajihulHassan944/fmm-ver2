@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap');
+
+
+  @font-face {
+    font-family: 'UfcSansRegular';
+    src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+.contactImg{
+	margin-left: -5px;
+}
+
+
+.footerDistributed{
+	background-image: linear-gradient(rgba(0,0,0,0.9),rgba(0,0,0,0.8)),url(/Assets/backtwo.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #FFF;
+    box-sizing: border-box;
+	width: 100%;
+	text-align: left;
+	font: bold 16px sans-serif;
+	padding: 55px 50px;
+    box-shadow: inset 0px 10px 15px rgba(0, 0, 0, 0.5);
+	
+}
+
+.footerDistributed .footerLeft,
+.footerDistributed .footerCenter,
+.footerDistributed .footerRight{
+	display: inline-block;
+	vertical-align: top;
+}
+
+/* Footer left */
+
+.footerDistributed .footerLeft{
+	width: 40%;
+}
+
+/* The company logo */
+
+.footerDistributed h3{
+	color:  #ffffff;
+	font: normal 36px 'Open Sans', cursive;
+	margin: 0;
+}
+
+.footerDistributed h3 span{
+	color:  lightseagreen;
+}
+
+/* Footer links */
+
+.footerDistributed .footerLinks{
+	color:  #ffffff;
+	margin: 20px 0 12px;
+	padding: 0;
+    display: flex;
+    gap:10px;
+}
+
+.footerDistributed .footerLinks .footerLink{
+	display:inline-block;
+	line-height: 1.8;
+  font-weight:400;
+	text-decoration: none;
+	color:  inherit; 
+    font-size: 18px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+.footerDistributed .footerCompanyName{
+	color:  #fff;
+	font-size: 14px;
+	font-weight: normal;
+	margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Footer Center */
+
+.footerDistributed .footerCenter{
+	width: 35%;
+}
+
+.footerDistributed .footerCenter i{
+	background-color:#fff;
+	color: red;
+	font-size: 25px;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 42px;
+	margin: 10px 15px;
+	vertical-align: middle;
+}
+
+.footerDistributed .footerCenter i.fa-envelope{
+	font-size: 17px;
+	line-height: 38px;
+}
+
+.footerDistributed .footerCenter p{
+	display: inline-block;
+	color: #ffffff;
+  font-weight:400;
+	vertical-align: middle;
+	margin:0;
+}
+
+.footerDistributed .footerCenter p span{
+	display:block;
+	font-weight: normal;
+	font-size:14px;
+	line-height:2;
+}
+
+.footerDistributed .footerCenter p a{
+	color:  #fff;
+	text-decoration: none;;
+}
+
+
+.footerDistributed .footerLinks .link-1:before {
+  content: none;
+}
+
+/* Footer Right */
+
+.footerDistributed .footerRight{
+	width: 20%;
+}
+
+.footerDistributed .footerCompanyAbout{
+	line-height: 20px;
+	color:  #92999f;
+	font-size: 13px;
+	font-weight: normal;
+	margin: 0;
+}
+
+.footerDistributed .footerCompanyAbout span{
+	display: block;
+	color:  #ffffff;
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+.footerDistributed .footerIcons{
+	margin-top: 25px;
+	display: flex;
+	gap:5px;
+}
+
+.footerDistributed .footerIcons a{
+	display: inline-block;
+	width: 35px;
+	height: 35px;
+	cursor: pointer;
+	background-color: #fff;
+	border-radius: 2px;
+
+	font-size: 20px;
+	color: red;
+	text-align: center;
+	line-height: 35px;
+
+	margin-right: 3px;
+	margin-bottom: 5px;
+}
+
+/* If you don't want the footer to be responsive, remove these media queries */
+
+@media (max-width: 880px) {
+
+	.footerDistributed{
+		font: bold 14px sans-serif;
+	}
+
+	.footerDistributed .footerLeft,
+	.footerDistributed .footerCenter,
+	.footerDistributed .footerRight{
+		display: block;
+		width: 100%;
+		margin-bottom: 40px;
+		text-align: center;
+	}
+
+	.footerDistributed .footerCenter i{
+		margin-left: 0;
+	}
+
+	.footerDistributed .footerIcons{
+		justify-content: center;
+		align-items: center;
+	}
+}
+
+
+.footerLeft p{
+	margin:15px 0;
+	font-size: 15px;
+}
+
+.footerLeft p a{
+	font-size: 15px;
+	text-decoration: none;
+	color:#ccc;
+}
+.footerCenter p{
+	display: flex !important;
+	flex-direction: column !important;
+}
+.footerCenter .footerLink{
+	font-size: 21px !important;
+
+}

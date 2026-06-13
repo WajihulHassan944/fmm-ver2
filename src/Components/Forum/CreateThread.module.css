@@ -1,0 +1,85 @@
+/* Container for creating a new thread */
+.createThreadContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 50px;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png);
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+    color: #fff; /* Ensure text is visible on dark background */
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Heading for the form */
+.createThreadContainer h1 {
+    font-size: 32px;
+    font-family: 'Bungee', sans-serif;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Form styling */
+.createThreadContainer form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Label styling */
+.createThreadContainer form label {
+    font-size: 18px;
+    color: #f0f0f0;
+    margin-bottom: 5px;
+}
+
+/* Input field styling */
+.createThreadContainer form input,
+.createThreadContainer form textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+    background-color: rgba(255,255,255,0.2);
+    color: #fff;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+}
+
+/* Input hover effect */
+.createThreadContainer form input:hover,
+.createThreadContainer form textarea:hover {
+    background-color: rgba(255,255,255,0.3);
+}
+
+/* Submit button styling */
+.createThreadContainer button[type="submit"] {
+    padding: 10px 30px;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    border:none;
+    outline: none;
+    width:30%;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for submit button */
+.createThreadContainer button[type="submit"]:hover {
+    background-color: #ff3b3b;
+}

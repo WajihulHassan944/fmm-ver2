@@ -1,0 +1,193 @@
+.wrapperAffLeaguesPublic {
+  background-image: linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.2)),url(/Assets/leagues.png);
+  background-size: cover;
+  background-position: center 90px;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 2rem 10%;
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: 'UFCSans';
+  padding-top: 13%;
+  
+}
+
+.wrapperAffLeaguesPublic .title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #d7dad9;
+  margin-bottom: 2rem;
+  letter-spacing: 2px;text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.8);
+
+}
+.wrapperAffLeaguesPublic .userItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.wrapperAffLeaguesPublic .userImage {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid red;
+}
+
+.wrapperAffLeaguesPublic .grid {
+  display: flex;
+  flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.wrapperAffLeaguesPublic .card {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 7px;
+  padding: 1.5rem;
+  transition: transform 0.3s ease;
+  position: relative;
+  
+}
+
+.wrapperAffLeaguesPublic .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.4);
+}
+
+.wrapperAffLeaguesPublic .cardContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.hasReward{
+  padding-top: 11px;
+}
+.wrapperAffLeaguesPublic .logoWrapper {
+  flex-shrink: 0;
+}
+
+.wrapperAffLeaguesPublic .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid red;
+  object-fit: cover;
+}
+
+.wrapperAffLeaguesPublic .details {
+  flex: 1;
+}
+
+.wrapperAffLeaguesPublic .name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.wrapperAffLeaguesPublic .description {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-top: 0.2rem;
+}
+
+.wrapperAffLeaguesPublic .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.wrapperAffLeaguesPublic .members {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #dddede;
+  cursor: pointer;
+}
+
+.wrapperAffLeaguesPublic .icon {
+  font-size: 0.9rem;
+  margin-top: -5px;
+  color: #b30000;
+}
+
+.wrapperAffLeaguesPublic .joinButton {
+  background-color: #b30000;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.3s ease;
+}
+
+.wrapperAffLeaguesPublic .joinButton:hover {
+  background-color: #ff1a1a;
+}
+
+.wrapperAffLeaguesPublic .userIds {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+@media (max-width: 768px) {
+  
+.hasReward{
+  padding-top: 15px;
+}
+  .wrapperAffLeaguesPublic {
+    padding: 2rem 5%;
+    padding-top: 180px;
+  }
+
+  .wrapperAffLeaguesPublic .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .wrapperAffLeaguesPublic .grid {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+
+  .wrapperAffLeaguesPublic .userIds {
+    font-size: 0.8rem;
+  }
+}
+.rewardBadgeNew {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  text-align: right;
+  z-index: 10;
+  display: flex;
+  gap:8px;
+  align-items: center;
+}
+
+.rewardBadgeNew img {
+  max-height: 30px;
+  max-width: 40px;
+  object-fit: contain;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.rewardBadgeNew span {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}

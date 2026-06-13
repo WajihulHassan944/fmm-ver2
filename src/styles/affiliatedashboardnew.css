@@ -1,0 +1,308 @@
+.promotional-container-affiliate-dashboard {
+    width: 100%;
+    min-height: 100vh !important;
+	position:relative;
+	background-color:black;
+    display: flex;
+    flex-direction: column;
+    padding-top:100px;
+}
+.affiliate-stats-section{
+	width: 100%;
+    height: 90vh !important;
+	background-image:url(/Assets/affiliateDashboard/seven.jpg);
+    background-size: cover; 
+    background-position: center -90px; 
+    background-repeat: no-repeat; 
+	position:relative;
+	display:flex;
+	justify-content:center;
+	align-items:flex-end;
+	padding-bottom:3%;
+	box-shadow:0 10px 20px rgba(0,0,0,0.6);
+position: relative;
+}
+
+
+.stats-cards-wrap{
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	gap:70px;
+	text-align:center;
+	font-style:italic;
+}.stats-cards-wrap h1 {
+    color: red;
+    font-family: 'UFCSans';
+    font-weight: 900;
+    font-stretch: condensed;
+ font-size: 26px;
+}
+
+
+
+.stats-cards-wrap h2{
+	color:#ccc;
+	margin-top:12px;
+}
+
+.section-fighter{
+    position: absolute;
+}
+.affiliate-dashboard-fights {
+    width: 100%;
+    min-height: 95vh ;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 8%;
+    overflow: hidden; 
+	border-top:2px solid gray;
+ background-image: url(/Assets/affiliateDashboard/thirt.jpg);
+    background-size: cover;
+    background-position: center 0;
+    background-repeat: no-repeat;
+}
+
+
+.fights-grid-affiliate {
+    display: flex;
+    justify-content: flex-start; 
+    width: 100%;
+	max-width:1000px;
+	gap:50px;
+    font-style: italic;
+    margin-top: 45px;
+	padding:20px;
+
+}
+
+
+.promotion-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+.promotion-bg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures it covers the area properly */
+    opacity: 1; /* Adjust opacity if needed */
+    z-index: 1;
+}
+
+.promotion-heading {
+    position: relative;
+    text-align: center;
+    font-family: 'UFCSans';
+    font-stretch: condensed;
+   font-size: 25px;
+    color: #fff;
+    font-weight: 700;
+    padding: 20px;
+    z-index: 2; /* Keeps the text above the image */
+	 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+
+.column {
+    display: flex;
+    flex-direction: column;
+
+   gap: 20px; /* Adjusts spacing between fight-cards */
+}
+
+.affiliate-dashboard-fights .fight-card {
+   width:365px;
+    cursor: pointer;
+	background:black;
+	padding-right:20px;
+	   clip-path: polygon(2% 0%, 100% 0%, 97.5% 100%, 0% 100%); 
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(2),.fights-grid-affiliate .two  .fight-card:nth-of-type(2){
+    margin-left: -8.2px;
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(3),.fights-grid-affiliate .two  .fight-card:nth-of-type(3){
+    margin-left: -15.8px;
+}
+.fights-grid-affiliate .one .fight-card:nth-of-type(4),.fights-grid-affiliate .two  .fight-card:nth-of-type(4){
+    margin-left: -24px;
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(5),.fights-grid-affiliate .two  .fight-card:nth-of-type(5){
+    margin-left: -33px;
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(6),.fights-grid-affiliate .two  .fight-card:nth-of-type(6){
+    margin-left: -40px;
+}
+
+
+.affiliate-dashboard-fights .fight-info h2 {
+    font-size: 17px;
+  }
+
+.fight-info p {
+text-transform: capitalize;
+}
+
+
+
+
+.dashboard-backward-forward-buttons{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 20%;
+}
+.dashboard-backward-forward-buttons .left-icon,.dashboard-backward-forward-buttons .right-icon {
+    padding: 8px 20px;
+    padding-top: 10px;
+    font-size: 15px;
+   }
+.affiliate-dashboard-fights .fight-date {
+    height: 60px;
+}
+
+
+
+
+
+
+
+
+@media(max-width:768px){
+    .affiliate-stats-section{
+        height: 90vh !important;
+        background-position: center; 
+        padding-bottom:7%;
+    }
+    .stats-cards-wrap{
+        gap:30px;
+        flex-wrap: wrap;
+    }
+    
+.stats-cards-wrap h1{
+	font-size: 17px;
+}
+    .stats-cards-wrap h2{
+        margin-top:10px;
+    }
+    
+    .promotional-container-affiliate-dashboard {
+        padding-top:80px;
+    }
+ 
+    
+
+
+
+
+
+
+    
+.affiliate-dashboard-fights {
+    min-height: 100vh !important;
+    padding-left: 0;
+    padding-bottom: 70px;
+    overflow: hidden; /* Ensures no overflow issues */
+	background-position: center 0;
+    flex-direction: column;
+}
+
+
+.fights-grid-affiliate {
+    justify-content: center;
+    flex-direction: column;
+}
+
+
+.affiliate-dashboard-fights .fight-card {
+   width:310px;
+    cursor: pointer;
+	background:black;
+	padding-right:20px;
+	   clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); 
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(2),.fights-grid-affiliate .two  .fight-card:nth-of-type(2){
+    margin-left: 0;
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(3),.fights-grid-affiliate .two  .fight-card:nth-of-type(3){
+    margin-left: 0;
+}
+.fights-grid-affiliate .one .fight-card:nth-of-type(4),.fights-grid-affiliate .two  .fight-card:nth-of-type(4){
+    margin-left: 0;
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(5),.fights-grid-affiliate .two  .fight-card:nth-of-type(5){
+    margin-left: 0;
+}
+
+.fights-grid-affiliate .one .fight-card:nth-of-type(6),.fights-grid-affiliate .two  .fight-card:nth-of-type(6){
+    margin-left: 0;
+}
+
+
+.affiliate-dashboard-fights .fight-info h2 {
+    font-size: 14px;
+  }
+
+  .dashboard-backward-forward-buttons{
+    padding-right: 0;
+}
+
+}
+.fight-card {
+  position: relative;
+}
+
+.fight-card .copy-button {
+  position: absolute;
+  bottom: 10px;
+  right: 5%;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.copy-button .copy-icon {
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* Tooltip styles */
+.copy-button::after {
+  content: "Fight Promotional URL";
+  position: absolute;
+  bottom: 110%; /* position above the icon */
+  right: 0;
+  background-color: #000;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(5px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+}
+
+.copy-button:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}

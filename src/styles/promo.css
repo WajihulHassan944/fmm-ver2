@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Holtwood+One+SC&display=swap');
+@import url('https://fonts.cdnfonts.com/css/roustel');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+@font-face {
+    font-family: 'Freshman';
+    src: url('/Assets/promotional/Freshman.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+.promotional-updated-design {
+    width: 100%;
+    min-height: 100vh;
+	background-color:black;
+	display:flex;
+	flex-direction:column;
+	justify-content:flex-start;
+	align-items:center;
+	background-image: url(/Assets/promotional/one.png);
+    background-attachment: fixed;
+	background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat;
+	position:relative;
+	padding-top:120px;
+    padding-bottom: 70px;	
+    scroll-behavior:auto;
+}.fighter-images-promotional {
+    display: flex;
+    gap: 12%;
+	width:100%;
+	justify-content:center;
+}
+
+.fighter-images-promotional .img-container {
+    width: 160px !important;
+    height: 160px !important;
+    border: 3px solid #ccc;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.fighter-images-promotional .img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    object-position: top;
+}
+
+
+
+
+.fighters-names {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Adjust as needed */
+    position: relative;
+	transform:rotate(-5deg);
+	margin-top:30px;
+}
+
+.fighters-names h1 {
+    font-family: 'Holtwood One SC', serif;
+    font-size: 20px; /* Adjust based on your needs */
+    text-transform: uppercase;
+    color: black;
+	font-weight:100;
+    background: yellow;
+    padding: 10px 30px;
+    position: relative;
+	width:350px;
+	text-align:center;
+    clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
+	font-style:italic;
+}
+
+.fighters-names h1:first-child {
+    background: yellow;
+}
+
+.fighters-names h1:last-child {
+    background: yellow;
+}
+
+.fighters-names h2 {
+    font-family: 'Edosz', sans-serif;
+    font-size: 60px;
+    text-transform: uppercase;
+    color: white;
+    margin: 0 15px;
+	text-shadow: 4px 4px 0px black;
+}
+.category{
+	font-family:'Anton';
+	font-size:110px;
+	margin-top:-10px;
+	
+	-webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      background-image:url(/Assets/promotional/four.png);
+	  background-repeat:no-repeat;
+	  background-size:cover;
+	 transform:rotate(-4deg);
+font-style:italic;	 
+    filter:  drop-shadow(-3px -3px 0px black) 
+        drop-shadow(-3px 0px 0px black) 
+        drop-shadow(3px 0px 0px black) 
+        drop-shadow(0px -3px 0px black) 
+        drop-shadow(0px 3px 0px black)
+        drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4)); /* Soft shadow */
+		text-align:center;
+		width:500px;
+        text-transform: capitalize;
+}
+.type{
+	color:#fff;
+	font-size:70px;
+	margin-top:-74px;
+	 font-family: 'Roustel', sans-serif;
+	 	 transform:rotate(-4deg);
+font-style:italic;	 
+font-weight:200;
+}
+.title-wrap {
+    position: relative;
+}
+
+.fancy-title-img {
+    position: absolute;
+    top: -11px;
+    left: -150px;
+    z-index: 1;
+}
+
+.fancy-title {
+    position: relative; /* Ensures text appears above the image */
+    font-family: 'Bebas Neue', sans-serif;
+    margin-top: 10px;
+    font-size: 30px;
+    font-weight: 300;
+    z-index: 2; /* Higher than the image */
+}
+.round-show, 
+.second-last{
+	-webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      background-image:url(/Assets/promotional/five.png);
+	  background-repeat:no-repeat;
+	  background-size:cover;
+	 font-family: 'Freshman', sans-serif;
+	 font-weight:100;
+	 margin-top:20px;
+	 font-size:30px;
+}
+
+.second-last{
+	font-size:20px;
+	margin-top:10px;
+    cursor: pointer;
+}
+.lastp{
+	   font-family: 'Bebas Neue', sans-serif;
+		color:#fff;
+		font-weight:200;
+		font-size:22px;
+		margin-top:7px;
+}
+
+
+
+
+
+
+
+
+
+
+@media(max-width:768px){
+body{
+	overflow-x:hidden;
+}
+.promotional-updated-design {
+    background-image: url(/Assets/promotional/mobie_background.jpg);
+	padding-top:140px;	
+}
+.fighter-images-promotional .img-container {
+    width: 130px !important;
+    height: 130px !important;
+    border: 2px solid #ccc;
+   }
+
+.fighters-names{
+	margin-top:30px;
+}
+.fighters-names h1 {
+    font-size: 16px; /* Adjust based on your needs */
+   width:140px;
+	}
+
+.fighters-names h2 {
+    font-size: 40px;
+    margin: 0 ;
+
+}
+.category{
+	font-size:100px;
+		width:300px;
+}
+.type{
+	font-size:60px;
+}
+.fancy-title-img {
+    position: absolute;
+    top: 1px;
+    left: -40px;
+    z-index: 1;
+	width:140%;
+}
+
+.fancy-title {
+    margin-top: 8px;
+    font-size: 22px;
+   }
+.lastp{
+	  text-align:center;
+}
+
+.round-show, 
+.second-last{
+font-size: 26px;
+}
+.second-last{
+    font-size: 21px;
+    }
+    }

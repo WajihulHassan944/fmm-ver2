@@ -1,0 +1,590 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gidugu&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat+Brush&display=swap');
+@font-face {
+  font-family: 'Edosz';
+  src: url('/Assets/affiliateDashboard/edosz.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+.promotional-details-container-new {
+  width: 100%;
+  min-height: 100vh;
+background-color:black;
+display:flex;
+flex-direction:column;
+justify-content:flex-start;
+align-items:center;
+   background-image: 
+      linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+      url(/Assets/affiliateDashboard/four.png);
+  background-size: cover; 
+  background-position: top; 
+  background-repeat: no-repeat; 
+background-attachment:fixed;
+position:relative;
+border-bottom:3px solid black;
+padding-top:120px;
+padding-bottom: 60px;
+
+}     .ufc-title {
+          font-family: 'Bebas Neue', sans-serif;
+       
+  font-style: italic;
+  font-size: 100px; /* Adjust as needed */
+  color: #4d0000; /* Dark red text */
+  text-shadow: 2px 1px 0px #bbb, 
+               -1px -1px 0px #bbb, 
+               2px -1px 0px #bbb, 
+               -1px 1px 0px #bbb; /* Softer white outline */
+       font-weight:999;
+       letter-spacing:6px;
+        }
+.fight-night-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 70px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #bbb;
+        text-shadow: 3px 3px 0px black,5px 5px 10px rgba(0, 0, 0, 0.5);
+    margin-top:-15px;
+  
+}
+.promotional-details-images{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:20%;
+margin-top:10px;
+}
+.promotional-details-image-cont{
+width:260px;
+height:210px;
+display:flex;
+justify-content:center;
+align-items:center;
+box-shadow:0 10px 20px rgba(0,0,0,0.7);
+overflow:hidden;
+}
+.promotional-details-image-cont img{
+width:100%;
+height:100%;
+object-fit:cover;
+object-position:top;
+}
+
+.promotional-details-rows{
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+width:100%;
+max-width:750px;
+box-shadow:0 10px 20px rgba(0,0,0,0.9);
+margin-top:40px;
+margin-bottom:50px;
+border-radius: 5px;
+}.promotional-details-rows {
+  width: 100%;
+  text-align: center;
+ font-family: 'Archivo Black', sans-serif;
+  background: #000; /* Brown background for fighter names */
+padding:40px 0;
+padding-bottom:50px;
+color:#fff;
+
+box-shadow:0 10px 20px rgba(0,0,0,0.9);
+
+}
+
+.promotional-details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 5px 10%; /* Adjusted padding for better alignment */
+
+}
+
+.promotional-details-row-two {
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  position: relative; /* Ensures absolute positioning of h4 is relative to this div */
+margin-bottom:8px;
+}
+
+.promotional-details-row-two img {
+  width: 60px;
+  }
+.promotional-details-rows h3 {
+          background: linear-gradient(to right, #bbb, #fff, #bbb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+.promotional-details-row-three {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.promotional-details-row-one {
+  justify-content: center;
+ }
+
+.promotional-details-row-four {
+  justify-content: center;
+  font-size: 15px;
+  text-transform: uppercase;
+font-family: 'Edosz', sans-serif;
+margin-top:10px;
+}
+@media (max-width:768px){
+.ufc-title {
+  font-size: 70px; /* Adjust as needed */
+         letter-spacing:6px;
+        }
+.fight-night-title {
+  font-size: 40px;
+   margin-top:-10px;
+ text-align:center; 
+}	
+.promotional-details-images{
+gap:10%;
+}
+.promotional-details-image-cont{
+width:160px;
+height:150px;
+}
+
+.promotional-details-row-two {
+  font-size: 16px;
+}
+
+.promotional-details-row-three {
+  font-size: 14px;
+}
+.promobtn{
+  width: 40% !important;
+  font-size: 21px;
+}
+
+.promotional-details-container-new {
+  background-image: 
+      url(/Assets/affiliateDashboard/mobile_background_affiliate_details.png);
+    }
+}
+
+.promobtn{
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Overlay that dims the background */
+.modal-overlay-instructions {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Dark semi-transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure the modal appears above all content */
+}
+
+/* Modal content box */
+.modal-overlay-instructions .modal-content {
+  background-color: #FFF;
+  padding: 30px;
+  width: 90%; /* Adjust width for better mobile responsiveness */
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1001; /* To ensure it's above the overlay */
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+/* Modal heading */
+.modal-overlay-instructions .modal-content h2 {
+  font-size: 24px;
+  color: #FF4500; /* Matching theme color */
+  margin-top: 0;
+}
+
+/* Modal paragraph and list */
+.modal-overlay-instructions .modal-content p {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.modal-overlay-instructions .modal-content ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  text-align: left;
+}
+
+.modal-overlay-instructions .modal-content ul li {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+/* Close button */
+.modal-overlay-instructions .close-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #FF4500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-overlay-instructions .close-btn:hover {
+  background-color: #e04300;
+  transition: background-color 0.3s ease;
+}
+
+/* MEDIA QUERIES for responsiveness */
+@media (max-width: 768px) {
+  .modal-overlay-instructions .modal-content {
+    width: 95%; /* Smaller width on tablets */
+    padding: 20px; /* Reduce padding */
+    max-width: 600px; /* Max width for tablet devices */
+  }
+  
+  .modal-overlay-instructions .modal-content h2 {
+    font-size: 22px; /* Slightly smaller heading */
+  }
+  
+  .modal-overlay-instructions .modal-content p,
+  .modal-overlay-instructions .modal-content ul {
+    font-size: 14px; /* Adjust font size for better readability */
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay-instructions .modal-content {
+    width: 100%; /* Full width on small mobile screens */
+    padding: 15px; /* Reduce padding for mobile */
+    max-width: 100%; /* No max-width for small screens */
+  }
+  
+  .modal-overlay-instructions .modal-content h2 {
+    font-size: 20px; /* Smaller heading for mobile */
+  }
+  
+  .modal-overlay-instructions .modal-content p,
+  .modal-overlay-instructions .modal-content ul {
+    font-size: 13px; /* Smaller font size for content on mobile */
+  }
+  
+  .modal-overlay-instructions .close-btn {
+    font-size: 14px; /* Smaller close button for mobile */
+    padding: 8px 16px;
+  }
+}
+
+
+
+
+.videoRecorderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.statusText {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.recordedVideo {
+  width: 100%;
+  max-width: 600px; /* Maximum width for larger screens */
+  height: auto;
+  border: 2px solid #38b90c; /* Green border to enhance visibility */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+  gap:20px;
+}
+
+.recordButton,
+.stopButton,
+.saveButton {
+  background-color: #38b90c; /* Attractive green color */
+  color: white; /* White text */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  padding: 10px 15px; /* Padding for buttons */
+  margin: 5px 0; /* Space between buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.recordButton:hover {
+  background-color: #32a80a; /* Darker green on hover */
+}
+
+.stopButton {
+  background-color: #d9534f; /* Attractive red color for stop */
+}
+
+.stopButton:hover {
+  background-color: #c9302c; /* Darker red on hover */
+}
+
+.saveButton {
+  background-color: #5bc0de; /* Attractive blue color for save */
+}
+
+.saveButton:hover {
+  background-color: #31b0d5; /* Darker blue on hover */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.dollar {
+  background: linear-gradient(90deg, #ffd700, #ff8c00, #ffd700); /* Gold to Orange */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+  font-size: 25px; /* Adjust as needed */
+}
+
+
+
+
+
+
+
+
+
+
+.criteria-details-another{
+  font-size: 21px;
+  padding: 20px 30px;
+  padding-top:0;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  font-family: 'Baloo Tamma 2', sans-serif;
+	color:#000;
+	font-weight:600; 
+  background-image: url(/Assets/affiliateDashboard/criteria.png);
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  margin-top:40px;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  height: 41vh;
+}
+.criteria-details-another h5{
+  color:#fff;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-style: italic;
+  background-color: #4d0000;
+  font-size: 23px;
+  padding:8px 20px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.justify-space-between{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.criteria-details-another h2{
+  font-size: 24px;
+  color: #4d0000;
+
+}
+
+.criteria-details-another h3{
+  font-size: 25px;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-style: italic;
+}
+
+
+.row-hover {
+  position: relative;
+  
+}
+.row-hover:last-of-type{
+  cursor: pointer;
+}
+
+.row-hover:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.hover-info-box {
+  position: absolute;
+  top: 50%;
+  right: -235px; /* Adjust as needed */
+  transform: translateY(-50%);
+  background: black;
+  border-radius: 8px;
+  padding: 10px 15px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+  width: 200px;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  font-size: 14px;
+  color: white;
+  text-align: left;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* Triangle Pointer */
+.hover-info-box::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10px; /* Position triangle on the left */
+  transform: translateY(-50%) rotate(180deg); /* Rotate 180 degrees */
+  width: 0;
+  height: 0;
+  border-left: 10px solid black; /* Triangle pointing to the row */
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+}
+@media(max-width:768px){
+  
+.criteria-details-another{
+  font-size: 18px;
+  padding: 20px;
+  padding-top:0;
+  width: 90%;
+}
+.criteria-details-another h5{
+  font-size: 21px;
+  margin-bottom: 15px;
+}
+.criteria-details-another h2{
+  font-size: 22px;
+}
+.criteria-details-another h3{
+  font-size: 23px;
+}
+
+}
+
+.flexed-div{
+  display:flex;
+  gap:20px;
+}
+
+.fight-timeline-wrapper{
+  margin-top:70px;
+  padding:2% 2.5%;
+  display: flex;
+  width: 70%;
+  background-image: url(/Assets/affiliateDashboard/criteria.png);
+  justify-content: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  align-items: center;
+  gap:20px;
+  font-family: 'Caveat Brush', cursive;
+  color: #4d0000;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  border:4px solid gray;
+  border-radius: 5px;
+}
+.fight-timeline-wrapper h1 {
+  font-weight: bold;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  font-size: 27px;
+  
+}
+
+.fight-timeline-wrapper .break{
+  width:90px;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.7);
+  position: relative;
+  border-radius: 30px;
+}
+@media (max-width: 768px) {
+  .flexed-div {
+    flex-direction: column; /* Stack items vertically */
+    gap: 15px; /* Reduce gap for better spacing */
+  }
+
+  .fight-timeline-wrapper {
+    width: 90%; /* Make it more responsive */
+    padding: 4%; /* Adjust padding for smaller screens */
+    flex-direction: column; /* Stack elements for better mobile layout */
+    gap: 15px; /* Reduce gap for a tighter look */
+    border-radius: 8px; /* Slightly smoother corners */
+  }
+
+  .fight-timeline-wrapper h1 {
+    font-size: 22px; /* Reduce font size for readability */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .fight-timeline-wrapper .break {
+    width: 70px; /* Make the divider slightly smaller */
+  }
+}

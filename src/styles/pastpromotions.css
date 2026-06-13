@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+@font-face {
+    font-family: 'Capture It';
+    src: url('/Assets/affiliateDashboard/Capture\ it.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Apalu';
+    src: url('/Assets/affiliateDashboard/Apalu.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+.past-fights-wrapper{
+    font-family: 'League Spartan', sans-serif;
+    color:#fff;
+    text-align: center;
+    background-image: url(/Assets/affiliateDashboard/promo_three.png);
+    background-position: bottom;
+    position: relative;
+}
+.past-fights-wrapper .past-fighters{
+    position: absolute;
+    bottom: 0;
+    width: 95%;
+}
+.past-fights-wrapper .past-fights-wrapper-title{
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 50px;
+    font-family: 'Apalu', sans-serif;
+    z-index: 2;
+    margin-top: 30px;
+}
+.past-fights-wrapper .past-fights-wrapper-subtitle{
+    font-size: 60px;
+    text-transform: uppercase;
+    margin-top: -30px;
+    font-family: 'Capture It', sans-serif;
+    color: #FF0000;
+    z-index: 1;
+}
+
+.past-fights-wrapper .past-fights-wrapper-sub-sub{
+    font-size: 30px;
+    text-transform: uppercase;
+    line-height: 1.2;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+}
+
+
+
+.past-fights-affiliate-wrapp{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap:25px;
+    margin-top: 30px;
+}
+.past-fights-affiliate-actual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    background:  #FF0000; /* Match background color */
+   }
+
+.past-fight-aff-div-outer {
+    width: 250px; /* Fixed width to maintain position */
+    height: 50px;
+   text-align: center;
+   background: #fff;
+   font-weight: bold;
+    font-family: 'League Spartan', sans-serif;
+    position: relative;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.past-fight-aff-div-outer img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    position: absolute;
+    top:-5px;
+}
+.past-fight-aff-div-outer .right-img{
+    right: -15px;
+}
+.past-fight-aff-div-outer .left-img{
+    left: -15px;
+}
+.past-fight-aff-div-outer h1 {
+    font-size: 16px;
+    margin-top: 5px;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.past-fight-aff-div-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 900;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 18px;
+    padding: 5px 15px;
+    border-radius: 10px;
+    z-index: 1;
+    width: 70px;
+}
+
+.past-fight-aff-div-center h2{
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6), 
+    0px 0px 10px rgba(255, 0, 0, 0.7), 
+    0px 0px 20px rgba(255, 165, 0, 0.9);
+}
+
+
+
+
+
+
+@media(max-width:768px){
+    
+
+.past-fights-wrapper .past-fights-wrapper-title{
+    font-size: 30px;
+  }
+.past-fights-wrapper .past-fights-wrapper-subtitle{
+    font-size: 35px;
+    margin-top: -10px;
+   }
+
+.past-fights-wrapper .past-fights-wrapper-sub-sub{
+    font-size: 25px;
+  }
+
+
+
+
+.past-fight-aff-div-outer {
+    width: 100px; 
+    height: 40px;  
+}
+
+.past-fight-aff-div-outer img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    position: absolute;
+    top:-1px;
+
+}
+.past-fight-aff-div-center {
+    font-size: 14px;
+    padding: 5px 15px;
+    border-radius: 10px;
+    z-index: 1;
+    width: 50px;
+}
+
+.past-fight-aff-div-center h2{
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6), 
+    0px 0px 10px rgba(255, 0, 0, 0.7), 
+    0px 0px 20px rgba(255, 165, 0, 0.9);
+}
+.past-fight-aff-div-outer .left-img {
+    left: -30px;
+}
+.past-fight-aff-div-outer .right-img {
+    right: -30px;
+}
+
+.past-fight-aff-div-outer h1 {
+    font-size: 14px;
+  
+}
+
+}
+
+
+.pastpromos{
+    padding-right: 0;
+    margin-top: 30px;
+}

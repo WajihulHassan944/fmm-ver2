@@ -1,0 +1,132 @@
+.lb2-bg-container {
+  background: url('/Assets/leaguesTwo.jpg') no-repeat center center/cover !important;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  font-family: 'Arial Black', sans-serif;
+
+}
+
+.lb2-leaderboard {
+  padding: 30px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 700px;
+  color: #fff;
+}
+
+.lb2-title {
+  text-align: center;
+  font-size: 36px;
+  color: #fff;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+.lb2-header-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #222;
+  color: #fff;
+  font-weight: bold;
+  border-bottom: 2px solid #999;
+}
+
+.lb2-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+  transition: 0.3s ease;
+  color: #eee;
+}
+
+.lb2-row:last-child {
+  border-bottom: none;
+}
+
+.lb2-highlight {
+  background-color: #a40000;
+  color: white;
+  font-weight: bold;
+}
+
+.lb2-rank,
+.lb2-score {
+  width: 50px;
+  text-align: center;
+}
+
+.lb2-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lb2-img {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.lb2-empty {
+  margin-top: 20px;
+  text-align: center;
+  color: #ccc;
+}
+@media (max-width: 768px) {
+  .lb2-bg-container {
+    padding: 20px 10px;
+  }
+
+  .lb2-title {
+    font-size: 28px;
+  }
+
+  .lb2-header-row,
+  .lb2-row {
+    padding: 10px 12px;
+  }
+
+  .lb2-header-row span,
+  .lb2-rank,
+  .lb2-score {
+    font-size: 14px;
+  }
+
+  .lb2-name {
+    font-size: 14px;
+    gap: 8px;
+  }
+
+  .lb2-img {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lb2-title {
+    font-size: 20px;
+  }
+
+  .lb2-rank,
+  .lb2-score {
+    width: 40px;
+    font-size: 13px;
+  }
+
+  .lb2-name {
+    font-size: 13px;
+  }
+
+  .lb2-img {
+    width: 28px;
+    height: 28px;
+  }
+}

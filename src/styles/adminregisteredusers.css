@@ -1,0 +1,154 @@
+
+.viewButtonUsers, .deleteButton {
+  
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    margin-right: 10px;
+  }
+  
+  .deleteButton {
+    background-color: #dc3545;
+  }
+  
+  .userDetails {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    background-image: url(/Assets/BlackredBackground.png);
+    border: 2px solid #ccc;
+    color: #fff;
+    text-align: center;
+  }
+  
+  .userDetails p {
+    margin-bottom: 5px;
+  }
+  
+  .userDetails img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+  }
+  
+  .closeButton {
+    margin-top: 20px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .giveTokensInput {
+    margin-top: 15px;
+    padding: 8px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #333;
+    color: #fff;
+    font-size: 16px;
+  }
+  
+  .submitTokensButton {
+    margin-top: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submitTokensButton:hover {
+    background-color: #218838;
+  }
+  
+  
+
+.toFlexRowTitle{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width:100%;
+  margin:50px 0;
+  margin-top:21px;
+  padding:0 80px;
+  padding-left: 100px;
+}
+.toFlexRowTitle div{
+  display: flex;
+  gap:20px;
+}
+.toFlexRowTitle button{
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.toFlexRowTitle .addAccountsBtn{
+  background-color: #218838;
+}
+.mobileItemOne{
+  margin-top:-55px;
+}
+ 
+@media (max-width: 767px){
+.mobileItemOne{
+  margin-top:-100px;
+}
+
+
+
+
+.toFlexRowTitle{
+  justify-content: center;
+  flex-direction: column-reverse;
+  margin:50px 0;
+  margin-top:21px;
+  padding:0 80px;
+  padding-left: 100px;
+  gap:20px;
+}
+.toFlexRowTitle div{
+  display: flex;
+  gap:20px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.toFlexRowTitle button{
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.toFlexRowTitle .addAccountsBtn{
+  background-color: #218838;
+}
+
+
+}
+
+

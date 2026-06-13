@@ -1,0 +1,105 @@
+.newsWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-top:170px;
+    padding-bottom: 10px;
+    background-image: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.5)),url('/Assets/news.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+  }
+  .newsWrapped{
+    width:100%;
+    max-width:700px;
+    display: flex;
+    flex-direction: column;
+    gap:20px;
+    background: black;
+    padding-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+
+  }
+  .newsmain{
+    width:100%;
+    background: #252736;
+    
+  }
+  .newsmain h1{
+    width:40%;
+    padding: 15px 20px;
+    padding-left: 10px;
+    background: #ba130c;
+    text-align: center;
+    color:#fff;
+    font-size: 25px;
+    font-family: "UfcSansRegular";
+    
+    clip-path: polygon(0 0, 90% 0, 95% 100%, 0% 100%);
+   
+  }
+  .newsMain {
+    overflow: hidden;
+  }
+  
+  .newsItem {
+    padding:10px 10px;
+  }
+  
+  .newsItem:last-child {
+    border-bottom: none;
+  }
+  .newsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ccc;
+    cursor: pointer;
+    font-family: "UfcSansRegular";
+    font-size: 22px;
+    position: relative; /* Ensures proper alignment for pseudo-elements */
+  }
+  
+  .newsHeader p {
+    margin: 0;
+    font-weight: bold;
+    position: relative;
+  }
+  
+  .newsHeader p::before {
+    content: "•"; /* Unicode character for a bullet dot */
+    color: #ccc; /* Matches the text color */
+    font-size: 22px; /* Matches the text size */
+    margin-right: 10px; /* Space between the dot and the text */
+  }
+  
+  
+  
+  .newsBody {
+    padding: 10px 15px;
+    background: #ccc;
+    display: none;
+  }
+  
+  .newsBody.open {
+    display: block;
+    animation: slideDown 0.3s ease-in-out;
+  }
+  
+  @keyframes slideDown {
+    from {
+      max-height: 0;
+    }
+    to {
+      max-height: 500px;
+    }
+  }
+  
+  .icon {
+    font-size: 18px;
+  }
+  

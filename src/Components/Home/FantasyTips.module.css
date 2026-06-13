@@ -1,0 +1,54 @@
+.fantasyTipsWrapper {
+    width: 100%;
+min-height: 100vh;
+    font-family: Arial, sans-serif;
+    padding-top: 152px;
+  }
+
+ .tipContent{
+    padding: 30px 10%;
+ }
+.tipHeaderImage h1{
+    color: #fff;
+    font-size: 48px;
+    font-weight: bold;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
+  
+}
+  .tipHeaderImage{
+    width: 100% !important;
+    height: 230px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url(/Assets/RING3.png);
+    background-size: cover;
+    background-position: center 58%;
+  }
+  .fantasyTipsWrapper .date {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+  
+  .fantasyTipsWrapper .title {
+    line-height: 1.1;
+    margin: 0;
+  }
+  
+  .fantasyTipsWrapper .kick {
+    color: #b30000;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  
+  .fantasyTipsWrapper .description {
+    font-size: 15px;
+    color: #333;
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+  

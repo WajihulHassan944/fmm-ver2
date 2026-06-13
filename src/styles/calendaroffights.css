@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500&display=swap');
+
+.calendar-of-matches-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    background-image: url(/Assets/calender/two.jpg);
+    background-position: center 60px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  padding-top: 22%;
+}
+.calendar-of-matches-wrapper h1 {
+    font-size: 80px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #d1e5ff;
+    font-family: 'Bungee', sans-serif;
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    background: linear-gradient(to right, #bfcde4 10%, #ffffff 50%, #bfcde4 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transform: skewX(-10deg);
+  }
+
+@media(max-width:768px){
+    .calendar-of-matches-wrapper h1 {
+        font-size: 40px;
+        text-align: center;
+       }
+}
+
+
+
+.custom-calendar-container {
+    margin-top: 22%;
+    margin-bottom: 100px;
+    position: relative;
+}
+
+
+
+.custom-calendar {
+    width: 100%;
+    max-width: 600px;
+    background: #271f29;
+    border: none;
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    border-radius: 0 !important;
+   
+
+}
+
+/* Month Heading Styling */
+.calendar-month {
+    font-size: 26px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 12px;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+    text-align: center;
+    font-family: 'UFCSans';
+    
+   }
+
+/* Weekday Names */
+.react-calendar__month-view__weekdays__weekday {
+    font-size: 17px;
+    background: #2d3646;
+    color: white;
+    text-decoration: none;
+    padding: 10px 0;
+    border-right: 4px solid #271f29;
+    
+}
+
+.react-calendar__month-view__weekdays__weekday:last-of-type{
+    border-right: 0;
+}
+/* Calendar Tiles */
+.react-calendar__tile {
+    background: #afb5b1;
+    color: black;
+    padding: 5px;
+    transition: all 0.3s ease-in-out;
+    font-size: 1.3rem;
+    height: 75px;
+    text-align: center;
+    margin: 5px; /* Added spacing */
+    
+    border-right: 4px solid #271f29 !important;
+    border-bottom: 4px solid #271f29 !important;
+}.react-calendar__month-view__days__day:nth-child(7n) {
+    border-right: 0 !important;
+}
+
+
+/* Active Date */
+.react-calendar__tile--active , .highlighted-circle{
+    background: #47484b;
+    color: white;
+    border: 3px solid white;
+    border:none !important;
+    transform: scale(1.01);
+
+}
+
+/* Remove underline from weekday abbreviations */
+abbr[title] {
+    text-decoration: none;
+}
+
+
+/* Calendar Navigation Arrows */
+
+.custom-calendar-container .calendar-arrow {
+    position: absolute;
+    bottom: -70px;
+    right: 10px;
+    font-size: 24px;
+    color: white;
+    background: #8f202a;
+    border: none;
+    cursor: pointer;
+    padding: 5px 18px;
+    clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+    transition: background 0.3s, transform 0.2s;
+}
+
+/* Spacing between buttons */
+.calendar-arrow.left {
+    right: 60px;
+}
+
+.calendar-arrow:hover {
+    background: #1d252c;
+    transform: scale(1.1);
+}
+
+
+
+@media(max-width:768px){
+ 
+.calendar-of-matches-wrapper {
+  padding:20px;
+    padding-top: 70%;
+}   
+
+
+
+/* Calendar Tiles */
+.react-calendar__tile {
+    font-size: 1rem;
+    height: 55px;
+   
+}
+
+}

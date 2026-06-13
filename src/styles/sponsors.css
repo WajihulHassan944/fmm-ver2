@@ -1,0 +1,446 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
+@font-face {
+    font-family: 'UFCSansMedium';
+    src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: condensed;
+  }
+  @font-face {
+    font-family: 'UFCSansCondensedBold';
+    src: url('/Fonts/UFCSans-CondensedBold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: condensed;
+  }
+      
+
+  @font-face {
+    font-family: 'UfcSansRegular';
+    src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  
+.sponsors-wrap{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 180px;
+    padding-bottom: 70px;
+    width: 100%;
+    min-height: 100vh; /* Full-screen height */
+    background: linear-gradient(136.74deg, #e7e7e9 19.43%, #fff 89.46%);
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .15);
+    position: relative;
+   }
+   .sponsors-wrap .toabsolutedesign{
+    position: absolute;
+    top:70px;
+    right:0;
+    width:120px;
+    height:120px;
+   }
+   
+   .sponsors-wrap h1{
+    color: #d20a0a;
+    font-size: 48px;
+    text-align: center;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    margin-bottom: 5px;
+   }
+   .sponsors-wrap h1 img{
+    position: absolute;
+    top:-24px;
+    left:-46px;
+    width:60px;
+    height:60px;
+   }
+  
+   .sponsors-wrap h2{
+    color: #d20a0a;
+    font-size: 36px;
+    text-align: center;
+    font-family: 'UFCSansMedium';
+    text-transform: uppercase;
+color:rgba(0, 0, 0, 0.87);
+font-style: italic;
+margin-bottom: 20px;
+   }
+
+   .sponsors-main{
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin-top:10px;
+   }
+   .sponsors-main a{
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    gap:20px;
+   }
+   .sponsors-main a h1{
+    color: rgb(210, 10, 10); /* Adjust color as needed */
+    font-family: 'UFCSansCondensedBold';
+    font-size: 24px;
+    letter-spacing: normal;
+   }
+   .sponsors-main .sponsorItem{
+    padding:16px;
+    padding-top: 0;
+    width:330px;
+    height:300px;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top:10px solid #eb0b0c;
+    position: relative;
+    cursor: pointer;
+   }
+   .sponsors-main .sponsorItem img{
+    width:100%;
+    height:100%;
+
+   }
+
+
+  .sponsor-container-parent{
+    display: flex;
+    flex-wrap:wrap;
+    justify-content: center;
+    align-items: center;
+    gap:20px;
+  }
+
+  .myaboutcontent{
+    font-style: normal !important;
+    font-weight: 400;
+    line-height: 1.5;
+    width:60%;
+margin-top:15px;
+color:#333 !important;
+    font-family: 'UFCSansCondensedBold' !important;
+    font-size: 24px !important;
+    text-align: center;
+    letter-spacing: 0.18px;
+   
+  }
+
+
+
+
+
+.rewards-container-parent{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  background: linear-gradient(136.74deg, #e7e7e9 19.43%, #fff 89.46%);
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .15);
+    padding:50px 0;
+}
+.rewards-container-parent .reward-description{
+  margin-bottom: 50px;
+  font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+    color: rgba(0, 0, 0, 0.87);
+    font-family: 'Roboto', sans-serif;
+  font-weight: 500; /* Medium weight */
+}
+.rewards-container-parent .reward-items-wrap{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap:50px;
+}
+.reward-item{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap:20px;
+}
+.reward-item h3{
+  color: rgb(210, 10, 10); /* Adjust color as needed */
+  font-family: 'UFCSansCondensedBold';
+  font-size: 24px;
+
+}
+
+.reward-item:nth-of-type(2) h3{
+  color: rgb(171, 142, 61);
+ 
+}
+
+.reward-item:nth-of-type(3) h3{
+  color: rgb(0, 0, 0);
+ 
+}
+.reward-item .reward-image{
+   width: 100%;
+   position: relative;
+}
+.reward-item .reward-image .rewardAbsolute{
+  position: absolute;
+  top: 0;
+  left:50%;
+  transform: translate(-50%,20%);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap:144.5px;
+}
+.reward-item .reward-image .rewardAbsolute p,.reward-item .reward-image .rewardAbsolute h2{
+  color:#fff;
+}
+.reward-item img{
+  width:330px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  @media (max-width: 767px){
+    .rewards-container-parent .reward-description{
+      font-size: 20px;
+    padding: 0 15px;
+    }
+    
+  .myaboutcontent{
+    width:90%;
+   
+  }
+  .sponsor-container-parent{
+   
+    gap:40px;
+  }
+  .sponsors-wrap .toabsolutedesign{
+    display: none;
+  }
+  .sponsors-wrap h1{
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: 2px;
+   }
+   .sponsors-wrap h1 img{
+    width:50px;
+    height:50px;
+   }
+  
+   .sponsors-wrap h2{
+    font-size: 30px;
+     }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.mywheel{
+  background-image: 
+  linear-gradient(to top, rgba(255, 0, 0, 0.3) 0%, rgba(255, 0, 0, 0) 100%), 
+  linear-gradient(to right, rgba(255, 0, 0, 0.2) 0%, rgba(0, 0, 255, 0.2) 100%), 
+  url(/Assets/newFightDetails/four\ \(1\).jpg);                 
+                  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 80vh;
+  display: flex;
+  gap:80px;
+  flex-direction: row;
+  }
+  .spin-button {
+    background: linear-gradient(to bottom, #32CD32, #228B22); /* Green gradient */
+    color: #fff; /* White text */
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3), inset 0px 4px 6px rgba(255, 255, 255, 0.2);
+    display: inline-block;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    
+    background:  #404660;
+    border: 4px solid #808080;
+    font-weight: 800;
+  text-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .spin-button:active {
+    transform: scale(0.95);
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2), inset 0px 2px 4px rgba(255, 255, 255, 0.2);
+  }
+  
+  .spin-button:disabled {
+    background: #a9a9a9;
+    cursor: not-allowed;
+    box-shadow: none;
+    border: 4px solid #808080;
+  }
+  
+
+
+
+
+
+
+  .spin-wheel-text h1{
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 5.5rem; /* Adjust size as needed */
+    font-weight: bold;
+    letter-spacing: 0;
+    font-family: 'UFCSansCondensedBold';
+    color:#d20a0a;
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.87);
+  }
+  
+  .spin-wheel-text h2{
+    font-size: 50px;
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.87);
+    color: #362A89;
+
+  }
+  .spin-wheel-text .winner-text{
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.87);
+
+  }
+
+
+
+
+
+
+@media(max-width:768px){
+  
+.mywheel{
+  flex-direction: column;
+  height: 120vh;
+}
+
+
+.spin-wheel-text h1{
+ font-size: 3rem;}
+
+.spin-wheel-text h2{
+  font-size: 30px;
+ 
+}
+}
+
+
+
+.bottom-glove{
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 100px;
+}
+
+
+.form-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: url('/Assets/newFightDetails/twelve.jpg') no-repeat center center;
+  background-size: cover;
+  max-width: 400px;
+  width: 100%;
+  padding: 50px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  text-align: center;
+z-index:10000;
+}
+
+.form-container h1 {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-container input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-container button {
+  padding: 10px;
+  font-size: 1rem;
+  background-color: red;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form-container button:hover {
+  background-color: #0056b3;
+}
