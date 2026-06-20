@@ -276,7 +276,7 @@ const HomeAnother = () => {
                 <Link href="/mock-game" className="theme-btn theme-btn-primary">
                   Try Demo Fight <FaPlay aria-hidden="true" />
                 </Link>
-                <Link href="/upcomingfights" className="theme-btn theme-btn-secondary">
+                <Link href="/fights" className="theme-btn theme-btn-secondary">
                   Join Free Contest <FaUserFriends aria-hidden="true" />
                 </Link>
               </div>
@@ -333,7 +333,7 @@ const HomeAnother = () => {
           <section className="fmm-active-section" aria-labelledby="active-contests-title">
             <div className="fmm-section-title-row">
               <h2 id="active-contests-title">Active Contests</h2>
-              <Link href="/upcomingfights">View All Contests <FaArrowRight aria-hidden="true" /></Link>
+              <Link href="/fights">View All Contests <FaArrowRight aria-hidden="true" /></Link>
             </div>
 
             <div className="fmm-contest-grid">
@@ -379,7 +379,7 @@ const HomeAnother = () => {
                       <strong>{getLockLabel(match, now)}</strong>
                     </div>
 
-                    <Link href="/upcomingfights" className="fmm-card-action">
+                    <Link href="/fights" className="fmm-card-action">
                       {isFinished ? 'View Contest' : 'Enter Free'}
                     </Link>
                   </article>
@@ -425,7 +425,7 @@ const HomeAnother = () => {
             <div className="fmm-panel fmm-winners-panel">
               <div className="fmm-panel-title-row">
                 <h2>Recent Winners</h2>
-                <Link href="/global-leaderboard">View All Winners <FaArrowRight aria-hidden="true" /></Link>
+                <Link href="/leaderboard">View All Winners <FaArrowRight aria-hidden="true" /></Link>
               </div>
               {STATIC_WINNERS.map((winner) => (
                 <div className="fmm-winner-row" key={winner.name}>
@@ -477,7 +477,7 @@ const HomeAnother = () => {
               <p>Fight Night Experience</p>
               <h2>Built for every punch, round and prediction.</h2>
               <span>Premium fight cards, live leaderboards and clean prediction flows stay focused on the contest, not hidden stat tables.</span>
-              <Link href="/upcomingfights" className="fmm-art-link">Explore contests <FaArrowRight aria-hidden="true" /></Link>
+              <Link href="/fights" className="fmm-art-link">Explore contests <FaArrowRight aria-hidden="true" /></Link>
             </div>
             <div className="fmm-fight-art-media">
               <img src="/images/hero-fight.png" alt="Combat sports fight night" loading="lazy" />

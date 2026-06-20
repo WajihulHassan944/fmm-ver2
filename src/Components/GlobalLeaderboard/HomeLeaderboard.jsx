@@ -68,8 +68,8 @@ const dispatch = useDispatch();
           <h1 className='home-leaderboard-points'>#{index + 1}</h1>
   
           <div className='home-leaderboard-buttons'>
-            <Link href="/login" ><button>Login</button></Link>
-            <Link href="/CreateAccount" ><button>Sign Up Now!</button></Link>
+            <Link href="/auth?mode=login&role=player" ><button>Login</button></Link>
+            <Link href="/auth?mode=signup&role=player" ><button>Sign Up Now!</button></Link>
             
           </div>
         </div>

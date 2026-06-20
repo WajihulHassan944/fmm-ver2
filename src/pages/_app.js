@@ -47,6 +47,9 @@ import "@/styles/referralLeaderboard.css";
 import "@/styles/homeleaderboardtwo.css";
 import "@/styles/mockpredictionsgame.css";
 import "@/styles/new-theme.css";
+import "@/styles/experience-theme.css";
+import "@/styles/route-experience.css";
+import "@/styles/admin-experience.css";
 import Script from "next/script";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
@@ -69,6 +72,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import "react-calendar/dist/Calendar.css";
 import AdminHeader from "@/Components/Header/AdminHeader";
 import ChatbaseWidget from "@/Components/ChatbaseWidget";
+import RouteExperienceFrame, { shouldUseRouteExperienceFrame } from "@/Components/Theme/RouteExperienceFrame";
 
 
 
@@ -139,10 +143,11 @@ function AppContent({ children }) {
   const howlerRef = useRef(null);
   const { isAdminAuthenticated } = useSelector((state) => state.adminAuth);
   
-  // Paths where Header & Footer should NOT be displayed
-  const hideLayout =
-    router.pathname.startsWith("/administration") ||
-    router.pathname === "/administration/login";
+  const isAdministrationRoute = router.pathname.startsWith("/administration");
+  const isAdminLoginRoute = router.pathname === "/administration/login";
+  const hideLayout = isAdministrationRoute;
+  const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute && isAdminAuthenticated;
+  const useRouteExperienceFrame = shouldUseRouteExperienceFrame(router.pathname);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -158,9 +163,11 @@ function AppContent({ children }) {
           const darkRoutes = [
             "/community-forum", "/Sponsors", "/guides", "/our-fighters",
             "/faqs", "/about", "/past-fights-records", "/fights-rewards",
-            "/sponsor-dashboard", "/global-leaderboard", "/testimonials",
+            "/sponsor-dashboard", "/leaderboard", "/testimonials", "/fights",
             "/spin-wheel", "/calendar-of-fights", "/AffiliateDashboard",
-            "/past-fights","/referral-leaderboard", "/HowItWorks", "/affiliate-league", "/fantasy-tips","/FantasyLeagues", "/invite", "/fighter-performance-tracker"
+            "/UserDashboard", "/auth", "/referral-leaderboard", "/HowItWorks",
+            "/affiliate-league", "/fantasy-tips", "/FantasyLeagues", "/invite",
+            "/fighter-performance-tracker"
           ];
 
           const redRoutes = ["/fights-news"];
@@ -244,10 +251,14 @@ function AppContent({ children }) {
      <ToastContainer  /></div>
    
       {!hideLayout && <Header />}
-      {hideLayout && isAdminAuthenticated && <AdminHeader />}
-      <ChatbaseWidget />
-    
-      <main>{children}</main>
+      {showAdminChrome && <AdminHeader />}
+      {!hideLayout && <ChatbaseWidget />}
+
+      <main className={isAdministrationRoute ? (isAdminLoginRoute ? "admin-login-main" : "admin-experience-main") : "site-experience-main"}>
+        {useRouteExperienceFrame ? (
+          <RouteExperienceFrame pathname={router.pathname}>{children}</RouteExperienceFrame>
+        ) : children}
+      </main>
       {!hideLayout && <Footer />}
     </>
   );

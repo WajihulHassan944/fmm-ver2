@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import AffiliateFightLeaderboard from "@/Components/Affiliates/AffiliateFightLeaderboard";
 import Head from "next/head";
 import Image from "next/image";
-const index = ({ affiliate, matchData }) => {
+const ShadowFightPage = ({ affiliate, matchData }) => {
   const router = useRouter();
   const { matchName, fullName } = router.query;
   const [isMobile, setIsMobile] = useState(false);
@@ -39,7 +39,7 @@ const index = ({ affiliate, matchData }) => {
   const handleJoinLeague = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
-      window.open("/login", "_blank");
+      window.open("/auth?mode=login&role=player", "_blank");
       return;
     }
 
@@ -279,4 +279,4 @@ export const getServerSideProps = async ({ params }) => {
   }
 };
 
-export default index;
+export default ShadowFightPage;

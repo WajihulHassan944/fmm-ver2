@@ -1,32 +1,129 @@
-// Components/Home/Fighters.jsx
-import React from "react";
-import styles from "./Fighters.module.css";
-import { Helmet } from "react-helmet";
+import React, { useMemo, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import { FaArrowRight, FaFistRaised, FaSearch, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
+import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
+
+const FALLBACK_FIGHTERS = [
+  `${FMM_ASSET_BASE}/fighter-jadden-addison.png`,
+  `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`,
+  `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
+  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.png`,
+  `${FMM_ASSET_BASE}/fighter-anthony-yarde.png`,
+  `${FMM_ASSET_BASE}/fighter-david-benavidez.png`,
+];
 
 const Fighters = ({ fighters = [] }) => {
+  const normalized = useMemo(() => (Array.isArray(fighters) ? fighters : []).filter((fighter) => fighter?.name), [fighters]);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all');
+
+  const categories = useMemo(() => Array.from(new Set(normalized.map((fighter) => fighter.category || 'MMA'))).sort(), [normalized]);
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return normalized.filter((fighter) => {
+      const matchesCategory = category === 'all' || String(fighter.category || 'MMA') === category;
+      const matchesSearch = !needle || `${fighter.name} ${fighter.category || ''}`.toLowerCase().includes(needle);
+      return matchesCategory && matchesSearch;
+    });
+  }, [category, normalized, search]);
+  const featured = normalized[0];
+
   return (
-    <div className={styles.FightersContainer}>
-      <Helmet>
-        <link rel="canonical" href="https://www.fantasymmadness.com/our-fighters" />
-        <title>Our Fighters - Fantasy Mmadness</title>
-        <meta name="description" content="Meet the professional fighters at Fantasy Mmadness. Discover their profiles, fight categories, and more!" />
-      </Helmet>
-      <h1 className={styles.FightersTitle}>Our Professional Fighters</h1>
-      <div className={styles.fightersWrapParent}>
-        {fighters.map((fighter, index) => (
-          <div className={styles.fighterItem} key={index}>
-            <div className={styles.fighterImagePart}>
-              <img src={fighter.image} alt={`${fighter.name}`} />
-            </div>
-            <div className={styles.fighterContentPart}>
-              <h2>{fighter.category}</h2>
-              <h1>{fighter.name}</h1>
-              <p>{fighter.description}</p>
+    <>
+      <Head>
+        <title>Our Fighters | Fantasy MMAdness</title>
+        <meta name="description" content="Explore the MMA, boxing, kickboxing, and bare-knuckle fighters featured across Fantasy MMAdness fight cards." />
+      </Head>
+      <div className="experience-page fighters-experience-page">
+        <ExperienceHero
+          eyebrow="Combat athlete directory"
+          title="Names that move the crowd."
+          accent="Fighters who define the card."
+          description="Explore the athletes appearing across Fantasy MMAdness fight cards—from championship-calibre boxers to explosive MMA and kickboxing specialists."
+          backgroundImage={`${FMM_ASSET_BASE}/homepage-fight-hero.jpg`}
+          actions={[
+            { href: '/fights', label: 'Browse fight cards' },
+            { href: '/fighter-performance-tracker', label: 'Open fighter tracker', variant: 'secondary' },
+          ]}
+          stats={[
+            { value: normalized.length, label: 'Featured fighters', icon: FaUsers },
+            { value: categories.length, label: 'Disciplines', icon: FaFistRaised },
+            { value: 'Live', label: 'Fight-card data', icon: FaShieldAlt },
+          ]}
+        >
+          <div className="xp-featured-fighter-card">
+            <div className="xp-featured-fighter-glow" />
+            <img src={featured?.image || FALLBACK_FIGHTERS[0]} alt={featured?.name || 'Featured fighter'} />
+            <div className="xp-featured-fighter-copy">
+              <span>Featured athlete</span>
+              <h2>{featured?.name || 'Fight Night Contender'}</h2>
+              <p>{featured?.category || 'Combat sports'}</p>
+              <Link href="/fights">See active matchup <FaArrowRight /></Link>
             </div>
           </div>
-        ))}
+        </ExperienceHero>
+
+        <main className="xp-page-main">
+          <div className="theme-container">
+            <section className="xp-page-section">
+              <ExperienceSectionHeading
+                eyebrow="Athlete roster"
+                title="Meet the fighters"
+                description="Search by name or narrow the roster by combat discipline. Fighter imagery is pulled from the live fight-card feed with premium visual fallbacks."
+              />
+
+              <div className="xp-directory-toolbar xp-fighter-toolbar">
+                <label className="xp-search-field"><FaSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search fighter..." /></label>
+                <div className="xp-filter-tabs is-compact" role="tablist" aria-label="Fighter disciplines">
+                  <button type="button" className={category === 'all' ? 'is-active' : ''} onClick={() => setCategory('all')}>All <span>{normalized.length}</span></button>
+                  {categories.map((item) => (
+                    <button type="button" className={category === item ? 'is-active' : ''} onClick={() => setCategory(item)} key={item}>{item}</button>
+                  ))}
+                </div>
+              </div>
+
+              {filtered.length > 0 ? (
+                <div className="xp-fighter-grid">
+                  {filtered.map((fighter, index) => (
+                    <article className="xp-fighter-card" key={`${fighter.name}-${index}`}>
+                      <div className="xp-fighter-card-number">{String(index + 1).padStart(2, '0')}</div>
+                      <div className="xp-fighter-card-media">
+                        <div className="xp-fighter-card-light" />
+                        <img src={fighter.image || FALLBACK_FIGHTERS[index % FALLBACK_FIGHTERS.length]} alt={fighter.name} loading="lazy" />
+                        <span>{fighter.category || 'Combat sports'}</span>
+                      </div>
+                      <div className="xp-fighter-card-copy">
+                        <p>Featured fighter</p>
+                        <h3>{fighter.name}</h3>
+                        <div className="xp-fighter-rule"><i /><FaTrophy /><i /></div>
+                        <p>{fighter.description || `${fighter.name} has appeared in competitive ${fighter.category || 'combat sports'} matchups across the Fantasy MMAdness fight card.`}</p>
+                        <Link href={`/fights?search=${encodeURIComponent(fighter.name)}`}>View fight cards <FaArrowRight /></Link>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <ExperienceEmptyState title="No fighters match those filters" description="Try a different name or select all disciplines." />
+              )}
+            </section>
+
+            <section className="xp-fighter-editorial">
+              <div>
+                <p className="xp-eyebrow">Fight intelligence</p>
+                <h2>Know the athlete. Read the matchup. Make the sharper pick.</h2>
+                <p>Use the fighter directory alongside current fight cards and performance tools to build better round-by-round predictions.</p>
+                <Link href="/fighter-performance-tracker" className="theme-btn theme-btn-primary">Explore performance tracker</Link>
+              </div>
+              <div className="xp-fighter-editorial-art">
+                <img src={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`} alt="Combat athlete in arena" loading="lazy" />
+              </div>
+            </section>
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 };
 

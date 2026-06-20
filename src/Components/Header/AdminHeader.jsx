@@ -1,87 +1,236 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import {
+  FaAngleDown,
+  FaBars,
+  FaBell,
+  FaBlog,
+  FaBolt,
+  FaCalendarAlt,
+  FaChartBar,
+  FaChevronLeft,
+  FaChevronRight,
+  FaComments,
+  FaEnvelope,
+  FaExternalLinkAlt,
+  FaFistRaised,
+  FaLayerGroup,
+  FaMoneyCheckAlt,
+  FaNewspaper,
+  FaPlus,
+  FaRobot,
+  FaSearch,
+  FaShieldAlt,
+  FaSignOutAlt,
+  FaTrophy,
+  FaUserFriends,
+  FaUsers,
+  FaVideo,
+  FaTimes,
+} from 'react-icons/fa';
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
+
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.png';
+
+const navigationGroups = [
+  {
+    id: 'fight-operations',
+    label: 'Fight operations',
+    icon: FaFistRaised,
+    items: [
+      { label: 'Score center', href: '/administration/upcomingFights', icon: FaTrophy },
+      { label: 'Create match', href: '/administration/AddNewMatch', icon: FaPlus },
+      { label: 'All matches', href: '/administration/PreviousMatches', icon: FaLayerGroup },
+      { label: 'Edit or delete', href: '/administration/DeleteUpdateMatches', icon: FaShieldAlt },
+      { label: 'Fight calendar', href: '/administration/Calendar', icon: FaCalendarAlt },
+      { label: 'Shadow library', href: '/administration/ShadowFightsLibrary', icon: FaBolt },
+      { label: 'Affiliate matches', href: '/administration/AffiliateMatches', icon: FaUserFriends },
+      { label: 'Predictions', href: '/administration/predictions', icon: FaChartBar },
+      { label: 'Admin records', href: '/administration/adminRecords', icon: FaTrophy },
+      { label: 'Video archive', href: '/administration/YoutubeArchive', icon: FaVideo },
+    ],
+  },
+  {
+    id: 'people-finance',
+    label: 'People & finance',
+    icon: FaUsers,
+    items: [
+      { label: 'Registered users', href: '/administration/RegisteredUsers', icon: FaUsers },
+      { label: 'Affiliate users', href: '/administration/AffiliateUsers', icon: FaUserFriends },
+      { label: 'Guest users', href: '/administration/non-registered-users', icon: FaUsers },
+      { label: 'Suspended accounts', href: '/administration/suspended-accounts', icon: FaShieldAlt },
+      { label: 'Payouts', href: '/administration/payouts', icon: FaMoneyCheckAlt },
+      { label: 'Sponsors', href: '/administration/sponsors', icon: FaTrophy },
+    ],
+  },
+  {
+    id: 'content',
+    label: 'Editorial',
+    icon: FaNewspaper,
+    items: [
+      { label: 'All blogs', href: '/administration/blogs', icon: FaBlog, matchPrefix: '/administration/blogs/blog-details-admin' },
+      { label: 'Add blog', href: '/administration/blogs/add-new-blog', icon: FaPlus },
+      { label: 'News', href: '/administration/news', icon: FaNewspaper },
+      { label: 'FAQs', href: '/administration/faqs', icon: FaComments },
+      { label: 'Email templates', href: '/administration/Email', icon: FaEnvelope },
+    ],
+  },
+  {
+    id: 'community',
+    label: 'Community',
+    icon: FaComments,
+    items: [
+      { label: 'Forum', href: '/administration/Community', icon: FaComments, matchPrefix: '/administration/threads' },
+      { label: 'Chatroom', href: '/administration/chatroom', icon: FaComments },
+      { label: 'Notifications', href: '/administration/notifications', icon: FaBell },
+    ],
+  },
+  {
+    id: 'automation',
+    label: 'AI & social',
+    icon: FaRobot,
+    items: [
+      { label: 'Blog AI', href: '/administration/BlogsAiBot', icon: FaRobot },
+      { label: 'Social AI', href: '/administration/SocialAiBot', icon: FaRobot },
+      { label: 'Create social post', href: '/administration/MakePost', icon: FaPlus },
+      { label: 'X / Twitter', href: '/administration/tweet', icon: FaBolt },
+      { label: 'TikTok', href: '/administration/tiktok', icon: FaVideo },
+    ],
+  },
+];
+
+const getActiveItem = (pathname) => {
+  for (const group of navigationGroups) {
+    const item = group.items.find((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`) || (entry.matchPrefix && pathname.startsWith(entry.matchPrefix)));
+    if (item) return { group, item };
+  }
+  return { group: null, item: { label: 'Command center', href: '/administration' } };
+};
 
 const AdminHeader = () => {
   const dispatch = useDispatch();
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const { pathname } = useRouter() || {}; // Ensure it never crashes
-  const handleLogout = () => {
+  const pathname = router.pathname || '/administration';
+  const active = useMemo(() => getActiveItem(pathname), [pathname]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [query, setQuery] = useState('');
+  const [openGroups, setOpenGroups] = useState(() => ({ [active.group?.id || 'fight-operations']: true }));
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' && window.localStorage.getItem('fmm-admin-nav-compact') === 'true';
+    setCompact(Boolean(stored));
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('admin-nav-compact', compact);
+    if (typeof window !== 'undefined') window.localStorage.setItem('fmm-admin-nav-compact', String(compact));
+    return () => document.body.classList.remove('admin-nav-compact');
+  }, [compact]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+    if (active.group) setOpenGroups((current) => ({ ...current, [active.group.id]: true }));
+  }, [active.group, pathname]);
+
+  const handleLogout = (event) => {
+    event?.preventDefault();
     dispatch(logoutAdmin());
-    router.push('/'); // Redirect to admin login page after logout
+    router.push('/administration/login');
   };
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
+  const filteredGroups = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return navigationGroups;
+    return navigationGroups
+      .map((group) => ({ ...group, items: group.items.filter((item) => item.label.toLowerCase().includes(normalized)) }))
+      .filter((group) => group.items.length);
+  }, [query]);
 
   return (
-    <div>
-    
-      <div className='menuIconFontAdmin' onClick={toggleMenu}>
-        <i className={menuOpen ? "fa fa-times" : "fa fa-bars"}></i>
-      </div>
-      
-      <div className='adminLogo'>
-        <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp" alt="Logo" style={{width:'70px'}} />
-      </div>
+    <>
+      <button className="admin-mobile-trigger" type="button" onClick={() => setMenuOpen((current) => !current)} aria-label="Toggle administration navigation">
+        {menuOpen ? <FaTimes /> : <FaBars />}
+      </button>
 
-        <div className={`admin-header ${menuOpen ? 'activeAdmin' : 'activeNotAdmin'}`}>
-          <div>
-            <center>
-              <div className='logoimg'>
-                <Link href="/administration">
-                  <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp" alt="Logo" style={{width:'70px'}} />
-                </Link>
-              </div>
-            </center>
-            <div className='anchorLinksWrapperAdmin'>
-              <h1 className='matchHeading' style={{fontSize:'21px', marginTop:'23px'}} >Matches</h1>
-              <Link href="/administration/upcomingFights"    className={`anchorlinksAdmin ${pathname === "/administration/upcomingFights" ? "activeLinkAdmin" : ""}`}>Submit/View Scores</Link>
-              <Link href="/administration/AddNewMatch" className={`anchorlinksAdmin ${pathname === "/administration/AddNewMatch" ? "activeLinkAdmin" : ""}`}>Create a Match</Link>
-              <Link href="/administration/PreviousMatches" className={`anchorlinksAdmin ${pathname === "/administration/PreviousMatches" ? "activeLinkAdmin" : ""}`}>All / prev Matches</Link>
-              <Link href="/administration/DeleteUpdateMatches" className={`anchorlinksAdmin ${pathname === "/administration/DeleteUpdateMatches" ? "activeLinkAdmin" : ""}`}>Delete/Update</Link>
-              <Link href="/administration/Calendar" className={`anchorlinksAdmin ${pathname === "/administration/Calendar" ? "activeLinkAdmin" : ""}`}>Calandar of matches</Link>
-              <Link href="/administration/ShadowFightsLibrary" className={`anchorlinksAdmin ${pathname === "/administration/ShadowFightsLibrary" ? "activeLinkAdmin" : ""}`}>Shadow Fights Library</Link>
-              <Link href="/administration/YoutubeArchive" className={`anchorlinksAdmin ${pathname === "/administration/YoutubeArchive" ? "activeLinkAdmin" : ""}`}>Youtube Archive</Link>
-              <Link href="/administration/Community" className={`anchorlinksAdmin ${pathname === "/administration/Community" ? "activeLinkAdmin" : ""}`}>Community Forum</Link>
-              <Link href="/administration/chatroom" className={`anchorlinksAdmin ${pathname === "/administration/chatroom" ? "activeLinkAdmin" : ""}`}>Chatroom</Link>
-              <Link href="/administration/faqs" className={`anchorlinksAdmin ${pathname === "/administration/faqs" ? "activeLinkAdmin" : ""}`}>Faqs</Link>
-              <Link href="/administration/news" className={`anchorlinksAdmin ${pathname === "/administration/news" ? "activeLinkAdmin" : ""}`}>News</Link>
-              <Link href="/administration/sponsors" className={`anchorlinksAdmin ${pathname === "/administration/sponsors" ? "activeLinkAdmin" : ""}`}>Sponsors</Link>
-             
-              <h1 className='matchHeading' style={{marginTop:'13px', fontSize:'21px'}}>Users</h1>
-              <Link href="/administration/RegisteredUsers" className={`anchorlinksAdmin ${pathname === "/administration/RegisteredUsers" ? "activeLinkAdmin" : ""}`}>Registered Users</Link>
-             {/* <Link href="/administration/SubscribedUsers" className={`anchorlinksAdmin ${pathname === "/administration/upcomingFights" ? "activeLinkAdmin" : ""}`}>Subscribed Users</Link>
-             */} <Link href="/administration/AffiliateUsers" className={`anchorlinksAdmin ${pathname === "/administration/AffiliateUsers" ? "activeLinkAdmin" : ""}`}>Affiliate Users</Link>
-              <Link href="/administration/Email" className={`anchorlinksAdmin ${pathname === "/administration/Email" ? "activeLinkAdmin" : ""}`}>Email Template</Link>
-
-
-
-
-              <h1 className='matchHeading' style={{marginTop:'13px', fontSize:'21px'}}>Blogs</h1>
-              <Link href="/administration/blogs" className={`anchorlinksAdmin ${pathname === "/administration/blogs" || pathname?.startsWith('/administration/blogs/blog-details-admin') ? "activeLinkAdmin" : ""}`}>All Blogs</Link>
-              <Link href="/administration/blogs/add-new-blog" className={`anchorlinksAdmin ${pathname === "/administration/blogs/add-new-blog" ? "activeLinkAdmin" : ""}`}>Add a blog</Link>
-              <Link href="/administration/BlogsAiBot" className={`anchorlinksAdmin ${pathname === "/administration/BlogsAiBot" ? "activeLinkAdmin" : ""}`}>Blog AI Bot</Link>
-              <Link href="/administration/SocialAiBot" className={`anchorlinksAdmin ${pathname === "/administration/SocialAiBot" ? "activeLinkAdmin" : ""}`}>Social AI Bot</Link>
-             <Link href="/administration/MakePost" className={`anchorlinksAdmin ${pathname === "/administration/MakePost" ? "activeLinkAdmin" : ""}`}>Make AI Post</Link>
-          
-
-
-            </div>
-          </div>
-
-          <div className='sideLinkswrapAdmin'>
-            <Link href="#" className="sideLinksAdmin" onClick={handleLogout}>
-              <i className="fa fa-sign-out" aria-hidden="true"></i> Logout
-            </Link>
-          </div>
+      <aside className={`admin-command-nav ${menuOpen ? 'is-open' : ''} ${compact ? 'is-compact' : ''}`} aria-label="Administration navigation">
+        <div className="admin-command-brand">
+          <Link href="/administration" aria-label="Administration dashboard">
+            <img src={LOGO_URL} alt="Fantasy MMAdness" />
+            <span><strong>FMM</strong><small>Command center</small></span>
+          </Link>
+          <button type="button" onClick={() => setCompact((current) => !current)} aria-label={compact ? 'Expand navigation' : 'Compact navigation'}>
+            {compact ? <FaChevronRight /> : <FaChevronLeft />}
+          </button>
         </div>
-    
-    </div>
+
+        <Link href="/administration" className={`admin-overview-link ${pathname === '/administration' ? 'is-active' : ''}`} title="Command center">
+          <FaChartBar /><span>Command center</span>
+        </Link>
+
+        <label className="admin-command-search">
+          <FaSearch aria-hidden="true" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a tool" aria-label="Find an administration tool" />
+        </label>
+
+        <nav className="admin-command-groups">
+          {filteredGroups.map((group) => {
+            const GroupIcon = group.icon;
+            const isOpen = compact || Boolean(openGroups[group.id]) || Boolean(query);
+            const hasActive = active.group?.id === group.id;
+            return (
+              <section className={`admin-command-group ${hasActive ? 'has-active' : ''}`} key={group.id}>
+                <button
+                  type="button"
+                  className="admin-command-group-toggle"
+                  onClick={() => setOpenGroups((current) => ({ ...current, [group.id]: !current[group.id] }))}
+                  aria-expanded={isOpen}
+                  title={group.label}
+                >
+                  <GroupIcon aria-hidden="true" />
+                  <span>{group.label}</span>
+                  <FaAngleDown className={isOpen ? 'is-rotated' : ''} aria-hidden="true" />
+                </button>
+                {isOpen && (
+                  <div className="admin-command-group-items">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`) || (item.matchPrefix && pathname.startsWith(item.matchPrefix));
+                      return (
+                        <Link key={item.href} href={item.href} className={`admin-command-link ${isActive ? 'is-active' : ''}`} title={item.label}>
+                          <Icon aria-hidden="true" /><span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </nav>
+
+        <div className="admin-command-footer">
+          <Link href="/home" target="_blank" rel="noreferrer"><FaExternalLinkAlt /><span>View website</span></Link>
+          <button type="button" onClick={handleLogout}><FaSignOutAlt /><span>Logout</span></button>
+        </div>
+      </aside>
+
+      {menuOpen && <button type="button" className="admin-command-backdrop" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
+
+      <header className="admin-command-topbar">
+        <div>
+          <span>Administration / {active.group?.label || 'Overview'}</span>
+          <h1>{active.item.label}</h1>
+        </div>
+        <div className="admin-command-topbar-actions">
+          <Link href="/administration/AddNewMatch" className="admin-topbar-primary"><FaPlus /> New match</Link>
+          <Link href="/home" target="_blank" rel="noreferrer" className="admin-topbar-secondary"><FaExternalLinkAlt /> View site</Link>
+          <button type="button" onClick={handleLogout} className="admin-topbar-icon" aria-label="Logout"><FaSignOutAlt /></button>
+        </div>
+      </header>
+    </>
   );
 };
 

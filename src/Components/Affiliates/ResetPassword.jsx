@@ -34,7 +34,7 @@ const ResetPassword = () => {
 
             if (response.ok) {
                 toast.success('Password reset successful');
-                navigate('/login'); // Redirect to login page after success
+                navigate('/auth?mode=login&role=affiliate'); // Redirect to login page after success
             } else {
                 const errorData = await response.json();
                 toast.error(errorData.message || 'Error resetting password. The token may be expired or invalid.');

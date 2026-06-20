@@ -2584,3 +2584,26 @@ html{background:var(--theme-bg);scroll-behavior:smooth}body{background:radial-gr
     width: 70%;
   }
 }
+
+/* Final readability refinement: primary controls are intentionally larger. */
+.theme-btn,
+.theme-header .theme-btn,
+.theme-home .theme-btn,
+.theme-footer .theme-btn,
+.btn-grad,
+.playNowLink,
+.joinButton,
+.membership-btn,
+button[class*="Button"],
+a[class*="Button"] {
+  font-size: 15px !important;
+}
+
+@media (max-width: 760px) {
+  .theme-btn,
+  .theme-header .theme-btn,
+  .theme-home .theme-btn,
+  .theme-footer .theme-btn {
+    font-size: 14px !important;
+  }
+}

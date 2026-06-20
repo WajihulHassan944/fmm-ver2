@@ -15,7 +15,7 @@ import {
   FaYoutube,
 } from 'react-icons/fa';
 
-const LOGO_URL = 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp';
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.png';
 
 const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/fantasymmadness', icon: FaInstagram },
@@ -26,7 +26,7 @@ const socialLinks = [
 ];
 
 const quickLinks = [
-  ['Fights', '/upcomingfights'],
+  ['Fights', '/fights'],
   ['Contests', '/FantasyLeagues'],
   ['Leaderboard', '/leaderboard'],
   ['How To Play', '/guides'],
@@ -55,7 +55,7 @@ const Footer = () => {
               <span>DAZN</span>
             </div>
           </div>
-          <Link href="/upcomingfights" className="fmm-footer-top-link">
+          <Link href="/fights" className="fmm-footer-top-link">
             View all contests <FaArrowRight aria-hidden="true" />
           </Link>
         </div>
@@ -66,7 +66,7 @@ const Footer = () => {
             <div className="fmm-footer-feature-icon"><FaUserFriends aria-hidden="true" /></div>
             <h3>Affiliates &amp; Creators</h3>
             <p>Earn tokens and cash by referring players. Join our affiliate program today.</p>
-            <Link href="/affiliate-create-account" className="fmm-footer-action">
+            <Link href="/auth?mode=signup&role=affiliate" className="fmm-footer-action">
               Learn More <FaArrowRight aria-hidden="true" />
             </Link>
           </section>

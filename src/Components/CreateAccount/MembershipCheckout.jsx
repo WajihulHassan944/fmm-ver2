@@ -3,14 +3,10 @@ import { useSelector } from 'react-redux';
 import ThankyouPurchaseTokens from '../Dashboard/ThankyouPurchaseTokens';
 import Link from 'next/link';
 
-const MembershipCheckout = (userId) => {
+const MembershipCheckout = ({ userId } = {}) => {
   const reduxUser = useSelector((state) => state.user); // Access user details from Redux store
   const [user, setUser] = useState(reduxUser);
   const [paymentSuccessful, setPaymentSuccessful] = useState(false);
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-
   useEffect(() => {
     if (reduxUser && reduxUser._id !== user?._id) {
       setUser(reduxUser); 
@@ -127,6 +123,10 @@ const MembershipCheckout = (userId) => {
       alert(`Error card: ${error.message}`);
     }
   };
+
+  if (!user) {
+    return <div className="experience-page xp-route-loading">Preparing secure checkout...</div>;
+  }
 
   if (paymentSuccessful) {
     // Pass the amount from billingInfo to ThankyouPurchaseTokens

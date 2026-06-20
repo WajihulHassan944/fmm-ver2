@@ -64,7 +64,6 @@ export const fetchAffiliate = createAsyncThunk('authAffiliate/fetchAffiliate', a
     }
 
     dispatch(setAffiliateUser(data.user));
-    console.log(data.user);
     return data.user; // Returning user data
 
 
@@ -88,7 +87,7 @@ const affiliateAuthSlice = createSlice({
     logoutAffiliate: (state) => {
       state.userAffiliate = null;
       state.isAuthenticatedAffiliate = false;
-      localStorage.removeItem('affiliateAuthToken');
+      if (typeof window !== 'undefined') localStorage.removeItem('affiliateAuthToken');
     },
   },
   extraReducers: (builder) => {
@@ -99,13 +98,9 @@ const affiliateAuthSlice = createSlice({
       })
       .addCase(loginAffiliate.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.verified) {
-            state.isAuthenticatedAffiliate = true; // Only set to true if the user is verified
-        }
-        localStorage.setItem('affiliateAuthToken', action.payload.token); // Store token in local storage
-        state.userAffiliate = action.payload.user; // Set user from action payload
-    
-        console.log('isAuthenticatedAffiliate:', state.isAuthenticatedAffiliate); // Console log the value
+        state.isAuthenticatedAffiliate = Boolean(action.payload.user?.verified);
+        if (typeof window !== 'undefined') localStorage.setItem('affiliateAuthToken', action.payload.token);
+        state.userAffiliate = action.payload.user;
     })
 
     .addCase(loginAffiliate.rejected, (state, action) => {
@@ -121,11 +116,7 @@ const affiliateAuthSlice = createSlice({
       .addCase(fetchAffiliate.fulfilled, (state, action) => {
         state.loading = false;
         state.userAffiliate = action.payload;
-        if (action.payload.verified) {
-            state.isAuthenticatedAffiliate = true; // Only set to true if the user is verified
-        }
-        
-        console.log('isAuthenticatedAffiliate:', state.isAuthenticatedAffiliate); // Console log the value
+        state.isAuthenticatedAffiliate = Boolean(action.payload?.verified);
     })
     
       .addCase(fetchAffiliate.rejected, (state, action) => {

@@ -1,678 +1,312 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMatches } from '../../Redux/matchSlice';
-import FightCosting from './FightCosting'
-import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
-import PurchaseTokensIntimation from './PurchaseTokensIntimation';
-import FinishedFightUserBoard from '../FinishedFightUserBoard/FinishedFightUserBoard';
-import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import {
+  FaArrowLeft,
+  FaArrowRight,
+  FaBolt,
+  FaCoins,
+  FaCommentDots,
+  FaFistRaised,
+  FaMedal,
+  FaPlus,
+  FaStar,
+  FaTrophy,
+  FaUserCircle,
+} from 'react-icons/fa';
+import { fetchMatches } from '@/Redux/matchSlice';
+import FightCosting from './FightCosting';
+import FightLeaderboard from '@/Components/GlobalLeaderboard/FightLeaderboard';
+import PurchaseTokensIntimation from './PurchaseTokensIntimation';
+import FinishedFightUserBoard from '@/Components/FinishedFightUserBoard/FinishedFightUserBoard';
+import { ExperienceEmptyState, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
+import { FightTimelineRow, FightVisualCard } from '@/Components/Theme/FightVisuals';
+import {
+  FMM_ASSET_BASE,
+  getFightId,
+  getFightStatus,
+  getFighterImage,
+  safeArray,
+  sortFights,
+} from '@/Utils/fightExperience';
+
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const queryValue = (value) => Array.isArray(value) ? value[0] : value;
 
 const Dashboard = () => {
   const router = useRouter();
-
   const dispatch = useDispatch();
-  const [isOpen, setIsOpen] = useState(false);
-  const [description, setDescription] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
-  const [selectedMatchId, setSelectedMatchId] = useState(null); // State to store the selected match ID
-  const [completedMatchId, setCompletedMatchId] = useState(null); // State to store the selected match ID
-  const [hoveredMatch, setHoveredMatch] = useState(null); // Track hovered match ID
-  const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const authLoading = useSelector((state) => state.auth.loading);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.user);
+  const [selectedMatchId, setSelectedMatchId] = useState(null);
+  const [completedMatchId, setCompletedMatchId] = useState(null);
   const [removedMatches, setRemovedMatches] = useState([]);
-
-  const user = useSelector((state) => state.user); // Access user details from Redux store
-
-
-  useEffect(() => {
-    const fetchRemovedMatches = async () => {
-      try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches');
-        const data = await response.json();
-        
-        // Filter the data for the current user's userId
-        const userMatches = data.filter(item => item.userId === user._id);
-        
-        // Assuming you want to store the removedMatchesIds array for the matched user
-        if (userMatches.length > 0) {
-          setRemovedMatches(userMatches[0].removedMatchesIds);
-        }
-      } catch (error) {
-        console.error('Error fetching removed matches:', error);
-      }
-    };
-
-    fetchRemovedMatches();
-  }, [user._id]); // Run the effect when user._id changes
+  const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
+  const [testimonial, setTestimonial] = useState('');
+  const [isSubmittingTestimonial, setIsSubmittingTestimonial] = useState(false);
+  const [testimonialSubmitted, setTestimonialSubmitted] = useState(false);
 
   useEffect(() => {
-    if (matchStatus === 'idle') {
-      dispatch(fetchMatches());
+    if (matchStatus === 'idle') dispatch(fetchMatches());
+  }, [dispatch, matchStatus]);
+
+  useEffect(() => {
+    if (!router.isReady || authLoading) return;
+    const hasToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('authToken'));
+    if (!isAuthenticated && !hasToken && !user?._id) {
+      router.replace({ pathname: '/auth', query: { mode: 'login', role: 'player', next: '/UserDashboard' } });
     }
-  }, [matchStatus, dispatch]);
-  
+  }, [authLoading, isAuthenticated, router, router.isReady, user?._id]);
 
   useEffect(() => {
-    const today = new Date();
-    const currentTime = new Date();
-  
-    const fetchUpcomingMatches = async () => {
-      try {
-        // Filter matches based on matchType
-        const filteredMatches = matches.map((match) => {
-          const matchDateTime = new Date(`${match?.matchDate?.split('T')[0]}T${match.matchTime}:00`);
-  
-          if (match.matchType === "LIVE") {
-            // No blur for LIVE matches within the valid date and time range
-            if (matchDateTime >= today.setHours(0, 0, 0, 0) && currentTime < matchDateTime) {
-              return { ...match, blurred: false };
-            }
-          } else if (match.matchType === "SHADOW") {
-            // Check if affiliateId and shadowFightId exist
-            if (match.affiliateId && match.shadowFightId) {
-              if (match.matchShadowStatus === "active") {
-                return { ...match, blurred: false };
-              }
-            }
-          }
-          return null;
-        }).filter(Boolean); // Filter out null values where no condition is met
-  
-        // Set filtered matches
-        setUpcomingMatches(filteredMatches);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-  
-    fetchUpcomingMatches();
-  }, [matches]);
-  
-  console.log(upcomingMatches);
-    
-  // Check if the user data is available before rendering
-  if (!user || !user.firstName) {
-    return <div>Loading...</div>;
-  }
+    if (!user?._id) return;
+    let cancelled = false;
+    fetch(`${API_BASE}/users/removed-matches`)
+      .then((response) => response.ok ? response.json() : [])
+      .then((data) => {
+        if (cancelled) return;
+        const record = safeArray(data).find((item) => String(item?.userId) === String(user._id));
+        setRemovedMatches(safeArray(record?.removedMatchesIds).map(String));
+      })
+      .catch((error) => console.error('Error fetching removed matches:', error));
+    return () => { cancelled = true; };
+  }, [user?._id]);
 
-  
-  const handleMatchClick = (matchId) => {
-    setSelectedMatchId(matchId); // Set the selected match ID
+  const hasSubmittedPrediction = useCallback((match) => safeArray(match?.userPredictions).some((prediction) => (
+    prediction?.userId && user?._id && String(prediction.userId) === String(user._id) && prediction?.predictionStatus === 'submitted'
+  )), [user?._id]);
+
+  const isAvailableFight = useCallback((match) => {
+    if (match?.matchType === 'SHADOW') {
+      return Boolean(match?.affiliateId && match?.shadowFightId && match?.matchShadowStatus === 'active');
+    }
+    const status = getFightStatus(match);
+    return status === 'upcoming' || status === 'live';
+  }, []);
+
+  const activeFights = useMemo(() => sortFights(safeArray(matches).filter((match) => isAvailableFight(match)), 'asc'), [isAvailableFight, matches]);
+  const submittedFights = useMemo(() => sortFights(safeArray(matches).filter((match) => hasSubmittedPrediction(match) && !removedMatches.includes(String(getFightId(match)))), 'desc'), [hasSubmittedPrediction, matches, removedMatches]);
+  const pendingFights = useMemo(() => activeFights.filter((match) => !hasSubmittedPrediction(match) && !removedMatches.includes(String(getFightId(match)))), [activeFights, hasSubmittedPrediction, removedMatches]);
+
+  useEffect(() => {
+    if (!router.isReady || !safeArray(matches).length || selectedMatchId || completedMatchId) return;
+    const requestedFight = queryValue(router.query.fight);
+    if (!requestedFight) return;
+    const match = safeArray(matches).find((item) => String(getFightId(item)) === String(requestedFight));
+    if (!match) return;
+    if (hasSubmittedPrediction(match)) setCompletedMatchId(getFightId(match));
+    else setSelectedMatchId(getFightId(match));
+  }, [completedMatchId, hasSubmittedPrediction, matches, router.isReady, router.query.fight, selectedMatchId]);
+
+  const clearSelectedView = () => {
+    setSelectedMatchId(null);
+    setCompletedMatchId(null);
+    if (queryValue(router.query.fight)) router.replace('/UserDashboard', undefined, { shallow: true });
   };
 
-
-  const handleCompletedMatchClick = (matchId) => {
-    setCompletedMatchId(matchId); // Set the selected match ID
-  };
+  const selectedMatch = safeArray(matches).find((match) => String(getFightId(match)) === String(selectedMatchId));
+  const completedMatch = safeArray(matches).find((match) => String(getFightId(match)) === String(completedMatchId));
 
   if (selectedMatchId) {
-    const selectedMatch = matches.find((match) => match._id === selectedMatchId);
-    if (!selectedMatch) {
-      return (
-        <>
-          <button onClick={() => setSelectedMatchId(null)}>← Back</button>
-          <div>Selected match not found.</div>
-        </>
-      );
-    }
-  
-    if (selectedMatch && user.tokens >= selectedMatch.matchTokens) {
-      return (
-        <>
-         <i className="fa fa-arrow-circle-left dashboard-back-arrow dashboard-arrow-circle" aria-hidden="true" onClick={() => setSelectedMatchId(null)}></i>
-
-   <FightCosting matchId={selectedMatchId} />
-        </>
-      );
-    } else {
-      return (
-        <>
-           <i className="fa fa-arrow-circle-left dashboard-arrow-circle" aria-hidden="true" onClick={() => setSelectedMatchId(null)}></i>
-
- <PurchaseTokensIntimation matchId={selectedMatchId} />
-        </>
-      );
-    }
+    const hasEnoughTokens = selectedMatch && Number(user?.tokens || 0) >= Number(selectedMatch?.matchTokens || 0);
+    return (
+      <div className="experience-page xp-dashboard-detail-view">
+        <button type="button" className="xp-dashboard-back" onClick={clearSelectedView}><FaArrowLeft /> Back to dashboard</button>
+        {selectedMatch ? (hasEnoughTokens ? <FightCosting matchId={selectedMatchId} /> : <PurchaseTokensIntimation matchId={selectedMatchId} />) : <ExperienceEmptyState title="Fight not found" description="This fight card may have been removed or rescheduled." />}
+      </div>
+    );
   }
- 
+
   if (completedMatchId) {
-    const matchCom = matches.find((match) => match._id === completedMatchId);
-    if (!matchCom) {
-      return (
-        <>
-          <button onClick={() => setCompletedMatchId(null)}>← Back</button>
-          <div>Completed match not found.</div>
-        </>
-      );
-    }
-  
-    if (matchCom && matchCom.matchStatus === "Ongoing") {
-      return (
-        <>
-           <i className="fa fa-arrow-circle-left dashboard-arrow-circle" aria-hidden="true" onClick={() => setCompletedMatchId(null)}></i>
-         <FightLeaderboard matchId={completedMatchId} />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <i className="fa fa-arrow-circle-left dashboard-arrow-circle" aria-hidden="true" onClick={() => setCompletedMatchId(null)}></i>
-
-      <FinishedFightUserBoard matchId={completedMatchId} />
-        </>
-      );
-    }
+    return (
+      <div className="experience-page xp-dashboard-detail-view">
+        <button type="button" className="xp-dashboard-back" onClick={clearSelectedView}><FaArrowLeft /> Back to dashboard</button>
+        {completedMatch ? (String(completedMatch.matchStatus).toLowerCase() === 'ongoing' ? <FightLeaderboard matchId={completedMatchId} /> : <FinishedFightUserBoard matchId={completedMatchId} />) : <ExperienceEmptyState title="Fight record not found" />}
+      </div>
+    );
   }
-  
 
+  const handleOpenFight = (match) => {
+    const id = getFightId(match);
+    if (!id) return;
+    if (hasSubmittedPrediction(match)) setCompletedMatchId(id);
+    else setSelectedMatchId(id);
+  };
 
-
-
-  function getRemainingTime(matchDate, matchTime) {
-    const [year, month, day] = matchDate.split('T')[0].split('-');
-    const [hours, minutes] = matchTime?.split(':');
-  
-    const matchDateTime = new Date(`${year}-${month}-${day}T${hours}:${minutes}`);
-    
-    // Get the current time
-    const now = new Date();
-    
-    // Calculate the difference in milliseconds
-    const diffMs = matchDateTime - now;
-    
-    // Convert the difference to hours and minutes
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    // Determine if the match has started
-    const hasStarted = diffMs <= 0;
-    
-    return {
-      diffHrs: hasStarted ? 0 : diffHrs,
-      diffMins: hasStarted ? 0 : diffMins,
-      hasStarted,
-    };
-  }
-  const completedMatches = matches.filter((match) => {
-    const hasSubmittedPrediction = match.userPredictions && 
-      match.userPredictions.some(prediction => 
-        prediction.userId && user._id && 
-        prediction.userId.toString() === user._id.toString() && 
-        prediction.predictionStatus === 'submitted'
-      );
-    return hasSubmittedPrediction;
-  });
-  
-  const handleRemoveMatch = async (matchId) => {
+  const handleRemoveMatch = async (event, matchId) => {
+    event.stopPropagation();
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard', {
+      const response = await fetch(`${API_BASE}/remove-match-from-my-dashboard`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user._id, // Assuming user._id is available
-          matchId,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user._id, matchId }),
       });
-  
-      const data = await response.json();
-      if (response.ok) {
-        alert('Match removed from dashboard successfully');
-        window.location.reload();
-        // Optionally, refresh or update the UI
-      } else {
-        alert(data.message);
-      }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Unable to remove fight');
+      setRemovedMatches((current) => [...new Set([...current, String(matchId)])]);
+      toast.success('Fight removed from your dashboard.');
     } catch (error) {
-      console.error('Error:', error);
+      toast.error(error.message || 'Unable to remove this fight.');
     }
   };
-  
-  const openPopup = () => setIsOpen(true);
-  const closePopup = () => {
-    setIsOpen(false);
-    setDescription("");
-  };
-  const handleSubmit = async () => {
-    if (!description.trim()) {
-      alert("Description cannot be empty!");
-      return;
-    }
-  
-    setIsSubmitting(true);
-  
-    const testimonialData = {
-      author: user.firstName,
-      description,
-    };
-  
-    const userId = user._id;
-  
+
+  const submitTestimonial = async (event) => {
+    event.preventDefault();
+    if (!testimonial.trim()) return;
+    setIsSubmittingTestimonial(true);
     try {
-      const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/testimonials", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, ...testimonialData }),
+      const response = await fetch(`${API_BASE}/testimonials`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user._id, author: user.firstName, description: testimonial.trim() }),
       });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit testimonial");
-      }
-  
-      alert("Testimonial submitted successfully!");
-      closePopup();
-      window.location.reload();
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Unable to submit testimonial');
+      toast.success('Thank you for sharing your experience.');
+      setTestimonialSubmitted(true);
+      setIsTestimonialOpen(false);
+      setTestimonial('');
     } catch (error) {
-      console.error(error.message);
-      alert("Failed to submit testimonial.");
+      toast.error(error.message || 'Unable to submit your testimonial.');
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingTestimonial(false);
     }
   };
-  
+
+  if (!user?.firstName) {
+    return <div className="experience-page xp-route-loading">Preparing your fight room...</div>;
+  }
+
+  const nextFight = pendingFights[0] || submittedFights[0];
+  const displayName = user.playerName || `${user.firstName} ${user.lastName || ''}`.trim();
+  const profileImage = user.profileUrl || `${FMM_ASSET_BASE}/fighter-jadden-addison.png`;
+
   return (
-    <div className='userdashboard'>
-     <i
-        className="fa fa-arrow-circle-left dashboard-arrow-circle"
-        aria-hidden="true"
-        onClick={() => router.push(-1)} // Go back to the previous page
-      ></i>
-   
-      <div className='member-header'>
-        <div className='member-header-image'>
-          <img src={user.profileUrl} alt={user.firstName} data-aos="zoom-in" />
-        </div>
-        <h3 data-aos="zoom-in"><span className='toRemove'>Member Name: </span>{user.firstName} {user.lastName}</h3>
-              <h3 data-aos="zoom-in"><span className='toRemove'>Current </span>Plan: {user.currentPlan}</h3>
-      </div>
-
-      <div className='fightwalletWrap' onClick={() => router.push('/checkout')}>
-        <div className='fightWallet' data-aos="zoom-in">
-          <h1><i className="fa fa-shopping-bag" aria-hidden="true"></i> Fight Wallet</h1>
-          <h2>Tokens Remaining: <span>{user.tokens}</span></h2>
-        </div>
-      </div>
-
-      <div className='fightsWrap'>
-      <div className='upcomingFights fightscontainer'>
-  <h1 className='fightsheadingone'>UPCOMING / ACTIVE FIGHTS</h1>
-  {upcomingMatches.length > 0 ? (
-          // Filter the matches to exclude removed matches
-          upcomingMatches.filter(match => !removedMatches.includes(match._id)).length > 0 ? (
-            upcomingMatches.map((match) => (
-              !removedMatches.includes(match._id) && ( // Check if match._id is NOT in removedMatches
-                <div className='fightItem' key={match._id} onMouseEnter={() => setHoveredMatch(match._id)} onMouseLeave={() => setHoveredMatch(null)}>
-                  {hoveredMatch === match._id && (
-                    <button className="removeButton" onClick={() => handleRemoveMatch(match._id)}>
-                      Remove from dashboard
-                    </button>
-                  )}
-                  
-                  {/* Handle timezone conversion for match date and time */}
-                  <div className={`fightersImages ${match.blurred ? 'blurred' : ''}`}>
-                    <div className='fighterOne'>
-                      <img src={match.fighterAImage} alt={match.matchFighterA} />
-                    </div>
-                    <div className='fighterTwo'>
-                      <img src={match.fighterBImage} alt={match.matchFighterB} />
-                    </div>
-                  </div>
-                  
-                  <div className='fightItemOne'>
-                    <div className={`transformed-div ${match.blurred ? 'blurred' : ''}`}>
-                      <h1 className='transformedFighterNames'>{match.matchFighterA} -VS- {match.matchFighterB}</h1>
-                    </div>
-                    <div className="transformed-div-two">
-                      <div className='transformed-div-two-partOne'>
-                        <h1>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</h1>
-                        {/* Convert match time to US timezone */}
-                        </div>
-                      <div className='transformed-div-two-partTwo'>
-                        {/* Convert match date to US timezone */}
-                        <p>
-                        {match.matchDate?.split('T')[0]}
-                        </p>
-                        <h1>{match.matchType}</h1>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className='fightItemTwo'>
-                    <div className="transformed-div-three">
-                      <p>{match.matchDescription}</p>
-                    </div>
-                    <div className="transformed-div-four">
-                      <h1>Players</h1>
-                      <p>{match.userPredictions.length}</p>
-                    </div>
-                  </div>    
+    <>
+      <Head><title>Player Dashboard | Fantasy MMAdness</title></Head>
+      <div className="experience-page dashboard-experience-page">
+        <section className="xp-dashboard-hero">
+          <div className="xp-dashboard-hero-grid" />
+          <div className="theme-container xp-dashboard-hero-layout">
+            <div className="xp-dashboard-profile">
+              <div className="xp-dashboard-avatar"><img src={profileImage} alt={displayName} /></div>
+              <div>
+                <p className="xp-eyebrow"><FaBolt /> Player command center</p>
+                <h1>Welcome back, <span>{user.firstName}.</span></h1>
+                <p>Manage your fight wallet, complete pending cards, and follow every submitted prediction from one focused dashboard.</p>
+                <div className="xp-dashboard-profile-meta">
+                  <span><FaUserCircle /> {displayName}</span>
+                  <span><FaMedal /> {user.currentPlan || 'Member'} plan</span>
                 </div>
-              )
-            ))
-          ) : (
-            <p className='noMatch'>No fights</p> // Message when no fights are available
-          )
-        ) : (
-          <p className='noMatch'>No upcoming matches</p>
-        )}
-</div>
-
-
-<div className='completedFights fightscontainer'>
-  <h1 className='fightsheadingtwo'>YOUR COMPLETED FIGHTS</h1>
-
-  {completedMatches.length > 0 ? (
-  completedMatches.filter(match => !removedMatches.includes(match._id)).length > 0 ? (
-    completedMatches.map((match) => {
-      if (!removedMatches.includes(match._id)) { // Check if match._id is NOT in removedMatches
-        let diffHrs, diffMins, hasStarted;
-
-        if (match.matchType === "LIVE") {
-          const remainingTime = getRemainingTime(match.matchDate, match.matchTime);
-          diffHrs = remainingTime.diffHrs;
-          diffMins = remainingTime.diffMins;
-          hasStarted = remainingTime.hasStarted;
-        }
-
-        return (           <div className="fightItem" key={match._id} onClick={() => handleCompletedMatchClick(match._id)} onMouseEnter={() => setHoveredMatch(match._id)} onMouseLeave={() => setHoveredMatch(null)}>
-              {hoveredMatch === match._id && (
-                <button className="removeButton" onClick={(e) => {
-                  e.stopPropagation(); // Prevent the parent div's onClick from firing
-                  handleRemoveMatch(match._id);
-                }}>
-                  Remove from dashboard
-                </button>
-              )}
-              <div className='fightersImages'>
-                <div className='fighterOne'>
-                  <img src={match.fighterAImage} alt="Fighter One" />
-                </div>
-                <div className='fighterTwo'>
-                  <img src={match.fighterBImage} alt="Fighter Two" />
-                </div>
-              </div>
-              <div className='fightItemOne'>
-                <div className="transformed-div">
-                  <h1 className='transformedFighterNames'>{match.matchFighterA} -VS- {match.matchFighterB}</h1>
-                </div>
-                <div className="transformed-div-two">
-                  <div className='transformed-div-two-partOne'>
-                    <h1>{new Date(`1970-01-01T${match.matchTime}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} est</h1>
-                  </div>
-                  {match.matchType === "LIVE" ? (
-  <div className='transformed-div-two-partTwo'>
-    <p style={{ marginLeft: '-15px' }}>
-      {hasStarted
-        ? "Fight has started"
-        : `Begins in ${diffHrs} H ${diffMins} M`}
-    </p>
-  </div>
-) : (
-  <div className='transformed-div-two-partTwo'>
-    <p style={{ marginLeft: '-15px' }}>
-      Shadow Fight
-    </p>
-  </div>
-
-)}
-
-
-                </div>
-              </div>
-              <div className='fightItemTwo'>
-                <div className="transformed-three">
-                  {match.matchCategory === "boxing" ? (
-                    <>
-                      <div className='transformedDivBox'>HP</div>
-                      <div className='transformedDivBox'>BP</div>
-                      <div className='transformedDivBox'>TP</div>
-                      <div className='transformedDivBox'>RW</div>
-                      <div className='transformedDivBox'>KO</div>
-                      <div className='transformedDivBox'>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory} </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className='transformedDivBox'>ST</div>
-                      <div className='transformedDivBox'>KI</div>
-                      <div className='transformedDivBox'>KN</div>
-                      <div className='transformedDivBox'>RW</div>
-                      <div className='transformedDivBox'>KO</div>
-                      <div className='transformedDivBox'>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</div>
-                    </>
-                  )}
-                </div>
-                <div className="transformed-div-four">
-                  <h1>Players</h1>
-                  <p>{match.userPredictions.length}</p>
-                </div>
-              </div>
-
-              <div className="transformed-five">
-                {match.matchCategory === "boxing" ? (
-                  <>
-                    <div className='transformedDivBox'>HP</div>
-                    <div className='transformedDivBox'>BP</div>
-                    <div className='transformedDivBox'>TP</div>
-                    <div className='transformedDivBox'>RW</div>
-                    <div className='transformedDivBox'>KO</div>
-                  </>
-                ) : (
-                  <>
-                    <div className='transformedDivBox'>ST</div>
-                    <div className='transformedDivBox'>KI</div>
-                    <div className='transformedDivBox'>KN</div>
-                    <div className='transformedDivBox'>RW</div>
-                    <div className='transformedDivBox'>KO</div>
-                  </>
-                )}
               </div>
             </div>
-          );
-        }
-        return null; // If the match is removed, do not render it
-      })
-    ) : (
-      <p className='noMatch'>No fights</p> // Message when no completed fights are available
-    )
-  ) : (
-    <p className='noMatch'>No completed matches</p>
-  )}
-</div>
-
-
-<div className='pendingFights fightscontainer'>
-  <h1 className='fightsheadingthree'>Your Pending Fights</h1>
-  {upcomingMatches.length > 0 ? (
-  // Filter matches where user predictions are not submitted and not removed
-  upcomingMatches
-    .filter(match =>
-      match.userPredictions &&
-      !match.userPredictions.some(prediction =>
-        prediction.userId === user._id && prediction.predictionStatus === 'submitted'
-      ) &&
-      !removedMatches.includes(match._id) // Check if match._id is NOT in removedMatches
-    )
-    .length > 0 ? (
-      // Map over filtered matches
-      upcomingMatches
-        .filter(match =>
-          match.userPredictions &&
-          !match.userPredictions.some(prediction =>
-            prediction.userId === user._id && prediction.predictionStatus === 'submitted'
-          ) &&
-          !removedMatches.includes(match._id) // Check if match._id is NOT in removedMatches
-        )
-        .map((match) => {
-          let diffHrs, diffMins, hasStarted;
-
-          if (match.matchType === "LIVE") {
-            const remainingTime = getRemainingTime(match.matchDate, match.matchTime);
-            diffHrs = remainingTime.diffHrs;
-            diffMins = remainingTime.diffMins;
-            hasStarted = remainingTime.hasStarted;
-          }
-
-          return (
-
-              <div
-                className='fightItem'
-                key={match._id}
-                onClick={() => {
-                  if (match.matchType === "SHADOW" && match.blurred) {
-                    toast.error("Affiliate criteria has not been met for this SHADOW match.");
-                  } else {
-                    handleMatchClick(match._id);
-                  }
-                }}
-                onMouseEnter={() => setHoveredMatch(match._id)} 
-                onMouseLeave={() => setHoveredMatch(null)}>
-                {hoveredMatch === match._id && (
-                  <button className="removeButton" onClick={(e) => {
-                    e.stopPropagation(); // Prevent the parent div's onClick from firing
-                    handleRemoveMatch(match._id);
-                  }}>
-                    Remove from dashboard
-                  </button>
-                )}
-                <div className={`fightersImages ${match.blurred ? 'blurred' : ''}`}>
-                  <div className='fighterOne'>
-                    <img src={match.fighterAImage} alt="Fighter One" />
+            <div className="xp-dashboard-next-fight">
+              {nextFight ? (
+                <>
+                  <div className="xp-dashboard-next-label">Next in your corner</div>
+                  <div className="xp-dashboard-next-art">
+                    <img src={getFighterImage(nextFight, 'A', 0)} alt={nextFight.matchFighterA || 'Fighter A'} />
+                    <span>VS</span>
+                    <img src={getFighterImage(nextFight, 'B', 0)} alt={nextFight.matchFighterB || 'Fighter B'} />
                   </div>
-                  <div className='fighterTwo'>
-                    <img src={match.fighterBImage} alt="Fighter Two" />
-                  </div>
-                </div>
-                <div className='fightItemOne'>
-                  <div className={`transformed-div ${match.blurred ? 'blurred' : ''}`}>
-                    <h1 className='transformedFighterNames'>{match.matchFighterA} -VS- {match.matchFighterB}</h1>
-                  </div>
-                  <div className="transformed-div-two">
-                  <div className="transformed-div-two-partOne">
-  <h1>
-    {new Date(`1970-01-01T${match.matchTime}:00`).toLocaleTimeString([], { 
-      hour: "2-digit", 
-      minute: "2-digit", 
-      hour12: true 
-    })}{" "} 
-    est &nbsp;&nbsp;
-    {match.matchTokens === null && (
-      <span className="blink-text" style={{ color: "green" }}>
-        Free
-      </span>
-    )}
-  </h1>
-</div>
-   {match.matchType === "LIVE" ? (
-  <div className='transformed-div-two-partTwo'>
-    <p style={{ marginLeft: '-15px' }}>
-      {hasStarted
-        ? "Fight has started"
-        : `Begins in ${diffHrs} H ${diffMins} M`}
-    </p>
-  </div>
-) : (
-  <div className='transformed-div-two-partTwo'>
-    <p style={{ marginLeft: '-15px' }}>
-      Shadow Fight
-    </p>
-  </div>
-
-)}
- </div>
-                </div>
-                <div className='fightItemTwo'>
-                  <div className="transformed-three">
-                    {match.matchCategory === "boxing" ? (
-                      <>
-                        <div className='transformedDivBox'>HP</div>
-                        <div className='transformedDivBox'>BP</div>
-                        <div className='transformedDivBox'>TP</div>
-                        <div className='transformedDivBox'>RW</div>
-                        <div className='transformedDivBox'>KO</div>
-                        <div className='transformedDivBox'>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</div>
-                      </>
-                    ) : (
-                      <>
-                        <div className='transformedDivBox'>ST</div>
-                        <div className='transformedDivBox'>KI</div>
-                        <div className='transformedDivBox'>KN</div>
-                        <div className='transformedDivBox'>RW</div>
-                        <div className='transformedDivBox'>KO</div>
-                        <div className='transformedDivBox'>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory} </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="transformed-div-four">
-                    <h1>Players</h1>
-                    <p>{match.userPredictions.length}</p>
-                  </div>
-                </div>
-
-                <div className="transformed-five">
-                  {match.matchCategory === "boxing" ? (
-                    <>
-                      <div className='transformedDivBox'>HP</div>
-                      <div className='transformedDivBox'>BP</div>
-                      <div className='transformedDivBox'>TP</div>
-                      <div className='transformedDivBox'>RW</div>
-                      <div className='transformedDivBox'>KO</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className='transformedDivBox'>ST</div>
-                      <div className='transformedDivBox'>KI</div>
-                      <div className='transformedDivBox'>KN</div>
-                      <div className='transformedDivBox'>RW</div>
-                      <div className='transformedDivBox'>KO</div>
-                    </>
-                  )}
-                </div>
-
-              </div>
-            );
-          })
-      ) : (
-        <p className='noMatch'>No pending matches</p>
-      )
-  ) : (
-    <p className='noMatch'>No pending matches</p>
-  )}
-</div>
-
-
-      </div>
-
-      {isOpen && (
-        <div className="popup-overlay-dashboard">
-          <div className="popup-dashboard">
-            <h2>Submit Your Testimonial</h2>
-            <textarea
-              placeholder="Enter your testimonial..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-            <div className="popup-actions-dashboard">
-              <button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
-              <button onClick={closePopup}>Cancel</button>
+                  <h2>{nextFight.matchFighterA} <em>VS</em> {nextFight.matchFighterB}</h2>
+                  <button type="button" className="theme-btn theme-btn-primary" onClick={() => handleOpenFight(nextFight)}>{hasSubmittedPrediction(nextFight) ? 'Follow my card' : 'Make predictions'} <FaArrowRight /></button>
+                </>
+              ) : (
+                <div className="xp-dashboard-next-empty"><FaFistRaised /><h2>Your next card is waiting.</h2><Link href="/fights" className="theme-btn theme-btn-primary">Browse fights</Link></div>
+              )}
             </div>
           </div>
-        </div>
-      )}
-  {(!user.hasSubmittedTestimonial &&     <div className='shareYourExperience' onClick={openPopup}>
-        <i className="fa fa-star"></i>
-        <h1>Share your experience</h1>
-      </div> )}
-    </div>
-  )
-}
+        </section>
+
+        <main className="xp-page-main xp-dashboard-main">
+          <div className="theme-container">
+            <section className="xp-dashboard-stat-grid" aria-label="Player overview">
+              <button type="button" onClick={() => router.push('/checkout')}><FaCoins /><span><strong>{Number(user.tokens || 0).toLocaleString()}</strong><small>Fight-wallet tokens</small></span><FaPlus /></button>
+              <div><FaFistRaised /><span><strong>{pendingFights.length}</strong><small>Cards waiting</small></span></div>
+              <div><FaTrophy /><span><strong>{submittedFights.length}</strong><small>Submitted fights</small></span></div>
+              <div><FaMedal /><span><strong>{user.currentPlan || 'Free'}</strong><small>Current plan</small></span></div>
+            </section>
+
+            <section className="xp-page-section">
+              <ExperienceSectionHeading
+                eyebrow="Action required"
+                title="Pending fight cards"
+                description="Complete these entries before they lock. Every fight card includes the paired fighter imagery and contest context used across the public experience."
+                action={{ href: '/fights?status=upcoming', label: 'Find more fights' }}
+              />
+              {matchStatus === 'loading' ? <div className="xp-loading-grid"><div className="xp-loading-card" /><div className="xp-loading-card" /></div> : pendingFights.length ? (
+                <div className="xp-fight-card-grid xp-dashboard-fight-grid">
+                  {pendingFights.map((match, index) => (
+                    <FightVisualCard
+                      match={match}
+                      index={index}
+                      onAction={handleOpenFight}
+                      key={getFightId(match)}
+                      footerAction={<button type="button" className="xp-dashboard-remove-fight" onClick={(event) => handleRemoveMatch(event, getFightId(match))}>Remove from dashboard</button>}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <ExperienceEmptyState title="No pending cards" description="You are fully caught up. Open the fight hub to enter another eligible contest." action={{ href: '/fights?status=upcoming', label: 'Explore upcoming fights' }} />
+              )}
+            </section>
+
+            <section className="xp-page-section">
+              <ExperienceSectionHeading
+                eyebrow="Your fight portfolio"
+                title="Submitted & completed fights"
+                description="Open a live entry to follow the leaderboard or revisit a completed contest to inspect your final performance."
+              />
+              {submittedFights.length ? (
+                <div className="xp-dashboard-portfolio">
+                  {submittedFights.map((match, index) => (
+                    <div className="xp-dashboard-timeline-wrap" key={getFightId(match)}>
+                      <FightTimelineRow match={match} index={index} onAction={handleOpenFight} />
+                      <button type="button" className="xp-dashboard-remove-inline" onClick={(event) => handleRemoveMatch(event, getFightId(match))}>Remove</button>
+                    </div>
+                  ))}
+                </div>
+              ) : <ExperienceEmptyState title="Your fight portfolio is empty" description="Submitted cards will appear here as soon as your first prediction is confirmed." />}
+            </section>
+
+            <section className="xp-dashboard-actions-panel">
+              <div className="xp-dashboard-action-art"><img src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fantasy MMAdness arena" /></div>
+              <div>
+                <p className="xp-eyebrow">Keep your corner ready</p>
+                <h2>Wallet, profile, standings, and support—one click away.</h2>
+                <div className="xp-dashboard-quick-actions">
+                  <Link href="/checkout"><FaCoins /> Add tokens</Link>
+                  <Link href="/profile"><FaUserCircle /> Edit profile</Link>
+                  <Link href="/leaderboard"><FaTrophy /> Leaderboard</Link>
+                  <Link href="/FantasyLeagues"><FaMedal /> Join a league</Link>
+                </div>
+              </div>
+              {!user.hasSubmittedTestimonial && !testimonialSubmitted && <button type="button" className="theme-btn theme-btn-secondary" onClick={() => setIsTestimonialOpen(true)}><FaStar /> Share experience</button>}
+            </section>
+          </div>
+        </main>
+
+        {isTestimonialOpen && (
+          <div className="xp-modal-backdrop" role="presentation" onMouseDown={() => setIsTestimonialOpen(false)}>
+            <form className="xp-modal" onSubmit={submitTestimonial} onMouseDown={(event) => event.stopPropagation()}>
+              <div className="xp-modal-icon"><FaCommentDots /></div>
+              <p className="xp-eyebrow">Player feedback</p>
+              <h2>Share your Fantasy MMAdness experience.</h2>
+              <textarea value={testimonial} onChange={(event) => setTestimonial(event.target.value)} placeholder="Tell the community what you enjoy about the fight-night experience..." required />
+              <div><button type="button" className="theme-btn theme-btn-secondary" onClick={() => setIsTestimonialOpen(false)}>Cancel</button><button type="submit" className="theme-btn theme-btn-primary" disabled={isSubmittingTestimonial}>{isSubmittingTestimonial ? 'Submitting...' : 'Submit testimonial'}</button></div>
+            </form>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
 
 export default Dashboard;

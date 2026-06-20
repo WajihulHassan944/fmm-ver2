@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 
-const index = ({ blogs }) => {
+const BlogsPage = ({ blogs }) => {
   const router = useRouter();
 
   return (
@@ -65,4 +65,4 @@ export async function getServerSideProps() {
   }
 }
 
-export default index;
+export default BlogsPage;

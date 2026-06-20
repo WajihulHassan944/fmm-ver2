@@ -1,94 +1,159 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
-import { useRouter } from 'next/router';
+import React, { useEffect, useMemo, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useDispatch, useSelector } from 'react-redux';
+import { FaBolt, FaChartLine, FaCrown, FaMedal, FaSearch, FaTrophy, FaUsers } from 'react-icons/fa';
+import { fetchMatches } from '@/Redux/matchSlice';
+import useLeaderboardData from '@/CustomFunctions/useLeaderboardData';
+import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
+import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
+
+const getPlayerName = (player) => player?.playerName || player?.username || [player?.firstName, player?.lastName].filter(Boolean).join(' ') || player?.email?.split?.('@')?.[0] || 'Player';
+const getPlayerId = (player) => player?._id || player?.id || player?.email || getPlayerName(player);
+const FALLBACK_AVATARS = [
+  `${FMM_ASSET_BASE}/fighter-jadden-addison.png`,
+  `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`,
+  `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
+  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.png`,
+  `${FMM_ASSET_BASE}/fighter-anthony-yarde.png`,
+  `${FMM_ASSET_BASE}/fighter-david-benavidez.png`,
+];
 
 const GlobalLeaderboard = () => {
-  const [refreshed, setRefreshed] = useState(false);
+  const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
+  const matchStatus = useSelector((state) => state.matches.status);
+  const currentUser = useSelector((state) => state.user);
   const { leaderboard, playerCount } = useLeaderboardData(matches);
-  const userLoggedIn = useSelector((state) => state.user); // Access user details from Redux store
-const router = useRouter();
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    
-    const refreshLeaderboard = () => {
-      setRefreshed(true);
-      setTimeout(() => setRefreshed(false), 3000); // Set refreshed to true for 3 seconds
-    };
+    if (matchStatus === 'idle') dispatch(fetchMatches());
+  }, [dispatch, matchStatus]);
 
-    // Refresh every 3 minutes
-    const interval = setInterval(() => {
-      refreshLeaderboard();
-    }, 180000);
+  const rows = useMemo(() => (Array.isArray(leaderboard) ? leaderboard : []).map((player, index) => ({
+    ...player,
+    rank: index + 1,
+    displayName: getPlayerName(player),
+    avatar: player?.profileUrl || FALLBACK_AVATARS[index % FALLBACK_AVATARS.length],
+    points: Number(player?.totalPoints || 0),
+  })), [leaderboard]);
 
-    // Cleanup the interval on component unmount
-    return () => clearInterval(interval);
-  }, []);
+  const filteredRows = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    if (!needle) return rows;
+    return rows.filter((player) => `${player.displayName} ${player.email || ''}`.toLowerCase().includes(needle));
+  }, [rows, search]);
 
-  const renderLeaderboardItems = () => {
-    if (leaderboard.length === 0) {
-      return <p className='noMatch'>No leaderboard items available at the moment.</p>;
-    }
-
-    return leaderboard.map((user, index) => (
-      <div className='leaderboardItem' key={user._id} data-aos="zoom-in">
-        <div className='leaderboard-item-image'>
-          <img src={user.profileUrl || "https://res.cloudinary.com/dqi6vk2vn/image/upload/v1744519663/home/dpwqg3n2k6xljperunif.png"} alt={user.firstName} />
-        </div>
-        <h1>{user.firstName} <span className='toRemove'>{user.lastName}</span></h1>
-        <h1 className='toRemove'>RW#</h1>
-        <h1 className='toRemove'>KO#</h1>
-        <h1>Points {user.totalPoints}</h1>
-        <h1>#{index + 1}</h1>
-      </div>
-    ));
-  };
+  const podium = rows.slice(0, 3);
+  const currentRank = rows.find((player) => String(getPlayerId(player)) === String(currentUser?._id || currentUser?.id))?.rank;
+  const leadingScore = rows[0]?.points || 0;
 
   return (
-    <div className='fightDetails global-leaderboard'>
-      <i
-        className="fa fa-arrow-circle-left dashboard-arrow-circle"
-        aria-hidden="true"
-        onClick={() => router.push(-1)} // Go back to the previous page
-      ></i>
-
-      <div className='member-header'>
-        <div className='member-header-image'>
-          <img src={userLoggedIn.profileUrl} alt="Logo" data-aos="zoom-in" />
-        </div>
-        <h3 data-aos="zoom-in"><span className='toRemove'>Member Name - </span>{userLoggedIn.firstName} {userLoggedIn.lastName}</h3>
-        <h3 data-aos="zoom-in"><span className='toRemove'>Current </span>Plan: {userLoggedIn.currentPlan}</h3>
-      </div>
-
-      <div className='fightwalletWrap' onClick={() => router.push('/checkout')}>
-        <div className='fightWallet' data-aos="zoom-in">
-          <h1><i className="fa fa-shopping-bag" aria-hidden="true"></i> Fight Wallet</h1>
-          <h2>Tokens Remaining: <span>{userLoggedIn.tokens}</span></h2>
-        </div>
-      </div>
-
-      <div className='homeThird'>
-        <h1 className='thirdHeadingOne' data-aos="zoom-in">Global Leader Board</h1>
-        <h2 data-aos="zoom-in">Players - <span>{playerCount}</span></h2>
-
-        <div className='leaderboardHeading'><h3>Leaderboard</h3></div>
-        <div className='controls'>
-          <h5 className='active control-relative'>All time</h5>
-          <h5>Last week</h5>
-          <h5>Last month</h5>
-          {refreshed && (
-            <div className='spinner'>
-              <div className='spin-circle'></div>
+    <>
+      <Head>
+        <title>Global Leaderboard | Fantasy MMAdness</title>
+        <meta name="description" content="See the leading Fantasy MMAdness combat sports predictors, total points, rankings, and your current position." />
+      </Head>
+      <div className="experience-page leaderboard-experience-page">
+        <ExperienceHero
+          eyebrow="Global combat rankings"
+          title="The table never lies."
+          accent="Earn your place."
+          description="Every scored round changes the order. Follow the community’s sharpest combat-sports predictors and turn accurate picks into a permanent place on the board."
+          backgroundImage={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`}
+          actions={[
+            { href: '/fights?status=upcoming', label: 'Enter an active fight' },
+            { href: '/guides', label: 'Review scoring', variant: 'secondary' },
+          ]}
+          stats={[
+            { value: playerCount || rows.length, label: 'Ranked players', icon: FaUsers },
+            { value: leadingScore.toLocaleString(), label: 'Leading points', icon: FaTrophy },
+            { value: currentRank ? `#${currentRank}` : '—', label: 'Your rank', icon: FaChartLine },
+          ]}
+        >
+          <div className="xp-podium-card">
+            <div className="xp-podium-header"><FaCrown /> All-time leaders <span>Live standings</span></div>
+            <div className="xp-podium">
+              {[podium[1], podium[0], podium[2]].map((player, visualIndex) => {
+                if (!player) return <div className="xp-podium-slot is-empty" key={`empty-${visualIndex}`} />;
+                const placement = visualIndex === 0 ? 2 : visualIndex === 1 ? 1 : 3;
+                return (
+                  <div className={`xp-podium-slot is-place-${placement}`} key={getPlayerId(player)}>
+                    <span className="xp-podium-rank">#{placement}</span>
+                    <div className="xp-podium-avatar"><img src={player.avatar} alt={player.displayName} /></div>
+                    {placement === 1 && <FaCrown className="xp-podium-crown" />}
+                    <strong>{player.displayName}</strong>
+                    <small>{player.points.toLocaleString()} pts</small>
+                    <i />
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
+          </div>
+        </ExperienceHero>
 
-        <div className='leaderboardItemsWrap'>
-          {renderLeaderboardItems()}
-        </div>
+        <main className="xp-page-main">
+          <div className="theme-container">
+            <section className="xp-page-section">
+              <ExperienceSectionHeading
+                eyebrow="Official standings"
+                title="Global leaderboard"
+                description="All verified Fantasy MMAdness points across scored fight cards. Rankings update as fight results are processed."
+              />
+
+              <div className="xp-leaderboard-shell">
+                <div className="xp-leaderboard-toolbar">
+                  <div className="xp-leaderboard-context"><FaBolt /><span><strong>All-time standings</strong><small>Scored fights only</small></span></div>
+                  <label className="xp-search-field">
+                    <FaSearch aria-hidden="true" />
+                    <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search player..." />
+                  </label>
+                </div>
+
+                <div className="xp-leaderboard-table" role="table" aria-label="Global leaderboard">
+                  <div className="xp-leaderboard-table-head" role="row">
+                    <span>Rank</span><span>Player</span><span>Fight points</span><span>Status</span>
+                  </div>
+                  {filteredRows.map((player, index) => {
+                    const isCurrent = String(getPlayerId(player)) === String(currentUser?._id || currentUser?.id);
+                    const rankIcon = player.rank === 1 ? <FaCrown /> : player.rank <= 3 ? <FaMedal /> : null;
+                    return (
+                      <div className={`xp-leaderboard-table-row ${isCurrent ? 'is-current' : ''}`} role="row" key={getPlayerId(player)}>
+                        <div className="xp-rank-cell">{rankIcon}<strong>{player.rank}</strong></div>
+                        <div className="xp-player-cell">
+                          <img src={player.avatar || FALLBACK_AVATARS[index % FALLBACK_AVATARS.length]} alt={player.displayName} loading="lazy" />
+                          <span><strong>{player.displayName}</strong><small>{isCurrent ? 'You' : player.rank <= 3 ? 'Title contender' : 'Fantasy contender'}</small></span>
+                        </div>
+                        <div className="xp-points-cell"><strong>{player.points.toLocaleString()}</strong><small>points</small></div>
+                        <div className="xp-status-cell"><i /> {player.rank <= 10 ? 'Top 10' : 'Ranked'}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {filteredRows.length === 0 && (
+                  <ExperienceEmptyState
+                    title={rows.length ? 'No player matches that search' : 'Standings are being calculated'}
+                    description={rows.length ? 'Try another player name.' : 'The table will populate after completed fights have verified scores.'}
+                  />
+                )}
+              </div>
+            </section>
+
+            <section className="xp-rank-cta">
+              <div className="xp-rank-cta-art"><img src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fantasy combat arena" /></div>
+              <div>
+                <p className="xp-eyebrow">Your next score starts now</p>
+                <h2>Great picks are remembered. Perfect rounds are ranked.</h2>
+                <p>Open an upcoming card, submit before the lock, and follow your position as the fight unfolds.</p>
+                <Link className="theme-btn theme-btn-primary" href="/fights?status=upcoming">Find your next fight</Link>
+              </div>
+            </section>
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 };
 

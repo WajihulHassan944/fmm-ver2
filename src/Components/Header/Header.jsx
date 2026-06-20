@@ -26,24 +26,23 @@ import {
   FaTrophy,
   FaUserCircle,
   FaUsers,
-  FaVideo,
 } from 'react-icons/fa';
 
-const LOGO_URL = 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp';
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.png';
 
 const fightLinks = [
-  { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
-  { label: 'Past Fights', href: '/past-fights', icon: FaMedal },
+  { label: 'Upcoming Fights', href: '/fights?status=upcoming', icon: FaFire },
+  { label: 'Past Fights', href: '/fights?status=past', icon: FaMedal },
   { label: 'Fight Calendar', href: '/calendar-of-fights', icon: FaCalendarAlt },
   { label: 'Fight Blogs', href: '/blogs', icon: FaNewspaper },
   { label: 'Fight News', href: '/fights-news', icon: FaNewspaper },
   { label: 'Our Fighters', href: '/our-fighters', icon: FaUsers },
-  { label: 'Past Fight Videos', href: '/past-fights-records', icon: FaVideo },
+  { label: 'Fight Archive', href: '/fights?status=past', icon: FaMedal },
   { label: 'Fighter Tracker', href: '/fighter-performance-tracker', icon: FaChartLine },
 ];
 
 const contestLinks = [
-  { label: 'Active Contests', href: '/upcomingfights', icon: FaBullseye },
+  { label: 'Active Contests', href: '/fights?status=upcoming', icon: FaBullseye },
   { label: 'Fantasy Leagues', href: '/FantasyLeagues', icon: FaTrophy },
   { label: 'Play For Free', href: '/playforfree', icon: FaCoins },
   { label: 'Rewards', href: '/fights-rewards', icon: FaMedal },
@@ -58,17 +57,17 @@ const companyLinks = [
 ];
 
 const publicNav = [
-  { label: 'Fights', href: '/upcomingfights', icon: FaFistRaised, children: fightLinks },
-  { label: 'Contests', href: '/upcomingfights', icon: FaBullseye, children: contestLinks },
+  { label: 'Fights', href: '/fights', icon: FaFistRaised, children: fightLinks },
+  { label: 'Contests', href: '/fights?status=upcoming', icon: FaBullseye, children: contestLinks },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
   { label: 'Tokens', href: '/fights-rewards', icon: FaCoins },
   { label: 'How To Play', href: '/guides', icon: FaQuestionCircle },
   {
     label: 'Affiliates',
-    href: '/affiliate-create-account',
+    href: '/auth?mode=signup&role=affiliate',
     icon: FaUsers,
     children: [
-      { label: 'Affiliate Program', href: '/affiliate-create-account', icon: FaUsers },
+      { label: 'Affiliate Program', href: '/auth?mode=signup&role=affiliate', icon: FaUsers },
       { label: 'Affiliate Guides', href: '/affiliate-guides', icon: FaQuestionCircle },
       { label: 'Affiliate League', href: '/affiliate-league', icon: FaTrophy },
       { label: 'Past Promotions', href: '/past-promotions', icon: FaMedal },
@@ -80,12 +79,12 @@ const publicNav = [
 const playerNav = [
   {
     label: 'Fights',
-    href: '/upcomingfights',
+    href: '/fights',
     icon: FaFistRaised,
     children: [
-      { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
+      { label: 'Upcoming Fights', href: '/fights?status=upcoming', icon: FaFire },
       { label: 'Your Fights', href: '/YourFights', icon: FaBullseye },
-      { label: 'Past Fights', href: '/past-fights', icon: FaMedal },
+      { label: 'Past Fights', href: '/fights?status=past', icon: FaMedal },
       { label: 'Fight Calendar', href: '/calendar-of-fights', icon: FaCalendarAlt },
     ],
   },
@@ -162,7 +161,10 @@ const Header = () => {
 
   const isActive = (href) => {
     if (!href || href === '#') return false;
-    return asPath === href || asPath.startsWith(`${href}/`);
+    const hrefPath = href.split('?')[0];
+    const currentPath = asPath.split('?')[0];
+    if (href.includes('?')) return asPath === href;
+    return currentPath === hrefPath || currentPath.startsWith(`${hrefPath}/`);
   };
 
   const userInitial = useMemo(() => {
@@ -284,8 +286,8 @@ const Header = () => {
 
     return (
       <>
-        <Link href="/login" className="theme-btn theme-btn-secondary">Login</Link>
-        <Link href="/CreateAccount" className="theme-btn theme-btn-primary">Sign Up Free</Link>
+        <Link href="/auth?mode=login" className="theme-btn theme-btn-secondary">Login</Link>
+        <Link href="/auth?mode=signup&role=player" className="theme-btn theme-btn-primary">Sign Up Free</Link>
       </>
     );
   };
@@ -329,8 +331,8 @@ const Header = () => {
           })}
           {!isAuthenticated && !isAuthenticatedAffiliate && !authStatusSponsor && (
             <div className="theme-mobile-auth">
-              <Link href="/login">Login</Link>
-              <Link href="/CreateAccount">Sign Up Free</Link>
+              <Link href="/auth?mode=login">Login</Link>
+              <Link href="/auth?mode=signup&role=player">Sign Up Free</Link>
             </div>
           )}
           {isAuthenticated && <button type="button" onClick={handleLogout}>Logout</button>}

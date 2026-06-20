@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import RoundByRoundMockScores from './RoundByRoundMockScores';
 import ReactPlayer from 'react-player/lazy';
 
-const index = () => {
+const MockGamePage = () => {
   const [isBoxing, setIsBoxing] = useState(false);
 const [showPredictions, setShowPredictions] = useState(false);
 
@@ -390,4 +390,4 @@ const [showPredictions, setShowPredictions] = useState(false);
     </div>
   );
 };
-export default index;
+export default MockGamePage;

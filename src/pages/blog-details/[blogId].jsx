@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import React from 'react';
 
-const index = ({ blog }) => {
+const BlogDetailsPage = ({ blog }) => {
   const router = useRouter();
 
   if (!blog) return <div className="blogsWrapper">No blog found.</div>;
@@ -100,4 +100,4 @@ export async function getServerSideProps(context) {
   }
 }
 
-export default index;
+export default BlogDetailsPage;
