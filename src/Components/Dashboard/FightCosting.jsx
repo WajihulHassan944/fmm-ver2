@@ -102,7 +102,7 @@ const FightCosting = ({ matchId }) => {
   }
 
   return (
-    <div className='fightCostingUpdated'>
+    <div className='fightCostingUpdated premium-fight-costing'>
       <div className='member-header'>
         <div className='member-header-image'>
           <img src={user.profileUrl || "https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp"} alt="Logo" />

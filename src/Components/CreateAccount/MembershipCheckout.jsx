@@ -166,7 +166,7 @@ const MembershipCheckout = (userId) => {
   };
 
   return (
-    <div className='membership-chackout-wrapper'>
+    <div className='membership-chackout-wrapper premium-membership-checkout'>
       <div className='member-header'>
         <div className='member-header-image'>
           <img src={user.profileUrl} alt="Profile" />

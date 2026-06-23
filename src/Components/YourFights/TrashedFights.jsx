@@ -95,7 +95,7 @@ console.log(user);
   
 
   return (
-    <div className='userdashboard yourFightsWrapper'>
+    <div className='userdashboard yourFightsWrapper premium-dashboard-list premium-trashed-list'>
     <i
         className="fa fa-arrow-circle-left dashboard-arrow-circle"
         aria-hidden="true"

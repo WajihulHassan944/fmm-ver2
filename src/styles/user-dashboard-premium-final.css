@@ -1,0 +1,301 @@
+
+/* User dashboard final premium pass */
+.premium-dashboard-list,
+.premium-user-profile,
+.premium-public-profile,
+.premium-membership-checkout,
+.premium-add-tokens,
+.premium-fight-costing,
+.premium-public-leaderboard,
+.premium-fighter-tracker-page,
+.premium-referral-board,
+.user-rewards-premium {
+  background:
+    linear-gradient(180deg, rgba(3, 7, 12, 0.94), rgba(3, 7, 12, 0.98)),
+    url('/images/fmm-pages/premium-arena-banner.png') center / cover fixed;
+  min-height: 100vh;
+}
+
+.premium-dashboard-list,
+.premium-user-profile,
+.premium-membership-checkout,
+.premium-add-tokens,
+.premium-fight-costing,
+.premium-public-leaderboard,
+.premium-public-profile .userdashboard,
+.user-rewards-premium {
+  padding-top: 128px;
+  padding-bottom: 56px;
+}
+
+.premium-dashboard-list .member-header,
+.premium-user-profile .member-header,
+.premium-membership-checkout .member-header,
+.premium-add-tokens .member-header,
+.premium-fight-costing .member-header,
+.premium-public-leaderboard .member-header,
+.premium-public-profile .member-header {
+  width: min(1240px, calc(100% - 32px));
+  margin: 0 auto 20px;
+  padding: 28px 30px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(9,14,22,0.94), rgba(9,14,22,0.76));
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.38);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  backdrop-filter: blur(14px);
+}
+.premium-dashboard-list .member-header-image,
+.premium-user-profile .member-header-image,
+.premium-membership-checkout .member-header-image,
+.premium-add-tokens .member-header-image,
+.premium-fight-costing .member-header-image,
+.premium-public-leaderboard .member-header-image,
+.premium-public-profile .member-header-image {
+  width: 96px; height: 96px; border-radius: 24px; overflow: hidden;
+  border: 2px solid rgba(237,31,49,0.72); box-shadow: 0 18px 34px rgba(0,0,0,0.35);
+}
+.premium-dashboard-list .member-header-image img,
+.premium-user-profile .member-header-image img,
+.premium-membership-checkout .member-header-image img,
+.premium-add-tokens .member-header-image img,
+.premium-fight-costing .member-header-image img,
+.premium-public-leaderboard .member-header-image img,
+.premium-public-profile .member-header-image img { width:100%; height:100%; object-fit:cover; }
+.premium-dashboard-list .member-header h3,
+.premium-user-profile .member-header h3,
+.premium-membership-checkout .member-header h3,
+.premium-add-tokens .member-header h3,
+.premium-fight-costing .member-header h3,
+.premium-public-leaderboard .member-header h3,
+.premium-public-profile .member-header h3 {
+  color: #fff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: .02em;
+}
+.premium-dashboard-list .fightwalletWrap,
+.premium-user-profile .fightwalletWrap,
+.premium-membership-checkout .fightwalletWrap,
+.premium-add-tokens .fightwalletWrap,
+.premium-fight-costing .fightwalletWrap,
+.premium-public-leaderboard .fightwalletWrap,
+.premium-public-profile .fightwalletWrap {
+  width: min(1240px, calc(100% - 32px)); margin: 0 auto 26px; display:grid; gap:18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.premium-dashboard-list .fightWallet,
+.premium-dashboard-list .totalPoints,
+.premium-user-profile .fightWallet,
+.premium-user-profile .totalPoints,
+.premium-membership-checkout .fightWallet,
+.premium-add-tokens .fightWallet,
+.premium-fight-costing .fightWallet,
+.premium-public-leaderboard .fightwalletWrap .totalPoints,
+.premium-public-profile .fightWallet,
+.premium-public-profile .totalPoints {
+  background: linear-gradient(160deg, rgba(8,12,18,0.96), rgba(12,18,28,0.82));
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; padding: 24px 26px; color:#fff;
+  box-shadow: 0 22px 48px rgba(0,0,0,0.32); min-height: 128px;
+}
+.premium-dashboard-list .fightWallet h1,
+.premium-user-profile .fightWallet h1,
+.premium-membership-checkout .fightWallet h1,
+.premium-add-tokens .fightWallet h1,
+.premium-fight-costing .fightWallet h1,
+.premium-public-profile .fightWallet h1 { font-size: 28px; margin: 0 0 12px; }
+.premium-dashboard-list .fightWallet h2,
+.premium-user-profile .fightWallet h2,
+.premium-membership-checkout .fightWallet h2,
+.premium-add-tokens .fightWallet h2,
+.premium-fight-costing .fightWallet h2,
+.premium-public-profile .fightWallet h2,
+.premium-dashboard-list .totalPoints h1,
+.premium-public-profile .totalPoints h1,
+.premium-public-leaderboard .fightwalletWrap .totalPoints h1 { font-size: 24px; margin:0; color:#fff; }
+.premium-dashboard-list .fightWallet span,
+.premium-user-profile .fightWallet span,
+.premium-membership-checkout .fightWallet span,
+.premium-add-tokens .fightWallet span,
+.premium-fight-costing .fightWallet span,
+.premium-public-profile .fightWallet span,
+.premium-dashboard-list .totalPoints span,
+.premium-public-profile .totalPoints span,
+.premium-public-leaderboard .fightwalletWrap .totalPoints span { color:#ffd35c !important; }
+
+.premium-dashboard-list .fightsWrap,
+.premium-public-profile .fightsWrap { width:min(1240px, calc(100% - 32px)); margin:0 auto; display:grid; gap:24px; }
+.premium-dashboard-list .fightscontainer,
+.premium-public-profile .fightscontainer {
+  background: linear-gradient(160deg, rgba(8,12,18,0.96), rgba(8,12,18,0.82));
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 28px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.34);
+}
+.premium-dashboard-list .fightsheadingtwo,
+.premium-public-profile .fightsheadingtwo { color:#fff; font-size: 32px; letter-spacing:.02em; margin:0 0 20px; text-transform: uppercase; }
+.premium-dashboard-list .fightItem,
+.premium-public-profile .fightItem {
+  border: 1px solid rgba(255,255,255,0.08); background: rgba(5,8,14,0.9); border-radius: 24px;
+  padding: 18px; margin-bottom: 18px; box-shadow: 0 18px 38px rgba(0,0,0,0.24);
+}
+.premium-dashboard-list .fightersImages,
+.premium-public-profile .fightersImages { justify-content:center; gap:22px; }
+.premium-dashboard-list .fighterOne img,
+.premium-dashboard-list .fighterTwo img,
+.premium-public-profile .fighterOne img,
+.premium-public-profile .fighterTwo img { width: 140px; height: 140px; object-fit: cover; border-radius: 20px; border:2px solid rgba(255,255,255,0.14); }
+.premium-dashboard-list .fightItemOne h1,
+.premium-public-profile .fightItemOne h1 { color:#fff; font-size: 26px; }
+.premium-dashboard-list .transformed-div,
+.premium-dashboard-list .transformed-div-two,
+.premium-dashboard-list .transformed-three,
+.premium-dashboard-list .transformed-div-four,
+.premium-dashboard-list .transformed-five,
+.premium-public-profile .transformed-div,
+.premium-public-profile .transformed-div-two,
+.premium-public-profile .transformed-three,
+.premium-public-profile .transformed-div-four,
+.premium-public-profile .transformed-five { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.08) !important; color:#fff !important; }
+.premium-dashboard-list .transformedDivBox,
+.premium-public-profile .transformedDivBox { font-size: 18px !important; min-width: 54px; min-height: 44px; display:inline-flex; align-items:center; justify-content:center; }
+.premium-dashboard-list .removeButton { background: linear-gradient(135deg, #ed1f31, #9a0613); color:#fff; border:none; border-radius: 12px; padding: 10px 14px; font-weight:800; }
+
+.premium-user-profile .createAccount,
+.premium-membership-checkout .mermbership-cards,
+.premium-add-tokens .mermbership-cards,
+.premium-fight-costing .fightDetailsContainerUpdated,
+.premium-public-leaderboard .fightDetails.global-leaderboard .homeThird {
+  width:min(1240px, calc(100% - 32px)); margin:0 auto; 
+}
+.premium-user-profile .registerCard,
+.premium-membership-checkout .billingInformation,
+.premium-membership-checkout .cardone,
+.premium-add-tokens .cardone,
+.premium-fight-costing .fightDetailsContainerUpdated,
+.premium-public-leaderboard .homeThird {
+  background: linear-gradient(160deg, rgba(8,12,18,0.96), rgba(8,12,18,0.82));
+  border: 1px solid rgba(255,255,255,0.09); border-radius: 28px; box-shadow: 0 24px 60px rgba(0,0,0,0.34);
+}
+.premium-user-profile .registerCard { padding: 28px !important; }
+.premium-user-profile .registerCard h1 { color:#fff; font-size: 40px; text-transform: uppercase; }
+.premium-user-profile .input-group label,
+.premium-membership-checkout .input-group label { color:#f2f4f8; font-size: 16px; font-weight:800; }
+.premium-user-profile .input-group input,
+.premium-user-profile .input-group textarea,
+.premium-membership-checkout .input-group input,
+.premium-membership-checkout .input-group select {
+  background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.11); color:#fff; border-radius: 14px;
+}
+.premium-user-profile .btn-grad,
+.premium-membership-checkout .btn-grad,
+.premium-add-tokens .btn-grad,
+.premium-fight-costing .fightDetailsBtn,
+.premium-user-profile .custom-file-label,
+.premium-public-leaderboard .controls h5.active {
+  background: linear-gradient(135deg, #ed1f31, #9d0712) !important; color:#fff !important; border:none !important;
+  box-shadow: 0 16px 34px rgba(237,31,49,0.28); border-radius: 14px;
+}
+.premium-user-profile .myPaymentMethod,
+.premium-user-profile .myActions { background: linear-gradient(160deg, rgba(8,12,18,0.96), rgba(8,12,18,0.84)); border:1px solid rgba(255,255,255,0.08); border-radius: 24px; }
+.premium-user-profile .myActions button { min-height: 58px; font-size: 18px; font-weight: 800; }
+
+.premium-membership-checkout .mermbership-cards,
+.premium-add-tokens .mermbership-cards { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items:start; }
+.premium-membership-checkout .cardone,
+.premium-add-tokens .cardone { padding: 22px; color:#fff; min-height: 100%; }
+.premium-membership-checkout .cardHeading,
+.premium-add-tokens .cardHeading { font-size: 34px; color:#fff; text-transform: uppercase; }
+.premium-membership-checkout .card-features li,
+.premium-add-tokens .card-features li { color: rgba(255,255,255,0.84); margin-bottom: 8px; }
+.premium-membership-checkout .billingInformation { padding: 24px; color:#fff; }
+.premium-membership-checkout .billingInformation h2 { font-size: 28px; color:#fff; }
+.premium-membership-checkout .checkbox-group, .premium-membership-checkout .terms-wrap { color:#fff; }
+
+.premium-fight-costing .fightDetailsContainerUpdated { padding: 30px; color:#fff; }
+.premium-fight-costing .fightHeading { font-size: 42px; color:#fff; text-transform: uppercase; }
+.premium-fight-costing .fightSubHeading { color:#ffd35c; font-size: 22px; }
+.premium-fight-costing .imgWrapFightsUpdated img { border-radius: 24px; border:2px solid rgba(255,255,255,0.14); box-shadow:0 18px 38px rgba(0,0,0,0.3); }
+.premium-fight-costing .fight-text { font-size: 24px; line-height:1.6; color:rgba(255,255,255,0.92); }
+
+.premium-public-leaderboard .fightDetails.global-leaderboard { width:min(1240px, calc(100% - 32px)); margin: 0 auto; }
+.premium-public-leaderboard .homeThird { padding:28px; color:#fff; }
+.premium-public-leaderboard .leaderboardHeading h3 { font-size: 34px; color:#fff; text-transform: uppercase; }
+.premium-public-leaderboard .controls { display:flex; gap:12px; margin-bottom:16px; }
+.premium-public-leaderboard .controls h5 { padding: 10px 18px; border-radius: 999px; background: rgba(255,255,255,0.06); color:#fff; }
+.premium-public-leaderboard .leaderboardItem { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius: 18px; padding:14px; color:#fff; }
+
+.premium-referral-board { padding: 140px 20px 70px; }
+.premium-referral-board .board-card { max-width: 1100px; margin:0 auto; background: linear-gradient(145deg, rgba(8,12,18,0.96), rgba(8,12,18,0.84)); border:1px solid rgba(255,255,255,0.1); border-radius: 30px; box-shadow:0 28px 64px rgba(0,0,0,0.42); color:#fff; }
+.premium-referral-board .leaderboard th, .premium-referral-board .leaderboard td { color:#fff; }
+.premium-referral-board .title, .premium-referral-board .hashtag { color:#fff; text-transform: uppercase; }
+
+.premium-fighter-tracker-page { padding-top: 130px; padding-bottom: 60px; }
+.premium-fighter-tracker-page .tracker-container-fighter {
+  max-width: 1240px; margin:0 auto; padding:32px; border-radius: 30px;
+  background: linear-gradient(145deg, rgba(8,12,18,0.96), rgba(8,12,18,0.84));
+  border:1px solid rgba(255,255,255,0.1); box-shadow:0 28px 64px rgba(0,0,0,0.42);
+}
+.premium-fighter-tracker-page .tracker-title { font-size: 44px; color:#fff; text-transform: uppercase; }
+.premium-fighter-tracker-page .fighter-select, .premium-fighter-tracker-page .popup-content button { border-radius: 14px; }
+.premium-fighter-tracker-page .fighter-card, .premium-fighter-tracker-page .fight-history, .premium-fighter-tracker-page .fantasy-points, .premium-fighter-tracker-page .stats-summary, .premium-fighter-tracker-page .community-accuracy, .premium-fighter-tracker-page .next-fight { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius: 22px; }
+.premium-fighter-tracker-page .filled { background: linear-gradient(90deg, #ed1f31, #ffb23f) !important; }
+.premium-fighter-tracker-page .circle { background: radial-gradient(circle at 30% 30%, rgba(237,31,49,0.9), rgba(84,7,15,0.95)) !important; }
+.premium-fighter-tracker-page .popup-content { background: linear-gradient(160deg, rgba(8,12,18,0.98), rgba(8,12,18,0.92)); color:#fff; border-radius:24px; }
+
+.user-rewards-premium {
+  padding-top: 140px; background: linear-gradient(180deg, rgba(3,7,12,0.92), rgba(3,7,12,0.96)), url('/images/fmm-pages/premium-duel-banner.png') center / cover fixed !important;
+}
+.user-rewards-premium .reward-items-wrap { max-width: 1160px; margin: 30px auto 0; }
+.user-rewards-premium .reward-item { background: rgba(8,12,18,0.9); border:1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow:0 18px 40px rgba(0,0,0,0.28); }
+.user-rewards-premium h1, .user-rewards-premium h2, .user-rewards-premium p, .user-rewards-premium h3 { color:#fff !important; }
+
+.thankyou-purchase-tokens-child { background: linear-gradient(160deg, rgba(8,12,18,0.98), rgba(8,12,18,0.9)); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius: 26px; box-shadow: 0 28px 64px rgba(0,0,0,0.42); }
+
+.player-dashboard-rich-page .xp-dashboard-hero.player-dashboard-hero-rich {
+  background:
+    linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76) 52%, rgba(3,6,10,0.4)),
+    url('/images/fmm-pages/premium-affiliate-banner.png') center right / cover !important;
+  min-height: 640px;
+  box-shadow: 0 28px 64px rgba(0,0,0,0.4);
+}
+.player-dashboard-rich-page .xp-dashboard-profile h1 { font-size: clamp(40px, 5vw, 68px); }
+.player-dashboard-rich-page .xp-dashboard-wallet { box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+.player-dashboard-rich-page .xp-dashboard-stats article,
+.player-dashboard-rich-page .xp-dashboard-fight-card,
+.player-dashboard-rich-page .xp-dashboard-modal { box-shadow: 0 20px 48px rgba(0,0,0,0.28); }
+
+@media (max-width: 1024px) {
+  .premium-membership-checkout .mermbership-cards,
+  .premium-add-tokens .mermbership-cards,
+  .premium-dashboard-list .fightwalletWrap,
+  .premium-user-profile .fightwalletWrap,
+  .premium-public-profile .fightwalletWrap { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .premium-dashboard-list,
+  .premium-user-profile,
+  .premium-membership-checkout,
+  .premium-add-tokens,
+  .premium-fight-costing,
+  .premium-public-leaderboard,
+  .premium-fighter-tracker-page,
+  .premium-referral-board,
+  .user-rewards-premium { padding-top: 110px; }
+  .premium-dashboard-list .member-header,
+  .premium-user-profile .member-header,
+  .premium-membership-checkout .member-header,
+  .premium-add-tokens .member-header,
+  .premium-fight-costing .member-header,
+  .premium-public-leaderboard .member-header,
+  .premium-public-profile .member-header { padding: 20px; }
+  .premium-dashboard-list .fighterOne img,
+  .premium-dashboard-list .fighterTwo img,
+  .premium-public-profile .fighterOne img,
+  .premium-public-profile .fighterTwo img { width: 110px; height: 110px; }
+  .premium-dashboard-list .fightsheadingtwo,
+  .premium-public-profile .fightsheadingtwo,
+  .premium-fighter-tracker-page .tracker-title,
+  .premium-user-profile .registerCard h1,
+  .premium-fight-costing .fightHeading { font-size: 28px; }
+  .premium-public-leaderboard .leaderboardItem { display:grid; gap:8px; }
+}

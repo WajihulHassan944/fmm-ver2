@@ -75,7 +75,7 @@ const AddTokensToWallet = () => {
       }
 
       return (
-        <div className='membership-wrapper addTokensToWallet'>
+        <div className='membership-wrapper addTokensToWallet premium-add-tokens'>
             <div className='member-header'>
                 <div className='member-header-image'>
                     <img src={user.profileUrl} alt="Profile" />

@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image';
 const Rewards = () => {
     return (
-        <div className='sponsors-wrap' style={{background:'#fff'}}>
+        <div className='sponsors-wrap user-rewards-premium' style={{background:'#fff'}}>
         <img src="https://ufcfightclub.com/assets/ufc2/patterns/double_black_top_right.svg" alt="design" className='toabsolutedesign'/>
         
           <h1 style={{textTransform:'uppercase'}}>Membership Has Its Perks! 

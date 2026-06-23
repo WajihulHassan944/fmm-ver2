@@ -92,7 +92,7 @@ const PublicProfile = () => {
     const totalPoints = currentUserData ? currentUserData.totalPoints : 0;
   
     return (
-        <div className='publicProfileWrapper'>
+        <div className='publicProfileWrapper premium-public-profile'>
       <div className='userdashboard yourFightsWrapper'>
         <div className='member-header'>
           <div className='member-header-image'>

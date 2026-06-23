@@ -123,7 +123,7 @@ const PublicFightLeaderboard = ({ matchId ,name, plan, profileUrl }) => {
   };
     
   return (
-    <div className='fightLeaderboard'>
+    <div className='fightLeaderboard premium-public-leaderboard'>
       <div className='fightDetails global-leaderboard'>
         <div className='member-header'>
           <div className='member-header-image'>

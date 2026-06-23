@@ -275,7 +275,7 @@ const [membershipGo, setMembershipGo] = useState(null);
 
   
     return (
-        <div className='myprofile'>
+        <div className='myprofile premium-user-profile'>
         <i
         className="fa fa-arrow-circle-left dashboard-arrow-circle"
         aria-hidden="true"

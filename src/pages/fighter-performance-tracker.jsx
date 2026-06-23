@@ -143,7 +143,7 @@ const FighterTracker = () => {
   };
 
   return (
-    <div className="paddingTop">
+    <div className="paddingTop premium-fighter-tracker-page">
       <div className="tracker-container-fighter">
         <h2 className="tracker-title">Fighter Performance Tracker</h2>
 

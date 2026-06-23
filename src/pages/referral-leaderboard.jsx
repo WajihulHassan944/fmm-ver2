@@ -34,7 +34,7 @@ const ReferralBoard = () => {
   });
 
   return (
-    <div className="referral-container">
+    <div className="referral-container premium-referral-board">
       <img
         src="https://ufcfightclub.com/assets/ufc2/patterns/double_black_top_right.svg"
         alt="design"

@@ -205,7 +205,7 @@ const YourFights = () => {
   
 
   return (
-    <div className='userdashboard yourFightsWrapper'>
+    <div className='userdashboard yourFightsWrapper premium-dashboard-list'>
     <i
         className="fa fa-arrow-circle-left dashboard-arrow-circle"
         aria-hidden="true"

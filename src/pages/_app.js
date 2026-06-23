@@ -58,6 +58,7 @@ import "@/styles/affiliate-experience-final.css";
 import "@/styles/final-campaign-community-pass.css";
 import "@/styles/final-fantasy-readability-mock.css";
 import "@/styles/premium-backgrounds-phase-two.css";
+import "@/styles/user-dashboard-premium-final.css";
 import Script from "next/script";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
@@ -162,7 +163,8 @@ function AppContent({ children }) {
             "/faqs", "/about", "/past-fights-records", "/fights-rewards",
             "/sponsor-dashboard", "/global-leaderboard", "/testimonials",
             "/spin-wheel", "/calendar-of-fights", "/AffiliateDashboard", "/AffiliateProfile", "/AffiliateAccountSettings",
-            "/past-promotions", "/past-fights","/referral-leaderboard", "/HowItWorks", "/affiliate-league", "/fantasy-tips","/FantasyLeagues", "/invite", "/fighter-performance-tracker", "/leaderboard", "/mock-game"
+            "/past-promotions", "/past-fights","/referral-leaderboard", "/HowItWorks", "/affiliate-league", "/fantasy-tips","/FantasyLeagues", "/invite", "/fighter-performance-tracker", "/leaderboard", "/mock-game",
+            "/UserDashboard", "/YourFights", "/trashed-fights", "/profile", "/checkout", "/fights-rewards", "/my-fantasy-team"
           ];
 
           const redRoutes = ["/fights-news"];
