@@ -9,6 +9,7 @@ import {
   FaEye,
   FaFistRaised,
   FaPlus,
+  FaQuestionCircle,
   FaShieldAlt,
   FaTrophy,
   FaUserFriends,
@@ -29,33 +30,36 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    const controller = new AbortController();
-
     const fetchDashboardCounts = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/dashboard-counts', { signal: controller.signal });
-        if (!response.ok) throw new Error(`Dashboard counts request failed with ${response.status}`);
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/dashboard-counts');
         const data = await response.json();
-        setDashboardCounts((current) => ({ ...current, ...data }));
+        setDashboardCounts(data);
       } catch (error) {
-        if (error.name !== 'AbortError') console.error('Error fetching dashboard counts:', error);
+        console.error('Error fetching dashboard counts:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchDashboardCounts();
-    return () => controller.abort();
   }, []);
 
   const handleResetStats = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/reset-stats', { method: 'POST' });
-      if (!response.ok) throw new Error('Failed to reset visitor stats');
-      setDashboardCounts((current) => ({ ...current, totalClicks: 0 }));
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/reset-stats', {
+        method: 'POST',
+      });
+      if (response.ok) {
+        alert('Stats have been reset successfully.');
+        setDashboardCounts((prev) => ({ ...prev, totalClicks: 0 }));
+      } else {
+        console.error('Failed to reset stats');
+        alert('Failed to reset stats');
+      }
     } catch (error) {
       console.error('Error resetting stats:', error);
-      window.alert('Visitor stats could not be reset. Please try again.');
+      alert('Error resetting stats');
     }
   };
 
@@ -80,6 +84,7 @@ const Admin = () => {
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },
     { title: 'Review payouts', copy: 'Process affiliate payout requests.', href: '/administration/payouts', icon: FaShieldAlt },
     { title: 'Publish content', copy: 'Create editorial and platform news.', href: '/administration/blogs/add-new-blog', icon: FaBolt },
+    { title: 'Manage FAQs', copy: 'Add, edit, publish, or remove support answers.', href: '/administration/faqs', icon: FaQuestionCircle },
   ];
 
   if (showAnalytics) {

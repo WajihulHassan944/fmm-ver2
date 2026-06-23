@@ -6,7 +6,7 @@ const PlayForFree = () => {
   const router = useRouter();
 
   const handlePlayNowClick = () => {
-    router.push('/auth?mode=login&role=player&next=/UserDashboard'); 
+    router.push('/login'); 
   };
 
   return (

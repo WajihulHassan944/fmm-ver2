@@ -40,16 +40,14 @@ const navigationGroups = [
     label: 'Fight operations',
     icon: FaFistRaised,
     items: [
-      { label: 'Score center', href: '/administration/upcomingFights', icon: FaTrophy },
-      { label: 'Create match', href: '/administration/AddNewMatch', icon: FaPlus },
-      { label: 'All matches', href: '/administration/PreviousMatches', icon: FaLayerGroup },
-      { label: 'Edit or delete', href: '/administration/DeleteUpdateMatches', icon: FaShieldAlt },
+      { label: 'Fight registry', href: '/administration/fights', icon: FaLayerGroup, matchPrefixes: ['/administration/PreviousMatches', '/administration/DeleteUpdateMatches', '/administration/upcomingFights'] },
+      { label: 'Scoring rules', href: '/administration/scoring-rules', icon: FaTrophy },
+      { label: 'Create fight', href: '/administration/AddNewMatch', icon: FaPlus },
       { label: 'Fight calendar', href: '/administration/Calendar', icon: FaCalendarAlt },
-      { label: 'Shadow library', href: '/administration/ShadowFightsLibrary', icon: FaBolt },
-      { label: 'Affiliate matches', href: '/administration/AffiliateMatches', icon: FaUserFriends },
-      { label: 'Predictions', href: '/administration/predictions', icon: FaChartBar },
-      { label: 'Admin records', href: '/administration/adminRecords', icon: FaTrophy },
-      { label: 'Video archive', href: '/administration/YoutubeArchive', icon: FaVideo },
+      { label: 'Prediction scoring', href: '/administration/predictions', icon: FaChartBar },
+      { label: 'Shadow fights', href: '/administration/ShadowFightsLibrary', icon: FaBolt },
+      { label: 'Affiliate fights', href: '/administration/AffiliateMatches', icon: FaUserFriends },
+      { label: 'Records & video', href: '/administration/adminRecords', icon: FaVideo },
     ],
   },
   {
@@ -59,8 +57,7 @@ const navigationGroups = [
     items: [
       { label: 'Registered users', href: '/administration/RegisteredUsers', icon: FaUsers },
       { label: 'Affiliate users', href: '/administration/AffiliateUsers', icon: FaUserFriends },
-      { label: 'Guest users', href: '/administration/non-registered-users', icon: FaUsers },
-      { label: 'Suspended accounts', href: '/administration/suspended-accounts', icon: FaShieldAlt },
+      { label: 'Guest & suspended', href: '/administration/non-registered-users', icon: FaShieldAlt, matchPrefixes: ['/administration/suspended-accounts'] },
       { label: 'Payouts', href: '/administration/payouts', icon: FaMoneyCheckAlt },
       { label: 'Sponsors', href: '/administration/sponsors', icon: FaTrophy },
     ],
@@ -70,8 +67,7 @@ const navigationGroups = [
     label: 'Editorial',
     icon: FaNewspaper,
     items: [
-      { label: 'All blogs', href: '/administration/blogs', icon: FaBlog, matchPrefix: '/administration/blogs/blog-details-admin' },
-      { label: 'Add blog', href: '/administration/blogs/add-new-blog', icon: FaPlus },
+      { label: 'Blogs', href: '/administration/blogs', icon: FaBlog, matchPrefixes: ['/administration/blogs/'] },
       { label: 'News', href: '/administration/news', icon: FaNewspaper },
       { label: 'FAQs', href: '/administration/faqs', icon: FaComments },
       { label: 'Email templates', href: '/administration/Email', icon: FaEnvelope },
@@ -82,28 +78,25 @@ const navigationGroups = [
     label: 'Community',
     icon: FaComments,
     items: [
-      { label: 'Forum', href: '/administration/Community', icon: FaComments, matchPrefix: '/administration/threads' },
-      { label: 'Chatroom', href: '/administration/chatroom', icon: FaComments },
+      { label: 'Forum & chat', href: '/administration/Community', icon: FaComments, matchPrefixes: ['/administration/threads', '/administration/chatroom'] },
       { label: 'Notifications', href: '/administration/notifications', icon: FaBell },
     ],
   },
   {
     id: 'automation',
-    label: 'AI & social',
+    label: 'Automation & social',
     icon: FaRobot,
     items: [
-      { label: 'Blog AI', href: '/administration/BlogsAiBot', icon: FaRobot },
-      { label: 'Social AI', href: '/administration/SocialAiBot', icon: FaRobot },
-      { label: 'Create social post', href: '/administration/MakePost', icon: FaPlus },
-      { label: 'X / Twitter', href: '/administration/tweet', icon: FaBolt },
-      { label: 'TikTok', href: '/administration/tiktok', icon: FaVideo },
+      { label: 'Content assistants', href: '/administration/BlogsAiBot', icon: FaRobot, matchPrefixes: ['/administration/SocialAiBot'] },
+      { label: 'Social publishing', href: '/administration/MakePost', icon: FaPlus, matchPrefixes: ['/administration/tweet', '/administration/tiktok'] },
+      { label: 'Video archive', href: '/administration/YoutubeArchive', icon: FaVideo },
     ],
   },
 ];
 
 const getActiveItem = (pathname) => {
   for (const group of navigationGroups) {
-    const item = group.items.find((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`) || (entry.matchPrefix && pathname.startsWith(entry.matchPrefix)));
+    const item = group.items.find((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`) || entry.matchPrefixes?.some((prefix) => pathname.startsWith(prefix)));
     if (item) return { group, item };
   }
   return { group: null, item: { label: 'Command center', href: '/administration' } };
@@ -197,7 +190,7 @@ const AdminHeader = () => {
                   <div className="admin-command-group-items">
                     {group.items.map((item) => {
                       const Icon = item.icon;
-                      const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`) || (item.matchPrefix && pathname.startsWith(item.matchPrefix));
+                      const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`) || item.matchPrefixes?.some((prefix) => pathname.startsWith(prefix));
                       return (
                         <Link key={item.href} href={item.href} className={`admin-command-link ${isActive ? 'is-active' : ''}`} title={item.label}>
                           <Icon aria-hidden="true" /><span>{item.label}</span>

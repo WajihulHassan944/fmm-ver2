@@ -1594,7 +1594,7 @@
   background:
     linear-gradient(180deg, rgba(3, 6, 10, 0.2), rgba(3, 6, 10, 0.95)),
     linear-gradient(90deg, rgba(3, 6, 10, 0.18), rgba(3, 6, 10, 0.62)),
-    url('/images/fmm-experience/backgrounds/auth-arena.jpg') center 38% / cover;
+    url('/images/fmm-pages/auth-arena-hd.webp') center 38% / cover;
   border-right: 1px solid var(--xp-border);
   min-height: calc(100vh - 80px);
   overflow: hidden;
@@ -1714,6 +1714,21 @@
 .xp-affiliate-hero,
 .xp-sponsor-dashboard-hero { background: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76)), url('/images/fmm-experience/fighter-duel-arena.jpg') center / cover; border-bottom: 1px solid var(--xp-border); min-height: 570px; overflow: hidden; padding: 146px 0 64px; position: relative; }
 .xp-dashboard-hero::before { background: radial-gradient(circle at 82% 30%, rgba(223, 17, 27, 0.27), transparent 29rem); content: ''; inset: 0; position: absolute; }
+
+.player-dashboard-rich-page {
+  background:
+    radial-gradient(circle at 82% 22%, rgba(223, 17, 27, 0.12), transparent 24rem),
+    radial-gradient(circle at 18% 18%, rgba(22, 143, 230, 0.08), transparent 28rem),
+    #04070b;
+}
+
+.player-dashboard-hero-rich {
+  background:
+    linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.78)),
+    url('/images/fmm-pages/premium-affiliate-banner.png') center / cover !important;
+  min-height: 600px;
+  padding-top: 118px;
+}
 .xp-dashboard-hero-layout { align-items: center; display: grid; gap: 42px; grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr); position: relative; z-index: 2; }
 .xp-dashboard-profile { align-items: center; display: grid; gap: 25px; grid-template-columns: 145px minmax(0, 1fr); }
 .xp-dashboard-avatar { background: #090d13; border: 2px solid rgba(223, 17, 27, 0.52); border-radius: 24px; box-shadow: var(--xp-glow-red); height: 160px; overflow: hidden; position: relative; width: 145px; }

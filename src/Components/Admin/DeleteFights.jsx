@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import EditMatch from './EditMatch';
+import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { fetchMatches } from '@/Redux/matchSlice';
 import { useRouter } from 'next/router';
+import { FaEdit, FaPlus, FaSearch, FaSyncAlt, FaTrashAlt } from 'react-icons/fa';
+import { fetchMatches } from '@/Redux/matchSlice';
+import EditMatch from './EditMatch';
+
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
 
 const DeleteFights = () => {
   const dispatch = useDispatch();
@@ -13,214 +19,117 @@ const DeleteFights = () => {
   const [selectedMatchId, setSelectedMatchId] = useState(null);
   const [selectedAffiliateId, setSelectedAffiliateId] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [popupStep, setPopupStep] = useState('default'); // 'default' or 'confirmReturnTokens'
+  const [popupStep, setPopupStep] = useState('default');
   const [returnTokens, setReturnTokens] = useState(false);
-  const [popupMessage, setPopupMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredMatches, setFilteredMatches] = useState([]);
+
+  useEffect(() => { if (matchStatus === 'idle') dispatch(fetchMatches()); }, [matchStatus, dispatch]);
 
   useEffect(() => {
-    if (matchStatus === 'idle') {
-      dispatch(fetchMatches());
+    if (router.isReady && router.query?.matchId) {
+      setSelectedMatchId(String(router.query.matchId));
+      setIsEditing(true);
     }
-  }, [matchStatus, dispatch]);
+  }, [router.isReady, router.query?.matchId]);
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredMatches(matches);
-    } else {
-      const lowerCaseQuery = searchQuery.toLowerCase();
-      const filtered = matches.filter((match) => 
-        match.matchFighterA.toLowerCase().includes(lowerCaseQuery) ||
-        match.matchFighterB.toLowerCase().includes(lowerCaseQuery) ||
-        match.matchDescription?.toLowerCase().includes(lowerCaseQuery) ||
-        match.matchCategory?.toLowerCase().includes(lowerCaseQuery) ||
-        match.matchCategoryTwo?.toLowerCase().includes(lowerCaseQuery) ||
-        match.matchStatus?.toLowerCase().includes(lowerCaseQuery)
-      );
-      setFilteredMatches(filtered);
-    }
-  }, [searchQuery, matches]);
+  const filteredMatches = useMemo(() => {
+    const all = Array.isArray(matches) ? matches : [];
+    if (!searchQuery.trim()) return all;
+    const term = searchQuery.toLowerCase();
+    return all.filter((match) => [match.matchName, match.matchFighterA, match.matchFighterB, match.matchDescription, match.matchCategory, match.matchCategoryTwo, match.matchStatus]
+      .filter(Boolean).join(' ').toLowerCase().includes(term));
+  }, [matches, searchQuery]);
 
-  const handleMatchClick = (id, affiliateId) => {
+  const handleDeleteClick = (id, affiliateId) => {
     setSelectedMatchId(id);
-    setSelectedAffiliateId(affiliateId);
+    setSelectedAffiliateId(affiliateId || null);
     setShowPopup(true);
     setPopupStep('default');
-    setPopupMessage('Delete or Edit this match?');
-  };
-
-  const modifyThisPopup = () => {
-    setPopupStep('confirmReturnTokens');
-    setPopupMessage('Return tokens to all users?');
   };
 
   const handleConfirmDelete = async () => {
-    if (selectedMatchId) {
-      const deleteMatchPromise = new Promise(async (resolve, reject) => {
-        try {
-          let url = `https://fantasymmadness-game-server-three.vercel.app/api/matches/${selectedMatchId}?updateWallet=${returnTokens}`;
-          if (selectedAffiliateId) {
-            url += `&affiliateId=${selectedAffiliateId}`;
-          }
-
-          const response = await fetch(url, { method: 'DELETE' });
-
-          if (response.ok) {
-            dispatch(fetchMatches());
-            resolve();
-
-            setTimeout(() => {
-              setShowPopup(false);
-              setSelectedMatchId(null);
-              setSelectedAffiliateId(null);
-            }, 1000);
-          } else {
-            reject(new Error('Failed to delete the match'));
-          }
-        } catch (error) {
-          reject(new Error('Server error, please try again later'));
-        }
-      });
-
-      toast.promise(deleteMatchPromise, {
-        pending: 'Deleting match...',
-        success: 'Match deleted successfully 👌',
-        error: {
-          render({ data }) {
-            return data.message || 'Failed to delete match';
-          },
-        },
-      }).finally(() => {
-        setTimeout(() => {
+    if (!selectedMatchId) return;
+    const deleteMatchPromise = new Promise(async (resolve, reject) => {
+      try {
+        let url = `${API_BASE}/api/matches/${selectedMatchId}?updateWallet=${returnTokens}`;
+        if (selectedAffiliateId) url += `&affiliateId=${selectedAffiliateId}`;
+        const response = await fetch(url, { method: 'DELETE' });
+        if (response.ok) {
+          dispatch(fetchMatches());
+          resolve();
           setShowPopup(false);
-        }, 1000);
-      });
-    }
-  };
+          setSelectedMatchId(null);
+          setSelectedAffiliateId(null);
+        } else reject(new Error('Failed to delete the match'));
+      } catch (error) {
+        reject(new Error('Server error, please try again later'));
+      }
+    });
 
-  const handleCancelDelete = () => {
-    setShowPopup(false);
-    setSelectedMatchId(null);
-    setSelectedAffiliateId(null);
-  };
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-    setShowPopup(false);
+    toast.promise(deleteMatchPromise, {
+      pending: 'Deleting match...',
+      success: 'Match deleted successfully 👌',
+      error: { render({ data }) { return data.message || 'Failed to delete match'; } },
+    });
   };
 
   if (isEditing && selectedMatchId) {
     return (
-      <>
-        <i
-          className="fa fa-arrow-circle-left"
-          aria-hidden="true"
-          onClick={() => setIsEditing(false)}
-          style={{ position: 'absolute', top: '38px', left: '18%', cursor: 'pointer', fontSize: '24px', color: '#007bff', zIndex: '99999' }}
-        ></i>
+      <div className="admin-workspace">
+        <section className="admin-page-heading admin-page-heading-compact">
+          <div><span>Fight operations</span><h2>Edit fight</h2><p>Update the selected fight through the existing edit match component and endpoints.</p></div>
+          <button type="button" className="admin-action-secondary" onClick={() => { setIsEditing(false); setSelectedMatchId(null); }}>Back to table</button>
+        </section>
         <EditMatch matchId={selectedMatchId} isShadow={false} />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <div>
-        <div className='adminWrapper'>
-          <i
-            className="fa fa-arrow-circle-left"
-            aria-hidden="true"
-            onClick={() => router.push(-1)}
-            style={{ position: 'absolute', top: '38px', left: '18%', cursor: 'pointer', fontSize: '24px', color: '#007bff', zIndex: '99999' }}
-          ></i>
-          <div className='homeSecond' style={{ background: 'transparent' }}>
-            <h1 className='second-main-heading'>Delete / Update Fights</h1>
-            <input
-              type="text"
-              placeholder='Search here...'
-              className='searchbar-fights'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <div className="fightswrap">
-              {filteredMatches.length > 0 ? (
-                filteredMatches.map((match) => (
-                  <div
-                    className="fightItem"
-                    key={match._id}
-                    onClick={() => handleMatchClick(match._id, match.affiliateId || null)}
-                  >
-                    <div className='fightersImages'>
-                      <div className='fighterOne'>
-                        <img src={match.fighterAImage} alt={match.matchFighterA} />
-                      </div>
-                      <div className='fighterTwo'>
-                        <img src={match.fighterBImage} alt={match.matchFighterB} />
-                      </div>
-                    </div>
-                    <div className='fightItemOne'>
-                      <div className="transformed-div">
-                        <h1>{match.matchFighterA} -VS- {match.matchFighterB}</h1>
-                      </div>
-                      <div className="transformed-div-two">
-                        <div className='transformed-div-two-partOne'>
-                          <h1>{match.matchCategoryTwo || match.matchCategory}</h1>
-                        </div>
-                        <div className='transformed-div-two-partTwo'>
-                          <p>{match.matchDate?.split('T')[0]}</p>
-                          <h1>{match.matchType}</h1>
-                          <h1>pot ${match.pot}</h1>
-                        </div>
-                      </div>
-                    </div>
-                    <div className='fightItemTwo'>
-                      <div className="transformed-div-three">
-                        <p>{match.matchDescription}</p>
-                      </div>
-                      <div className="transformed-div-four">
-                        <h1>Status</h1>
-                        <p>{match.matchStatus}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className='noMatch'>No matches found</p>
-              )}
-            </div>
-          </div>
+    <div className="admin-workspace admin-delete-fights-workspace">
+      <section className="admin-page-heading">
+        <div><span>Fight operations</span><h2>Delete / update fights</h2><p>Search all fight cards, edit production records, or delete with the original token-return confirmation flow.</p></div>
+        <div className="admin-heading-actions"><Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link><button type="button" className="admin-action-secondary" onClick={() => dispatch(fetchMatches())}><FaSyncAlt className={matchStatus === 'loading' ? 'xp-spin' : ''} /> Refresh</button></div>
+      </section>
+
+      <section className="admin-table-panel">
+        <div className="admin-table-toolbar">
+          <label className="admin-table-search"><FaSearch /><input type="search" placeholder="Search fight, fighter, category, or status" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></label>
+          <span className="admin-result-count">{filteredMatches.length} of {(matches || []).length} fights</span>
         </div>
-        {showPopup && (
-          <div className="popup">
-            <div className="popup-content">
-              <h2 style={{color:'#fff', fontFamily:'sans-serif', fontSize:'19px'}}>{popupMessage}</h2>
-              {popupStep === 'default' ? (
-                <div className="popup-actions">
-                  <button onClick={modifyThisPopup}>Delete</button>
-                  <button onClick={handleEditClick}>Edit</button>
-                  <button onClick={handleCancelDelete}>Cancel</button>
-                </div>
-              ) : (
-                <div>
-                  <label style={{marginRight:'20px'}}>
-                    <input type="radio" name="returnTokens" value="true" onChange={() => setReturnTokens(true)} /> Yes
-                  </label>
-                  <label>
-                    <input type="radio" name="returnTokens" value="false" onChange={() => setReturnTokens(false)} defaultChecked /> No
-                  </label>
-                  <div className="popup-actions">
-                    <button onClick={handleConfirmDelete}>Submit</button>
-                    <button onClick={handleCancelDelete}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+        <div className="admin-data-table-scroll">
+          <table className="admin-data-table admin-fights-table">
+            <thead><tr><th>Fight</th><th>Sport</th><th>Schedule</th><th>Status</th><th>Prize</th><th>Actions</th></tr></thead>
+            <tbody>
+              {filteredMatches.length ? filteredMatches.map((match, index) => (
+                <tr key={match._id || index}>
+                  <td><div className="admin-fight-cell"><span><img src={match.fighterAImage || FALLBACK_A} alt="" /><img src={match.fighterBImage || FALLBACK_B} alt="" /></span><div><strong>{match.matchName || `${match.matchFighterA} vs ${match.matchFighterB}`}</strong><small>{match.matchFighterA} vs {match.matchFighterB}</small></div></div></td>
+                  <td>{match.matchCategoryTwo || match.matchCategory}</td>
+                  <td><span className="admin-cell-stack"><strong>{match.matchDate?.split('T')[0] || 'Date pending'}</strong><small>{match.matchTime || 'Time pending'}</small></span></td>
+                  <td><span className={`admin-status-badge ${match.matchStatus === 'Finished' ? 'is-success' : 'is-warning'}`}>{match.matchStatus || 'Draft'}</span></td>
+                  <td>{Number(match.pot || 0) ? `$${Number(match.pot).toLocaleString()}` : '—'}</td>
+                  <td><div className="admin-row-actions"><button type="button" onClick={() => { setSelectedMatchId(match._id); setIsEditing(true); }}><FaEdit /> Edit</button><button type="button" className="is-danger" onClick={() => handleDeleteClick(match._id, match.affiliateId)}><FaTrashAlt /> Delete</button></div></td>
+                </tr>
+              )) : <tr><td colSpan="6"><div className="admin-empty-table">No matches found.</div></td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {showPopup && (
+        <div className="admin-modal-backdrop">
+          <section className="admin-video-modal admin-delete-modal">
+            <button type="button" className="admin-modal-close" onClick={() => setShowPopup(false)}>×</button>
+            {popupStep === 'default' ? (
+              <><header><FaTrashAlt /><span>Delete fight</span><h3>Delete or edit this match?</h3><p>Editing keeps all data. Deleting can optionally return tokens to users.</p></header><div className="admin-delete-modal-actions"><button type="button" className="admin-action-danger" onClick={() => setPopupStep('confirmReturnTokens')}>Delete</button><button type="button" className="admin-action-secondary" onClick={() => { setIsEditing(true); setShowPopup(false); }}>Edit</button><button type="button" className="admin-action-secondary" onClick={() => setShowPopup(false)}>Cancel</button></div></>
+            ) : (
+              <><header><FaTrashAlt /><span>Wallet adjustment</span><h3>Return tokens?</h3><p>Choose whether users should receive their entry tokens back after deletion.</p></header><div className="admin-token-choice"><label><input type="radio" name="returnTokens" checked={returnTokens} onChange={() => setReturnTokens(true)} /> Yes</label><label><input type="radio" name="returnTokens" checked={!returnTokens} onChange={() => setReturnTokens(false)} /> No</label></div><div className="admin-delete-modal-actions"><button type="button" className="admin-action-danger" onClick={handleConfirmDelete}>Submit</button><button type="button" className="admin-action-secondary" onClick={() => setShowPopup(false)}>Cancel</button></div></>
+            )}
+          </section>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,9 +1,5 @@
-import dynamic from 'next/dynamic';
-
-const FightsHub = dynamic(() => import('@/Components/Fights/FightsHub'), {
-  loading: () => <div className="experience-page xp-route-loading">Loading the fight room...</div>,
-});
+import FightsHub from '@/Components/Fights/FightsHub';
 
 export default function FightsPage() {
-  return <FightsHub />;
+  return <FightsHub initialStatus="all" />;
 }

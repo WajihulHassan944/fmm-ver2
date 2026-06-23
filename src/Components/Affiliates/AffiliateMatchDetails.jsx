@@ -11,11 +11,29 @@ const ReactMediaRecorder = dynamic(
   { ssr: false }
 );
 
-import s3 from "../Config/s3Config"; // Importing the configured S3 instance
 import { toast } from 'react-toastify';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
-import { Signer } from 'aws-sdk';
 import UsersPlayed from './UsersPlayed/UsersPlayed';
+import {
+  FaArrowLeft,
+  FaBullhorn,
+  FaChartLine,
+  FaCheckCircle,
+  FaClock,
+  FaCoins,
+  FaCopy,
+  FaDownload,
+  FaInfoCircle,
+  FaMicrophone,
+  FaPause,
+  FaPlay,
+  FaShareAlt,
+  FaTimes,
+  FaTrash,
+  FaTrophy,
+  FaUsers,
+  FaVideo,
+} from 'react-icons/fa';
 
 
 
@@ -246,14 +264,12 @@ const actualProfit = extraActualProfit / 2;
   };
   if (navigateDashboard) {
     return (
-      <>
-        <i
-          className="fa fa-arrow-circle-left dashboard-arrow-circle"
-          aria-hidden="true"
-          onClick={() => setNavigateToDash(null)} // Go back to the previous component
-        ></i>
+      <div className="affiliate-campaign-subview">
+        <button type="button" className="affiliate-campaign-back" onClick={() => setNavigateToDash(null)}>
+          <FaArrowLeft /> Back to campaign
+        </button>
         <AffiliateFightLeaderboard matchId={navigateDashboard} />
-      </>
+      </div>
     );
   }
   
@@ -422,265 +438,259 @@ const handleSave = async (blobUrl) => {
   };
 
 
+  const userPredictions = Array.isArray(match.userPredictions) ? match.userPredictions : [];
+  const userPredictionCount = userPredictions.length;
+  const minimumUsers = Number.isFinite(Number(requiredUsers)) ? Math.ceil(Number(requiredUsers)) : 0;
+  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(match.matchName)}/${encodeURIComponent(`${affiliate.firstName} ${affiliate.lastName}`)}`;
+  const fightCategory = match.matchCategoryTwo || match.matchCategory || 'Fight campaign';
+  const fightStatus = match.matchShadowStatus || 'inactive';
+  const scheduledDate = match.matchDate ? String(match.matchDate).split('T')[0] : 'Schedule pending';
+
   if (showUsersPlayed) {
     return (
-       <>
-    <i
-      className="fa fa-arrow-circle-left dashboard-arrow-circle"
-      aria-hidden="true"
-      onClick={() => setShowUsersPlayed(false)} // Go back to the previous component
-    ></i>
-    <UsersPlayed userPredictions={match.userPredictions} />
-   
-  </> );
+      <div className="affiliate-campaign-subview">
+        <button type="button" className="affiliate-campaign-back" onClick={() => setShowUsersPlayed(false)}>
+          <FaArrowLeft /> Back to campaign
+        </button>
+        <UsersPlayed userPredictions={userPredictions} />
+      </div>
+    );
   }
 
   return (
-    
-  <div class="promotional-details-container-new">
-  <div class="ufc-title">{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</div>
- <div class="fight-night-title">{match.matchName}</div>
-<div class="promotional-details-images">
- <div class="promotional-details-image-cont">
-   <img src={match.fighterAImage} alt="Fighter A" />
- </div>
- 
- <div class="promotional-details-image-cont">
-   <img src={match.fighterBImage} alt="Fighter B" />
- </div>
- </div>
- <div class="promotional-details-rows">
-   <div class="promotional-details-row promotional-details-row-two">
-   <h3 class="makelower">{match.matchFighterA}</h3><img src="https://res.cloudinary.com/daflot6fo/image/upload/v1742999736/jecyacmfqqmq2tmnek3q.png" alt="vs" /><h3 class="makeupper">{match.matchFighterB}</h3>
-   </div>
-   <div class="promotional-details-row promotional-details-row-three">
-   <h3 style={{fontSize:'17px'}}>Type: {match.matchType}</h3>
-   <h3>Token Price: <span className='dollar'>${match.matchTokens}</span></h3>
-   <h3>Pot: <span className='dollar'>${match.pot}</span></h3>
-   </div>
-   <div class="promotional-details-row promotional-details-row-one">
-   <h3>Fight promotion url below <span onClick={copyToClipboard} style={{ cursor: 'pointer' }}>Click to copy</span></h3></div>
+    <div className="affiliate-campaign-command">
+      <section
+        className="affiliate-campaign-hero"
+        style={{ '--affiliate-campaign-bg': `url(${match.promotionBackground || backgroundImgVar})` }}
+      >
+        <div className="affiliate-campaign-hero-overlay" aria-hidden="true" />
+        <div className="affiliate-campaign-hero-grid" aria-hidden="true" />
 
-   <div class="promotional-details-row promotional-details-row-four">
-   <h3 onClick={copyToClipboard} style={{cursor:'pointer'}}>fantasymmadness.com/shadow/{match.matchName}/{affiliate.firstName} {affiliate.lastName}</h3></div>
-
-<div className='flexed-div'>
-   <button 
-  className='save-updated-btn startFight' 
-  onClick={match.matchShadowStatus === "inactive" ? () => handleActiveFight(match._id) : null}
-  disabled={match.matchShadowStatus === "active"}
->
-  {match.matchShadowStatus === "inactive" ? "Start this Fight" : "Fight Started"}
-</button>
-  <button 
-    className='save-updated-btn startFight' 
-    onClick={() => handleToggleFightStatus(match._id, match.matchShadowStatus)}
-  >
-    {match.matchShadowStatus === "inactive" ? "Activate Fight" : "Deactivate Fight"}
-  </button>
-</div>
-
- </div>
- 
- 
-
-  <div className="criteria-details-another">
-    <h5>Profit Stats</h5>
-
-    <div
-      className="justify-space-between row-hover"
-      onMouseEnter={() => setHoveredRow("earnedProfit")}
-      onMouseLeave={() => setHoveredRow(null)}
-    >
-      <h2>Earned Profit:</h2> <h3>${actualProfit.toFixed(2)}</h3>
-      {hoveredRow === "earnedProfit" && (
-        <div className="hover-info-box">Actual profit earned from extra users.</div>
-      )}
-    </div>
-
-    <div
-      className="justify-space-between row-hover"
-      onMouseEnter={() => setHoveredRow("expectedProfit")}
-      onMouseLeave={() => setHoveredRow(null)}
-    >
-      <h2>Expected Profit:</h2> <h3>${profit.toFixed(2)}</h3>
-      {hoveredRow === "expectedProfit" && (
-        <div className="hover-info-box">Estimated profit based on required users.</div>
-      )}
-    </div>
-
-    <div
-      className="justify-space-between row-hover"
-      onMouseEnter={() => setHoveredRow("leagueMembers")}
-      onMouseLeave={() => setHoveredRow(null)}
-    >
-      <h2>League Members:</h2> <h3>{currentUsers}</h3>
-      {hoveredRow === "leagueMembers" && (
-        <div className="hover-info-box">Total users currently in the league.</div>
-      )}
-    </div>
-
-    <div
-      className="justify-space-between row-hover"
-      onMouseEnter={() => setHoveredRow("minUsers")}
-      onMouseLeave={() => setHoveredRow(null)}
-    >
-      <h2>Min Reqd Users:</h2> <h3>{Math.ceil(requiredUsers)}</h3>
-      {hoveredRow === "minUsers" && (
-        <div className="hover-info-box">Minimum users required to complete the pot.</div>
-      )}
-    </div>
-
-    <div
-      className="justify-space-between row-hover"
-      onMouseEnter={() => setHoveredRow("usersPlayed")}
-      onMouseLeave={() => setHoveredRow(null)}
-      onClick={() => setShowUsersPlayed(true)}
-      
-    >
-      <h2>Users Played:</h2>
-      <h3>{match.userPredictions.length > 0 ? match.userPredictions.length : "None"}</h3>
-      {hoveredRow === "usersPlayed" && (
-        <div className="hover-info-box">Number of users who submitted predictions.</div>
-      )}
-    </div>
-  </div>
-
-
- <div style={{ width: '100%', display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-          <button className='btn-grad promobtn' onClick={() => handleDeleteFight(match._id)}>Delete Fight</button>
-          <button className='btn-grad promobtn' onClick={() => handleDashboardOpening(match._id)}>Dashboard</button>
+        <div className="affiliate-campaign-hero-copy">
+          <p className="xp-eyebrow"><FaBullhorn /> Live creator campaign</p>
+          <span className={`affiliate-campaign-status is-${fightStatus}`}><i /> {fightStatus}</span>
+          <h1>{match.matchName}</h1>
+          <p>
+            Control campaign visibility, distribute the promotional kit, monitor participation,
+            and open the live scoring dashboard without leaving this workspace.
+          </p>
+          <div className="affiliate-campaign-hero-meta">
+            <span><FaTrophy /> {fightCategory}</span>
+            <span><FaCoins /> {match.matchTokens || 0} token entry</span>
+            <span><FaClock /> {scheduledDate}</span>
+          </div>
         </div>
 
-        <canvas 
-  ref={canvasRef} 
-  width={500} 
-  height={300} 
-  style={{ 
-    border: '1px solid #000', 
-    marginTop: '70px', 
-    width: '100%', // Make the width responsive
-    maxWidth: '500px', // Set the maximum width to avoid stretching too much
-    height: 'auto' // Maintain aspect ratio
-  }}
-></canvas>
+        <div className="affiliate-campaign-faceoff" aria-label={`${match.matchFighterA} versus ${match.matchFighterB}`}>
+          <figure>
+            <img src={match.fighterAImage} alt={match.matchFighterA || 'Fighter A'} />
+            <figcaption>{match.matchFighterA || 'Fighter A'}</figcaption>
+          </figure>
+          <div><span>{fightCategory}</span><strong>VS</strong><small>{match.maxRounds || '—'} rounds max</small></div>
+          <figure>
+            <img src={match.fighterBImage} alt={match.matchFighterB || 'Fighter B'} />
+            <figcaption>{match.matchFighterB || 'Fighter B'}</figcaption>
+          </figure>
+        </div>
+      </section>
 
+      <section className="affiliate-campaign-kpi-strip">
+        <article><span>Prize pot</span><strong>${Number(match.pot || 0).toLocaleString()}</strong><small>Configured winner award</small></article>
+        <article><span>Entries</span><strong>{userPredictionCount}</strong><small>Predictions submitted</small></article>
+        <article><span>Required</span><strong>{minimumUsers || '—'}</strong><small>Minimum paid players</small></article>
+        <article><span>Earned</span><strong>${actualProfit.toFixed(2)}</strong><small>Calculated campaign profit</small></article>
+      </section>
 
-<div style={{display:'flex',gap:'10px'}}>
-        <button onClick={downloadImage} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#FF4500', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}>Download Image</button>
-        <button  onClick={openModal} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#FF4500', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}>View Instructions</button>
-     
-        {!match.matchPromotionalVideoUrl && (
-  <button 
-    onClick={() => {
-      openPodcastRecorder(); 
-      window.scrollBy({ top: 400, behavior: 'smooth' });
-    }} 
-    style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#FF4500', color: '#FFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}
-  >
-    Record a podcast
-  </button>
-)}
-   </div>  
-       
-        {isModalOpen && (
-  <div className="modal-overlay-instructions">
-    <div className="modal-content">
-      <h2>Event Instructions</h2>
-      <p>Follow these steps to maximize your promotion:</p>
-      <ul className="instruction-list">
-        <li>🌟 <strong>Step 1:</strong> Download the promotional image.</li>
-        <li>🌐 <strong>Step 2:</strong> Share it on your social networks.</li>
-        <li>📱 <strong>Step 3:</strong> Let users scan the QR code to access the promotion.</li>
-        <li>🎉 <strong>Step 4:</strong> Enjoy welcoming new members!</li>
-      </ul>
-      <button className="close-btn" onClick={closeModal}>Close</button>
-    </div>
-  </div>
-)}
-{isOpenPodcast && (
-  <ReactMediaRecorder
-    video
-    render={({ status, startRecording, stopRecording, mediaBlobUrl, previewStream }) => (
-      <div className="videoRecorderContainer">
-        <p className="statusText" style={{color:'#fff'}}>Status: {status}</p>
-        
-        {/* Live preview video element */}
-        <video 
-          className="liveVideo" 
-          ref={(video) => {
-            if (video && previewStream) {
-              video.srcObject = previewStream; // Correctly setting srcObject for the live preview
-            }
-          }} 
-          autoPlay 
-          muted 
-          playsInline
-        />
-        
-        {/* Video element to show recorded video after stopping */}
-        {mediaBlobUrl && (
-          <video className="recordedVideo" src={mediaBlobUrl} controls />
-        )}
-        
-        <div className="buttonContainer">
-        
-<button
-  className="recordButton"
-  onClick={() => {
-    setIsRecording(true); // Disable Start button
-    startRecording();
-  }}
-  disabled={isRecording} // Disable Start button after clicking
-  style={{ pointerEvents: isRecording ? 'none' : 'auto' }}
->
-  Start Recording
-</button>
+      <div className="affiliate-campaign-layout">
+        <main className="affiliate-campaign-main">
+          <section className="affiliate-campaign-panel affiliate-campaign-control-panel">
+            <header>
+              <div><p className="xp-eyebrow">Campaign controls</p><h2>Fight operations</h2></div>
+              <span className={`affiliate-campaign-state-pill is-${fightStatus}`}>{fightStatus === 'active' ? <FaPlay /> : <FaPause />} {fightStatus}</span>
+            </header>
+            <div className="affiliate-campaign-control-grid">
+              <button
+                type="button"
+                className="affiliate-campaign-action is-primary"
+                onClick={match.matchShadowStatus === 'inactive' ? () => handleActiveFight(match._id) : undefined}
+                disabled={match.matchShadowStatus === 'active'}
+              >
+                <FaPlay /><span><strong>{match.matchShadowStatus === 'inactive' ? 'Start this fight' : 'Fight started'}</strong><small>Move the campaign into its live fight state.</small></span>
+              </button>
+              <button
+                type="button"
+                className="affiliate-campaign-action"
+                onClick={() => handleToggleFightStatus(match._id, match.matchShadowStatus)}
+              >
+                {match.matchShadowStatus === 'inactive' ? <FaCheckCircle /> : <FaPause />}
+                <span><strong>{match.matchShadowStatus === 'inactive' ? 'Activate fight' : 'Deactivate fight'}</strong><small>Control whether the campaign accepts audience activity.</small></span>
+              </button>
+              <button type="button" className="affiliate-campaign-action" onClick={() => handleDashboardOpening(match._id)}>
+                <FaChartLine /><span><strong>Open dashboard</strong><small>Review fight leaderboard and campaign performance.</small></span>
+              </button>
+              <button type="button" className="affiliate-campaign-action is-danger" onClick={() => handleDeleteFight(match._id)}>
+                <FaTrash /><span><strong>Delete fight</strong><small>Remove this promotion using the existing delete workflow.</small></span>
+              </button>
+            </div>
+          </section>
 
-<button
-  className="stopButton"
-  onClick={() => {
-    setIsRecording(false); // Re-enable Start button
-    stopRecording();
-  }}
-  disabled={!isRecording} // Initially disabled, enabled when recording
->
-  Stop Recording
-</button>
+          <section className="affiliate-campaign-panel affiliate-campaign-link-panel">
+            <header>
+              <div><p className="xp-eyebrow">Audience entry point</p><h2>Public promotion link</h2></div>
+              <FaShareAlt />
+            </header>
+            <button type="button" className="affiliate-campaign-url" onClick={copyToClipboard}>
+              <span><small>Public campaign URL</small><strong>{promotionUrl}</strong></span>
+              <i><FaCopy /> Copy</i>
+            </button>
+          </section>
 
-<button
-  className="saveButton"
-  onClick={() => handleSave(mediaBlobUrl)}
-  disabled={!mediaBlobUrl} // Enable only if mediaBlobUrl exists
->
-  Save Video
-</button></div>
+          <section className="affiliate-campaign-panel">
+            <header>
+              <div><p className="xp-eyebrow">Campaign intelligence</p><h2>Profit and participation</h2></div>
+              <FaChartLine />
+            </header>
+            <div className="affiliate-campaign-metric-grid">
+              {[
+                { key: 'earnedProfit', label: 'Earned profit', value: `$${actualProfit.toFixed(2)}`, copy: 'Actual profit calculated from paid players beyond the required campaign capacity.' },
+                { key: 'expectedProfit', label: 'Expected profit', value: `$${profit.toFixed(2)}`, copy: 'Estimated profit based on current league membership and configured buy-in.' },
+                { key: 'leagueMembers', label: 'League members', value: currentUsers, copy: 'Total members currently connected to your affiliate league.' },
+                { key: 'minUsers', label: 'Minimum required', value: minimumUsers || '—', copy: 'Paid entries required for the configured prize pot to be covered.' },
+              ].map((item) => (
+                <article
+                  key={item.key}
+                  onMouseEnter={() => setHoveredRow(item.key)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                >
+                  <span>{item.label}</span><strong>{item.value}</strong><small>{item.copy}</small>
+                  {hoveredRow === item.key && <em>{item.copy}</em>}
+                </article>
+              ))}
+              <button type="button" className="affiliate-campaign-participation-card" onClick={() => setShowUsersPlayed(true)}>
+                <FaUsers /><span><small>Users played</small><strong>{userPredictionCount || 'None'}</strong><em>Open the submitted-player list</em></span>
+              </button>
+            </div>
+          </section>
+
+          <section className="affiliate-campaign-panel affiliate-campaign-creative-panel">
+            <header>
+              <div><p className="xp-eyebrow">Promotion studio</p><h2>Campaign creative kit</h2></div>
+              <FaBullhorn />
+            </header>
+            <div className="affiliate-campaign-creative-layout">
+              <div className="affiliate-campaign-canvas-shell">
+                <canvas ref={canvasRef} width={500} height={300} />
+                <span><FaCheckCircle /> QR-enabled campaign artwork</span>
+              </div>
+              <div className="affiliate-campaign-creative-copy">
+                <h3>Take the fight to your audience.</h3>
+                <p>Download the generated promotion graphic, publish it across your channels, and let fans scan directly into the campaign.</p>
+                <div>
+                  <button type="button" className="theme-btn theme-btn-primary" onClick={downloadImage}><FaDownload /> Download image</button>
+                  <button type="button" className="theme-btn theme-btn-secondary" onClick={openModal}><FaInfoCircle /> View instructions</button>
+                  {!match.matchPromotionalVideoUrl && (
+                    <button
+                      type="button"
+                      className="theme-btn theme-btn-secondary"
+                      onClick={() => {
+                        openPodcastRecorder();
+                        window.scrollBy({ top: 400, behavior: 'smooth' });
+                      }}
+                    >
+                      <FaMicrophone /> Record a podcast
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {isOpenPodcast && (
+            <section className="affiliate-campaign-panel affiliate-campaign-recorder-panel">
+              <header>
+                <div><p className="xp-eyebrow">Creator media studio</p><h2>Record campaign video</h2></div>
+                <button type="button" onClick={() => setOpenPodcast(false)} aria-label="Close recorder"><FaTimes /></button>
+              </header>
+              <ReactMediaRecorder
+                video
+                render={({ status, startRecording, stopRecording, mediaBlobUrl, previewStream }) => (
+                  <div className="affiliate-campaign-recorder">
+                    <span className="affiliate-campaign-recorder-status"><i /> Recorder status: {status}</span>
+                    <div className="affiliate-campaign-recorder-videos">
+                      <video
+                        ref={(video) => {
+                          if (video && previewStream) video.srcObject = previewStream;
+                        }}
+                        autoPlay
+                        muted
+                        playsInline
+                      />
+                      {mediaBlobUrl && <video src={mediaBlobUrl} controls />}
+                    </div>
+                    <div className="affiliate-campaign-recorder-actions">
+                      <button type="button" onClick={() => { setIsRecording(true); startRecording(); }} disabled={isRecording}><FaVideo /> Start recording</button>
+                      <button type="button" onClick={() => { setIsRecording(false); stopRecording(); }} disabled={!isRecording}><FaPause /> Stop recording</button>
+                      <button type="button" onClick={() => handleSave(mediaBlobUrl)} disabled={!mediaBlobUrl}><FaCheckCircle /> Save video</button>
+                    </div>
+                  </div>
+                )}
+              />
+            </section>
+          )}
+
+          {match.matchPromotionalVideoUrl && (
+            <section className="affiliate-campaign-panel affiliate-campaign-video-panel">
+              <header><div><p className="xp-eyebrow">Published campaign media</p><h2>Promotional video</h2></div><FaVideo /></header>
+              <video controls><source src={match.matchPromotionalVideoUrl} type="video/mp4" />Your browser does not support the video tag.</video>
+            </section>
+          )}
+        </main>
+
+        <aside className="affiliate-campaign-sidebar">
+          <section className="affiliate-campaign-side-card is-owner">
+            <img src={affiliate.profileUrl} alt={`${affiliate.firstName} ${affiliate.lastName}`} />
+            <p>Campaign owner</p>
+            <h3>{affiliate.firstName} {affiliate.lastName}</h3>
+            <span><FaUsers /> {currentUsers} league members</span>
+          </section>
+
+          <section className="affiliate-campaign-side-card">
+            <p>Campaign readiness</p>
+            <div className="affiliate-campaign-progress"><i style={{ width: `${Math.min(100, minimumUsers ? (userPredictionCount / minimumUsers) * 100 : 0)}%` }} /></div>
+            <strong>{userPredictionCount} / {minimumUsers || '—'} entries</strong>
+            <small>{minimumUsers && userPredictionCount >= minimumUsers ? 'Minimum capacity reached.' : 'Continue promoting to reach the minimum capacity.'}</small>
+          </section>
+
+          <section className="affiliate-campaign-side-card">
+            <p>Campaign timeline</p>
+            <ol className="affiliate-campaign-timeline">
+              <li className="is-complete"><FaCheckCircle /><span><strong>Promotion created</strong><small>Campaign configuration published</small></span></li>
+              <li className="is-complete"><FaCheckCircle /><span><strong>User dashboard listed</strong><small>Fight is visible to eligible players</small></span></li>
+              <li className={fightStatus === 'active' ? 'is-complete' : ''}><FaPlay /><span><strong>Fight activated</strong><small>Live campaign controls enabled</small></span></li>
+              <li className={userPredictionCount ? 'is-complete' : ''}><FaUsers /><span><strong>Predictions received</strong><small>{userPredictionCount} current submissions</small></span></li>
+            </ol>
+          </section>
+        </aside>
       </div>
-    )}
-  />
-)}
 
-
-{match.matchPromotionalVideoUrl && (
-  <div className="videoContainer">
-    <video className="responsiveVideo" controls>
-      <source src={match.matchPromotionalVideoUrl} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-)}
-
-
-<div className='fight-timeline-wrapper'>
-  <h1>Promotion Created</h1><div className='break'></div>
-  <h1>Fight Rendered on User Dashboard</h1>
- </div>
-
-
-
-
-</div>
-      );
+      {isModalOpen && (
+        <div className="affiliate-campaign-modal-backdrop" role="presentation" onClick={closeModal}>
+          <div className="affiliate-campaign-modal" role="dialog" aria-modal="true" aria-labelledby="campaign-instructions-title" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="affiliate-campaign-modal-close" onClick={closeModal} aria-label="Close instructions"><FaTimes /></button>
+            <p className="xp-eyebrow">Promotion playbook</p>
+            <h2 id="campaign-instructions-title">Launch the campaign in four moves.</h2>
+            <ol>
+              <li><span>01</span><div><strong>Download the artwork</strong><small>Use the QR-enabled image generated for this campaign.</small></div></li>
+              <li><span>02</span><div><strong>Share across your network</strong><small>Publish it to the channels where your audience already follows you.</small></div></li>
+              <li><span>03</span><div><strong>Drive scans and entries</strong><small>Fans can scan the QR code to open the promotion directly.</small></div></li>
+              <li><span>04</span><div><strong>Monitor campaign capacity</strong><small>Return here to track players, profit, and fight status.</small></div></li>
+            </ol>
+            <button type="button" className="theme-btn theme-btn-primary" onClick={closeModal}>Got it</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AffiliateMatchDetails;

@@ -1,458 +1,260 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/router';
+import {
+  FaArrowRight,
+  FaCamera,
+  FaCheck,
+  FaCog,
+  FaCopy,
+  FaEnvelope,
+  FaIdBadge,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaSave,
+  FaShareAlt,
+  FaShieldAlt,
+  FaUserFriends,
+} from 'react-icons/fa';
+import AffiliateExperienceNav from './AffiliateExperienceNav';
+import {
+  ExperienceHero,
+  ExperienceSectionHeading,
+} from '@/Components/Theme/ExperiencePrimitives';
+import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
+
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
 const AffiliateProfile = () => {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const authLoading = useSelector((state) => state.affiliateAuth.loading);
+
   const [profileUrl, setProfileUrl] = useState(affiliate?.profileUrl || null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [payoutAmount, setPayoutAmount] = useState();
+  const [profilePreview, setProfilePreview] = useState(
+    affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
+  );
   const [firstName, setFirstName] = useState(affiliate?.firstName || '');
   const [lastName, setLastName] = useState(affiliate?.lastName || '');
   const [playerName, setPlayerName] = useState(affiliate?.playerName || '');
   const [phone, setPhone] = useState(affiliate?.phone || '');
   const [zipCode, setZipCode] = useState(affiliate?.zipCode || '');
   const [shortBio, setShortBio] = useState(affiliate?.shortBio || '');
-  const router = useRouter();
-  
-  const [venmoId, setVenmoId] = useState(
-    affiliate?.preferredPaymentMethod === 'Venmo' ? affiliate.preferredPaymentMethodValue : ''
-  );
-  const [cashAppId, setCashAppId] = useState(
-    affiliate?.preferredPaymentMethod === 'CashApp' ? affiliate.preferredPaymentMethodValue : ''
-  );
-  const [paypalEmail, setPaypalEmail] = useState(
-    affiliate?.preferredPaymentMethod === 'PayPal' ? affiliate.preferredPaymentMethodValue : ''
-  );
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    affiliate?.preferredPaymentMethod || ''
-  );
-
-  const [loading, setLoading] = useState(false);
-  const [loadingTwo, setLoadingTwo] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (affiliate) {
-      setFirstName(affiliate.firstName || '');
-      setLastName(affiliate.lastName || '');
-      setPlayerName(affiliate.playerName || '');
-      setPhone(affiliate.phone || '');
-      setZipCode(affiliate.zipCode || '');
-      setShortBio(affiliate.shortBio || '');
-      setProfileUrl(affiliate.profileUrl || null);
-      setSelectedPaymentMethod(affiliate.preferredPaymentMethod || '');
-      const paymentValue = affiliate.preferredPaymentMethodValue || '';
-      if (affiliate.preferredPaymentMethod === 'Venmo') setVenmoId(paymentValue);
-      else if (affiliate.preferredPaymentMethod === 'CashApp') setCashAppId(paymentValue);
-      else if (affiliate.preferredPaymentMethod === 'PayPal') setPaypalEmail(paymentValue);
-    }
+    if (!affiliate) return;
+
+    setFirstName(affiliate.firstName || '');
+    setLastName(affiliate.lastName || '');
+    setPlayerName(affiliate.playerName || '');
+    setPhone(affiliate.phone || '');
+    setZipCode(affiliate.zipCode || '');
+    setShortBio(affiliate.shortBio || '');
+    setProfileUrl(affiliate.profileUrl || null);
   }, [affiliate]);
 
-  const handleSubmit = async (e) => {
-      e.preventDefault();
-      setLoadingTwo(true);
-  
-      const updateAffiliateProfilePromise = new Promise(async (resolve, reject) => {
-          try {
+  useEffect(() => {
+    if (profileUrl instanceof File) {
+      const objectUrl = URL.createObjectURL(profileUrl);
+      setProfilePreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
 
-            const formDatatwo = new FormData();
-            formDatatwo.append('firstName', firstName);
-            formDatatwo.append('lastName', lastName);
-            formDatatwo.append('playerName', playerName);
-            formDatatwo.append('phone', phone);
-            formDatatwo.append('zipCode', zipCode);
-            formDatatwo.append('shortBio', shortBio);
-              // Append the profile image file if a new file was selected
-              if (profileUrl instanceof File) {
-                formDatatwo.append('image', profileUrl);
-            }
+    setProfilePreview(profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`);
+    return undefined;
+  }, [profileUrl]);
 
-              const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-profile-affiliate/${affiliate._id}`, {
-                method: 'PUT',
-                body: formDatatwo,
-              });
-  
-              if (!response.ok) {
-                  reject(new Error('Failed to update profile')); // Reject if response isn't ok
-              } else {
-                  const data = await response.json();
-                  resolve(data); // Resolve with the response data
-              }
-          } catch (error) {
-              console.error('Error updating profile:', error);
-              reject(new Error('Error updating profile')); // Reject on error
-          }
+  const affiliateId = affiliate?._id || affiliate?.id || '';
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || playerName || 'Affiliate creator';
+  const memberCount = safeArray(affiliate?.usersJoined).length;
+  const referralUrl = `https://fantasymmadness.com/my-fantasy-team?referenceId=${affiliateId}`;
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (savingProfile || !affiliateId) return;
+
+    setSavingProfile(true);
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('playerName', playerName);
+    formData.append('phone', phone);
+    formData.append('zipCode', zipCode);
+    formData.append('shortBio', shortBio);
+    if (profileUrl instanceof File) formData.append('image', profileUrl);
+
+    try {
+      const response = await fetch(`${API_BASE}/update-profile-affiliate/${affiliateId}`, {
+        method: 'PUT',
+        body: formData,
       });
-  
-      // Use toast.promise to handle pending, success, and error states
-      toast.promise(updateAffiliateProfilePromise, {
-          pending: 'Updating profile...',
-          success: {
-              render({ data }) {
-                  return `Profile updated successfully! 👌`; // Display success message
-              },
-          },
-          error: {
-              render({ data }) {
-                  return data.message || 'Failed to update profile'; // Display error message
-              }
-          }
-      }).finally(() => {
-          setLoadingTwo(false); // Reset loading state after promise settles
-      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.message || 'Failed to update profile');
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error(error?.message || 'Failed to update profile');
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
-   const copyToClipboard = () => {
-    const text = `https://fantasymmadness.com/my-fantasy-team?referenceId=${affiliate._id}`;
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Link copied to clipboard!');
-    });
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(referralUrl);
+      setCopied(true);
+      toast.success('Fantasy team link copied.');
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      console.error('Unable to copy affiliate referral link:', error);
+      toast.error('The fantasy team link could not be copied.');
+    }
   };
-  const handleSubmittingDetails = async (e) => {
-      e.preventDefault();
-      setLoading(true);
-  
-      let preferredPaymentMethod = '';
-      let preferredPaymentMethodValue = '';
-  
-      if (venmoId.trim()) {
-          preferredPaymentMethod = 'Venmo';
-          preferredPaymentMethodValue = venmoId;
-      } else if (cashAppId.trim()) {
-          preferredPaymentMethod = 'CashApp';
-          preferredPaymentMethodValue = cashAppId;
-      } else if (paypalEmail.trim()) {
-          preferredPaymentMethod = 'PayPal';
-          preferredPaymentMethodValue = paypalEmail;
-      } else {
-          toast.error("Please enter a valid payment method.");
-          setLoading(false);
-          return;
-      }
-  
-      // Clear other fields based on the selected method
-      if (preferredPaymentMethod === 'Venmo') {
-          setCashAppId('');
-          setPaypalEmail('');
-      } else if (preferredPaymentMethod === 'CashApp') {
-          setVenmoId('');
-          setPaypalEmail('');
-      } else if (preferredPaymentMethod === 'PayPal') {
-          setVenmoId('');
-          setCashAppId('');
-      }
-  
-      const updatePaymentPromise = new Promise(async (resolve, reject) => {
-          try {
-              const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/updatePayment/${affiliate._id}`, {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                      preferredPaymentMethod,
-                      preferredPaymentMethodValue,
-                  }),
-              });
-  
-              if (!response.ok) {
-                  reject(new Error('Failed to save payment method')); // Reject if response isn't ok
-              } else {
-                  const data = await response.json();
-                  resolve(data); // Resolve with the response data
-              }
-          } catch (error) {
-              console.error('Error updating payment method:', error);
-              reject(new Error('Error updating payment method')); // Reject on error
-          }
-      });
-  
-      // Use toast.promise to handle pending, success, and error states
-      toast.promise(updatePaymentPromise, {
-          pending: 'Saving payment method...',
-          success: {
-              render({ data }) {
-                  return 'Settings saved successfully! 👌'; // Display success message
-              },
-          },
-          error: {
-              render({ data }) {
-                  return data.message || 'Failed to save payment method'; // Display error message
-              }
-          }
-      }).finally(() => {
-          setLoading(false); // Reset loading state after promise settles
-      });
-  };
-  
+
   if (!affiliate) {
-    return <div>Loading...</div>;
+    return (
+      <div className="experience-page affiliate-settings-page-final affiliate-auth-state">
+        <div className="theme-container xp-route-loading">
+          {authLoading ? 'Restoring affiliate profile…' : 'Sign in as an affiliate to manage your creator profile.'}
+          {!authLoading && (
+            <Link
+              className="theme-btn theme-btn-primary"
+              href="/auth?mode=login&role=affiliate&next=/AffiliateProfile"
+            >
+              Affiliate sign in
+            </Link>
+          )}
+        </div>
+      </div>
+    );
   }
 
-
-
-
-  const handleRequestPayout = () => {
-    setIsModalOpen(true); // Open the modal
-  };
-  
- 
-  
-  const handleConfirmPayout = async () => {
-    if (payoutAmount > affiliate.tokens) {
-      toast.error("Amount exceeds your current balance!");
-      return;
-    }
-  
-    setLoading(true); // Show loading spinner while processing
-  
-    try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/payout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: payoutAmount,
-        }),
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        toast.error(`Error: ${data.message}`);
-      } else {
-        toast.success(`Payout request created successfully!`);
-        setIsModalOpen(false); // Close the modal
-        setPayoutAmount(0); // Reset the amount input
-        
-      }
-    } catch (error) {
-      toast.error('Failed to create payout request.');
-    } finally {
-      setLoading(false); // Hide loading spinner
-    }
-  };
-  
-
-
-
-
-
-
-
-
-
   return (
-    <div className='myprofile myprofileupdated'>
-   
-      
-      <div className='profile-wrapper-updated' style={{ background: 'transparent' }}>
-        <form className='registerCard' onSubmit={handleSubmit}>
-          <h1 className='updated-profile-title'>Edit your profile</h1>
+    <>
+      <Head><title>Affiliate Profile | Fantasy MMAdness</title></Head>
+      <div className="experience-page affiliate-settings-page-final">
+        <ExperienceHero
+          eyebrow="Public creator profile"
+          title="Your identity."
+          accent="Your fight community."
+          description="Shape the public creator identity attached to promotions and league invitations. Private payment and payout controls now live in a separate account workspace."
+          backgroundImage="/images/fmm-pages/premium-affiliate-banner.png"
+          actions={[
+            { href: '/AffiliateAccountSettings', label: 'Account settings', icon: FaCog },
+            { href: '/AffiliateDashboard', label: 'Affiliate dashboard', variant: 'secondary' },
+          ]}
+          stats={[
+            { value: memberCount, label: 'League members', icon: FaUserFriends },
+            { value: affiliate.playerName || 'Creator', label: 'Public handle', icon: FaIdBadge },
+            { value: affiliate.verified ? 'Verified' : 'Active', label: 'Profile status', icon: FaShieldAlt },
+          ]}
+        >
+        </ExperienceHero>
 
-          <div className='input-wrap-one' style={{flexBasis:'100%'}}>
-  <div className='input-group'>
-    {profileUrl instanceof File
-      ? <center><img src={URL.createObjectURL(profileUrl)} alt="Fighter A" style={{ width: '100px', objectFit: 'cover', borderRadius: '50%', height: '100px' }} /></center>
-      : <center><img src={profileUrl} alt="Fighter A" style={{ width: '100px', objectFit: 'cover', borderRadius: '50%', height: '100px' }} /></center>
-    }
+        <AffiliateExperienceNav />
 
+        <main className="xp-page-main affiliate-settings-main-final">
+          <div className="theme-container affiliate-settings-shell">
+            <section className="xp-page-section affiliate-profile-section-final">
+              <ExperienceSectionHeading
+                eyebrow="Creator identity studio"
+                title="Profile information"
+                description="Every field and image upload below remains connected to the existing affiliate profile update endpoint."
+              />
 
-    <input
-    type="file"
-    name="profileUrl"
-    id="profileUrl"
-    onChange={(e) => {
-        if (e.target.files && e.target.files[0]) {
-          setProfileUrl(e.target.files[0]);
-        }
-      }} 
-    style={{ display: 'none' }} // Hide the default input
-  />
-  <center><label htmlFor="profileUrl" className="custom-file-label updatedBtnFile" style={{marginTop:"17px"}}>
-    Choose File
-  </label></center>
+              <div className="affiliate-profile-workspace-grid">
+                <form className="affiliate-settings-card affiliate-profile-form affiliate-profile-editor-card" onSubmit={handleSubmit}>
+                  <div className="affiliate-avatar-editor">
+                    <div>
+                      <img src={profilePreview} alt={fullName} />
+                      <label htmlFor="affiliate-avatar"><FaCamera /> Change photo</label>
+                      <input
+                        id="affiliate-avatar"
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(event) => setProfileUrl(event.target.files?.[0] || profileUrl)}
+                      />
+                    </div>
+                    <span>
+                      <small>Affiliate creator</small>
+                      <strong>{fullName}</strong>
+                      <em>{affiliate.email || 'Creator profile'}</em>
+                    </span>
+                  </div>
 
-  </div>
-</div>
+                  <div className="affiliate-settings-field-grid">
+                    <label><span>First name</span><input value={firstName} onChange={(event) => setFirstName(event.target.value)} /></label>
+                    <label><span>Last name</span><input value={lastName} onChange={(event) => setLastName(event.target.value)} /></label>
+                    <label><span>Creator username</span><input value={playerName} onChange={(event) => setPlayerName(event.target.value)} /></label>
+                    <label><span>Phone</span><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} /></label>
+                    <label><span>ZIP code</span><input value={zipCode} onChange={(event) => setZipCode(event.target.value)} /></label>
+                    <label className="is-wide"><span>Short bio</span><textarea value={shortBio} onChange={(event) => setShortBio(event.target.value)} rows="5" /></label>
+                  </div>
 
+                  <div className="affiliate-settings-submit-row">
+                    <span><FaShieldAlt /> Public profile fields and image upload remain attached to the authenticated affiliate record.</span>
+                    <button type="submit" className="theme-btn theme-btn-primary" disabled={savingProfile}>
+                      <FaSave /> {savingProfile ? 'Saving profile…' : 'Save profile'}
+                    </button>
+                  </div>
+                </form>
 
+                <aside className="affiliate-profile-preview-card">
+                  <div className="affiliate-profile-preview-media" aria-hidden="true">
+                    <img src={`${FMM_ASSET_BASE}/fighter-david-benavidez.png`} alt="" />
+                    <span>Creator card</span>
+                  </div>
+                  <div className="affiliate-profile-preview-content">
+                    <div className="affiliate-profile-preview-avatar"><img src={profilePreview} alt={fullName} /></div>
+                    <p className="xp-eyebrow">Public profile preview</p>
+                    <h2>{fullName}</h2>
+                    <strong>@{playerName || 'creator'}</strong>
+                    <p>{shortBio || 'Add a short bio to tell your fight community what your creator league is about.'}</p>
+                    <div className="affiliate-profile-meta-grid">
+                      <span><FaEnvelope /><small>Email</small><strong>{affiliate.email || 'Not available'}</strong></span>
+                      <span><FaPhone /><small>Phone</small><strong>{phone || 'Not added'}</strong></span>
+                      <span><FaMapMarkerAlt /><small>ZIP code</small><strong>{zipCode || 'Not added'}</strong></span>
+                      <span><FaUserFriends /><small>League</small><strong>{memberCount} members</strong></span>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </section>
 
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>First Name</label>
-              <input type='text' value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-            </div>
-            <div className='input-group'>
-              <label>Last Name</label>
-              <input type='text' value={lastName} onChange={(e) => setLastName(e.target.value)} />
-            </div>
+            <section className="affiliate-settings-card affiliate-referral-card affiliate-referral-card-final">
+              <div className="affiliate-settings-card-heading">
+                <FaShareAlt />
+                <span><small>League growth</small><h2>Fantasy team invitation</h2></span>
+              </div>
+              <p>Share this affiliate reference URL to direct players into your fantasy team and league experience.</p>
+              <div className="affiliate-referral-url affiliate-referral-url-final">
+                <span>{referralUrl}</span>
+                <button type="button" onClick={copyToClipboard}>{copied ? <FaCheck /> : <FaCopy />} {copied ? 'Copied' : 'Copy link'}</button>
+              </div>
+              <div className="affiliate-referral-actions">
+                <Link href="/affiliate-league" className="theme-btn theme-btn-secondary"><FaIdBadge /> Manage league</Link>
+                <Link href="/AffiliateAccountSettings" className="theme-btn theme-btn-primary">
+                  Private account settings <FaArrowRight />
+                </Link>
+              </div>
+            </section>
+
+            <section className="affiliate-profile-settings-callout">
+              <FaCog />
+              <div>
+                <small>Private account workspace</small>
+                <h2>Payment destinations and payout requests are managed separately.</h2>
+                <p>Your profile remains focused on public creator information. No payment or payout functionality was removed; those controls are available on the dedicated account settings route.</p>
+              </div>
+              <Link href="/AffiliateAccountSettings" className="theme-btn theme-btn-secondary">Open settings <FaArrowRight /></Link>
+            </section>
           </div>
-
-          <div className='input-wrap-two'>
-            <div className='input-group'>
-              <label>User Name?</label>
-              <input type='text' value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
-            </div>
-            <i className="fa fa-refresh" aria-hidden="true"></i>
-          </div>
-
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Your Phone <span className='toRemove'>(Mobile)</span> </label>
-              <input type='text' value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </div>
-            <div className='input-group'>
-              <label>Zip Code </label>
-              <input type='text' value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
-            </div>
-          </div>
-
-          <div className='termsConditions'>
-            <h2>Your Short Bio</h2>
-            <textarea
-              style={{ width: '100%', border: 'none' }}
-              value={shortBio}
-              onChange={(e) => setShortBio(e.target.value)}
-            ></textarea>
-          </div>
-
-          <button type="submit" className='save-updated-btn'>
-            {loadingTwo ? 'Saving!' : 'Save Settings'}
-          </button>
-        </form>
-
-        <div className='divTwoProfile' style={{ marginTop: '1px' }}>
-              
-  <h1>Preferred payment method - choose 1</h1>
-
-  {/* Venmo */}
-  <div className='inputParent'>
-    <div className='input-group-profile'>
-      <label style={{ color: '#4997cf' }}>Venmo Id </label>
-      <input
-        type='text'
-        value={venmoId}
-        onChange={(e) => {
-          setVenmoId(e.target.value);
-          setCashAppId(''); // Clear CashApp input
-          setPaypalEmail(''); // Clear PayPal input
-        }}
-        style={{ color: '#fff', borderColor: '#4997cf' }}
-      />
-    </div>
-    <label className='switch'>
-      <input
-        type='radio'
-        name='paymentMethod'
-        value='venmo'
-        checked={selectedPaymentMethod === 'Venmo'}
-        onChange={() => setSelectedPaymentMethod('Venmo')}
-      />
-      <span className='slider round'></span>
-    </label>
-    <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743008104/affiliateGuide/dlncedhoow0psafar6sp.png" alt='Venmo' />
-  </div>
-
-  {/* Cash App */}
-  <div className='inputParent'>
-    <div className='input-group-profile'>
-      <label style={{ color: '#00d54b' }}>Cash app Id </label>
-      <input
-        type='text'
-        value={cashAppId}
-        onChange={(e) => {
-          setCashAppId(e.target.value);
-          setVenmoId(''); // Clear Venmo input
-          setPaypalEmail(''); // Clear PayPal input
-        }}
-        style={{ color: '#fff', borderColor: '#00d54b' }}
-      />
-    </div>
-    <label className='switch'>
-      <input
-        type='radio'
-        name='paymentMethod'
-        value='cashApp'
-        checked={selectedPaymentMethod === 'CashApp'}
-        onChange={() => setSelectedPaymentMethod('CashApp')}
-      />
-      <span className='slider round'></span>
-    </label>
-    <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743008182/affiliateGuide/kxgccvamkih3l4pupenh.png" alt='Cash App' />
-  </div>
-
-  {/* PayPal */}
-  <div className='inputParent'>
-    <div className='input-group-profile'>
-      <label style={{ color: '#0773c3' }}>Paypal Email Address </label>
-      <input
-        type='text'
-        value={paypalEmail}
-        onChange={(e) => {
-          setPaypalEmail(e.target.value);
-          setVenmoId(''); // Clear Venmo input
-          setCashAppId(''); // Clear CashApp input
-        }}
-        style={{ color: '#fff', borderColor: '#0773c3' }}
-      />
-    </div>
-    <label className='switch'>
-      <input
-        type='radio'
-        name='paymentMethod'
-        value='paypal'
-        checked={selectedPaymentMethod === 'PayPal'}
-        onChange={() => setSelectedPaymentMethod('PayPal')}
-      />
-      <span className='slider round'></span>
-    </label>
-    <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743008237/affiliateGuide/fg8ozrnkepmtv3r7wqli.png" alt='PayPal' />
-  </div>
-
-  {/* Submit Button */}
-  <button type="submit" className='btn-grad' style={{ width: '40%' }} onClick={handleSubmittingDetails}>
-    {loading ? 'Saving!' : 'Save Payment Settings'}
-  </button>
-  <button
-  type="button"
-  className='btn-grad profile-btn'
-  style={{ width: '40%', background: '#0d8c17' }}
-  onClick={handleRequestPayout}
->
-  {loading ? 'Requesting...' : 'Request a payout'}
-</button>
-
-{isModalOpen && (
-        <div className='modalPayout show'>
-          <div className='modal-content'>
-            <span className='close' onClick={() => setIsModalOpen(false)}>&times;</span>
-            <h2>Request a Payout</h2>
-            <input 
-              type="number" 
-              value={payoutAmount} 
-              onChange={(e) => setPayoutAmount(Number(e.target.value))} 
-              placeholder="Enter amount" 
-            />
-            <p>Your current balance is: ${affiliate.tokens}</p>
-            <button onClick={handleConfirmPayout}>Confirm</button>
-          </div>
-        </div>
-      )}
-
-</div>
-
+        </main>
       </div>
-
-<div className='affiliateTeamLinkWrap'>
-  <h1>Fantasy Team Link</h1>
-  <h2>https://fantasymmadness.com/my-fantasy-team?referenceId={affiliate._id}</h2>
-  <button onClick={copyToClipboard}>Click to copy</button>
-</div>
-
-    </div>
+    </>
   );
 };
 

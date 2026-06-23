@@ -1,311 +1,279 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
+
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBolt,
-  FaCoins,
-  FaCommentDots,
-  FaFistRaised,
-  FaMedal,
-  FaPlus,
-  FaStar,
-  FaTrophy,
-  FaUserCircle,
-} from 'react-icons/fa';
-import { fetchMatches } from '@/Redux/matchSlice';
+import { FaArrowRight, FaCoins, FaFistRaised, FaHistory, FaStar, FaTimes, FaTrophy, FaUserCircle } from 'react-icons/fa';
+import { fetchMatches } from '../../Redux/matchSlice';
 import FightCosting from './FightCosting';
-import FightLeaderboard from '@/Components/GlobalLeaderboard/FightLeaderboard';
+import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
 import PurchaseTokensIntimation from './PurchaseTokensIntimation';
-import FinishedFightUserBoard from '@/Components/FinishedFightUserBoard/FinishedFightUserBoard';
-import { ExperienceEmptyState, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
-import { FightTimelineRow, FightVisualCard } from '@/Components/Theme/FightVisuals';
-import {
-  FMM_ASSET_BASE,
-  getFightId,
-  getFightStatus,
-  getFighterImage,
-  safeArray,
-  sortFights,
-} from '@/Utils/fightExperience';
+import FinishedFightUserBoard from '../FinishedFightUserBoard/FinishedFightUserBoard';
+import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
-const queryValue = (value) => Array.isArray(value) ? value[0] : value;
+const safePredictions = (match) => Array.isArray(match?.userPredictions) ? match.userPredictions : [];
+const isSameId = (a, b) => String(a || '') === String(b || '');
 
 const Dashboard = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
-  const authLoading = useSelector((state) => state.auth.loading);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const user = useSelector((state) => state.user);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState(null);
   const [completedMatchId, setCompletedMatchId] = useState(null);
+  const [hoveredMatch, setHoveredMatch] = useState(null);
+  const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [removedMatches, setRemovedMatches] = useState([]);
-  const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
-  const [testimonial, setTestimonial] = useState('');
-  const [isSubmittingTestimonial, setIsSubmittingTestimonial] = useState(false);
-  const [testimonialSubmitted, setTestimonialSubmitted] = useState(false);
-
-  useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches());
-  }, [dispatch, matchStatus]);
-
-  useEffect(() => {
-    if (!router.isReady || authLoading) return;
-    const hasToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('authToken'));
-    if (!isAuthenticated && !hasToken && !user?._id) {
-      router.replace({ pathname: '/auth', query: { mode: 'login', role: 'player', next: '/UserDashboard' } });
-    }
-  }, [authLoading, isAuthenticated, router, router.isReady, user?._id]);
 
   useEffect(() => {
     if (!user?._id) return;
-    let cancelled = false;
-    fetch(`${API_BASE}/users/removed-matches`)
-      .then((response) => response.ok ? response.json() : [])
-      .then((data) => {
-        if (cancelled) return;
-        const record = safeArray(data).find((item) => String(item?.userId) === String(user._id));
-        setRemovedMatches(safeArray(record?.removedMatchesIds).map(String));
-      })
-      .catch((error) => console.error('Error fetching removed matches:', error));
-    return () => { cancelled = true; };
+    const fetchRemovedMatches = async () => {
+      try {
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches');
+        const data = await response.json();
+        const userMatches = Array.isArray(data) ? data.filter((item) => isSameId(item.userId, user._id)) : [];
+        if (userMatches.length > 0) setRemovedMatches(userMatches[0].removedMatchesIds || []);
+      } catch (error) {
+        console.error('Error fetching removed matches:', error);
+      }
+    };
+    fetchRemovedMatches();
   }, [user?._id]);
 
-  const hasSubmittedPrediction = useCallback((match) => safeArray(match?.userPredictions).some((prediction) => (
-    prediction?.userId && user?._id && String(prediction.userId) === String(user._id) && prediction?.predictionStatus === 'submitted'
-  )), [user?._id]);
-
-  const isAvailableFight = useCallback((match) => {
-    if (match?.matchType === 'SHADOW') {
-      return Boolean(match?.affiliateId && match?.shadowFightId && match?.matchShadowStatus === 'active');
-    }
-    const status = getFightStatus(match);
-    return status === 'upcoming' || status === 'live';
-  }, []);
-
-  const activeFights = useMemo(() => sortFights(safeArray(matches).filter((match) => isAvailableFight(match)), 'asc'), [isAvailableFight, matches]);
-  const submittedFights = useMemo(() => sortFights(safeArray(matches).filter((match) => hasSubmittedPrediction(match) && !removedMatches.includes(String(getFightId(match)))), 'desc'), [hasSubmittedPrediction, matches, removedMatches]);
-  const pendingFights = useMemo(() => activeFights.filter((match) => !hasSubmittedPrediction(match) && !removedMatches.includes(String(getFightId(match)))), [activeFights, hasSubmittedPrediction, removedMatches]);
+  useEffect(() => {
+    if (matchStatus === 'idle') dispatch(fetchMatches());
+  }, [matchStatus, dispatch]);
 
   useEffect(() => {
-    if (!router.isReady || !safeArray(matches).length || selectedMatchId || completedMatchId) return;
-    const requestedFight = queryValue(router.query.fight);
-    if (!requestedFight) return;
-    const match = safeArray(matches).find((item) => String(getFightId(item)) === String(requestedFight));
-    if (!match) return;
-    if (hasSubmittedPrediction(match)) setCompletedMatchId(getFightId(match));
-    else setSelectedMatchId(getFightId(match));
-  }, [completedMatchId, hasSubmittedPrediction, matches, router.isReady, router.query.fight, selectedMatchId]);
+    const today = new Date();
+    const currentTime = new Date();
+    const filteredMatches = (Array.isArray(matches) ? matches : []).map((match) => {
+      const matchDateTime = new Date(`${match?.matchDate?.split('T')[0]}T${match?.matchTime || '00:00'}:00`);
+      if (match.matchType === 'LIVE') {
+        if (matchDateTime >= today.setHours(0, 0, 0, 0) && currentTime < matchDateTime) return { ...match, blurred: false };
+      } else if (match.matchType === 'SHADOW') {
+        if (match.affiliateId && match.shadowFightId && match.matchShadowStatus === 'active') return { ...match, blurred: false };
+      }
+      return null;
+    }).filter(Boolean);
+    setUpcomingMatches(filteredMatches);
+  }, [matches]);
 
-  const clearSelectedView = () => {
-    setSelectedMatchId(null);
-    setCompletedMatchId(null);
-    if (queryValue(router.query.fight)) router.replace('/UserDashboard', undefined, { shallow: true });
+  const getRemainingTime = (matchDate, matchTime) => {
+    const [year, month, day] = String(matchDate || '').split('T')[0].split('-');
+    const [hours = '00', minutes = '00'] = String(matchTime || '00:00').split(':');
+    const matchDateTime = new Date(`${year}-${month}-${day}T${hours}:${minutes}`);
+    const diffMs = matchDateTime - new Date();
+    const hasStarted = diffMs <= 0 || Number.isNaN(diffMs);
+    return {
+      diffHrs: hasStarted ? 0 : Math.floor(diffMs / (1000 * 60 * 60)),
+      diffMins: hasStarted ? 0 : Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)),
+      hasStarted,
+    };
   };
 
-  const selectedMatch = safeArray(matches).find((match) => String(getFightId(match)) === String(selectedMatchId));
-  const completedMatch = safeArray(matches).find((match) => String(getFightId(match)) === String(completedMatchId));
+  const completedMatches = useMemo(() => (Array.isArray(matches) ? matches : []).filter((match) => safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')), [matches, user?._id]);
+  const pendingMatches = useMemo(() => upcomingMatches.filter((match) => safePredictions(match) && !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(match._id)), [removedMatches, upcomingMatches, user?._id]);
+  const visibleCompleted = useMemo(() => completedMatches.filter((match) => !removedMatches.includes(match._id)), [completedMatches, removedMatches]);
 
-  if (selectedMatchId) {
-    const hasEnoughTokens = selectedMatch && Number(user?.tokens || 0) >= Number(selectedMatch?.matchTokens || 0);
-    return (
-      <div className="experience-page xp-dashboard-detail-view">
-        <button type="button" className="xp-dashboard-back" onClick={clearSelectedView}><FaArrowLeft /> Back to dashboard</button>
-        {selectedMatch ? (hasEnoughTokens ? <FightCosting matchId={selectedMatchId} /> : <PurchaseTokensIntimation matchId={selectedMatchId} />) : <ExperienceEmptyState title="Fight not found" description="This fight card may have been removed or rescheduled." />}
-      </div>
-    );
-  }
-
-  if (completedMatchId) {
-    return (
-      <div className="experience-page xp-dashboard-detail-view">
-        <button type="button" className="xp-dashboard-back" onClick={clearSelectedView}><FaArrowLeft /> Back to dashboard</button>
-        {completedMatch ? (String(completedMatch.matchStatus).toLowerCase() === 'ongoing' ? <FightLeaderboard matchId={completedMatchId} /> : <FinishedFightUserBoard matchId={completedMatchId} />) : <ExperienceEmptyState title="Fight record not found" />}
-      </div>
-    );
-  }
-
-  const handleOpenFight = (match) => {
-    const id = getFightId(match);
-    if (!id) return;
-    if (hasSubmittedPrediction(match)) setCompletedMatchId(id);
-    else setSelectedMatchId(id);
-  };
-
-  const handleRemoveMatch = async (event, matchId) => {
-    event.stopPropagation();
+  const handleRemoveMatch = async (matchId) => {
     try {
-      const response = await fetch(`${API_BASE}/remove-match-from-my-dashboard`, {
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, matchId }),
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Unable to remove fight');
-      setRemovedMatches((current) => [...new Set([...current, String(matchId)])]);
-      toast.success('Fight removed from your dashboard.');
+      const data = await response.json();
+      if (response.ok) {
+        alert('Match removed from dashboard successfully');
+        window.location.reload();
+      } else {
+        alert(data.message);
+      }
     } catch (error) {
-      toast.error(error.message || 'Unable to remove this fight.');
+      console.error('Error:', error);
     }
   };
 
-  const submitTestimonial = async (event) => {
-    event.preventDefault();
-    if (!testimonial.trim()) return;
-    setIsSubmittingTestimonial(true);
+  const closePopup = () => {
+    setIsOpen(false);
+    setDescription('');
+  };
+
+  const handleSubmit = async () => {
+    if (!description.trim()) {
+      alert('Description cannot be empty!');
+      return;
+    }
+    setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE}/testimonials`, {
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/testimonials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user._id, author: user.firstName, description: testimonial.trim() }),
+        body: JSON.stringify({ userId: user._id, author: user.firstName, description }),
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Unable to submit testimonial');
-      toast.success('Thank you for sharing your experience.');
-      setTestimonialSubmitted(true);
-      setIsTestimonialOpen(false);
-      setTestimonial('');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit testimonial');
+      }
+      alert('Testimonial submitted successfully!');
+      closePopup();
+      window.location.reload();
     } catch (error) {
-      toast.error(error.message || 'Unable to submit your testimonial.');
+      console.error(error.message);
+      alert('Failed to submit testimonial.');
     } finally {
-      setIsSubmittingTestimonial(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (!user?.firstName) {
-    return <div className="experience-page xp-route-loading">Preparing your fight room...</div>;
+  if (!user || !user.firstName) {
+    return <section className="xp-dashboard-page player-dashboard-rich-page"><div className="theme-container"><div className="xp-empty-card">Loading player dashboard...</div></div></section>;
   }
 
-  const nextFight = pendingFights[0] || submittedFights[0];
-  const displayName = user.playerName || `${user.firstName} ${user.lastName || ''}`.trim();
-  const profileImage = user.profileUrl || `${FMM_ASSET_BASE}/fighter-jadden-addison.png`;
+  if (selectedMatchId) {
+    const selectedMatch = (Array.isArray(matches) ? matches : []).find((match) => match._id === selectedMatchId);
+    if (!selectedMatch) {
+      return <section className="xp-dashboard-page"><button className="xp-dashboard-back" onClick={() => setSelectedMatchId(null)}>← Back</button><div className="xp-empty-card">Selected match not found.</div></section>;
+    }
+    return (
+      <section className="xp-dashboard-focus-view">
+        <button className="xp-dashboard-back dashboard-back-arrow" type="button" onClick={() => setSelectedMatchId(null)}>← Back to dashboard</button>
+        {Number(user.tokens || 0) >= Number(selectedMatch.matchTokens || 0) ? <FightCosting matchId={selectedMatchId} /> : <PurchaseTokensIntimation matchId={selectedMatchId} />}
+      </section>
+    );
+  }
+
+  if (completedMatchId) {
+    const matchCom = (Array.isArray(matches) ? matches : []).find((match) => match._id === completedMatchId);
+    if (!matchCom) {
+      return <section className="xp-dashboard-page"><button className="xp-dashboard-back" onClick={() => setCompletedMatchId(null)}>← Back</button><div className="xp-empty-card">Completed match not found.</div></section>;
+    }
+    return (
+      <section className="xp-dashboard-focus-view">
+        <button className="xp-dashboard-back" type="button" onClick={() => setCompletedMatchId(null)}>← Back to dashboard</button>
+        {matchCom.matchStatus === 'Ongoing' ? <FightLeaderboard matchId={completedMatchId} /> : <FinishedFightUserBoard matchId={completedMatchId} />}
+      </section>
+    );
+  }
+
+  const renderFightCard = (match, variant = 'active') => {
+    const id = getFightId(match);
+    const remaining = match.matchType === 'LIVE' ? getRemainingTime(match.matchDate, match.matchTime) : null;
+    const predictionsCount = safePredictions(match).length;
+    const canOpen = variant === 'pending' || variant === 'completed';
+    const handleOpen = () => {
+      if (!canOpen) return;
+      if (variant === 'completed') {
+        setCompletedMatchId(id);
+        return;
+      }
+      if (match.matchType === 'SHADOW' && match.blurred) {
+        toast.error('Affiliate criteria has not been met for this SHADOW match.');
+      } else {
+        setSelectedMatchId(id);
+      }
+    };
+
+    return (
+      <article
+        className={`xp-dashboard-fight-card ${match.blurred ? 'is-blurred' : ''}`}
+        key={`${variant}-${id}`}
+        onMouseEnter={() => setHoveredMatch(id)}
+        onMouseLeave={() => setHoveredMatch(null)}
+      >
+        {hoveredMatch === id && (
+          <button className="xp-dashboard-remove" type="button" onClick={(event) => { event.stopPropagation(); handleRemoveMatch(id); }}>Remove</button>
+        )}
+        <button className="xp-dashboard-card-main" type="button" onClick={handleOpen} disabled={!canOpen}>
+          <div className="xp-dashboard-fighters">
+            <img src={getFighterImage(match, 'A', 0)} alt={match.matchFighterA || 'Fighter A'} />
+            <span>VS</span>
+            <img src={getFighterImage(match, 'B', 1)} alt={match.matchFighterB || 'Fighter B'} />
+          </div>
+          <div className="xp-dashboard-fight-copy">
+            <small>{getFightCategory(match)} · {match.matchType}</small>
+            <strong>{match.matchFighterA} vs {match.matchFighterB}</strong>
+            <p>{match.matchDate?.split('T')[0] || 'Date TBA'} · {match.matchTime || 'Time TBA'}</p>
+            {match.matchDescription && <em>{match.matchDescription}</em>}
+          </div>
+          <div className="xp-dashboard-card-meta">
+            <span><FaFistRaised /> {match.maxRounds || '—'} rounds</span>
+            <span><FaTrophy /> {predictionsCount} players</span>
+            <span><FaCoins /> {match.matchTokens === null ? 'Free' : `${match.matchTokens || 0} tokens`}</span>
+            {remaining && <span>{remaining.hasStarted ? 'Fight has started' : `Begins in ${remaining.diffHrs}h ${remaining.diffMins}m`}</span>}
+          </div>
+          {canOpen && <b>{variant === 'completed' ? 'Open result' : 'Open prediction'} <FaArrowRight /></b>}
+        </button>
+      </article>
+    );
+  };
 
   return (
-    <>
-      <Head><title>Player Dashboard | Fantasy MMAdness</title></Head>
-      <div className="experience-page dashboard-experience-page">
-        <section className="xp-dashboard-hero">
-          <div className="xp-dashboard-hero-grid" />
-          <div className="theme-container xp-dashboard-hero-layout">
-            <div className="xp-dashboard-profile">
-              <div className="xp-dashboard-avatar"><img src={profileImage} alt={displayName} /></div>
-              <div>
-                <p className="xp-eyebrow"><FaBolt /> Player command center</p>
-                <h1>Welcome back, <span>{user.firstName}.</span></h1>
-                <p>Manage your fight wallet, complete pending cards, and follow every submitted prediction from one focused dashboard.</p>
-                <div className="xp-dashboard-profile-meta">
-                  <span><FaUserCircle /> {displayName}</span>
-                  <span><FaMedal /> {user.currentPlan || 'Member'} plan</span>
-                </div>
-              </div>
-            </div>
-            <div className="xp-dashboard-next-fight">
-              {nextFight ? (
-                <>
-                  <div className="xp-dashboard-next-label">Next in your corner</div>
-                  <div className="xp-dashboard-next-art">
-                    <img src={getFighterImage(nextFight, 'A', 0)} alt={nextFight.matchFighterA || 'Fighter A'} />
-                    <span>VS</span>
-                    <img src={getFighterImage(nextFight, 'B', 0)} alt={nextFight.matchFighterB || 'Fighter B'} />
-                  </div>
-                  <h2>{nextFight.matchFighterA} <em>VS</em> {nextFight.matchFighterB}</h2>
-                  <button type="button" className="theme-btn theme-btn-primary" onClick={() => handleOpenFight(nextFight)}>{hasSubmittedPrediction(nextFight) ? 'Follow my card' : 'Make predictions'} <FaArrowRight /></button>
-                </>
-              ) : (
-                <div className="xp-dashboard-next-empty"><FaFistRaised /><h2>Your next card is waiting.</h2><Link href="/fights" className="theme-btn theme-btn-primary">Browse fights</Link></div>
-              )}
+    <section className="xp-dashboard-page">
+      <div className="theme-container">
+        <div className="xp-dashboard-hero player-dashboard-hero-rich">
+          <div className="xp-dashboard-profile">
+            <img src={user.profileUrl || '/images/fmm-experience/avatar-placeholder.svg'} alt={user.firstName} />
+            <div>
+              <span>Player dashboard</span>
+              <h1>{user.firstName} {user.lastName}</h1>
+              <p>{user.currentPlan || 'Member'} plan · control your active entries, pending cards, completed fights, wallet, and testimonials.</p>
             </div>
           </div>
-        </section>
+          <button type="button" className="xp-dashboard-wallet" onClick={() => router.push('/checkout')}>
+            <FaCoins />
+            <span>Fight wallet</span>
+            <strong>{user.tokens || 0}</strong>
+            <small>tokens remaining</small>
+          </button>
+        </div>
 
-        <main className="xp-page-main xp-dashboard-main">
-          <div className="theme-container">
-            <section className="xp-dashboard-stat-grid" aria-label="Player overview">
-              <button type="button" onClick={() => router.push('/checkout')}><FaCoins /><span><strong>{Number(user.tokens || 0).toLocaleString()}</strong><small>Fight-wallet tokens</small></span><FaPlus /></button>
-              <div><FaFistRaised /><span><strong>{pendingFights.length}</strong><small>Cards waiting</small></span></div>
-              <div><FaTrophy /><span><strong>{submittedFights.length}</strong><small>Submitted fights</small></span></div>
-              <div><FaMedal /><span><strong>{user.currentPlan || 'Free'}</strong><small>Current plan</small></span></div>
-            </section>
+        <div className="xp-dashboard-stats">
+          <article><FaHistory /><strong>{pendingMatches.length}</strong><span>Pending picks</span></article>
+          <article><FaTrophy /><strong>{visibleCompleted.length}</strong><span>Submitted cards</span></article>
+          <article><FaUserCircle /><strong>{user.currentPlan || 'Player'}</strong><span>Current plan</span></article>
+        </div>
 
-            <section className="xp-page-section">
-              <ExperienceSectionHeading
-                eyebrow="Action required"
-                title="Pending fight cards"
-                description="Complete these entries before they lock. Every fight card includes the paired fighter imagery and contest context used across the public experience."
-                action={{ href: '/fights?status=upcoming', label: 'Find more fights' }}
-              />
-              {matchStatus === 'loading' ? <div className="xp-loading-grid"><div className="xp-loading-card" /><div className="xp-loading-card" /></div> : pendingFights.length ? (
-                <div className="xp-fight-card-grid xp-dashboard-fight-grid">
-                  {pendingFights.map((match, index) => (
-                    <FightVisualCard
-                      match={match}
-                      index={index}
-                      onAction={handleOpenFight}
-                      key={getFightId(match)}
-                      footerAction={<button type="button" className="xp-dashboard-remove-fight" onClick={(event) => handleRemoveMatch(event, getFightId(match))}>Remove from dashboard</button>}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <ExperienceEmptyState title="No pending cards" description="You are fully caught up. Open the fight hub to enter another eligible contest." action={{ href: '/fights?status=upcoming', label: 'Explore upcoming fights' }} />
-              )}
-            </section>
+        <div className="xp-dashboard-sections">
+          <section>
+            <div className="xp-dashboard-section-heading"><span>01</span><div><h2>Your completed fights</h2><p>Cards where your prediction status has already been submitted.</p></div></div>
+            <div className="xp-dashboard-card-grid">{visibleCompleted.length ? visibleCompleted.map((match) => renderFightCard(match, 'completed')) : <div className="xp-empty-card">No completed matches</div>}</div>
+          </section>
 
-            <section className="xp-page-section">
-              <ExperienceSectionHeading
-                eyebrow="Your fight portfolio"
-                title="Submitted & completed fights"
-                description="Open a live entry to follow the leaderboard or revisit a completed contest to inspect your final performance."
-              />
-              {submittedFights.length ? (
-                <div className="xp-dashboard-portfolio">
-                  {submittedFights.map((match, index) => (
-                    <div className="xp-dashboard-timeline-wrap" key={getFightId(match)}>
-                      <FightTimelineRow match={match} index={index} onAction={handleOpenFight} />
-                      <button type="button" className="xp-dashboard-remove-inline" onClick={(event) => handleRemoveMatch(event, getFightId(match))}>Remove</button>
-                    </div>
-                  ))}
-                </div>
-              ) : <ExperienceEmptyState title="Your fight portfolio is empty" description="Submitted cards will appear here as soon as your first prediction is confirmed." />}
-            </section>
+          <section>
+            <div className="xp-dashboard-section-heading"><span>02</span><div><h2>Your pending fights</h2><p>Open these cards to make or complete your prediction entry.</p></div></div>
+            <div className="xp-dashboard-card-grid">{pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="xp-empty-card">No pending matches</div>}</div>
+          </section>
+        </div>
 
-            <section className="xp-dashboard-actions-panel">
-              <div className="xp-dashboard-action-art"><img src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fantasy MMAdness arena" /></div>
-              <div>
-                <p className="xp-eyebrow">Keep your corner ready</p>
-                <h2>Wallet, profile, standings, and support—one click away.</h2>
-                <div className="xp-dashboard-quick-actions">
-                  <Link href="/checkout"><FaCoins /> Add tokens</Link>
-                  <Link href="/profile"><FaUserCircle /> Edit profile</Link>
-                  <Link href="/leaderboard"><FaTrophy /> Leaderboard</Link>
-                  <Link href="/FantasyLeagues"><FaMedal /> Join a league</Link>
-                </div>
-              </div>
-              {!user.hasSubmittedTestimonial && !testimonialSubmitted && <button type="button" className="theme-btn theme-btn-secondary" onClick={() => setIsTestimonialOpen(true)}><FaStar /> Share experience</button>}
-            </section>
-          </div>
-        </main>
-
-        {isTestimonialOpen && (
-          <div className="xp-modal-backdrop" role="presentation" onMouseDown={() => setIsTestimonialOpen(false)}>
-            <form className="xp-modal" onSubmit={submitTestimonial} onMouseDown={(event) => event.stopPropagation()}>
-              <div className="xp-modal-icon"><FaCommentDots /></div>
-              <p className="xp-eyebrow">Player feedback</p>
-              <h2>Share your Fantasy MMAdness experience.</h2>
-              <textarea value={testimonial} onChange={(event) => setTestimonial(event.target.value)} placeholder="Tell the community what you enjoy about the fight-night experience..." required />
-              <div><button type="button" className="theme-btn theme-btn-secondary" onClick={() => setIsTestimonialOpen(false)}>Cancel</button><button type="submit" className="theme-btn theme-btn-primary" disabled={isSubmittingTestimonial}>{isSubmittingTestimonial ? 'Submitting...' : 'Submit testimonial'}</button></div>
-            </form>
-          </div>
+        {!user.hasSubmittedTestimonial && (
+          <button className="xp-dashboard-testimonial" type="button" onClick={() => setIsOpen(true)}>
+            <FaStar /> <span>Share your experience</span>
+          </button>
         )}
       </div>
-    </>
+
+      {isOpen && (
+        <div className="xp-modal-backdrop">
+          <div className="xp-dashboard-modal">
+            <button className="xp-modal-close" type="button" onClick={closePopup}><FaTimes /></button>
+            <h2>Submit your testimonial</h2>
+            <p>Share a short note about your Fantasy MMAdness experience.</p>
+            <textarea placeholder="Enter your testimonial..." value={description} onChange={(event) => setDescription(event.target.value)} />
+            <div>
+              <button className="theme-btn theme-btn-primary" type="button" onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Submit'}</button>
+              <button className="theme-btn theme-btn-secondary" type="button" onClick={closePopup}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 

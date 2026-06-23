@@ -50,6 +50,13 @@ import "@/styles/new-theme.css";
 import "@/styles/experience-theme.css";
 import "@/styles/route-experience.css";
 import "@/styles/admin-experience.css";
+import "@/styles/frontend-final.css";
+import "@/styles/design-port.css";
+import "@/styles/final-route-polish.css";
+import "@/styles/admin-targeted-finish.css";
+import "@/styles/affiliate-experience-final.css";
+import "@/styles/final-campaign-community-pass.css";
+import "@/styles/final-fantasy-readability-mock.css";
 import Script from "next/script";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
@@ -89,17 +96,6 @@ function App({ Component, ...rest }) {
     <>
       <Head>
       <link rel="canonical" href={canonicalUrl} />
-        {/* Font Awesome Latest */}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-        />
-        {/* Older Font Awesome Version */}
-        <link
-          rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-        />
-        
       </Head>
       <Script
         async
@@ -146,7 +142,7 @@ function AppContent({ children }) {
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const hideLayout = isAdministrationRoute;
-  const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute && isAdminAuthenticated;
+  const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(router.pathname);
 
   useEffect(() => {
@@ -163,11 +159,9 @@ function AppContent({ children }) {
           const darkRoutes = [
             "/community-forum", "/Sponsors", "/guides", "/our-fighters",
             "/faqs", "/about", "/past-fights-records", "/fights-rewards",
-            "/sponsor-dashboard", "/leaderboard", "/testimonials", "/fights",
-            "/spin-wheel", "/calendar-of-fights", "/AffiliateDashboard",
-            "/UserDashboard", "/auth", "/referral-leaderboard", "/HowItWorks",
-            "/affiliate-league", "/fantasy-tips", "/FantasyLeagues", "/invite",
-            "/fighter-performance-tracker"
+            "/sponsor-dashboard", "/global-leaderboard", "/testimonials",
+            "/spin-wheel", "/calendar-of-fights", "/AffiliateDashboard", "/AffiliateProfile", "/AffiliateAccountSettings",
+            "/past-promotions", "/past-fights","/referral-leaderboard", "/HowItWorks", "/affiliate-league", "/fantasy-tips","/FantasyLeagues", "/invite", "/fighter-performance-tracker", "/leaderboard", "/mock-game"
           ];
 
           const redRoutes = ["/fights-news"];

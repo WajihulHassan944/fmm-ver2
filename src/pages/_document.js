@@ -27,6 +27,8 @@ export default function Document() {
                 <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&display=swap" rel="stylesheet" />
               
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 
                 {/* Preload Local Fonts */}
                 <link rel="preload" href="/Fonts/UFCSans-CondensedMedium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />

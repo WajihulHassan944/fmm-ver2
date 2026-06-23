@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
-const AdminBlogsPage = () => {
+const index = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -77,4 +77,4 @@ const AdminBlogsPage = () => {
   );
 };
 
-export default AdminBlogsPage;
+export default index;

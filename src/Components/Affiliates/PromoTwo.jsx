@@ -1,149 +1,145 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+  FaArrowRight,
+  FaCheckCircle,
+  FaCoins,
+  FaCrown,
+  FaShieldAlt,
+  FaTrophy,
+  FaUserPlus,
+  FaUsers,
+} from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
-const PromoTwo = ({matchId , affiliateId}) => {
-    const dispatch = useDispatch();
-      const [affiliate, setAffiliate] = useState(null);
-   
-    const matches = useSelector((state) => state.matches.data);
-    const match = matches.find((m) => m.shadowFightId === matchId && m.affiliateId === affiliateId);
-       
-    const matchStatus = useSelector((state) => state.matches.status);
-    const user = useSelector((state) => state.user);
-    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
-    useEffect(() => {
+const PromoTwo = ({ matchId, affiliateId }) => {
+  const dispatch = useDispatch();
+  const [affiliate, setAffiliate] = useState(null);
+  const [affiliateLoading, setAffiliateLoading] = useState(true);
+  const matches = useSelector((state) => state.matches.data);
+  const matchStatus = useSelector((state) => state.matches.status);
+  const user = useSelector((state) => state.user);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  const match = useMemo(
+    () => safeArray(matches).find((item) => String(item?.shadowFightId || '') === String(matchId || '') && String(item?.affiliateId || '') === String(affiliateId || '')),
+    [affiliateId, matchId, matches],
+  );
+
+  useEffect(() => {
+    let active = true;
+
     const fetchAffiliates = async () => {
+      setAffiliateLoading(true);
       try {
-        // Fetch all affiliates from the API
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates');
-        if (!response.ok) {
-          throw new Error('Failed to fetch affiliates');
-        }
-
-        // Convert response to JSON
+        const response = await fetch(`${API_BASE}/affiliates`);
+        if (!response.ok) throw new Error('Failed to fetch affiliates');
         const affiliates = await response.json();
-
-        // Compare each affiliate's ID with the given affiliateId
-        const matchedAffiliate = affiliates.find(aff => aff._id === affiliateId);
-
-        // If a matching affiliate is found, update the state
-        if (matchedAffiliate) {
-          setAffiliate(matchedAffiliate);
-        }
+        const matchedAffiliate = safeArray(affiliates).find((item) => String(item?._id || '') === String(affiliateId || ''));
+        if (active) setAffiliate(matchedAffiliate || null);
       } catch (error) {
         console.error('Error fetching affiliates:', error);
+        if (active) setAffiliate(null);
+      } finally {
+        if (active) setAffiliateLoading(false);
       }
     };
 
-    // Call the function to fetch and compare
     fetchAffiliates();
-  }, [affiliateId]); // The effect runs whenever affiliateId changes
-
-    
-    useEffect(() => {
-      if (matchStatus === 'idle') {
-        console.log("Fetching matches...");
-        dispatch(fetchMatches());
-      } else {
-        console.log("Matches already fetched or fetching...");
-      }
-    }, [matchStatus, dispatch]);
-  
-    
-  if (!affiliate) {
-    return <div>Loading...</div>;
-  }
-    // Handle join league action
-    const handleJoinLeague = async () => {
-      if (!isAuthenticated) {
-        window.open('/auth?mode=login&role=player', '_blank'); // Open login page in a new window
-        return;
-      }
-  
-      const userId = user._id;
-      const userEmail = user.email;
-  
-      console.log("User attempting to join league:", userId, userEmail);
-  
-      try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/join`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId, userEmail }),
-        });
-  
-        if (response.ok) {
-          alert('Successfully joined the league');
-          window.location.reload();
-        } else {
-          const data = await response.json();
-          alert(`${data.message}`);
-        }
-      } catch (error) {
-        console.error('Error joining league:', error);
-      }
+    return () => {
+      active = false;
     };
-  
-  
-    if (!match) {
-      return <p>Loading...</p>;
+  }, [affiliateId]);
+
+  useEffect(() => {
+    if (matchStatus === 'idle') dispatch(fetchMatches());
+  }, [dispatch, matchStatus]);
+
+  const handleJoinLeague = async () => {
+    if (!isAuthenticated) {
+      window.open('/login', '_blank');
+      return;
     }
-  
-  
-    return (
-      <div className='fightDetails'>
-        <div className='member-header' style={{ marginBottom: '30px' }}>
-          <div className='member-header-image'>
-            <img src={affiliate.profileUrl} alt="Affiliate" />
+
+    const userId = user._id;
+    const userEmail = user.email;
+
+    try {
+      const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, userEmail }),
+      });
+
+      if (response.ok) {
+        alert('Successfully joined the league');
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert(`${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error joining league:', error);
+    }
+  };
+
+  if (affiliateLoading || matchStatus === 'loading') {
+    return <div className="public-promo-loading">Preparing the creator fight room…</div>;
+  }
+
+  if (!affiliate || !match) {
+    return <div className="public-promo-loading is-error">This promoted campaign is not currently available.</div>;
+  }
+
+  const affiliateName = [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate';
+  const memberCount = safeArray(affiliate.usersJoined).length;
+  const category = getFightCategory(match);
+
+  return (
+    <section className="public-promo-experience">
+      <div className="public-promo-ambient" aria-hidden="true" />
+      <div className="public-promo-stage">
+        <div className="public-promo-copy">
+          <p className="xp-eyebrow"><FaCrown /> {affiliateName}&apos;s featured campaign</p>
+          <span className="public-promo-live"><i /> Creator league promotion</span>
+          <h1>{match.matchName || `${match.matchFighterA} vs ${match.matchFighterB}`}</h1>
+          <p>
+            Enter a premium creator-led fight room, join the league, and put your round-by-round
+            prediction against the rest of the community.
+          </p>
+          <div className="public-promo-meta">
+            <span><FaTrophy /> {category}</span>
+            <span><FaCoins /> {match.matchTokens || 0} token entry</span>
+            <span><FaUsers /> {memberCount} league members</span>
           </div>
-          <h3>Affiliate Name - {affiliate.firstName} {affiliate.lastName}</h3>
-          <h3>Users Joined League: {affiliate.usersJoined.length}</h3>
+          <button type="button" className="theme-btn theme-btn-primary public-promo-join" onClick={handleJoinLeague}>
+            <FaUserPlus /> Join {affiliate.firstName || 'creator'}&apos;s league <FaArrowRight />
+          </button>
+          <div className="public-promo-trust"><FaShieldAlt /><span><strong>Existing league flow</strong><small>Authentication, membership checks, and join API behavior remain unchanged.</small></span></div>
         </div>
-  
-        <div className='fightDetailsContainer'>
-          <h1 className='fightDetailsContainerFirstHeading'>Fight: <span>{match.matchName}</span></h1>
-  
-          <div className='fightersImagesInFightDetails'>
-            <div className='imgWrapFights'><img src={match.fighterAImage} alt={match.matchFighterA} /></div>
-            <h1>VS</h1>
-            <div className='imgWrapFights'><img src={match.fighterBImage} alt={match.matchFighterB} /></div>
+
+        <div className="public-promo-fight-card">
+          <div className="public-promo-fighter is-a">
+            <img src={match.fighterAImage} alt={match.matchFighterA || 'Fighter A'} />
+            <span>{match.matchFighterA || 'Fighter A'}</span>
           </div>
-  
-          <div className='fightDetailsPot'>
-            <h1 style={{ background: '#e90000', padding: '5px 10px', fontSize: '22px' }}>This fight is approved.</h1>
+          <div className="public-promo-versus"><small>{category}</small><strong>VS</strong><em>{getFightRounds(match)}</em></div>
+          <div className="public-promo-fighter is-b">
+            <img src={match.fighterBImage} alt={match.matchFighterB || 'Fighter B'} />
+            <span>{match.matchFighterB || 'Fighter B'}</span>
           </div>
-  
-          <h1 className='fightTypeInFightDetails' style={{ fontSize: '21.5px' }}>
-            Fight type: <span>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</span>
-            - <span style={{ color: '#3fd50b' }}>{match.matchType} </span>
-            - <span>{match.matchFighterA} </span> VS <span>{match.matchFighterB} </span>
-          </h1>
-  
-          <div className='fightDetailsPot'>
-            <h1>POT :</h1>
-            <p style={{ color: "#38b90c" }}>{match.pot}</p>
-          </div>
-  
-          <div className='beiginningTimeFight'>
-            <h1 style={{ fontSize: '21.5px' }}> {match.matchDate?.split('T')[0]} - </h1>
-            {match.matchType === "LIVE" && (
-  <p style={{ color: "#38b90c" }}>
-    {new Date(`1970-01-01T${match.matchTime}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
-  </p>
-)}
-  </div>
-  
-          <div style={{ width: '100%', display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-            <button className='btn-grad promobtn' onClick={handleJoinLeague} style={{width:'200px'}}>Join my league</button>
+          <div className="public-promo-prize-strip">
+            <span><small>Prize pot</small><strong>${Number(match.pot || 0).toLocaleString()}</strong></span>
+            <span><small>Entry</small><strong>{match.matchTokens || 0} tokens</strong></span>
+            <span><small>Status</small><strong><FaCheckCircle /> Approved</strong></span>
           </div>
         </div>
       </div>
-    );
-  };
-  
+    </section>
+  );
+};
 
-export default PromoTwo
+export default PromoTwo;

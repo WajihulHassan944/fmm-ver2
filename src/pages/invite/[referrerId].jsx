@@ -35,7 +35,7 @@ const InvitePage = () => {
 
       <div className='invite-container'>
         <h1>Earn 20 free tokens to play fantasy sports by Signing up</h1>
-        <Link href={`/auth?mode=signup&role=player&referrer=${referrerId}`} className='signUpBtnInvite'>
+        <Link href={`/CreateAccount?referrer=${referrerId}`} className='signUpBtnInvite'>
           Sign up now
         </Link>
       </div>

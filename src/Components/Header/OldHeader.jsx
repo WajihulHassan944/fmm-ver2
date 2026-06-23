@@ -16,13 +16,13 @@ const Header = () => {
       <div className='anchorLinksWrapper'>
         <NavLink to="/playforfree" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Play for free</NavLink>
         <NavLink to="/HowToPlay" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>How to play</NavLink>
-        <NavLink to="/fights?status=upcoming" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Upcoming Fights</NavLink>
-        <NavLink to="/auth?mode=signup&role=player" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Create account</NavLink>
+        <NavLink to="/upcomingfights" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Upcoming Fights</NavLink>
+        <NavLink to="/CreateAccount" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Create account</NavLink>
       </div>
 
 
       <div className='sideLinkswrap'>
-        <NavLink to="/auth?mode=login&role=player" className={({ isActive }) => (isActive ? 'sideLinks activeLink' : 'sideLinks')}>
+        <NavLink to="/login" className={({ isActive }) => (isActive ? 'sideLinks activeLink' : 'sideLinks')}>
           <i className="fa fa-sign-in" aria-hidden="true"></i> Login
         </NavLink>
       </div>
@@ -40,7 +40,7 @@ const Header = () => {
       <div className='anchorLinksWrapper'>
         <NavLink to="/YourFights" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Your Fights</NavLink>
         <NavLink to="/leaderboard" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Leaderboard</NavLink>
-        <NavLink to="/fights?status=upcoming" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Upcoming Fights</NavLink>
+        <NavLink to="/upcomingfights" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Upcoming Fights</NavLink>
         <NavLink to="/profile" className={({ isActive }) => (isActive ? 'anchorlinks activeLink' : 'anchorlinks')}>Profile</NavLink>
       </div>
 

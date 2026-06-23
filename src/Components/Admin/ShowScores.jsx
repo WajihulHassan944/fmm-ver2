@@ -1,321 +1,187 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { FaChartBar, FaCheckCircle, FaFistRaised, FaTrophy } from 'react-icons/fa';
+
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
+
+const BOXING_FIELDS = [
+  { key: 'HP', label: 'Head punches' },
+  { key: 'BP', label: 'Body punches' },
+  { key: 'TP', label: 'Total punches' },
+  { key: 'RW', label: 'Rounds won' },
+  { key: 'RL', label: 'Rounds lost' },
+  { key: 'KO', label: 'Knockout' },
+  { key: 'SP', label: 'Scoring points' },
+];
+
+const MMA_FIELDS = [
+  { key: 'ST', label: 'Strikes' },
+  { key: 'KI', label: 'Kicks' },
+  { key: 'KN', label: 'Knockdowns' },
+  { key: 'EL', label: 'Elbows' },
+  { key: 'RW', label: 'Rounds won' },
+  { key: 'RL', label: 'Rounds lost' },
+  { key: 'KO', label: 'Knockout' },
+  { key: 'SP', label: 'Scoring points' },
+];
+
+const numericValue = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 const ShowScores = ({ matchId, filter }) => {
-    const [shadowMatches, setShadowMatches] = useState([]);
-    const matches = useSelector((state) => state.matches.data);
-    
-    
+  const [shadowMatches, setShadowMatches] = useState([]);
+  const [shadowLoading, setShadowLoading] = useState(filter !== 'normal');
+  const matches = useSelector((state) => state.matches.data);
 
+  useEffect(() => {
+    if (filter === 'normal') return undefined;
 
-
-
-    useEffect(() => {
-        if (filter !== 'normal') {
-          const fetchShadowMatch = async () => {
-            try {
-              const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/shadow`);
-              const shadowData = await response.json();
-              setShadowMatches(shadowData);
-            } catch (error) {
-              console.error('Error fetching shadow match data:', error);
-            }
-          };
-          fetchShadowMatch();
-        }
-      }, [filter]);
-    
-      let match;
-      if (filter === 'shadowTemplate') {
-        match = shadowMatches.find((m) => m._id === matchId);
-      } else {
-        match = matches.find((m) => m._id === matchId);
+    let active = true;
+    const fetchShadowMatch = async () => {
+      setShadowLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/shadow`);
+        const shadowData = await response.json();
+        if (active) setShadowMatches(Array.isArray(shadowData) ? shadowData : []);
+      } catch (error) {
+        console.error('Error fetching shadow match data:', error);
+      } finally {
+        if (active) setShadowLoading(false);
       }
-    
+    };
 
+    fetchShadowMatch();
+    return () => { active = false; };
+  }, [filter]);
 
+  const match = useMemo(() => {
+    const source = filter === 'shadowTemplate' ? shadowMatches : (Array.isArray(matches) ? matches : []);
+    return source.find((item) => String(item?._id || item?.id) === String(matchId));
+  }, [filter, matchId, matches, shadowMatches]);
 
+  const isBoxing = match?.matchCategory === 'boxing';
+  const fields = isBoxing ? BOXING_FIELDS : MMA_FIELDS;
 
+  const scoringData = useMemo(() => {
+    if (!match) return { rounds: [], fighterOneTotals: {}, fighterTwoTotals: {} };
 
+    const container = isBoxing ? match.BoxingMatch : match.MMAMatch;
+    const fighterOneRows = Array.isArray(container?.fighterOneStats) ? container.fighterOneStats : [];
+    const fighterTwoRows = Array.isArray(container?.fighterTwoStats) ? container.fighterTwoStats : [];
+    const roundCount = Math.max(fighterOneRows.length, fighterTwoRows.length);
 
+    const rounds = Array.from({ length: roundCount }, (_, index) => ({
+      number: fighterOneRows[index]?.roundNumber || fighterTwoRows[index]?.roundNumber || index + 1,
+      fighterOne: fighterOneRows[index] || {},
+      fighterTwo: fighterTwoRows[index] || {},
+    }));
 
+    const total = (rows, key) => rows.reduce((sum, row) => sum + numericValue(row?.[key]), 0);
+    return {
+      rounds,
+      fighterOneTotals: Object.fromEntries(fields.map(({ key }) => [key, total(fighterOneRows, key)])),
+      fighterTwoTotals: Object.fromEntries(fields.map(({ key }) => [key, total(fighterTwoRows, key)])),
+    };
+  }, [fields, isBoxing, match]);
 
-
-
-
-
-
-
-
-    const isBoxing = match?.matchCategory === 'boxing';
-
-    const [rounds, setRounds] = useState([]);
-
-    useEffect(() => {
-        if (match) {
-            const stats = isBoxing
-                ? {
-                    fighterOneStats: match.BoxingMatch.fighterOneStats,
-                    fighterTwoStats: match.BoxingMatch.fighterTwoStats
-                }
-                : {
-                    fighterOneStats: match.MMAMatch.fighterOneStats,
-                    fighterTwoStats: match.MMAMatch.fighterTwoStats
-                };
-    
-            const roundData = stats.fighterOneStats.map((round, index) => {
-                // Determine borders based on values for fighter one
-                const rwBorder = round.RW === 100 ? '2px solid #95a04d' : '';
-                const koBorder = round.KO === 500 ? '2px solid #95a04d' : '';
-                const spBorder = round.SP === 500 ? '2px solid #95a04d' : '';
-                
-                return {
-                    round: round.roundNumber,
-                    hpPrediction1: round.HP || round.ST, // Boxing: HP, MMA: ST
-                    bpPrediction1: round.BP || round.KI, // Boxing: BP, MMA: KI
-                    tpPrediction1: round.TP || round.KN, // Boxing: TP, MMA: KN
-                    elPrediction1: round.EL || 0,        // MMA: EL, Boxing: 0
-                    hpPrediction2: stats.fighterTwoStats[index]?.HP || stats.fighterTwoStats[index]?.ST,
-                    bpPrediction2: stats.fighterTwoStats[index]?.BP || stats.fighterTwoStats[index]?.KI,
-                    tpPrediction2: stats.fighterTwoStats[index]?.TP || stats.fighterTwoStats[index]?.KN,
-                    elPrediction2: stats.fighterTwoStats[index]?.EL || 0,
-                    rwBorder,
-                    rlBorder: round.RL === 100 ? '2px solid #95a04d' : '', // Example for RL, adjust as needed
-                    koBorder,
-                    spBorder,
-                };
-            });
-            setRounds(roundData);
-        }
-    }, [match, isBoxing]);
-    
-    if (!match) {
-        return <div>Match not found</div>;
-    }
-
-    const label1 = isBoxing ? 'HP' : 'ST';
-    const label2 = isBoxing ? 'BP' : 'KI';
-    const label3 = isBoxing ? 'TP' : 'KN';
-    const label4 = isBoxing ? '' : 'EL'; // MMA has an extra 'EL' field
-
+  if (!match) {
     return (
-        <div className='fightCosting makePredictions' style={{width:'calc(100% - 230px)' , marginLeft:'230px' , paddingTop:'50px'}}>
-            <div className='fightDetailsContainer'>
-                <h1 className='fightTypeInFightDetails'>
-                    Fight type: <span>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</span> - 
-                    <span className='makeGreen'> {match.matchType} </span> - 
-                    <span>{match.matchFighterA} </span> VS <span> {match.matchFighterB} </span>
-                </h1>
-
-                <div className='fightersImagesInFightDetails'>
-                    <div className='flexColumn'>
-                        <div className='imgWrapFights'>
-                            <img src={match.fighterAImage} alt={match.matchFighterA} />
-                        </div>
-                        <h1 className='fightTypeInFightDetails'>{match.matchFighterA}</h1>
-                    </div>
-
-                    <h1>VS</h1>
-
-                    <div className='flexColumn'>
-                        <div className='imgWrapFights'>
-                            <img src={match.fighterBImage} style={{border:'3px solid red'}} alt='logo' />
-                        </div>
-                        <h1 className='fightTypeInFightDetails'>{match.matchFighterB}</h1>
-                    </div>
-                </div>
-
-                <div className='roundsWrapper'>
-                    {rounds.map((round, index) => (
-                        <div className='roundActual' key={index}>
-                            <div className='roundHeading'>
-                                <h1>Round {round.round}</h1>
-                            </div>
-                            <div className='roundInputWrap'>
-                                <div className='roundInput'>
-                                    <div className='roundInputDivOne'>
-                                        <i className="fa fa-caret-left" aria-hidden="true"></i>  
-                                        <input
-                                            type='number'
-                                            style={{border:'2px solid #2a8adb' , background:'#fff'}}
-                                            value={round.hpPrediction1}
-                                            disabled={true}
-                                        />
-                                    </div>
-                                    <div className='roundinput-image'>
-                                        <h2>{label1}</h2>
-                                        <div className='roundInputImgWrap'>
-                                            <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743258002/home/cozzru3dapikvamnd44q.png" alt={`${label1} Icon`} />
-                                        </div>
-                                    </div>
-                                    <div className='roundInputDivOne'>
-                                        <input
-                                            type='number'
-                                            style={{border:'2px solid #e1130c' , background:'#fff'}}
-                                            value={round.hpPrediction2}
-                                            disabled={true}
-                                        />
-                                        <i className="fa fa-caret-right" aria-hidden="true"></i>
-                                    </div>
-                                </div>
-
-                                <div className='roundInput'>
-                                    <div className='roundInputDivOne'>
-                                        <i className="fa fa-caret-left" aria-hidden="true"></i>  
-                                        <input
-                                            type='number'
-                                            style={{border:'2px solid #2a8adb' , background:'#fff'}}
-                                            value={round.bpPrediction1}
-                                            disabled={true}
-                                        />
-                                    </div>
-                                    <div className='roundinput-image'>
-                                        <h2>{label2}</h2>
-                                        <div className='roundInputImgWrap'>
-                                            <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743258002/home/cozzru3dapikvamnd44q.png" alt={`${label2} Icon`} />
-                                        </div>
-                                    </div>
-                                    <div className='roundInputDivOne'>
-                                        <input
-                                            type='number'
-                                            style={{border:'2px solid #e1130c' , background:'#fff'}}
-                                            value={round.bpPrediction2}
-                                            disabled={true}
-                                        />
-                                        <i className="fa fa-caret-right" aria-hidden="true"></i>
-                                    </div>
-                                </div>
-
-                                <div className='roundInput' style={{border:'2px dashed #ccc', borderRadius:'15px', width:'80%', padding:'5px'}}>
-                                    <div className='roundInputDivOne'>
-                                        <input
-                                            type='number'
-                                            style={{border:'2px solid #2a8adb', background:'#fff'}}
-                                            value={round.tpPrediction1}
-                                            disabled={true}
-                                        />
-                                    </div>
-                                    <div className='roundinput-image'>
-                                        <h2>{label3}</h2>
-                                        <div className='roundInputImgWrap'>
-                                            <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743258002/home/cozzru3dapikvamnd44q.png" alt={`${label3} Icon`} />
-                                        </div>
-                                    </div>
-                                    <div className='roundInputDivOne'>
-                                        <input
-                                            type='number'
-                                            style={{border:'2px solid #e1130c', background:'#fff'}}
-                                            value={round.tpPrediction2}
-                                            disabled={true}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* EL Field for MMA */}
-                                {!isBoxing && (
-                                    <div className='roundInput'>
-                                        <div className='roundInputDivOne'>
-                                            <i className="fa fa-caret-left" aria-hidden="true"></i>
-                                            <input
-                                                type='number'
-                                                style={{border:'2px solid #2a8adb' , background:'#fff'}}
-                                                value={round.elPrediction1}
-                                                disabled={true}
-                                            />
-                                        </div>
-                                        <div className='roundinput-image'>
-                                            <h2>{label4}</h2>
-                                            <div className='roundInputImgWrap'>
-                                                <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743258002/home/cozzru3dapikvamnd44q.png" alt={`${label4} Icon`} />
-                                            </div>
-                                        </div>
-                                        <div className='roundInputDivOne'>
-                                            <input
-                                                type='number'
-                                                style={{border:'2px solid #e1130c' , background:'#fff'}}
-                                                value={round.elPrediction2}
-                                                disabled={true}
-                                            />
-                                            <i className="fa fa-caret-right" aria-hidden="true"></i>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className='roundInput' style={{paddingLeft: '40px', paddingRight: '37px'}}>
-    <div className='roundInputDivOne'>
-        <input
-            type='button'
-            style={{
-                border: round.rwBorder || '2px solid #95a04d', 
-                background: '#264fa4', 
-                textAlign: 'center', 
-                color: '#fff', 
-            }}
-            value={round.rwBorder ? 'RW' : 'RL'}
-            disabled={true}
-        />
-    </div>
-
-    <div className='roundinput-image'>
-        <h2 style={{marginTop: '8px'}}>- OR -</h2>
-    </div>
-
-    <div className='roundInputDivOne'>
-        <input
-            type='button'
-            style={{
-                border: round.rlBorder || '2px solid #95a04d', 
-                background: '#8a1318', 
-                textAlign: 'center', 
-                color: '#fff'
-            }}
-            value={round.rlBorder ? 'RW' : 'RL'}
-            disabled={true}
-        />
-    </div>
-</div>
-
-
-                                <div className='roundInput' style={{paddingLeft:'40px', paddingRight:'37px'}}>
-    <div className='roundInputDivOne'>
-        <input
-            type='button'
-            style={{
-                border: round.koBorder || '2px solid #95a04d', 
-                background: '#264fa4', 
-                textAlign: 'center', 
-                color: '#fff', 
-                marginBottom: '5px'
-            }}
-            value={round.koBorder ? 'KO' : 'SP'}
-            disabled={true}
-        />
-    </div>
-    <div className='roundInputDivOne'>
-        <input
-            type='button'
-            style={{
-                border: round.spBorder || '2px solid #95a04d', 
-                background: '#8a1318', 
-                textAlign: 'center', 
-                color: '#fff',
-            }}
-            value={round.spBorder ? 'KO' : 'SP'}
-            disabled={true}
-        />
-    </div>
-</div>
-
-
-
-                                
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+      <div className="admin-submitted-scores admin-submitted-scores-empty">
+        <FaChartBar />
+        <strong>{shadowLoading ? 'Loading submitted scores' : 'Match scores are not available'}</strong>
+        <p>{shadowLoading ? 'Retrieving the selected shadow fight record.' : 'The selected fight could not be found in the current match records.'}</p>
+      </div>
     );
+  }
+
+  return (
+    <div className="admin-submitted-scores">
+      <section className="admin-submitted-score-hero">
+        <article className="is-red">
+          <img src={match.fighterAImage || FALLBACK_A} alt={match.matchFighterA || 'Fighter A'} />
+          <div><span>Red corner</span><strong>{match.matchFighterA || 'Fighter A'}</strong></div>
+        </article>
+        <div>
+          <span>{match.matchCategoryTwo || match.matchCategory || 'Combat'}</span>
+          <b>VS</b>
+          <small>{match.matchType || match.matchStatus || 'Official result'}</small>
+        </div>
+        <article className="is-blue">
+          <img src={match.fighterBImage || FALLBACK_B} alt={match.matchFighterB || 'Fighter B'} />
+          <div><span>Blue corner</span><strong>{match.matchFighterB || 'Fighter B'}</strong></div>
+        </article>
+      </section>
+
+      <section className="admin-score-summary-strip" aria-label="Submitted score summary">
+        <article><FaFistRaised /><div><small>Fight</small><strong>{match.matchName || `${match.matchFighterA} vs ${match.matchFighterB}`}</strong></div></article>
+        <article><FaChartBar /><div><small>Submitted rounds</small><strong>{scoringData.rounds.length}</strong></div></article>
+        <article><FaCheckCircle /><div><small>Status</small><strong>{match.matchStatus || match.matchShadowStatus || 'Recorded'}</strong></div></article>
+      </section>
+
+      {scoringData.rounds.length ? (
+        <div className="admin-submitted-rounds">
+          {scoringData.rounds.map((round) => (
+            <section className="admin-submitted-round-card" key={round.number}>
+              <header>
+                <div><span>Official scorecard</span><h3>Round {round.number}</h3></div>
+                <FaTrophy aria-hidden="true" />
+              </header>
+              <div className="admin-submitted-score-table-scroll">
+                <table className="admin-submitted-score-table">
+                  <thead>
+                    <tr>
+                      <th>Scoring field</th>
+                      <th>{match.matchFighterA || 'Fighter A'}</th>
+                      <th>{match.matchFighterB || 'Fighter B'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fields.map(({ key, label }) => (
+                      <tr key={`${round.number}-${key}`}>
+                        <td><strong>{label}</strong><span>{key}</span></td>
+                        <td><b className="is-red">{numericValue(round.fighterOne?.[key])}</b></td>
+                        <td><b className="is-blue">{numericValue(round.fighterTwo?.[key])}</b></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <section className="admin-submitted-scores-empty">
+          <FaChartBar />
+          <strong>No submitted rounds</strong>
+          <p>This fight record does not contain official round scores yet.</p>
+        </section>
+      )}
+
+      {scoringData.rounds.length > 0 && (
+        <section className="admin-score-totals-panel">
+          <header><span>Fight totals</span><h3>All submitted rounds</h3></header>
+          <div className="admin-submitted-score-table-scroll">
+            <table className="admin-submitted-score-table is-total-table">
+              <thead><tr><th>Scoring field</th><th>{match.matchFighterA || 'Fighter A'}</th><th>{match.matchFighterB || 'Fighter B'}</th></tr></thead>
+              <tbody>
+                {fields.map(({ key, label }) => (
+                  <tr key={`total-${key}`}>
+                    <td><strong>{label}</strong><span>{key}</span></td>
+                    <td><b className="is-red">{scoringData.fighterOneTotals[key]}</b></td>
+                    <td><b className="is-blue">{scoringData.fighterTwoTotals[key]}</b></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </div>
+  );
 };
 
 export default ShowScores;

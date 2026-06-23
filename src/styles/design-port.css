@@ -1,0 +1,492 @@
+/* ========================================================================== 
+   fmm-ver2 design port — target-specific compatibility refinements
+   ========================================================================== */
+
+/* Administration: people tables and inspectors --------------------------- */
+.admin-person-cell {
+  align-items: center;
+  background: transparent !important;
+  border: 0 !important;
+  color: #fff !important;
+  display: flex !important;
+  gap: 12px;
+  justify-content: flex-start !important;
+  min-height: auto !important;
+  min-width: 220px;
+  padding: 0 !important;
+  text-align: left;
+  text-transform: none !important;
+}
+
+.admin-person-cell:hover {
+  filter: none !important;
+  transform: none !important;
+}
+
+.admin-person-cell img {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(223, 17, 27, 0.48);
+  border-radius: 11px;
+  flex: 0 0 auto;
+  height: 46px;
+  object-fit: cover;
+  width: 46px;
+}
+
+.admin-person-cell span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin-person-cell strong {
+  color: #fff;
+  font-family: var(--admin-body, Inter, sans-serif);
+  font-size: 14px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-person-cell small {
+  color: var(--admin-muted, rgba(244, 246, 250, 0.62));
+  font-size: 11px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-result-count {
+  align-items: center;
+  color: var(--admin-muted, rgba(244, 246, 250, 0.62));
+  display: inline-flex;
+  font-size: 12px;
+  gap: 8px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.admin-result-count svg {
+  color: var(--admin-red, #df111b);
+}
+
+.admin-filter-tabs {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--admin-border, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.admin-filter-tab {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: rgba(255, 255, 255, 0.58) !important;
+  font-size: 11px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+}
+
+.admin-filter-tab.is-active {
+  background: rgba(223, 17, 27, 0.15) !important;
+  border-color: rgba(223, 17, 27, 0.46) !important;
+  color: #fff !important;
+}
+
+.admin-distinction-button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid var(--admin-border, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 8px !important;
+  color: rgba(255, 255, 255, 0.74) !important;
+  display: inline-flex;
+  font-size: 11px !important;
+  gap: 7px;
+  min-height: 38px !important;
+  padding: 0 11px !important;
+  white-space: nowrap;
+}
+
+.admin-distinction-button svg {
+  color: #ffd066;
+}
+
+.admin-distinction-button.has-reward {
+  background: rgba(53, 212, 93, 0.08) !important;
+  border-color: rgba(53, 212, 93, 0.3) !important;
+  color: #79ed8f !important;
+}
+
+.admin-row-actions button span {
+  font-size: 10px;
+}
+
+.admin-user-profile {
+  align-items: center;
+  display: grid;
+  gap: 17px;
+  grid-template-columns: 94px minmax(0, 1fr);
+  padding: 22px;
+}
+
+.admin-user-profile > img {
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(223, 17, 27, 0.48);
+  border-radius: 17px;
+  height: 94px;
+  object-fit: cover;
+  width: 94px;
+}
+
+.admin-user-profile > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.admin-user-profile strong {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 24px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.admin-user-profile span,
+.admin-user-profile p {
+  color: var(--admin-muted, rgba(244, 246, 250, 0.62));
+  margin: 0 !important;
+}
+
+.admin-wallet-adjust {
+  align-items: end;
+  border-top: 1px solid var(--admin-border, rgba(255, 255, 255, 0.1));
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 18px 22px;
+}
+
+.admin-wallet-adjust label,
+.admin-stacked-form label {
+  color: rgba(255, 255, 255, 0.72) !important;
+  display: grid;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 12px;
+  font-weight: 900;
+  gap: 7px;
+  text-transform: uppercase;
+}
+
+.admin-modal-form-body {
+  padding: 22px;
+}
+
+.admin-stacked-form {
+  display: grid;
+  gap: 15px;
+}
+
+.admin-stacked-form input[type='file'] {
+  min-height: 54px;
+  padding: 10px !important;
+}
+
+.admin-create-user,
+.admin-create-affiliate,
+.admin-distinction-modal {
+  max-width: 660px;
+}
+
+.admin-page-heading-compact {
+  margin-bottom: 0;
+}
+
+/* Affiliate account detail ----------------------------------------------- */
+.admin-affiliate-detail-content {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-affiliate-profile-card,
+.admin-affiliate-email-panel {
+  background: linear-gradient(180deg, rgba(17, 25, 35, 0.96), rgba(7, 12, 18, 0.97));
+  border: 1px solid var(--admin-border, rgba(255, 255, 255, 0.1));
+  border-radius: 17px;
+  box-shadow: 0 28px 76px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.admin-affiliate-profile-card {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(420px, 1.28fr) auto;
+  padding: 22px;
+}
+
+.admin-affiliate-profile-identity {
+  align-items: center;
+  display: flex;
+  gap: 15px;
+  min-width: 0;
+}
+
+.admin-affiliate-profile-identity img {
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(223, 17, 27, 0.52);
+  border-radius: 17px;
+  flex: 0 0 auto;
+  height: 100px;
+  object-fit: cover;
+  width: 100px;
+}
+
+.admin-affiliate-profile-identity > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-affiliate-profile-identity span,
+.admin-panel-header span {
+  color: var(--admin-red, #df111b);
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.admin-affiliate-profile-identity h2 {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: clamp(27px, 3vw, 39px);
+  line-height: 0.95;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-affiliate-profile-identity p {
+  margin: 0 !important;
+}
+
+.admin-affiliate-profile-meta {
+  display: grid;
+  gap: 9px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-affiliate-profile-meta > div {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--admin-border, rgba(255, 255, 255, 0.1));
+  border-radius: 11px;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.admin-affiliate-profile-meta small {
+  color: var(--admin-muted, rgba(244, 246, 250, 0.62));
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.admin-affiliate-profile-meta strong:not(.admin-status-badge) {
+  align-items: center;
+  color: #fff;
+  display: flex;
+  font-size: 13px;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-affiliate-profile-meta svg {
+  color: var(--admin-red, #df111b);
+  flex: 0 0 auto;
+}
+
+.admin-affiliate-approve {
+  align-self: center;
+  white-space: nowrap;
+}
+
+.admin-panel-header {
+  align-items: center;
+  border-bottom: 1px solid var(--admin-border, rgba(255, 255, 255, 0.1));
+  display: flex;
+  justify-content: space-between;
+  padding: 17px 19px;
+}
+
+.admin-panel-header h3 {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 24px;
+  margin: 4px 0 0;
+  text-transform: uppercase;
+}
+
+.admin-panel-header > strong {
+  color: var(--admin-muted, rgba(244, 246, 250, 0.62));
+  font-size: 12px;
+}
+
+.admin-panel-header > svg {
+  color: var(--admin-red, #df111b);
+  font-size: 24px;
+}
+
+.admin-affiliate-email-form {
+  padding: 21px;
+}
+
+.admin-affiliate-email-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+  margin-top: 16px;
+}
+
+.admin-affiliate-email-actions p {
+  font-size: 13px;
+  margin: 0 !important;
+}
+
+.admin-affiliate-email-actions p.is-success {
+  color: #79ed8f !important;
+}
+
+.admin-affiliate-email-actions p.is-error {
+  color: #ff7580 !important;
+}
+
+/* Public route compatibility --------------------------------------------- */
+.route-experience-content :is(
+  .createAccount,
+  .userCreateAccount,
+  .affiliateCreateAccount,
+  .affiliateCreateAccountWrapper,
+  .registerWrapper,
+  .resetPasswordWrapper,
+  .checkoutWrapper,
+  .profileWrapper
+) {
+  background: transparent !important;
+  min-height: auto !important;
+  padding-top: 0 !important;
+}
+
+.route-experience-content :is(
+  .registerCard,
+  .createAccountCard,
+  .affiliateRegisterCard,
+  .resetPasswordCard,
+  .checkoutContainer,
+  .contact-form,
+  .contactInfo
+) {
+  backdrop-filter: blur(15px);
+  background: linear-gradient(180deg, rgba(17, 25, 35, 0.95), rgba(7, 12, 18, 0.96)) !important;
+  border: 1px solid var(--route-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 28px 78px rgba(0, 0, 0, 0.38) !important;
+}
+
+.route-experience-content :is(.registerCard, .createAccountCard, .affiliateRegisterCard, .resetPasswordCard) {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  max-width: 920px;
+}
+
+.route-experience-content :is(.privacyPolicyWrapper, .termsWrapper, .forumRulesWrapper) {
+  background: linear-gradient(180deg, rgba(17, 25, 35, 0.94), rgba(7, 12, 18, 0.95)) !important;
+  border: 1px solid var(--route-border) !important;
+  border-radius: 18px;
+  box-shadow: 0 28px 78px rgba(0, 0, 0, 0.34);
+  padding: clamp(22px, 4vw, 50px) !important;
+}
+
+.route-experience-content :is(.privacyPolicyWrapper, .termsWrapper, .forumRulesWrapper) :is(h1, h2, h3) {
+  text-align: left !important;
+}
+
+@media (max-width: 1180px) {
+  .admin-affiliate-profile-card {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-affiliate-approve {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-result-count {
+    margin-left: 0;
+  }
+
+  .admin-filter-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .admin-filter-tab {
+    width: 100%;
+  }
+
+  .admin-user-profile,
+  .admin-wallet-adjust {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-profile {
+    text-align: center;
+  }
+
+  .admin-user-profile > img {
+    margin: 0 auto;
+  }
+
+  .admin-wallet-adjust button,
+  .admin-affiliate-approve {
+    width: 100%;
+  }
+
+  .admin-affiliate-profile-identity {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-affiliate-profile-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-affiliate-email-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-affiliate-email-actions button {
+    width: 100%;
+  }
+}
+
+
+/* Final audit fixes: legacy public/account surfaces that should not look old */
+.route-experience-content :is(.upcomingFightsUser,.pastFightsUser,.sponsors-wrapper,.sponsor-wrapper,.dashboard-container,.affiliate-profile-container,.affiliate-dashboard,.affiliate-promotion-wrapper,.affiliateLeagueWrapper,.pastPromotionsWrapper,.myLeagueRecordsWrapper,.myfancyContainer,.fighter-performance-page,.playForFreeWrapper,.fightsRewardsWrapper,.fantasyLeaguesWrapper,.howItWorksWrapper,.user-profile-wrapper,.profile-wrapper){background:transparent!important;min-height:auto!important;padding-top:0!important}.route-experience-content :is(.homeSecond,.homeThird,.profile-container,.profile-card,.affiliate-card,.promotion-card,.league-card,.past-promotion-card,.reward-card,.guide-card,.calendar-card,.fightswrap,.fightsWrap,.fightItem,.fighter-card,.stats-summary,.fight-history,.fantasy-points,.community-accuracy,.board-card,.member-card,.myfancyAffiliateCard,.myfancyTeamCard){backdrop-filter:blur(14px);background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.022))!important;border:1px solid var(--route-border,rgba(255,255,255,.11))!important;border-radius:18px!important;box-shadow:0 25px 72px rgba(0,0,0,.38)!important}.route-experience-content :is(.second-main-heading,.tracker-title,.hashtag,.myfancyTitle,.affiliate-title,.profile-title,.page-title){color:#fff!important;font-family:var(--route-display,Impact,sans-serif)!important;font-size:clamp(34px,4vw,54px)!important;line-height:.96!important;text-transform:uppercase!important}.route-experience-content :is(.fightItem,.fighter-card,.stats-summary,.fight-history,.fantasy-points,.community-accuracy,.board-card,.myfancyAffiliateCard,.myfancyTeamCard){padding:20px!important}.route-experience-content :is(.fightersImages,.fighter-img,.myfancyAvatar,.myfancyTeamPic,.profile-avatar,img[class*='avatar']){border-color:rgba(223,17,27,.55)!important;box-shadow:0 0 0 5px rgba(223,17,27,.09)!important}.route-experience-content .fightswrap,.route-experience-content .fightsWrap{display:grid!important;gap:22px!important;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important}.route-experience-content .fightItem{cursor:pointer;overflow:hidden;transition:transform .18s ease,border-color .18s ease}.route-experience-content .fightItem:hover{border-color:rgba(223,17,27,.56)!important;transform:translateY(-4px)}
+
+/* Final audit fixes: old administration modules normalised into the command-center shell */
+.admin-experience-main :is(.faqwrapper-admin,.newswrapper-admin,.sponsor-wrapper,.adminPredictions,.adminSideThreadsContainer,.nonRegisteredUsers,.youtubeLibrary,.adminRecords,.adminChatroomContainer,.blogsContainerAdmin,.adminAddBlog,.bot-wrapper-blogs,.bot-wrapper-social,.poster-form-wrapped){background:transparent!important;color:var(--admin-text,#f4f6fa)!important;margin:0 auto!important;max-width:1540px!important;min-height:auto!important;padding:0!important;width:100%!important}.admin-experience-main :is(.faqmain-admin,.newsmain-admin,.sponsor-grid,.adminPredictionsMain,.adminPredictionsBody,.adminSideThreadsWrapper,.youtubeArchive,.adminRecordsMain,.blogsContentActual,.adminAddBlog-form,.chat-box-blogs,.poster-form-container){display:grid;gap:18px}.admin-experience-main :is(.faqItem-admin,.newsItem-admin,.sponsor-card,.prediction-card,.adminThreadCard,.youtube-card,.adminRecordCard,.blogItem,.adminAddBlog-section){backdrop-filter:blur(14px);background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.022))!important;border:1px solid var(--admin-border,rgba(255,255,255,.1))!important;border-radius:17px!important;box-shadow:0 24px 72px rgba(0,0,0,.34)!important;color:#fff!important;overflow:hidden;padding:18px!important}.admin-experience-main :is(.faqHeader-admin,.newsHeader-admin){align-items:center;color:#fff!important;display:flex;font-family:var(--admin-display,Impact,sans-serif)!important;font-size:20px!important;font-weight:900!important;justify-content:space-between;text-transform:uppercase}.admin-experience-main :is(.faqBody-admin,.newsBody-admin){border-top:1px solid var(--admin-border,rgba(255,255,255,.1));color:var(--admin-muted,rgba(244,246,250,.62))!important;margin-top:12px!important;padding-top:14px!important}.admin-experience-main :is(.add-faq-btn,.add-news-btn,.add-sponsor-btn,.submit-sponsor-btn,.edit-sponsor-btn,.delete-sponsor-btn,.nonregistereduserslist){background:linear-gradient(135deg,#df111b,#8f0710)!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff!important}.admin-experience-main :is(.delete-btn,.delete-sponsor-btn){background:rgba(223,17,27,.18)!important;border-color:rgba(223,17,27,.45)!important}.admin-experience-main .sponsor-grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.admin-experience-main .sponsor-image{border-radius:13px;height:180px!important;object-fit:cover;width:100%}.admin-experience-main :is(.sponsor-name,.sponsor-heading){font-family:var(--admin-display,Impact,sans-serif)!important;text-transform:uppercase!important}.admin-experience-main :is(.add-sponsor-form,.popup-content,.modal-content){backdrop-filter:blur(16px);background:linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.98))!important;border:1px solid var(--admin-border,rgba(255,255,255,.1))!important;border-radius:18px!important;box-shadow:0 30px 90px rgba(0,0,0,.46)!important;color:#fff!important;padding:22px!important}

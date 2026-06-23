@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import {
   FaArrowRight,
   FaBolt,
@@ -11,30 +12,51 @@ import {
 } from 'react-icons/fa';
 
 const BACKGROUNDS = {
-  editorial: '/images/fmm-experience/backgrounds/editorial-red.jpg',
-  community: '/images/fmm-experience/backgrounds/community-cage.jpg',
-  profile: '/images/fmm-experience/backgrounds/profile-corner.jpg',
-  rewards: '/images/fmm-experience/backgrounds/rewards-vault.jpg',
-  affiliate: '/images/fmm-experience/backgrounds/league-night.jpg',
-  legal: '/images/fmm-experience/backgrounds/legal-vault.jpg',
+  editorial: '/images/fmm-pages/editorial-arena-hd.webp',
+  community: '/images/fmm-pages/community-arena-hd.webp',
+  profile: '/images/fmm-pages/profile-arena-hd.webp',
+  rewards: '/images/fmm-pages/rewards-arena-hd.webp',
+  affiliate: '/images/fmm-pages/league-arena-hd.webp',
+  legal: '/images/fmm-pages/legal-arena-hd.webp',
 };
 
 const CORE_ROUTES = new Set([
   '/',
   '/home',
-  '/fights',
+  '/auth',
+  '/login',
+  '/CreateAccount',
+  '/AffiliateCreateAccount',
+  '/affiliate-create-account',
   '/leaderboard',
+  '/mock-game',
+  '/fights',
+  '/upcomingfights',
+  '/past-fights',
   '/our-fighters',
   '/Sponsors',
-  '/fights-rewards',
-  '/FantasyLeagues',
-  '/auth',
+  '/faqs',
   '/UserDashboard',
+  '/myLeagueRecords',
+  '/FantasyLeagues',
   '/AffiliateDashboard',
-  '/sponsor-dashboard',
+  '/HowItWorks',
+  '/affiliate-league',
+  '/past-promotions',
+  '/AffiliateProfile',
+  '/AffiliateAccountSettings',
 ]);
 
 const ROUTE_META = {
+
+  '/upcomingfights': {
+    group: 'editorial', eyebrow: 'Upcoming fight cards', title: 'Find your next prediction.',
+    description: 'Browse the scheduled cards and enter prediction contests using the existing fight flow.',
+  },
+  '/past-fights': {
+    group: 'editorial', eyebrow: 'Completed fight cards', title: 'Review finished contests.',
+    description: 'Explore past cards, completed outcomes, and historical Fantasy MMAdness fight activity.',
+  },
   '/about': {
     group: 'legal', eyebrow: 'Inside Fantasy MMAdness', title: 'Built for combat sports fans.',
     description: 'Meet the platform, principles, and fight-night vision behind every prediction experience.',
@@ -115,6 +137,18 @@ const ROUTE_META = {
     group: 'profile', eyebrow: 'Player account', title: 'Your public fight identity.',
     description: 'Manage profile details, payout preferences, sharing, and account settings.',
   },
+  '/account/settings': {
+    group: 'profile', eyebrow: 'Player account', title: 'Account settings.',
+    description: 'Manage notifications, communication preferences, and payout identity separately from your public profile.', compact: true,
+  },
+  '/account/security': {
+    group: 'profile', eyebrow: 'Player security', title: 'Secure every session.',
+    description: 'Change your password and review or revoke active account sessions.', compact: true,
+  },
+  '/account/wallet': {
+    group: 'rewards', eyebrow: 'Fight wallet', title: 'Every token movement.',
+    description: 'Review the authoritative wallet ledger for entries, rewards, refunds, purchases, and adjustments.', compact: true,
+  },
   '/[userId]': {
     group: 'profile', eyebrow: 'Player profile', title: 'Competitor record.',
     description: 'View a public player profile, completed fights, and leaderboard performance.', compact: true,
@@ -162,6 +196,10 @@ const ROUTE_META = {
   '/checkout': {
     group: 'rewards', eyebrow: 'Secure checkout', title: 'Complete your corner.',
     description: 'Confirm your membership or token purchase through the existing secure checkout flow.', compact: true,
+  },
+  '/AffiliateAccountSettings': {
+    group: 'affiliate', eyebrow: 'Creator account', title: 'Affiliate account settings.',
+    description: 'Manage private payment details and payout requests separately from the public creator profile.', compact: true,
   },
   '/AffiliateProfile': {
     group: 'affiliate', eyebrow: 'Creator account', title: 'Your affiliate identity.',
@@ -235,10 +273,17 @@ export const shouldUseRouteExperienceFrame = (pathname) => {
 };
 
 const RouteExperienceFrame = ({ pathname, children }) => {
+  const isPlayerAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const isAffiliateAuthenticated = useSelector((state) => state.affiliateAuth.isAuthenticatedAffiliate);
   const meta = resolveMeta(pathname);
   if (!meta) return children;
 
   const background = BACKGROUNDS[meta.group] || BACKGROUNDS.profile;
+  const accountAction = isPlayerAuthenticated
+    ? { href: '/UserDashboard', label: 'Player dashboard' }
+    : isAffiliateAuthenticated
+      ? { href: '/AffiliateDashboard', label: 'Affiliate dashboard' }
+      : { href: '/auth?mode=signup&role=player', label: 'Join free' };
   const proof = meta.group === 'affiliate'
     ? [['Creator ready', 'League and promotion tools'], ['Audience first', 'Community-led fight cards'], ['Existing flows', 'Production APIs preserved']]
     : meta.group === 'community'
@@ -263,8 +308,8 @@ const RouteExperienceFrame = ({ pathname, children }) => {
             <h1>{meta.title}</h1>
             <p className="route-experience-description">{meta.description}</p>
             <div className="route-experience-actions">
-              <Link href="/fights" className="theme-btn theme-btn-primary">Explore fights <FaArrowRight aria-hidden="true" /></Link>
-              <Link href="/auth?mode=signup&role=player" className="theme-btn theme-btn-secondary">Join free</Link>
+              <Link href="/upcomingfights" className="theme-btn theme-btn-primary">Explore fights <FaArrowRight aria-hidden="true" /></Link>
+              <Link href={accountAction.href} className="theme-btn theme-btn-secondary">{accountAction.label}</Link>
             </div>
           </div>
 

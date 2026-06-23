@@ -101,7 +101,7 @@ const Promo = () => {
   // Handle join league action
   const handleJoinLeague = async () => {
     if (!isAuthenticated) {
-      window.open('/auth?mode=login&role=player', '_blank'); // Open login page in a new window
+      window.open('/login', '_blank'); // Open login page in a new window
       return;
     }
 

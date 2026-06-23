@@ -10,7 +10,7 @@ const UpcomingFights = () => {
   const router = useRouter();
 
   const handleFightClick = () => {
-    router.push('/auth?mode=login&role=player&next=/UserDashboard');
+    router.push('/login');
   };
 
   useEffect(() => {

@@ -1,7 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-const AffiliateAddNewMatch = ({ matchId }) => {
+import {
+  FaBullhorn,
+  FaCalendarAlt,
+  FaCoins,
+  FaDollarSign,
+  FaInfoCircle,
+  FaSave,
+  FaUsers,
+} from 'react-icons/fa';
+import {
+  FMM_ASSET_BASE,
+  getFightCategory,
+  getFighterImage,
+  safeArray,
+} from '@/Utils/fightExperience';
 
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+
+const AffiliateAddNewMatch = ({ matchId }) => {
+  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const [promoMatches, setPromoMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [buttonText, setButtonText] = useState('Publish fight promotion');
   const [formData, setFormData] = useState({
     shadowFightId: '',
     matchTokens: '',
@@ -11,92 +33,82 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     amountOverPotBudget: '',
     matchDate: '',
     matchTime: '',
-    matchCategoryTwo:'',
+    matchCategoryTwo: '',
   });
 
-  const [promoMatches, setPromoMatches] = useState([]);
-  const [requiredUsers, setRequiredUsers] = useState(null);  // Default initial value
-
   useEffect(() => {
+    let active = true;
+
     const fetchPromoMatches = async () => {
+      setLoading(true);
+      setLoadError('');
+
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/shadow');
-        if (!response.ok) {
-          throw new Error('Failed to fetch promo matches');
-        }
+        const response = await fetch(`${API_BASE}/shadow`);
+        if (!response.ok) throw new Error('Failed to fetch promo matches');
         const data = await response.json();
-        setPromoMatches(data);
-      } catch (err) {
-        console.log(err);
+        if (active) setPromoMatches(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error(error);
+        if (active) {
+          setPromoMatches([]);
+          setLoadError('The approved fight template could not be loaded.');
+        }
+      } finally {
+        if (active) setLoading(false);
       }
     };
 
     fetchPromoMatches();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const [buttonText, setButtonText] = useState('Create');
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
-  const promoDetails = promoMatches.find((m) => m._id === matchId);
+  const promoDetails = useMemo(
+    () => safeArray(promoMatches).find((match) => String(match?._id || '') === String(matchId || '')),
+    [matchId, promoMatches],
+  );
 
-  if(!promoDetails) {
-    return <p>Loading...</p>;
-  }
+  useEffect(() => {
+    if (!promoDetails) return;
 
-  if (!affiliate) {
-    return <div>Loading...</div>;
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    const numericFields = ['matchTokens', 'pot', 'profit', 'amountOverPotBudget'];
-    const dateFields = ['matchDate', 'matchTime'];
-
-    let newValue;
-
-    if (numericFields.includes(name)) {
-      newValue = parseFloat(value) || 0;
-    } else if (dateFields.includes(name)) {
-      newValue = value; // Keep date and time as string
-    } else {
-      newValue = value;
-    }
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: newValue,
+    setFormData((current) => ({
+      ...current,
+      matchTokens: current.matchTokens || promoDetails.matchTokens || '',
+      pot: current.pot || promoDetails.pot || '',
+      profit: current.profit || promoDetails.profit || '',
+      amountOverPotBudget: current.amountOverPotBudget || promoDetails.amountOverPotBudget || '',
+      matchDate: current.matchDate || String(promoDetails.matchDate || '').slice(0, 10),
+      matchTime: current.matchTime || String(promoDetails.matchTime || '').slice(0, 5),
     }));
+  }, [promoDetails]);
 
-    // Dynamically calculate the required number of players in real-time
-    if (name === 'pot' || name === 'matchTokens') {
-      const potValue = name === 'pot' ? newValue : formData.pot;
-      const matchTokensValue = name === 'matchTokens' ? newValue : formData.matchTokens;
+  const requiredUsers = useMemo(() => {
+    const pot = Number(formData.pot);
+    const buyIn = Number(formData.matchTokens);
+    if (!Number.isFinite(pot) || !Number.isFinite(buyIn) || pot <= 0 || buyIn <= 0) return 0;
+    return Math.ceil(pot / buyIn);
+  }, [formData.matchTokens, formData.pot]);
 
-      // Avoid division by zero for matchTokens
-      if (matchTokensValue > 0) {
-        setRequiredUsers(potValue / matchTokensValue);
-      } else {
-        setRequiredUsers(0);  // Set to 0 if matchTokens is invalid
-      }
-    }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((current) => ({ ...current, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const url = 'https://fantasymmadness-game-server-three.vercel.app/addMatch';
-  
-    const matchDetails = promoMatches.find((m) => m._id === matchId);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const url = `${API_BASE}/addMatch`;
+    const matchDetails = promoMatches.find((match) => match._id === matchId);
+
     if (!matchDetails) {
       alert('Match not found!');
       return;
     }
-  
-    // Parse local date and time from form data (assuming it's in the user's local timezone)
+
     const localDateTime = new Date(`${formData.matchDate}T${formData.matchTime}:00`);
-  
-    const matchTimeEST = localDateTime.toTimeString().substring(0, 5); // Time part in HH:MM format
-  
+    const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
     const matchDate = formData.matchDate.split('T')[0];
 
     const data = new FormData();
@@ -106,20 +118,14 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     data.append('pot', formData.pot);
     data.append('profit', formData.profit);
     data.append('amountOverPotBudget', formData.amountOverPotBudget);
-    data.append('matchDate', matchDate);  // Store adjusted date
-    data.append('matchTime', matchTimeEST);  // Store local time
-  
-    // Append image URLs directly if available
+    data.append('matchDate', matchDate);
+    data.append('matchTime', matchTimeEST);
     data.append('fighterAImageUrl', matchDetails.fighterAImage);
     data.append('fighterBImageUrl', matchDetails.fighterBImage);
     data.append('fighterAImageDeleteUrlFromReq', matchDetails.fighterAImageDeleteUrl);
     data.append('fighterBImageDeleteUrlFromReq', matchDetails.fighterBImageDeleteUrl);
-   
     data.append('promotionBackgroundUrl', matchDetails.promotionBackground);
     data.append('promotionBackgroundDeleteUrlFromReq', matchDetails.promotionBackgroundDeleteUrl);
-  
-   
-    // Append other match details
     data.append('matchStatus', matchDetails.matchStatus);
     data.append('matchCategory', matchDetails.matchCategory);
     data.append('matchCategoryTwo', matchDetails.matchCategoryTwo);
@@ -131,20 +137,17 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     data.append('matchType', 'SHADOW');
     data.append('maxRounds', matchDetails.maxRounds);
     data.append('notify', false);
- 
-    // Append BoxingMatch and MMAMatch stats
     data.append('BoxingMatch', JSON.stringify(matchDetails.BoxingMatch));
     data.append('MMAMatch', JSON.stringify(matchDetails.MMAMatch));
-  
+
     setButtonText('Saving, please wait...');
-  
+
     try {
-      console.log(data);
       const response = await fetch(url, {
         method: 'POST',
         body: data,
       });
-  
+
       if (response.ok) {
         const responseData = await response.json();
         alert('Match added successfully!');
@@ -157,63 +160,107 @@ const AffiliateAddNewMatch = ({ matchId }) => {
       console.error('Error adding match:', error);
       window.location.reload();
     } finally {
-      setButtonText('Add Match');
+      setButtonText('Publish fight promotion');
     }
   };
-  
+
+  if (loading) {
+    return <div className="affiliate-create-loading">Loading approved fight template…</div>;
+  }
+
+  if (loadError) {
+    return <div className="affiliate-create-loading is-error">{loadError}</div>;
+  }
+
+  if (!promoDetails || !affiliate) {
+    return <div className="affiliate-create-loading">Preparing campaign workspace…</div>;
+  }
+
+  const memberCount = safeArray(affiliate.usersJoined).length;
+  const fullName = [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || affiliate.playerName || 'Affiliate';
+
   return (
-    <div className='addNewMatch' style={{ marginLeft: '0', width: '100%', flexDirection: 'column' }}>
-      <div className='member-header' style={{ marginBottom: '20px' }}>
-        <div className='member-header-image'>
-          <img src={affiliate.profileUrl} alt="Logo" />
+    <section className="affiliate-create-promotion affiliate-create-promotion-premium">
+      <header className="affiliate-create-header">
+        <div className="affiliate-create-identity">
+          <img src={affiliate.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`} alt={fullName} />
+          <span>
+            <small><FaBullhorn /> Promotion owner</small>
+            <strong>{fullName}</strong>
+            <em><FaUsers /> {memberCount} league members</em>
+          </span>
         </div>
-        <h3><span className='toRemove'>Affiliate Name:</span> {affiliate.firstName} {affiliate.lastName}</h3>
-        <h3>Users <span className="toRemove"> in my League</span> : {affiliate.usersJoined.length}</h3>
-      </div>
 
-      <div className='registerCard' style={{ maxWidth: '700px', marginTop: '10px' }}>
-        <h1>Create a promo for a fight</h1>
-
-        <form>
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Fight Name</label>
-              <input type='text' name='matchName' value={promoDetails.matchName} disabled style={{ background: '#fff' }} />
-            </div>
-            <div className='input-group'>
-              <label>POT - Winner Award <span>*</span></label>
-              <input type='number' name='pot' value={formData.pot} onChange={handleChange} />
-            </div>
+        <div className="affiliate-create-fight-summary">
+          <figure>
+            <img src={getFighterImage(promoDetails, 'A')} alt={promoDetails.matchFighterA || 'Fighter A'} />
+            <figcaption>{promoDetails.matchFighterA || 'Fighter A'}</figcaption>
+          </figure>
+          <div>
+            <span>{getFightCategory(promoDetails)}</span>
+            <strong>VS</strong>
+            <small>{promoDetails.matchName || 'Approved fight template'}</small>
           </div>
+          <figure>
+            <img src={getFighterImage(promoDetails, 'B')} alt={promoDetails.matchFighterB || 'Fighter B'} />
+            <figcaption>{promoDetails.matchFighterB || 'Fighter B'}</figcaption>
+          </figure>
+        </div>
+      </header>
 
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Player Buy in (Tokens) <span>*</span></label>
-              <input type='number' name='matchTokens' value={formData.matchTokens} onChange={handleChange} />
-            </div>
+      <form className="affiliate-create-form" onSubmit={handleSubmit}>
+        <div className="affiliate-create-form-heading">
+          <div>
+            <p>Campaign configuration</p>
+            <h2>Create a promo for this fight</h2>
           </div>
+          <span><FaInfoCircle /> Configure the prize pool, entry cost, schedule, and commercial values before publishing the campaign.</span>
+        </div>
 
-          <div className='input-wrap-one'>
-            <div className='input-group' style={{ flexBasis: '100%', margin: '10px 0' }}>
-              <label style={{ color: 'yellow' }}>Note - You will need {requiredUsers > 0 ? Math.ceil(requiredUsers) : ' '} players in order for this fight to start. If the budget is not reached by the start time, the fight will not start so you need to have sufficient players in your league.</label>
-            </div>
-          </div>
+        <div className="affiliate-create-field-grid">
+          <label>
+            <span><FaDollarSign /> Prize pot <small>Winner award</small></span>
+            <input type="number" name="pot" min="1" step="1" value={formData.pot} onChange={handleChange} required />
+          </label>
+          <label>
+            <span><FaCoins /> Player buy-in <small>Tokens per entry</small></span>
+            <input type="number" name="matchTokens" min="1" step="1" value={formData.matchTokens} onChange={handleChange} required />
+          </label>
+          <label>
+            <span><FaCalendarAlt /> Promotion date <small>Local calendar date</small></span>
+            <input type="date" name="matchDate" value={formData.matchDate} onChange={handleChange} required />
+          </label>
+          <label>
+            <span><FaCalendarAlt /> Start time <small>Local fight time</small></span>
+            <input type="time" name="matchTime" value={formData.matchTime} onChange={handleChange} required />
+          </label>
+          <label>
+            <span><FaDollarSign /> Projected profit <small>Optional manual value</small></span>
+            <input type="number" name="profit" min="0" step="0.01" value={formData.profit} onChange={handleChange} />
+          </label>
+          <label>
+            <span><FaDollarSign /> Amount over budget <small>Optional manual value</small></span>
+            <input type="number" name="amountOverPotBudget" min="0" step="0.01" value={formData.amountOverPotBudget} onChange={handleChange} />
+          </label>
+        </div>
 
-   {/*        <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Match Date <span>*</span></label>
-              <input type='date' name='matchDate' value={formData.matchDate} onChange={handleChange} />
-            </div>
-            <div className='input-group'>
-              <label>Match time <span>*</span></label>
-              <input type='time' name='matchTime' value={formData.matchTime} onChange={handleChange} />
-            </div>
-          </div>
-*/}
-          <button type="submit" className='btn-grad' style={{ width: '50%' }} onClick={handleSubmit}>{buttonText}</button>
-        </form>
-      </div>
-    </div>
+        <div className="affiliate-create-capacity-note">
+          <FaUsers />
+          <span>
+            <strong>{requiredUsers || '—'} players required</strong>
+            <small>
+              {requiredUsers
+                ? `At least ${requiredUsers} paid entries are needed for the buy-ins to cover the configured prize pot.`
+                : 'Enter the prize pot and buy-in to preview the minimum campaign capacity.'}
+            </small>
+          </span>
+        </div>
+
+        <button type="submit" className="theme-btn theme-btn-primary affiliate-create-submit" disabled={buttonText !== 'Publish fight promotion'}>
+          <FaSave /> {buttonText}
+        </button>
+      </form>
+    </section>
   );
 };
 

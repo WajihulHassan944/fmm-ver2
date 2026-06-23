@@ -1,103 +1,63 @@
-import { useRouter } from 'next/router';
 import React from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import { FaArrowRight, FaCalendarAlt, FaClock, FaListUl, FaNewspaper } from 'react-icons/fa';
 
-const BlogDetailsPage = ({ blog }) => {
-  const router = useRouter();
+const API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+const cleanText = (value = '') => String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const words = (blog) => [blog?.metaDescription, ...(blog?.sections || []).flatMap((section) => [section.content, ...(section.headings || []).map((heading) => heading.content)])].filter(Boolean).join(' ').split(/\s+/).filter(Boolean).length;
 
-  if (!blog) return <div className="blogsWrapper">No blog found.</div>;
+export default function BlogDetailsPage({ blog }) {
+  if (!blog) return <div className="xp-article-not-found"><FaNewspaper /><h2>Story not found</h2><p>This article may have been moved or unpublished.</p><Link href="/blogs">Return to stories <FaArrowRight /></Link></div>;
+  const sections = Array.isArray(blog.sections) ? blog.sections : [];
+  const title = blog.header || blog.metaTitle || blog.title || 'Fight intelligence';
+  const published = blog.createdAt ? new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Fantasy MMAdness';
+  const readTime = Math.max(1, Math.ceil(words(blog) / 220));
 
   return (
-    <div className="blogsWrapper" style={{ display: 'flex', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div className="blogDetailsCard">
-          <div className="blogDetailsCardHeader">
-            {new Date(blog.createdAt).toLocaleString('en-US', {
-              weekday: 'long',
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true,
-              timeZone: 'America/New_York',
-            })}
-          </div>
+    <article className="xp-article-shell">
+      <Head><title>{title} | Fantasy MMAdness</title><meta name="description" content={blog.metaDescription || title} /></Head>
+      <header className="xp-article-header">
+        <p className="xp-eyebrow"><FaNewspaper /> Fantasy MMAdness editorial</p>
+        <h2>{title}</h2>
+        {blog.metaDescription && <p>{blog.metaDescription}</p>}
+        <div><span><FaCalendarAlt /> {published}</span><span><FaClock /> {readTime} min read</span><Link href="/blogs">All stories <FaArrowRight /></Link></div>
+      </header>
 
-          <div className="blogDetailsCardMain">
-            <h1>{blog.header}</h1>
-            {blog.metaDescription && <p>{blog.metaDescription}</p>}
-            <p>brought to you by</p>
-            <p className="network">Fantasy MMA Madness</p>
-          </div>
+      {blog.blogHeaderImage && <div className="xp-article-image"><img src={blog.blogHeaderImage} alt={title} /></div>}
 
-          {blog.blogHeaderImage && (
-            <img
-              src={blog.blogHeaderImage}
-              alt="Blog Header"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-          )}
+      {sections.length > 0 && (
+        <aside className="xp-article-toc"><strong><FaListUl /> Table of contents</strong>{sections.map((section, index) => <a href={`#section-${index}`} key={section._id || section.title || index}>{section.title || `Section ${index + 1}`}</a>)}</aside>
+      )}
 
-          <div className="blogDetailsCardBoutLabel">Table of Contents</div>
-
-          <div className="blogDetailsCardFights">
-            {blog.sections.map((section) => (
-              <p key={section._id}>{section.title.toUpperCase()}</p>
+      <div className="xp-article-content">
+        {sections.map((section, index) => (
+          <section id={`section-${index}`} key={section._id || section.title || index}>
+            {section.title && <h3>{section.title}</h3>}
+            {section.content && <p>{cleanText(section.content)}</p>}
+            {section.image && <img src={section.image} alt={section.title || title} />}
+            {Array.isArray(section.headings) && section.headings.map((heading) => (
+              <div className="xp-article-subsection" key={heading._id || heading.title}>
+                {heading.title && <h4>{heading.title}</h4>}
+                {heading.content && <p>{cleanText(heading.content)}</p>}
+              </div>
             ))}
-          </div>
-        </div>
-
-        {/* Optional Full Breakdown Below Bout Card */}
-        {blog.sections.map((section) => (
-          <div key={section._id} className="blogDetailsCard" style={{ marginTop: '30px' }}>
-            <div className="blogDetailsCardBoutLabel">{section.title}</div>
-
-            <div className="blogDetailsCardMain">
-              <p>{section.content}</p>
-
-              {section.image && (
-                <img
-                  src={section.image}
-                  alt="Section"
-                  style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
-                />
-              )}
-
-              {section.headings.map((heading) => (
-                <div key={heading._id} style={{ marginTop: '20px' }}>
-                  <strong>{heading.title}</strong>
-                  <p>{heading.content}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          </section>
         ))}
+        {!sections.length && <p>{cleanText(blog.metaDescription) || 'This story does not have published sections yet.'}</p>}
       </div>
-    </div>
+    </article>
   );
-};
-
-export async function getServerSideProps(context) {
-  const { blogId } = context.params;
-
-  try {
-    const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/blogs/${blogId}`);
-    if (!res.ok) throw new Error('Blog not found');
-    const data = await res.json();
-
-    return {
-      props: {
-        blog: data,
-      },
-    };
-  } catch (err) {
-    console.error('Error fetching blog details:', err);
-    return {
-      props: {
-        blog: null,
-      },
-    };
-  }
 }
 
-export default BlogDetailsPage;
+export async function getServerSideProps({ params }) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/blogs/${params.blogId}`);
+    if (!response.ok) throw new Error('Not found');
+    const data = await response.json();
+    return { props: { blog: JSON.parse(JSON.stringify(data?.data || data)) } };
+  } catch (error) {
+    console.error('Error fetching blog:', error);
+    return { props: { blog: null } };
+  }
+}

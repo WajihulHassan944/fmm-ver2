@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+  FaCalendarAlt,
+  FaCheck,
+  FaClock,
+  FaCoins,
+  FaFistRaised,
+  FaImage,
+  FaLayerGroup,
+  FaSave,
+  FaTrophy,
+  FaUsers,
+} from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
+
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
+const FALLBACK_PROMOTION = 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png';
+
+const resolveDisplayCategory = (category, categoryTwo) => {
+  if (categoryTwo === 'kickboxing' || categoryTwo === 'Bare-knuckle') return categoryTwo;
+  return category || 'boxing';
+};
+
+const previewSource = (value, fallback) => {
+  if (typeof File !== 'undefined' && value instanceof File) return URL.createObjectURL(value);
+  return value || fallback;
+};
+
 const EditMatch = ({ matchId, isShadow }) => {
-    
   const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
-
-  const match = matches.find((m) => m._id === matchId);
+  const match = (Array.isArray(matches) ? matches : []).find((item) => String(item?._id || item?.id) === String(matchId));
 
   const [formData, setFormData] = useState({
     matchCategory: 'boxing',
@@ -20,7 +46,7 @@ const EditMatch = ({ matchId, isShadow }) => {
     matchTime: '',
     matchTokens: '',
     pot: '',
-    addToShadowTemplates:false,
+    addToShadowTemplates: false,
     fighterAImage: null,
     fighterBImage: null,
     promotionBackground: null,
@@ -37,28 +63,29 @@ const EditMatch = ({ matchId, isShadow }) => {
     } else if (isShadow) {
       const fetchShadowMatches = async () => {
         try {
-          const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/shadow");
+          const response = await fetch(`${API_BASE}/shadow`);
           const data = await response.json();
-          const specificMatch = data.find((m) => m._id === matchId);
+          const specificMatch = (Array.isArray(data) ? data : []).find((item) => String(item?._id || item?.id) === String(matchId));
           if (specificMatch) {
-            setFormData({
-              ...formData,
+            setFormData((current) => ({
+              ...current,
               matchCategory: specificMatch.matchCategory || 'boxing',
               matchName: specificMatch.matchName || '',
               matchFighterA: specificMatch.matchFighterA || '',
               matchFighterB: specificMatch.matchFighterB || '',
               matchDescription: specificMatch.matchDescription || '',
+              matchVideoUrl: specificMatch.matchVideoUrl || '',
               fighterAImage: specificMatch.fighterAImage || null,
               fighterBImage: specificMatch.fighterBImage || null,
-              promotionBackground:specificMatch.promotionBackground || null ,
+              promotionBackground: specificMatch.promotionBackground || null,
               maxRounds: specificMatch.maxRounds || '',
               matchCategoryTwo: specificMatch.matchCategoryTwo || '',
               addToShadowTemplates: false,
-    
-            });
+            }));
+            setDisplayCategory(resolveDisplayCategory(specificMatch.matchCategory, specificMatch.matchCategoryTwo));
           }
         } catch (error) {
-          console.error("Error fetching shadow matches:", error);
+          console.error('Error fetching shadow matches:', error);
         }
       };
       fetchShadowMatches();
@@ -73,7 +100,7 @@ const EditMatch = ({ matchId, isShadow }) => {
         matchDescription: match.matchDescription || '',
         matchVideoUrl: match.matchVideoUrl || '',
         matchDate: match.matchDate ? new Date(match.matchDate).toISOString().split('T')[0] : '',
-        promotionBackground: match.promotionBackground || null ,
+        promotionBackground: match.promotionBackground || null,
         matchTime: match.matchTime || '',
         matchTokens: match.matchTokens || '',
         pot: match.pot || '',
@@ -83,12 +110,12 @@ const EditMatch = ({ matchId, isShadow }) => {
         matchCategoryTwo: match.matchCategoryTwo || '',
         addToShadowTemplates: match.shadowTemplatesAdditionStatus || false,
       });
-      setDisplayCategory(match.matchCategory || 'boxing');
+      setDisplayCategory(resolveDisplayCategory(match.matchCategory, match.matchCategoryTwo));
     }
   }, [match, matchStatus, isShadow, dispatch, matchId]);
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  const handleChange = (event) => {
+    const { name, value, files } = event.target;
     if (name === 'matchCategory') {
       let categoryOne = value;
       let categoryTwo = '';
@@ -103,33 +130,20 @@ const EditMatch = ({ matchId, isShadow }) => {
         categoryTwo = 'Bare-knuckle';
       }
 
-      setFormData({
-        ...formData,
-        matchCategory: categoryOne,
-        matchCategoryTwo: categoryTwo,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: files ? files[0] : value,
-      });
+      setFormData((current) => ({ ...current, matchCategory: categoryOne, matchCategoryTwo: categoryTwo }));
+      return;
     }
+
+    setFormData((current) => ({ ...current, [name]: files ? files[0] : value }));
   };
-  
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const url = isShadow
-      ? 'https://fantasymmadness-game-server-three.vercel.app/editShadow'
-      : 'https://fantasymmadness-game-server-three.vercel.app/editMatch';
-  
-    // Parse local date and time from form data (this should be in the user's local timezone)
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const url = isShadow ? `${API_BASE}/editShadow` : `${API_BASE}/editMatch`;
     const localDateTime = new Date(`${formData.matchDate}T${formData.matchTime}:00`);
-  
-    const matchTimeEST = localDateTime.toTimeString().substring(0, 5); // Time part in HH:MM format
+    const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
     const matchDate = formData.matchDate?.split('T')[0];
-
 
     const data = new FormData();
     data.append('matchId', matchId);
@@ -145,22 +159,18 @@ const EditMatch = ({ matchId, isShadow }) => {
     data.append('promotionBackground', formData.promotionBackground);
     data.append('addToShadow', formData.addToShadowTemplates);
 
-  
     if (!isShadow) {
-      data.append('matchDate', matchDate);  // Use adjusted date
-      data.append('matchTime', matchTimeEST);  // Use local time
+      data.append('matchDate', matchDate);
+      data.append('matchTime', matchTimeEST);
       data.append('matchTokens', formData.matchTokens);
       data.append('pot', formData.pot);
     }
-    
+
     setButtonText('Updating, please wait...');
-  
+
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        body: data,
-      });
-  
+      const response = await fetch(url, { method: 'POST', body: data });
+
       if (response.ok) {
         const result = await response.json();
         console.log('Response received:', result);
@@ -176,8 +186,7 @@ const EditMatch = ({ matchId, isShadow }) => {
           shadowData.append('matchDescription', formData.matchDescription);
           shadowData.append('matchVideoUrl', formData.matchVideoUrl);
           shadowData.append('maxRounds', formData.maxRounds);
-          shadowData.append('matchType', "SHADOW");
-  
+          shadowData.append('matchType', 'SHADOW');
           shadowData.append('fighterAImageUrl', formData.fighterAImage ? formData.fighterAImage : match?.fighterAImage);
           shadowData.append('fighterBImageUrl', formData.fighterBImage ? formData.fighterBImage : match?.fighterBImage);
           shadowData.append('fighterAImageDeleteUrlFromReq', match.fighterAImageDeleteUrl);
@@ -187,25 +196,12 @@ const EditMatch = ({ matchId, isShadow }) => {
           shadowData.append('BoxingMatch', JSON.stringify(match.BoxingMatch));
           shadowData.append('MMAMatch', JSON.stringify(match.MMAMatch));
           shadowData.append('notify', true);
-     
-          const shadowResponse = await fetch(
-            'https://fantasymmadness-game-server-three.vercel.app/addShadow',
-            {
-              method: 'POST',
-              body: shadowData,
-            }
-          );
-  
-          if (shadowResponse.ok) {
-            alert('Fight added to shadow templates successfully.');
-          } else {
-            console.warn('Failed to add fight to shadow templates.');
-          }
+
+          const shadowResponse = await fetch(`${API_BASE}/addShadow`, { method: 'POST', body: shadowData });
+
+          if (shadowResponse.ok) alert('Fight added to shadow templates successfully.');
+          else console.warn('Failed to add fight to shadow templates.');
         }
-
-
-
-
 
         window.location.reload();
       } else {
@@ -218,176 +214,94 @@ const EditMatch = ({ matchId, isShadow }) => {
       setButtonText('Edit Match');
     }
   };
-    
+
   return (
-    <div className='addNewMatch'>
-      <div className='registerCard'>
-        <h1>Update <span style={{ color: 'crimson' }}>{formData.matchName}</span></h1>
+    <div className="admin-edit-fight-workspace">
+      <section className="admin-edit-fight-banner">
+        <div>
+          <span>{isShadow ? 'Shadow template' : 'Production fight'}</span>
+          <h3>{formData.matchName || 'Edit fight record'}</h3>
+          <p>Every original edit field and submission flow remains available in a structured fight-operations form.</p>
+        </div>
+        <div className="admin-edit-fight-faceoff" aria-hidden="true">
+          <img src={previewSource(formData.fighterAImage, FALLBACK_A)} alt="" />
+          <b>VS</b>
+          <img src={previewSource(formData.fighterBImage, FALLBACK_B)} alt="" />
+        </div>
+      </section>
 
-        <form onSubmit={handleSubmit}>
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Select Category </label>
-              <select name='matchCategory' value={displayCategory} onChange={handleChange}>
-                <option value="boxing">Boxing</option>
-                <option value="mma">MMA</option>
-                <option value="kickboxing">Kickboxing</option>
-                <option value="Bare-knuckle">Bare-knuckle</option>
-              </select>
-            </div>
-
-            <div className='input-group'>
-              <label>Match Name </label>
-              <input type='text' name='matchName' value={formData.matchName} onChange={handleChange} />
-            </div>
+      <form className="admin-edit-fight-form" onSubmit={handleSubmit}>
+        <section className="admin-edit-form-section">
+          <header><span><FaLayerGroup /></span><div><small>Fight identity</small><h4>Core match details</h4><p>Update the sport, title, competitors, description, and round configuration.</p></div></header>
+          <div className="admin-edit-form-grid">
+            <label><span>Select category</span><select name="matchCategory" value={displayCategory} onChange={handleChange}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
+            <label><span>Match name</span><input type="text" name="matchName" value={formData.matchName} onChange={handleChange} /></label>
+            <label><span>Fighter A</span><input type="text" name="matchFighterA" value={formData.matchFighterA} onChange={handleChange} /></label>
+            <label><span>Fighter B</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
+            <label className="is-wide"><span>Match description</span><textarea name="matchDescription" value={formData.matchDescription} onChange={handleChange} rows="5" /></label>
+            <label><span>Max rounds</span><input type="number" name="maxRounds" value={formData.maxRounds} onChange={handleChange} /></label>
           </div>
+        </section>
 
-          <div className='input-wrap-two'>
-            <div className='input-group'>
-              <label>Fighter A </label>
-              <input type='text' name='matchFighterA' value={formData.matchFighterA} onChange={handleChange} />
+        {!isShadow && (
+          <section className="admin-edit-form-section">
+            <header><span><FaCalendarAlt /></span><div><small>Schedule & finance</small><h4>Event configuration</h4><p>Maintain the existing date, time, entry token, and prize-pot values.</p></div></header>
+            <div className="admin-edit-form-grid">
+              <label><span><FaCalendarAlt /> Match date</span><input type="date" name="matchDate" value={formData.matchDate} onChange={handleChange} /></label>
+              <label><span><FaClock /> Match time</span><input type="time" name="matchTime" value={formData.matchTime} onChange={handleChange} /></label>
+              <label><span><FaCoins /> Match tokens</span><input type="number" name="matchTokens" value={formData.matchTokens} onChange={handleChange} /></label>
+              <label><span><FaTrophy /> Pot</span><input type="number" name="pot" value={formData.pot} onChange={handleChange} /></label>
             </div>
-            <div className='input-group'>
-              <label>Fighter B </label>
-              <input type='text' name='matchFighterB' value={formData.matchFighterB} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div className='input-wrap-one'>
-            <div className='input-group' style={{ flexBasis: '100%' }}>
-              <label>Match Description</label>
-              <textarea name='matchDescription' style={{ border: '3px solid #ccc' }} value={formData.matchDescription} onChange={handleChange} />
-            </div>
-          </div>
-
-          {/* Conditional rendering for fields only when isShadow is false */}
-          {!isShadow && (
-            <>
-              <div className='input-wrap-one'>
-                <div className='input-group'>
-                  <label>Match Date </label>
-                  <input type='date' name='matchDate' value={formData.matchDate} onChange={handleChange} />
-                </div>
-                <div className='input-group'>
-                  <label>Match Time </label>
-                  <input type='time' name='matchTime' value={formData.matchTime} onChange={handleChange} />
-                </div>
-              </div>
-
-              <div className='input-wrap-one'>
-                <div className='input-group'>
-                  <label>Match Tokens </label>
-                  <input type='number' name='matchTokens' value={formData.matchTokens} onChange={handleChange} />
-                </div>
-                <div className='input-group'>
-                  <label>POT </label>
-                  <input type='number' name='pot' value={formData.pot} onChange={handleChange} />
-                </div>
-              </div>
-            </>
-          )}
-
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Fighter A Image </label>
-              {formData.fighterAImage instanceof File
-                ? <img src={URL.createObjectURL(formData.fighterAImage)} alt="Fighter A" style={{ width: '80px', objectFit: 'cover', borderRadius: '50%', height: '80px' }} />
-                : <img src={formData.fighterAImage} alt="Fighter A" style={{ width: '80px', objectFit: 'cover', borderRadius: '50%', height: '80px' }} />
-              }
-              <input type='file' name='fighterAImage' onChange={handleChange} style={{display:'block', marginTop:'10px'}} />
-            </div>
-            <div className='input-group'>
-              <label>Fighter B Image </label>
-              {formData.fighterBImage instanceof File
-                ? <img src={URL.createObjectURL(formData.fighterBImage)} alt="Fighter B" style={{ width: '80px', objectFit: 'cover', borderRadius: '50%', height: '80px' }} />
-                : <img src={formData.fighterBImage} alt="Fighter B" style={{ width: '80px', objectFit: 'cover', borderRadius: '50%', height: '80px' }} />
-              }
-              <input type='file' name='fighterBImage' onChange={handleChange} style={{display:'block',marginTop:'10px'}}/>
-            </div>
-          </div>
-
-          {isShadow || !isShadow && (
-            
-
-             <div className='input-group' style={{display:'flex', flexDirection:'column'}}>
-              <label>Promotion Background </label>
-              {formData.promotionBackground instanceof File ? (
-  // If promotionBackground is a File instance, display the selected file
-  <img
-    src={URL.createObjectURL(formData.promotionBackground)}
-    alt="promotionBackground"
-    style={{ width: '70%', objectFit: 'cover', height: 'auto', margin: 'auto' }}
-  />
-) : formData.promotionBackground ? (
-  // If promotionBackground is not a File but contains a URL, display the URL
-  <img
-    src={formData.promotionBackground}
-    alt="promotionBackground"
-    style={{ width: '70%', objectFit: 'cover', height: 'auto', margin: 'auto' }}
-  />
-) : (
-  // If neither condition is met, display the default promoBackground
-  <img
-    src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png"
-    alt="promotionBackground"
-    style={{ width: '70%', objectFit: 'cover', height: 'auto', margin: 'auto' }}
-  />
-)}
-
-
-  <input
-    type="file"
-    name="promotionBackground"
-    id="promotionBackground"
-    onChange={handleChange}
-    style={{ display: 'none' }} // Hide the default input
-  />
-  <label htmlFor="promotionBackground" className="custom-file-label" style={{marginTop:"10px"}}>
-    Choose File
-  </label>
-            </div>
-
+          </section>
         )}
 
-
-
-
-          <div className='input-wrap-one'>
-          <div className='input-group'>
-            <label>Max Rounds </label>
-            <input type='number' name='maxRounds' value={formData.maxRounds} onChange={handleChange} />
+        <section className="admin-edit-form-section">
+          <header><span><FaUsers /></span><div><small>Fight artwork</small><h4>Fighter images</h4><p>Review the current artwork and optionally upload replacement fighter assets.</p></div></header>
+          <div className="admin-edit-media-grid">
+            <label className="admin-edit-upload-card is-red">
+              <span>Fighter A image</span>
+              <img src={previewSource(formData.fighterAImage, FALLBACK_A)} alt={formData.matchFighterA || 'Fighter A'} />
+              <strong><FaImage /> Choose replacement</strong>
+              <input type="file" name="fighterAImage" onChange={handleChange} />
+              <small>{formData.matchFighterA || 'Red corner'}</small>
+            </label>
+            <label className="admin-edit-upload-card is-blue">
+              <span>Fighter B image</span>
+              <img src={previewSource(formData.fighterBImage, FALLBACK_B)} alt={formData.matchFighterB || 'Fighter B'} />
+              <strong><FaImage /> Choose replacement</strong>
+              <input type="file" name="fighterBImage" onChange={handleChange} />
+              <small>{formData.matchFighterB || 'Blue corner'}</small>
+            </label>
           </div>
-        </div>
-        
-        
-  <div className="input-wrap-one">
-    <div className="input-group" style={{flexDirection:'row',gap:'20px', marginTop:'10px'}}>
-      <label   style={{
-        color: formData.addToShadowTemplates ? 'rgb(0, 213, 75)' : 'white', // Dynamic color
-        transition: 'color 0.3s ease', // Add animation
-      }}>In Shadow Templates ? </label>
-      <div className="toggle-switch">
-      <input
-        type="checkbox"
-        id="addToShadowTemplates"
-        checked={formData.addToShadowTemplates}
-        onChange={() => setFormData((prevData) => ({
-      ...prevData,
-      addToShadowTemplates: !prevData.addToShadowTemplates,
-    }))}
-    />
-        <label htmlFor="addToShadowTemplates" className="switch"></label>
-      </div>
-    </div>
-  </div>
+        </section>
 
-        
-        
-          <button type='submit' className='btn-grad' style={{ width: '50%' }}>
-            {buttonText}
-          </button>
-        </form>
-      </div>
+        {!isShadow && (
+          <section className="admin-edit-form-section">
+            <header><span><FaImage /></span><div><small>Promotion artwork</small><h4>Fight background</h4><p>Keep the current promotional artwork or choose a replacement file.</p></div></header>
+            <label className="admin-edit-promotion-upload">
+              <img src={previewSource(formData.promotionBackground, FALLBACK_PROMOTION)} alt="Promotion background" />
+              <div><strong><FaImage /> Choose promotion background</strong><small>The selected file will be submitted through the original edit-match request.</small></div>
+              <input type="file" name="promotionBackground" onChange={handleChange} />
+            </label>
+          </section>
+        )}
+
+        <section className="admin-edit-form-section admin-edit-shadow-section">
+          <header><span><FaFistRaised /></span><div><small>Template distribution</small><h4>Shadow template setting</h4><p>Preserves the existing add-to-shadow toggle and follow-up request behavior.</p></div></header>
+          <label className="admin-edit-toggle-row" htmlFor="addToShadowTemplates">
+            <div><strong>In shadow templates?</strong><small>{formData.addToShadowTemplates ? 'This fight is marked for the shadow template library.' : 'This fight is not currently marked for shadow distribution.'}</small></div>
+            <span className={`admin-edit-toggle ${formData.addToShadowTemplates ? 'is-active' : ''}`}>
+              <input type="checkbox" id="addToShadowTemplates" checked={formData.addToShadowTemplates} onChange={() => setFormData((current) => ({ ...current, addToShadowTemplates: !current.addToShadowTemplates }))} />
+              <i><FaCheck /></i>
+            </span>
+          </label>
+        </section>
+
+        <footer className="admin-edit-form-actions">
+          <div><small>Match ID</small><strong>{matchId}</strong></div>
+          <button type="submit" className="admin-primary-action"><FaSave /> {buttonText}</button>
+        </footer>
+      </form>
     </div>
   );
 };

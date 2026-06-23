@@ -85,7 +85,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
-      if (typeof window !== 'undefined') localStorage.removeItem('authToken');
+      localStorage.removeItem('authToken');
     },
   },
   extraReducers: (builder) => {
@@ -99,7 +99,7 @@ const authSlice = createSlice({
         if (action.payload.user.currentPlan !== 'None') {
           state.isAuthenticated = true; // Only set to true if the plan is not 'None'
         }
-        if (typeof window !== 'undefined') localStorage.setItem('authToken', action.payload.token); // Store token in local storage
+        localStorage.setItem('authToken', action.payload.token); // Store token in local storage
         state.user = action.payload.user; // Set user from action payload
       })
       .addCase(loginUser.rejected, (state, action) => {

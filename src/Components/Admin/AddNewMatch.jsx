@@ -1,380 +1,232 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { FaBolt, FaCalendarAlt, FaCloudUploadAlt, FaPlus, FaSave, FaTrophy } from 'react-icons/fa';
 import AdminPredictions from './AdminPredictions';
-import { useRouter } from 'next/router';
-const AddNewMatch = () => {
-  const router = useRouter();  
-  const [formData, setFormData] = useState({
-    matchCategory: 'boxing',
-    matchName: '',
-    matchFighterA: '',
-    matchFighterB: '',
-    matchDescription: '',
-    matchVideoUrl: '',
-    matchDate: '',
-    matchTime: '',
-    matchTokens: '',
-    matchType: 'LIVE',
-    pot: '',
-    fighterAImage: null,
-    notify:true,
-    addToShadowTemplates:false,
-    fighterBImage: null,
-    promotionBackground: null,
-    maxRounds: '',
-    matchCategoryTwo: '',
-  });
-  
-  const [buttonText, setButtonText] = useState('Add Match');  // State for button text
-  const [displayCategory, setDisplayCategory] = useState('boxing');
-  const [matchId, setMatchId] = useState(null); // State to store matchId for AdminPredictions
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [showAdminPredictions, setShowAdminPredictions] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-
-    if (name === 'matchCategory') {
-      let categoryOne = value;
-      let categoryTwo = '';
-
-      setDisplayCategory(value); // Update the displayed value
-
-      if (value === 'kickboxing') {
-        categoryOne = 'mma';
-        categoryTwo = 'kickboxing';
-      } else if (value === 'Bare-knuckle') {
-        categoryOne = 'boxing';
-        categoryTwo = 'Bare-knuckle';
-      }
-
-      setFormData({
-        ...formData,
-        matchCategory: categoryOne,
-        matchCategoryTwo: categoryTwo,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: files ? files[0] : value // Handles both text and file inputs
-      });
-    }
-  };
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const url =
-      formData.matchType === 'LIVE'
-        ? 'https://fantasymmadness-game-server-three.vercel.app/addMatch'
-        : 'https://fantasymmadness-game-server-three.vercel.app/addShadow';
-  
-    // Parse local date and time from form data (assuming it's in the user's local timezone)
-    const localDateTime = new Date(`${formData.matchDate}T${formData.matchTime}:00`);
-    const matchTimeEST = localDateTime.toTimeString().substring(0, 5); // Time part in HH:MM format
-    const matchDate = formData.matchDate.split('T')[0];
-
-    const data = new FormData();
-    data.append('matchCategory', formData.matchCategory);
-    data.append('matchCategoryTwo', formData.matchCategoryTwo);
-    data.append('matchName', formData.matchName);
-    data.append('matchFighterA', formData.matchFighterA);
-    data.append('matchFighterB', formData.matchFighterB);
-    data.append('matchDescription', formData.matchDescription);
-    data.append('matchVideoUrl', formData.matchVideoUrl);
-    data.append('fighterAImage', formData.fighterAImage);
-    data.append('fighterBImage', formData.fighterBImage);
-    data.append('maxRounds', formData.maxRounds);
-    data.append('matchDate', matchDate);
-    data.append('matchTime', matchTimeEST);
-    data.append('matchType', formData.matchType);
-    data.append('matchTokens', formData.matchTokens);
-    data.append('pot', formData.pot);
-    data.append('notify', formData.notify);
-    data.append('promotionBackground', formData.promotionBackground);
-    data.append('addToShadow', formData.addToShadowTemplates);
-
-    setButtonText('Saving, please wait...'); // Update button text
-  
-    try {
-      // Send the main request
-      const response = await fetch(url, {
-        method: 'POST',
-        body: data,
-      });
-  
-      if (response.ok) {
-        const result = await response.json(); // Parse the JSON response
-        console.log('Response received:', result); // Log the full response
-        alert('Match added successfully!');
-  
-        // If matchType is 'LIVE' and addToShadowTemplates is true, add the fight to shadow templates
-        if (formData.matchType === 'LIVE' && formData.addToShadowTemplates) {
-          const shadowData = new FormData();
-          shadowData.append('matchCategory', formData.matchCategory);
-          shadowData.append('matchCategoryTwo', formData.matchCategoryTwo);
-          shadowData.append('matchName', formData.matchName);
-          shadowData.append('matchFighterA', formData.matchFighterA);
-          shadowData.append('matchFighterB', formData.matchFighterB);
-          shadowData.append('matchDescription', formData.matchDescription);
-          shadowData.append('matchVideoUrl', formData.matchVideoUrl);
-          shadowData.append('fighterAImage', formData.fighterAImage);
-          shadowData.append('fighterBImage', formData.fighterBImage);
-          shadowData.append('maxRounds', formData.maxRounds);
-          shadowData.append('matchType', formData.matchType); // Force matchType to SHADOW
-          shadowData.append('notify', formData.notify);
-          shadowData.append('promotionBackground', formData.promotionBackground);
-  
-          const shadowResponse = await fetch(
-            'https://fantasymmadness-game-server-three.vercel.app/addShadow',
-            {
-              method: 'POST',
-              body: shadowData,
-            }
-          );
-  
-          if (shadowResponse.ok) {
-            alert('Fight also added to shadow templates successfully.');
-          } else {
-            console.warn('Failed to add fight to shadow templates.');
-          }
-        }
-  
-        if (formData.matchType === 'SHADOW') {
-          setMatchId(result.matchId); // Store the matchId
-          setShowPopup(true); // Show the popup
-        } else {
-          window.location.reload(); // Reload for LIVE matches
-        }
-      } else {
-        alert('Failed to add match.');
-      }
-    } catch (error) {
-      console.error('Error adding match:', error);
-      alert('An error occurred while adding the match.');
-    } finally {
-      setButtonText('Add Match'); // Revert button text
-    }
-  };
-  
-  
-  const handlePopupResponse = (response) => {
-    setShowPopup(false); // Hide the popup
-    if (response === 'yes') {
-      setShowAdminPredictions(true); // Trigger rendering of AdminPredictions
-    } else {
-      window.location.reload();
-    }
-  };
-  
-  if (showAdminPredictions && matchId) {
-    return <AdminPredictions matchId={matchId} filter={'shadowTemplate'} />;
-  }
- 
-  return (
-    <div className='addNewMatch'>
-     <i
-        className="fa fa-arrow-circle-left"
-        aria-hidden="true"
-        onClick={() => router.push(-1)} // Go back to the previous page
-        style={{ position: 'absolute', top: '38px', left: '18%', cursor: 'pointer', fontSize: '24px', color: '#007bff', zIndex: '99999' }}
-      ></i>
-  
-      <div className='registerCard'>
-        <h1>Add New Match</h1>
-
-        <form onSubmit={handleSubmit}>
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Select Category <span>*</span></label>
-              <select name='matchCategory' value={displayCategory} onChange={handleChange}>
-                <option value="boxing">Boxing</option>
-                <option value="mma">MMA</option>
-                <option value="kickboxing">Kickboxing</option>
-                <option value="Bare-knuckle">Bare-knuckle</option>
-              </select>
-            </div>
-
-            <div className='input-group'>
-              <label>Match Name <span>*</span></label>
-              <input type='text' name='matchName' value={formData.matchName} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div className='input-wrap-two'>
-            <div className='input-group'>
-              <label>Fighter A <span>*</span></label>
-              <input type='text' name='matchFighterA' value={formData.matchFighterA} onChange={handleChange} />
-            </div>
-            <div className='input-group'>
-              <label>Fighter B <span>*</span></label>
-              <input type='text' name='matchFighterB' value={formData.matchFighterB} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div className='input-wrap-one'>
-            <div className='input-group' style={{ flexBasis: '100%' }}>
-              <label>Match Description <span>*</span></label>
-              <textarea name='matchDescription' style={{ border: '3px solid #ccc' }} value={formData.matchDescription} onChange={handleChange} />
-            </div>
-          </div>
-
-          {formData.matchType === 'LIVE' && (
-            <>
-              <div className='input-wrap-one'>
-                <div className='input-group'>
-                  <label>Match Date <span>*</span></label>
-                  <input type='date' name='matchDate' value={formData.matchDate} onChange={handleChange} />
-                </div>
-                <div className='input-group'>
-                  <label>Match Time <span>*</span></label>
-                  <input type='time' name='matchTime' value={formData.matchTime} onChange={handleChange} />
-                </div>
-              </div>
-
-              <div className='input-wrap-one'>
-                <div className='input-group'>
-                  <label>Match Tokens <span>*</span></label>
-                  <input type='number' name='matchTokens' value={formData.matchTokens} onChange={handleChange} />
-                </div>
-                <div className='input-group'>
-                  <label>POT <span>*</span></label>
-                  <input type='number' name='pot' value={formData.pot} onChange={handleChange} />
-                </div>
-              </div>
-            </>
-          )}
-
-
-
-
-         
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Fighter 1 Image <span>*</span></label>
-              <input type='file' name='fighterAImage' onChange={handleChange} style={{display:'block'}} />
-            </div>
-            <div className='input-group'>
-              <label>Fighter 2 Image <span>*</span></label>
-              <input type='file' name='fighterBImage' onChange={handleChange} style={{display:'block'}} />
-            </div>
-          </div>
-
-            
-            <div className='input-wrap-one' style={{flexDirection:'column'}}>
-            {formData.promotionBackground instanceof File
-                ? <img src={URL.createObjectURL(formData.promotionBackground)} alt="promotionBackground" style={{ width: '70%', objectFit: 'cover', height: 'auto', margin:'auto' }} />
-                : <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png" alt="promotionBackground" style={{ width: '70%', objectFit: 'cover',  height: 'auto', margin:'auto' }} />
-              }
-            <div className="input-group">
-  <label>Promotion Background <span>*</span></label>
-  <input
-    type="file"
-    name="promotionBackground"
-    id="promotionBackground"
-    onChange={handleChange}
-    style={{ display: 'none' }} // Hide the default input
-  />
-  <label htmlFor="promotionBackground" className="custom-file-label">
-    Choose File
-  </label>
-</div>
- </div>
-
-
-
-          <div className='input-wrap-one'>
-            <div className='input-group'>
-              <label>Fight <span>*</span></label>
-              <select name='matchType' value={formData.matchType} onChange={handleChange}>
-                <option value="LIVE">LIVE</option>
-                <option value="SHADOW">SHADOW</option>
-              </select>
-            </div>
-            <div className='input-group'>
-              <label>Max Rounds <span>*</span></label>
-              <input type='number' name='maxRounds' value={formData.maxRounds} onChange={handleChange} />
-            </div>
-          </div>
-          
-          
-          <div className="input-wrap-one">
-    <div className="input-group" style={{flexDirection:'row',gap:'20px', marginTop:'10px'}}>
-      <label   style={{
-        color: formData.notify ? 'rgb(0, 213, 75)' : 'white', // Dynamic color
-        transition: 'color 0.3s ease', // Add animation
-      }}>Notify Users</label>
-      <div className="toggle-switch">
-      <input
-        type="checkbox"
-        id="notify-switch"
-        checked={formData.notify}
-        onChange={() => setFormData((prevData) => ({
-      ...prevData,
-      notify: !prevData.notify,
-    }))}
-    />
-        <label htmlFor="notify-switch" className="switch"></label>
-      </div>
-    </div>
-  </div>
-
-
-
-
-
-
-
-
-  <div className="input-wrap-one">
-    <div className="input-group" style={{flexDirection:'row',gap:'20px', marginTop:'10px'}}>
-      <label   style={{
-        color: formData.addToShadowTemplates ? 'rgb(0, 213, 75)' : 'white', // Dynamic color
-        transition: 'color 0.3s ease', // Add animation
-      }}>Add To Shadow Templates</label>
-      <div className="toggle-switch">
-      <input
-        type="checkbox"
-        id="addToShadowTemplates"
-        checked={formData.addToShadowTemplates}
-        onChange={() => setFormData((prevData) => ({
-      ...prevData,
-      addToShadowTemplates: !prevData.addToShadowTemplates,
-    }))}
-    />
-        <label htmlFor="addToShadowTemplates" className="switch"></label>
-      </div>
-    </div>
-  </div>
-
-          <button type="submit" className='btn-grad' style={{ width: '50%' }}>{buttonText}</button>
-        </form>
-
-       
-      </div>
-
-
-
-      {showPopup && (
-        <div className='popup'>
-          <h2>Want to submit scores now?</h2>
-          <button onClick={() => handlePopupResponse('yes')}>Yes</button>
-          <button onClick={() => handlePopupResponse('no')}>Not Now</button>
-        </div>
-      )}
-
-      
-
-    </div>
-  );
+const EMPTY = {
+  matchCategory: 'boxing',
+  matchCategoryTwo: '',
+  matchName: '',
+  matchFighterA: '',
+  matchFighterB: '',
+  matchDescription: '',
+  matchVideoUrl: '',
+  matchDate: '',
+  matchTime: '',
+  matchTokens: '0',
+  pot: '0',
+  matchType: 'LIVE',
+  maxRounds: '12',
+  notify: true,
+  addToShadowTemplates: false,
+  fighterAImage: null,
+  fighterBImage: null,
+  promotionBackground: null,
 };
 
-export default AddNewMatch;
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+
+const normaliseCategory = (value) => {
+  if (value === 'kickboxing') return { matchCategory: 'mma', matchCategoryTwo: 'kickboxing' };
+  if (value === 'Bare-knuckle') return { matchCategory: 'boxing', matchCategoryTwo: 'Bare-knuckle' };
+  return { matchCategory: value, matchCategoryTwo: '' };
+};
+
+const appendLegacyFight = (data, form, { shadow = false } = {}) => {
+  data.append('matchCategory', form.matchCategory);
+  data.append('matchCategoryTwo', form.matchCategoryTwo);
+  data.append('matchName', form.matchName);
+  data.append('matchFighterA', form.matchFighterA);
+  data.append('matchFighterB', form.matchFighterB);
+  data.append('matchDescription', form.matchDescription);
+  data.append('matchVideoUrl', form.matchVideoUrl);
+  if (form.fighterAImage) data.append('fighterAImage', form.fighterAImage);
+  if (form.fighterBImage) data.append('fighterBImage', form.fighterBImage);
+  data.append('maxRounds', form.maxRounds);
+  data.append('matchType', form.matchType);
+  data.append('notify', form.notify);
+  if (form.promotionBackground) data.append('promotionBackground', form.promotionBackground);
+
+  if (!shadow) {
+    const localDateTime = form.matchDate && form.matchTime ? new Date(`${form.matchDate}T${form.matchTime}:00`) : null;
+    const matchTimeEST = localDateTime && !Number.isNaN(localDateTime.getTime())
+      ? localDateTime.toTimeString().substring(0, 5)
+      : form.matchTime;
+    const matchDate = form.matchDate ? form.matchDate.split('T')[0] : '';
+    data.append('matchDate', matchDate);
+    data.append('matchTime', matchTimeEST);
+    data.append('matchTokens', form.matchTokens);
+    data.append('pot', form.pot);
+    data.append('addToShadow', form.addToShadowTemplates);
+  }
+};
+
+export default function AddNewMatch() {
+  const [form, setForm] = useState(EMPTY);
+  const [displayCategory, setDisplayCategory] = useState('boxing');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [created, setCreated] = useState(null);
+  const [showShadowPredictionChoice, setShowShadowPredictionChoice] = useState(false);
+  const [createdShadowId, setCreatedShadowId] = useState(null);
+  const [showAdminPredictions, setShowAdminPredictions] = useState(false);
+
+  const previews = useMemo(() => ({
+    fighterAImage: form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : '/images/fmm-experience/fighter-action-red.jpg',
+    fighterBImage: form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : '/images/fmm-experience/fighter-action-blue.jpg',
+    promotionBackground: form.promotionBackground ? URL.createObjectURL(form.promotionBackground) : '/images/fmm-pages/admin-command-hd.webp',
+  }), [form.fighterAImage, form.fighterBImage, form.promotionBackground]);
+
+  const change = (event) => {
+    const { name, type, checked, value, files } = event.target;
+    if (name === 'matchCategory') {
+      setDisplayCategory(value);
+      setForm((current) => ({ ...current, ...normaliseCategory(value) }));
+      return;
+    }
+    setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : type === 'file' ? files?.[0] || null : value }));
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError('');
+    setCreated(null);
+    setShowShadowPredictionChoice(false);
+
+    try {
+      if (!form.matchName.trim() || !form.matchFighterA.trim() || !form.matchFighterB.trim()) {
+        throw new Error('Fight name and both fighters are required.');
+      }
+      if (form.matchType === 'LIVE' && (!form.matchDate || !form.matchTime)) {
+        throw new Error('Date and time are required for a live fight card.');
+      }
+
+      const data = new FormData();
+      appendLegacyFight(data, form);
+      const endpoint = form.matchType === 'SHADOW' ? `${API_BASE}/addShadow` : `${API_BASE}/addMatch`;
+      const response = await fetch(endpoint, { method: 'POST', body: data });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to add match.');
+
+      const matchId = payload?.matchId || payload?.data?._id || payload?._id || payload?.match?._id;
+
+      if (form.matchType === 'LIVE' && form.addToShadowTemplates) {
+        const shadow = new FormData();
+        appendLegacyFight(shadow, form, { shadow: true });
+        const shadowResponse = await fetch(`${API_BASE}/addShadow`, { method: 'POST', body: shadow });
+        if (!shadowResponse.ok) console.warn('Failed to add fight to shadow templates.');
+      }
+
+      setCreated({ id: matchId, type: form.matchType, name: form.matchName });
+      if (form.matchType === 'SHADOW' && matchId) {
+        setCreatedShadowId(matchId);
+        setShowShadowPredictionChoice(true);
+      } else {
+        setForm(EMPTY);
+        setDisplayCategory('boxing');
+      }
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to create the fight card.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (showAdminPredictions && createdShadowId) {
+    return <AdminPredictions matchId={createdShadowId} filter="shadowTemplate" />;
+  }
+
+  return (
+    <div className="admin-workspace admin-create-fight-page">
+      <section className="admin-page-heading">
+        <div>
+          <span>Fight operations</span>
+          <h2>Create a fight card</h2>
+          <p>Build a production fight or reusable shadow template in one structured workspace. The existing addMatch/addShadow backend contracts are preserved.</p>
+        </div>
+        <div className="admin-heading-actions">
+          <Link className="admin-action-secondary" href="/administration/fights"><FaTrophy /> Fight registry</Link>
+          <Link className="admin-action-secondary" href="/administration/ShadowFightsLibrary"><FaBolt /> Shadow library</Link>
+        </div>
+      </section>
+
+      {created && (
+        <section className="admin-success-panel">
+          <div><span>Fight created</span><strong>{created.name}</strong><p>The fight is available to the appropriate registry and scoring workflow.</p></div>
+          <div>
+            {created.id && <Link href={`/administration/upcomingFights?matchId=${created.id}`}>Open score centre</Link>}
+            <Link href="/administration/fights">View all fights</Link>
+          </div>
+        </section>
+      )}
+      {showShadowPredictionChoice && (
+        <section className="admin-success-panel admin-shadow-choice-panel">
+          <div><span>Shadow prediction setup</span><strong>Add official prediction values now?</strong><p>This is the same follow-up step used by the original shadow fight creation flow.</p></div>
+          <div>
+            <button type="button" onClick={() => setShowAdminPredictions(true)}>Yes, open predictions</button>
+            <button type="button" onClick={() => { setShowShadowPredictionChoice(false); setForm(EMPTY); setDisplayCategory('boxing'); }}>No, finish later</button>
+          </div>
+        </section>
+      )}
+      {error && <div className="admin-inline-notice is-error">{error}</div>}
+
+      <form className="admin-create-fight-layout" onSubmit={submit}>
+        <main>
+          <section className="admin-form-card">
+            <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and define its operating mode.</p></div></header>
+            <div className="admin-form-grid">
+              <label><span>Fight type</span><select name="matchType" value={form.matchType} onChange={change}><option value="LIVE">Live production fight</option><option value="SHADOW">Shadow template</option></select></label>
+              <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
+              <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
+              <label><span>Fighter A</span><input name="matchFighterA" value={form.matchFighterA} onChange={change} placeholder="Red corner" required /></label>
+              <label><span>Fighter B</span><input name="matchFighterB" value={form.matchFighterB} onChange={change} placeholder="Blue corner" required /></label>
+              <label><span>Maximum rounds</span><input type="number" min="1" max="30" name="maxRounds" value={form.maxRounds} onChange={change} /></label>
+              <label><span>Video URL</span><input type="url" name="matchVideoUrl" value={form.matchVideoUrl} onChange={change} placeholder="https://…" /></label>
+              <label className="is-wide"><span>Description</span><textarea name="matchDescription" value={form.matchDescription} onChange={change} rows="5" placeholder="Give players the context they need before predicting." /></label>
+            </div>
+          </section>
+
+          {form.matchType === 'LIVE' && (
+            <section className="admin-form-card">
+              <header><span>02</span><div><h3>Schedule and economy</h3><p>Configure lock timing, entry cost and the advertised prize pool.</p></div></header>
+              <div className="admin-form-grid">
+                <label><span>Fight date</span><input type="date" name="matchDate" value={form.matchDate} onChange={change} required /></label>
+                <label><span>Fight time (EST)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} required /></label>
+                <label><span>Entry tokens</span><input type="number" min="0" name="matchTokens" value={form.matchTokens} onChange={change} /></label>
+                <label><span>Prize pool</span><input type="number" min="0" step="0.01" name="pot" value={form.pot} onChange={change} /></label>
+              </div>
+            </section>
+          )}
+
+          <section className="admin-form-card">
+            <header><span>{form.matchType === 'LIVE' ? '03' : '02'}</span><div><h3>Publishing controls</h3><p>Choose who is notified and whether a reusable template is generated.</p></div></header>
+            <div className="admin-toggle-grid">
+              <label><input type="checkbox" name="notify" checked={form.notify} onChange={change} /><span><strong>Notify members</strong><small>Send the existing platform announcement after publishing.</small></span></label>
+              {form.matchType === 'LIVE' && <label><input type="checkbox" name="addToShadowTemplates" checked={form.addToShadowTemplates} onChange={change} /><span><strong>Create shadow copy</strong><small>Make the same card available to affiliate creators.</small></span></label>}
+            </div>
+          </section>
+        </main>
+
+        <aside>
+          <section className="admin-fight-visual-card" style={{ backgroundImage: `linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.95)),url(${previews.promotionBackground})` }}>
+            <span>Live preview</span>
+            <h3>{form.matchName || 'Untitled fight card'}</h3>
+            <div><article><img src={previews.fighterAImage} alt="Fighter A preview" /><strong>{form.matchFighterA || 'Fighter A'}</strong></article><b>VS</b><article><img src={previews.fighterBImage} alt="Fighter B preview" /><strong>{form.matchFighterB || 'Fighter B'}</strong></article></div>
+            <small><FaCalendarAlt /> {form.matchDate || 'Schedule pending'} · {form.matchTime || 'TBA'} EST</small>
+          </section>
+          <section className="admin-upload-stack">
+            {[
+              ['fighterAImage', 'Fighter A image'],
+              ['fighterBImage', 'Fighter B image'],
+              ['promotionBackground', 'Fight background'],
+            ].map(([name, label]) => (
+              <label key={name}><FaCloudUploadAlt /><span><strong>{label}</strong><small>{form[name]?.name || 'Select a high-resolution image'}</small></span><input hidden type="file" accept="image/*" name={name} onChange={change} /></label>
+            ))}
+          </section>
+          <button className="admin-primary-action admin-create-submit" type="submit" disabled={saving}><FaSave /> {saving ? 'Publishing fight…' : <><FaPlus /> Publish fight card</>}</button>
+        </aside>
+      </form>
+    </div>
+  );
+}

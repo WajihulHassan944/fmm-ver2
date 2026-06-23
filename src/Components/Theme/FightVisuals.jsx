@@ -59,13 +59,13 @@ export const FeaturedFight = ({ match, index = 0, onAction, actionLabel }) => {
   );
 };
 
-export const FightVisualCard = ({ match, index = 0, onAction, compact = false, footerAction }) => {
+export const FightVisualCard = ({ match, index = 0, onAction, compact = false, footerAction, actionLabel: suppliedActionLabel, actionIcon: ActionIcon }) => {
   if (!match) return null;
   const status = getFightStatus(match);
   const playerCount = getFightPlayerCount(match);
   const category = getFightCategory(match);
   const resultLabel = match?.winner || match?.winningFighter || match?.result || 'Result available';
-  const actionLabel = status === 'past' ? 'View result' : status === 'live' ? 'Follow live' : match?.matchTokens == null ? 'Enter free' : 'Enter fight';
+  const actionLabel = suppliedActionLabel || (status === 'past' ? 'View result' : status === 'live' ? 'Follow live' : match?.matchTokens == null ? 'Enter free' : 'Enter fight');
 
   return (
     <article className={`xp-fight-card is-${status} ${compact ? 'is-compact' : ''}`}>
@@ -90,7 +90,7 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
             <small>{status === 'past' ? 'Official result' : 'Prize pool'}</small>
           </div>
           <button type="button" className="xp-card-action" onClick={() => onAction?.(match)}>
-            {status === 'past' ? <FaTrophy /> : <FaPlay />} {actionLabel}
+            {ActionIcon ? <ActionIcon /> : status === 'past' ? <FaTrophy /> : <FaPlay />} {actionLabel}
           </button>
         </div>
         {footerAction}
@@ -99,7 +99,7 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
   );
 };
 
-export const FightTimelineRow = ({ match, index = 0, onAction }) => {
+export const FightTimelineRow = ({ match, index = 0, onAction, actionLabel }) => {
   if (!match) return null;
   const { day, month } = getFightDayParts(match);
   const status = getFightStatus(match);
@@ -118,7 +118,7 @@ export const FightTimelineRow = ({ match, index = 0, onAction }) => {
       </div>
       <div className="xp-timeline-side">
         <strong>{status === 'past' ? match?.result || 'Final' : getFightPrize(match)}</strong>
-        <button type="button" onClick={() => onAction?.(match)}>{status === 'past' ? 'Result' : 'Open'} →</button>
+        <button type="button" onClick={() => onAction?.(match)}>{actionLabel || (status === 'past' ? 'View result' : 'Open fight')} →</button>
       </div>
     </article>
   );

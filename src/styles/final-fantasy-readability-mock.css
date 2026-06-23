@@ -1,0 +1,1309 @@
+/* Final readability, premium dashboard imagery, Fantasy Leagues, and mock-fight flow pass. */
+
+:root {
+  --fmm-readable-control: clamp(14px, 0.88rem + 0.08vw, 16px);
+  --fmm-readable-label: clamp(13px, 0.8rem + 0.08vw, 15px);
+  --fmm-readable-micro: clamp(12px, 0.75rem + 0.06vw, 14px);
+}
+
+/* The condensed display face has narrow glyphs. Keep it, but do not render UI copy at micro sizes. */
+body :is(
+  button,
+  [role='button'],
+  .theme-btn,
+  .btn-grad,
+  .joinButton,
+  .playNowLink,
+  a[class*='Button'],
+  button[class*='Button']
+) {
+  font-size: var(--fmm-readable-control) !important;
+  line-height: 1.15 !important;
+}
+
+body :is(label, legend, .form-label, .input-label) {
+  font-size: var(--fmm-readable-label) !important;
+  line-height: 1.35 !important;
+}
+
+body :is(input, select, textarea) {
+  font-size: max(15px, 0.94rem) !important;
+  line-height: 1.35 !important;
+}
+
+body :is(small, th, .xp-eyebrow, .theme-eyebrow, [class*='eyebrow'], [class*='kicker'], [class*='Kicker']) {
+  font-size: var(--fmm-readable-micro) !important;
+  line-height: 1.35 !important;
+}
+
+body :is(.theme-nav-link, .theme-nav-button, .affiliate-experience-nav-inner a) {
+  font-size: 13px !important;
+}
+
+body :is(.xp-status-cell, .xp-fighter-card-copy > p:first-child, .xp-featured-date span, .xp-sponsor-card-copy > span) {
+  font-size: 12px !important;
+}
+
+body table th {
+  font-size: 13px !important;
+  letter-spacing: 0.07em !important;
+}
+
+body table td {
+  font-size: 14px;
+}
+
+/* Sharp affiliate command-center art. The previous separate fighter layer was intentionally removed. */
+.affiliate-dashboard-experience-page {
+  background:
+    radial-gradient(circle at 86% 8%, rgba(227, 22, 43, 0.16), transparent 34rem),
+    linear-gradient(180deg, #03060a, #060a10 48%, #03060a) !important;
+}
+
+.affiliate-dashboard-hero-final {
+  background-image:
+    linear-gradient(90deg, rgba(2, 5, 9, 0.98) 0%, rgba(3, 8, 14, 0.84) 50%, rgba(3, 7, 12, 0.18) 100%),
+    linear-gradient(180deg, transparent 62%, #03060a 100%),
+    url('/images/fmm-pages/affiliate-command-premium.webp') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  min-height: 680px !important;
+}
+
+.affiliate-dashboard-hero-final .xp-affiliate-hero-layout {
+  align-items: end;
+  min-height: 590px;
+}
+
+.affiliate-dashboard-hero-final .xp-affiliate-profile-card,
+.affiliate-dashboard-hero-final .xp-affiliate-pipeline-card {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(10, 16, 23, 0.78), rgba(4, 8, 13, 0.9));
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 28px 86px rgba(0, 0, 0, 0.46);
+}
+
+.affiliate-dashboard-main-final {
+  background:
+    linear-gradient(180deg, rgba(3, 6, 10, 0.96), rgba(3, 6, 10, 0.82) 42%, #03060a 100%),
+    url('/images/fmm-pages/affiliate-command-premium.webp') center top / cover fixed no-repeat;
+}
+
+/* Player dashboard receives its own fight-night background while all sections and behavior stay unchanged. */
+.xp-dashboard-page {
+  background:
+    linear-gradient(180deg, rgba(3, 7, 12, 0.93), rgba(4, 8, 13, 0.88) 44%, #04070b 100%),
+    url('/images/fmm-pages/player-fight-night-premium.webp') center top / cover fixed no-repeat !important;
+}
+
+.xp-dashboard-page::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px) !important;
+  background-size: 54px 54px !important;
+}
+
+.xp-dashboard-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 9, 14, 0.97) 0%, rgba(6, 11, 17, 0.78) 52%, rgba(4, 8, 14, 0.42) 100%),
+    url('/images/fmm-pages/player-fight-night-premium.webp') !important;
+  background-position: center 30% !important;
+  background-size: cover !important;
+  min-height: 310px;
+}
+
+.xp-dashboard-profile,
+.xp-dashboard-wallet {
+  position: relative;
+  z-index: 2;
+}
+
+.xp-dashboard-profile {
+  background: linear-gradient(90deg, rgba(4, 8, 13, 0.78), rgba(4, 8, 13, 0.12));
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.xp-dashboard-wallet {
+  backdrop-filter: blur(9px);
+  background: linear-gradient(180deg, rgba(18, 26, 36, 0.82), rgba(7, 12, 18, 0.92)) !important;
+}
+
+/* Realistic mock fight flow ------------------------------------------------ */
+.mock-real-flow-page {
+  background:
+    radial-gradient(circle at 10% 10%, rgba(227, 22, 43, 0.18), transparent 34rem),
+    radial-gradient(circle at 92% 17%, rgba(22, 143, 230, 0.16), transparent 34rem),
+    #04070b;
+}
+
+.mock-real-flow-hero {
+  --xp-hero-image: url('/images/fmm-pages/player-fight-night-premium.webp') !important;
+  min-height: 720px;
+}
+
+.mock-real-flow-hero::before {
+  background: linear-gradient(90deg, rgba(2, 5, 9, 0.98), rgba(3, 8, 14, 0.78) 48%, rgba(3, 7, 12, 0.2)) !important;
+}
+
+.mock-event-ticket {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(12, 19, 27, 0.88), rgba(4, 8, 13, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 21px;
+  box-shadow: 0 32px 92px rgba(0, 0, 0, 0.52);
+  overflow: hidden;
+  padding: 22px;
+  position: relative;
+}
+
+.mock-event-ticket::before {
+  background: linear-gradient(90deg, #e3162b, transparent 50%, #168fe6);
+  content: '';
+  height: 3px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.mock-event-ticket-top,
+.mock-event-ticket-meta {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.mock-event-ticket-top span,
+.mock-event-ticket-top strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.mock-event-ticket-top span {
+  align-items: center;
+  color: #ff4453;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.mock-event-ticket-top strong {
+  color: #67d99d;
+}
+
+.mock-event-ticket-fighters {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr);
+  margin: 16px 0;
+}
+
+.mock-event-ticket-fighters figure {
+  margin: 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.mock-event-ticket-fighters img {
+  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.12), transparent 62%);
+  border-radius: 16px;
+  height: 210px;
+  object-fit: contain;
+  object-position: center bottom;
+  width: 100%;
+}
+
+.mock-event-ticket-fighters figcaption {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 20px;
+  margin-top: -10px;
+  text-transform: uppercase;
+}
+
+.mock-event-ticket-fighters > div {
+  align-self: center;
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+  text-align: center;
+}
+
+.mock-event-ticket-fighters > div small {
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+}
+
+.mock-event-ticket-fighters > div b {
+  align-items: center;
+  background: #e3162b;
+  border: 5px solid #0a1017;
+  border-radius: 50%;
+  box-shadow: 0 0 26px rgba(227, 22, 43, 0.4);
+  display: flex;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 22px;
+  height: 62px;
+  justify-content: center;
+  width: 62px;
+}
+
+.mock-event-ticket-fighters > div em {
+  color: #70caff;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-event-ticket-meta {
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.64);
+  flex-wrap: wrap;
+  font-size: 13px;
+  padding-top: 15px;
+}
+
+.mock-event-ticket-meta span {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.mock-flow-rail {
+  background: rgba(3, 6, 10, 0.96);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  position: sticky;
+  top: 80px;
+  z-index: 80;
+}
+
+.mock-flow-rail-inner {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  min-height: 86px;
+}
+
+.mock-flow-rail button {
+  align-items: center;
+  background: transparent !important;
+  border: 0 !important;
+  color: rgba(255, 255, 255, 0.52) !important;
+  display: flex;
+  gap: 11px;
+  justify-content: center;
+  min-height: 58px;
+  padding: 8px !important;
+}
+
+.mock-flow-rail button > span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 50%;
+  display: flex;
+  flex: 0 0 auto;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.mock-flow-rail button strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.mock-flow-rail button.is-active,
+.mock-flow-rail button.is-complete {
+  color: #fff !important;
+}
+
+.mock-flow-rail button.is-active > span {
+  background: #e3162b;
+  border-color: #ff4656;
+  box-shadow: 0 0 22px rgba(227, 22, 43, 0.36);
+}
+
+.mock-flow-rail button.is-complete > span {
+  background: rgba(63, 205, 125, 0.14);
+  border-color: rgba(63, 205, 125, 0.38);
+  color: #66dc9d;
+}
+
+.mock-flow-chevron {
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.mock-real-flow-main {
+  background:
+    linear-gradient(180deg, rgba(4, 7, 11, 0.68), #04070b 54%),
+    url('/images/fmm-pages/player-fight-night-premium.webp') center top / 100% auto no-repeat;
+}
+
+.mock-fight-card-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mock-selectable-fight-card {
+  background: linear-gradient(180deg, rgba(15, 23, 33, 0.98), rgba(6, 10, 16, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 26px 78px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  padding: 18px;
+  position: relative;
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.mock-selectable-fight-card:hover,
+.mock-selectable-fight-card.is-selected {
+  border-color: rgba(227, 22, 43, 0.65);
+  box-shadow: 0 30px 86px rgba(0, 0, 0, 0.47), 0 0 0 1px rgba(227, 22, 43, 0.16);
+  transform: translateY(-5px);
+}
+
+.mock-selectable-fight-card.is-selected::before {
+  background: linear-gradient(90deg, #e3162b, transparent 72%);
+  content: '';
+  height: 3px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.mock-selectable-card-status {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.mock-selectable-card-status span,
+.mock-selectable-card-status strong {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-selectable-card-status span {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mock-selectable-card-status strong {
+  align-items: center;
+  color: #65d999;
+  display: inline-flex;
+  gap: 6px;
+}
+
+.mock-selectable-fighters {
+  align-items: end;
+  background:
+    radial-gradient(circle at 15% 55%, rgba(227, 22, 43, 0.15), transparent 36%),
+    radial-gradient(circle at 85% 55%, rgba(22, 143, 230, 0.15), transparent 36%),
+    rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  display: grid;
+  gap: 5px;
+  grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
+  margin: 14px 0 17px;
+  min-height: 225px;
+  overflow: hidden;
+  padding: 10px 8px 0;
+}
+
+.mock-selectable-fighters figure {
+  margin: 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.mock-selectable-fighters img {
+  height: 165px;
+  object-fit: contain;
+  object-position: center bottom;
+  width: 100%;
+}
+
+.mock-selectable-fighters figcaption {
+  display: grid;
+  margin-top: -5px;
+  padding-bottom: 10px;
+}
+
+.mock-selectable-fighters figcaption strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.mock-selectable-fighters figcaption small {
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.mock-selectable-fighters > div {
+  align-self: center;
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+  text-align: center;
+}
+
+.mock-selectable-fighters > div span {
+  color: #69c7ff;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-selectable-fighters > div b {
+  align-items: center;
+  background: #e3162b;
+  border-radius: 50%;
+  display: flex;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.mock-selectable-fighters > div small {
+  color: rgba(255, 255, 255, 0.43);
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.mock-selectable-card-copy > p {
+  color: #ff4050;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.mock-selectable-card-copy h3 {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 28px;
+  line-height: 0.98;
+  margin: 8px 0 14px;
+  text-transform: uppercase;
+}
+
+.mock-selectable-card-copy h3 span {
+  color: #e3162b;
+}
+
+.mock-selectable-card-copy > div {
+  display: grid;
+  gap: 7px;
+}
+
+.mock-selectable-card-copy > div span {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.56);
+  display: inline-flex;
+  font-size: 13px;
+  gap: 7px;
+}
+
+.mock-selectable-fight-card > button {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  display: flex;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 15px !important;
+  gap: 9px;
+  justify-content: center;
+  margin-top: 18px;
+  min-height: 48px;
+  padding: 0 15px !important;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.mock-selectable-fight-card.is-selected > button {
+  background: linear-gradient(135deg, #e3162b, #9c0714) !important;
+}
+
+.mock-entry-desk {
+  align-items: center;
+  background:
+    linear-gradient(105deg, rgba(5, 9, 14, 0.98), rgba(8, 18, 29, 0.88) 60%, rgba(227, 22, 43, 0.19)),
+    url('/images/fmm-pages/affiliate-command-premium.webp') center / cover;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 24px;
+  overflow: hidden;
+  padding: clamp(24px, 4vw, 42px);
+  position: relative;
+}
+
+.mock-entry-desk::after {
+  background: linear-gradient(90deg, #e3162b, transparent 55%, #168fe6);
+  bottom: 0;
+  content: '';
+  height: 4px;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.mock-entry-desk-copy h2 {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: clamp(38px, 5vw, 62px);
+  line-height: 0.92;
+  margin: 9px 0 12px;
+  text-transform: uppercase;
+}
+
+.mock-entry-desk-copy > p:not(.xp-eyebrow) {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 780px;
+}
+
+.mock-entry-desk-copy > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.mock-entry-desk-copy > div > span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  display: grid;
+  gap: 2px 9px;
+  grid-template-columns: auto 1fr;
+  min-width: 170px;
+  padding: 12px;
+}
+
+.mock-entry-desk-copy > div svg {
+  color: #ff3546;
+  grid-row: 1 / 3;
+}
+
+.mock-entry-desk-copy > div strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.mock-entry-desk-copy > div small {
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.mock-enter-fight {
+  min-height: 58px !important;
+  min-width: 230px;
+}
+
+.mock-real-prediction-section {
+  scroll-margin-top: 115px;
+}
+
+.mock-real-builder-heading {
+  background:
+    linear-gradient(90deg, rgba(5, 9, 14, 0.95), rgba(5, 9, 14, 0.64)),
+    url('/images/fmm-pages/player-fight-night-premium.webp') center / cover;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 20px 20px 0 0;
+  padding: clamp(24px, 4vw, 38px);
+}
+
+.mock-real-builder-heading h2 {
+  font-size: clamp(42px, 6vw, 72px) !important;
+}
+
+.mock-real-faceoff img {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  height: 145px;
+  object-fit: contain !important;
+}
+
+.mock-real-prediction-shell {
+  border-radius: 0 0 20px 20px;
+  margin-top: 0 !important;
+  overflow: visible !important;
+}
+
+.mock-real-outcome-panel {
+  position: sticky;
+  top: 190px;
+}
+
+.mock-entry-mini-card {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+}
+
+.mock-entry-mini-card strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.mock-entry-mini-card small {
+  color: #69c9ff;
+}
+
+.mock-entry-mini-card em {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-style: normal;
+}
+
+.mock-input-total {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  display: grid;
+  padding: 16px 0;
+}
+
+.mock-input-total span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-input-total strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 44px;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.mock-real-round-list {
+  min-width: 0;
+}
+
+.mock-real-round-card {
+  overflow: hidden;
+}
+
+.mock-real-round-card > header {
+  align-items: center;
+  display: grid !important;
+  gap: 10px;
+  grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+
+.mock-real-round-card > header > div {
+  align-items: center;
+  display: grid;
+  justify-items: center;
+}
+
+.mock-real-round-card > header > div span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-real-round-card > header > div strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 40px;
+  line-height: 1;
+}
+
+.mock-real-round-card .mock-toggle-button {
+  align-items: start;
+  display: grid;
+  gap: 3px;
+  justify-content: start;
+  min-height: 58px;
+  padding: 10px 13px;
+  text-align: left;
+}
+
+.mock-real-round-card .mock-toggle-button small {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: inherit;
+  font-size: 12px !important;
+}
+
+.mock-real-round-card .mock-toggle-button strong {
+  font-size: 16px;
+}
+
+.mock-real-round-card .mock-toggle-button.is-side-a {
+  background: rgba(227, 22, 43, 0.17) !important;
+  border-color: rgba(227, 22, 43, 0.46) !important;
+}
+
+.mock-real-round-card .mock-toggle-button.is-side-b {
+  background: rgba(22, 143, 230, 0.15) !important;
+  border-color: rgba(22, 143, 230, 0.4) !important;
+}
+
+.mock-real-round-fighters {
+  align-items: stretch;
+}
+
+.mock-real-fighter-card {
+  min-width: 0;
+  padding: 20px !important;
+}
+
+.mock-fighter-card-heading {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  display: grid;
+  gap: 11px;
+  grid-template-columns: 54px minmax(0, 1fr);
+  margin-bottom: 15px;
+  padding-bottom: 14px;
+}
+
+.mock-fighter-card-heading img {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  height: 54px;
+  object-fit: cover;
+  width: 54px;
+}
+
+.mock-fighter-card-heading span {
+  display: grid !important;
+}
+
+.mock-fighter-card-heading small {
+  color: #ff3b4c;
+  font-size: 12px !important;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-fighter-card-heading h3 {
+  font-size: 25px !important;
+  line-height: 1;
+  margin: 3px 0 0 !important;
+}
+
+.mock-real-fighter-card label {
+  align-items: center !important;
+  display: grid !important;
+  gap: 14px !important;
+  grid-template-columns: minmax(0, 1fr) 104px !important;
+  min-height: 70px;
+}
+
+.mock-real-fighter-card label + label {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.mock-real-fighter-card label > span {
+  align-items: center;
+  display: grid !important;
+  gap: 4px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: stretch !important;
+}
+
+.mock-real-fighter-card label > span strong {
+  color: #fff;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: clamp(19px, 1.7vw, 24px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.mock-real-fighter-card label > span em {
+  align-items: center;
+  background: rgba(22, 143, 230, 0.13);
+  border: 1px solid rgba(22, 143, 230, 0.3);
+  border-radius: 8px;
+  color: #7bd0ff !important;
+  display: flex;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 18px;
+  height: 36px;
+  justify-content: center;
+  min-width: 42px;
+}
+
+.mock-real-fighter-card input {
+  font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+  font-size: 24px !important;
+  font-weight: 900;
+  min-height: 48px;
+  padding: 8px !important;
+  text-align: center;
+  width: 104px !important;
+}
+
+.mock-real-results-section {
+  background: linear-gradient(180deg, rgba(12, 19, 27, 0.98), rgba(4, 8, 13, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 22px;
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.45);
+  margin: 34px 0 70px;
+  overflow: hidden;
+  scroll-margin-top: 110px;
+}
+
+.mock-real-results-header {
+  align-items: end;
+  background:
+    linear-gradient(90deg, rgba(4, 8, 13, 0.96), rgba(4, 8, 13, 0.63)),
+    url('/images/fmm-pages/player-fight-night-premium.webp') center 36% / cover;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  padding: clamp(25px, 4vw, 40px);
+}
+
+.mock-real-results-header h2 {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: clamp(42px, 5vw, 66px);
+  line-height: 0.92;
+  margin: 7px 0 10px;
+  text-transform: uppercase;
+}
+
+.mock-real-results-header > div:first-child > p:last-child {
+  color: rgba(255, 255, 255, 0.62);
+  margin: 0;
+}
+
+.mock-result-tabs {
+  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+}
+
+.mock-result-tabs button {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  color: rgba(255, 255, 255, 0.58) !important;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  min-height: 43px;
+  padding: 0 17px !important;
+  text-transform: uppercase;
+}
+
+.mock-result-tabs button.is-active {
+  background: linear-gradient(135deg, #e3162b, #9d0714) !important;
+  color: #fff !important;
+}
+
+.mock-score-view {
+  padding: clamp(20px, 3vw, 32px);
+}
+
+.mock-score-recap-strip,
+.mock-score-summary {
+  display: grid;
+  gap: 11px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 22px;
+}
+
+.mock-score-recap-strip > span,
+.mock-score-summary > article,
+.mock-score-summary > div {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  display: flex;
+  gap: 12px;
+  min-height: 84px;
+  padding: 15px;
+}
+
+.mock-score-recap-strip svg,
+.mock-score-summary svg {
+  color: #ff3546;
+  flex: 0 0 auto;
+  font-size: 22px;
+}
+
+.mock-score-recap-strip > span > strong,
+.mock-score-summary article strong {
+  display: block;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 28px;
+  text-transform: uppercase;
+}
+
+.mock-score-recap-strip > span > small,
+.mock-score-summary article small {
+  color: rgba(255, 255, 255, 0.48);
+  display: block;
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+.mock-score-summary {
+  grid-template-columns: minmax(230px, 1.25fr) repeat(3, minmax(0, 1fr));
+}
+
+.mock-score-summary > div {
+  background: linear-gradient(135deg, rgba(227, 22, 43, 0.2), rgba(227, 22, 43, 0.045));
+  display: grid;
+  gap: 0;
+  grid-template-columns: auto 1fr auto;
+}
+
+.mock-score-summary > div p {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 7px;
+  grid-column: 1 / -1;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.mock-score-summary > div strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 58px;
+  line-height: 1;
+}
+
+.mock-score-summary > div > span {
+  align-self: end;
+  color: #ff4b59;
+  font-size: 13px;
+  font-weight: 900;
+  padding-bottom: 7px;
+  text-transform: uppercase;
+}
+
+.mock-round-result-list {
+  display: grid;
+  gap: 16px;
+}
+
+.mock-round-result-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 17px;
+  overflow: hidden;
+}
+
+.mock-round-result-card > header {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.24);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  justify-content: space-between;
+  padding: 17px 20px;
+}
+
+.mock-round-result-card > header span {
+  color: #ff4050;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-round-result-card > header h3 {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 32px;
+  line-height: 1;
+  margin: 4px 0 0;
+  text-transform: uppercase;
+}
+
+.mock-round-result-card > header > strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 34px;
+}
+
+.mock-round-result-card > header > strong small {
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 12px !important;
+}
+
+.mock-round-result-fighters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mock-round-result-fighters > section {
+  min-width: 0;
+  padding: 18px;
+}
+
+.mock-round-result-fighters > section + section {
+  border-left: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.mock-round-result-fighter-heading {
+  align-items: center;
+  display: grid;
+  gap: 11px;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  margin-bottom: 14px;
+}
+
+.mock-round-result-fighter-heading img {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  height: 54px;
+  object-fit: cover;
+  width: 54px;
+}
+
+.mock-round-result-fighter-heading span {
+  min-width: 0;
+}
+
+.mock-round-result-fighter-heading small {
+  color: #ff4050;
+  display: block;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-round-result-fighter-heading h4 {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 25px;
+  line-height: 1;
+  margin: 3px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mock-round-result-fighter-heading > strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 25px;
+}
+
+.mock-round-result-fighter-heading > strong em {
+  color: rgba(255, 255, 255, 0.43);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.mock-round-result-table {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  overflow: hidden;
+}
+
+.mock-round-result-table-head,
+.mock-round-result-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(145px, 1.3fr) minmax(72px, 0.65fr) minmax(72px, 0.65fr) 78px;
+  padding: 11px 12px;
+}
+
+.mock-round-result-table-head {
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mock-round-result-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.mock-round-result-row > span:first-child {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+  min-width: 0;
+}
+
+.mock-round-result-row > span:first-child b {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 17px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mock-round-result-row > span:first-child em {
+  align-items: center;
+  background: rgba(22, 143, 230, 0.12);
+  border-radius: 6px;
+  color: #73ccff;
+  display: flex;
+  flex: 0 0 auto;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 13px;
+  font-style: normal;
+  height: 28px;
+  justify-content: center;
+  min-width: 34px;
+}
+
+.mock-round-result-row > strong {
+  font-size: 14px;
+}
+
+.mock-round-result-row.is-outcome > strong {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+}
+
+.mock-round-result-row > span:last-child {
+  align-items: center;
+  border-radius: 7px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 5px;
+  justify-content: center;
+  min-height: 30px;
+}
+
+.mock-round-result-row > span:last-child.is-hit {
+  background: rgba(62, 204, 123, 0.12);
+  color: #69dda0;
+}
+
+.mock-round-result-row > span:last-child.is-miss {
+  background: rgba(227, 22, 43, 0.1);
+  color: #ff6874;
+}
+
+.mock-scorecard-footer {
+  align-items: center;
+  background: linear-gradient(90deg, rgba(227, 22, 43, 0.14), rgba(22, 143, 230, 0.07));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 17px;
+}
+
+.mock-scorecard-footer > svg {
+  color: #f3b53f;
+  flex: 0 0 auto;
+  font-size: 28px;
+}
+
+.mock-scorecard-footer strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.mock-scorecard-footer p {
+  color: rgba(255, 255, 255, 0.56);
+  margin: 4px 0 0;
+}
+
+.mock-leaderboard-view .mock-premium-leaderboard {
+  margin: 0;
+}
+
+@media (max-width: 1120px) {
+  .mock-fight-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mock-fight-card-grid article:last-child { grid-column: 1 / -1; max-width: calc(50% - 9px); }
+  .mock-real-prediction-shell { grid-template-columns: 1fr !important; }
+  .mock-real-outcome-panel { position: static; }
+  .mock-score-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .affiliate-dashboard-hero-final .xp-affiliate-hero-layout { min-height: auto; }
+  .mock-flow-rail { position: static; }
+  .mock-flow-rail-inner { gap: 4px; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 10px 0; }
+  .mock-flow-chevron { display: none; }
+  .mock-flow-rail button { align-items: center; flex-direction: column; gap: 6px; text-align: center; }
+  .mock-flow-rail button strong { font-size: 12px; }
+  .mock-entry-desk { grid-template-columns: 1fr; }
+  .mock-enter-fight { width: 100%; }
+  .mock-real-results-header { align-items: stretch; flex-direction: column; }
+  .mock-result-tabs { align-self: flex-start; }
+  .mock-round-result-fighters { grid-template-columns: 1fr; }
+  .mock-round-result-fighters > section + section { border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.09); }
+}
+
+@media (max-width: 720px) {
+  body :is(button, [role='button'], .theme-btn, .btn-grad, .joinButton, .playNowLink) { font-size: 15px !important; }
+  body :is(label, legend, .form-label, .input-label) { font-size: 14px !important; }
+  .mock-event-ticket-fighters { grid-template-columns: minmax(0, 1fr) 62px minmax(0, 1fr); }
+  .mock-event-ticket-fighters img { height: 160px; }
+  .mock-event-ticket-fighters figcaption { font-size: 16px; }
+  .mock-event-ticket-fighters > div b { height: 48px; width: 48px; }
+  .mock-fight-card-grid { grid-template-columns: 1fr; }
+  .mock-fight-card-grid article:last-child { grid-column: auto; max-width: none; }
+  .mock-real-round-card > header { grid-template-columns: 64px 1fr !important; }
+  .mock-real-round-card > header .mock-toggle-button:last-child { grid-column: 1 / -1; }
+  .mock-real-round-fighters { grid-template-columns: 1fr !important; }
+  .mock-real-round-fighters section + section { border-left: 0 !important; border-top: 1px solid rgba(255, 255, 255, 0.09); }
+  .mock-score-recap-strip, .mock-score-summary { grid-template-columns: 1fr; }
+  .mock-round-result-table { overflow-x: auto; }
+  .mock-round-result-table-head, .mock-round-result-row { min-width: 540px; }
+}
+
+@media (max-width: 480px) {
+  .mock-flow-rail-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mock-event-ticket { padding: 16px; }
+  .mock-event-ticket-fighters { grid-template-columns: 1fr; }
+  .mock-event-ticket-fighters > div { order: -1; }
+  .mock-event-ticket-fighters figure { display: grid; grid-template-columns: 90px 1fr; align-items: center; text-align: left; }
+  .mock-event-ticket-fighters img { height: 100px; }
+  .mock-event-ticket-fighters figcaption { margin: 0; }
+  .mock-selectable-fighters { grid-template-columns: 1fr; }
+  .mock-selectable-fighters > div { order: -1; }
+  .mock-selectable-fighters figure { align-items: center; display: grid; grid-template-columns: 100px 1fr; text-align: left; }
+  .mock-selectable-fighters img { height: 110px; }
+  .mock-real-fighter-card label { grid-template-columns: 1fr 88px !important; }
+  .mock-real-fighter-card input { width: 88px !important; }
+  .mock-result-tabs { display: grid; grid-template-columns: 1fr; width: 100%; }
+}
+
+.mock-real-round-card .mock-toggle-button.is-unset {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.mock-premium-leaderboard {
+  background:
+    linear-gradient(110deg, rgba(4, 8, 13, 0.985), rgba(5, 10, 16, 0.78)),
+    url('/images/fmm-pages/player-fight-night-premium.webp') center 38% / cover !important;
+}

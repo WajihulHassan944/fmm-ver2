@@ -53,9 +53,12 @@ export const parseFightDate = (match) => {
 
 export const getFightStatus = (match, now = new Date()) => {
   const source = `${match?.matchStatus || ''} ${match?.matchShadowStatus || ''} ${match?.matchShadowOpenStatus || ''}`.toLowerCase();
-  if (/(live|ongoing|active)/.test(source)) return 'live';
   if (/(finished|completed|closed|past|result)/.test(source)) return 'past';
   const date = parseFightDate(match);
+  if (/\blive\b/.test(source)) return 'live';
+  // Legacy records use "Ongoing" for every non-finished fight. Only call it
+  // live once the scheduled start has arrived; future cards remain upcoming.
+  if (/(ongoing|active)/.test(source) && (!date || date.getTime() <= now.getTime())) return 'live';
   if (date && date.getTime() < now.getTime()) return 'past';
   return 'upcoming';
 };

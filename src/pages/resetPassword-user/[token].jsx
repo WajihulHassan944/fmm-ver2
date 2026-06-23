@@ -31,7 +31,7 @@ const ResetPassword = () => {
 
             if (response.ok) {
                 toast.success('Password reset successful');
-                router.push('/auth?mode=login&role=player'); // Redirect to login page after success
+                router.push('/login'); // Redirect to login page after success
             } else {
                 const errorData = await response.json();
                 toast.error(errorData.message || 'Error resetting password. The token may be expired or invalid.');

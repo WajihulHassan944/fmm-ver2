@@ -26,8 +26,38 @@ import UploadAvatar from '@/Components/CreateAccount/UploadAvatar';
 import Membership from '@/Components/CreateAccount/Membership';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
-const RECAPTCHA_SITE_KEY = '6LeLErwpAAAAAD3s3QWddvNAWULeDdLGUu3_-5lK';
+
+const API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+
+const parseApiPayload = async (response) => {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try { return await response.json(); } catch { return null; }
+  }
+  const rawText = await response.text();
+  return rawText ? { message: rawText } : null;
+};
+
+const apiRequest = async (path, { method = 'GET', body, headers = {}, token = null } = {}) => {
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers: {
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
+    credentials: 'include',
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
+  });
+  const payload = await parseApiPayload(response);
+  if (!response.ok) {
+    throw new Error(payload?.message || payload?.error || `Request failed with status ${response.status}`);
+  }
+  return payload;
+};
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeLErwpAAAAAD3s3QWddvNAWULeDdLGUu3_-5lK';
 
 const roles = [
   { id: 'player', label: 'Player', icon: FaUser, loginCopy: 'Enter fights, manage predictions, and view your wallet.', signupCopy: 'Create a player account and start predicting combat sports.' },
@@ -94,9 +124,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
 
     const checkVerification = async () => {
       try {
-        const response = await fetch(`${API_BASE}/user/${encodeURIComponent(playerRegistration.email)}`);
-        const data = await response.json().catch(() => ({}));
-        if (!cancelled && response.ok && data.verified) {
+        const data = await apiRequest(`/user/${encodeURIComponent(playerRegistration.email)}`, { token: null });
+        if (!cancelled && data?.verified) {
           setPlayerRegistration((current) => ({ ...current, state: 'verified' }));
         } else if (!cancelled && Date.now() - startedAt > 120000) {
           setPlayerRegistration((current) => ({ ...current, state: 'timed-out' }));
@@ -124,7 +153,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   };
 
   const navigateAfterAuth = (fallback) => {
-    let pathname = getSafeNextPath(router.query.next, fallback);
+    let pathname = getSafeNextPath(router.query.next || router.query.returnTo, fallback);
     if (redirectTo?.type === 'view-thread' && redirectTo.threadId) pathname = `/threads/${redirectTo.threadId}`;
     if (redirectTo?.type === 'create-thread') pathname = '/create-thread';
     const query = {};
@@ -166,9 +195,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
           navigateAfterAuth('/AffiliateDashboard');
         }
       } else {
-        const response = await fetch(`${API_BASE}/sponsors/email/${encodeURIComponent(loginForm.email)}`);
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || 'Sponsor profile not found');
+        const data = await apiRequest(`/sponsors/email/${encodeURIComponent(loginForm.email)}`, { token: null });
         localStorage.setItem('isSponsorAuthenticated', 'true');
         localStorage.setItem('sponsorData', JSON.stringify(data));
         toast.success('Sponsor access confirmed.');
@@ -186,13 +213,11 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     if (!forgotEmail) return;
     setIsSubmitting(true);
     try {
-      const endpoint = role === 'affiliate' ? 'forgotPassword' : 'forgotPassword-user';
-      const response = await fetch(`${API_BASE}/${endpoint}`, {
+      await apiRequest(role === 'affiliate' ? '/forgotPassword' : '/forgotPassword-user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail }),
+        token: null,
+        body: { email: forgotEmail },
       });
-      if (!response.ok) throw new Error('Email address was not found');
       toast.success('A password reset link has been sent.');
       setForgotPassword(false);
     } catch (error) {
@@ -213,13 +238,11 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     setIsSubmitting(true);
     try {
       const referrerId = queryValue(router.query.referrer);
-      const response = await fetch(`${API_BASE}/register`, {
+      await apiRequest('/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...playerForm, ...(referrerId ? { referrerId } : {}) }),
+        token: null,
+        body: { ...playerForm, ...(referrerId ? { referrerId } : {}) },
       });
-      const responseText = await response.text();
-      if (!response.ok) throw new Error(responseText || 'Registration failed');
       setPlayerRegistration({ state: 'polling', email: playerForm.email });
       toast.success('Account created. Check your email to verify it.');
     } catch (error) {
@@ -245,9 +268,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       });
       if (affiliateForm.affiliateImage) payload.append('image', affiliateForm.affiliateImage);
 
-      const response = await fetch(`${API_BASE}/registerAffiliate`, { method: 'POST', body: payload });
-      const responseText = await response.text();
-      if (!response.ok) throw new Error(responseText || 'Affiliate registration failed');
+      await apiRequest('/registerAffiliate', { method: 'POST', token: null, body: payload });
       setAffiliateRegistered(true);
       toast.success('Affiliate application submitted.');
     } catch (error) {
@@ -262,17 +283,16 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     if (!requireRecaptcha()) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE}/contact-us-fantasymmadness`, {
+      await apiRequest('/contact-us-fantasymmadness', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        token: null,
+        body: {
           fullName: sponsorForm.fullName,
           email: sponsorForm.email,
           subject: `Sponsorship enquiry — ${sponsorForm.company}`,
           message: `Company: ${sponsorForm.company}\nWebsite: ${sponsorForm.website || 'Not provided'}\n\n${sponsorForm.message}`,
-        }),
+        },
       });
-      if (!response.ok) throw new Error('Unable to send the sponsorship enquiry');
       setSponsorSubmitted(true);
       toast.success('Sponsorship enquiry sent.');
     } catch (error) {
@@ -286,25 +306,24 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     if (!credential || role === 'sponsor') return;
     setIsSubmitting(true);
     try {
-      const endpoint = role === 'affiliate' ? 'affiliate-google-login' : 'google-login';
       const referrerId = queryValue(router.query.referrer);
-      const response = await fetch(`${API_BASE}/${endpoint}`, {
+      const endpoint = role === 'affiliate' ? '/affiliate-google-login' : '/google-login';
+      const data = await apiRequest(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: credential, ...(role === 'player' && referrerId ? { referrerId } : {}) }),
+        token: null,
+        body: { token: credential, ...(role === 'player' && referrerId ? { referrerId } : {}) },
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.token) throw new Error(data.message || 'Google authentication failed');
+      const accessToken = data?.accessToken || data?.token;
+      if (!accessToken) throw new Error(data?.message || 'Google authentication failed');
 
       if (role === 'affiliate') {
-        localStorage.setItem('affiliateAuthToken', data.token);
-        const affiliate = data.affiliate || await dispatch(fetchAffiliate(data.token)).unwrap();
-        await dispatch(fetchAffiliate(data.token));
+        localStorage.setItem('affiliateAuthToken', accessToken);
+        const affiliate = await dispatch(fetchAffiliate(accessToken)).unwrap();
         if (!affiliate?.verified) toast.warning('Your affiliate application is awaiting approval.');
         else navigateAfterAuth('/AffiliateDashboard');
       } else {
-        localStorage.setItem('authToken', data.token);
-        const account = await dispatch(fetchUser(data.token)).unwrap();
+        localStorage.setItem('authToken', accessToken);
+        const account = await dispatch(fetchUser(accessToken)).unwrap();
         if (account?.currentPlan === 'None') setMembershipEmail(account.email);
         else navigateAfterAuth('/UserDashboard');
       }

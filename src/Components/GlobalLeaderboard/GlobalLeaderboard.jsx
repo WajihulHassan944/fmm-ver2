@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { FaBolt, FaChartLine, FaCrown, FaMedal, FaSearch, FaTrophy, FaUsers } from 'react-icons/fa';
-import { fetchMatches } from '@/Redux/matchSlice';
 import useLeaderboardData from '@/CustomFunctions/useLeaderboardData';
 import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
@@ -20,16 +19,11 @@ const FALLBACK_AVATARS = [
 ];
 
 const GlobalLeaderboard = () => {
-  const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
-  const matchStatus = useSelector((state) => state.matches.status);
   const currentUser = useSelector((state) => state.user);
   const { leaderboard, playerCount } = useLeaderboardData(matches);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches());
-  }, [dispatch, matchStatus]);
 
   const rows = useMemo(() => (Array.isArray(leaderboard) ? leaderboard : []).map((player, index) => ({
     ...player,
@@ -63,7 +57,7 @@ const GlobalLeaderboard = () => {
           description="Every scored round changes the order. Follow the community’s sharpest combat-sports predictors and turn accurate picks into a permanent place on the board."
           backgroundImage={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`}
           actions={[
-            { href: '/fights?status=upcoming', label: 'Enter an active fight' },
+            { href: '/upcomingfights', label: 'Enter an active fight' },
             { href: '/guides', label: 'Review scoring', variant: 'secondary' },
           ]}
           stats={[
@@ -147,7 +141,7 @@ const GlobalLeaderboard = () => {
                 <p className="xp-eyebrow">Your next score starts now</p>
                 <h2>Great picks are remembered. Perfect rounds are ranked.</h2>
                 <p>Open an upcoming card, submit before the lock, and follow your position as the fight unfolds.</p>
-                <Link className="theme-btn theme-btn-primary" href="/fights?status=upcoming">Find your next fight</Link>
+                <Link className="theme-btn theme-btn-primary" href="/upcomingfights">Find your next fight</Link>
               </div>
             </section>
           </div>

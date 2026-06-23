@@ -15,7 +15,9 @@ const AdminLogin = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     dispatch(loginAdmin({ email, password })).then((action) => {
-      if (action.type === 'adminAuth/loginAdmin/fulfilled') router.push('/administration');
+      if (action.type === 'adminAuth/loginAdmin/fulfilled') {
+        router.push('/administration');
+      }
     });
   };
 
@@ -34,7 +36,7 @@ const AdminLogin = () => {
         <div className="admin-login-card">
           <span><FaShieldAlt aria-hidden="true" /> Authorized personnel only</span>
           <h2>Enter command center.</h2>
-          <p>Use your administrator credentials to continue. All existing authentication behavior is preserved.</p>
+          <p>Use your administrator credentials to continue.</p>
 
           <form onSubmit={handleSubmit}>
             <label>
@@ -73,7 +75,7 @@ const AdminLogin = () => {
           </form>
 
           {error && <p className="admin-login-error">{error}</p>}
-          <Link href="/home" className="admin-login-secondary">Return to website <FaArrowRight aria-hidden="true" /></Link>
+          <Link href="/" className="admin-login-secondary">Return to website <FaArrowRight aria-hidden="true" /></Link>
         </div>
       </section>
     </div>

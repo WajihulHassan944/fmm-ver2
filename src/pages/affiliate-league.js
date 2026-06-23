@@ -1,15 +1,6 @@
-import dynamic from 'next/dynamic';
 import React from 'react';
+import AffiliateLeague from '@/Components/Affiliates/AffiliateLeague/AffiliateLeague';
 
-const AffiliateLeague = dynamic(
-  () => import('@/Components/Affiliates/AffiliateLeague/AffiliateLeague'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
+const AffiliateLeaguePage = () => <AffiliateLeague />;
 
-const Index = () => {
-  return <AffiliateLeague />;
-};
-
-export default Index;
+export default AffiliateLeaguePage;

@@ -1,23 +1,25 @@
-import nextVitals from 'eslint-config-next/core-web-vitals';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
 
 const eslintConfig = [
-  ...nextVitals,
-  {
-    ignores: ['.next/**', 'node_modules/**', 'public/**'],
-  },
+  ...compat.extends("next/core-web-vitals"),
   {
     rules: {
-      'react/no-unescaped-entities': 'off',
-      '@next/next/no-img-element': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react-hooks/set-state-in-effect': 'off',
-      'react-hooks/preserve-manual-memoization': 'off',
-      'react-hooks/immutability': 'off',
-      'react-hooks/static-components': 'off',
-      'react-hooks/purity': 'off',
-      'no-unused-vars': 'off',
-      'no-console': 'off',
-      'no-debugger': 'off',
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-img-element": "off",
+      "react/react-in-jsx-scope": "off",
+      "no-unused-vars": "off",
+      "no-console": "off",
+      "no-debugger": "off",
+      // Add more rules here if necessary
     },
   },
 ];

@@ -23,14 +23,22 @@ const FILTERS = [
   { value: 'past', label: 'Past fights' },
 ];
 
-const FightsHub = () => {
+const PAGE_COPY = {
+  all: { eyebrow: 'The complete fight room', title: 'Every fight.', accent: 'One arena.', description: 'Move from the next opening bell to verified past results without leaving the page. Search the full combat archive, filter by discipline, and enter active prediction contests from one cinematic fight hub.' },
+  upcoming: { eyebrow: 'Upcoming fight cards', title: 'Next cards.', accent: 'Built for predictions.', description: 'Browse the scheduled cards, inspect each matchup, and enter the existing prediction flow with a premium fight-night presentation.' },
+  live: { eyebrow: 'Live fight cards', title: 'The action.', accent: 'Happening now.', description: 'Follow active fights and open scoreboards or entry flows using the same production state and routes.' },
+  past: { eyebrow: 'Completed fight archive', title: 'Past fights.', accent: 'Verified records.', description: 'Review completed contests, fight history, and result pages in a searchable premium archive.' },
+};
+
+const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const matches = useSelector((state) => state.matches.data);
+  const reduxMatches = useSelector((state) => state.matches.data);
+  const matches = safeArray(reduxMatches).length ? reduxMatches : initialMatches;
   const matchStatus = useSelector((state) => state.matches.status);
   const matchError = useSelector((state) => state.matches.error);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
 
@@ -41,8 +49,8 @@ const FightsHub = () => {
   useEffect(() => {
     if (!router.isReady) return;
     const requested = Array.isArray(router.query.status) ? router.query.status[0] : router.query.status;
-    setActiveFilter(FILTERS.some((item) => item.value === requested) ? requested : 'all');
-  }, [router.isReady, router.query.status]);
+    setActiveFilter(FILTERS.some((item) => item.value === requested) ? requested : (FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all'));
+  }, [initialStatus, router.isReady, router.query.status]);
 
   const groups = useMemo(() => splitFightsByStatus(safeArray(matches)), [matches]);
 
@@ -71,7 +79,7 @@ const FightsHub = () => {
 
   const handleFilter = (value) => {
     setActiveFilter(value);
-    router.replace({ pathname: '/fights', query: value === 'all' ? {} : { status: value } }, undefined, { shallow: true, scroll: false });
+    router.replace({ pathname: router.pathname || '/fights', query: value === 'all' ? {} : { status: value } }, undefined, { shallow: true, scroll: false });
   };
 
   const handleFightAction = (match) => {
@@ -82,12 +90,13 @@ const FightsHub = () => {
       return;
     }
     if (!isAuthenticated) {
-      router.push({ pathname: '/auth', query: { mode: 'login', role: 'player', next: '/UserDashboard', ...(id ? { fight: id } : {}) } });
+      router.push({ pathname: '/auth', query: { mode: 'login', role: 'player', next: '/UserDashboard' } });
       return;
     }
-    router.push({ pathname: '/UserDashboard', query: id ? { fight: id } : {} });
+    router.push('/UserDashboard');
   };
 
+  const heroCopy = PAGE_COPY[activeFilter] || PAGE_COPY[initialStatus] || PAGE_COPY.all;
   const visibleUpcoming = filteredFights.filter((match) => !groups.past.some((item) => getFightId(item) === getFightId(match)));
   const visiblePast = filteredFights.filter((match) => groups.past.some((item) => getFightId(item) === getFightId(match)));
 
@@ -99,11 +108,11 @@ const FightsHub = () => {
       </Head>
       <div className="experience-page fights-experience-page">
         <ExperienceHero
-          eyebrow="The complete fight room"
-          title="Every fight."
-          accent="One arena."
-          description="Move from the next opening bell to verified past results without leaving the page. Search the full combat archive, filter by discipline, and enter active prediction contests from one cinematic fight hub."
-          backgroundImage={`${FMM_ASSET_BASE}/fighter-duel-arena.jpg`}
+          eyebrow={heroCopy.eyebrow}
+          title={heroCopy.title}
+          accent={heroCopy.accent}
+          description={heroCopy.description}
+          backgroundImage="/images/fmm-pages/rewards-arena-hd.webp"
           actions={[
             { href: '#fight-directory', label: 'Explore fight cards' },
             { href: '/guides', label: 'How scoring works', variant: 'secondary' },
@@ -120,7 +129,7 @@ const FightsHub = () => {
               <FeaturedFight match={featuredFight} onAction={handleFightAction} />
             ) : (
               <div className="xp-hero-poster-card">
-                <img src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fantasy MMAdness fight arena" />
+                <img src="/images/fmm-pages/rewards-fighter-panel.webp" alt="Fantasy MMAdness fight arena" />
                 <strong>Next card loading</strong>
               </div>
             )}
@@ -174,7 +183,7 @@ const FightsHub = () => {
               <ExperienceEmptyState
                 title="No fights match these filters"
                 description="Try another discipline, remove the search term, or return to all fights."
-                action={{ href: '/fights', label: 'View all fights' }}
+                action={{ href: router.pathname || '/fights', label: 'View all fights' }}
               />
             )}
 
@@ -202,7 +211,7 @@ const FightsHub = () => {
                 />
                 <div className="xp-past-layout">
                   <aside className="xp-archive-poster">
-                    <img src={`${FMM_ASSET_BASE}/fighter-action-red.jpg`} alt="Fight archive" loading="lazy" />
+                    <img src="/images/fmm-pages/rewards-fighter-panel.webp" alt="Fight archive" loading="lazy" />
                     <div>
                       <span><FaTrophy /> Fight archive</span>
                       <h3>Every bell leaves a record.</h3>

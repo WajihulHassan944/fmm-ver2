@@ -1,15 +1,6 @@
-import dynamic from 'next/dynamic';
+import React from 'react';
+import GlobalLeaderboard from '@/Components/GlobalLeaderboard/GlobalLeaderboard';
 
-const GlobalLeaderboard = dynamic(() =>
-  import('@/Components/GlobalLeaderboard/GlobalLeaderboard'), {
-    loading: () => <p>Loading...</p> // ✅ optional loading component
-  }
-);
-
-import React from 'react'
-
-const index = () => {
-  return <GlobalLeaderboard />
+export default function LeaderboardPage() {
+  return <GlobalLeaderboard />;
 }
-
-export default index

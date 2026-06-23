@@ -1,19 +1,12 @@
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/router';
+// src/Components/PrivateRoute.js
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const PrivateRoute = ({ element, children }) => {
-  const router = useRouter();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+const PrivateRoute = ({ element, ...rest }) => {
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (!router.isReady || isAuthenticated) return;
-    const next = router.asPath && router.asPath.startsWith('/') ? router.asPath : '/UserDashboard';
-    router.replace({ pathname: '/auth', query: { mode: 'login', role: 'player', next } });
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) return <div className="experience-page xp-route-loading">Checking player access...</div>;
-  return element || children || null;
+  return isAuthenticated ? element : <Navigate to="/login" />;
 };
 
 export default PrivateRoute;
