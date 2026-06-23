@@ -42,7 +42,8 @@ const Fighters = ({ fighters = [] }) => {
           title="Names that move the crowd."
           accent="Fighters who define the card."
           description="Explore the athletes appearing across Fantasy MMAdness fight cards—from championship-calibre boxers to explosive MMA and kickboxing specialists."
-          backgroundImage={`${FMM_ASSET_BASE}/homepage-fight-hero.jpg`}
+          backgroundImage="/images/fmm-pages/premium-duel-banner.png"
+          className="premium-fighters-phase-two-hero"
           actions={[
             { href: '/fights', label: 'Browse fight cards' },
             { href: '/fighter-performance-tracker', label: 'Open fighter tracker', variant: 'secondary' },

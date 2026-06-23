@@ -97,6 +97,9 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   };
 
   const heroCopy = PAGE_COPY[activeFilter] || PAGE_COPY[initialStatus] || PAGE_COPY.all;
+  const heroBackground = activeFilter === 'past'
+    ? '/images/fmm-pages/premium-arena-banner.png'
+    : '/images/fmm-pages/premium-duel-banner.png';
   const visibleUpcoming = filteredFights.filter((match) => !groups.past.some((item) => getFightId(item) === getFightId(match)));
   const visiblePast = filteredFights.filter((match) => groups.past.some((item) => getFightId(item) === getFightId(match)));
 
@@ -112,7 +115,8 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
           title={heroCopy.title}
           accent={heroCopy.accent}
           description={heroCopy.description}
-          backgroundImage="/images/fmm-pages/rewards-arena-hd.webp"
+          backgroundImage={heroBackground}
+          className={`premium-fights-phase-two-hero is-${activeFilter}`}
           actions={[
             { href: '#fight-directory', label: 'Explore fight cards' },
             { href: '/guides', label: 'How scoring works', variant: 'secondary' },

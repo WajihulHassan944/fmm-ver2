@@ -28,7 +28,8 @@ const Sponsors = ({ sponsors = [] }) => {
           title="Enter where fight fans"
           accent="already care."
           description="Connect your brand with an active combat-sports audience through fight cards, creator leagues, rewards, and measurable fan participation."
-          backgroundImage={`${FMM_ASSET_BASE}/fighter-action-red.jpg`}
+          backgroundImage="/images/fmm-pages/premium-affiliate-banner.png"
+          className="premium-sponsors-phase-two-hero"
           actions={[
             { href: '/contact', label: 'Become a sponsor' },
             { href: '#partner-board', label: 'Meet the partners', variant: 'secondary' },

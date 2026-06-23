@@ -57,6 +57,7 @@ import "@/styles/admin-targeted-finish.css";
 import "@/styles/affiliate-experience-final.css";
 import "@/styles/final-campaign-community-pass.css";
 import "@/styles/final-fantasy-readability-mock.css";
+import "@/styles/premium-backgrounds-phase-two.css";
 import Script from "next/script";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper

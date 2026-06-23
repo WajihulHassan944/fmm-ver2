@@ -23,7 +23,7 @@ export default function BlogsPage({ blogs = [] }) {
   const remaining = visible.slice(1);
 
   return (
-    <div className="xp-editorial-shell">
+    <div className="xp-editorial-shell premium-blogs-phase-two">
       <Head>
         <title>Fight Intelligence | Fantasy MMAdness</title>
         <meta name="description" content="Fight previews, combat-sports analysis, Fantasy MMAdness updates, and prediction strategy." />

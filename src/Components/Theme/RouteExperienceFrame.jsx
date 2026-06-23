@@ -20,6 +20,14 @@ const BACKGROUNDS = {
   legal: '/images/fmm-pages/legal-arena-hd.webp',
 };
 
+
+const ROUTE_BACKGROUNDS = {
+  '/blogs': '/images/fmm-pages/premium-arena-banner.png',
+  '/fights-news': '/images/fmm-pages/premium-affiliate-banner.png',
+  '/fantasy-tips': '/images/fmm-pages/premium-duel-banner.png',
+  '/calendar-of-fights': '/images/fmm-pages/premium-arena-banner.png',
+};
+
 const CORE_ROUTES = new Set([
   '/',
   '/home',
@@ -278,7 +286,8 @@ const RouteExperienceFrame = ({ pathname, children }) => {
   const meta = resolveMeta(pathname);
   if (!meta) return children;
 
-  const background = BACKGROUNDS[meta.group] || BACKGROUNDS.profile;
+  const background = ROUTE_BACKGROUNDS[pathname] || BACKGROUNDS[meta.group] || BACKGROUNDS.profile;
+  const routeClassName = pathname.replace(/^\//, '').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-|-$/g, '') || 'home';
   const accountAction = isPlayerAuthenticated
     ? { href: '/UserDashboard', label: 'Player dashboard' }
     : isAffiliateAuthenticated
@@ -292,7 +301,7 @@ const RouteExperienceFrame = ({ pathname, children }) => {
 
   return (
     <div
-      className={`route-experience-page route-experience-${meta.group} ${meta.compact ? 'is-compact' : ''}`}
+      className={`route-experience-page route-experience-${meta.group} route-experience-path-${routeClassName} ${meta.compact ? 'is-compact' : ''}`}
       style={{ '--route-experience-bg': `url(${background})` }}
     >
       <section className="route-experience-hero">

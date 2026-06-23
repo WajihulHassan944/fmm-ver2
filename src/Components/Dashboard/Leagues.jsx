@@ -91,7 +91,7 @@ const Leagues = () => {
   };
 
   if (!user || !user.firstName) {
-    return <section className="xp-league-page"><div className="theme-container"><div className="xp-empty-card">Loading league records...</div></div></section>;
+    return <section className="xp-league-page premium-league-records-page"><div className="theme-container"><div className="xp-empty-card">Loading league records...</div></div></section>;
   }
 
   const renderLeagueCard = (affiliate, joined) => {
@@ -125,10 +125,10 @@ const Leagues = () => {
   };
 
   return (
-    <section className="xp-league-page">
+    <section className="xp-league-page premium-league-records-page">
       <div className="theme-container">
         <button className="xp-dashboard-back" type="button" onClick={() => router.push(-1)}>← Back</button>
-        <div className="xp-league-hero">
+        <div className="xp-league-hero premium-league-records-hero">
           <div>
             <span><FaTrophy /> League records</span>
             <h1>Your league footprint.</h1>
