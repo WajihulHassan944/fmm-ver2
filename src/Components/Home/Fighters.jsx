@@ -56,7 +56,7 @@ const Fighters = ({ fighters = [] }) => {
         >
           <div className="xp-featured-fighter-card">
             <div className="xp-featured-fighter-glow" />
-            <img src={featured?.image || FALLBACK_FIGHTERS[0]} alt={featured?.name || 'Featured fighter'} />
+            <img src="/images/fmm-pages/our-fighters-featured-sharp.webp" alt={featured?.name || 'Featured fighter'} />
             <div className="xp-featured-fighter-copy">
               <span>Featured athlete</span>
               <h2>{featured?.name || 'Fight Night Contender'}</h2>

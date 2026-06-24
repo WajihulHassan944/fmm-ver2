@@ -189,7 +189,7 @@ const MakePredictions = ({ matchId }) => {
   const fighterBImage = getFighterImage(match, 'B', 1);
 
   return (
-    <section className="xp-prediction-arena">
+    <section className="xp-prediction-arena player-prediction-premium">
       <div className="theme-container">
         <div className="xp-prediction-hero">
           <div className="xp-prediction-hero-copy">
@@ -223,6 +223,14 @@ const MakePredictions = ({ matchId }) => {
           <div><span>Member</span><strong>{user.firstName} {user.lastName}</strong></div>
           <div><span>Plan</span><strong>{user.currentPlan || 'Player'}</strong></div>
           <div><span>Prediction type</span><strong>{isBoxing ? 'Boxing metrics' : 'MMA metrics'}</strong></div>
+        </div>
+
+        <div className="player-prediction-flow-strip" aria-label="Prediction workflow">
+          <span><b>1</b><strong>Review the card</strong><small>Confirm fighters and rules</small></span>
+          <i aria-hidden="true" />
+          <span><b>2</b><strong>Call every round</strong><small>Enter all available metrics</small></span>
+          <i aria-hidden="true" />
+          <span><b>3</b><strong>Submit picks</strong><small>Lock the existing score payload</small></span>
         </div>
 
         <div className="xp-round-board">

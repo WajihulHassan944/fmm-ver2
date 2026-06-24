@@ -1,6 +1,7 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import {
   FaArrowRight,
   FaEnvelope,
@@ -36,6 +37,21 @@ const quickLinks = [
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const isAuthenticated = useSelector((state) => Boolean(state.auth?.isAuthenticated));
+  const isAuthenticatedAffiliate = useSelector((state) => Boolean(state.affiliateAuth?.isAuthenticatedAffiliate));
+  const [isSponsorAuthenticated, setIsSponsorAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsSponsorAuthenticated(typeof window !== 'undefined' && localStorage.getItem('isSponsorAuthenticated') === 'true');
+  }, []);
+
+  const dashboardHomeHref = isAuthenticatedAffiliate
+    ? '/AffiliateDashboard'
+    : isSponsorAuthenticated
+      ? '/sponsor-dashboard'
+      : isAuthenticated
+        ? '/UserDashboard'
+        : '/home';
 
   const handleNewsletterSubmit = (event) => {
     event.preventDefault();
@@ -106,7 +122,7 @@ const Footer = () => {
         </div>
 
         <div className="fmm-footer-bottom">
-          <Link href="/home" className="fmm-footer-logo" aria-label="Fantasy MMAdness home">
+          <Link href={dashboardHomeHref} className="fmm-footer-logo" aria-label="Fantasy MMAdness home">
             <img src={LOGO_URL} alt="Fantasy MMAdness" loading="lazy" />
           </Link>
           <nav aria-label="Footer navigation">

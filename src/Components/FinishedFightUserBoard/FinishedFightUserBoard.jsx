@@ -6,6 +6,8 @@ import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import { useRouter } from 'next/router';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { FaCoins, FaDownload, FaFistRaised, FaMedal, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa';
+import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
 
 const FinishedFightUserBoard = ({ matchId }) => {
      const router = useRouter();
@@ -267,143 +269,75 @@ const FinishedFightUserBoard = ({ matchId }) => {
         return totalScore;
     };
     
-    const getYouTubeEmbedUrl = (url) => {
-        const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-        return `https://www.youtube.com/embed/${videoId}`;
+    const getYouTubeEmbedUrl = (url = '') => {
+        if (url.includes('youtu.be/')) return `https://www.youtube.com/embed/${url.split('youtu.be/')[1]?.split('?')[0] || ''}`;
+        if (url.includes('watch?v=')) return `https://www.youtube.com/embed/${url.split('watch?v=')[1]?.split('&')[0] || ''}`;
+        if (url.includes('/embed/')) return url;
+        return '';
       };
       
   const renderRoundResults = (predictions) => {
-    const scoreLabels = match.matchCategory === 'boxing' 
-        ? { hp: 'HP', bp: 'BP', tp: 'TP', rw: 'RW',rl:'RL', ko: 'KO', sp:'SP' }
-        : { hp: 'ST', bp: 'KI', tp: 'KN', rw: 'RW',rl:'RL', ko: 'KO', sp:'SP' , el:'EL' };
+    const isBoxing = match.matchCategory === 'boxing';
+    const scoreLabels = isBoxing
+      ? { hp: 'HP', bp: 'BP', tp: 'TP', rw: 'RW', rl: 'RL', ko: 'KO', sp: 'SP' }
+      : { hp: 'ST', bp: 'KI', tp: 'KN', rw: 'RW', rl: 'RL', ko: 'KO', sp: 'SP', el: 'EL' };
 
     return predictions.map((round, index) => {
-        // Check if any meaningful prediction is made for the current round
-        const hasValidPredictions = round.hpPrediction1 !== null || round.bpPrediction1 !== null || 
-                                    round.tpPrediction1 !== null || round.rwPrediction1 !== null || 
-                                    round.koPrediction1 !== null || round.hpPrediction2 !== null || 
-                                    round.bpPrediction2 !== null || round.tpPrediction2 !== null || 
-                                    round.elPrediction1 !== null || round.elPrediction2 !== null || 
-                                    round.rwPrediction2 !== null || round.koPrediction2 !== null;
+      const hasValidPredictions = round.hpPrediction1 !== null || round.bpPrediction1 !== null
+        || round.tpPrediction1 !== null || round.rwPrediction1 !== null
+        || round.koPrediction1 !== null || round.hpPrediction2 !== null
+        || round.bpPrediction2 !== null || round.tpPrediction2 !== null
+        || round.elPrediction1 !== null || round.elPrediction2 !== null
+        || round.rwPrediction2 !== null || round.koPrediction2 !== null;
 
-        let roundPoints = 0;
-        if (hasValidPredictions) {
-            let fighterOneRound, fighterTwoRound;
-    
-            // Check match category and get the corresponding fighter stats
-            if (match.matchCategory === 'boxing' && match.BoxingMatch) {
-                fighterOneRound = match.BoxingMatch.fighterOneStats[index];
-                fighterTwoRound = match.BoxingMatch.fighterTwoStats[index];
-            } else if (match.matchCategory === 'mma' && match.MMAMatch) {
-                fighterOneRound = match.MMAMatch.fighterOneStats[index];
-                fighterTwoRound = match.MMAMatch.fighterTwoStats[index];
-            }
-    
-            // Ensure fighter stats are available before calculating points
-            if (fighterOneRound && fighterTwoRound) {
-                roundPoints = calculateRoundPoints(round, fighterOneRound, fighterTwoRound);
-                totalPoints += roundPoints;
-            } else {
-                console.error('Fighter round data is missing in calculateRoundPoints', round, fighterOneRound, fighterTwoRound);
-            }
+      let roundPoints = 0;
+      if (hasValidPredictions) {
+        let fighterOneRound;
+        let fighterTwoRound;
+        if (isBoxing && match.BoxingMatch) {
+          fighterOneRound = match.BoxingMatch.fighterOneStats[index];
+          fighterTwoRound = match.BoxingMatch.fighterTwoStats[index];
+        } else if (!isBoxing && match.MMAMatch) {
+          fighterOneRound = match.MMAMatch.fighterOneStats[index];
+          fighterTwoRound = match.MMAMatch.fighterTwoStats[index];
         }
+        if (fighterOneRound && fighterTwoRound) {
+          roundPoints = calculateRoundPoints(round, fighterOneRound, fighterTwoRound);
+          totalPoints += roundPoints;
+        }
+      }
 
-        return (
-            <div key={index} className='roundResultDiv'>
-                <h1>Round {round.round} Complete</h1>
-                <div className='line'></div>
-                <div className='scoresWrapper'>
-                    {/* Render prediction scores dynamically */}
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.hp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.hpPrediction1 !== null ? round.hpPrediction1 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.hp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.hpPrediction2 !== null ? round.hpPrediction2 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.bp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.bpPrediction1 !== null ? round.bpPrediction1 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.bp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.bpPrediction2 !== null ? round.bpPrediction2 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.tp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.tpPrediction1 !== null ? round.tpPrediction1 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.tp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.tpPrediction2 !== null ? round.tpPrediction2 : '-'}</p>
-                        </div>
-                    </div>
-                    {match.matchCategory === "mma" && (
-    <>
-        <div className='scoresOfRound'>
-            <h2>{scoreLabels.el}</h2>
-            <div className='scoreBox'>
-                <p>{round.elPrediction1 !== null ? round.elPrediction1 : '-'}</p>
-            </div>
-        </div>
-        <div className='scoresOfRound'>
-            <h2>{scoreLabels.el}</h2>
-            <div className='scoreBox'>
-                <p>{round.elPrediction2 !== null ? round.elPrediction2 : '-'}</p>
-            </div>
-        </div>
-    </>
-)}
+      const metrics = [
+        { code: scoreLabels.hp, title: isBoxing ? 'Head punches' : 'Significant strikes', left: round.hpPrediction1, right: round.hpPrediction2 },
+        { code: scoreLabels.bp, title: isBoxing ? 'Body punches' : 'Kicks', left: round.bpPrediction1, right: round.bpPrediction2 },
+        { code: scoreLabels.tp, title: isBoxing ? 'Total punches' : 'Knockdowns', left: round.tpPrediction1, right: round.tpPrediction2 },
+        ...(!isBoxing ? [{ code: scoreLabels.el, title: 'Elbow strikes', left: round.elPrediction1, right: round.elPrediction2 }] : []),
+        { code: `${scoreLabels.rw}/${scoreLabels.rl}`, title: 'Round result', left: round.rwPrediction1, right: round.rwPrediction2 },
+        { code: `${scoreLabels.ko}/${scoreLabels.sp}`, title: 'Finish call', left: round.koPrediction1, right: round.koPrediction2 },
+      ];
 
-                   
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.rw}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.rwPrediction1 !== null ? round.rwPrediction1 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.rl}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.rwPrediction2 !== null ? round.rwPrediction2 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.ko}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.koPrediction1 !== null ? round.koPrediction1 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h2>{scoreLabels.sp}</h2>
-                        <div className='scoreBox'>
-                            <p>{round.koPrediction2 !== null ? round.koPrediction2 : '-'}</p>
-                        </div>
-                    </div>
-                    <div className='scoresOfRound'>
-                        <h3>Points<span className='toRemove'> total</span></h3>
-                        <div className='scoreBoxSpecial'>
-                            <p>{roundPoints}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+      return (
+        <article key={index} className="player-result-round">
+          <header>
+            <div><span>Round</span><strong>{round.round || index + 1}</strong></div>
+            <p>Prediction points <b>{roundPoints}</b></p>
+          </header>
+          <div className="player-result-round-fighters">
+            <span>{match.matchFighterA}</span><em>Metric</em><span>{match.matchFighterB}</span>
+          </div>
+          <div className="player-result-metric-grid">
+            {metrics.map((metric) => (
+              <div key={`${index}-${metric.code}`}>
+                <b>{metric.left !== null && metric.left !== '' ? metric.left : '—'}</b>
+                <span><small>{metric.title}</small><strong>{metric.code}</strong></span>
+                <b>{metric.right !== null && metric.right !== '' ? metric.right : '—'}</b>
+              </div>
+            ))}
+          </div>
+        </article>
+      );
     });
-};
-
+  };
 
     const userScore = scores.length > 0 ? scores[0] : null;
 
@@ -450,88 +384,87 @@ const downloadPredictionPDF = async () => {
 };
 
 
+    if (!match) {
+      return <div className="player-dynamic-empty"><FaTrophy /><h2>Fight result unavailable</h2><p>The selected completed fight is not available.</p></div>;
+    }
+
+    const fighterAImage = getFighterImage(match, 'A', 0);
+    const fighterBImage = getFighterImage(match, 'B', 1);
+    const videoUrl = getYouTubeEmbedUrl(match.matchVideoUrl);
+    const reportTotalPoints = userScore?.predictions?.reduce((sum, round, index) => {
+      const fighterOneRound = match.matchCategory === 'boxing'
+        ? match.BoxingMatch?.fighterOneStats?.[index]
+        : match.MMAMatch?.fighterOneStats?.[index];
+      const fighterTwoRound = match.matchCategory === 'boxing'
+        ? match.BoxingMatch?.fighterTwoStats?.[index]
+        : match.MMAMatch?.fighterTwoStats?.[index];
+      return sum + (fighterOneRound && fighterTwoRound ? calculateRoundPoints(round, fighterOneRound, fighterTwoRound) : 0);
+    }, 0) || 0;
+
     return (
-        <div className='finishedFightUserBoard'>
-            <div className='fightLeaderboard'>
-                <div className='fightDetails global-leaderboard'>
-                    <div className='member-header'>
-                        <div className='member-header-image'>
-                            <img src={user.profileUrl} alt="Logo" data-aos="zoom-in" />
-                        </div>
-                        <h3 data-aos="zoom-in"><span className='toRemove'>Member Name - </span>{user.firstName} {user.lastName}</h3>
-                        <h3 data-aos="zoom-in"><span className='toRemove'>Current </span>Plan: {user.currentPlan}</h3>
-                    </div>
-                    <div className='fightwalletWrap' >
-                        <div className='totalPoints'>
-                            <h1 data-aos="zoom-in" className='fightTypeInFightDetails'>
-                                Fight type: <span>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</span> - 
-                                <span style={{color:"#38b90c"}}>{match.matchType} </span> - 
-                                <span>{match.matchFighterA} </span> VS <span> {match.matchFighterB} </span>
-                            </h1>
-                            <h1 data-aos="zoom-in" style={{textAlign:'left'}}>POT: <span style={{color:"#38b90c"}}>{match.pot}</span> &nbsp;Players: <span style={{color:"#38b90c"}}>{match.userPredictions.length}</span></h1>
-                        </div>
-                        <div className='fightWallet' data-aos="zoom-in" onClick={() => router.push('/checkout')}>
-                            <h1><i className="fa fa-shopping-bag" aria-hidden="true"></i> Fight Wallet</h1>
-                            <h2>Tokens Remaining: <span>{user.tokens}</span></h2>
-                        </div>
-                    </div>
-                    <div className='homeThird'>
-                        <div className='fightersImagesInFightDetails' data-aos="zoom-in">
-                            <div className='flexColumn'>
-                                <div className='imgWrapFights' style={{border:'none'}}>
-                                    <img src={match.fighterAImage} style={{border:'3px solid blue'}} alt={match.matchFighterA} />
-                                </div>
-                                <h1 className='fightTypeInFightDetails'>{match.matchFighterA}</h1>
-                            </div>
-                            <h1>VS</h1>
-                            <div className='flexColumn'>
-                                <div className='imgWrapFights' style={{border:'none'}}>
-                                    <img src={match.fighterBImage} style={{border:'3px solid red'}} alt={match.matchFighterB} />
-                                </div>
-                                <h1 className='fightTypeInFightDetails'>{match.matchFighterB}</h1>
-                            </div>
-                        </div>   
-                        <div className="videoWrapper">
-      <iframe
-        src={getYouTubeEmbedUrl(match.matchVideoUrl)}
-        title="YouTube video player"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      ></iframe>
-    </div>
-    
-    
-    <div className='leaderboardHeading'>
-                            <h3 data-aos="zoom-in">FIGHT COMPLETED</h3>
-                        </div>
-                     <div id="pdfContent" style={{width:'100%'}}>
-                        <div className='roundResultsWrapper'>
-                            {userScore ? renderRoundResults(userScore.predictions) : <p>No data available.</p>}
-                            <div className='winnerDiv'>
-                            <div className='winnerSuDivbOne'>
-            <div className='winnerImg'>
-                <img src={winner.profileUrl} alt="Winner" />
+      <section className="player-completed-result finishedFightUserBoard">
+        <div className="player-completed-result-backdrop" aria-hidden="true" />
+        <div className="theme-container player-completed-result-shell">
+          <header className="player-completed-result-hero">
+            <div>
+              <p><FaTrophy /> Completed fight report</p>
+              <h1>{match.matchFighterA} <span>vs</span> {match.matchFighterB}</h1>
+              <div>
+                <span><FaFistRaised /> {getFightCategory(match)}</span>
+                <span><FaCoins /> Pot {match.pot || 0}</span>
+                <span><FaUsers /> {Array.isArray(match.userPredictions) ? match.userPredictions.length : 0} players</span>
+              </div>
             </div>
-            <div className='winnerDetails'>
-                <h1>Winner</h1>
-                <h2>{winner.firstName}<span className='toRemove'> {winner.lastName}</span></h2>
-            </div>
+            <button type="button" onClick={() => router.push('/checkout')}>
+              <FaCoins /><span><small>Fight wallet</small><strong>{user.tokens || 0}</strong><em>tokens remaining</em></span>
+            </button>
+          </header>
+
+          <section className="player-completed-fight-card">
+            <article className="is-blue"><img src={fighterAImage} alt={match.matchFighterA} /><span><small>Blue corner</small><strong>{match.matchFighterA}</strong></span></article>
+            <div><b>FINAL</b><small>{match.maxRounds || '—'} rounds</small></div>
+            <article className="is-red"><img src={fighterBImage} alt={match.matchFighterB} /><span><small>Red corner</small><strong>{match.matchFighterB}</strong></span></article>
+          </section>
+
+          {videoUrl && (
+            <section className="player-completed-video">
+              <div className="player-result-section-heading"><span><FaPlay /> Fight replay</span><h2>Review the posted fight video</h2></div>
+              <iframe
+                src={videoUrl}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </section>
+          )}
+
+          <div id="pdfContent" className="player-completed-pdf-content">
+            <section className="player-completed-winner-card">
+              <div className="player-completed-winner-profile">
+                <i><FaMedal /></i>
+                <img src={winner.profileUrl || '/images/fmm-experience/avatar-placeholder.svg'} alt="Winner" />
+                <span><small>Fight winner</small><strong>{winner.firstName || 'Pending'} {winner.lastName || ''}</strong></span>
+              </div>
+              <div><small>Your prediction total</small><strong>{reportTotalPoints}</strong><span>points</span></div>
+            </section>
+
+            <section className="player-completed-score-report">
+              <div className="player-result-section-heading">
+                <div><span><FaFistRaised /> Your scorecard</span><h2>Round-by-round prediction report</h2></div>
+                <p>Every submitted field remains visible in the report.</p>
+              </div>
+              <div className="roundResultsWrapper">
+                {userScore ? renderRoundResults(userScore.predictions) : <div className="player-dynamic-empty is-inline"><FaTrophy /><h3>No prediction report available</h3></div>}
+              </div>
+            </section>
+          </div>
+
+          <button onClick={downloadPredictionPDF} className="download-btn player-result-download">
+            <FaDownload /> Download prediction report
+          </button>
         </div>
-                                <div className='winnerSibDivTwo'>
-                                    <h1>Points Grand Total</h1>
-                                    <h2>{totalPoints}</h2>
-                                </div>
-                            </div>
-                        </div> </div>
-                        <button onClick={downloadPredictionPDF} className="download-btn">
-  Download Prediction Report
-</button>
- 
-                    </div>  
-                </div>
-            </div>
-        </div>
+      </section>
     );
 };
 

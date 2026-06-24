@@ -53,6 +53,15 @@ const CORE_ROUTES = new Set([
   '/past-promotions',
   '/AffiliateProfile',
   '/AffiliateAccountSettings',
+  '/profile',
+  '/account-settings',
+  '/YourFights',
+  '/trashed-fights',
+  '/checkout',
+  '/fights-rewards',
+  '/my-fantasy-team',
+  '/fighter-performance-tracker',
+  '/referral-leaderboard',
 ]);
 
 const ROUTE_META = {

@@ -13,6 +13,7 @@ import {
   FaChevronDown,
   FaCoins,
   FaComments,
+  FaCog,
   FaEllipsisH,
   FaFire,
   FaFistRaised,
@@ -101,6 +102,7 @@ const playerNav = [
       { label: 'Dashboard', href: '/UserDashboard', icon: FaHome },
       { label: 'Leagues', href: '/myLeagueRecords', icon: FaTrophy },
       { label: 'Profile', href: '/profile', icon: FaUserCircle },
+      { label: 'Account Settings', href: '/account-settings', icon: FaCog },
       { label: 'Fantasy Chatroom', href: '/fantasy-chatroom', icon: FaComments },
     ],
   },
@@ -175,6 +177,13 @@ const Header = () => {
     if (authStatusSponsor) return sponsorNav;
     if (isAuthenticated) return playerNav;
     return publicNav;
+  }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
+
+  const dashboardHomeHref = useMemo(() => {
+    if (isAuthenticatedAffiliate) return '/AffiliateDashboard';
+    if (authStatusSponsor) return '/sponsor-dashboard';
+    if (isAuthenticated) return '/UserDashboard';
+    return '/home';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
   const handleLogout = () => {
@@ -294,7 +303,7 @@ const Header = () => {
 
   return (
     <header className="header theme-header">
-      <Link href="/home" className="theme-brand" aria-label="Fantasy MMAdness home">
+      <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
         <img src={LOGO_URL} alt="Fantasy MMAdness" loading="eager" />
       </Link>
 
@@ -317,7 +326,7 @@ const Header = () => {
 
       {mobileOpen && (
         <div className="theme-mobile-menu">
-          <Link href="/home"><FaHome aria-hidden="true" /> Home</Link>
+          <Link href={dashboardHomeHref}><FaHome aria-hidden="true" /> Home</Link>
           {mobileLinks.map((item) => {
             const Icon = item.icon;
             return (

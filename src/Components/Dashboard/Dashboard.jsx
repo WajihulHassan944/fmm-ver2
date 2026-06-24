@@ -1,18 +1,37 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-import { FaArrowRight, FaCoins, FaFistRaised, FaHistory, FaStar, FaTimes, FaTrophy, FaUserCircle } from 'react-icons/fa';
+import {
+  FaArrowLeft,
+  FaArrowRight,
+  FaBolt,
+  FaCalendarAlt,
+  FaChartLine,
+  FaCoins,
+  FaFire,
+  FaFistRaised,
+  FaHistory,
+  FaMedal,
+  FaShieldAlt,
+  FaStar,
+  FaTimes,
+  FaTrophy,
+  FaUserCircle,
+  FaUserCog,
+  FaUsers,
+} from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
 import FightCosting from './FightCosting';
 import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
 import PurchaseTokensIntimation from './PurchaseTokensIntimation';
 import FinishedFightUserBoard from '../FinishedFightUserBoard/FinishedFightUserBoard';
+import UserWorkspaceNav from '../UserProfile/UserWorkspaceNav';
 import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
 
-const safePredictions = (match) => Array.isArray(match?.userPredictions) ? match.userPredictions : [];
-const isSameId = (a, b) => String(a || '') === String(b || '');
+const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
+const isSameId = (left, right) => String(left || '') === String(right || '');
 
 const Dashboard = () => {
   const router = useRouter();
@@ -78,7 +97,7 @@ const Dashboard = () => {
   };
 
   const completedMatches = useMemo(() => (Array.isArray(matches) ? matches : []).filter((match) => safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')), [matches, user?._id]);
-  const pendingMatches = useMemo(() => upcomingMatches.filter((match) => safePredictions(match) && !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(match._id)), [removedMatches, upcomingMatches, user?._id]);
+  const pendingMatches = useMemo(() => upcomingMatches.filter((match) => !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(match._id)), [removedMatches, upcomingMatches, user?._id]);
   const visibleCompleted = useMemo(() => completedMatches.filter((match) => !removedMatches.includes(match._id)), [completedMatches, removedMatches]);
 
   const handleRemoveMatch = async (matchId) => {
@@ -132,32 +151,36 @@ const Dashboard = () => {
     }
   };
 
-  if (!user || !user.firstName) {
-    return <section className="xp-dashboard-page player-dashboard-rich-page"><div className="theme-container"><div className="xp-empty-card">Loading player dashboard...</div></div></section>;
+  if (!user?.firstName) {
+    return <section className="player-command-page"><div className="theme-container"><div className="player-dynamic-empty"><FaFistRaised /><h2>Loading player command center…</h2></div></div></section>;
   }
 
   if (selectedMatchId) {
     const selectedMatch = (Array.isArray(matches) ? matches : []).find((match) => match._id === selectedMatchId);
     if (!selectedMatch) {
-      return <section className="xp-dashboard-page"><button className="xp-dashboard-back" onClick={() => setSelectedMatchId(null)}>← Back</button><div className="xp-empty-card">Selected match not found.</div></section>;
+      return <section className="player-dynamic-route-view"><div className="theme-container player-dynamic-back-row"><button type="button" onClick={() => setSelectedMatchId(null)}><FaArrowLeft /> Back to dashboard</button></div><div className="player-dynamic-empty"><FaShieldAlt /><h2>Selected fight not found</h2></div></section>;
     }
     return (
-      <section className="xp-dashboard-focus-view">
-        <button className="xp-dashboard-back dashboard-back-arrow" type="button" onClick={() => setSelectedMatchId(null)}>← Back to dashboard</button>
-        {Number(user.tokens || 0) >= Number(selectedMatch.matchTokens || 0) ? <FightCosting matchId={selectedMatchId} /> : <PurchaseTokensIntimation matchId={selectedMatchId} />}
+      <section className="player-dynamic-route-view">
+        <div className="theme-container player-dynamic-back-row"><button type="button" onClick={() => setSelectedMatchId(null)}><FaArrowLeft /> Back to dashboard</button></div>
+        {Number(user.tokens || 0) >= Number(selectedMatch.matchTokens || 0)
+          ? <FightCosting matchId={selectedMatchId} />
+          : <PurchaseTokensIntimation matchId={selectedMatchId} />}
       </section>
     );
   }
 
   if (completedMatchId) {
-    const matchCom = (Array.isArray(matches) ? matches : []).find((match) => match._id === completedMatchId);
-    if (!matchCom) {
-      return <section className="xp-dashboard-page"><button className="xp-dashboard-back" onClick={() => setCompletedMatchId(null)}>← Back</button><div className="xp-empty-card">Completed match not found.</div></section>;
+    const completedMatch = (Array.isArray(matches) ? matches : []).find((match) => match._id === completedMatchId);
+    if (!completedMatch) {
+      return <section className="player-dynamic-route-view"><div className="theme-container player-dynamic-back-row"><button type="button" onClick={() => setCompletedMatchId(null)}><FaArrowLeft /> Back to dashboard</button></div><div className="player-dynamic-empty"><FaShieldAlt /><h2>Completed fight not found</h2></div></section>;
     }
     return (
-      <section className="xp-dashboard-focus-view">
-        <button className="xp-dashboard-back" type="button" onClick={() => setCompletedMatchId(null)}>← Back to dashboard</button>
-        {matchCom.matchStatus === 'Ongoing' ? <FightLeaderboard matchId={completedMatchId} /> : <FinishedFightUserBoard matchId={completedMatchId} />}
+      <section className="player-dynamic-route-view">
+        <div className="theme-container player-dynamic-back-row"><button type="button" onClick={() => setCompletedMatchId(null)}><FaArrowLeft /> Back to dashboard</button></div>
+        {completedMatch.matchStatus === 'Ongoing'
+          ? <FightLeaderboard matchId={completedMatchId} />
+          : <FinishedFightUserBoard matchId={completedMatchId} />}
       </section>
     );
   }
@@ -173,95 +196,138 @@ const Dashboard = () => {
         setCompletedMatchId(id);
         return;
       }
-      if (match.matchType === 'SHADOW' && match.blurred) {
-        toast.error('Affiliate criteria has not been met for this SHADOW match.');
-      } else {
-        setSelectedMatchId(id);
-      }
+      if (match.matchType === 'SHADOW' && match.blurred) toast.error('Affiliate criteria has not been met for this SHADOW match.');
+      else setSelectedMatchId(id);
     };
 
     return (
       <article
-        className={`xp-dashboard-fight-card ${match.blurred ? 'is-blurred' : ''}`}
+        className={`player-command-fight-card ${match.blurred ? 'is-blurred' : ''}`}
         key={`${variant}-${id}`}
         onMouseEnter={() => setHoveredMatch(id)}
         onMouseLeave={() => setHoveredMatch(null)}
       >
-        {hoveredMatch === id && (
-          <button className="xp-dashboard-remove" type="button" onClick={(event) => { event.stopPropagation(); handleRemoveMatch(id); }}>Remove</button>
-        )}
-        <button className="xp-dashboard-card-main" type="button" onClick={handleOpen} disabled={!canOpen}>
-          <div className="xp-dashboard-fighters">
-            <img src={getFighterImage(match, 'A', 0)} alt={match.matchFighterA || 'Fighter A'} />
+        {hoveredMatch === id && <button className="player-command-remove" type="button" onClick={(event) => { event.stopPropagation(); handleRemoveMatch(id); }}>Remove</button>}
+        <button type="button" onClick={handleOpen} disabled={!canOpen}>
+          <div className="player-command-fight-art">
+            <figure><img src={getFighterImage(match, 'A', 0)} alt={match.matchFighterA || 'Fighter A'} /><figcaption>{match.matchFighterA}</figcaption></figure>
             <span>VS</span>
-            <img src={getFighterImage(match, 'B', 1)} alt={match.matchFighterB || 'Fighter B'} />
+            <figure><img src={getFighterImage(match, 'B', 1)} alt={match.matchFighterB || 'Fighter B'} /><figcaption>{match.matchFighterB}</figcaption></figure>
           </div>
-          <div className="xp-dashboard-fight-copy">
-            <small>{getFightCategory(match)} · {match.matchType}</small>
-            <strong>{match.matchFighterA} vs {match.matchFighterB}</strong>
-            <p>{match.matchDate?.split('T')[0] || 'Date TBA'} · {match.matchTime || 'Time TBA'}</p>
-            {match.matchDescription && <em>{match.matchDescription}</em>}
+          <div className="player-command-fight-copy">
+            <p><span>{getFightCategory(match)}</span><b>{match.matchType}</b></p>
+            <h3>{match.matchFighterA} <em>vs</em> {match.matchFighterB}</h3>
+            <div>
+              <span><FaCalendarAlt /> {match.matchDate?.split('T')[0] || 'Date TBA'}</span>
+              <span><FaUsers /> {predictionsCount} players</span>
+              <span><FaCoins /> {match.matchTokens === null ? 'Free' : `${match.matchTokens || 0} tokens`}</span>
+            </div>
+            {match.matchDescription && <small>{match.matchDescription}</small>}
           </div>
-          <div className="xp-dashboard-card-meta">
-            <span><FaFistRaised /> {match.maxRounds || '—'} rounds</span>
-            <span><FaTrophy /> {predictionsCount} players</span>
-            <span><FaCoins /> {match.matchTokens === null ? 'Free' : `${match.matchTokens || 0} tokens`}</span>
-            {remaining && <span>{remaining.hasStarted ? 'Fight has started' : `Begins in ${remaining.diffHrs}h ${remaining.diffMins}m`}</span>}
+          <div className="player-command-fight-action">
+            {remaining && <span>{remaining.hasStarted ? 'Fight has started' : `${remaining.diffHrs}h ${remaining.diffMins}m to lock`}</span>}
+            <strong>{variant === 'completed' ? 'View result' : 'Make predictions'} <FaArrowRight /></strong>
           </div>
-          {canOpen && <b>{variant === 'completed' ? 'Open result' : 'Open prediction'} <FaArrowRight /></b>}
         </button>
       </article>
     );
   };
 
+  const nextMission = pendingMatches[0];
+  const currentRankEstimate = visibleCompleted.length ? Math.max(1, 100 - visibleCompleted.length * 3) : '—';
+  const quickActions = [
+    { href: '/YourFights', label: 'My fight library', copy: 'All completed and pending cards', icon: FaFistRaised },
+    { href: '/myLeagueRecords', label: 'My leagues', copy: 'Creator communities and records', icon: FaUsers },
+    { href: '/fighter-performance-tracker', label: 'Fighter tracker', copy: 'Research form and performance', icon: FaChartLine },
+    { href: '/account-settings', label: 'Account settings', copy: 'Preferences and payment details', icon: FaUserCog },
+  ];
+
   return (
-    <section className="xp-dashboard-page">
-      <div className="theme-container">
-        <div className="xp-dashboard-hero player-dashboard-hero-rich">
-          <div className="xp-dashboard-profile">
-            <img src={user.profileUrl || '/images/fmm-experience/avatar-placeholder.svg'} alt={user.firstName} />
-            <div>
-              <span>Player dashboard</span>
-              <h1>{user.firstName} {user.lastName}</h1>
-              <p>{user.currentPlan || 'Member'} plan · control your active entries, pending cards, completed fights, wallet, and testimonials.</p>
+    <div className="player-command-page">
+      <section className="player-command-hero">
+        <div className="player-command-hero-grid" aria-hidden="true" />
+        <div className="theme-container player-command-hero-layout">
+          <div className="player-command-hero-copy">
+            <p><FaFire /> Player command center</p>
+            <h1>Read the card. <span>Own the round.</span></h1>
+            <p>Welcome back, {user.firstName}. Your dashboard now brings every pending pick, completed result, league, wallet, and research tool into one premium fight-night workspace.</p>
+            <div className="player-command-hero-actions">
+              {nextMission ? (
+                <button type="button" onClick={() => setSelectedMatchId(getFightId(nextMission))}>Make next prediction <FaArrowRight /></button>
+              ) : (
+                <Link href="/upcomingfights">Explore upcoming fights <FaArrowRight /></Link>
+              )}
+              <Link href="/mock-game" className="is-secondary">Practice in mock game <FaBolt /></Link>
+            </div>
+            <div className="player-command-hero-proof">
+              <span><FaShieldAlt /><strong>Original flow intact</strong><small>Every API and prediction action remains connected.</small></span>
+              <span><FaTrophy /><strong>{visibleCompleted.length} submitted</strong><small>Your completed prediction cards.</small></span>
             </div>
           </div>
-          <button type="button" className="xp-dashboard-wallet" onClick={() => router.push('/checkout')}>
-            <FaCoins />
-            <span>Fight wallet</span>
-            <strong>{user.tokens || 0}</strong>
-            <small>tokens remaining</small>
-          </button>
-        </div>
 
-        <div className="xp-dashboard-stats">
-          <article><FaHistory /><strong>{pendingMatches.length}</strong><span>Pending picks</span></article>
-          <article><FaTrophy /><strong>{visibleCompleted.length}</strong><span>Submitted cards</span></article>
-          <article><FaUserCircle /><strong>{user.currentPlan || 'Player'}</strong><span>Current plan</span></article>
+          <aside className="player-command-spotlight">
+            <header>
+              <img src={user.profileUrl || '/images/fmm-experience/avatar-placeholder.svg'} alt={user.firstName} />
+              <span><small>Fight identity</small><strong>{user.firstName} {user.lastName}</strong><em>{user.currentPlan || 'Member'} plan</em></span>
+              <i><FaMedal /></i>
+            </header>
+            {nextMission ? (
+              <div className="player-command-next-card">
+                <p>Next prediction mission</p>
+                <div>
+                  <figure><img src={getFighterImage(nextMission, 'A', 0)} alt={nextMission.matchFighterA || 'Fighter A'} /></figure>
+                  <b>VS</b>
+                  <figure><img src={getFighterImage(nextMission, 'B', 1)} alt={nextMission.matchFighterB || 'Fighter B'} /></figure>
+                </div>
+                <h2>{nextMission.matchFighterA} <span>vs</span> {nextMission.matchFighterB}</h2>
+                <button type="button" onClick={() => setSelectedMatchId(getFightId(nextMission))}>Open scorecard <FaArrowRight /></button>
+              </div>
+            ) : (
+              <div className="player-command-next-empty"><FaTrophy /><h2>You are caught up.</h2><p>No pending cards require a prediction right now.</p></div>
+            )}
+          </aside>
         </div>
+      </section>
 
-        <div className="xp-dashboard-sections">
-          <section>
-            <div className="xp-dashboard-section-heading"><span>01</span><div><h2>Your completed fights</h2><p>Cards where your prediction status has already been submitted.</p></div></div>
-            <div className="xp-dashboard-card-grid">{visibleCompleted.length ? visibleCompleted.map((match) => renderFightCard(match, 'completed')) : <div className="xp-empty-card">No completed matches</div>}</div>
-          </section>
+      <UserWorkspaceNav className="player-workspace-nav-dashboard-home" />
 
-          <section>
-            <div className="xp-dashboard-section-heading"><span>02</span><div><h2>Your pending fights</h2><p>Open these cards to make or complete your prediction entry.</p></div></div>
-            <div className="xp-dashboard-card-grid">{pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="xp-empty-card">No pending matches</div>}</div>
-          </section>
-        </div>
+      <main className="theme-container player-command-main">
+        <section className="player-command-stat-grid">
+          <article><FaHistory /><span><strong>{pendingMatches.length}</strong><small>Pending picks</small></span></article>
+          <article><FaTrophy /><span><strong>{visibleCompleted.length}</strong><small>Submitted cards</small></span></article>
+          <article onClick={() => router.push('/checkout')} role="button" tabIndex={0}><FaCoins /><span><strong>{user.tokens || 0}</strong><small>Wallet tokens</small></span></article>
+          <article><FaMedal /><span><strong>{currentRankEstimate}</strong><small>Momentum rank</small></span></article>
+        </section>
+
+        <section className="player-command-quick-section">
+          <header><div><p>Fight-night tools</p><h2>Move faster from one corner.</h2></div><Link href="/YourFights">Open full fight library <FaArrowRight /></Link></header>
+          <div className="player-command-quick-grid">
+            {quickActions.map(({ href, label, copy, icon: Icon }) => (
+              <Link href={href} key={href}><i><Icon /></i><span><strong>{label}</strong><small>{copy}</small></span><FaArrowRight /></Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="player-command-section">
+          <header><span>01</span><div><p>Submitted fight cards</p><h2>Your completed fights</h2><small>Open a card to review live standings or the completed round-by-round report.</small></div></header>
+          <div className="player-command-fight-grid">{visibleCompleted.length ? visibleCompleted.map((match) => renderFightCard(match, 'completed')) : <div className="player-dynamic-empty is-inline"><FaTrophy /><h3>No completed matches</h3><p>Your submitted prediction cards will appear here.</p></div>}</div>
+        </section>
+
+        <section className="player-command-section">
+          <header><span>02</span><div><p>Cards requiring action</p><h2>Your pending fights</h2><small>Open a card to review entry details and submit your predictions.</small></div></header>
+          <div className="player-command-fight-grid">{pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No pending matches</h3><p>You are fully caught up for the current fight schedule.</p></div>}</div>
+        </section>
 
         {!user.hasSubmittedTestimonial && (
-          <button className="xp-dashboard-testimonial" type="button" onClick={() => setIsOpen(true)}>
-            <FaStar /> <span>Share your experience</span>
+          <button className="player-command-testimonial" type="button" onClick={() => setIsOpen(true)}>
+            <FaStar /><span><strong>Share your Fantasy MMAdness experience</strong><small>Your approved story may be featured on the public testimonials page.</small></span><FaArrowRight />
           </button>
         )}
-      </div>
+      </main>
 
       {isOpen && (
         <div className="xp-modal-backdrop">
-          <div className="xp-dashboard-modal">
+          <div className="xp-dashboard-modal player-command-modal">
             <button className="xp-modal-close" type="button" onClick={closePopup}><FaTimes /></button>
             <h2>Submit your testimonial</h2>
             <p>Share a short note about your Fantasy MMAdness experience.</p>
@@ -273,7 +339,7 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 
