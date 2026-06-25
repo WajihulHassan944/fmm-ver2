@@ -406,7 +406,7 @@ const HomeAnother = () => {
               <div><Link href="/pro-wrestling" className="theme-btn theme-btn-primary">Enter wrestling mode <FaArrowRight /></Link><Link href="/pro-wrestling/how-to-play" className="theme-btn theme-btn-secondary">How wrestling scores</Link></div>
             </div>
             <div className="fmm-home-wrestling-visual">
-              <img src="/images/pro-wrestling/pro-wrestling-hero.jpg" alt="Fantasy MMADNESS Pro Wrestling" />
+              <img src="/images/pro-wrestling/wrestling-match-premium.jpg" alt="Fantasy MMADNESS Pro Wrestling" />
               {wrestlingMatches[0] ? <article><header><small>{wrestlingMatches[0].status}</small><strong>{wrestlingMatches[0].eventName}</strong></header><div><figure><img src={getPWImage(wrestlingMatches[0].competitorA,'A')} alt="" /><figcaption>{wrestlingMatches[0].competitorA?.displayName}</figcaption></figure><b>VS</b><figure><img src={getPWImage(wrestlingMatches[0].competitorB,'B')} alt="" /><figcaption>{wrestlingMatches[0].competitorB?.displayName}</figcaption></figure></div><p>{formatWrestlingDate(wrestlingMatches[0].matchDate)} · {wrestlingMatches[0].currentPot || 0} token pot</p><Link href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}>Open featured card <FaArrowRight /></Link></article> : <article className="is-empty"><FaCrown /><strong>Wrestling contest cards will appear here.</strong><Link href="/pro-wrestling">Explore the new game mode</Link></article>}
             </div>
           </section>

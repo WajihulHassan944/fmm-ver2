@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -26,7 +27,10 @@ import {
 const WrestlingLivePage = () => {
   const router = useRouter();
   const { matchId } = router.query;
+  const user = useSelector((state) => state.user);
+  const isAuthenticated = useSelector((state) => Boolean(state.auth?.isAuthenticated));
   const [live, setLive] = useState(null);
+  const [myEntry, setMyEntry] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,12 +41,17 @@ const WrestlingLivePage = () => {
     if (!matchId) return;
     if (silent) setRefreshing(true); else setLoading(true);
     try {
-      const [livePayload, leaderboardPayload] = await Promise.all([
-        wrestlingRequest(`/api/wrestling/matches/${matchId}/live`, { auth: Boolean(getPlayerToken()) }),
+      const hasPlayerToken = Boolean(getPlayerToken());
+      const [livePayload, leaderboardPayload, entryPayload] = await Promise.all([
+        wrestlingRequest(`/api/wrestling/matches/${matchId}/live`, { auth: hasPlayerToken }),
         wrestlingRequest(`/api/wrestling/matches/${matchId}/leaderboard?limit=25`),
+        hasPlayerToken
+          ? wrestlingRequest(`/api/wrestling/matches/${matchId}/my-entry`, { auth: true }).catch(() => null)
+          : Promise.resolve(null),
       ]);
       setLive(livePayload);
       setLeaderboard(Array.isArray(leaderboardPayload?.data) ? leaderboardPayload.data : []);
+      setMyEntry(entryPayload);
       setError('');
       setLastUpdated(new Date());
     } catch (requestError) {
@@ -64,6 +73,13 @@ const WrestlingLivePage = () => {
   if (!live?.match) return <div className="pw-page pw-state-page"><div className="pw-state-card"><FaClock /><h1>Live scoring is not open</h1><p>{error}</p><Link href={`/pro-wrestling/matches/${matchId}`} className="pw-btn pw-btn-secondary">Contest overview <FaArrowRight /></Link></div></div>;
 
   const match = live.match;
+  const hasPlayerSession = isAuthenticated || Boolean(getPlayerToken());
+  const userId = String(user?._id || '');
+  const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.playerName || '';
+  const displayPlayerName = (row) => (userId && String(row?.playerId || '') === userId && userDisplayName ? userDisplayName : row?.playerName || 'Player');
+  const leaderboardPosition = userId ? leaderboard.find((row) => String(row?.playerId || '') === userId) : null;
+  const entryPrediction = myEntry?.prediction || null;
+  const personalPosition = live.myPosition || leaderboardPosition || (entryPrediction?.score !== undefined ? entryPrediction : null);
   const topThree = leaderboard.slice(0, 3);
 
   return (
@@ -97,20 +113,20 @@ const WrestlingLivePage = () => {
           <section className="pw-live-grid">
             <article className="pw-my-live-position">
               <p className="pw-eyebrow"><FaBolt /> Your provisional result</p>
-              {live.myPosition ? (
-                <><div><span><small>Current rank</small><strong>#{live.myPosition.rank || '—'}</strong></span><span><small>Current score</small><strong>{Number(live.myPosition.score || 0).toLocaleString()}</strong></span><span><small>Rank movement</small><strong>{live.myPosition.previousRank && live.myPosition.rank ? `${live.myPosition.previousRank - live.myPosition.rank > 0 ? '+' : ''}${live.myPosition.previousRank - live.myPosition.rank}` : '—'}</strong></span></div><p>Scores are provisional until the official result is finalized.</p></>
-              ) : <div className="pw-live-no-entry"><FaMedal /><h3>No personal score is available.</h3><p>Sign in and submit a prediction before lock time to appear here.</p></div>}
+              {personalPosition ? (
+                <><div><span><small>Current rank</small><strong>#{personalPosition.rank || '—'}</strong></span><span><small>Current score</small><strong>{Number(personalPosition.score || 0).toLocaleString()}</strong></span><span><small>Rank movement</small><strong>{personalPosition.previousRank && personalPosition.rank ? `${personalPosition.previousRank - personalPosition.rank > 0 ? '+' : ''}${personalPosition.previousRank - personalPosition.rank}` : '—'}</strong></span></div><p>Scores are provisional until the official result is finalized.</p></>
+              ) : <div className="pw-live-no-entry"><FaMedal /><h3>{hasPlayerSession ? 'Your score is waiting for calculation.' : 'No personal score is available.'}</h3><p>{hasPlayerSession ? (myEntry?.prediction ? 'Your submitted prediction is attached to this contest. The score appears after official statistics are recalculated.' : myEntry?.entry ? 'Your contest entry is confirmed, but this account has no submitted prediction for this card.' : 'This signed-in account does not have an entry in this contest.') : 'Sign in and submit a prediction before lock time to appear here.'}</p></div>}
             </article>
 
             <article className="pw-live-podium-card">
               <p className="pw-eyebrow"><FaTrophy /> Live podium</p>
-              <div>{topThree.length ? topThree.map((row, index) => <span key={row.playerId}><em>#{row.rank || index + 1}</em>{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <i>{row.playerName?.charAt(0) || 'P'}</i>}<strong>{row.playerName}</strong><small>{Number(row.score || 0).toLocaleString()} pts</small></span>) : <p>Rankings appear when official action totals are submitted.</p>}</div>
+              <div>{topThree.length ? topThree.map((row, index) => <span key={row.playerId}><em>#{row.rank || index + 1}</em>{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <i>{displayPlayerName(row).charAt(0) || 'P'}</i>}<strong>{displayPlayerName(row)}</strong><small>{Number(row.score || 0).toLocaleString()} pts</small></span>) : <p>Rankings appear when official action totals are submitted.</p>}</div>
             </article>
           </section>
 
           <section className="pw-live-table-panel">
             <header><div><p>Provisional standings</p><h2>Live wrestling leaderboard</h2></div><Link href={`/pro-wrestling/leaderboard/${match._id}`}>Open full leaderboard <FaArrowRight /></Link></header>
-            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Score</th></tr></thead><tbody>{leaderboard.length ? leaderboard.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{row.playerName?.charAt(0) || 'P'}</span>}<b>{row.playerName}</b></div></td><td className={row.rankMovement > 0 ? 'is-up' : row.rankMovement < 0 ? 'is-down' : ''}>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td></tr>) : <tr><td colSpan="5">No provisional scores have been calculated yet.</td></tr>}</tbody></table></div>
+            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Score</th></tr></thead><tbody>{leaderboard.length ? leaderboard.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{displayPlayerName(row).charAt(0) || 'P'}</span>}<b>{displayPlayerName(row)}</b></div></td><td className={row.rankMovement > 0 ? 'is-up' : row.rankMovement < 0 ? 'is-down' : ''}>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td></tr>) : <tr><td colSpan="5">No provisional scores have been calculated yet.</td></tr>}</tbody></table></div>
           </section>
         </main>
       </div>

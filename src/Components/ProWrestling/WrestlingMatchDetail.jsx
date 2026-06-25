@@ -137,7 +137,7 @@ const WrestlingMatchDetail = () => {
     <>
       <Head><title>{match.matchTitle} | Pro Wrestling | Fantasy MMADNESS</title></Head>
       <div className="pw-page pw-match-detail-page">
-        <section className="pw-detail-hero" style={{ '--pw-detail-bg': `url(${match.bannerImage || '/images/pro-wrestling/pro-wrestling-hero.jpg'})` }}>
+        <section className="pw-detail-hero" style={{ '--pw-detail-bg': `url(${match.bannerImage || '/images/pro-wrestling/wrestling-match-premium.jpg'})` }}>
           <div className="pw-detail-hero-grid" />
           <div className="theme-container pw-detail-hero-inner">
             <Link href="/pro-wrestling" className="pw-inline-back"><FaArrowLeft /> Wrestling lobby</Link>

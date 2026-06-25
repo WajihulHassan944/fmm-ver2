@@ -224,6 +224,19 @@ const AdminHeader = () => {
         </div>
       </aside>
 
+      {compact && (
+        <button
+          type="button"
+          className="admin-compact-expand-trigger"
+          onClick={() => setCompact(false)}
+          aria-label="Expand administration navigation"
+          title="Expand navigation"
+        >
+          <FaChevronRight aria-hidden="true" />
+          <span>Expand menu</span>
+        </button>
+      )}
+
       {menuOpen && <button type="button" className="admin-command-backdrop" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
 
       <header className="admin-command-topbar">

@@ -4,9 +4,10 @@ import { toast } from 'react-toastify';
 import {
   FaEdit,
   FaImage,
+  FaPowerOff,
   FaSave,
   FaSearch,
-  FaTrash,
+  
   FaUsers,
 } from 'react-icons/fa';
 import {
@@ -241,7 +242,7 @@ const WrestlingAdminRoster = () => {
 
         <section className="pw-admin-panel">
           <header><div><p>Roster registry</p><h2>Wrestler profiles</h2><span>{wrestlers.length} total profiles</span></div><label className="pw-admin-search-inline"><FaSearch /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search roster" /></label></header>
-          <div className="pw-admin-table-wrap"><table className="pw-admin-table"><thead><tr><th>Wrestler</th><th>Promotion</th><th>Style</th><th>Record</th><th>Research sample</th><th>Status</th><th>Actions</th></tr></thead><tbody>{loading ? <tr><td colSpan="7">Loading roster…</td></tr> : visible.length ? visible.map((item, index) => <tr key={item._id}><td><div className="pw-admin-player-cell"><img src={item.profileImage || getWrestlerImage(null, index % 2 ? 'B' : 'A')} alt="" /><span><strong>{item.displayName}</strong><small>{item.country || 'Country not set'}</small></span></div></td><td>{item.promotion || '—'}</td><td>{item.wrestlingStyle || '—'}</td><td>{item.careerRecord?.wins || 0}-{item.careerRecord?.losses || 0}-{item.careerRecord?.draws || 0}</td><td>{item.historicalStatistics?.matches || 0} matches</td><td>{item.active ? 'Active' : 'Inactive'}{item.featured ? ' · Featured' : ''}</td><td><div className="pw-admin-row-actions"><button type="button" onClick={() => edit(item)} title="Edit wrestler"><FaEdit /></button><button type="button" onClick={() => deactivate(item)} title="Deactivate wrestler"><FaTrash /></button></div></td></tr>) : <tr><td colSpan="7">No wrestler profiles found.</td></tr>}</tbody></table></div>
+          <div className="pw-admin-table-wrap"><table className="pw-admin-table"><thead><tr><th>Wrestler</th><th>Promotion</th><th>Style</th><th>Record</th><th>Research sample</th><th>Status</th><th>Actions</th></tr></thead><tbody>{loading ? <tr><td colSpan="7">Loading roster…</td></tr> : visible.length ? visible.map((item, index) => <tr key={item._id}><td><div className="pw-admin-player-cell"><img src={item.profileImage || getWrestlerImage(null, index % 2 ? 'B' : 'A')} alt="" /><span><strong>{item.displayName}</strong><small>{item.country || 'Country not set'}</small></span></div></td><td>{item.promotion || '—'}</td><td>{item.wrestlingStyle || '—'}</td><td>{item.careerRecord?.wins || 0}-{item.careerRecord?.losses || 0}-{item.careerRecord?.draws || 0}</td><td>{item.historicalStatistics?.matches || 0} matches</td><td>{item.active ? 'Active' : 'Inactive'}{item.featured ? ' · Featured' : ''}</td><td><div className="pw-admin-row-actions"><button type="button" className="is-edit" onClick={() => edit(item)} title="Edit wrestler" aria-label={`Edit ${item.displayName}`}><FaEdit /></button><button type="button" className="is-deactivate" onClick={() => deactivate(item)} title="Deactivate wrestler" aria-label={`Deactivate ${item.displayName}`}><FaPowerOff /></button></div></td></tr>) : <tr><td colSpan="7">No wrestler profiles found.</td></tr>}</tbody></table></div>
         </section>
       </div>
     </>

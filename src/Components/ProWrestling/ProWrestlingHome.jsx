@@ -83,7 +83,7 @@ const ProWrestlingHome = () => {
         >
           <div className="pw-featured-poster">
             <div className="pw-featured-poster-label"><FaCrown /> New game mode</div>
-            <img src="/images/pro-wrestling/pro-wrestling-hero.jpg" alt="Fantasy MMADNESS Pro Wrestling arena" />
+            <img src="/images/pro-wrestling/wrestling-match-premium.jpg" alt="Fantasy MMADNESS Pro Wrestling arena" />
             <div><small>Full-match scorecard</small><strong>HP · BP · K · PM · FM</strong><span>Predict both wrestlers plus the official winner.</span></div>
           </div>
         </WrestlingHero>

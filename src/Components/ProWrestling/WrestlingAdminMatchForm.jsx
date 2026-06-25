@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa';
 import {
   getWrestlerImage,
+  nextStatusOptions,
   safeWrestlingArray,
   wrestlingRequest,
 } from '@/Utils/proWrestling';
@@ -64,6 +65,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const [scoringRules, setScoringRules] = useState([]);
   const [payoutRules, setPayoutRules] = useState([]);
   const [matchCounts, setMatchCounts] = useState({ entries: 0, predictions: 0 });
+  const [originalStatus, setOriginalStatus] = useState('DRAFT');
   const [bannerFile, setBannerFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -100,6 +102,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
         setMatchCounts(matchPayload?.counts || { entries: 0, predictions: 0 });
 
         if (match) {
+          setOriginalStatus(match.status || 'DRAFT');
           setForm({
             eventName: match.eventName || '',
             promotionName: match.promotionName || '',
@@ -130,6 +133,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
             seoKeywords: safeWrestlingArray(match.seo?.keywords).join(', '),
           });
         } else {
+          setOriginalStatus('DRAFT');
           setForm((current) => ({
             ...current,
             scoringRuleVersion: scoring[0]?.ruleId || '',
@@ -151,7 +155,11 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const selectedA = useMemo(() => wrestlers.find((item) => String(item._id) === String(form.competitorAId)), [form.competitorAId, wrestlers]);
   const selectedB = useMemo(() => wrestlers.find((item) => String(item._id) === String(form.competitorBId)), [form.competitorBId, wrestlers]);
   const selectedAffiliate = useMemo(() => affiliates.find((item) => String(item._id) === String(form.affiliateId)), [affiliates, form.affiliateId]);
-  const identityLocked = isEdit && (form.status !== 'DRAFT' || Number(matchCounts.entries || 0) > 0);
+  const identityLocked = isEdit && (originalStatus !== 'DRAFT' || Number(matchCounts.entries || 0) > 0);
+  const statusOptions = useMemo(() => {
+    if (!isEdit) return ['DRAFT', 'OPEN'];
+    return Array.from(new Set([originalStatus, ...nextStatusOptions(originalStatus)]));
+  }, [isEdit, originalStatus]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -187,10 +195,23 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
       }));
       if (bannerFile) body.append('bannerImage', bannerFile);
 
-      const result = await wrestlingRequest(
+      let result = await wrestlingRequest(
         isEdit ? `/api/admin/wrestling/matches/${matchId}` : '/api/admin/wrestling/matches',
         { admin: true, method: isEdit ? 'PUT' : 'POST', body },
       );
+
+      if (isEdit && form.status !== originalStatus) {
+        result = await wrestlingRequest(`/api/admin/wrestling/matches/${matchId}/status`, {
+          admin: true,
+          method: 'PUT',
+          body: {
+            status: form.status,
+            reason: `Status changed from ${originalStatus} to ${form.status} in the wrestling contest editor.`,
+          },
+        });
+        setOriginalStatus(form.status);
+      }
+
       toast.success(isEdit ? 'Wrestling contest updated.' : 'Wrestling contest created.');
       router.push(`/administration/pro-wrestling/${result?._id || matchId}`);
     } catch (requestError) {
@@ -222,7 +243,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Promotion name</span><input value={form.promotionName} onChange={(event) => update('promotionName', event.target.value)} /></label>
               <label className="is-wide"><span>Match title *</span><input required value={form.matchTitle} onChange={(event) => update('matchTitle', event.target.value)} placeholder="Wrestler A vs Wrestler B" /></label>
               <label><span>Match format</span><select value={form.matchFormat} disabled={identityLocked} onChange={(event) => update('matchFormat', event.target.value)}>{['SINGLES', 'TAG_TEAM', 'TRIPLE_THREAT', 'FATAL_FOUR_WAY'].map((value) => <option key={value}>{value}</option>)}</select></label>
-              <label><span>Initial status</span><select value={form.status} disabled={isEdit} onChange={(event) => update('status', event.target.value)}><option value="DRAFT">Draft</option><option value="OPEN">Open</option></select></label>
+              <label><span>{isEdit ? 'Contest status' : 'Initial status'}</span><select value={form.status} onChange={(event) => update('status', event.target.value)}>{statusOptions.map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select>{isEdit && form.status !== originalStatus && <small className="pw-admin-status-change-note">Saving will move this contest from {originalStatus} to {form.status} through the protected lifecycle endpoint.</small>}</label>
               <label className="is-wide"><span>Description</span><textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows="4" /></label>
               {identityLocked && <div className="pw-admin-field-notice is-wide"><FaShieldAlt /><span><strong>Contest identity is protected.</strong><small>Competitors, rules, entry fee, and base pot become immutable after publication or first entry.</small></span></div>}
             </div>

@@ -1,8 +1,14 @@
-
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { FaClock, FaCoins, FaFistRaised, FaShieldAlt, FaTrophy } from 'react-icons/fa';
+import {
+  FaCheck,
+  FaClock,
+  FaCoins,
+  FaFistRaised,
+  FaShieldAlt,
+  FaTrophy,
+} from 'react-icons/fa';
 import { FMM_ASSET_BASE, getFighterImage } from '@/Utils/fightExperience';
 
 const buildRound = (round) => ({
@@ -35,18 +41,19 @@ const MakePredictions = ({ matchId }) => {
   const router = useRouter();
   const user = useSelector((state) => state.user);
   const matches = useSelector((state) => state.matches.data);
-  const match = Array.isArray(matches) ? matches.find((m) => m._id === matchId) : null;
+  const match = Array.isArray(matches) ? matches.find((item) => item._id === matchId) : null;
   const roundCount = Math.max(Number(match?.maxRounds) || 3, 1);
   const isBoxing = String(match?.matchCategory || '').toLowerCase() === 'boxing';
 
-  const [rounds, setRounds] = useState(() => Array.from({ length: roundCount }, (_, i) => buildRound(i + 1)));
+  const [rounds, setRounds] = useState(() => Array.from({ length: roundCount }, (_, index) => buildRound(index + 1)));
   const [timeRemaining, setTimeRemaining] = useState({ diffHrs: 0, diffMins: 0, diffSecs: 0, hasStarted: false });
   const [buttonText, setButtonText] = useState('Submit Predictions');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     setRounds((current) => {
       if (current.length === roundCount) return current;
-      return Array.from({ length: roundCount }, (_, i) => current[i] || buildRound(i + 1));
+      return Array.from({ length: roundCount }, (_, index) => current[index] || buildRound(index + 1));
     });
   }, [roundCount]);
 
@@ -63,8 +70,7 @@ const MakePredictions = ({ matchId }) => {
 
     const calculateTimeRemaining = () => {
       const matchDateTime = new Date(`${match.matchDate?.split('T')[0]}T${match.matchTime || '00:00'}`);
-      const now = new Date();
-      const diffMs = matchDateTime - now;
+      const diffMs = matchDateTime - new Date();
       const hasStarted = diffMs <= 0 || Number.isNaN(diffMs);
 
       setTimeRemaining({
@@ -76,8 +82,8 @@ const MakePredictions = ({ matchId }) => {
     };
 
     calculateTimeRemaining();
-    const interval = setInterval(calculateTimeRemaining, 1000);
-    return () => clearInterval(interval);
+    const interval = window.setInterval(calculateTimeRemaining, 1000);
+    return () => window.clearInterval(interval);
   }, [match]);
 
   const metricLabels = useMemo(() => {
@@ -88,6 +94,7 @@ const MakePredictions = ({ matchId }) => {
         { code: 'TP', title: 'Total punches', left: 'tpPrediction1', right: 'tpPrediction2', featured: true },
       ];
     }
+
     return [
       { code: 'ST', title: 'Significant strikes', left: 'hpPrediction1', right: 'hpPrediction2' },
       { code: 'KI', title: 'Kicks', left: 'bpPrediction1', right: 'bpPrediction2' },
@@ -98,55 +105,60 @@ const MakePredictions = ({ matchId }) => {
 
   const handlePredictionChange = (event, roundIndex, field) => {
     const { value } = event.target;
-    setRounds((current) => {
-      const updated = [...current];
-      updated[roundIndex] = { ...updated[roundIndex], [field]: value };
-      return updated;
-    });
+    setRounds((current) => current.map((round, index) => (
+      index === roundIndex ? { ...round, [field]: value } : round
+    )));
   };
 
-  const handleButtonClick = (roundIndex, buttonType) => {
-    setRounds((current) => {
-      const updated = [...current];
-      const currentRound = { ...updated[roundIndex] };
+  const selectRoundWinner = (roundIndex, side) => {
+    setRounds((current) => current.map((round, index) => {
+      if (index !== roundIndex) return round;
+      const fighterAWins = side === 'A';
+      return {
+        ...round,
+        rwPrediction1: fighterAWins ? 100 : 25,
+        rwPrediction2: fighterAWins ? 25 : 100,
+        rwText: fighterAWins ? 'RW' : 'RL',
+        rlText: fighterAWins ? 'RL' : 'RW',
+        rwBorder: fighterAWins ? '2px solid #2f9cff' : '2px solid rgba(255,255,255,.16)',
+        rlBorder: fighterAWins ? '2px solid rgba(255,255,255,.16)' : '2px solid #ed1f31',
+      };
+    }));
+  };
 
-      if (buttonType === 'rw') {
-        if (currentRound.rwText === 'RW') {
-          currentRound.rwPrediction1 = 100;
-          currentRound.rwPrediction2 = 25;
-          currentRound.rwText = 'RL';
-          currentRound.rlText = 'RW';
-        } else {
-          currentRound.rwPrediction1 = 25;
-          currentRound.rwPrediction2 = 100;
-          currentRound.rwText = 'RW';
-          currentRound.rlText = 'RL';
-        }
-        currentRound.rwBorder = '2px solid #95a04d';
-        currentRound.rlBorder = '2px solid #95a04d';
-      } else if (buttonType === 'ko') {
-        if (currentRound.koText === 'KO') {
-          currentRound.koPrediction1 = 500;
-          currentRound.koPrediction2 = 25;
-          currentRound.koText = 'SP';
-          currentRound.spText = 'KO';
-        } else {
-          currentRound.koPrediction1 = 25;
-          currentRound.koPrediction2 = 500;
-          currentRound.koText = 'KO';
-          currentRound.spText = 'SP';
-        }
-        currentRound.koBorder = '2px solid #95a04d';
-        currentRound.spBorder = '2px solid #95a04d';
-      }
+  const selectFinish = (roundIndex, side) => {
+    setRounds((current) => current.map((round, index) => {
+      if (index !== roundIndex) return round;
+      const fighterAFinishes = side === 'A';
+      return {
+        ...round,
+        koPrediction1: fighterAFinishes ? 500 : 25,
+        koPrediction2: fighterAFinishes ? 25 : 500,
+        koText: fighterAFinishes ? 'KO' : 'SP',
+        spText: fighterAFinishes ? 'SP' : 'KO',
+        koBorder: fighterAFinishes ? '2px solid #2f9cff' : '2px solid rgba(255,255,255,.16)',
+        spBorder: fighterAFinishes ? '2px solid rgba(255,255,255,.16)' : '2px solid #ed1f31',
+      };
+    }));
+  };
 
-      updated[roundIndex] = currentRound;
-      return updated;
-    });
+  const getWinnerSide = (round) => {
+    if (Number(round.rwPrediction1) === 100) return 'A';
+    if (Number(round.rwPrediction2) === 100) return 'B';
+    return '';
+  };
+
+  const getFinishSide = (round) => {
+    if (Number(round.koPrediction1) === 500) return 'A';
+    if (Number(round.koPrediction2) === 500) return 'B';
+    return '';
   };
 
   const handleFinish = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     setButtonText('Saving!');
+
     try {
       await fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores', {
         method: 'POST',
@@ -173,6 +185,7 @@ const MakePredictions = ({ matchId }) => {
       console.error('Error saving predictions:', error);
       alert('Failed to save predictions.');
     } finally {
+      setSubmitting(false);
       setButtonText('Submit Predictions');
     }
   };
@@ -189,7 +202,7 @@ const MakePredictions = ({ matchId }) => {
   const fighterBImage = getFighterImage(match, 'B', 1);
 
   return (
-    <section className="xp-prediction-arena player-prediction-premium">
+    <section className="xp-prediction-arena player-prediction-premium player-prediction-scorecard-v2">
       <div className="theme-container">
         <div className="xp-prediction-hero">
           <div className="xp-prediction-hero-copy">
@@ -233,45 +246,130 @@ const MakePredictions = ({ matchId }) => {
           <span><b>3</b><strong>Submit picks</strong><small>Lock the existing score payload</small></span>
         </div>
 
-        <div className="xp-round-board">
-          {rounds.map((round, index) => (
-            <article className="xp-round-card" key={round.round}>
-              <header>
-                <span>Round</span>
-                <strong>{round.round}</strong>
-              </header>
+        <div className="player-round-board-v2">
+          {rounds.map((round, roundIndex) => {
+            const winnerSide = getWinnerSide(round);
+            const finishSide = getFinishSide(round);
 
-              <div className="xp-round-metrics">
-                {metricLabels.map((metric) => (
-                  <div className={`xp-round-metric ${metric.featured ? 'is-featured' : ''}`} key={`${round.round}-${metric.code}`}>
-                    <label>
-                      <span>{metric.title}</span>
-                      <strong>{metric.code}</strong>
-                    </label>
-                    <div className="xp-metric-input-row">
-                      <input type="number" value={round[metric.left]} onChange={(event) => handlePredictionChange(event, index, metric.left)} aria-label={`${metric.title} for ${match.matchFighterA}`} />
-                      <img src={metricIcon} alt="" aria-hidden="true" />
-                      <input type="number" value={round[metric.right]} onChange={(event) => handlePredictionChange(event, index, metric.right)} aria-label={`${metric.title} for ${match.matchFighterB}`} />
-                    </div>
+            return (
+              <article className="player-round-card-v2" key={round.round}>
+                <header className="player-round-card-v2-header">
+                  <div className="player-round-corner is-a">
+                    <img src={fighterAImage} alt={match.matchFighterA} />
+                    <span><small>Blue corner</small><strong>{match.matchFighterA}</strong></span>
                   </div>
-                ))}
-              </div>
+                  <div className="player-round-number">
+                    <small>Prediction card</small>
+                    <strong>Round {round.round}</strong>
+                    <span>{isBoxing ? 'Boxing' : 'Combat'} scoring</span>
+                  </div>
+                  <div className="player-round-corner is-b">
+                    <span><small>Red corner</small><strong>{match.matchFighterB}</strong></span>
+                    <img src={fighterBImage} alt={match.matchFighterB} />
+                  </div>
+                </header>
 
-              <div className="xp-round-buttons">
-                <button type="button" className="is-blue" style={{ border: round.rwBorder }} onClick={() => handleButtonClick(index, 'rw')}>{round.rwText}<small>Round result</small></button>
-                <span>or</span>
-                <button type="button" className="is-red" style={{ border: round.rlBorder }} onClick={() => handleButtonClick(index, 'rw')}>{round.rlText}<small>Round result</small></button>
-                <button type="button" className="is-blue" style={{ border: round.koBorder }} onClick={() => handleButtonClick(index, 'ko')}>{round.koText}<small>Finish call</small></button>
-                <span>or</span>
-                <button type="button" className="is-red" style={{ border: round.spBorder }} onClick={() => handleButtonClick(index, 'ko')}>{round.spText}<small>Finish call</small></button>
-              </div>
-            </article>
-          ))}
+                <div className="player-round-score-table">
+                  <div className="player-round-score-head">
+                    <span>{match.matchFighterA}</span>
+                    <strong>Predicted action</strong>
+                    <span>{match.matchFighterB}</span>
+                  </div>
+                  {metricLabels.map((metric) => (
+                    <div className={`player-round-score-row ${metric.featured ? 'is-featured' : ''}`} key={`${round.round}-${metric.code}`}>
+                      <label className="is-a">
+                        <input
+                          type="number"
+                          min="0"
+                          inputMode="numeric"
+                          value={round[metric.left]}
+                          onChange={(event) => handlePredictionChange(event, roundIndex, metric.left)}
+                          aria-label={`${metric.title} for ${match.matchFighterA}`}
+                        />
+                        <small>{match.matchFighterA}</small>
+                      </label>
+                      <div>
+                        <img src={metricIcon} alt="" aria-hidden="true" />
+                        <span><b>{metric.code}</b><strong>{metric.title}</strong></span>
+                      </div>
+                      <label className="is-b">
+                        <input
+                          type="number"
+                          min="0"
+                          inputMode="numeric"
+                          value={round[metric.right]}
+                          onChange={(event) => handlePredictionChange(event, roundIndex, metric.right)}
+                          aria-label={`${metric.title} for ${match.matchFighterB}`}
+                        />
+                        <small>{match.matchFighterB}</small>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="player-round-outcome-grid">
+                  <section>
+                    <header><span>Round result</span><strong>Pick the round winner</strong></header>
+                    <div>
+                      <button
+                        type="button"
+                        className={`is-a ${winnerSide === 'A' ? 'is-active' : ''}`}
+                        onClick={() => selectRoundWinner(roundIndex, 'A')}
+                        aria-pressed={winnerSide === 'A'}
+                      >
+                        <img src={fighterAImage} alt="" />
+                        <span><small>{match.matchFighterA}</small><strong>{winnerSide === 'B' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'A' ? 'Round winner' : winnerSide === 'B' ? 'Round loss' : 'Select corner'}</em></span>
+                        {winnerSide === 'A' && <FaCheck />}
+                      </button>
+                      <button
+                        type="button"
+                        className={`is-b ${winnerSide === 'B' ? 'is-active' : ''}`}
+                        onClick={() => selectRoundWinner(roundIndex, 'B')}
+                        aria-pressed={winnerSide === 'B'}
+                      >
+                        <img src={fighterBImage} alt="" />
+                        <span><small>{match.matchFighterB}</small><strong>{winnerSide === 'A' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'B' ? 'Round winner' : winnerSide === 'A' ? 'Round loss' : 'Select corner'}</em></span>
+                        {winnerSide === 'B' && <FaCheck />}
+                      </button>
+                    </div>
+                  </section>
+
+                  <section>
+                    <header><span>Finish call</span><strong>Pick KO or score path</strong></header>
+                    <div>
+                      <button
+                        type="button"
+                        className={`is-a ${finishSide === 'A' ? 'is-active' : ''}`}
+                        onClick={() => selectFinish(roundIndex, 'A')}
+                        aria-pressed={finishSide === 'A'}
+                      >
+                        <img src={fighterAImage} alt="" />
+                        <span><small>{match.matchFighterA}</small><strong>{finishSide === 'B' ? 'SP' : 'KO'}</strong><em>{finishSide === 'A' ? 'Knockout pick' : finishSide === 'B' ? 'Score path' : 'Select corner'}</em></span>
+                        {finishSide === 'A' && <FaCheck />}
+                      </button>
+                      <button
+                        type="button"
+                        className={`is-b ${finishSide === 'B' ? 'is-active' : ''}`}
+                        onClick={() => selectFinish(roundIndex, 'B')}
+                        aria-pressed={finishSide === 'B'}
+                      >
+                        <img src={fighterBImage} alt="" />
+                        <span><small>{match.matchFighterB}</small><strong>{finishSide === 'A' ? 'SP' : 'KO'}</strong><em>{finishSide === 'B' ? 'Knockout pick' : finishSide === 'A' ? 'Score path' : 'Select corner'}</em></span>
+                        {finishSide === 'B' && <FaCheck />}
+                      </button>
+                    </div>
+                  </section>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
         <div className="xp-prediction-submit-panel">
-          <div><FaShieldAlt /><span>Existing score submission endpoints are unchanged.</span></div>
-          <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish}><FaTrophy /> {buttonText}</button>
+          <div><FaShieldAlt /><span>Every existing score field, endpoint, and prediction-status update remains intact.</span></div>
+          <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting}>
+            <FaTrophy /> {buttonText}
+          </button>
         </div>
       </div>
     </section>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
 import { FaArrowLeft, FaArrowRight, FaCoins, FaCrown, FaMedal, FaTrophy } from 'react-icons/fa';
 import { WrestlingModeNav, WrestlingStatusBadge } from './WrestlingPrimitives';
 import { formatTokenAmount, getWrestlerImage, winnerLabel, wrestlingRequest } from '@/Utils/proWrestling';
@@ -9,6 +10,7 @@ import { formatTokenAmount, getWrestlerImage, winnerLabel, wrestlingRequest } fr
 const WrestlingLeaderboardPage = () => {
   const router = useRouter();
   const { matchId } = router.query;
+  const user = useSelector((state) => state.user);
   const [match, setMatch] = useState(null);
   const [rows, setRows] = useState([]);
   const [myResult, setMyResult] = useState(null);
@@ -49,6 +51,9 @@ const WrestlingLeaderboardPage = () => {
   if (loading) return <div className="pw-page pw-state-page"><div className="pw-state-card"><FaTrophy /><h1>Loading wrestling leaderboard…</h1></div></div>;
   if (error || !match) return <div className="pw-page pw-state-page"><div className="pw-state-card"><FaMedal /><h1>Leaderboard unavailable</h1><p>{error}</p><Link href="/pro-wrestling" className="pw-btn pw-btn-secondary">Wrestling lobby <FaArrowRight /></Link></div></div>;
 
+  const userId = String(user?._id || '');
+  const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.playerName || '';
+  const displayPlayerName = (row) => (userId && String(row?.playerId || '') === userId && userDisplayName ? userDisplayName : row?.playerName || 'Player');
   const podium = rows.slice(0, 3);
   return (
     <>
@@ -64,14 +69,14 @@ const WrestlingLeaderboardPage = () => {
         <WrestlingModeNav active="contests" />
         <main className="theme-container pw-main pw-leaderboard-main">
           <section className="pw-podium">
-            {podium.length ? podium.map((row, index) => <article key={row.playerId} className={`place-${index + 1}`}><span>#{row.rank || index + 1}</span>{row.profileUrl ? <img src={row.profileUrl} alt={row.playerName} /> : <i>{row.playerName?.charAt(0) || 'P'}</i>}<FaCrown /><h2>{row.playerName}</h2><strong>{Number(row.score || 0).toLocaleString()} pts</strong><small>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens won` : `${row.exactPredictionCount || 0} exact categories`}</small></article>) : <div className="pw-empty-podium"><FaTrophy /><h2>Rankings have not been calculated.</h2><p>The leaderboard will populate when the administration team submits official action totals.</p></div>}
+            {podium.length ? podium.map((row, index) => <article key={row.playerId} className={`place-${index + 1}`}><span>#{row.rank || index + 1}</span>{row.profileUrl ? <img src={row.profileUrl} alt={displayPlayerName(row)} /> : <i>{displayPlayerName(row).charAt(0) || 'P'}</i>}<FaCrown /><h2>{displayPlayerName(row)}</h2><strong>{Number(row.score || 0).toLocaleString()} pts</strong><small>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens won` : `${row.exactPredictionCount || 0} exact categories`}</small></article>) : <div className="pw-empty-podium"><FaTrophy /><h2>Rankings have not been calculated.</h2><p>The leaderboard will populate when the administration team submits official action totals.</p></div>}
           </section>
 
           {myResult && <section className="pw-my-final-result"><FaMedal /><div><small>Your finalized performance</small><h2>Rank #{myResult.rank || '—'} · {Number(myResult.score || 0).toLocaleString()} points</h2><p>{myResult.exactPredictionCount || 0} exact category predictions · {formatTokenAmount(myResult.payoutAmount)} payout tokens</p></div><Link href="/pro-wrestling/history">Open wrestling history <FaArrowRight /></Link></section>}
 
           <section className="pw-live-table-panel is-final">
             <header><div><p>{match.status === 'FINALIZED' ? 'Official final standings' : 'Provisional standings'}</p><h2>{match.matchTitle}</h2></div><span>{rows.length} ranked players</span></header>
-            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Score</th><th>Payout</th></tr></thead><tbody>{rows.length ? rows.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{row.playerName?.charAt(0) || 'P'}</span>}<b>{row.playerName}</b></div></td><td>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td><td>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens` : 'Pending'}</td></tr>) : <tr><td colSpan="6">No ranked predictions are available.</td></tr>}</tbody></table></div>
+            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Score</th><th>Payout</th></tr></thead><tbody>{rows.length ? rows.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{displayPlayerName(row).charAt(0) || 'P'}</span>}<b>{displayPlayerName(row)}</b></div></td><td>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td><td>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens` : 'Pending'}</td></tr>) : <tr><td colSpan="6">No ranked predictions are available.</td></tr>}</tbody></table></div>
           </section>
         </main>
       </div>
