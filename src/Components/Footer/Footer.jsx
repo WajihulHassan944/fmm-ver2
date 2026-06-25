@@ -29,6 +29,7 @@ const socialLinks = [
 const quickLinks = [
   ['Fights', '/upcomingfights'],
   ['Contests', '/FantasyLeagues'],
+  ['Pro Wrestling', '/pro-wrestling'],
   ['Leaderboard', '/leaderboard'],
   ['How To Play', '/guides'],
   ['Rewards', '/fights-rewards'],
@@ -69,6 +70,7 @@ const Footer = () => {
               <span>GLORY</span>
               <span>ESPN</span>
               <span>DAZN</span>
+              <span>WRESTLING</span>
             </div>
           </div>
           <Link href="/upcomingfights" className="fmm-footer-top-link">

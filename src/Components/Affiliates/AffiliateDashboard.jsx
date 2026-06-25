@@ -9,6 +9,7 @@ import {
   FaChartLine,
   FaCheck,
   FaCopy,
+  FaCrown,
   FaDollarSign,
   FaEye,
   FaHistory,
@@ -29,6 +30,7 @@ import {
   getFighterImage,
   safeArray,
 } from '@/Utils/fightExperience';
+import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const MAX_CARDS = 5;
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
@@ -48,6 +50,8 @@ const AffiliateDashboard = () => {
   const [copiedId, setCopiedId] = useState(null);
   const [promoStartIndex, setPromoStartIndex] = useState(0);
   const [promotedStartIndex, setPromotedStartIndex] = useState(0);
+  const [wrestlingSummary, setWrestlingSummary] = useState(null);
+  const [wrestlingLoading, setWrestlingLoading] = useState(false);
 
   useEffect(() => {
     if (shadowMatchId || promoMatchDetails.matchId) {
@@ -60,6 +64,21 @@ const AffiliateDashboard = () => {
       dispatch(fetchMatches());
     }
   }, [matchStatus, dispatch]);
+
+  useEffect(() => {
+    if (!affiliate?._id) return undefined;
+    let active = true;
+    setWrestlingLoading(true);
+    wrestlingRequest('/api/affiliates/me/wrestling-summary', { affiliate: true })
+      .then((payload) => { if (active) setWrestlingSummary(payload); })
+      .catch((error) => {
+        // The affiliate dashboard remains fully usable if the optional game mode is disabled.
+        console.info('Pro Wrestling affiliate summary unavailable:', error.message);
+        if (active) setWrestlingSummary(null);
+      })
+      .finally(() => { if (active) setWrestlingLoading(false); });
+    return () => { active = false; };
+  }, [affiliate?._id]);
 
   useEffect(() => {
     let active = true;
@@ -125,6 +144,8 @@ const AffiliateDashboard = () => {
     .filter(Boolean)
     .join(' ') || affiliate?.playerName || 'Affiliate';
   const profileImage = affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`;
+  const wrestlingMatches = safeWrestlingArray(wrestlingSummary?.matches);
+  const wrestlingCommission = Number(wrestlingSummary?.totalCommissionTokens || 0);
 
   const handleCopy = async (event, match) => {
     event.stopPropagation();
@@ -382,6 +403,45 @@ const AffiliateDashboard = () => {
                 />
               )}
             </section>
+
+            {(wrestlingLoading || wrestlingSummary) && (
+              <section className="affiliate-wrestling-command-module">
+                <div className="affiliate-wrestling-command-copy">
+                  <p className="xp-eyebrow"><FaCrown /> Pro Wrestling game mode</p>
+                  <h2>Bring your audience into the wrestling arena.</h2>
+                  <p>
+                    Pro Wrestling contests use the same Fantasy MMADNESS account, wallet, and affiliate attribution.
+                    Share an assigned card and monitor entries and earned commission from this creator workspace.
+                  </p>
+                  <div className="affiliate-wrestling-command-stats">
+                    <span><strong>{wrestlingLoading ? '—' : wrestlingMatches.length}</strong><small>Assigned cards</small></span>
+                    <span><strong>{wrestlingLoading ? '—' : Number(wrestlingSummary?.attributedEntries || 0).toLocaleString()}</strong><small>Attributed entries</small></span>
+                    <span><strong>{wrestlingLoading ? '—' : formatTokenAmount(wrestlingCommission)}</strong><small>Commission tokens</small></span>
+                  </div>
+                  <div className="affiliate-wrestling-command-actions">
+                    <Link href="/pro-wrestling" className="theme-btn theme-btn-primary">Open wrestling lobby <FaArrowRight /></Link>
+                    <Link href="/pro-wrestling/how-to-play" className="theme-btn theme-btn-secondary">Scoring guide</Link>
+                  </div>
+                </div>
+                <div className="affiliate-wrestling-command-cards">
+                  {wrestlingLoading ? (
+                    <div className="affiliate-wrestling-command-empty">Loading assigned wrestling cards…</div>
+                  ) : wrestlingMatches.length ? wrestlingMatches.slice(0, 2).map((match, index) => (
+                    <Link
+                      href={`/pro-wrestling/matches/${match._id}?affiliateId=${affiliateId}${match.referralCode ? `&referralCode=${encodeURIComponent(match.referralCode)}` : ''}`}
+                      key={match._id}
+                    >
+                      <div><img src={getWrestlerImage(match.competitorA, 'A')} alt="" /><b>VS</b><img src={getWrestlerImage(match.competitorB, 'B')} alt="" /></div>
+                      <p>{match.status} · {formatWrestlingDate(match.matchDate)}</p>
+                      <h3>{match.matchTitle}</h3>
+                      <span>{formatTokenAmount(match.currentPot)} token pot <FaArrowRight /></span>
+                    </Link>
+                  )) : (
+                    <div className="affiliate-wrestling-command-empty"><FaCrown /><strong>No wrestling card is assigned yet.</strong><span>Assigned Pro Wrestling campaigns will appear here automatically.</span></div>
+                  )}
+                </div>
+              </section>
+            )}
 
             <section className="affiliate-dashboard-community-final">
               <div>

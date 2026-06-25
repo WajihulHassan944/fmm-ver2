@@ -13,6 +13,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaComments,
+  FaCrown,
   FaEnvelope,
   FaExternalLinkAlt,
   FaFistRaised,
@@ -35,6 +36,18 @@ import { logoutAdmin } from '@/Redux/adminAuthSlice';
 const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.png';
 
 const navigationGroups = [
+  {
+    id: 'pro-wrestling',
+    label: 'Pro Wrestling',
+    icon: FaCrown,
+    items: [
+      { label: 'Wrestling registry', href: '/administration/pro-wrestling', icon: FaCrown, exact: true },
+      { label: 'Create wrestling card', href: '/administration/pro-wrestling/new', icon: FaPlus },
+      { label: 'Wrestler roster', href: '/administration/pro-wrestling/wrestlers', icon: FaUsers },
+      { label: 'Rules & payouts', href: '/administration/pro-wrestling/rules', icon: FaTrophy },
+      { label: 'Analytics, audit & ledger', href: '/administration/pro-wrestling/analytics', icon: FaShieldAlt },
+    ],
+  },
   {
     id: 'fight-operations',
     label: 'Fight operations',
@@ -96,7 +109,7 @@ const navigationGroups = [
 
 const getActiveItem = (pathname) => {
   for (const group of navigationGroups) {
-    const item = group.items.find((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`) || entry.matchPrefixes?.some((prefix) => pathname.startsWith(prefix)));
+    const item = group.items.find((entry) => pathname === entry.href || (!entry.exact && pathname.startsWith(`${entry.href}/`)) || entry.matchPrefixes?.some((prefix) => pathname.startsWith(prefix)));
     if (item) return { group, item };
   }
   return { group: null, item: { label: 'Command center', href: '/administration' } };
@@ -107,6 +120,7 @@ const AdminHeader = () => {
   const router = useRouter();
   const pathname = router.pathname || '/administration';
   const active = useMemo(() => getActiveItem(pathname), [pathname]);
+  const isWrestlingRoute = pathname.startsWith('/administration/pro-wrestling');
   const [menuOpen, setMenuOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const [query, setQuery] = useState('');
@@ -218,7 +232,7 @@ const AdminHeader = () => {
           <h1>{active.item.label}</h1>
         </div>
         <div className="admin-command-topbar-actions">
-          <Link href="/administration/AddNewMatch" className="admin-topbar-primary"><FaPlus /> New match</Link>
+          <Link href={isWrestlingRoute ? '/administration/pro-wrestling/new' : '/administration/AddNewMatch'} className="admin-topbar-primary"><FaPlus /> {isWrestlingRoute ? 'New wrestling card' : 'New match'}</Link>
           <Link href="/home" target="_blank" rel="noreferrer" className="admin-topbar-secondary"><FaExternalLinkAlt /> View site</Link>
           <button type="button" onClick={handleLogout} className="admin-topbar-icon" aria-label="Logout"><FaSignOutAlt /></button>
         </div>

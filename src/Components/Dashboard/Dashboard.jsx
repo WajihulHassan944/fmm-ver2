@@ -10,6 +10,7 @@ import {
   FaCalendarAlt,
   FaChartLine,
   FaCoins,
+  FaCrown,
   FaFire,
   FaFistRaised,
   FaHistory,
@@ -29,6 +30,7 @@ import PurchaseTokensIntimation from './PurchaseTokensIntimation';
 import FinishedFightUserBoard from '../FinishedFightUserBoard/FinishedFightUserBoard';
 import UserWorkspaceNav from '../UserProfile/UserWorkspaceNav';
 import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
+import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
 const isSameId = (left, right) => String(left || '') === String(right || '');
@@ -48,6 +50,8 @@ const Dashboard = () => {
   const [hoveredMatch, setHoveredMatch] = useState(null);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [removedMatches, setRemovedMatches] = useState([]);
+  const [wrestlingHistory, setWrestlingHistory] = useState([]);
+  const [wrestlingMatches, setWrestlingMatches] = useState([]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -67,6 +71,22 @@ const Dashboard = () => {
   useEffect(() => {
     if (matchStatus === 'idle') dispatch(fetchMatches());
   }, [matchStatus, dispatch]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    let active = true;
+    Promise.all([
+      wrestlingRequest('/api/users/me/wrestling-history?limit=6', { auth: true }),
+      wrestlingRequest('/api/wrestling/matches?limit=4&status=OPEN,LIVE,SCORING'),
+    ]).then(([historyPayload, matchPayload]) => {
+      if (!active) return;
+      setWrestlingHistory(safeWrestlingArray(historyPayload?.data));
+      setWrestlingMatches(safeWrestlingArray(matchPayload?.data));
+    }).catch((requestError) => {
+      console.info('Pro Wrestling dashboard module is not available yet:', requestError.message);
+    });
+    return () => { active = false; };
+  }, [user?._id]);
 
   useEffect(() => {
     const today = new Date();
@@ -237,6 +257,7 @@ const Dashboard = () => {
   const currentRankEstimate = visibleCompleted.length ? Math.max(1, 100 - visibleCompleted.length * 3) : '—';
   const quickActions = [
     { href: '/YourFights', label: 'My fight library', copy: 'All completed and pending cards', icon: FaFistRaised },
+    { href: '/pro-wrestling', label: 'Pro Wrestling', copy: 'Full-match action prediction mode', icon: FaCrown },
     { href: '/myLeagueRecords', label: 'My leagues', copy: 'Creator communities and records', icon: FaUsers },
     { href: '/fighter-performance-tracker', label: 'Fighter tracker', copy: 'Research form and performance', icon: FaChartLine },
     { href: '/account-settings', label: 'Account settings', copy: 'Preferences and payment details', icon: FaUserCog },
@@ -297,6 +318,7 @@ const Dashboard = () => {
           <article><FaTrophy /><span><strong>{visibleCompleted.length}</strong><small>Submitted cards</small></span></article>
           <article onClick={() => router.push('/checkout')} role="button" tabIndex={0}><FaCoins /><span><strong>{user.tokens || 0}</strong><small>Wallet tokens</small></span></article>
           <article><FaMedal /><span><strong>{currentRankEstimate}</strong><small>Momentum rank</small></span></article>
+          <article onClick={() => router.push('/pro-wrestling/history')} role="button" tabIndex={0}><FaCrown /><span><strong>{wrestlingHistory.length}</strong><small>Wrestling entries</small></span></article>
         </section>
 
         <section className="player-command-quick-section">
@@ -308,13 +330,30 @@ const Dashboard = () => {
           </div>
         </section>
 
+        <section className="player-command-wrestling-feature">
+          <div className="player-command-wrestling-copy">
+            <p><FaCrown /> Additional game mode</p>
+            <h2>Pro Wrestling is now inside your command center.</h2>
+            <span>Predict head punches, body punches, kicks, power moves, finishers, and the official winner across the full match.</span>
+            <div><Link href="/pro-wrestling" className="pw-btn pw-btn-primary">Open wrestling lobby <FaArrowRight /></Link><Link href="/pro-wrestling/history" className="pw-btn pw-btn-secondary">My wrestling record</Link></div>
+          </div>
+          <div className="player-command-wrestling-card">
+            {wrestlingMatches[0] ? <>
+              <header><small>{wrestlingMatches[0].status}</small><strong>{wrestlingMatches[0].eventName}</strong></header>
+              <div><figure><img src={getPWImage(wrestlingMatches[0].competitorA, 'A')} alt={wrestlingMatches[0].competitorA?.displayName} /><figcaption>{wrestlingMatches[0].competitorA?.displayName}</figcaption></figure><b>VS</b><figure><img src={getPWImage(wrestlingMatches[0].competitorB, 'B')} alt={wrestlingMatches[0].competitorB?.displayName} /><figcaption>{wrestlingMatches[0].competitorB?.displayName}</figcaption></figure></div>
+              <p>{formatWrestlingDate(wrestlingMatches[0].matchDate)} · {wrestlingMatches[0].entryFeeTokens || 0} token entry</p>
+              <Link href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}>Open featured card <FaArrowRight /></Link>
+            </> : <div className="player-command-wrestling-empty"><FaCrown /><strong>Wrestling cards will appear here.</strong><span>The public game-mode guide and roster are already available.</span></div>}
+          </div>
+        </section>
+
         <section className="player-command-section">
-          <header><span>01</span><div><p>Submitted fight cards</p><h2>Your completed fights</h2><small>Open a card to review live standings or the completed round-by-round report.</small></div></header>
+          <header><span>02</span><div><p>Submitted fight cards</p><h2>Your completed fights</h2><small>Open a card to review live standings or the completed round-by-round report.</small></div></header>
           <div className="player-command-fight-grid">{visibleCompleted.length ? visibleCompleted.map((match) => renderFightCard(match, 'completed')) : <div className="player-dynamic-empty is-inline"><FaTrophy /><h3>No completed matches</h3><p>Your submitted prediction cards will appear here.</p></div>}</div>
         </section>
 
         <section className="player-command-section">
-          <header><span>02</span><div><p>Cards requiring action</p><h2>Your pending fights</h2><small>Open a card to review entry details and submit your predictions.</small></div></header>
+          <header><span>03</span><div><p>Cards requiring action</p><h2>Your pending fights</h2><small>Open a card to review entry details and submit your predictions.</small></div></header>
           <div className="player-command-fight-grid">{pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No pending matches</h3><p>You are fully caught up for the current fight schedule.</p></div>}</div>
         </section>
 

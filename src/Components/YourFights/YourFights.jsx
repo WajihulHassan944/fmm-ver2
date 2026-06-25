@@ -7,6 +7,7 @@ import {
   FaArrowRight,
   FaCalendarAlt,
   FaCoins,
+  FaCrown,
   FaFistRaised,
   FaHistory,
   FaShieldAlt,
@@ -20,6 +21,7 @@ import FightCosting from '../Dashboard/FightCosting';
 import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
 import UserWorkspaceNav from '../UserProfile/UserWorkspaceNav';
 import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
+import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
 const sameId = (left, right) => String(left || '') === String(right || '');
@@ -36,10 +38,20 @@ const YourFights = () => {
   const [completedMatchId, setCompletedMatchId] = useState(null);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [removedMatches, setRemovedMatches] = useState([]);
+  const [wrestlingHistory, setWrestlingHistory] = useState([]);
 
   useEffect(() => {
     if (matchStatus === 'idle') dispatch(fetchMatches());
   }, [matchStatus, dispatch]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    let active = true;
+    wrestlingRequest('/api/users/me/wrestling-history?limit=20', { auth: true })
+      .then((payload) => { if (active) setWrestlingHistory(safeWrestlingArray(payload?.data)); })
+      .catch((requestError) => console.info('Wrestling history unavailable:', requestError.message));
+    return () => { active = false; };
+  }, [user?._id]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -237,6 +249,15 @@ const YourFights = () => {
           <article><FaFistRaised /><span><strong>{pendingMatches.length}</strong><small>Pending cards</small></span></article>
           <article onClick={() => router.push('/checkout')} role="button" tabIndex={0}><FaCoins /><span><strong>{user.tokens || 0}</strong><small>Wallet tokens</small></span></article>
           <article><FaTrophy /><span><strong>{totalPoints}</strong><small>Leaderboard points</small></span></article>
+          <article onClick={() => router.push('/pro-wrestling/history')} role="button" tabIndex={0}><FaCrown /><span><strong>{wrestlingHistory.length}</strong><small>Wrestling cards</small></span></article>
+        </section>
+
+        <section className="player-fights-wrestling-section">
+          <header><span>PW</span><div><p>Additional game mode</p><h2>My Pro Wrestling cards</h2><small>Full-match wrestling entries remain separate from round-based fight predictions while living in the same player workspace.</small></div><Link href="/pro-wrestling">Open wrestling lobby <FaArrowRight /></Link></header>
+          {wrestlingHistory.length ? <div className="player-fights-wrestling-grid">{wrestlingHistory.slice(0, 4).map(({ entry, match, prediction }) => {
+            const href = ['LIVE','SCORING'].includes(match?.status) ? `/pro-wrestling/live/${match._id}` : match?.status === 'FINALIZED' ? `/pro-wrestling/leaderboard/${match._id}` : `/pro-wrestling/play/${match._id}`;
+            return <Link href={href} key={entry?._id}><div><figure><img src={getPWImage(match?.competitorA,'A')} alt="" /><figcaption>{match?.competitorA?.displayName}</figcaption></figure><b>VS</b><figure><img src={getPWImage(match?.competitorB,'B')} alt="" /><figcaption>{match?.competitorB?.displayName}</figcaption></figure></div><p>{match?.status} · {formatWrestlingDate(match?.matchDate)}</p><h3>{match?.matchTitle}</h3><span>{prediction?.predictionStatus || 'Entry confirmed'}{prediction?.rank ? ` · Rank #${prediction.rank}` : ''}</span><strong>Open wrestling card <FaArrowRight /></strong></Link>;
+          })}</div> : <div className="player-dynamic-empty is-inline"><FaCrown /><h3>No Pro Wrestling entries yet</h3><p>Enter an open wrestling contest to add the new game mode to your fight library.</p><Link href="/pro-wrestling">Browse wrestling contests</Link></div>}
         </section>
 
         <section className="player-fights-section">

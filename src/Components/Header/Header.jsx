@@ -12,6 +12,7 @@ import {
   FaChartLine,
   FaChevronDown,
   FaCoins,
+  FaCrown,
   FaComments,
   FaCog,
   FaEllipsisH,
@@ -41,6 +42,7 @@ const fightLinks = [
   { label: 'Our Fighters', href: '/our-fighters', icon: FaUsers },
   { label: 'Past Fight Videos', href: '/past-fights-records', icon: FaVideo },
   { label: 'Fighter Tracker', href: '/fighter-performance-tracker', icon: FaChartLine },
+  { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
 ];
 
 const contestLinks = [
@@ -48,6 +50,7 @@ const contestLinks = [
   { label: 'Fantasy Leagues', href: '/FantasyLeagues', icon: FaTrophy },
   { label: 'Play For Free', href: '/playforfree', icon: FaCoins },
   { label: 'Rewards', href: '/fights-rewards', icon: FaMedal },
+  { label: 'Pro Wrestling Contests', href: '/pro-wrestling', icon: FaCrown },
 ];
 
 const companyLinks = [
@@ -61,6 +64,7 @@ const companyLinks = [
 const publicNav = [
   { label: 'Fights', href: '/upcomingfights', icon: FaFistRaised, children: fightLinks },
   { label: 'Contests', href: '/upcomingfights', icon: FaBullseye, children: contestLinks },
+  { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
   { label: 'Tokens', href: '/fights-rewards', icon: FaCoins },
   { label: 'How To Play', href: '/guides', icon: FaQuestionCircle },
@@ -91,6 +95,7 @@ const playerNav = [
     ],
   },
   { label: 'Contests', href: '/YourFights', icon: FaBullseye },
+  { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
   { label: 'Tokens', href: '/fights-rewards', icon: FaCoins },
   { label: 'Community', href: '/community-forum', icon: FaComments },
@@ -110,6 +115,7 @@ const playerNav = [
 
 const affiliateNav = [
   { label: 'Dashboard', href: '/AffiliateDashboard', icon: FaHome },
+  { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'How It Works', href: '/HowItWorks', icon: FaQuestionCircle },
   { label: 'League', href: '/affiliate-league', icon: FaTrophy },
   { label: 'Promotions', href: '/past-promotions', icon: FaMedal },

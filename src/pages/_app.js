@@ -61,6 +61,7 @@ import "@/styles/premium-backgrounds-phase-two.css";
 import "@/styles/user-dashboard-premium-final.css";
 import "@/styles/client-feedback-final.css";
 import "@/styles/targeted-dashboard-checkout-logo-fix.css";
+import "@/styles/pro-wrestling.css";
 import Script from "next/script";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
@@ -166,7 +167,7 @@ function AppContent({ children }) {
             "/sponsor-dashboard", "/global-leaderboard", "/testimonials",
             "/spin-wheel", "/calendar-of-fights", "/AffiliateDashboard", "/AffiliateProfile", "/AffiliateAccountSettings",
             "/past-promotions", "/past-fights","/referral-leaderboard", "/HowItWorks", "/affiliate-league", "/fantasy-tips","/FantasyLeagues", "/invite", "/fighter-performance-tracker", "/leaderboard", "/mock-game",
-            "/UserDashboard", "/YourFights", "/trashed-fights", "/profile", "/account-settings", "/checkout", "/fights-rewards", "/my-fantasy-team"
+            "/UserDashboard", "/YourFights", "/trashed-fights", "/profile", "/account-settings", "/checkout", "/fights-rewards", "/my-fantasy-team", "/pro-wrestling"
           ];
 
           const redRoutes = ["/fights-news"];

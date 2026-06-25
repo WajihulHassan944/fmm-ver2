@@ -5,6 +5,7 @@ import { fetchMatches } from '../../Redux/matchSlice';
 import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
 import Link from 'next/link';
 import Head from 'next/head';
+import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 import {
   FaArrowRight,
   FaBullseye,
@@ -165,6 +166,7 @@ const HomeAnother = () => {
   const [buttonText, setButtonText] = useState('Send Message');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [now, setNow] = useState(null);
+  const [wrestlingMatches, setWrestlingMatches] = useState([]);
 
   useEffect(() => {
     const currentSeek = howlerRef.current?.seek?.() || 0;
@@ -180,6 +182,14 @@ const HomeAnother = () => {
     setNow(new Date());
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    wrestlingRequest('/api/wrestling/matches?limit=3&status=OPEN,LIVE,SCORING')
+      .then((payload) => { if (active) setWrestlingMatches(safeWrestlingArray(payload?.data)); })
+      .catch((requestError) => console.info('Pro Wrestling homepage module unavailable:', requestError.message));
+    return () => { active = false; };
   }, []);
 
   const orderedMatches = useMemo(() => getOrderedMatches(matches), [matches]);
@@ -236,7 +246,7 @@ const HomeAnother = () => {
     <>
       <Head>
         <title>Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing</title>
-        <meta name="description" content="Predict MMA, Boxing, Kickboxing, Bare Knuckle, and combat sports contests. Pick winners, score every round, climb leaderboards, and win real fantasy rewards." />
+        <meta name="description" content="Predict MMA, Boxing, Kickboxing, Bare Knuckle, Pro Wrestling, and combat sports contests. Pick winners, score every round, climb leaderboards, and win real fantasy rewards." />
         <meta property="og:title" content="Fantasy MMAdness - Predict Combat Sports" />
         <meta property="og:description" content="Join Fantasy MMAdness and compete in premium combat sports prediction contests." />
         <meta property="og:url" content="https://fantasymmadness.com/" />
@@ -269,7 +279,7 @@ const HomeAnother = () => {
                 <span>Score <em>Every Round.</em></span>
               </h1>
               <p className="fmm-hero-subtitle">
-                Join thousands of fans in MMA, Boxing, Kickboxing and Bare-Knuckle prediction contests. Predict winners, methods, rounds and scores. Climb the leaderboard and win real prizes.
+                Join thousands of fans in MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests. Predict winners, methods, rounds and scores. Climb the leaderboard and win real prizes.
               </p>
 
               <div className="fmm-hero-actions">
@@ -385,6 +395,19 @@ const HomeAnother = () => {
                   </article>
                 );
               })}
+            </div>
+          </section>
+
+          <section className="fmm-home-wrestling-feature">
+            <div className="fmm-home-wrestling-copy">
+              <p><FaCrown /> New game mode</p>
+              <h2>Pro Wrestling is now part of Fantasy MMADNESS.</h2>
+              <span>Predict head punches, body punches, kicks, power moves, finishers, and the official winner across the entire match.</span>
+              <div><Link href="/pro-wrestling" className="theme-btn theme-btn-primary">Enter wrestling mode <FaArrowRight /></Link><Link href="/pro-wrestling/how-to-play" className="theme-btn theme-btn-secondary">How wrestling scores</Link></div>
+            </div>
+            <div className="fmm-home-wrestling-visual">
+              <img src="/images/pro-wrestling/pro-wrestling-hero.jpg" alt="Fantasy MMADNESS Pro Wrestling" />
+              {wrestlingMatches[0] ? <article><header><small>{wrestlingMatches[0].status}</small><strong>{wrestlingMatches[0].eventName}</strong></header><div><figure><img src={getPWImage(wrestlingMatches[0].competitorA,'A')} alt="" /><figcaption>{wrestlingMatches[0].competitorA?.displayName}</figcaption></figure><b>VS</b><figure><img src={getPWImage(wrestlingMatches[0].competitorB,'B')} alt="" /><figcaption>{wrestlingMatches[0].competitorB?.displayName}</figcaption></figure></div><p>{formatWrestlingDate(wrestlingMatches[0].matchDate)} · {wrestlingMatches[0].currentPot || 0} token pot</p><Link href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}>Open featured card <FaArrowRight /></Link></article> : <article className="is-empty"><FaCrown /><strong>Wrestling contest cards will appear here.</strong><Link href="/pro-wrestling">Explore the new game mode</Link></article>}
             </div>
           </section>
 

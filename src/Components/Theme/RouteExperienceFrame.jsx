@@ -62,6 +62,16 @@ const CORE_ROUTES = new Set([
   '/my-fantasy-team',
   '/fighter-performance-tracker',
   '/referral-leaderboard',
+  '/pro-wrestling',
+  '/pro-wrestling/how-to-play',
+  '/pro-wrestling/history',
+  '/pro-wrestling/wrestlers',
+  '/pro-wrestling/wrestlers/[idOrSlug]',
+  '/pro-wrestling/matches/[matchId]',
+  '/pro-wrestling/play/[matchId]',
+  '/pro-wrestling/live/[matchId]',
+  '/pro-wrestling/leaderboard',
+  '/pro-wrestling/leaderboard/[matchId]',
 ]);
 
 const ROUTE_META = {
@@ -286,6 +296,7 @@ const resolveMeta = (pathname) => {
 
 export const shouldUseRouteExperienceFrame = (pathname) => {
   if (!pathname || pathname.startsWith('/administration')) return false;
+  if (pathname.startsWith('/pro-wrestling')) return false;
   return !CORE_ROUTES.has(pathname);
 };
 

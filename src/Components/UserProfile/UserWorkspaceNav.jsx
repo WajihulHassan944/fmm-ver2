@@ -7,12 +7,14 @@ import {
   FaIdBadge,
   FaTachometerAlt,
   FaTrophy,
+  FaCrown,
   FaUserCog,
 } from 'react-icons/fa';
 
 const NAV_ITEMS = [
   { href: '/UserDashboard', label: 'Dashboard', icon: FaTachometerAlt },
   { href: '/YourFights', label: 'My fights', icon: FaFistRaised },
+  { href: '/pro-wrestling/history', label: 'My wrestling', icon: FaCrown },
   { href: '/myLeagueRecords', label: 'My leagues', icon: FaTrophy },
   { href: '/profile', label: 'Player profile', icon: FaIdBadge },
   { href: '/account-settings', label: 'Account settings', icon: FaUserCog },
