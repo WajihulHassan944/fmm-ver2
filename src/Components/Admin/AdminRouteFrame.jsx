@@ -88,6 +88,11 @@ const ROUTE_COPY = {
     title: 'Notifications',
     description: 'Review and publish notification content through the existing admin notification flow.',
   },
+  '/administration/swarm': {
+    eyebrow: 'Automation',
+    title: 'Swarm command center',
+    description: 'Submit MMA and pro-wrestling automation jobs, review generated artifacts, and publish approved blog drafts through the backend gateway.',
+  },
   '/administration/BlogsAiBot': {
     eyebrow: 'Automation',
     title: 'Blog AI bot',

@@ -10,12 +10,14 @@ import {
   FaFistRaised,
   FaPlus,
   FaQuestionCircle,
+  FaRobot,
   FaShieldAlt,
   FaTrophy,
   FaUserFriends,
   FaUsers,
 } from 'react-icons/fa';
 import VisitorsAnalytics from './VisitorsAnalytics';
+import SwarmStatusPanel from './SwarmStatusPanel';
 
 const Admin = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -77,6 +79,7 @@ const Admin = () => {
     { area: 'Player accounts', metric: `${dashboardCounts.usersCount || 0} registered`, status: 'Monitored', statusClass: 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
     { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Community alerts', metric: `${dashboardCounts.unreadNotificationsCount || 0} unread`, status: dashboardCounts.unreadNotificationsCount ? 'Attention' : 'Clear', statusClass: dashboardCounts.unreadNotificationsCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'View notifications' },
+    { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Gateway', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
   ];
 
   const quickActions = [
@@ -84,6 +87,7 @@ const Admin = () => {
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },
     { title: 'Review payouts', copy: 'Process affiliate payout requests.', href: '/administration/payouts', icon: FaShieldAlt },
     { title: 'Publish content', copy: 'Create editorial and platform news.', href: '/administration/blogs/add-new-blog', icon: FaBolt },
+    { title: 'Swarm automation', copy: 'Generate blogs, SEO drafts, social drafts, and review jobs.', href: '/administration/swarm', icon: FaRobot },
     { title: 'Manage FAQs', copy: 'Add, edit, publish, or remove support answers.', href: '/administration/faqs', icon: FaQuestionCircle },
   ];
 
@@ -149,6 +153,8 @@ const Admin = () => {
             </table>
           </div>
         </div>
+
+        <SwarmStatusPanel />
 
         <aside className="admin-dashboard-panel">
           <div className="admin-dashboard-panel-heading">
