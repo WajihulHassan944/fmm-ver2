@@ -16,6 +16,7 @@ import {
   FaCoins,
   FaCrown,
   FaDollarSign,
+  FaFistRaised,
   FaGift,
   FaPlay,
   FaShieldAlt,
