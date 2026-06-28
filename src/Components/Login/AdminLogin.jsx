@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -11,6 +11,17 @@ const AdminLogin = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { loading, error } = useSelector((state) => state.adminAuth);
+  const [sessionNotice, setSessionNotice] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const notice = window.sessionStorage.getItem('adminLoginNotice');
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    if (notice || reason === 'session-expired') {
+      setSessionNotice(notice || 'Your admin session expired. Please login again.');
+      window.sessionStorage.removeItem('adminLoginNotice');
+    }
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -74,6 +85,7 @@ const AdminLogin = () => {
             </button>
           </form>
 
+          {sessionNotice && <p className="admin-login-error">{sessionNotice}</p>}
           {error && <p className="admin-login-error">{error}</p>}
           <Link href="/" className="admin-login-secondary">Return to website <FaArrowRight aria-hidden="true" /></Link>
         </div>

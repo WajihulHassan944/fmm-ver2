@@ -2,6 +2,42 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
+
+const getMatchTimestamp = (match) => {
+  const date = match?.matchDate?.split?.('T')?.[0];
+  const time = String(match?.matchTime || '00:00').trim() || '00:00';
+  const candidate = new Date(`${date || ''}T${time}:00`);
+  return Number.isNaN(candidate.getTime()) ? Number.MAX_SAFE_INTEGER : candidate.getTime();
+};
+
+const sortUpcomingMatches = (matches) => {
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(startOfToday);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return [...matches].sort((a, b) => {
+    const score = (match) => {
+      const status = String(match?.matchStatus || match?.matchShadowOpenStatus || match?.matchType || '').toLowerCase();
+      const ts = getMatchTimestamp(match);
+      const isFeatured = Boolean(match?.featured || match?.isFeatured || match?.pinToTop || match?.promoteTonight || match?.isPromoted);
+      const isLive = status.includes('live') || status.includes('ongoing');
+      const isClosed = status.includes('finished') || status.includes('closed') || status.includes('complete');
+      const isToday = ts >= startOfToday.getTime() && ts < tomorrow.getTime();
+      const isFuture = ts >= now.getTime();
+      if (isFeatured) return 1000;
+      if (isLive) return 900;
+      if (isToday && !isClosed) return 800;
+      if (isFuture && !isClosed) return 700;
+      if (!isClosed) return 500;
+      return 100;
+    };
+    const scoreDiff = score(b) - score(a);
+    if (scoreDiff) return scoreDiff;
+    return getMatchTimestamp(a) - getMatchTimestamp(b);
+  });
+};
 const UpcomingFights = () => {
   const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
@@ -60,8 +96,8 @@ const UpcomingFights = () => {
           return null;
         }).filter(Boolean); // Filter out null values where no condition is met
   
-        // Set filtered matches
-        setUpcomingMatches(filteredMatches);
+        // Prioritize featured, live, tonight, and nearest active fights first.
+        setUpcomingMatches(sortUpcomingMatches(filteredMatches));
       } catch (error) {
         console.error("Error fetching data:", error);
       } 
@@ -83,7 +119,7 @@ const UpcomingFights = () => {
      <i
         className="fa fa-arrow-circle-left homeup-arrow-circle"
         aria-hidden="true"
-        onClick={() => navigate(-1)} // Go back to the previous page
+        onClick={() => router.back()} // Go back to the previous page
       ></i>
    
       <div className='homeSecond' style={{ background: 'transparent' }}>

@@ -8,8 +8,10 @@ import Head from 'next/head';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 import {
   FaArrowRight,
+  FaBolt,
   FaBullseye,
   FaCalendarAlt,
+  FaGlobe,
   FaClock,
   FaCoins,
   FaCrown,
@@ -47,9 +49,51 @@ const FALLBACK_LEADERBOARD = [
   { name: 'TheGhost', points: 1347 },
 ];
 
+
+const getMatchTimestamp = (match) => {
+  const rawDate = match?.matchDate?.split?.('T')?.[0];
+  const rawTime = String(match?.matchTime || '00:00').trim() || '00:00';
+  const candidate = new Date(`${rawDate || ''}T${rawTime}:00`);
+  return Number.isNaN(candidate.getTime()) ? Number.MAX_SAFE_INTEGER : candidate.getTime();
+};
+
+const getMatchPriorityScore = (match, now = new Date()) => {
+  const status = String(match?.matchStatus || match?.matchShadowOpenStatus || match?.matchType || '').toLowerCase();
+  const category = String(match?.matchCategoryTwo || match?.matchCategory || '').toLowerCase();
+  const matchTime = getMatchTimestamp(match);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const isLive = status.includes('live') || status.includes('ongoing');
+  const isClosed = status.includes('finished') || status.includes('closed') || status.includes('complete');
+  const isToday = matchTime >= today.getTime() && matchTime < tomorrow.getTime();
+  const isFuture = matchTime >= now.getTime();
+  const isFeatured = Boolean(match?.featured || match?.isFeatured || match?.pinToTop || match?.promoteTonight || match?.isPromoted);
+  const sportBoost = category.includes('box') || category.includes('mma') || category.includes('kick') ? 5 : 0;
+
+  if (isFeatured) return 1000 + sportBoost;
+  if (isLive) return 900 + sportBoost;
+  if (isToday && !isClosed) return 800 + sportBoost;
+  if (isFuture && !isClosed) return 700 + sportBoost;
+  if (!isClosed) return 500 + sportBoost;
+  return 100 + sportBoost;
+};
+
 const getOrderedMatches = (matches) => {
   if (!Array.isArray(matches)) return [];
-  return [...matches].filter(Boolean).reverse();
+  const now = new Date();
+  return [...matches].filter(Boolean).sort((a, b) => {
+    const scoreDiff = getMatchPriorityScore(b, now) - getMatchPriorityScore(a, now);
+    if (scoreDiff) return scoreDiff;
+    const aTime = getMatchTimestamp(a);
+    const bTime = getMatchTimestamp(b);
+    const aFuture = aTime >= now.getTime();
+    const bFuture = bTime >= now.getTime();
+    if (aFuture && bFuture) return aTime - bTime;
+    if (!aFuture && !bFuture) return bTime - aTime;
+    return aFuture ? -1 : 1;
+  });
 };
 
 const pad = (value) => String(value).padStart(2, '0');
@@ -291,6 +335,14 @@ const HomeAnother = () => {
                 </Link>
               </div>
 
+              {primaryFight && (
+                <div className="fmm-tonight-callout">
+                  <span>Featured now</span>
+                  <strong>{primaryFight.matchName || getFightTitle(primaryFight)}</strong>
+                  <Link href="/upcomingfights">Play this fight free <FaArrowRight aria-hidden="true" /></Link>
+                </div>
+              )}
+
               <div className="fmm-proof-strip">
                 <div><FaGift aria-hidden="true" /><strong>100% Free</strong><span>To play</span></div>
                 <div><FaTrophy aria-hidden="true" /><strong>Real Prizes</strong><span>Every week</span></div>
@@ -340,6 +392,20 @@ const HomeAnother = () => {
         </section>
 
         <main className="theme-container fmm-home-main">
+          <section className="fmm-fight-night-command-strip" aria-label="Fight night coverage">
+            <div>
+              <p><FaBolt /> Fight-night ready</p>
+              <h2>MMA, Boxing, and Pro Wrestling contests move to the front when they matter most.</h2>
+              <span>Active, live, featured, and tonight fights are prioritized so fans can quickly find the contest they came to play.</span>
+            </div>
+            <div className="fmm-fight-night-pills">
+              <Link href="/upcomingfights"><FaFistRaised /> Play tonight</Link>
+              <Link href="/calendar-of-fights"><FaCalendarAlt /> Fight calendar</Link>
+              <Link href="/pro-wrestling"><FaCrown /> Pro wrestling</Link>
+              <Link href="/fights-news"><FaGlobe /> Fight news</Link>
+            </div>
+          </section>
+
           <section className="fmm-active-section" aria-labelledby="active-contests-title">
             <div className="fmm-section-title-row">
               <h2 id="active-contests-title">Active Contests</h2>

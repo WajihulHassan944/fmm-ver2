@@ -10,6 +10,89 @@ export const SWARM_MODES = [
   { value: 'AUTOMATED', label: 'Automated' },
 ];
 
+export const SWARM_SPORT_OPTIONS = [
+  { value: 'mma', label: 'MMA' },
+  { value: 'boxing', label: 'Boxing' },
+  { value: 'kickboxing', label: 'Kickboxing' },
+  { value: 'bare_knuckle', label: 'Bare Knuckle' },
+  { value: 'combat', label: 'General Combat' },
+  { value: 'pro_wrestling', label: 'Pro Wrestling' },
+];
+
+export const SWARM_CAMPAIGN_TYPES = [
+  { value: 'fight_full_campaign', label: 'Fight full campaign', sport: 'mma', copy: 'Run all fight promotion agents for one fight.' },
+  { value: 'fight_tonight_campaign', label: "Tonight's fight campaign", sport: 'mma', copy: 'Fast promotion pack for a fight happening tonight.' },
+  { value: 'boxing_fight_campaign', label: 'Boxing fight campaign', sport: 'boxing', copy: 'Boxing-specific blog, SEO, social, newsletter, and homepage pack.' },
+  { value: 'fight_result_campaign', label: 'Fight result campaign', sport: 'mma', copy: 'Recap, result social post, and leaderboard summary after results.' },
+  { value: 'pro_wrestling_match_campaign', label: 'Pro-wrestling match campaign', sport: 'pro_wrestling', copy: 'Wrestling match preview or recap automation pack.' },
+  { value: 'blog_promotion_campaign', label: 'Blog promotion campaign', sport: 'combat', copy: 'Promote an approved blog across SEO, social, image, and newsletter drafts.' },
+  { value: 'contest_promotion_campaign', label: 'Contest promotion campaign', sport: 'combat', copy: 'Rules/explainer, reminders, and winner announcement support.' },
+  { value: 'custom_campaign', label: 'Custom campaign', sport: 'combat', copy: 'Choose exactly which agents should run together.' },
+];
+
+export const CAMPAIGN_SECTION_OPTIONS = [
+  { value: 'content', label: 'Blog/content', helper: 'Preview, recap, fighter/wrestler profile, FAQ, landing copy.' },
+  { value: 'seo', label: 'SEO package', helper: 'Metadata, schema, canonical checks, internal links, page audit.' },
+  { value: 'social', label: 'Social posts', helper: 'Twitter/X drafts, captions, reminders, result announcements.' },
+  { value: 'newsletter', label: 'Email/newsletter', helper: 'Email copy users can send out for the fight or blog.' },
+  { value: 'homepage', label: 'Homepage feature', helper: 'Featured-card headline and CTA copy.' },
+  { value: 'media', label: 'Image prompts', helper: 'Creative prompts for fight/blog visuals.' },
+  { value: 'analytics', label: 'Traffic report', helper: 'Keyword and traffic opportunity suggestions.' },
+];
+
+export const QUICK_CAMPAIGN_PRESETS = [
+  {
+    id: 'tonight-mma',
+    label: "Promote Tonight's Fight",
+    campaignType: 'fight_tonight_campaign',
+    sport: 'mma',
+    vertical: 'combat',
+    includeAll: true,
+    title: "Tonight's Fight Promo",
+    copy: 'Use this for a fight happening now or tonight.',
+  },
+  {
+    id: 'all-agents-mma',
+    label: 'Run All Agents for MMA Fight',
+    campaignType: 'fight_full_campaign',
+    sport: 'mma',
+    vertical: 'combat',
+    includeAll: true,
+    title: 'Full MMA Fight Campaign',
+    copy: 'Blog, SEO, social, newsletter, homepage, media, traffic suggestions.',
+  },
+  {
+    id: 'all-agents-boxing',
+    label: 'Run All Agents for Boxing',
+    campaignType: 'boxing_fight_campaign',
+    sport: 'boxing',
+    vertical: 'combat',
+    includeAll: true,
+    title: 'Full Boxing Fight Campaign',
+    copy: 'Boxing-specific campaign language and promotion outputs.',
+  },
+  {
+    id: 'all-agents-wrestling',
+    label: 'Run All Agents for Pro Wrestling',
+    campaignType: 'pro_wrestling_match_campaign',
+    sport: 'pro_wrestling',
+    vertical: 'pro_wrestling',
+    includeAll: true,
+    title: 'Full Pro-Wrestling Match Campaign',
+    copy: 'Wrestling preview/recap, social, SEO, and content pack.',
+  },
+  {
+    id: 'blog-promo',
+    label: 'Promote Approved Blog',
+    campaignType: 'blog_promotion_campaign',
+    sport: 'combat',
+    vertical: 'combat',
+    includeAll: true,
+    title: 'Blog Promotion Campaign',
+    copy: 'Social draft, SEO audit, related links, image prompt, newsletter.',
+  },
+];
+
 export const SWARM_TRIGGER_OPTIONS = [
   { value: 'manual', label: 'Manual' },
   { value: 'fight_published', label: 'Fight published' },
@@ -58,7 +141,6 @@ const CORE_JOB_TYPES = [
   ['content.landing-page-suggestion', 'Landing page suggestion', 'content', ['combat', 'pro_wrestling']],
   ['content.old-blog-refresh', 'Old blog refresh suggestion', 'content', ['combat', 'pro_wrestling']],
   ['content.blog-topic-suggestions', 'Blog topic suggestions', 'content', ['combat', 'pro_wrestling']],
-
   ['seo.audit', 'SEO audit / recommendations', 'seo', ['combat', 'pro_wrestling']],
   ['seo.metadata', 'SEO metadata', 'seo', ['combat', 'pro_wrestling']],
   ['seo.schema-markup', 'Schema markup', 'seo', ['combat', 'pro_wrestling']],
@@ -78,7 +160,6 @@ const CORE_JOB_TYPES = [
   ['seo.fight-event-structured-data', 'Fight/event structured data', 'seo', ['combat']],
   ['seo.wrestler-fighter-structured-data', 'Wrestler/fighter structured data', 'seo', ['combat', 'pro_wrestling']],
   ['seo.content-freshness-monitor', 'Content freshness monitor', 'seo', ['combat', 'pro_wrestling']],
-
   ['social.draft', 'Social post drafts', 'social', ['combat', 'pro_wrestling']],
   ['social.twitter-post', 'Twitter/X post draft', 'social', ['combat', 'pro_wrestling']],
   ['social.promotional-posts', 'Promotional social posts', 'social', ['combat', 'pro_wrestling']],
@@ -89,7 +170,6 @@ const CORE_JOB_TYPES = [
   ['social.discord-announcement', 'Discord announcement draft', 'social', ['combat', 'pro_wrestling']],
   ['social.content-calendar', 'Social content calendar', 'social', ['combat', 'pro_wrestling']],
   ['social.admin-notification', 'Admin notification draft', 'social', ['combat', 'pro_wrestling']],
-
   ['data.external-candidate', 'External data candidate', 'data', ['combat', 'pro_wrestling']],
   ['data.trending-mma-topic', 'Trending MMA topic finder', 'data', ['combat']],
   ['data.trending-pro-wrestling-topic', 'Trending pro-wrestling topic finder', 'data', ['pro_wrestling']],
@@ -99,11 +179,9 @@ const CORE_JOB_TYPES = [
   ['data.traffic-opportunity', 'Traffic opportunity report', 'data', ['combat', 'pro_wrestling']],
   ['data.homepage-featured-content', 'Homepage featured content plan', 'data', ['combat', 'pro_wrestling']],
   ['data.leaderboard-summary', 'Leaderboard summary', 'data', ['combat', 'pro_wrestling']],
-
   ['wrestling.scorecard-suggestion', 'Wrestling scorecard suggestion', 'wrestling', ['pro_wrestling']],
   ['wrestling.match-analysis', 'Wrestling match analysis', 'wrestling', ['pro_wrestling']],
   ['wrestling.wrestler-profile', 'Wrestler analysis profile', 'wrestling', ['pro_wrestling']],
-
   ['automation.settings-snapshot', 'Automation settings snapshot', 'automation', ['combat', 'pro_wrestling']],
   ['automation.logs-report', 'Automation logs report', 'automation', ['combat', 'pro_wrestling']],
   ['automation.failed-job-retry-report', 'Failed-job retry report', 'automation', ['combat', 'pro_wrestling']],
@@ -112,25 +190,31 @@ const CORE_JOB_TYPES = [
   ['system.health-check', 'System health check', 'system', ['combat', 'pro_wrestling']],
 ];
 
-export const SWARM_JOB_TYPES = CORE_JOB_TYPES.map(([value, label, group, verticals]) => ({
-  value,
-  label,
-  group,
-  verticals,
-}));
+export const SWARM_JOB_TYPES = CORE_JOB_TYPES.map(([value, label, group, verticals]) => ({ value, label, group, verticals }));
 
 export const getAdminToken = () => {
   if (typeof window === 'undefined') return '';
   return window.localStorage.getItem('adminAuthToken') || '';
 };
 
+export const clearAdminTokenAndRedirect = (message = 'Your admin session expired. Please login again.') => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem('adminAuthToken');
+    window.sessionStorage.setItem('adminSessionMessage', message);
+  } catch (_error) {
+    // Ignore storage failures; redirect still matters.
+  }
+  if (!window.location.pathname.includes('/administration/login')) {
+    window.location.assign('/administration/login?expired=1');
+  }
+};
+
 const buildUrl = (path, query) => {
   const url = new URL(`${API_BASE_URL}${path}`);
   if (query && typeof query === 'object') {
     Object.entries(query).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        url.searchParams.set(key, String(value));
-      }
+      if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value));
     });
   }
   return url.toString();
@@ -157,12 +241,18 @@ export async function swarmRequest(path, options = {}) {
   const payload = contentType.includes('application/json') ? await response.json() : await response.text();
 
   if (!response.ok) {
+    const code = typeof payload === 'object' ? payload.code || payload.error?.code : '';
+    const shouldLogin = response.status === 401 && (payload?.shouldLogin || code === 'ADMIN_TOKEN_INVALID_OR_EXPIRED' || code === 'ADMIN_TOKEN_REQUIRED');
     const message = typeof payload === 'object'
       ? payload.message || payload.code || payload.error?.message || `Request failed with HTTP ${response.status}`
       : payload || `Request failed with HTTP ${response.status}`;
     const error = new Error(message);
     error.status = response.status;
     error.payload = payload;
+    if (shouldLogin) {
+      error.shouldLogin = true;
+      clearAdminTokenAndRedirect(message || 'Your admin session expired. Please login again.');
+    }
     throw error;
   }
 
@@ -182,6 +272,14 @@ export const swarmApi = {
   triggerEvent: (body = {}) => swarmRequest('/api/admin/swarm/events/trigger', { method: 'POST', body }),
   triggerNamedEvent: (trigger, body = {}) => swarmRequest(`/api/admin/swarm/events/${encodeURIComponent(trigger)}`, { method: 'POST', body }),
   runAutomation: (jobType, body = {}) => swarmRequest(`/api/admin/swarm/automations/${encodeURIComponent(jobType)}/run`, { method: 'POST', body }),
+  campaignPacks: (query = {}) => swarmRequest('/api/admin/swarm/campaigns/packs', { query }),
+  listCampaigns: (query = {}) => swarmRequest('/api/admin/swarm/campaigns', { query }),
+  getCampaign: (campaignId, query = {}) => swarmRequest(`/api/admin/swarm/campaigns/${encodeURIComponent(campaignId)}`, { query }),
+  createCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns', { method: 'POST', body }),
+  createFightCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/fight', { method: 'POST', body }),
+  createFullFightCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/fight/full', { method: 'POST', body }),
+  createTonightFightCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/fight/tonight', { method: 'POST', body }),
+  createBoxingCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/boxing', { method: 'POST', body }),
   listJobs: (query = {}) => swarmRequest('/api/admin/swarm/jobs', { query }),
   createJob: (body) => swarmRequest('/api/admin/swarm/jobs', { method: 'POST', body }),
   cancelJob: (jobId, reason) => swarmRequest(`/api/admin/swarm/jobs/${encodeURIComponent(jobId)}/cancel`, { method: 'POST', body: { reason } }),
@@ -189,6 +287,7 @@ export const swarmApi = {
   listArtifacts: (query = {}) => swarmRequest('/api/admin/swarm/artifacts', { query }),
   getArtifact: (artifactId, query = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}`, { query }),
   approveArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/approve`, { method: 'POST', body }),
+  applySeoArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/apply-seo`, { method: 'POST', body }),
   rejectArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/reject`, { method: 'POST', body }),
   regenerateArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/regenerate`, { method: 'POST', body }),
 };
@@ -197,6 +296,12 @@ export const isBlogLikeArtifact = (artifact) => {
   const type = String(artifact?.artifactType || '');
   const jobType = String(artifact?.jobType || '');
   return type.startsWith('content.') || jobType.startsWith('content.');
+};
+
+export const isSeoArtifact = (artifact) => {
+  const type = String(artifact?.artifactType || '');
+  const jobType = String(artifact?.jobType || '');
+  return type.startsWith('seo.') || jobType.startsWith('seo.');
 };
 
 export const formatSwarmDate = (value) => {
@@ -208,7 +313,7 @@ export const formatSwarmDate = (value) => {
 
 export const summarizeJobInput = (input) => {
   if (!input || typeof input !== 'object') return '—';
-  return input.topic || input.title || input.prompt || input.eventName || input.matchId || input.blogId || JSON.stringify(input).slice(0, 90);
+  return input.topic || input.title || input.prompt || input.eventName || input.matchId || input.blogId || input.campaignType || JSON.stringify(input).slice(0, 90);
 };
 
 export const formatJobTypeLabel = (jobType, catalog = null) => {
@@ -217,9 +322,7 @@ export const formatJobTypeLabel = (jobType, catalog = null) => {
   const localItem = SWARM_JOB_TYPES.find((item) => item.value === jobType);
   if (catalogItem?.label) return catalogItem.label;
   if (localItem?.label) return localItem.label;
-  return String(jobType)
-    .replace(/[-_.]+/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return String(jobType).replace(/[-_.]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
 export const inferJobTypeGroup = (jobType, catalog = null) => {
@@ -235,13 +338,29 @@ export const getItemsFromPayload = (payload) => {
   if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.events)) return payload.events;
   if (Array.isArray(payload?.backendEvents)) return payload.backendEvents;
+  if (Array.isArray(payload?.campaigns)) return payload.campaigns;
   return [];
 };
 
-export const buildManualSourceEntity = ({ title, topic, jobType, vertical, trigger }) => ({
-  type: trigger ? 'manual_automation_event' : 'manual_prompt',
-  label: title || topic || jobType || 'Manual swarm request',
+export const buildManualSourceEntity = ({ title, topic, jobType, vertical, trigger, sport, campaignType, campaignId }) => ({
+  type: trigger ? 'manual_automation_event' : campaignType ? 'manual_campaign' : 'manual_prompt',
+  label: title || topic || campaignType || jobType || 'Manual swarm request',
   vertical,
   trigger,
+  sport,
+  campaignType,
+  campaignId,
   origin: 'frontend_admin_panel',
+});
+
+export const normalizeCampaignDisplay = (campaign) => ({
+  id: campaign?.campaignId || campaign?.id || campaign?._id,
+  title: campaign?.title || campaign?.input?.title || campaign?.sourceEntity?.label || campaign?.campaignType || 'Untitled campaign',
+  type: campaign?.campaignType || 'campaign',
+  status: campaign?.status || 'queued',
+  sport: campaign?.sport || campaign?.input?.sport || 'combat',
+  vertical: campaign?.vertical || 'combat',
+  counts: campaign?.counts || {},
+  jobIds: campaign?.jobIds || [],
+  createdAt: campaign?.createdAt,
 });

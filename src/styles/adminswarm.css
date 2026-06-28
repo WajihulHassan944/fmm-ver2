@@ -725,3 +725,592 @@
     white-space: nowrap;
   }
 }
+
+/* Client UX pass — campaign/all-agents workflow, visible progress, SEO application clarity. */
+.admin-swarm-layout-wide {
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, .55fr);
+}
+
+.admin-swarm-latest-card {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(36, 196, 94, .16), rgba(255,255,255,.035));
+  border: 1px solid rgba(36, 196, 94, .32);
+  border-radius: 16px;
+  box-shadow: 0 18px 46px rgba(0,0,0,.28);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 16px 18px;
+}
+
+.admin-swarm-latest-card span,
+.admin-swarm-campaign-option-head span,
+.admin-swarm-checkbox-grid label span,
+.admin-swarm-preset-card span,
+.admin-swarm-seo-target small,
+.admin-swarm-application-plan p {
+  color: rgba(255,255,255,.62);
+}
+
+.admin-swarm-latest-card strong {
+  color: #fff;
+  display: block;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 24px;
+  line-height: 1;
+  margin: 4px 0;
+  text-transform: uppercase;
+}
+
+.admin-swarm-latest-card p {
+  color: rgba(255,255,255,.66) !important;
+  margin: 0 !important;
+}
+
+.admin-swarm-preset-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 18px 20px 0;
+}
+
+.admin-swarm-preset-card {
+  align-items: flex-start !important;
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11)) !important;
+  border-radius: 14px !important;
+  color: #fff !important;
+  display: grid !important;
+  gap: 8px !important;
+  justify-content: stretch !important;
+  min-height: 106px !important;
+  padding: 14px !important;
+  text-align: left !important;
+}
+
+.admin-swarm-preset-card:hover,
+.admin-swarm-preset-card:focus-visible {
+  background: rgba(223,17,27,.13) !important;
+  border-color: rgba(223,17,27,.36) !important;
+}
+
+.admin-swarm-preset-card strong {
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 16px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.admin-swarm-preset-card span {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.admin-swarm-campaign-options {
+  border-top: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  margin-top: 18px;
+  padding: 18px 20px 20px;
+}
+
+.admin-swarm-campaign-option-head {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.admin-swarm-campaign-option-head strong {
+  color: #fff;
+  display: block;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.admin-swarm-switch,
+.admin-swarm-switch-row button {
+  align-items: center;
+  display: inline-flex !important;
+  gap: 8px;
+}
+
+.admin-swarm-switch input {
+  min-height: auto !important;
+  width: auto;
+}
+
+.admin-swarm-checkbox-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-swarm-checkbox-grid.is-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-swarm-checkbox-grid label {
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  border-radius: 13px;
+  display: grid;
+  gap: 6px;
+  min-height: 92px;
+  padding: 13px;
+}
+
+.admin-swarm-checkbox-grid label.is-selected {
+  background: rgba(223,17,27,.12);
+  border-color: rgba(223,17,27,.38);
+}
+
+.admin-swarm-checkbox-grid input {
+  min-height: auto !important;
+  width: auto;
+}
+
+.admin-swarm-checkbox-grid strong {
+  color: #fff;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.admin-swarm-campaign-list {
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px;
+}
+
+.admin-swarm-campaign-list article {
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  padding: 14px;
+}
+
+.admin-swarm-campaign-list strong {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 20px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.admin-swarm-campaign-list small {
+  color: rgba(255,255,255,.56);
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-swarm-campaign-list p {
+  color: rgba(255,255,255,.66) !important;
+  margin: 0 !important;
+}
+
+.admin-swarm-seo-explainer {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0 20px 18px;
+}
+
+.admin-swarm-seo-explainer article,
+.admin-swarm-application-plan {
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.admin-swarm-seo-explainer svg,
+.admin-swarm-application-plan svg {
+  color: var(--admin-red, #df111b);
+  font-size: 22px;
+}
+
+.admin-swarm-seo-explainer strong,
+.admin-swarm-application-plan strong {
+  color: #fff;
+  display: block;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 18px;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.admin-swarm-seo-explainer p {
+  color: rgba(255,255,255,.64) !important;
+  line-height: 1.5;
+  margin: 8px 0 0 !important;
+}
+
+.admin-swarm-seo-target {
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.admin-swarm-seo-target label {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-swarm-seo-target span {
+  color: rgba(255,255,255,.6);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-swarm-application-plan {
+  align-items: start;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  display: flex;
+  gap: 12px;
+  margin: 0;
+}
+
+.admin-swarm-application-plan strong {
+  margin-top: 0;
+}
+
+.admin-swarm-application-plan p {
+  line-height: 1.55;
+  margin: 6px 0 0 !important;
+}
+
+.admin-swarm-alert {
+  scroll-margin-top: 90px;
+}
+
+@media (max-width: 1300px) {
+  .admin-swarm-preset-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-swarm-checkbox-grid,
+  .admin-swarm-seo-explainer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .admin-swarm-latest-card,
+  .admin-swarm-campaign-option-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-swarm-preset-grid,
+  .admin-swarm-checkbox-grid,
+  .admin-swarm-checkbox-grid.is-compact,
+  .admin-swarm-seo-explainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Client campaign UX expansion: all-agents, Boxing, visible movement, SEO clarity. */
+.admin-swarm-hero-v2 {
+  align-items: stretch;
+}
+
+.admin-swarm-hero-actions {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 230px;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-swarm-sticky-alert {
+  position: sticky;
+  top: 14px;
+  z-index: 20;
+}
+
+.admin-swarm-alert button {
+  align-items: center;
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  display: inline-flex !important;
+  height: 30px !important;
+  justify-content: center !important;
+  margin-left: auto;
+  min-height: 30px !important;
+  padding: 0 !important;
+  width: 30px !important;
+}
+
+.admin-swarm-live-submission {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(53,212,93,.13), rgba(255,255,255,.045));
+  border: 1px solid rgba(53,212,93,.28);
+  border-radius: 16px;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.admin-swarm-live-submission div {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-swarm-live-submission strong,
+.admin-swarm-live-submission span {
+  color: #fff;
+}
+
+.admin-swarm-live-submission small {
+  color: rgba(255,255,255,.62);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-swarm-layout-wide-left {
+  grid-template-columns: minmax(0, 1.35fr) minmax(360px, .65fr);
+}
+
+.admin-swarm-campaign-quick-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 18px 20px;
+}
+
+.admin-swarm-quick-campaign {
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.026)) !important;
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11)) !important;
+  border-radius: 16px !important;
+  color: #fff !important;
+  display: grid !important;
+  gap: 10px;
+  justify-items: start;
+  min-height: 170px !important;
+  padding: 16px !important;
+  text-align: left !important;
+  width: 100%;
+}
+
+.admin-swarm-quick-campaign > span {
+  align-items: center;
+  background: linear-gradient(135deg, var(--admin-red, #df111b), #ff5a63);
+  border-radius: 14px;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.admin-swarm-quick-campaign strong {
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 23px;
+  line-height: .95;
+  text-transform: uppercase;
+}
+
+.admin-swarm-quick-campaign small {
+  color: rgba(255,255,255,.62);
+  line-height: 1.45;
+}
+
+.admin-swarm-quick-campaign em {
+  color: #fff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .07em;
+  margin-top: auto;
+  text-transform: uppercase;
+}
+
+.admin-swarm-campaign-intro {
+  background: rgba(223,17,27,.08);
+  border-bottom: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  display: grid;
+  gap: 6px;
+  padding: 16px 20px;
+}
+
+.admin-swarm-campaign-intro strong {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.admin-swarm-campaign-intro span {
+  color: rgba(255,255,255,.68);
+  line-height: 1.5;
+}
+
+.admin-swarm-section-selector {
+  padding: 18px 20px 0;
+}
+
+.admin-swarm-section-selector-head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-swarm-section-selector-head span {
+  color: rgba(255,255,255,.56);
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.admin-swarm-section-selector-head strong {
+  color: #fff;
+  display: block;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 24px;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.admin-swarm-section-selector-head > div:last-child {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-swarm-section-checks {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-swarm-section-checks label {
+  align-items: flex-start;
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  border-radius: 14px;
+  display: flex;
+  gap: 11px;
+  padding: 13px;
+}
+
+.admin-swarm-section-checks label.is-selected {
+  background: rgba(53,212,93,.08);
+  border-color: rgba(53,212,93,.26);
+}
+
+.admin-swarm-section-checks input {
+  min-height: auto !important;
+  margin-top: 3px;
+  width: auto;
+}
+
+.admin-swarm-section-checks strong {
+  color: #fff;
+  display: block;
+  font-size: 14px;
+}
+
+.admin-swarm-section-checks small {
+  color: rgba(255,255,255,.57);
+  display: block;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.admin-swarm-inline-filters {
+  padding: 14px 20px 0;
+}
+
+.admin-swarm-campaign-list {
+  display: grid;
+  gap: 12px;
+  padding: 16px 20px 20px;
+}
+
+.admin-swarm-campaign-list article {
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  padding: 14px;
+}
+
+.admin-swarm-campaign-list strong {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 20px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.admin-swarm-campaign-list small,
+.admin-swarm-campaign-list p {
+  color: rgba(255,255,255,.6);
+  margin: 0 !important;
+}
+
+.admin-swarm-seo-note {
+  align-items: center;
+  background: rgba(249,180,22,.08);
+  border: 1px solid rgba(249,180,22,.22);
+  border-radius: 12px;
+  display: flex;
+  gap: 9px;
+  padding: 10px 12px;
+}
+
+.admin-swarm-table td small {
+  color: rgba(255,255,255,.5);
+  display: block;
+  font-size: 10px;
+  margin-top: 5px;
+  word-break: break-all;
+}
+
+@media (max-width: 1180px) {
+  .admin-swarm-layout-wide-left,
+  .admin-swarm-campaign-quick-grid,
+  .admin-swarm-section-checks {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-swarm-hero-actions,
+  .admin-swarm-live-submission,
+  .admin-swarm-section-selector-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-swarm-campaign-quick-grid,
+  .admin-swarm-section-checks {
+    grid-template-columns: 1fr;
+  }
+}
