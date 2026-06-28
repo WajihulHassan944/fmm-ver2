@@ -8,6 +8,7 @@ import Head from 'next/head';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 import {
   FaArrowRight,
+  FaFistRaised,
   FaBolt,
   FaBullseye,
   FaCalendarAlt,
@@ -16,7 +17,6 @@ import {
   FaCoins,
   FaCrown,
   FaDollarSign,
-  FaFistRaised,
   FaGift,
   FaPlay,
   FaShieldAlt,
