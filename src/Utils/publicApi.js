@@ -58,6 +58,18 @@ export const safeFetchJson = async (path, query = {}, options = {}) => {
   return withTimeout(execute, timeoutMs);
 };
 
+
+export const isDraftFight = (fight = {}) => {
+  const values = [fight.matchStatus, fight.status, fight.matchShadowStatus, fight.publicStatus]
+    .map((value) => String(value || '').trim().toLowerCase());
+  return Boolean(fight.draft || fight.isDraft || fight.publicVisible === false || values.includes('draft'));
+};
+
+export const filterPublicFights = (fights = [], { includeDrafts = false } = {}) => {
+  const rows = Array.isArray(fights) ? fights : [];
+  return includeDrafts ? rows : rows.filter((fight) => !isDraftFight(fight));
+};
+
 export const normalizePaginatedPayload = (payload, fallback = []) => {
   if (Array.isArray(payload)) {
     return { rows: payload, pagination: { page: 1, limit: payload.length, total: payload.length, pages: 1 } };
@@ -84,14 +96,15 @@ export const normalizePaginatedPayload = (payload, fallback = []) => {
 };
 
 export const fetchPublicFights = async (query = {}) => {
+  const includeDrafts = ['true', '1', 'yes'].includes(String(query.includeDrafts || query.admin || '').toLowerCase());
   try {
     const payload = await safeFetchJson('/api/public/fights', { limit: 60, ...query });
-    return normalizePaginatedPayload(payload).rows;
+    return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
   } catch (error) {
     console.warn('Public fights API unavailable, falling back to legacy /match endpoint:', error.message);
-    const response = await fetch(`${PUBLIC_API_BASE_URL}/match`);
+    const response = await fetch(buildPublicApiUrl('/match', { ...query, includeDrafts: includeDrafts ? 'true' : undefined }));
     if (!response.ok) throw error;
-    return response.json();
+    return filterPublicFights(await response.json(), { includeDrafts });
   }
 };
 

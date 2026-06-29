@@ -47,7 +47,7 @@ const Calandar = () => {
   const [currentMatch, setCurrentMatch] = useState(null);
 
   useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches());
+    if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true }));
   }, [matchStatus, dispatch]);
 
   const matchRows = useMemo(() => (Array.isArray(matches) ? matches : []), [matches]);
@@ -85,7 +85,7 @@ const Calandar = () => {
         </div>
         <div className="admin-heading-actions">
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
-          <button type="button" className="admin-action-secondary" onClick={() => dispatch(fetchMatches())}><FaSyncAlt className={matchStatus === 'loading' ? 'xp-spin' : ''} /> Refresh</button>
+          <button type="button" className="admin-action-secondary" onClick={() => dispatch(fetchMatches({ includeDrafts: true }))}><FaSyncAlt className={matchStatus === 'loading' ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
 
