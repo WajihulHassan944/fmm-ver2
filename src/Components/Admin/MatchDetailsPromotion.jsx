@@ -31,7 +31,7 @@ const MatchDetailsPromotion = ({matchId}) => {
   
     useEffect(() => {
       if (matchStatus === 'idle') {
-        dispatch(fetchMatches({ includeDrafts: true }));
+        dispatch(fetchMatches());
       }
     }, [matchStatus, dispatch]);
   

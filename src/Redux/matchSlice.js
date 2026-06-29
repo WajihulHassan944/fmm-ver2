@@ -1,19 +1,27 @@
 "use client";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { orderFightsForDisplay } from "@/Utils/fightOrdering";
-import { fetchPublicFights } from "@/Utils/publicApi";
 
 // ✅ Fetch Matches for Redux (Client-Side)
-export const fetchMatches = createAsyncThunk("matches/fetchMatches", async (query = {}) => {
-  const data = await fetchPublicFights(query);
-  return { rows: orderFightsForDisplay(data, { includeDrafts: Boolean(query?.includeDrafts) }), includeDrafts: Boolean(query?.includeDrafts) };
+export const fetchMatches = createAsyncThunk("matches/fetchMatches", async () => {
+  const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/match");
+  const data = await response.json();
+  return orderFightsForDisplay(data);
 });
 
 // ✅ Fetch Matches for getServerSideProps (Server-Side)
-export const fetchMatchesSSR = async (query = {}) => {
+export const fetchMatchesSSR = async () => {
   try {
-    const data = await fetchPublicFights(query);
-    return JSON.parse(JSON.stringify(orderFightsForDisplay(data, { includeDrafts: Boolean(query?.includeDrafts) })));
+    const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/match");
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: Failed to fetch matches`);
+    }
+
+    const data = await response.json();
+    
+    // Only return JSON serializable data
+    return JSON.parse(JSON.stringify(orderFightsForDisplay(data)));
   } catch (error) {
     console.error("Error fetching matches (SSR):", error);
     return [];
@@ -36,7 +44,7 @@ const matchSlice = createSlice({
       })
       .addCase(fetchMatches.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.data = orderFightsForDisplay(action.payload?.rows || action.payload || [], { includeDrafts: Boolean(action.payload?.includeDrafts) });
+        state.data = orderFightsForDisplay(action.payload);
       })
       .addCase(fetchMatches.rejected, (state, action) => {
         state.status = "failed";

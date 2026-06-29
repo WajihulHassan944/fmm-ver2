@@ -24,7 +24,7 @@ const DeleteFights = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => { if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true })); }, [matchStatus, dispatch]);
+  useEffect(() => { if (matchStatus === 'idle') dispatch(fetchMatches()); }, [matchStatus, dispatch]);
 
   useEffect(() => {
     if (router.isReady && router.query?.matchId) {
@@ -56,7 +56,7 @@ const DeleteFights = () => {
         if (selectedAffiliateId) url += `&affiliateId=${selectedAffiliateId}`;
         const response = await fetch(url, { method: 'DELETE' });
         if (response.ok) {
-          dispatch(fetchMatches({ includeDrafts: true }));
+          dispatch(fetchMatches());
           resolve();
           setShowPopup(false);
           setSelectedMatchId(null);
@@ -90,7 +90,7 @@ const DeleteFights = () => {
     <div className="admin-workspace admin-delete-fights-workspace">
       <section className="admin-page-heading">
         <div><span>Fight operations</span><h2>Delete / update fights</h2><p>Search all fight cards, edit production records, or delete with the original token-return confirmation flow.</p></div>
-        <div className="admin-heading-actions"><Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link><button type="button" className="admin-action-secondary" onClick={() => dispatch(fetchMatches({ includeDrafts: true }))}><FaSyncAlt className={matchStatus === 'loading' ? 'xp-spin' : ''} /> Refresh</button></div>
+        <div className="admin-heading-actions"><Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link><button type="button" className="admin-action-secondary" onClick={() => dispatch(fetchMatches())}><FaSyncAlt className={matchStatus === 'loading' ? 'xp-spin' : ''} /> Refresh</button></div>
       </section>
 
       <section className="admin-table-panel">

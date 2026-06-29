@@ -54,7 +54,6 @@ import {
   SWARM_TRIGGER_OPTIONS,
   summarizeJobInput,
 } from '@/Utils/swarmApi';
-import AdminSeoGrowthCenter from './AdminSeoGrowthCenter';
 
 const DEFAULT_FORM = {
   vertical: 'combat',
@@ -691,7 +690,6 @@ const SwarmCommandCenter = () => {
       <section className="admin-swarm-tabs" aria-label="Swarm sections">
         <button type="button" className={tabButtonClass('campaigns')} onClick={() => setActiveTab('campaigns')}><FaRocket /> All Agents campaigns</button>
         <button type="button" className={tabButtonClass('overview')} onClick={() => setActiveTab('overview')}><FaChartLine /> Overview</button>
-        <button type="button" className={tabButtonClass('seoGrowth')} onClick={() => setActiveTab('seoGrowth')}><FaSearch /> SEO growth</button>
         <button type="button" className={tabButtonClass('create')} onClick={() => setActiveTab('create')}><FaPaperPlane /> Single job</button>
         <button type="button" className={tabButtonClass('automations')} onClick={() => setActiveTab('automations')}><FaSlidersH /> Automation controls</button>
         <button type="button" className={tabButtonClass('events')} onClick={() => setActiveTab('events')}><FaBolt /> Event triggers</button>
@@ -860,11 +858,6 @@ const SwarmCommandCenter = () => {
             </div>
           </section>
         </section>
-      )}
-
-
-      {activeTab === 'seoGrowth' && (
-        <AdminSeoGrowthCenter />
       )}
 
       {activeTab === 'create' && (

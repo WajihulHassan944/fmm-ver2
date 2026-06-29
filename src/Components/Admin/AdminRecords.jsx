@@ -40,7 +40,7 @@ const AdminRecords = () => {
 
   // Fetch matches from Redux
   useEffect(() => {
-    dispatch(fetchMatches({ includeDrafts: true }));
+    dispatch(fetchMatches());
   }, [dispatch]);
 
   // Find affiliate details based on affiliateId

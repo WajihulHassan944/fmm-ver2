@@ -14,7 +14,7 @@ const PromoAdminPage = () => {
     useEffect(() => {
       if (matchStatus === 'idle') {
         console.log("Fetching matches...");
-        dispatch(fetchMatches({ includeDrafts: true }));
+        dispatch(fetchMatches());
       } else {
         console.log("Matches already fetched or fetching...");
       }

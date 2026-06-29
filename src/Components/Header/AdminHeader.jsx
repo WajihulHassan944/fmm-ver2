@@ -101,7 +101,6 @@ const navigationGroups = [
     icon: FaRobot,
     items: [
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
-      { label: 'SEO growth center', href: '/administration/seo-growth', icon: FaSearch },
       { label: 'Content assistants', href: '/administration/BlogsAiBot', icon: FaRobot, matchPrefixes: ['/administration/SocialAiBot'] },
       { label: 'Social publishing', href: '/administration/MakePost', icon: FaPlus, matchPrefixes: ['/administration/tweet', '/administration/tiktok'] },
       { label: 'Video archive', href: '/administration/YoutubeArchive', icon: FaVideo },

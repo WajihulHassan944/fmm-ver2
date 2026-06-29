@@ -329,8 +329,8 @@ const HomeAnother = () => {
         <title>Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing</title>
         <meta name="description" content="Predict MMA, Boxing, Kickboxing, Bare Knuckle, Pro Wrestling, and combat sports contests. Pick winners, score every round, climb leaderboards, and win real fantasy rewards." />
         <meta property="og:title" content="Fantasy MMAdness - Predict Combat Sports" />
-        <meta property="og:description" content="Join Fantasy MMAdness and compete in premium MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests." />
-        <meta property="og:url" content="https://www.fantasymmadness.com/" />
+        <meta property="og:description" content="Join Fantasy MMAdness and compete in premium combat sports prediction contests." />
+        <meta property="og:url" content="https://fantasymmadness.com/" />
         <meta name="keywords" content="Fantasy MMA, Fantasy UFC, Fantasy BKFC, Fantasy Boxing, Fantasy Kickboxing, Fantasy Bare Knuckle, Fantasy Combat, Fantasy Fighting, Fantasy Fighter Rankings" />
         <script
           type="application/ld+json"
@@ -405,9 +405,9 @@ const HomeAnother = () => {
                     <span>{primaryFight?.matchFighterB || 'Matchup'}</span>
                   </h2>
                   <div className="fmm-hero-fighters" aria-hidden="true">
-                    <img src={getFighterImage(primaryFight?.fighterAImage)} alt="" loading="lazy" decoding="async" />
+                    <img src={getFighterImage(primaryFight?.fighterAImage)} alt="" loading="lazy" />
                     <span>VS</span>
-                    <img src={getFighterImage(primaryFight?.fighterBImage)} alt="" loading="lazy" decoding="async" />
+                    <img src={getFighterImage(primaryFight?.fighterBImage)} alt="" loading="lazy" />
                   </div>
                   <div className="fmm-hero-event-meta">
                     <FaClock aria-hidden="true" />
@@ -494,12 +494,12 @@ const HomeAnother = () => {
 
                     <div className="fmm-contest-fighters">
                       <figure>
-                        <img src={getFighterImage(match.fighterAImage)} alt={match.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" />
+                        <img src={getFighterImage(match.fighterAImage)} alt={match.matchFighterA || 'Fighter A'} loading="lazy" />
                         <figcaption>{match.matchFighterA || 'Fighter A'}</figcaption>
                       </figure>
                       <span>VS</span>
                       <figure>
-                        <img src={getFighterImage(match.fighterBImage)} alt={match.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" />
+                        <img src={getFighterImage(match.fighterBImage)} alt={match.matchFighterB || 'Fighter B'} loading="lazy" />
                         <figcaption>{match.matchFighterB || 'Fighter B'}</figcaption>
                       </figure>
                     </div>
@@ -535,8 +535,8 @@ const HomeAnother = () => {
               <div><Link href="/pro-wrestling" className="theme-btn theme-btn-primary">Enter wrestling mode <FaArrowRight /></Link><Link href="/pro-wrestling/how-to-play" className="theme-btn theme-btn-secondary">How wrestling scores</Link></div>
             </div>
             <div className="fmm-home-wrestling-visual">
-              <img src="/images/pro-wrestling/wrestling-match-premium.jpg" alt="Fantasy MMADNESS Pro Wrestling" loading="lazy" decoding="async" />
-              {wrestlingMatches[0] ? <article><header><small>{wrestlingMatches[0].status}</small><strong>{wrestlingMatches[0].eventName}</strong></header><div><figure><img src={getPWImage(wrestlingMatches[0].competitorA,'A')} alt="Pro wrestling competitor" loading="lazy" decoding="async" /><figcaption>{wrestlingMatches[0].competitorA?.displayName}</figcaption></figure><b>VS</b><figure><img src={getPWImage(wrestlingMatches[0].competitorB,'B')} alt="Pro wrestling competitor" loading="lazy" decoding="async" /><figcaption>{wrestlingMatches[0].competitorB?.displayName}</figcaption></figure></div><p>{formatWrestlingDate(wrestlingMatches[0].matchDate)} · {wrestlingMatches[0].currentPot || 0} token pot</p><Link href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}>Open featured card <FaArrowRight /></Link></article> : <article className="is-empty"><FaCrown /><strong>Wrestling contest cards will appear here.</strong><Link href="/pro-wrestling">Explore the new game mode</Link></article>}
+              <img src="/images/pro-wrestling/wrestling-match-premium.jpg" alt="Fantasy MMADNESS Pro Wrestling" />
+              {wrestlingMatches[0] ? <article><header><small>{wrestlingMatches[0].status}</small><strong>{wrestlingMatches[0].eventName}</strong></header><div><figure><img src={getPWImage(wrestlingMatches[0].competitorA,'A')} alt="" /><figcaption>{wrestlingMatches[0].competitorA?.displayName}</figcaption></figure><b>VS</b><figure><img src={getPWImage(wrestlingMatches[0].competitorB,'B')} alt="" /><figcaption>{wrestlingMatches[0].competitorB?.displayName}</figcaption></figure></div><p>{formatWrestlingDate(wrestlingMatches[0].matchDate)} · {wrestlingMatches[0].currentPot || 0} token pot</p><Link href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}>Open featured card <FaArrowRight /></Link></article> : <article className="is-empty"><FaCrown /><strong>Wrestling contest cards will appear here.</strong><Link href="/pro-wrestling">Explore the new game mode</Link></article>}
             </div>
           </section>
 
@@ -602,7 +602,7 @@ const HomeAnother = () => {
                 <div className={`fmm-leaderboard-row ${index === 3 ? 'is-highlighted' : ''}`} key={`${player.name}-${index}`}>
                   <span>{index + 1}</span>
                   <div>
-                    {player.avatar ? <img src={player.avatar} alt={player.name} loading="lazy" decoding="async" /> : <span>{player.name.charAt(0).toUpperCase()}</span>}
+                    {player.avatar ? <img src={player.avatar} alt={player.name} loading="lazy" /> : <span>{player.name.charAt(0).toUpperCase()}</span>}
                     <strong>{player.name}</strong>
                   </div>
                   <strong>{Number(player.points || 0).toLocaleString()}</strong>
@@ -632,7 +632,7 @@ const HomeAnother = () => {
               <Link href="/upcomingfights" className="fmm-art-link">Explore contests <FaArrowRight aria-hidden="true" /></Link>
             </div>
             <div className="fmm-fight-art-media">
-              <img src="/images/hero-fight.png" alt="Combat sports fight night" loading="lazy" decoding="async" />
+              <img src="/images/hero-fight.png" alt="Combat sports fight night" loading="lazy" />
             </div>
           </section>
 

@@ -5,10 +5,9 @@ export default function PastFightsPage({ pastMatches = [] }) {
   return <FightsHub initialStatus="past" initialMatches={pastMatches} />;
 }
 
-export const getServerSideProps = async ({ res }) => {
+export const getServerSideProps = async () => {
   try {
-    res?.setHeader?.('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    const pastMatches = await fetchMatchesSSR({ status: 'past', limit: 60 });
+    const pastMatches = await fetchMatchesSSR();
     return { props: { pastMatches: JSON.parse(JSON.stringify(pastMatches || [])) } };
   } catch (error) {
     console.error('Error fetching past matches:', error);

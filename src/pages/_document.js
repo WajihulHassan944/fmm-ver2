@@ -7,8 +7,6 @@ export default function Document() {
                 {/* Preconnect for Faster Google Font Loading */}
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-                <link rel="preconnect" href="https://fantasymmadness-game-server-three.vercel.app" />
-                <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
                 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -38,32 +36,47 @@ export default function Document() {
                 <link rel="preload" href="/Fonts/UFCSans-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
                 <link rel="preload" href="/Assets/affiliateDashboard/edosz.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
             
-<meta property="og:title" content="Fantasy MMAdness | Fantasy Combat Sports" />
-<meta property="og:description" content="Play fantasy MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests." />
-<meta property="og:image" content="https://www.fantasymmadness.com/images/fmm-pages/premium-duel-banner.png" />
-<meta property="og:url" content="https://www.fantasymmadness.com" />
+<meta property="og:title" content="Fantasy Mmadness | Fantasy Sports Reimagined" />
+<meta property="og:description" content="Join Fantasy Mmadness for exciting fantasy MMA games and more." />
+<meta property="og:image" content="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
+<meta property="og:url" content="https://fantasymmadness.com" />
 <meta property="og:type" content="website" />
 
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:site" content="@FMmadness2024" />
-<meta name="twitter:title" content="Fantasy MMAdness | Fantasy Combat Sports" />
-<meta name="twitter:description" content="Play fantasy MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests." />
-<meta name="twitter:image" content="https://www.fantasymmadness.com/images/fmm-pages/premium-duel-banner.png" />
+<meta name="twitter:site" content="@davis_kell51697" />
+<meta name="twitter:title" content="Fantasy Mmadness | Fantasy Sports Reimagined" />
+<meta name="twitter:description" content="Join Fantasy Mmadness for exciting fantasy MMA games and more." />
+<meta name="twitter:image" content="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
+
+
 
 <script
   type="application/ld+json"
   dangerouslySetInnerHTML={{
     __html: JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "SportsOrganization",
-      "name": "Fantasy MMAdness",
-      "url": "https://www.fantasymmadness.com",
-      "logo": "https://www.fantasymmadness.com/images/fmm-experience/fantasy-mmadness-logo.png",
+      "@type": "LocalBusiness",
+      "name": "Fantasy MMAadness",
+      "image": "https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png",
+      "url": "https://fantasymmadness.com",
+      "telephone": "+1-555-555-5555",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "2350 Beaver Ruin Rd",
+        "addressLocality": "Norcross",
+        "addressRegion": "GA",
+        "postalCode": "30071",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "33.9331",
+        "longitude": "-84.1930"
+      },
+      "openingHours": "Mo-Sa 09:00-18:00",
       "sameAs": [
         "https://www.facebook.com/fantasymmadness",
-        "https://www.instagram.com/fantasymmadness",
-        "https://x.com/FMmadness2024",
-        "https://www.youtube.com/channel/UCP4yMpNpD-QMmAi_XlCYozg"
+        "https://www.instagram.com/fantasymmadness"
       ]
     }),
   }}

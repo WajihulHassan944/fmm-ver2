@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { FaArrowRight, FaCalendarAlt, FaNewspaper, FaSearch } from 'react-icons/fa';
 
-import { fetchPublicBlogs } from '@/Utils/publicApi';
+const API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
 const cleanText = (value = '') => String(value).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
 const storyTitle = (blog) => blog?.metaTitle || blog?.header || blog?.title || 'Fight story';
@@ -11,7 +11,7 @@ const storyDescription = (blog) => cleanText(blog?.metaDescription || blog?.desc
 const storyDate = (blog) => blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Latest publication';
 const storyImage = (blog) => blog?.blogHeaderImage || blog?.image || '/images/fmm-pages/editorial-arena-hd.webp';
 
-export default function BlogsPage({ blogs = [], pagination = {} }) {
+export default function BlogsPage({ blogs = [] }) {
   const [query, setQuery] = useState('');
   const visible = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -44,7 +44,7 @@ export default function BlogsPage({ blogs = [], pagination = {} }) {
         <>
           {featured && (
             <article className="xp-featured-story">
-              <div className="xp-featured-story-image"><img src={storyImage(featured)} alt={storyTitle(featured)} loading="eager" decoding="async" /></div>
+              <div className="xp-featured-story-image"><img src={storyImage(featured)} alt="" /></div>
               <div>
                 <span>Featured story</span>
                 <h2>{storyTitle(featured)}</h2>
@@ -58,7 +58,7 @@ export default function BlogsPage({ blogs = [], pagination = {} }) {
           <section className="xp-story-grid">
             {remaining.map((blog) => (
               <article className="xp-story-card" key={blog._id || blog.id || storyTitle(blog)}>
-                <div><img src={storyImage(blog)} alt={storyTitle(blog)} loading="lazy" decoding="async" /></div>
+                <div><img src={storyImage(blog)} alt="" loading="lazy" /></div>
                 <span>{storyDate(blog)}</span>
                 <h3>{storyTitle(blog)}</h3>
                 <p>{storyDescription(blog).slice(0, 150) || 'Read the full Fantasy MMAdness story.'}</p>
@@ -66,25 +66,21 @@ export default function BlogsPage({ blogs = [], pagination = {} }) {
               </article>
             ))}
           </section>
-          {Number(pagination?.pages || 0) > 1 && (
-            <div className="xp-editorial-pagination" aria-label="Blog pagination summary">
-              Page {pagination.page || 1} of {pagination.pages} · {pagination.total || visible.length} stories indexed
-            </div>
-          )}
         </>
       )}
     </div>
   );
 }
 
-export async function getServerSideProps({ query, res }) {
+export async function getServerSideProps() {
   try {
-    res?.setHeader?.('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    const page = Number(query?.page || 1);
-    const { rows: blogs, pagination } = await fetchPublicBlogs({ page, limit: 24 });
-    return { props: { blogs: JSON.parse(JSON.stringify(blogs)), pagination: JSON.parse(JSON.stringify(pagination || {})) } };
+    const response = await fetch(`${API_BASE_URL}/api/blogs`);
+    if (!response.ok) throw new Error('Unable to load blogs');
+    const data = await response.json();
+    const blogs = Array.isArray(data) ? data : data?.data || [];
+    return { props: { blogs: JSON.parse(JSON.stringify(blogs)) } };
   } catch (error) {
     console.error('Error fetching blogs:', error);
-    return { props: { blogs: [], pagination: {} } };
+    return { props: { blogs: [] } };
   }
 }

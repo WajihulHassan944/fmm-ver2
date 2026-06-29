@@ -122,7 +122,7 @@ const ShadowFightsLibrary = () => {
           setShowFightPopup(false);
           setSelectedMatch(null);
           await fetchMatchesData();
-          dispatch(fetchMatches({ includeDrafts: true }));
+          dispatch(fetchMatches());
           resolve();
         } else {
           reject(new Error('Failed to delete the match.'));

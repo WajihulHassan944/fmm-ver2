@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import {
   FaCalendarAlt,
   FaChartBar,
@@ -12,7 +11,6 @@ import {
   FaSearch,
   FaSyncAlt,
   FaTrophy,
-  FaTrashAlt,
   FaVideo,
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
@@ -56,7 +54,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedPromotion, setSelectedPromotion] = useState(null);
 
   useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true }));
+    if (matchStatus === 'idle') dispatch(fetchMatches());
   }, [dispatch, matchStatus]);
 
   const loadShadowTemplates = async () => {
@@ -107,29 +105,6 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const openScores = (fight) => setSelectedScoresView({ id: getId(fight), filter: fight.__source === 'shadowTemplate' ? 'shadowTemplate' : 'normal' });
   const openPromotion = (fight) => setSelectedPromotion(fight);
 
-  const deleteFight = async (fight) => {
-    const id = getId(fight);
-    if (!id) return;
-    const title = getTitle(fight);
-    const isShadowTemplate = fight.__source === 'shadowTemplate';
-    const confirmed = window.confirm(`Delete "${title}"? This cannot be undone.`);
-    if (!confirmed) return;
-
-    const endpoint = isShadowTemplate
-      ? `${API_BASE}/shadowfighttodelete/${id}`
-      : `${API_BASE}/api/matches/${id}?updateWallet=false`;
-
-    try {
-      const response = await fetch(endpoint, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete fight');
-      toast.success(isShadowTemplate ? 'Shadow fight deleted.' : 'Fight deleted.');
-      dispatch(fetchMatches({ includeDrafts: true }));
-      loadShadowTemplates();
-    } catch (error) {
-      toast.error(error.message || 'Failed to delete fight.');
-    }
-  };
-
   if (selectedScore?.id) {
     return (
       <div className="admin-workspace admin-score-workspace-shell">
@@ -176,7 +151,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
-          <button type="button" className="admin-action-secondary" onClick={() => { dispatch(fetchMatches({ includeDrafts: true })); loadShadowTemplates(); }}><FaSyncAlt className={matchStatus === 'loading' || shadowLoading ? 'xp-spin' : ''} /> Refresh</button>
+          <button type="button" className="admin-action-secondary" onClick={() => { dispatch(fetchMatches()); loadShadowTemplates(); }}><FaSyncAlt className={matchStatus === 'loading' || shadowLoading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
 
@@ -225,7 +200,6 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                         {isFinished && <button type="button" onClick={() => openScoring(fight)}><FaEdit /> Edit scores</button>}
                         {isLive && <button type="button" onClick={() => openPromotion(fight)}><FaVideo /> Promote</button>}
                         <Link href={`/administration/DeleteUpdateMatches?matchId=${id}`}><FaEdit /> Edit fight</Link>
-                        <button type="button" className="is-danger" onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>
                       </div>
                     </td>
                   </tr>
