@@ -1,26 +1,18 @@
 "use client";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { orderFightsForDisplay } from "@/Utils/fightOrdering";
+import { fetchPublicFights } from "@/Utils/publicApi";
 
 // ✅ Fetch Matches for Redux (Client-Side)
-export const fetchMatches = createAsyncThunk("matches/fetchMatches", async () => {
-  const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/match");
-  const data = await response.json();
+export const fetchMatches = createAsyncThunk("matches/fetchMatches", async (query = {}) => {
+  const data = await fetchPublicFights(query);
   return orderFightsForDisplay(data);
 });
 
 // ✅ Fetch Matches for getServerSideProps (Server-Side)
-export const fetchMatchesSSR = async () => {
+export const fetchMatchesSSR = async (query = {}) => {
   try {
-    const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/match");
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status}: Failed to fetch matches`);
-    }
-
-    const data = await response.json();
-    
-    // Only return JSON serializable data
+    const data = await fetchPublicFights(query);
     return JSON.parse(JSON.stringify(orderFightsForDisplay(data)));
   } catch (error) {
     console.error("Error fetching matches (SSR):", error);

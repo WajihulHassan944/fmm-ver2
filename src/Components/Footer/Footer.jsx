@@ -28,11 +28,19 @@ const socialLinks = [
 
 const quickLinks = [
   ['Fights', '/upcomingfights'],
+  ['Fantasy MMA', '/fantasy-mma'],
+  ['Fantasy Boxing', '/fantasy-boxing'],
+  ['Kickboxing', '/fantasy-kickboxing'],
+  ['Bare-Knuckle', '/fantasy-bare-knuckle'],
+  ['Pro Wrestling', '/fantasy-pro-wrestling'],
+  ['Fight Calendar', '/calendar-of-fights'],
+  ['Fight News', '/blogs'],
+  ['Fantasy Tips', '/fantasy-tips'],
   ['Contests', '/FantasyLeagues'],
-  ['Pro Wrestling', '/pro-wrestling'],
   ['Leaderboard', '/leaderboard'],
   ['How To Play', '/guides'],
   ['Rewards', '/fights-rewards'],
+  ['FAQs', '/faqs'],
   ['Contact', '/contact'],
 ];
 

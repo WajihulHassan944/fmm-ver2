@@ -80,6 +80,7 @@ const Admin = () => {
     { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Community alerts', metric: `${dashboardCounts.unreadNotificationsCount || 0} unread`, status: dashboardCounts.unreadNotificationsCount ? 'Attention' : 'Clear', statusClass: dashboardCounts.unreadNotificationsCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'View notifications' },
     { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Gateway', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
+    { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Ready', statusClass: 'is-success', href: '/administration/seo-growth', action: 'Open SEO center' },
   ];
 
   const quickActions = [
@@ -88,6 +89,7 @@ const Admin = () => {
     { title: 'Review payouts', copy: 'Process affiliate payout requests.', href: '/administration/payouts', icon: FaShieldAlt },
     { title: 'Publish content', copy: 'Create editorial and platform news.', href: '/administration/blogs/add-new-blog', icon: FaBolt },
     { title: 'Swarm automation', copy: 'Generate blogs, SEO drafts, social drafts, and review jobs.', href: '/administration/swarm', icon: FaRobot },
+    { title: 'SEO growth center', copy: 'Review SEO reports, metadata, links, and growth tasks.', href: '/administration/seo-growth', icon: FaChartLine },
     { title: 'Manage FAQs', copy: 'Add, edit, publish, or remove support answers.', href: '/administration/faqs', icon: FaQuestionCircle },
   ];
 

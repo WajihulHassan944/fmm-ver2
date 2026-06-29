@@ -93,6 +93,11 @@ const ROUTE_COPY = {
     title: 'Swarm command center',
     description: 'Submit MMA and pro-wrestling automation jobs, review generated artifacts, and publish approved blog drafts through the backend gateway.',
   },
+  '/administration/seo-growth': {
+    eyebrow: 'SEO growth',
+    title: 'SEO & growth control center',
+    description: 'Review swarm SEO audits, metadata, internal-link previews, content calendars, and traffic-growth actions from one approval-safe workspace.',
+  },
   '/administration/BlogsAiBot': {
     eyebrow: 'Automation',
     title: 'Blog AI bot',
