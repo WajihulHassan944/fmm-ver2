@@ -9,14 +9,18 @@ import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray
 import { diversifyFightsBySport, orderFightsForDisplay } from '@/Utils/fightOrdering';
 import {
   FaArrowRight,
+  FaBolt,
   FaBullseye,
   FaCalendarAlt,
   FaClock,
   FaCoins,
+  FaChevronRight,
   FaCrown,
   FaDollarSign,
+  FaFire,
   FaGift,
   FaPlay,
+  FaMobileAlt,
   FaShieldAlt,
   FaStar,
   FaTrophy,
@@ -188,6 +192,8 @@ const getLeaderboardName = (player) => (
 const HomeAnother = () => {
   const dispatch = useDispatch();
   const howlerRef = useRef(null);
+  const contestRailRef = useRef(null);
+  const contestDragRef = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
   const matchError = useSelector((state) => state.matches.error);
@@ -222,7 +228,7 @@ const HomeAnother = () => {
   }, []);
 
   const orderedMatches = useMemo(() => getOrderedMatches(matches), [matches]);
-  const contestMatches = useMemo(() => diversifyFightsBySport(orderedMatches, 4), [orderedMatches]);
+  const contestMatches = useMemo(() => diversifyFightsBySport(orderedMatches, 8), [orderedMatches]);
   const primaryFight = orderedMatches[0];
   const primaryCountdown = getCountdownParts(primaryFight, now);
 
@@ -271,6 +277,52 @@ const HomeAnother = () => {
     }
   };
 
+
+  const getPointerX = (event) => event?.pageX || event?.clientX || event?.touches?.[0]?.pageX || 0;
+
+  const handleContestRailPointerDown = (event) => {
+    const rail = contestRailRef.current;
+    if (!rail) return;
+    if (typeof event.button === 'number' && event.button !== 0) return;
+
+    contestDragRef.current = {
+      active: true,
+      startX: getPointerX(event),
+      scrollLeft: rail.scrollLeft,
+      moved: false,
+    };
+    rail.classList.add('is-dragging');
+  };
+
+  const handleContestRailPointerMove = (event) => {
+    const rail = contestRailRef.current;
+    const drag = contestDragRef.current;
+    if (!rail || !drag.active) return;
+
+    const delta = getPointerX(event) - drag.startX;
+    if (Math.abs(delta) > 5) {
+      drag.moved = true;
+      rail.scrollLeft = drag.scrollLeft - delta;
+      event.preventDefault();
+    }
+  };
+
+  const handleContestRailPointerEnd = () => {
+    const rail = contestRailRef.current;
+    if (rail) rail.classList.remove('is-dragging');
+    setTimeout(() => {
+      contestDragRef.current.active = false;
+      contestDragRef.current.moved = false;
+    }, 0);
+  };
+
+  const handleContestRailClickCapture = (event) => {
+    if (contestDragRef.current.moved) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   return (
     <>
       <Head>
@@ -303,21 +355,28 @@ const HomeAnother = () => {
         <section className="fmm-home-hero" aria-label="Fantasy combat sports hero">
           <div className="theme-container fmm-hero-grid">
             <div className="fmm-hero-copy">
+              <div className="fmm-premium-eyebrow"><FaBolt aria-hidden="true" /> Live fight feed refreshed from the back office</div>
               <h1>
-                Predict Combat Sports.
-                <span>Score <em>Every Round.</em></span>
+                Step Into The Fight.
+                <span>Predict. <em>Win.</em> Repeat.</span>
               </h1>
               <p className="fmm-hero-subtitle">
-                Join thousands of fans in MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests. Predict winners, methods, rounds and scores. Climb the leaderboard and win real prizes.
+                A premium fantasy fight app for MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling fans. Fresh fights move forward, big moments stay visible, and every contest feels ready to play.
               </p>
 
               <div className="fmm-hero-actions">
                 <Link href="/upcomingfights" className="theme-btn theme-btn-primary">
-                  Play Active Fights <FaPlay aria-hidden="true" />
+                  Start Playing <FaPlay aria-hidden="true" />
                 </Link>
-                <Link href="/upcomingfights" className="theme-btn theme-btn-secondary">
-                  Join Free Contest <FaUserFriends aria-hidden="true" />
+                <Link href="/calendar-of-fights" className="theme-btn theme-btn-secondary">
+                  Fight Calendar <FaCalendarAlt aria-hidden="true" />
                 </Link>
+              </div>
+
+              <div className="fmm-premium-hero-stats" aria-label="Fantasy MMAdness live experience stats">
+                <div><strong>{contestMatches.length || 0}</strong><span>Fresh fights</span></div>
+                <div><strong>{primaryFight ? getLockLabel(primaryFight, now) : 'OPEN'}</strong><span>Next lock</span></div>
+                <div><strong>5</strong><span>Combat modes</span></div>
               </div>
 
               {primaryFight && (
@@ -377,13 +436,45 @@ const HomeAnother = () => {
         </section>
 
         <main className="theme-container fmm-home-main">
+          <section className="fmm-mobile-fight-app" aria-label="Mobile fight app preview">
+            <div className="fmm-mobile-app-top">
+              <div>
+                <span><FaMobileAlt aria-hidden="true" /> App-style fight feed</span>
+                <h2>Swipe tonight's fight opportunities.</h2>
+              </div>
+              <Link href="/upcomingfights" aria-label="Open all fights"><FaChevronRight aria-hidden="true" /></Link>
+            </div>
+            <div className="fmm-mobile-app-chips">
+              <span>Live</span>
+              <span>Tonight</span>
+              <span>Boxing</span>
+              <span>MMA</span>
+              <span>Wrestling</span>
+            </div>
+          </section>
+
           <section className="fmm-active-section" aria-labelledby="active-contests-title">
             <div className="fmm-section-title-row">
-              <h2 id="active-contests-title">Active Contests</h2>
-              <Link href="/upcomingfights">View All Contests <FaArrowRight aria-hidden="true" /></Link>
+              <div>
+                <span className="fmm-section-kicker"><FaFire aria-hidden="true" /> Fresh fight opportunities</span>
+                <h2 id="active-contests-title">Active Contests</h2>
+              </div>
+              <div className="fmm-section-actions">
+                <span className="fmm-swipe-hint">Drag fight cards</span>
+                <Link href="/upcomingfights">View All Contests <FaArrowRight aria-hidden="true" /></Link>
+              </div>
             </div>
 
-            <div className="fmm-contest-grid">
+            <div
+              className="fmm-contest-grid"
+              ref={contestRailRef}
+              onPointerDown={handleContestRailPointerDown}
+              onPointerMove={handleContestRailPointerMove}
+              onPointerUp={handleContestRailPointerEnd}
+              onPointerCancel={handleContestRailPointerEnd}
+              onPointerLeave={handleContestRailPointerEnd}
+              onClickCapture={handleContestRailClickCapture}
+            >
               {matchStatus === 'loading' && <div className="fmm-empty-card">Loading active contests...</div>}
               {matchStatus === 'failed' && <div className="fmm-empty-card">Unable to load fights: {matchError}</div>}
               {matchStatus !== 'loading' && matchStatus !== 'failed' && contestMatches.length === 0 && <div className="fmm-empty-card">No contests are currently available.</div>}
@@ -397,6 +488,7 @@ const HomeAnother = () => {
                   <article className={`fmm-contest-card ${categoryClass}`} key={match._id || getFightTitle(match)}>
                     <div className="fmm-contest-card-top">
                       <span className="fmm-category-pill">{category}</span>
+                      <span className="fmm-fresh-pill">{index === 0 ? 'Top now' : getLockLabel(match, now)}</span>
                       {index === 0 && <span className="fmm-featured-pill"><FaStar aria-hidden="true" /> Featured</span>}
                     </div>
 
@@ -427,7 +519,7 @@ const HomeAnother = () => {
                     </div>
 
                     <Link href="/upcomingfights" className="fmm-card-action">
-                      {isFinished ? 'View Contest' : 'Enter Free'}
+                      {isFinished ? 'View Contest' : 'Enter Free'} <FaChevronRight aria-hidden="true" />
                     </Link>
                   </article>
                 );
