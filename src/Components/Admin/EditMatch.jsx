@@ -77,7 +77,7 @@ const EditMatch = ({ matchId, isShadow }) => {
 
   useEffect(() => {
     if (!isShadow && matchStatus === 'idle') {
-      dispatch(fetchMatches());
+      dispatch(fetchMatches({ includeDrafts: true }));
     } else if (isShadow) {
       const fetchShadowMatches = async () => {
         try {
@@ -303,7 +303,7 @@ const EditMatch = ({ matchId, isShadow }) => {
           <div className="admin-edit-form-grid">
             <label className="is-wide"><span>Fight video URL</span><input type="url" name="matchVideoUrl" value={formData.matchVideoUrl} onChange={handleChange} placeholder="https://youtube.com/watch?v=..." /></label>
             <label className="is-wide"><span>Promotional video URL</span><input type="url" name="matchPromotionalVideoUrl" value={formData.matchPromotionalVideoUrl} onChange={handleChange} placeholder="Optional promo / trailer URL" /></label>
-            {!isShadow && <label><span>Public fight status</span><select name="matchStatus" value={formData.matchStatus} onChange={handleChange}><option value="">Keep current</option><option value="Scheduled">Scheduled</option><option value="Live">Live</option><option value="Open">Open</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
+            {!isShadow && <label><span>Public fight status</span><select name="matchStatus" value={formData.matchStatus} onChange={handleChange}><option value="">Keep current</option><option value="Draft">Draft</option><option value="Scheduled">Scheduled</option><option value="Live">Live</option><option value="Open">Open</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
             {isShadow && <label><span>Shadow status</span><select name="matchShadowStatus" value={formData.matchShadowStatus} onChange={handleChange}><option value="">Keep current</option><option value="Template">Template</option><option value="Open">Open</option><option value="Live">Live</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
             {isShadow && <label><span>Shadow open status</span><select name="matchShadowOpenStatus" value={formData.matchShadowOpenStatus} onChange={handleChange}><option value="">Keep current</option><option value="Open">Open</option><option value="Closed">Closed</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label>}
           </div>

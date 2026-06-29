@@ -9,7 +9,7 @@ const AffiliatePodcasts = () => {
 
   useEffect(() => {
     if (matchStatus === 'idle') {
-      dispatch(fetchMatches());
+      dispatch(fetchMatches({ includeDrafts: true }));
     }
   }, [matchStatus, dispatch]);
 

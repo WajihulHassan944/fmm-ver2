@@ -64,6 +64,7 @@ import "@/styles/targeted-dashboard-checkout-logo-fix.css";
 import "@/styles/pro-wrestling.css";
 import "@/styles/pro-wrestling-client-corrections.css";
 import "@/styles/adminswarm.css";
+import "@/styles/phase4-seo-pages.css";
 import Script from "next/script";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
@@ -79,7 +80,8 @@ import { fetchAffiliate } from "@/Redux/affiliateAuthSlice";
 import { playMusic, stopMusic } from "@/Redux/musicSlice";
 import Header from "@/Components/Header/Header";
 import Footer from "@/Components/Footer/Footer";
-import Head from "next/head";
+import SeoHead from "@/Components/SEO/SeoHead";
+import { API_BASE_URL } from "@/Utils/swarmApi";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -94,16 +96,10 @@ function App({ Component, ...rest }) {
   const { store, props } = wrapper.useWrappedStore(rest); // Wrapped store for SSR
 
   const router = useRouter();
-  const DOMAIN = "https://www.fantasymmadness.com";
-  const canonicalUrl = `${DOMAIN}${router.asPath === "/" ? "" : router.asPath.split("?")[0]}`;
-
-
 
   return (
     <>
-      <Head>
-      <link rel="canonical" href={canonicalUrl} />
-      </Head>
+      <SeoHead />
       <Script
         async
         src="https://www.googletagmanager.com/gtag/js?id=AW-16787825610"
@@ -229,7 +225,7 @@ function AppContent({ children }) {
   useEffect(() => {
     const deviceId = getOrCreateDeviceId();
 
-    fetch("https://fantasymmadness-game-server-three.vercel.app/track-click", {
+    fetch(`${API_BASE_URL}/track-click`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ deviceId }), // Send deviceId

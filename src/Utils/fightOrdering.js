@@ -1,3 +1,9 @@
+export const isDraftFightForDisplay = (fight = {}) => {
+  const statusValues = [fight.matchStatus, fight.status, fight.publicStatus]
+    .map((value) => String(value || '').trim().toLowerCase());
+  return Boolean(fight.draft === true || fight.isDraft === true || statusValues.includes('draft'));
+};
+
 export const getFightId = (fight) => fight?._id || fight?.id || fight?.matchId || '';
 
 export const getFightSport = (fight) => {
@@ -60,9 +66,10 @@ export const getFightPriorityScore = (fight, now = new Date()) => {
   return 1000;
 };
 
-export const orderFightsForDisplay = (fights = []) => {
+export const orderFightsForDisplay = (fights = [], options = {}) => {
   const now = new Date();
-  return [...(Array.isArray(fights) ? fights : [])].filter(Boolean).sort((a, b) => {
+  const includeDrafts = Boolean(options.includeDrafts);
+  return [...(Array.isArray(fights) ? fights : [])].filter((fight) => fight && (includeDrafts || !isDraftFightForDisplay(fight))).sort((a, b) => {
     const scoreDiff = getFightPriorityScore(b, now) - getFightPriorityScore(a, now);
     if (scoreDiff) return scoreDiff;
 
