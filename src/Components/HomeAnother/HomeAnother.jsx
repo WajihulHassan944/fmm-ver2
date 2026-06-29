@@ -9,11 +9,8 @@ import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray
 import { diversifyFightsBySport, orderFightsForDisplay } from '@/Utils/fightOrdering';
 import {
   FaArrowRight,
-  FaFistRaised,
-  FaBolt,
   FaBullseye,
   FaCalendarAlt,
-  FaGlobe,
   FaClock,
   FaCoins,
   FaCrown,
@@ -380,20 +377,6 @@ const HomeAnother = () => {
         </section>
 
         <main className="theme-container fmm-home-main">
-          <section className="fmm-fight-night-command-strip" aria-label="Fight night coverage">
-            <div>
-              <p><FaBolt /> Fight-night ready</p>
-              <h2>MMA, Boxing, and Pro Wrestling contests move to the front when they matter most.</h2>
-              <span>Active, live, featured, and tonight fights are prioritized so fans can quickly find the contest they came to play.</span>
-            </div>
-            <div className="fmm-fight-night-pills">
-              <Link href="/upcomingfights"><FaFistRaised /> Play tonight</Link>
-              <Link href="/calendar-of-fights"><FaCalendarAlt /> Fight calendar</Link>
-              <Link href="/pro-wrestling"><FaCrown /> Pro wrestling</Link>
-              <Link href="/fights-news"><FaGlobe /> Fight news</Link>
-            </div>
-          </section>
-
           <section className="fmm-active-section" aria-labelledby="active-contests-title">
             <div className="fmm-section-title-row">
               <h2 id="active-contests-title">Active Contests</h2>

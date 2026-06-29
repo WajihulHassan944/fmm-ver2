@@ -1314,3 +1314,105 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Daily SEO/social/calendar growth controls requested by client. */
+.admin-swarm-daily-controls {
+  border-top: 1px solid var(--admin-border, rgba(255,255,255,.11));
+  padding: 18px 20px;
+}
+.admin-swarm-daily-controls > header {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.admin-swarm-daily-controls > header span {
+  color: var(--admin-red, #df111b);
+  display: block;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.admin-swarm-daily-controls > header strong {
+  color: #fff;
+  display: block;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 26px;
+  line-height: 1;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+.admin-swarm-daily-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.admin-swarm-daily-grid button {
+  align-items: flex-start !important;
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid var(--admin-border, rgba(255,255,255,.11)) !important;
+  border-radius: 14px !important;
+  color: #fff !important;
+  display: grid !important;
+  gap: 8px !important;
+  justify-items: start !important;
+  min-height: 138px !important;
+  padding: 14px !important;
+  text-align: left !important;
+}
+.admin-swarm-daily-grid button:hover,
+.admin-swarm-daily-grid button:focus-visible {
+  background: rgba(223, 17, 27, .12) !important;
+  border-color: rgba(223, 17, 27, .38) !important;
+}
+.admin-swarm-daily-grid svg {
+  color: var(--admin-red, #df111b);
+  font-size: 22px;
+}
+.admin-swarm-daily-grid strong {
+  color: #fff;
+  font-family: var(--admin-display, Impact, sans-serif);
+  font-size: 18px;
+  text-transform: uppercase;
+}
+.admin-swarm-daily-grid span {
+  color: rgba(255,255,255,.62);
+  line-height: 1.45;
+}
+.admin-swarm-social-platform-line {
+  align-items: center;
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 13px;
+  padding: 12px;
+}
+.admin-swarm-social-platform-line span {
+  align-items: center;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 11px;
+}
+.admin-swarm-social-platform-line em {
+  color: rgba(255,255,255,.58);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.45;
+}
+@media (max-width: 1180px) {
+  .admin-swarm-daily-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .admin-swarm-daily-controls > header { align-items: stretch; flex-direction: column; }
+  .admin-swarm-daily-grid { grid-template-columns: 1fr; }
+}

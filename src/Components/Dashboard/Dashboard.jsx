@@ -13,6 +13,7 @@ import {
   FaCrown,
   FaFire,
   FaFistRaised,
+  FaGlobe,
   FaHistory,
   FaMedal,
   FaShieldAlt,
@@ -30,6 +31,7 @@ import PurchaseTokensIntimation from './PurchaseTokensIntimation';
 import FinishedFightUserBoard from '../FinishedFightUserBoard/FinishedFightUserBoard';
 import UserWorkspaceNav from '../UserProfile/UserWorkspaceNav';
 import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
+import { diversifyFightsBySport, orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
@@ -91,7 +93,7 @@ const Dashboard = () => {
   useEffect(() => {
     const today = new Date();
     const currentTime = new Date();
-    const filteredMatches = (Array.isArray(matches) ? matches : []).map((match) => {
+    const filteredMatches = orderFightsForDisplay((Array.isArray(matches) ? matches : []).map((match) => {
       const matchDateTime = new Date(`${match?.matchDate?.split('T')[0]}T${match?.matchTime || '00:00'}:00`);
       if (match.matchType === 'LIVE') {
         if (matchDateTime >= today.setHours(0, 0, 0, 0) && currentTime < matchDateTime) return { ...match, blurred: false };
@@ -99,7 +101,7 @@ const Dashboard = () => {
         if (match.affiliateId && match.shadowFightId && match.matchShadowStatus === 'active') return { ...match, blurred: false };
       }
       return null;
-    }).filter(Boolean);
+    }).filter(Boolean));
     setUpcomingMatches(filteredMatches);
   }, [matches]);
 
@@ -116,9 +118,19 @@ const Dashboard = () => {
     };
   };
 
-  const completedMatches = useMemo(() => (Array.isArray(matches) ? matches : []).filter((match) => safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')), [matches, user?._id]);
-  const pendingMatches = useMemo(() => upcomingMatches.filter((match) => !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(match._id)), [removedMatches, upcomingMatches, user?._id]);
-  const visibleCompleted = useMemo(() => completedMatches.filter((match) => !removedMatches.includes(match._id)), [completedMatches, removedMatches]);
+  const completedMatches = useMemo(() => orderFightsForDisplay((Array.isArray(matches) ? matches : []).filter((match) => safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted'))), [matches, user?._id]);
+  const pendingMatches = useMemo(() => orderFightsForDisplay(upcomingMatches.filter((match) => !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(match._id))), [removedMatches, upcomingMatches, user?._id]);
+  const visibleCompleted = useMemo(() => orderFightsForDisplay(completedMatches.filter((match) => !removedMatches.includes(match._id))), [completedMatches, removedMatches]);
+  const dashboardOpportunities = useMemo(() => {
+    const seen = new Set();
+    const merged = orderFightsForDisplay([...pendingMatches, ...upcomingMatches]).filter((match) => {
+      const id = getFightId(match);
+      if (!id || seen.has(id) || removedMatches.includes(id)) return false;
+      seen.add(id);
+      return true;
+    });
+    return diversifyFightsBySport(merged, 4);
+  }, [pendingMatches, removedMatches, upcomingMatches]);
 
   const handleRemoveMatch = async (matchId) => {
     try {
@@ -313,6 +325,19 @@ const Dashboard = () => {
       <UserWorkspaceNav className="player-workspace-nav-dashboard-home" />
 
       <main className="theme-container player-command-main">
+        <section className="player-command-fight-night-strip" aria-label="Fresh fight opportunities">
+          <div>
+            <p><FaBolt /> Fresh fight opportunities</p>
+            <h2>Tonight, live, featured, and newly updated fights stay in front.</h2>
+            <span>Your dashboard keeps changing with new MMA, Boxing, and Pro Wrestling opportunities so there is always something fresh to play.</span>
+          </div>
+          <div className="player-command-fight-night-actions">
+            <Link href="/upcomingfights" className="player-command-play-tonight"><FaFistRaised /> Play tonight</Link>
+            <Link href="/calendar-of-fights"><FaCalendarAlt /> Fight calendar</Link>
+            <Link href="/pro-wrestling"><FaCrown /> Pro wrestling</Link>
+            <Link href="/fights-news"><FaGlobe /> Fight news</Link>
+          </div>
+        </section>
         <section className="player-command-stat-grid">
           <article><FaHistory /><span><strong>{pendingMatches.length}</strong><small>Pending picks</small></span></article>
           <article><FaTrophy /><span><strong>{visibleCompleted.length}</strong><small>Submitted cards</small></span></article>
@@ -328,6 +353,11 @@ const Dashboard = () => {
               <Link href={href} key={href}><i><Icon /></i><span><strong>{label}</strong><small>{copy}</small></span><FaArrowRight /></Link>
             ))}
           </div>
+        </section>
+
+        <section className="player-command-section player-command-opportunity-section">
+          <header><span>01</span><div><p>New fight opportunities</p><h2>Fresh cards to play now</h2><small>Featured, live, tonight, newly added, and recently updated fights rotate to the top of your dashboard.</small></div><Link href="/upcomingfights">View all <FaArrowRight /></Link></header>
+          <div className="player-command-fight-grid">{dashboardOpportunities.length ? dashboardOpportunities.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No fresh fights yet</h3><p>New fight opportunities will appear here as soon as they are published.</p></div>}</div>
         </section>
 
         <section className="player-command-wrestling-feature">

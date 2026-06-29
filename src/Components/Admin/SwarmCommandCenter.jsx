@@ -3,13 +3,16 @@ import {
   FaBolt,
   FaBullhorn,
   FaChartLine,
+  FaCalendarAlt,
   FaCheck,
   FaCog,
   FaEnvelope,
   FaExclamationTriangle,
+  FaFacebook,
   FaFileAlt,
   FaGlobe,
   FaHistory,
+  FaInstagram,
   FaList,
   FaMagic,
   FaPaperPlane,
@@ -26,6 +29,7 @@ import {
   FaToggleOff,
   FaToggleOn,
   FaTwitter,
+  FaUserPlus,
 } from 'react-icons/fa';
 import {
   buildManualSourceEntity,
@@ -612,6 +616,35 @@ const SwarmCommandCenter = () => {
     }
   };
 
+  const runScheduleAction = async (action) => {
+    const actionMap = {
+      daily: { label: 'Full daily automation', call: swarmApi.runDailySchedule },
+      weekly: { label: 'Weekly traffic opportunity report', call: swarmApi.runWeeklySchedule },
+      seo: { label: 'Daily SEO audit', call: swarmApi.runDailySeo },
+      social: { label: 'Multiple daily social drafts', call: swarmApi.runDailySocial },
+      calendar: { label: 'Fight schedule calendar refresh', call: swarmApi.runDailyCalendarRefresh },
+    };
+    const selected = actionMap[action];
+    if (!selected) return;
+    setActionId(`schedule:${action}`);
+    try {
+      const result = await selected.call({
+        mode: globalSettings.defaultMode || config?.defaultMode || 'DRAFT_ONLY',
+        platforms: ['x', 'instagram', 'facebook'],
+        source: 'frontend_daily_growth_controls',
+        reason: `manual-${action}-run-from-swarm-command-center`,
+      });
+      const createdCount = result?.createdJobs?.length || result?.jobs?.length || result?.campaign?.jobIds?.length || result?.count || 0;
+      setRecentSubmission({ type: 'schedule', id: action, title: selected.label, status: 'submitted', count: createdCount, createdAt: new Date().toISOString() });
+      showMessage({ type: 'success', text: `${selected.label} submitted. ${createdCount ? `${createdCount} jobs created.` : 'Check jobs/artifacts shortly.'}` });
+      await loadSwarm({ silent: true });
+    } catch (error) {
+      handleError(error, `Could not run ${selected.label}.`);
+    } finally {
+      setActionId('');
+    }
+  };
+
   const tabButtonClass = (tab) => `admin-swarm-tab${activeTab === tab ? ' is-active' : ''}`;
   const activePackCount = campaignPacks.length || SWARM_CAMPAIGN_TYPES.length;
 
@@ -794,10 +827,29 @@ const SwarmCommandCenter = () => {
               <article><small>Active campaigns</small><strong>{Number(counts.activeCampaigns || displayedCampaigns.filter((item) => !['published', 'failed', 'cancelled'].includes(String(item.status).toLowerCase())).length || 0).toLocaleString()}</strong><span>All-agent groups</span></article>
               <article><small>SEO mode</small><strong>Review</strong><span>Generated, approved, then applied</span></article>
             </div>
+            <div className="admin-swarm-daily-controls">
+              <header>
+                <div><span>Daily growth engine</span><strong>SEO, calendar, and social every day</strong></div>
+                <button type="button" className="admin-topbar-primary" disabled={Boolean(actionId)} onClick={() => runScheduleAction('daily')}><FaBolt /> Run full daily set</button>
+              </header>
+              <div className="admin-swarm-daily-grid">
+                <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('seo')}><FaSearch /><strong>Daily SEO</strong><span>Audit metadata, schema, links, and page opportunities.</span></button>
+                <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('calendar')}><FaCalendarAlt /><strong>Calendar refresh</strong><span>Refresh fight schedule opportunities for website/user dashboard.</span></button>
+                <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('social')}><FaBullhorn /><strong>Social drafts</strong><span>Create multiple daily drafts for X, Instagram, and Facebook.</span></button>
+                <button type="button" disabled={Boolean(actionId)} onClick={() => runManualAutomation('automation.growth-plan-1000-users')}><FaUserPlus /><strong>1000-user plan</strong><span>Generate the next traffic and acquisition action plan.</span></button>
+              </div>
+              <div className="admin-swarm-social-platform-line">
+                <span><FaTwitter /> X/Twitter drafts</span>
+                <span><FaInstagram /> Instagram drafts</span>
+                <span><FaFacebook /> Facebook drafts</span>
+                <em>Publishing stays draft/review controlled until credentials and final approval are confirmed.</em>
+              </div>
+            </div>
+
             <div className="admin-swarm-seo-explainer">
               <article><FaSearch /><strong>SEO is managed by swarm</strong><p>The swarm generates SEO artifacts: metadata, schema, internal links, canonical checks, sitemap plans, and audit reports.</p></article>
               <article><FaCheck /><strong>SEO is applied safely</strong><p>Blog SEO can be applied after approval. Site-wide schema/sitemap/internal-link outputs remain application plans until a target workflow is selected.</p></article>
-              <article><FaTwitter /><strong>Social stays controlled</strong><p>Twitter/X drafts are generated now. Real auto-posting stays disabled until the admin enables social publishing.</p></article>
+              <article><FaTwitter /><strong>Social stays controlled</strong><p>X, Instagram, and Facebook drafts are generated now. Real auto-posting stays disabled until the admin enables social publishing.</p></article>
             </div>
             <div className="admin-swarm-quick-actions">
               {QUICK_CAMPAIGN_PRESETS.slice(0, 4).map((preset) => (
