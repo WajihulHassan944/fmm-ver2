@@ -1741,3 +1741,32 @@
     width: 100%;
   }
 }
+
+/* Client review update: edit video/scoring sections */
+.admin-edit-video-section,
+.admin-edit-scoring-section {
+  border-color: rgba(255, 184, 77, 0.26);
+}
+.admin-edit-scoring-section textarea {
+  background: rgba(5, 8, 18, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  min-height: 170px;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+.admin-edit-scoring-section textarea:focus,
+.admin-edit-video-section input:focus,
+.admin-edit-video-section select:focus {
+  border-color: rgba(255, 184, 77, 0.72);
+  box-shadow: 0 0 0 3px rgba(255, 184, 77, 0.12);
+  outline: none;
+}
+.admin-score-metric input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}

@@ -6,6 +6,7 @@ import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
 import Link from 'next/link';
 import Head from 'next/head';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
+import { diversifyFightsBySport, orderFightsForDisplay } from '@/Utils/fightOrdering';
 import {
   FaArrowRight,
   FaFistRaised,
@@ -81,21 +82,7 @@ const getMatchPriorityScore = (match, now = new Date()) => {
   return 100 + sportBoost;
 };
 
-const getOrderedMatches = (matches) => {
-  if (!Array.isArray(matches)) return [];
-  const now = new Date();
-  return [...matches].filter(Boolean).sort((a, b) => {
-    const scoreDiff = getMatchPriorityScore(b, now) - getMatchPriorityScore(a, now);
-    if (scoreDiff) return scoreDiff;
-    const aTime = getMatchTimestamp(a);
-    const bTime = getMatchTimestamp(b);
-    const aFuture = aTime >= now.getTime();
-    const bFuture = bTime >= now.getTime();
-    if (aFuture && bFuture) return aTime - bTime;
-    if (!aFuture && !bFuture) return bTime - aTime;
-    return aFuture ? -1 : 1;
-  });
-};
+const getOrderedMatches = (matches) => orderFightsForDisplay(matches);
 
 const pad = (value) => String(value).padStart(2, '0');
 
@@ -238,7 +225,7 @@ const HomeAnother = () => {
   }, []);
 
   const orderedMatches = useMemo(() => getOrderedMatches(matches), [matches]);
-  const contestMatches = useMemo(() => orderedMatches.slice(0, 4), [orderedMatches]);
+  const contestMatches = useMemo(() => diversifyFightsBySport(orderedMatches, 4), [orderedMatches]);
   const primaryFight = orderedMatches[0];
   const primaryCountdown = getCountdownParts(primaryFight, now);
 
@@ -328,8 +315,8 @@ const HomeAnother = () => {
               </p>
 
               <div className="fmm-hero-actions">
-                <Link href="/mock-game" className="theme-btn theme-btn-primary">
-                  Try Demo Fight <FaPlay aria-hidden="true" />
+                <Link href="/upcomingfights" className="theme-btn theme-btn-primary">
+                  Play Active Fights <FaPlay aria-hidden="true" />
                 </Link>
                 <Link href="/upcomingfights" className="theme-btn theme-btn-secondary">
                   Join Free Contest <FaUserFriends aria-hidden="true" />
@@ -355,7 +342,7 @@ const HomeAnother = () => {
             <div className="fmm-hero-fight-area">
               <aside className="fmm-hero-event-card">
                 <div className="fmm-hero-event-main">
-                  <p>Next Big Fight</p>
+                  <p>Fresh Featured Fight</p>
                   <h2>
                     <span>{primaryFight?.matchFighterA || 'Upcoming'}</span>
                     <small>vs</small>

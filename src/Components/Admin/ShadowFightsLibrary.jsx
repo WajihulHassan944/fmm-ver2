@@ -15,6 +15,7 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import EditMatch from './EditMatch';
+import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { fetchMatches } from '@/Redux/matchSlice';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
@@ -42,7 +43,7 @@ const ShadowFightsLibrary = () => {
     try {
       const response = await fetch(`${API_BASE}/shadow`);
       const data = await response.json();
-      setMatches(Array.isArray(data) ? data : []);
+      setMatches(orderFightsForDisplay(Array.isArray(data) ? data : []));
     } catch (error) {
       console.error('Error fetching matches:', error);
       setMatches([]);

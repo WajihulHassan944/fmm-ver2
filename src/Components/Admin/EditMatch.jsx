@@ -6,7 +6,9 @@ import {
   FaClock,
   FaCoins,
   FaFistRaised,
+  FaFilm,
   FaImage,
+  FaSlidersH,
   FaLayerGroup,
   FaSave,
   FaTrophy,
@@ -29,6 +31,16 @@ const previewSource = (value, fallback) => {
   return value || fallback;
 };
 
+const stringifyScoreConfig = (value) => {
+  if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return '';
+  try { return JSON.stringify(value, null, 2); } catch { return ''; }
+};
+
+const parseScoreConfig = (label, value) => {
+  if (!String(value || '').trim()) return null;
+  try { return JSON.parse(value); } catch (error) { throw new Error(`${label} must be valid JSON before saving.`); }
+};
+
 const EditMatch = ({ matchId, isShadow }) => {
   const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
@@ -42,6 +54,10 @@ const EditMatch = ({ matchId, isShadow }) => {
     matchFighterB: '',
     matchDescription: '',
     matchVideoUrl: '',
+    matchPromotionalVideoUrl: '',
+    matchStatus: '',
+    matchShadowStatus: '',
+    matchShadowOpenStatus: '',
     matchDate: '',
     matchTime: '',
     matchTokens: '',
@@ -52,6 +68,8 @@ const EditMatch = ({ matchId, isShadow }) => {
     promotionBackground: null,
     maxRounds: '',
     matchCategoryTwo: '',
+    BoxingMatch: '',
+    MMAMatch: '',
   });
 
   const [buttonText, setButtonText] = useState('Edit Match');
@@ -63,9 +81,17 @@ const EditMatch = ({ matchId, isShadow }) => {
     } else if (isShadow) {
       const fetchShadowMatches = async () => {
         try {
-          const response = await fetch(`${API_BASE}/shadow`);
-          const data = await response.json();
-          const specificMatch = (Array.isArray(data) ? data : []).find((item) => String(item?._id || item?.id) === String(matchId));
+          let specificMatch = null;
+          const singleResponse = await fetch(`${API_BASE}/api/shadow/${matchId}`);
+          if (singleResponse.ok) {
+            const singleData = await singleResponse.json();
+            specificMatch = singleData?.match || singleData;
+          }
+          if (!specificMatch) {
+            const response = await fetch(`${API_BASE}/shadow`);
+            const data = await response.json();
+            specificMatch = (Array.isArray(data) ? data : []).find((item) => String(item?._id || item?.id) === String(matchId));
+          }
           if (specificMatch) {
             setFormData((current) => ({
               ...current,
@@ -75,11 +101,17 @@ const EditMatch = ({ matchId, isShadow }) => {
               matchFighterB: specificMatch.matchFighterB || '',
               matchDescription: specificMatch.matchDescription || '',
               matchVideoUrl: specificMatch.matchVideoUrl || '',
+              matchPromotionalVideoUrl: specificMatch.matchPromotionalVideoUrl || specificMatch.promotionalVideoUrl || '',
+              matchStatus: specificMatch.matchStatus || '',
+              matchShadowStatus: specificMatch.matchShadowStatus || '',
+              matchShadowOpenStatus: specificMatch.matchShadowOpenStatus || '',
               fighterAImage: specificMatch.fighterAImage || null,
               fighterBImage: specificMatch.fighterBImage || null,
               promotionBackground: specificMatch.promotionBackground || null,
               maxRounds: specificMatch.maxRounds || '',
               matchCategoryTwo: specificMatch.matchCategoryTwo || '',
+              BoxingMatch: stringifyScoreConfig(specificMatch.BoxingMatch),
+              MMAMatch: stringifyScoreConfig(specificMatch.MMAMatch),
               addToShadowTemplates: false,
             }));
             setDisplayCategory(resolveDisplayCategory(specificMatch.matchCategory, specificMatch.matchCategoryTwo));
@@ -99,6 +131,10 @@ const EditMatch = ({ matchId, isShadow }) => {
         matchFighterB: match.matchFighterB || '',
         matchDescription: match.matchDescription || '',
         matchVideoUrl: match.matchVideoUrl || '',
+        matchPromotionalVideoUrl: match.matchPromotionalVideoUrl || match.promotionalVideoUrl || '',
+        matchStatus: match.matchStatus || '',
+        matchShadowStatus: match.matchShadowStatus || '',
+        matchShadowOpenStatus: match.matchShadowOpenStatus || '',
         matchDate: match.matchDate ? new Date(match.matchDate).toISOString().split('T')[0] : '',
         promotionBackground: match.promotionBackground || null,
         matchTime: match.matchTime || '',
@@ -108,6 +144,8 @@ const EditMatch = ({ matchId, isShadow }) => {
         fighterBImage: match.fighterBImage || null,
         maxRounds: match.maxRounds || '',
         matchCategoryTwo: match.matchCategoryTwo || '',
+        BoxingMatch: stringifyScoreConfig(match.BoxingMatch),
+        MMAMatch: stringifyScoreConfig(match.MMAMatch),
         addToShadowTemplates: match.shadowTemplatesAdditionStatus || false,
       });
       setDisplayCategory(resolveDisplayCategory(match.matchCategory, match.matchCategoryTwo));
@@ -145,6 +183,16 @@ const EditMatch = ({ matchId, isShadow }) => {
     const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
     const matchDate = formData.matchDate?.split('T')[0];
 
+    let parsedBoxingMatch = null;
+    let parsedMMAMatch = null;
+    try {
+      parsedBoxingMatch = parseScoreConfig('Boxing scoring JSON', formData.BoxingMatch);
+      parsedMMAMatch = parseScoreConfig('MMA scoring JSON', formData.MMAMatch);
+    } catch (validationError) {
+      alert(validationError.message);
+      return;
+    }
+
     const data = new FormData();
     data.append('matchId', matchId);
     data.append('matchCategory', formData.matchCategory);
@@ -153,6 +201,13 @@ const EditMatch = ({ matchId, isShadow }) => {
     data.append('matchFighterA', formData.matchFighterA);
     data.append('matchFighterB', formData.matchFighterB);
     data.append('matchDescription', formData.matchDescription);
+    data.append('matchVideoUrl', formData.matchVideoUrl || '');
+    data.append('matchPromotionalVideoUrl', formData.matchPromotionalVideoUrl || '');
+    data.append('matchStatus', formData.matchStatus || '');
+    data.append('matchShadowStatus', formData.matchShadowStatus || '');
+    data.append('matchShadowOpenStatus', formData.matchShadowOpenStatus || '');
+    if (parsedBoxingMatch) data.append('BoxingMatch', JSON.stringify(parsedBoxingMatch));
+    if (parsedMMAMatch) data.append('MMAMatch', JSON.stringify(parsedMMAMatch));
     data.append('fighterAImage', formData.fighterAImage ? formData.fighterAImage : match?.fighterAImage);
     data.append('fighterBImage', formData.fighterBImage ? formData.fighterBImage : match?.fighterBImage);
     data.append('maxRounds', formData.maxRounds);
@@ -240,6 +295,25 @@ const EditMatch = ({ matchId, isShadow }) => {
             <label><span>Fighter B</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
             <label className="is-wide"><span>Match description</span><textarea name="matchDescription" value={formData.matchDescription} onChange={handleChange} rows="5" /></label>
             <label><span>Max rounds</span><input type="number" name="maxRounds" value={formData.maxRounds} onChange={handleChange} /></label>
+          </div>
+        </section>
+
+        <section className="admin-edit-form-section admin-edit-video-section">
+          <header><span><FaFilm /></span><div><small>Video & visibility</small><h4>Fight video and status</h4><p>Update the regular fight video, promotional video, and public/admin status without leaving this edit screen.</p></div></header>
+          <div className="admin-edit-form-grid">
+            <label className="is-wide"><span>Fight video URL</span><input type="url" name="matchVideoUrl" value={formData.matchVideoUrl} onChange={handleChange} placeholder="https://youtube.com/watch?v=..." /></label>
+            <label className="is-wide"><span>Promotional video URL</span><input type="url" name="matchPromotionalVideoUrl" value={formData.matchPromotionalVideoUrl} onChange={handleChange} placeholder="Optional promo / trailer URL" /></label>
+            {!isShadow && <label><span>Public fight status</span><select name="matchStatus" value={formData.matchStatus} onChange={handleChange}><option value="">Keep current</option><option value="Scheduled">Scheduled</option><option value="Live">Live</option><option value="Open">Open</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
+            {isShadow && <label><span>Shadow status</span><select name="matchShadowStatus" value={formData.matchShadowStatus} onChange={handleChange}><option value="">Keep current</option><option value="Template">Template</option><option value="Open">Open</option><option value="Live">Live</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
+            {isShadow && <label><span>Shadow open status</span><select name="matchShadowOpenStatus" value={formData.matchShadowOpenStatus} onChange={handleChange}><option value="">Keep current</option><option value="Open">Open</option><option value="Closed">Closed</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label>}
+          </div>
+        </section>
+
+        <section className="admin-edit-form-section admin-edit-scoring-section">
+          <header><span><FaSlidersH /></span><div><small>Scoring data</small><h4>Manual scoring configuration</h4><p>Use this only when you need to update stored scoring JSON. Total punches stay manual and separate from head/body punches.</p></div></header>
+          <div className="admin-edit-form-grid">
+            <label className="is-wide"><span>Boxing scoring JSON</span><textarea name="BoxingMatch" value={formData.BoxingMatch} onChange={handleChange} rows="7" placeholder='{"fighterOneStats":[],"fighterTwoStats":[]}' /></label>
+            <label className="is-wide"><span>MMA scoring JSON</span><textarea name="MMAMatch" value={formData.MMAMatch} onChange={handleChange} rows="7" placeholder='{"fighterOneStats":[],"fighterTwoStats":[]}' /></label>
           </div>
         </section>
 

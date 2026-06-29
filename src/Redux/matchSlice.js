@@ -1,10 +1,12 @@
 "use client";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { orderFightsForDisplay } from "@/Utils/fightOrdering";
 
 // ✅ Fetch Matches for Redux (Client-Side)
 export const fetchMatches = createAsyncThunk("matches/fetchMatches", async () => {
   const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/match");
-  return response.json();
+  const data = await response.json();
+  return orderFightsForDisplay(data);
 });
 
 // ✅ Fetch Matches for getServerSideProps (Server-Side)
@@ -19,7 +21,7 @@ export const fetchMatchesSSR = async () => {
     const data = await response.json();
     
     // Only return JSON serializable data
-    return JSON.parse(JSON.stringify(data));
+    return JSON.parse(JSON.stringify(orderFightsForDisplay(data)));
   } catch (error) {
     console.error("Error fetching matches (SSR):", error);
     return [];
@@ -42,7 +44,7 @@ const matchSlice = createSlice({
       })
       .addCase(fetchMatches.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.data = action.payload;
+        state.data = orderFightsForDisplay(action.payload);
       })
       .addCase(fetchMatches.rejected, (state, action) => {
         state.status = "failed";

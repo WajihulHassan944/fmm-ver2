@@ -22,11 +22,16 @@ const FIELD_LABELS = {
 
 const BOXING_FIELDS = ['HP', 'BP', 'TP', 'RW', 'RL', 'KO', 'SP'];
 const MMA_FIELDS = ['ST', 'KI', 'KN', 'EL', 'RW', 'RL', 'KO', 'SP'];
-const emptyStats = (category) => Object.fromEntries((category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS).map((key) => [key, 0]));
+const emptyStats = (category) => Object.fromEntries((category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS).map((key) => [key, '']));
 const normalizeNumber = (value) => {
+  if (value === '' || value === null || value === undefined) return 0;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 };
+
+const normalizeStatsForSubmit = (stats = {}) => Object.fromEntries(
+  Object.entries(stats).map(([key, value]) => [key, normalizeNumber(value)])
+);
 
 const AdminPredictions = ({ matchId, filter, onBack }) => {
   const [showRWPopup, setShowRWPopup] = useState(false);
@@ -88,11 +93,11 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   const handleMetricInput = (fighter, stat, value) => {
     const setter = fighter === 'one' ? setFighterOneStats : setFighterTwoStats;
-    setter((stats) => {
-      const next = { ...stats, [stat]: normalizeNumber(value) };
-      if (category === 'boxing' && (stat === 'HP' || stat === 'BP')) next.TP = normalizeNumber(next.HP) + normalizeNumber(next.BP);
-      return next;
-    });
+    setter((stats) => ({
+      ...stats,
+      // Total punches is intentionally manual. HP/BP never auto-update TP.
+      [stat]: value === '' ? '' : String(Math.max(0, normalizeNumber(value))),
+    }));
   };
 
   const handleButtonClick = (fighter, stat) => {
@@ -104,8 +109,8 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   const handleSave = async () => {
     const payload = {
-      fighterOneStats: { ...fighterOneStats, roundNumber: round },
-      fighterTwoStats: { ...computeFighterTwoStats(), roundNumber: round },
+      fighterOneStats: { ...normalizeStatsForSubmit(fighterOneStats), roundNumber: round },
+      fighterTwoStats: { ...normalizeStatsForSubmit(computeFighterTwoStats()), roundNumber: round },
     };
 
     const saveRoundResultsPromise = new Promise(async (resolve, reject) => {
@@ -124,7 +129,10 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         if (response.ok) {
           setRoundScores((prevScores) => {
             const newScores = [...prevScores];
-            newScores[round - 1] = { fighterOneStats, fighterTwoStats: computeFighterTwoStats() };
+            newScores[round - 1] = {
+              fighterOneStats: normalizeStatsForSubmit(fighterOneStats),
+              fighterTwoStats: normalizeStatsForSubmit(computeFighterTwoStats()),
+            };
             return newScores;
           });
 
@@ -287,7 +295,16 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         </button>
         <label>
           <span>{stat} value</span>
-          <input type="number" value={stats[stat] ?? 0} onChange={(event) => handleMetricInput(fighter, stat, event.target.value)} />
+          <input
+            type="number"
+            min="0"
+            inputMode="numeric"
+            placeholder="0"
+            value={stats[stat] ?? ''}
+            onFocus={(event) => event.target.select()}
+            onWheel={(event) => event.currentTarget.blur()}
+            onChange={(event) => handleMetricInput(fighter, stat, event.target.value)}
+          />
         </label>
       </article>
     );

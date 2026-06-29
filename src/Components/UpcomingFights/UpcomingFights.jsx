@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
+import { diversifyFightsBySport } from '@/Utils/fightOrdering';
 
 const getMatchTimestamp = (match) => {
   const date = match?.matchDate?.split?.('T')?.[0];
@@ -97,7 +98,7 @@ const UpcomingFights = () => {
         }).filter(Boolean); // Filter out null values where no condition is met
   
         // Prioritize featured, live, tonight, and nearest active fights first.
-        setUpcomingMatches(sortUpcomingMatches(filteredMatches));
+        setUpcomingMatches(diversifyFightsBySport(sortUpcomingMatches(filteredMatches)));
       } catch (error) {
         console.error("Error fetching data:", error);
       } 
@@ -124,6 +125,7 @@ const UpcomingFights = () => {
    
       <div className='homeSecond' style={{ background: 'transparent' }}>
         <h1 className='second-main-heading'>Upcoming fights <span className='toRemove'>/ Active fights</span></h1>
+        <p className='upcomingFreshMixNote'>Fresh mix: live, tonight, recently added, and recently completed combat-sports cards are prioritized first.</p>
         <div className="fightswrap" data-aos="zoom-out">
           {upcomingMatches.length > 0 ? (
             upcomingMatches.map((match) => {
