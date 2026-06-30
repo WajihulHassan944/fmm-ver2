@@ -60,9 +60,9 @@ export const safeFetchJson = async (path, query = {}, options = {}) => {
 
 
 export const isDraftFight = (fight = {}) => {
-  const values = [fight.matchStatus, fight.status, fight.publicStatus]
+  const values = [fight.matchStatus, fight.status, fight.matchShadowStatus, fight.publicStatus]
     .map((value) => String(value || '').trim().toLowerCase());
-  return Boolean(fight.draft === true || fight.isDraft === true || values.includes('draft'));
+  return Boolean(fight.draft || fight.isDraft || fight.publicVisible === false || values.includes('draft'));
 };
 
 export const filterPublicFights = (fights = [], { includeDrafts = false } = {}) => {
@@ -95,16 +95,31 @@ export const normalizePaginatedPayload = (payload, fallback = []) => {
   return { rows, pagination };
 };
 
+const fetchLegacyFightRows = async (path, query = {}, includeDrafts = false) => {
+  const response = await fetch(buildPublicApiUrl(path, { ...query, includeDrafts: includeDrafts ? 'true' : undefined }));
+  if (!response.ok) return [];
+  const payload = await response.json();
+  return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
+};
+
 export const fetchPublicFights = async (query = {}) => {
   const includeDrafts = ['true', '1', 'yes'].includes(String(query.includeDrafts || query.admin || '').toLowerCase());
+  const publicQuery = { limit: 100, ...query };
+
   try {
-    const payload = await safeFetchJson('/api/public/fights', { limit: 60, ...query });
-    return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
+    const payload = await safeFetchJson('/api/public/fights', publicQuery);
+    const rows = filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
+    if (rows.length) return rows;
+
+    const legacyRows = await fetchLegacyFightRows('/match', publicQuery, includeDrafts);
+    if (legacyRows.length) return legacyRows;
+
+    return fetchLegacyFightRows('/shadow', publicQuery, includeDrafts);
   } catch (error) {
-    console.warn('Public fights API unavailable, falling back to legacy /match endpoint:', error.message);
-    const response = await fetch(buildPublicApiUrl('/match', { ...query, includeDrafts: includeDrafts ? 'true' : undefined }));
-    if (!response.ok) throw error;
-    return filterPublicFights(await response.json(), { includeDrafts });
+    console.warn('Public fights API unavailable, falling back to legacy fight endpoints:', error.message);
+    const legacyRows = await fetchLegacyFightRows('/match', publicQuery, includeDrafts);
+    if (legacyRows.length) return legacyRows;
+    return fetchLegacyFightRows('/shadow', publicQuery, includeDrafts);
   }
 };
 

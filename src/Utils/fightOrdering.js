@@ -1,15 +1,45 @@
 export const isDraftFightForDisplay = (fight = {}) => {
-  const statusValues = [fight.matchStatus, fight.status, fight.publicStatus]
+  const statusValues = [fight.matchStatus, fight.status, fight.matchShadowStatus, fight.publicStatus]
     .map((value) => String(value || '').trim().toLowerCase());
-  return Boolean(fight.draft === true || fight.isDraft === true || statusValues.includes('draft'));
+  return Boolean(fight.draft || fight.isDraft || fight.publicVisible === false || statusValues.includes('draft'));
 };
 
 export const getFightId = (fight) => fight?._id || fight?.id || fight?.matchId || '';
 
+export const normalizeCombatSportKey = (value = '') => {
+  const normalized = String(value || '').trim().toLowerCase().replace(/[_-]+/g, ' ');
+  if (!normalized) return 'mma';
+  if (normalized.includes('bare') || normalized.includes('bkfc') || normalized.includes('bareknuckle') || normalized.includes('bare knuckle')) return 'bareknuckle';
+  if (normalized.includes('kick')) return 'kickboxing';
+  if (normalized.includes('box')) return 'boxing';
+  if (normalized.includes('mixed') || normalized.includes('mma') || normalized.includes('ufc') || normalized.includes('combat')) return 'mma';
+  return normalized.replace(/[^a-z0-9]+/g, '-') || 'mma';
+};
+
 export const getFightSport = (fight) => {
-  const raw = fight?.matchCategoryTwo || fight?.matchCategory || fight?.sport || 'combat';
+  const raw = fight?.matchCategoryTwo
+    || fight?.matchCategory
+    || fight?.sport
+    || fight?.matchSport
+    || fight?.category
+    || fight?.fightSport
+    || fight?.discipline
+    || fight?.matchDiscipline
+    || fight?.matchName
+    || 'mma';
   const value = String(raw || '').trim();
-  return value || 'combat';
+  return value || 'mma';
+};
+
+export const getFightSportKey = (fight) => normalizeCombatSportKey(getFightSport(fight));
+
+export const getFightSportLabel = (fight) => {
+  const key = getFightSportKey(fight);
+  if (key === 'bareknuckle') return 'Bareknuckle';
+  if (key === 'kickboxing') return 'Kickboxing';
+  if (key === 'boxing') return 'Boxing';
+  if (key === 'mma') return 'MMA';
+  return String(getFightSport(fight) || 'MMA').trim();
 };
 
 export const getFightTimestamp = (fight) => {
@@ -95,7 +125,7 @@ export const diversifyFightsBySport = (fights = [], limit) => {
   const seenSports = new Set();
 
   ordered.forEach((fight) => {
-    const sport = getFightSport(fight).toLowerCase();
+    const sport = getFightSportKey(fight);
     if (!seenSports.has(sport)) {
       seenSports.add(sport);
       firstBySport.push(fight);

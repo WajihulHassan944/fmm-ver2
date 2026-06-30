@@ -3276,3 +3276,125 @@ a[class*="Button"] {
     letter-spacing: .08em;
   }
 }
+
+/* Phase 5 public all-fights homepage sport tabs */
+.fmm-home-fight-tabs {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 4px 0 16px;
+}
+
+.fmm-home-fight-tabs button {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  color: rgba(255,255,255,.78);
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 14px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.fmm-home-fight-tabs button span,
+.fmm-home-fight-tabs button strong {
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.fmm-home-fight-tabs button strong {
+  align-items: center;
+  background: rgba(255,255,255,.1);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  justify-content: center;
+  min-width: 28px;
+  padding: 7px 8px 5px;
+}
+
+.fmm-home-fight-tabs button.is-active,
+.fmm-home-fight-tabs button:hover {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(223,17,27,.34), transparent 6rem),
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.035));
+  border-color: rgba(223,17,27,.65);
+  box-shadow: 0 18px 44px rgba(223,17,27,.16), inset 0 1px 0 rgba(255,255,255,.08);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.fmm-mobile-app-chips button {
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  color: rgba(255,255,255,.78);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-family: var(--fmm-font-ui, Impact, sans-serif);
+  font-size: 10px;
+  font-weight: 900;
+  gap: 7px;
+  letter-spacing: .08em;
+  padding: 8px 12px;
+  text-transform: uppercase;
+}
+
+.fmm-mobile-app-chips button small {
+  color: rgba(255,255,255,.55);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.fmm-mobile-app-chips button.is-active {
+  background: linear-gradient(135deg, #df111b, #ff5964);
+  border-color: rgba(255,255,255,.2);
+  box-shadow: 0 14px 28px rgba(223,17,27,.22);
+  color: #fff;
+}
+
+.fmm-mobile-app-chips button.is-active small {
+  color: rgba(255,255,255,.85);
+}
+
+@media (max-width: 760px) {
+  .fmm-home-fight-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 0 14px 12px 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .fmm-home-fight-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fmm-home-fight-tabs button {
+    border-radius: 999px;
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 10px 0 12px;
+  }
+
+  .fmm-home-fight-tabs button span {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .fmm-home-fight-tabs button strong {
+    font-size: 9px;
+    min-width: 22px;
+    padding: 5px 6px 4px;
+  }
+}

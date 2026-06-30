@@ -6,7 +6,7 @@ import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
 import Link from 'next/link';
 import Head from 'next/head';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
-import { diversifyFightsBySport, orderFightsForDisplay } from '@/Utils/fightOrdering';
+import { diversifyFightsBySport, getFightSportKey, getFightSportLabel, orderFightsForDisplay } from '@/Utils/fightOrdering';
 import {
   FaArrowRight,
   FaBolt,
@@ -29,6 +29,15 @@ import {
 } from 'react-icons/fa';
 
 const FALLBACK_FIGHT_IMAGE = '/images/hero-fight.png';
+
+const HOME_FIGHT_SPORT_TABS = [
+  { key: 'all', label: 'All Fights' },
+  { key: 'boxing', label: 'Boxing' },
+  { key: 'kickboxing', label: 'Kickboxing' },
+  { key: 'mma', label: 'MMA' },
+  { key: 'bareknuckle', label: 'Bareknuckle' },
+];
+
 
 const SCORING_ROWS = [
   ['Correct Winner', '100'],
@@ -152,16 +161,15 @@ const getLockLabel = (match, now) => {
   return 'OPEN';
 };
 
-const getCategory = (match) => {
-  const value = match?.matchCategoryTwo || match?.matchCategory || 'MMA';
-  return String(value).trim() || 'MMA';
-};
+const getCategory = (match) => getFightSportLabel(match);
 
-const getCategoryClass = (category) => {
-  const normalized = String(category).toLowerCase();
-  if (normalized.includes('box')) return 'is-boxing';
-  if (normalized.includes('kick')) return 'is-kickboxing';
-  if (normalized.includes('bare')) return 'is-bare-knuckle';
+const getCategoryClass = (matchOrCategory) => {
+  const key = typeof matchOrCategory === 'object'
+    ? getFightSportKey(matchOrCategory)
+    : getFightSportKey({ matchCategory: matchOrCategory });
+  if (key === 'boxing') return 'is-boxing';
+  if (key === 'kickboxing') return 'is-kickboxing';
+  if (key === 'bareknuckle') return 'is-bare-knuckle';
   return 'is-mma';
 };
 
@@ -201,6 +209,7 @@ const HomeAnother = () => {
   const [buttonText, setButtonText] = useState('Send Message');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [now, setNow] = useState(null);
+  const [activeFightSport, setActiveFightSport] = useState('all');
   const [wrestlingMatches, setWrestlingMatches] = useState([]);
 
   useEffect(() => {
@@ -228,8 +237,21 @@ const HomeAnother = () => {
   }, []);
 
   const orderedMatches = useMemo(() => getOrderedMatches(matches), [matches]);
-  const contestMatches = useMemo(() => diversifyFightsBySport(orderedMatches, 8), [orderedMatches]);
-  const primaryFight = orderedMatches[0];
+  const homepageFightPool = useMemo(() => diversifyFightsBySport(orderedMatches), [orderedMatches]);
+  const sportCounts = useMemo(() => HOME_FIGHT_SPORT_TABS.reduce((acc, tab) => {
+    acc[tab.key] = tab.key === 'all'
+      ? homepageFightPool.length
+      : homepageFightPool.filter((fight) => getFightSportKey(fight) === tab.key).length;
+    return acc;
+  }, {}), [homepageFightPool]);
+  const contestMatches = useMemo(() => {
+    const rows = activeFightSport === 'all'
+      ? homepageFightPool
+      : homepageFightPool.filter((fight) => getFightSportKey(fight) === activeFightSport);
+    return rows.slice(0, 12);
+  }, [activeFightSport, homepageFightPool]);
+  const selectedSportLabel = HOME_FIGHT_SPORT_TABS.find((tab) => tab.key === activeFightSport)?.label || 'All Fights';
+  const primaryFight = homepageFightPool[0] || orderedMatches[0];
   const primaryCountdown = getCountdownParts(primaryFight, now);
 
   const liveLeaderboardRows = useMemo(() => {
@@ -444,12 +466,18 @@ const HomeAnother = () => {
               </div>
               <Link href="/upcomingfights" aria-label="Open all fights"><FaChevronRight aria-hidden="true" /></Link>
             </div>
-            <div className="fmm-mobile-app-chips">
-              <span>Live</span>
-              <span>Tonight</span>
-              <span>Boxing</span>
-              <span>MMA</span>
-              <span>Wrestling</span>
+            <div className="fmm-mobile-app-chips" role="tablist" aria-label="Homepage fight sport filters">
+              {HOME_FIGHT_SPORT_TABS.map((tab) => (
+                <button
+                  type="button"
+                  key={tab.key}
+                  className={activeFightSport === tab.key ? 'is-active' : ''}
+                  onClick={() => setActiveFightSport(tab.key)}
+                >
+                  {tab.label.replace(' Fights', '')}
+                  <small>{sportCounts[tab.key] || 0}</small>
+                </button>
+              ))}
             </div>
           </section>
 
@@ -465,6 +493,20 @@ const HomeAnother = () => {
               </div>
             </div>
 
+            <div className="fmm-home-fight-tabs" role="tablist" aria-label="Filter homepage fight cards by sport">
+              {HOME_FIGHT_SPORT_TABS.map((tab) => (
+                <button
+                  type="button"
+                  key={tab.key}
+                  className={activeFightSport === tab.key ? 'is-active' : ''}
+                  onClick={() => setActiveFightSport(tab.key)}
+                >
+                  <span>{tab.label}</span>
+                  <strong>{sportCounts[tab.key] || 0}</strong>
+                </button>
+              ))}
+            </div>
+
             <div
               className="fmm-contest-grid"
               ref={contestRailRef}
@@ -477,11 +519,11 @@ const HomeAnother = () => {
             >
               {matchStatus === 'loading' && <div className="fmm-empty-card">Loading active contests...</div>}
               {matchStatus === 'failed' && <div className="fmm-empty-card">Unable to load fights: {matchError}</div>}
-              {matchStatus !== 'loading' && matchStatus !== 'failed' && contestMatches.length === 0 && <div className="fmm-empty-card">No contests are currently available.</div>}
+              {matchStatus !== 'loading' && matchStatus !== 'failed' && contestMatches.length === 0 && <div className="fmm-empty-card">No {selectedSportLabel.toLowerCase()} contests are currently available.</div>}
 
               {contestMatches.map((match, index) => {
                 const category = getCategory(match);
-                const categoryClass = getCategoryClass(category);
+                const categoryClass = getCategoryClass(match);
                 const isFinished = String(match?.matchStatus || '').toLowerCase().includes('finished');
 
                 return (
