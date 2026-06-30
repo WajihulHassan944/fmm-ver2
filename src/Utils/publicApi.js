@@ -146,6 +146,36 @@ export const fetchPublicFights = async (query = {}) => {
   }
 };
 
+
+export const fetchPublicPredictionFights = async (query = {}) => {
+  const includeDrafts = ['true', '1', 'yes'].includes(String(query.includeDrafts || query.admin || '').toLowerCase());
+  const requestQuery = { limit: 100, ...query };
+
+  const normalizePlayableRows = (payload) => filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts })
+    .map((fight) => ({
+      ...fight,
+      __source: fight.__source || fight.sourceType || fight.collection || 'playable',
+      __playable: fight.__playable !== false,
+    }));
+
+  try {
+    const payload = await safeFetchJson('/api/public/prediction-fights', requestQuery);
+    const rows = normalizePlayableRows(payload);
+    if (rows.length) return rows;
+  } catch (error) {
+    console.warn('Prediction-ready fights API unavailable, falling back to legacy playable filters:', error.message);
+  }
+
+  try {
+    const legacyRows = await fetchLegacyCombinedFights({ ...requestQuery, playable: 'true', status: 'playable' }, includeDrafts);
+    if (legacyRows.length) return legacyRows.map((fight) => ({ ...fight, __playable: true }));
+  } catch (error) {
+    console.warn('Legacy playable fight filters unavailable:', error.message);
+  }
+
+  return fetchPublicFights(requestQuery);
+};
+
 export const fetchPublicBlogs = async (query = {}) => {
   try {
     const payload = await safeFetchJson('/api/public/blogs', { limit: 24, ...query });

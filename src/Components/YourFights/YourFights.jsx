@@ -16,11 +16,13 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
+import { fetchPublicPredictionFights } from '@/Utils/publicApi';
 import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
 import FightCosting from '../Dashboard/FightCosting';
 import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
 import UserWorkspaceNav from '../UserProfile/UserWorkspaceNav';
 import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
+import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
@@ -37,12 +39,26 @@ const YourFights = () => {
   const [selectedMatchId, setSelectedMatchId] = useState(null);
   const [completedMatchId, setCompletedMatchId] = useState(null);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const [playableMatches, setPlayableMatches] = useState([]);
   const [removedMatches, setRemovedMatches] = useState([]);
   const [wrestlingHistory, setWrestlingHistory] = useState([]);
 
   useEffect(() => {
     if (matchStatus === 'idle') dispatch(fetchMatches());
   }, [matchStatus, dispatch]);
+
+  useEffect(() => {
+    let active = true;
+    fetchPublicPredictionFights({ limit: 100 })
+      .then((rows) => {
+        if (active) setPlayableMatches(Array.isArray(rows) ? rows : []);
+      })
+      .catch((error) => {
+        console.warn('Prediction-ready fight library feed unavailable:', error.message);
+        if (active) setPlayableMatches([]);
+      });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -69,57 +85,35 @@ const YourFights = () => {
   }, [user?._id]);
 
   useEffect(() => {
-    let active = true;
-    const loadUpcomingMatches = async () => {
-      try {
-        const [affiliateResponse, usersResponse] = await Promise.all([
-          fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates'),
-          fetch('https://fantasymmadness-game-server-three.vercel.app/users'),
-        ]);
-        const [affiliatePayload, usersPayload] = await Promise.all([affiliateResponse.json(), usersResponse.json()]);
-        const affiliates = Array.isArray(affiliatePayload) ? affiliatePayload : [];
-        const users = Array.isArray(usersPayload) ? usersPayload : [];
-        const now = new Date();
-        const startOfToday = new Date(now);
-        startOfToday.setHours(0, 0, 0, 0);
+    const sourceRows = playableMatches.length ? playableMatches : (Array.isArray(matches) ? matches : []);
+    const filteredMatches = orderFightsForDisplay(sourceRows)
+      .filter(Boolean)
+      .map((match) => ({
+        ...match,
+        blurred: Boolean(match.blurred || match.entryLocked || match.isLocked || match.requiresMorePlayers),
+      }));
+    setUpcomingMatches(filteredMatches);
+  }, [matches, playableMatches]);
 
-        const filteredMatches = (Array.isArray(matches) ? matches : []).map((match) => {
-          const matchDateTime = new Date(`${match.matchDate?.split('T')[0]}T${match.matchTime || '00:00'}:00`);
-          if (match.matchType === 'LIVE' && matchDateTime >= startOfToday && now < matchDateTime) {
-            return { ...match, blurred: false };
-          }
-          if (match.matchType === 'SHADOW') {
-            const affiliate = affiliates.find((candidate) => sameId(candidate._id, match.affiliateId));
-            if (!affiliate || !(matchDateTime >= startOfToday && now < matchDateTime)) return null;
-            const joinedIds = (Array.isArray(affiliate.usersJoined) ? affiliate.usersJoined : []).map((entry) => String(entry?.userId || ''));
-            const eligibleUsers = users.filter((candidate) => joinedIds.includes(String(candidate._id)) && Number.parseInt(candidate.tokens, 10) >= Number(match.matchTokens || 0));
-            const requiredUsers = Number(match.matchTokens || 0) > 0 ? Number(match.pot || 0) / Number(match.matchTokens) : 0;
-            return { ...match, blurred: eligibleUsers.length < requiredUsers };
-          }
-          return null;
-        }).filter(Boolean);
 
-        if (active) setUpcomingMatches(filteredMatches);
-      } catch (error) {
-        console.error('Error fetching fight eligibility data:', error);
-        if (active) setUpcomingMatches([]);
-      }
-    };
+  const allFightRows = useMemo(() => {
+    const seen = new Set();
+    return orderFightsForDisplay([...(Array.isArray(matches) ? matches : []), ...(Array.isArray(playableMatches) ? playableMatches : [])]).filter((match) => {
+      const id = getFightId(match);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [matches, playableMatches]);
 
-    loadUpcomingMatches();
-    return () => {
-      active = false;
-    };
-  }, [matches]);
-
-  const completedMatches = useMemo(() => (Array.isArray(matches) ? matches : []).filter((match) => (
+  const completedMatches = useMemo(() => allFightRows.filter((match) => (
     safePredictions(match).some((prediction) => sameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')
-    && !removedMatches.includes(match._id)
-  )), [matches, removedMatches, user?._id]);
+    && !removedMatches.includes(getFightId(match))
+  )), [allFightRows, removedMatches, user?._id]);
 
   const pendingMatches = useMemo(() => upcomingMatches.filter((match) => (
     !safePredictions(match).some((prediction) => sameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')
-    && !removedMatches.includes(match._id)
+    && !removedMatches.includes(getFightId(match))
   )), [upcomingMatches, removedMatches, user?._id]);
 
   const currentUserData = Array.isArray(leaderboard) ? leaderboard.find((player) => sameId(player._id, user?._id)) : null;
@@ -270,7 +264,7 @@ const YourFights = () => {
         <section className="player-fights-section">
           <header><span>02</span><div><p>Cards requiring action</p><h2>Pending fights</h2><small>Open an available card to review entry cost and submit every prediction field.</small></div></header>
           <div className="player-fight-library-grid">
-            {pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No pending fights</h3><p>You are caught up. New eligible cards will appear here.</p></div>}
+            {pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No prediction-ready fights yet</h3><p>Fresh playable fight cards will appear here as soon as admin opens predictions.</p></div>}
           </div>
         </section>
       </main>

@@ -25,6 +25,7 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
+import { fetchPublicPredictionFights } from '@/Utils/publicApi';
 import FightCosting from './FightCosting';
 import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
 import PurchaseTokensIntimation from './PurchaseTokensIntimation';
@@ -51,6 +52,7 @@ const Dashboard = () => {
   const [completedMatchId, setCompletedMatchId] = useState(null);
   const [hoveredMatch, setHoveredMatch] = useState(null);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const [playableMatches, setPlayableMatches] = useState([]);
   const [removedMatches, setRemovedMatches] = useState([]);
   const [wrestlingHistory, setWrestlingHistory] = useState([]);
   const [wrestlingMatches, setWrestlingMatches] = useState([]);
@@ -75,6 +77,19 @@ const Dashboard = () => {
   }, [matchStatus, dispatch]);
 
   useEffect(() => {
+    let active = true;
+    fetchPublicPredictionFights({ limit: 80 })
+      .then((rows) => {
+        if (active) setPlayableMatches(Array.isArray(rows) ? rows : []);
+      })
+      .catch((error) => {
+        console.warn('Prediction-ready fight feed unavailable:', error.message);
+        if (active) setPlayableMatches([]);
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
     if (!user?._id) return;
     let active = true;
     Promise.all([
@@ -91,19 +106,15 @@ const Dashboard = () => {
   }, [user?._id]);
 
   useEffect(() => {
-    const today = new Date();
-    const currentTime = new Date();
-    const filteredMatches = orderFightsForDisplay((Array.isArray(matches) ? matches : []).map((match) => {
-      const matchDateTime = new Date(`${match?.matchDate?.split('T')[0]}T${match?.matchTime || '00:00'}:00`);
-      if (match.matchType === 'LIVE') {
-        if (matchDateTime >= today.setHours(0, 0, 0, 0) && currentTime < matchDateTime) return { ...match, blurred: false };
-      } else if (match.matchType === 'SHADOW') {
-        if (match.affiliateId && match.shadowFightId && match.matchShadowStatus === 'active') return { ...match, blurred: false };
-      }
-      return null;
-    }).filter(Boolean));
+    const sourceRows = playableMatches.length ? playableMatches : (Array.isArray(matches) ? matches : []);
+    const filteredMatches = orderFightsForDisplay(sourceRows)
+      .filter(Boolean)
+      .map((match) => ({
+        ...match,
+        blurred: Boolean(match.blurred || match.entryLocked || match.isLocked || match.requiresMorePlayers),
+      }));
     setUpcomingMatches(filteredMatches);
-  }, [matches]);
+  }, [matches, playableMatches]);
 
   const getRemainingTime = (matchDate, matchTime) => {
     const [year, month, day] = String(matchDate || '').split('T')[0].split('-');
@@ -118,9 +129,19 @@ const Dashboard = () => {
     };
   };
 
-  const completedMatches = useMemo(() => orderFightsForDisplay((Array.isArray(matches) ? matches : []).filter((match) => safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted'))), [matches, user?._id]);
-  const pendingMatches = useMemo(() => orderFightsForDisplay(upcomingMatches.filter((match) => !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(match._id))), [removedMatches, upcomingMatches, user?._id]);
-  const visibleCompleted = useMemo(() => orderFightsForDisplay(completedMatches.filter((match) => !removedMatches.includes(match._id))), [completedMatches, removedMatches]);
+  const allFightRows = useMemo(() => {
+    const seen = new Set();
+    return orderFightsForDisplay([...(Array.isArray(matches) ? matches : []), ...(Array.isArray(playableMatches) ? playableMatches : [])]).filter((match) => {
+      const id = getFightId(match);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [matches, playableMatches]);
+
+  const completedMatches = useMemo(() => orderFightsForDisplay(allFightRows.filter((match) => safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted'))), [allFightRows, user?._id]);
+  const pendingMatches = useMemo(() => orderFightsForDisplay(upcomingMatches.filter((match) => !safePredictions(match).some((prediction) => isSameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted') && !removedMatches.includes(getFightId(match)))), [removedMatches, upcomingMatches, user?._id]);
+  const visibleCompleted = useMemo(() => orderFightsForDisplay(completedMatches.filter((match) => !removedMatches.includes(getFightId(match)))), [completedMatches, removedMatches]);
   const dashboardOpportunities = useMemo(() => {
     const seen = new Set();
     const merged = orderFightsForDisplay([...pendingMatches, ...upcomingMatches]).filter((match) => {
@@ -188,7 +209,7 @@ const Dashboard = () => {
   }
 
   if (selectedMatchId) {
-    const selectedMatch = (Array.isArray(matches) ? matches : []).find((match) => match._id === selectedMatchId);
+    const selectedMatch = allFightRows.find((match) => getFightId(match) === selectedMatchId);
     if (!selectedMatch) {
       return <section className="player-dynamic-route-view"><div className="theme-container player-dynamic-back-row"><button type="button" onClick={() => setSelectedMatchId(null)}><FaArrowLeft /> Back to dashboard</button></div><div className="player-dynamic-empty"><FaShieldAlt /><h2>Selected fight not found</h2></div></section>;
     }
@@ -203,7 +224,7 @@ const Dashboard = () => {
   }
 
   if (completedMatchId) {
-    const completedMatch = (Array.isArray(matches) ? matches : []).find((match) => match._id === completedMatchId);
+    const completedMatch = allFightRows.find((match) => getFightId(match) === completedMatchId);
     if (!completedMatch) {
       return <section className="player-dynamic-route-view"><div className="theme-container player-dynamic-back-row"><button type="button" onClick={() => setCompletedMatchId(null)}><FaArrowLeft /> Back to dashboard</button></div><div className="player-dynamic-empty"><FaShieldAlt /><h2>Completed fight not found</h2></div></section>;
     }
@@ -384,7 +405,7 @@ const Dashboard = () => {
 
         <section className="player-command-section">
           <header><span>03</span><div><p>Cards requiring action</p><h2>Your pending fights</h2><small>Open a card to review entry details and submit your predictions.</small></div></header>
-          <div className="player-command-fight-grid">{pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No pending matches</h3><p>You are fully caught up for the current fight schedule.</p></div>}</div>
+          <div className="player-command-fight-grid">{pendingMatches.length ? pendingMatches.map((match) => renderFightCard(match, 'pending')) : <div className="player-dynamic-empty is-inline"><FaShieldAlt /><h3>No prediction-ready fights yet</h3><p>Fresh playable fight cards will appear here as soon as admin opens predictions.</p></div>}</div>
         </section>
 
         {!user.hasSubmittedTestimonial && (
