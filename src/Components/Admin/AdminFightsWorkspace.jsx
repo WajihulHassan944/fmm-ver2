@@ -54,6 +54,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedScore, setSelectedScore] = useState(null);
   const [selectedScoresView, setSelectedScoresView] = useState(null);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
+  const [selectedFightIds, setSelectedFightIds] = useState([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true }));
@@ -96,6 +98,10 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     });
   }, [activeTab, allRows, search]);
 
+  useEffect(() => {
+    setSelectedFightIds((current) => current.filter((id) => filteredRows.some((fight) => String(getId(fight)) === String(id))));
+  }, [filteredRows]);
+
   const metrics = useMemo(() => ({
     total: allRows.length,
     active: allRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'ongoing').length,
@@ -103,31 +109,69 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     shadows: allRows.filter((fight) => fight.__source === 'shadowTemplate').length,
   }), [allRows]);
 
+  const getSourceType = (fight) => fight.__source === 'shadowTemplate' || fight.__source === 'shadow' ? 'shadow' : 'match';
+
+  const selectedFights = useMemo(() => (
+    allRows.filter((fight) => selectedFightIds.includes(String(getId(fight))))
+  ), [allRows, selectedFightIds]);
+
+  const toggleFightSelection = (fight) => {
+    const id = String(getId(fight) || '');
+    if (!id) return;
+    setSelectedFightIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  };
+
+  const toggleVisibleSelection = () => {
+    const visibleIds = filteredRows.map((fight) => String(getId(fight) || '')).filter(Boolean);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedFightIds.includes(id));
+    setSelectedFightIds((current) => allSelected
+      ? current.filter((id) => !visibleIds.includes(id))
+      : Array.from(new Set([...current, ...visibleIds]))
+    );
+  };
+
+  const refreshFightRows = () => {
+    dispatch(fetchMatches({ includeDrafts: true }));
+    loadShadowTemplates();
+  };
+
+  const bulkDeleteFights = async (fightsToDelete = selectedFights) => {
+    const rows = fightsToDelete.filter((fight) => getId(fight));
+    if (!rows.length) return;
+    const confirmed = window.confirm(`Delete ${rows.length} selected fight${rows.length === 1 ? '' : 's'}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    setBulkDeleting(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/fights/bulk-delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          updateWallet: false,
+          items: rows.map((fight) => ({ id: getId(fight), sourceType: getSourceType(fight) })),
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to delete selected fights');
+
+      toast.success(payload?.message || `${rows.length} fight${rows.length === 1 ? '' : 's'} deleted.`);
+      setSelectedFightIds([]);
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete selected fights.');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
   const openScoring = (fight) => setSelectedScore({ id: getId(fight), filter: fight.__source === 'shadowTemplate' ? 'shadowTemplate' : 'normal' });
   const openScores = (fight) => setSelectedScoresView({ id: getId(fight), filter: fight.__source === 'shadowTemplate' ? 'shadowTemplate' : 'normal' });
   const openPromotion = (fight) => setSelectedPromotion(fight);
 
   const deleteFight = async (fight) => {
-    const id = getId(fight);
-    if (!id) return;
-    const title = getTitle(fight);
-    const isShadowTemplate = fight.__source === 'shadowTemplate';
-    const confirmed = window.confirm(`Delete "${title}"? This cannot be undone.`);
-    if (!confirmed) return;
-
-    const endpoint = isShadowTemplate
-      ? `${API_BASE}/shadowfighttodelete/${id}`
-      : `${API_BASE}/api/matches/${id}?updateWallet=false`;
-
-    try {
-      const response = await fetch(endpoint, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete fight');
-      toast.success(isShadowTemplate ? 'Shadow fight deleted.' : 'Fight deleted.');
-      dispatch(fetchMatches({ includeDrafts: true }));
-      loadShadowTemplates();
-    } catch (error) {
-      toast.error(error.message || 'Failed to delete fight.');
-    }
+    if (!getId(fight)) return;
+    return bulkDeleteFights([fight]);
   };
 
   if (selectedScore?.id) {
@@ -176,7 +220,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
-          <button type="button" className="admin-action-secondary" onClick={() => { dispatch(fetchMatches({ includeDrafts: true })); loadShadowTemplates(); }}><FaSyncAlt className={matchStatus === 'loading' || shadowLoading ? 'xp-spin' : ''} /> Refresh</button>
+          <button type="button" className="admin-action-secondary" onClick={refreshFightRows}><FaSyncAlt className={matchStatus === 'loading' || shadowLoading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
 
@@ -195,10 +239,20 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           </div>
         </div>
 
+        <div className="admin-bulk-actions">
+          <button type="button" className="admin-action-secondary" onClick={toggleVisibleSelection}>
+            {filteredRows.length > 0 && filteredRows.every((fight) => selectedFightIds.includes(String(getId(fight)))) ? 'Clear visible' : 'Select visible'}
+          </button>
+          <span>{selectedFightIds.length} selected</span>
+          <button type="button" className="admin-danger-action" disabled={!selectedFightIds.length || bulkDeleting} onClick={() => bulkDeleteFights()}>
+            <FaTrashAlt /> {bulkDeleting ? 'Deleting...' : 'Delete selected'}
+          </button>
+        </div>
+
         <div className="admin-data-table-scroll">
           <table className="admin-data-table admin-fights-table">
             <thead>
-              <tr><th>Fight</th><th>Sport</th><th>Schedule</th><th>Status</th><th>Entry</th><th>Prize</th><th>Actions</th></tr>
+              <tr><th>Select</th><th>Fight</th><th>Sport</th><th>Schedule</th><th>Status</th><th>Entry</th><th>Prize</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {filteredRows.length ? filteredRows.map((fight, index) => {
@@ -208,6 +262,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                 const isLive = String(fight.matchType || '').toUpperCase() === 'LIVE';
                 return (
                   <tr key={`${fight.__source}-${id || index}`}>
+                    <td>
+                      <label className="admin-row-check" aria-label={`Select ${getTitle(fight)}`}>
+                        <input type="checkbox" checked={selectedFightIds.includes(String(id))} onChange={() => toggleFightSelection(fight)} />
+                      </label>
+                    </td>
                     <td>
                       <div className="admin-fight-cell">
                         <span><img src={fight.fighterAImage || FALLBACK_A} alt="" /><img src={fight.fighterBImage || FALLBACK_B} alt="" /></span>
@@ -230,7 +289,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                   </tr>
                 );
-              }) : <tr><td colSpan="7"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term or filter tab.</span></div></td></tr>}
+              }) : <tr><td colSpan="8"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term or filter tab.</span></div></td></tr>}
             </tbody>
           </table>
         </div>

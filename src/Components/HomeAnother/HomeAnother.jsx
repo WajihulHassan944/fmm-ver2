@@ -36,6 +36,7 @@ const HOME_FIGHT_SPORT_TABS = [
   { key: 'kickboxing', label: 'Kickboxing' },
   { key: 'mma', label: 'MMA' },
   { key: 'bareknuckle', label: 'Bareknuckle' },
+  { key: 'pro-wrestling', label: 'Pro Wrestling' },
 ];
 
 
@@ -170,6 +171,7 @@ const getCategoryClass = (matchOrCategory) => {
   if (key === 'boxing') return 'is-boxing';
   if (key === 'kickboxing') return 'is-kickboxing';
   if (key === 'bareknuckle') return 'is-bare-knuckle';
+  if (key === 'pro-wrestling') return 'is-pro-wrestling';
   return 'is-mma';
 };
 
@@ -192,6 +194,22 @@ const getPlayerCount = (match) => {
   if (Array.isArray(match?.userPredictions)) return match.userPredictions.length;
   return 0;
 };
+
+const normalizeWrestlingFightForHome = (match = {}) => ({
+  ...match,
+  __source: 'pro-wrestling',
+  matchName: match.eventName || match.matchName || 'Pro Wrestling Match',
+  matchFighterA: match.competitorA?.displayName || match.wrestlerA?.displayName || match.wrestlerAName || 'Wrestler A',
+  matchFighterB: match.competitorB?.displayName || match.wrestlerB?.displayName || match.wrestlerBName || 'Wrestler B',
+  fighterAImage: getPWImage(match.competitorA || match.wrestlerA, 'A'),
+  fighterBImage: getPWImage(match.competitorB || match.wrestlerB, 'B'),
+  matchCategory: 'Pro Wrestling',
+  matchCategoryTwo: 'Pro Wrestling',
+  matchStatus: match.status || match.matchStatus || 'Open',
+  matchDate: match.matchDate || match.date,
+  matchTime: match.matchTime || match.time,
+  pot: match.currentPot || match.pot || 0,
+});
 
 const getLeaderboardName = (player) => (
   player?.firstName || player?.username || player?.name || player?.email?.split?.('@')?.[0] || 'Player'
@@ -238,20 +256,26 @@ const HomeAnother = () => {
 
   const orderedMatches = useMemo(() => getOrderedMatches(matches), [matches]);
   const homepageFightPool = useMemo(() => diversifyFightsBySport(orderedMatches), [orderedMatches]);
+  const normalizedWrestlingFights = useMemo(() => wrestlingMatches.map(normalizeWrestlingFightForHome), [wrestlingMatches]);
   const sportCounts = useMemo(() => HOME_FIGHT_SPORT_TABS.reduce((acc, tab) => {
+    if (tab.key === 'pro-wrestling') {
+      acc[tab.key] = normalizedWrestlingFights.length;
+      return acc;
+    }
     acc[tab.key] = tab.key === 'all'
-      ? homepageFightPool.length
+      ? homepageFightPool.length + normalizedWrestlingFights.length
       : homepageFightPool.filter((fight) => getFightSportKey(fight) === tab.key).length;
     return acc;
-  }, {}), [homepageFightPool]);
+  }, {}), [homepageFightPool, normalizedWrestlingFights]);
   const contestMatches = useMemo(() => {
+    if (activeFightSport === 'pro-wrestling') return normalizedWrestlingFights.slice(0, 12);
     const rows = activeFightSport === 'all'
-      ? homepageFightPool
+      ? [...homepageFightPool, ...normalizedWrestlingFights]
       : homepageFightPool.filter((fight) => getFightSportKey(fight) === activeFightSport);
     return rows.slice(0, 12);
-  }, [activeFightSport, homepageFightPool]);
+  }, [activeFightSport, homepageFightPool, normalizedWrestlingFights]);
   const selectedSportLabel = HOME_FIGHT_SPORT_TABS.find((tab) => tab.key === activeFightSport)?.label || 'All Fights';
-  const primaryFight = homepageFightPool[0] || orderedMatches[0];
+  const primaryFight = homepageFightPool[0] || null;
   const primaryCountdown = getCountdownParts(primaryFight, now);
 
   const liveLeaderboardRows = useMemo(() => {
@@ -418,41 +442,43 @@ const HomeAnother = () => {
             </div>
 
             <div className="fmm-hero-fight-area">
-              <aside className="fmm-hero-event-card">
-                <div className="fmm-hero-event-main">
-                  <p>Fresh Featured Fight</p>
-                  <h2>
-                    <span>{primaryFight?.matchFighterA || 'Upcoming'}</span>
-                    <small>vs</small>
-                    <span>{primaryFight?.matchFighterB || 'Matchup'}</span>
-                  </h2>
-                  <div className="fmm-hero-fighters" aria-hidden="true">
-                    <img src={getFighterImage(primaryFight?.fighterAImage)} alt="" loading="lazy" decoding="async" />
-                    <span>VS</span>
-                    <img src={getFighterImage(primaryFight?.fighterBImage)} alt="" loading="lazy" decoding="async" />
-                  </div>
-                  <div className="fmm-hero-event-meta">
-                    <FaClock aria-hidden="true" />
-                    <span>{formatDateTime(primaryFight)}</span>
-                  </div>
-                </div>
-
-                <div className="fmm-countdown-box" aria-label="Fight countdown">
-                  {primaryCountdown ? (
-                    primaryCountdown.map(({ label, value }) => (
-                      <div key={label}>
-                        <strong>{value}</strong>
-                        <span>{label}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="fmm-countdown-state">
-                      <strong>{primaryFight?.matchStatus || 'Open'}</strong>
-                      <span>{primaryFight?.matchName || 'Contest'}</span>
+              {primaryFight && (
+                <aside className="fmm-hero-event-card">
+                  <div className="fmm-hero-event-main">
+                    <p>Fresh Featured Fight</p>
+                    <h2>
+                      <span>{primaryFight.matchFighterA}</span>
+                      <small>vs</small>
+                      <span>{primaryFight.matchFighterB}</span>
+                    </h2>
+                    <div className="fmm-hero-fighters" aria-hidden="true">
+                      <img src={getFighterImage(primaryFight.fighterAImage)} alt="" loading="lazy" decoding="async" />
+                      <span>VS</span>
+                      <img src={getFighterImage(primaryFight.fighterBImage)} alt="" loading="lazy" decoding="async" />
                     </div>
-                  )}
-                </div>
-              </aside>
+                    <div className="fmm-hero-event-meta">
+                      <FaClock aria-hidden="true" />
+                      <span>{formatDateTime(primaryFight)}</span>
+                    </div>
+                  </div>
+
+                  <div className="fmm-countdown-box" aria-label="Fight countdown">
+                    {primaryCountdown ? (
+                      primaryCountdown.map(({ label, value }) => (
+                        <div key={label}>
+                          <strong>{value}</strong>
+                          <span>{label}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="fmm-countdown-state">
+                        <strong>{primaryFight.matchStatus || 'Open'}</strong>
+                        <span>{primaryFight.matchName || 'Contest'}</span>
+                      </div>
+                    )}
+                  </div>
+                </aside>
+              )}
             </div>
           </div>
         </section>
@@ -560,8 +586,8 @@ const HomeAnother = () => {
                       <strong>{getLockLabel(match, now)}</strong>
                     </div>
 
-                    <Link href="/upcomingfights" className="fmm-card-action">
-                      {isFinished ? 'View Contest' : 'Enter Free'} <FaChevronRight aria-hidden="true" />
+                    <Link href={match.__source === 'pro-wrestling' ? `/pro-wrestling/matches/${match._id}` : '/upcomingfights'} className="fmm-card-action">
+                      {match.__source === 'pro-wrestling' ? 'Open Wrestling' : isFinished ? 'View Contest' : 'Enter Free'} <FaChevronRight aria-hidden="true" />
                     </Link>
                   </article>
                 );

@@ -2099,3 +2099,65 @@ input[type='submit'],
   .admin-fights-table th:last-child,
   .admin-fights-table td:last-child { min-width: 220px; }
 }
+
+/* Phase 5 bulk fight management controls */
+.admin-bulk-actions {
+  align-items: center;
+  background: rgba(255, 255, 255, .035);
+  border-bottom: 1px solid var(--ff-border, var(--admin-border));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 15px;
+}
+
+.admin-bulk-actions span {
+  color: var(--ff-muted, var(--admin-muted));
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-danger-action {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(223, 17, 27, .92), rgba(255, 70, 82, .92)) !important;
+  border: 1px solid rgba(255, 88, 98, .5) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  display: inline-flex;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  gap: 8px;
+  min-height: 42px !important;
+  padding: 0 15px !important;
+  text-transform: uppercase;
+}
+
+.admin-danger-action:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.admin-row-check {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.admin-row-check input {
+  accent-color: #df111b;
+  height: 18px;
+  width: 18px;
+}
+
+.fmm-contest-card.is-pro-wrestling {
+  background: radial-gradient(circle at 18% 12%, rgba(249, 180, 22, .18), transparent 34%), linear-gradient(180deg, rgba(18, 13, 26, .98), rgba(8, 10, 18, .98));
+  border-color: rgba(249, 180, 22, .35);
+}
+
+.fmm-contest-card.is-pro-wrestling .fmm-category-pill {
+  background: rgba(249, 180, 22, .14);
+  color: #ffd36f;
+}

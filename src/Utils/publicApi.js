@@ -95,11 +95,33 @@ export const normalizePaginatedPayload = (payload, fallback = []) => {
   return { rows, pagination };
 };
 
-const fetchLegacyFightRows = async (path, query = {}, includeDrafts = false) => {
+const getFightIdentity = (fight = {}) => String(fight._id || fight.id || fight.matchId || fight.matchName || '').trim();
+
+const dedupeFightRows = (rows = []) => {
+  const seen = new Set();
+  return rows.filter((fight) => {
+    const key = getFightIdentity(fight);
+    if (!key) return true;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const fetchLegacyFightRows = async (path, query = {}, includeDrafts = false, sourceType = 'legacy') => {
   const response = await fetch(buildPublicApiUrl(path, { ...query, includeDrafts: includeDrafts ? 'true' : undefined }));
   if (!response.ok) return [];
   const payload = await response.json();
-  return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
+  return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts })
+    .map((fight) => ({ ...fight, __source: fight.__source || sourceType }));
+};
+
+const fetchLegacyCombinedFights = async (query = {}, includeDrafts = false) => {
+  const [matchRows, shadowRows] = await Promise.all([
+    fetchLegacyFightRows('/match', query, includeDrafts, 'match'),
+    fetchLegacyFightRows('/shadow', query, includeDrafts, 'shadow'),
+  ]);
+  return dedupeFightRows([...matchRows, ...shadowRows]);
 };
 
 export const fetchPublicFights = async (query = {}) => {
@@ -107,19 +129,20 @@ export const fetchPublicFights = async (query = {}) => {
   const publicQuery = { limit: 100, ...query };
 
   try {
+    const legacyRows = await fetchLegacyCombinedFights(publicQuery, includeDrafts);
+    if (legacyRows.length) return legacyRows;
+
     const payload = await safeFetchJson('/api/public/fights', publicQuery);
-    const rows = filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
-    if (rows.length) return rows;
-
-    const legacyRows = await fetchLegacyFightRows('/match', publicQuery, includeDrafts);
-    if (legacyRows.length) return legacyRows;
-
-    return fetchLegacyFightRows('/shadow', publicQuery, includeDrafts);
+    return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
   } catch (error) {
-    console.warn('Public fights API unavailable, falling back to legacy fight endpoints:', error.message);
-    const legacyRows = await fetchLegacyFightRows('/match', publicQuery, includeDrafts);
-    if (legacyRows.length) return legacyRows;
-    return fetchLegacyFightRows('/shadow', publicQuery, includeDrafts);
+    console.warn('Legacy fight endpoints unavailable, falling back to public fights API:', error.message);
+    try {
+      const payload = await safeFetchJson('/api/public/fights', publicQuery);
+      return filterPublicFights(normalizePaginatedPayload(payload).rows, { includeDrafts });
+    } catch (fallbackError) {
+      console.warn('Public fights API unavailable:', fallbackError.message);
+      return [];
+    }
   }
 };
 
