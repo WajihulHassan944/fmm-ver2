@@ -2161,3 +2161,35 @@ input[type='submit'],
   background: rgba(249, 180, 22, .14);
   color: #ffd36f;
 }
+
+/* Guide page final premium shell */
+.xp-guide-page-shell {
+  background:
+    radial-gradient(circle at 16% 8%, rgba(223,17,27,.18), transparent 28rem),
+    radial-gradient(circle at 84% 18%, rgba(26,128,255,.13), transparent 32rem),
+    linear-gradient(180deg, #05080d 0%, #08101a 52%, #05070b 100%);
+  min-height: 100vh;
+  padding: 102px min(5vw, 64px) 64px;
+}
+.xp-guide-page-shell .xp-guide-intro,
+.xp-guide-page-shell .xp-guide-workspace,
+.xp-guide-page-shell .xp-guide-scoring {
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.026));
+  border-color: rgba(255,255,255,.115);
+}
+.xp-guide-page-shell .xp-guide-eyebrow {
+  align-items: center;
+  color: #ff3b45;
+  display: inline-flex;
+  font-family: var(--ff-display);
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px;
+  letter-spacing: .1em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+@media (max-width: 780px) {
+  .xp-guide-page-shell { padding: 82px 14px 44px; }
+}

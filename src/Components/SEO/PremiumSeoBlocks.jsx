@@ -1,6 +1,19 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaArrowRight, FaBolt, FaCalendarAlt, FaChartLine, FaCheckCircle, FaClock, FaFire, FaNewspaper, FaSearch, FaShieldAlt, FaStar, FaTrophy, FaUsers } from 'react-icons/fa';
+import {
+  FaArrowRight,
+  FaBolt,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaClock,
+  FaFire,
+  FaNewspaper,
+  FaSearch,
+  FaShieldAlt,
+  FaStar,
+  FaTrophy,
+  FaUsers,
+} from 'react-icons/fa';
 
 import SeoHead from '@/Components/SEO/SeoHead';
 import {
@@ -21,15 +34,44 @@ import { SITE_URL } from '@/Utils/seoConfig';
 
 const safeArray = (value) => (Array.isArray(value) ? value.filter(Boolean) : []);
 const truncate = (value = '', max = 150) => cleanText(value).slice(0, max);
+const entityId = (value = {}) => value._id || value.id || value.matchId || value.slug || getEntityName(value) || getMatchTitle(value);
 
 export const SeoStatBar = ({ stats = [] }) => (
   <div className="phase4-statbar">
-    {stats.map((stat) => (
+    {safeArray(stats).map((stat) => (
       <div key={stat.label}>
         <strong>{stat.value}</strong>
         <span>{stat.label}</span>
       </div>
     ))}
+  </div>
+);
+
+const PageShell = ({ children, className = '', accent = 'red' }) => (
+  <main className={`phase4-page phase4-page-${accent || 'red'} ${className}`}>{children}</main>
+);
+
+const PremiumHero = ({ eyebrow, title, description, image, children, accentIcon: Icon = FaFire }) => (
+  <section className="phase4-premium-hero">
+    <div className="phase4-premium-copy">
+      <p className="phase4-eyebrow"><Icon /> {eyebrow}</p>
+      <h1>{title}</h1>
+      <p>{description}</p>
+      {children}
+    </div>
+    <div className="phase4-premium-visual" aria-hidden={!image}>
+      {image ? <img src={image} alt={title} loading="eager" decoding="async" /> : null}
+      <span className="phase4-premium-vs">VS</span>
+    </div>
+  </section>
+);
+
+const EmptyCard = ({ title, copy, href = '/upcomingfights', linkLabel = 'View fights' }) => (
+  <div className="phase4-empty-card">
+    <FaSearch />
+    <h3>{title}</h3>
+    <p>{copy}</p>
+    <Link href={href}>{linkLabel} <FaArrowRight /></Link>
   </div>
 );
 
@@ -46,134 +88,103 @@ export const PremiumSportLanding = ({ config, fights = [], blogs = [] }) => {
   };
 
   return (
-    <main className={`phase4-page phase4-page-${config.accent || 'red'}`}>
+    <PageShell className="phase4-sport-page" accent={config.accent}>
       <SeoHead title={config.title} description={config.description} keywords={config.keywords} image={`${SITE_URL}${config.heroImage}`} schemas={[schema]} />
 
-      <section className="phase4-hero">
-        <div className="phase4-hero-glow" />
-        <div className="phase4-hero-copy">
-          <p className="phase4-eyebrow"><FaFire /> {config.eyebrow}</p>
-          <h1>{config.title}</h1>
-          <p>{config.description}</p>
-          <div className="phase4-hero-actions">
-            <Link href="/upcomingfights">Find active fights <FaArrowRight /></Link>
-            <Link href="/guides/how-to-play-fantasy-mma" className="phase4-secondary-link">How it works</Link>
-          </div>
+      <PremiumHero eyebrow={config.eyebrow} title={config.title} description={config.description} image={config.heroImage}>
+        <div className="phase4-hero-actions">
+          <Link href="/upcomingfights">Find active fights <FaArrowRight /></Link>
+          <Link href="/guides/how-to-play-fantasy-mma" className="phase4-secondary-link">How it works</Link>
         </div>
-        <div className="phase4-hero-card">
-          <img src={config.heroImage} alt={`${config.sport} fantasy fight experience`} loading="eager" decoding="async" />
-          <div>
-            <span>{config.sport}</span>
-            <strong>Fresh fight opportunities</strong>
-            <small>Premium prediction contests, content, and campaign pages.</small>
-          </div>
-        </div>
-      </section>
+      </PremiumHero>
 
       <SeoStatBar stats={[
         { value: config.sport, label: 'Sport focus' },
-        { value: visibleFights.length || 'Live', label: 'Fight opportunities' },
-        { value: visibleBlogs.length || 'SEO', label: 'Content paths' },
+        { value: visibleFights.length || 'Ready', label: 'Fight cards' },
+        { value: visibleBlogs.length || 'Live', label: 'Story paths' },
       ]} />
 
-      <section className="phase4-split-section">
+      <section className="phase4-premium-panel phase4-content-brief">
         <div>
-          <p className="phase4-eyebrow"><FaBolt /> Why this page exists</p>
-          <h2>Dedicated traffic doorway for {config.sport}</h2>
-          <p>Instead of sending every search visitor to one generic page, this destination gives {config.sport} fans a clear sport-specific path into fights, guides, blogs, and signup actions.</p>
+          <p className="phase4-eyebrow"><FaBolt /> Why this matters</p>
+          <h2>A dedicated destination for {config.sport} fans</h2>
+          <p>Each sport page now gives visitors a focused way to discover relevant fights, learn the format, and move into active prediction opportunities without landing on a generic page.</p>
         </div>
         <div className="phase4-check-grid">
-          {config.bullets.map((item) => <span key={item}><FaCheckCircle /> {item}</span>)}
+          {safeArray(config.bullets).slice(0, 6).map((item) => <span key={item}><FaCheckCircle /> {item}</span>)}
         </div>
       </section>
 
       <section className="phase4-section-head">
-        <p className="phase4-eyebrow"><FaCalendarAlt /> Active cards</p>
-        <h2>Latest {config.sport} fight opportunities</h2>
-        <p>Cards are pulled from the live fight system when matching sport data exists.</p>
+        <p className="phase4-eyebrow"><FaCalendarAlt /> Live opportunities</p>
+        <h2>Latest {config.sport} fights</h2>
+        <p>Fresh cards from the fight system appear here when they match this sport.</p>
       </section>
-
       <section className="phase4-card-grid phase4-fight-grid">
         {visibleFights.length ? visibleFights.map((fight) => (
-          <article className="phase4-fight-card" key={fight._id || fight.id || getMatchTitle(fight)}>
+          <article className="phase4-fight-card" key={entityId(fight)}>
             <img src={getMatchImage(fight)} alt={getMatchTitle(fight)} loading="lazy" decoding="async" />
             <div>
               <span>{getMatchSport(fight)}</span>
               <h3>{getMatchTitle(fight)}</h3>
               <p><FaClock /> {getMatchDateLabel(fight)}</p>
-              <Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight page <FaArrowRight /></Link>
+              <Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight <FaArrowRight /></Link>
             </div>
           </article>
-        )) : (
-          <div className="phase4-empty-card">
-            <FaSearch />
-            <h3>No live {config.sport} fights found yet</h3>
-            <p>This page still provides search-friendly content and will show matching fights when they are added from admin.</p>
-            <Link href="/upcomingfights">View all upcoming fights</Link>
-          </div>
-        )}
+        )) : <EmptyCard title={`No live ${config.sport} fights found yet`} copy="This page is ready and will populate as matching fight cards are added from admin." />}
       </section>
 
       <section className="phase4-section-head">
-        <p className="phase4-eyebrow"><FaNewspaper /> Editorial path</p>
-        <h2>Related fight stories and guides</h2>
+        <p className="phase4-eyebrow"><FaNewspaper /> Learn and play</p>
+        <h2>Related stories and guides</h2>
       </section>
       <section className="phase4-card-grid">
         {visibleBlogs.length ? visibleBlogs.map((blog) => (
-          <article className="phase4-story-card" key={blog._id || blog.id || getBlogTitle(blog)}>
+          <article className="phase4-story-card" key={entityId(blog)}>
             <h3>{getBlogTitle(blog)}</h3>
-            <p>{getBlogDescription(blog) || 'Read the full Fantasy MMAdness story.'}</p>
+            <p>{getBlogDescription(blog) || 'Read the latest Fantasy MMAdness story.'}</p>
             <Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link>
           </article>
-        )) : ['How to play', 'Fight scoring', 'Fantasy strategy'].map((title) => (
+        )) : ['How to play', 'Scoring basics', 'Fight-night strategy'].map((title) => (
           <article className="phase4-story-card" key={title}>
             <h3>{title}</h3>
-            <p>Use Fantasy MMAdness guides to understand scoring, picks, and fight-night strategy.</p>
+            <p>Learn how picks, scoring, and fight opportunities work on Fantasy MMAdness.</p>
             <Link href="/guides">Open guides <FaArrowRight /></Link>
           </article>
         ))}
       </section>
 
       <section className="phase4-faq-section">
-        <p className="phase4-eyebrow"><FaShieldAlt /> Helpful answers</p>
-        <h2>{config.sport} fantasy FAQs</h2>
+        <p className="phase4-eyebrow"><FaShieldAlt /> Quick answers</p>
+        <h2>{config.sport} FAQs</h2>
         <div className="phase4-faq-grid">
-          {config.faqs.map(([question, answer]) => (
-            <article key={question}>
-              <h3>{question}</h3>
-              <p>{answer}</p>
-            </article>
+          {safeArray(config.faqs).map(([question, answer]) => (
+            <article key={question}><h3>{question}</h3><p>{answer}</p></article>
           ))}
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 };
 
 export const FightSeoDetail = ({ fight = {}, relatedBlogs = [] }) => {
   const title = getMatchTitle(fight);
-  const description = `${title} fantasy prediction page with schedule, sport context, related fight stories, and calls to play on Fantasy MMAdness.`;
+  const description = `${title} fantasy prediction page with schedule, sport context, related stories, and calls to play on Fantasy MMAdness.`;
   const path = `/fight/${fight?._id || fight?.id || fight?.matchId || ''}`;
   return (
-    <main className="phase4-page phase4-detail-page">
+    <PageShell className="phase4-detail-page">
       <SeoHead title={`${title} | Fantasy Fight Prediction Page`} description={description} image={getMatchImage(fight).startsWith('http') ? getMatchImage(fight) : `${SITE_URL}${getMatchImage(fight)}`} schemas={[buildSportsEventSchema(fight, path)]} />
-      <section className="phase4-detail-hero">
-        <div>
-          <p className="phase4-eyebrow"><FaTrophy /> Fight detail</p>
-          <h1>{title}</h1>
-          <p>{description}</p>
-          <div className="phase4-pill-row">
-            <span>{getMatchSport(fight)}</span>
-            <span>{getMatchDateLabel(fight)}</span>
-            <span>{fight.matchStatus || fight.status || 'Status pending'}</span>
-          </div>
-          <div className="phase4-hero-actions">
-            <Link href="/upcomingfights">View active fights <FaArrowRight /></Link>
-            <Link href="/playforfree" className="phase4-secondary-link">Play free</Link>
-          </div>
+      <PremiumHero eyebrow="Fight detail" title={title} description={description} image={getMatchImage(fight)} accentIcon={FaTrophy}>
+        <div className="phase4-pill-row">
+          <span>{getMatchSport(fight)}</span>
+          <span>{getMatchDateLabel(fight)}</span>
+          <span>{fight.matchStatus || fight.status || 'Status pending'}</span>
         </div>
-        <img src={getMatchImage(fight)} alt={title} loading="eager" decoding="async" />
-      </section>
+        <div className="phase4-hero-actions">
+          <Link href="/upcomingfights">View active fights <FaArrowRight /></Link>
+          <Link href="/playforfree" className="phase4-secondary-link">Play free</Link>
+        </div>
+      </PremiumHero>
 
       <section className="phase4-matchup-panel">
         <article><span>Corner A</span><h2>{fight.matchFighterA || fight.fighterAName || 'Fighter A'}</h2></article>
@@ -181,21 +192,16 @@ export const FightSeoDetail = ({ fight = {}, relatedBlogs = [] }) => {
         <article><span>Corner B</span><h2>{fight.matchFighterB || fight.fighterBName || 'Fighter B'}</h2></article>
       </section>
 
-      <section className="phase4-section-head">
-        <p className="phase4-eyebrow"><FaNewspaper /> Related content</p>
-        <h2>Build context before making picks</h2>
-      </section>
+      <section className="phase4-section-head"><p className="phase4-eyebrow"><FaNewspaper /> Related content</p><h2>Build context before making picks</h2></section>
       <section className="phase4-card-grid">
         {safeArray(relatedBlogs).slice(0, 3).map((blog) => (
-          <article className="phase4-story-card" key={blog._id || blog.id || getBlogTitle(blog)}>
-            <h3>{getBlogTitle(blog)}</h3>
-            <p>{getBlogDescription(blog)}</p>
-            <Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link>
+          <article className="phase4-story-card" key={entityId(blog)}>
+            <h3>{getBlogTitle(blog)}</h3><p>{getBlogDescription(blog)}</p><Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link>
           </article>
         ))}
         <article className="phase4-story-card"><h3>How scoring works</h3><p>Review scoring rules before submitting picks.</p><Link href="/guides/how-to-play-fantasy-mma">Open guide <FaArrowRight /></Link></article>
       </section>
-    </main>
+    </PageShell>
   );
 };
 
@@ -204,62 +210,37 @@ export const FighterProfileSeo = ({ fighter = {}, fights = [], blogs = [], entit
   const title = `${name} ${entityType === 'wrestler' ? 'Wrestler' : 'Fighter'} Profile | Fantasy MMAdness`;
   const path = entityType === 'wrestler' ? `/wrestlers/${fighter._id || fighter.id || name}` : `/fighters/${fighter._id || fighter.id || name}`;
   return (
-    <main className="phase4-page phase4-profile-page">
+    <PageShell className="phase4-profile-page" accent={entityType === 'wrestler' ? 'purple' : 'red'}>
       <SeoHead title={title} description={`${name} profile, fight opportunities, related stories, and fantasy prediction context on Fantasy MMAdness.`} image={getEntityImage(fighter).startsWith('http') ? getEntityImage(fighter) : `${SITE_URL}${getEntityImage(fighter)}`} schemas={[buildPersonSchema(fighter, path)]} />
-      <section className="phase4-profile-hero">
-        <img src={getEntityImage(fighter)} alt={name} loading="eager" decoding="async" />
-        <div>
-          <p className="phase4-eyebrow"><FaUsers /> {entityType === 'wrestler' ? 'Wrestler profile' : 'Fighter profile'}</p>
-          <h1>{name}</h1>
-          <p>{truncate(fighter.description || fighter.bio || `${name} is part of the Fantasy MMAdness combat-sports ecosystem.`, 260)}</p>
-          <div className="phase4-pill-row"><span>{fighter.category || fighter.sport || fighter.weightClass || 'Combat sports'}</span><span>{safeArray(fights).length} related fights</span></div>
-        </div>
-      </section>
-
-      <section className="phase4-section-head"><p className="phase4-eyebrow"><FaCalendarAlt /> Related opportunities</p><h2>Fights and stories connected to {name}</h2></section>
+      <PremiumHero eyebrow={entityType === 'wrestler' ? 'Wrestler profile' : 'Fighter profile'} title={name} description={`${name} appears in Fantasy MMAdness fight cards, content, and prediction opportunities.`} image={getEntityImage(fighter)} accentIcon={FaUsers}>
+        <div className="phase4-hero-actions"><Link href="/upcomingfights">Find fights <FaArrowRight /></Link><Link href="/fights-news" className="phase4-secondary-link">Fight news</Link></div>
+      </PremiumHero>
       <section className="phase4-card-grid">
-        {safeArray(fights).slice(0, 4).map((fight) => (
-          <article className="phase4-story-card" key={fight._id || fight.id || getMatchTitle(fight)}>
-            <h3>{getMatchTitle(fight)}</h3>
-            <p>{getMatchSport(fight)} · {getMatchDateLabel(fight)}</p>
-            <Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight <FaArrowRight /></Link>
-          </article>
-        ))}
-        {safeArray(blogs).slice(0, 2).map((blog) => (
-          <article className="phase4-story-card" key={blog._id || blog.id || getBlogTitle(blog)}>
-            <h3>{getBlogTitle(blog)}</h3>
-            <p>{getBlogDescription(blog)}</p>
-            <Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link>
-          </article>
-        ))}
+        {safeArray(fights).slice(0, 3).map((fight) => <article className="phase4-story-card" key={entityId(fight)}><h3>{getMatchTitle(fight)}</h3><p>{getMatchDateLabel(fight)}</p><Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight <FaArrowRight /></Link></article>)}
+        {safeArray(blogs).slice(0, 3).map((blog) => <article className="phase4-story-card" key={entityId(blog)}><h3>{getBlogTitle(blog)}</h3><p>{truncate(getBlogDescription(blog), 130)}</p><Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link></article>)}
+        {!safeArray(fights).length && !safeArray(blogs).length && <EmptyCard title="Profile content is ready" copy="Related fights and stories will appear here as the platform grows." href="/upcomingfights" />}
       </section>
-    </main>
+    </PageShell>
   );
 };
 
-export const BlogCategorySeoPage = ({ category = 'mma', blogs = [], fights = [] }) => {
-  const label = category.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-  const description = `${label} fight stories, fantasy strategy, previews, results, and related opportunities on Fantasy MMAdness.`;
+export const BlogCategorySeoPage = ({ category = 'fight-news', blogs = [], fights = [] }) => {
+  const label = String(category || 'fight news').replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const description = `${label} articles, fantasy fight previews, strategy, and platform updates from Fantasy MMAdness.`;
   return (
-    <main className="phase4-page phase4-editorial-page">
-      <SeoHead title={`${label} Fight Blogs & Fantasy Strategy | Fantasy MMAdness`} description={description} image={`${SITE_URL}/images/fmm-pages/editorial-arena-hd.webp`} schemas={[buildArticleSchema({ title: `${label} blog category`, description }, `/blogs/${category}`)]} />
-      <section className="phase4-hero phase4-editorial-hero">
-        <div className="phase4-hero-copy"><p className="phase4-eyebrow"><FaNewspaper /> Blog category</p><h1>{label} fight intelligence</h1><p>{description}</p></div>
-      </section>
+    <PageShell className="phase4-editorial-page" accent="steel">
+      <SeoHead title={`${label} Blogs | Fantasy MMAdness`} description={description} schemas={[buildArticleSchema({ title: `${label} Blog Category`, description }, `/blogs/${category}`)]} />
+      <PremiumHero eyebrow="Blog category" title={`${label} intelligence`} description={description} image="/images/fmm-experience/fighter-action-red.jpg" accentIcon={FaNewspaper} />
       <section className="phase4-card-grid">
         {safeArray(blogs).length ? safeArray(blogs).map((blog) => (
-          <article className="phase4-story-card" key={blog._id || blog.id || getBlogTitle(blog)}>
-            <h3>{getBlogTitle(blog)}</h3>
-            <p>{getBlogDescription(blog)}</p>
-            <Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link>
-          </article>
-        )) : <div className="phase4-empty-card"><FaSearch /><h3>No {label} posts yet</h3><p>This category page is ready to index new stories when blogs are approved.</p><Link href="/blogs">View all blogs</Link></div>}
+          <article className="phase4-story-card" key={entityId(blog)}><h3>{getBlogTitle(blog)}</h3><p>{getBlogDescription(blog)}</p><Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link></article>
+        )) : <EmptyCard title={`No ${label} posts yet`} copy="This category is ready for approved stories and future swarm content." href="/blogs" linkLabel="View blogs" />}
       </section>
       <section className="phase4-section-head"><p className="phase4-eyebrow"><FaStar /> Related fight cards</p><h2>Fresh fight opportunities</h2></section>
       <section className="phase4-card-grid">
-        {safeArray(fights).slice(0, 3).map((fight) => <article className="phase4-story-card" key={fight._id || getMatchTitle(fight)}><h3>{getMatchTitle(fight)}</h3><p>{getMatchDateLabel(fight)}</p><Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight <FaArrowRight /></Link></article>)}
+        {safeArray(fights).slice(0, 3).map((fight) => <article className="phase4-story-card" key={entityId(fight)}><h3>{getMatchTitle(fight)}</h3><p>{getMatchDateLabel(fight)}</p><Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight <FaArrowRight /></Link></article>)}
       </section>
-    </main>
+    </PageShell>
   );
 };
 
@@ -270,16 +251,15 @@ export const GuideSeoPage = ({ guide }) => {
     mainEntity: safeArray(guide.faqs).map(([question, answer]) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })),
   };
   return (
-    <main className="phase4-page phase4-guide-page">
+    <PageShell className="phase4-guide-page" accent="red">
       <SeoHead title={guide.title} description={guide.description} image={`${SITE_URL}${guide.image}`} schemas={[schema]} />
-      <section className="phase4-detail-hero">
-        <div><p className="phase4-eyebrow"><FaChartLine /> Fantasy guide</p><h1>{guide.title}</h1><p>{guide.description}</p><div className="phase4-hero-actions"><Link href="/upcomingfights">Find fights <FaArrowRight /></Link><Link href="/playforfree" className="phase4-secondary-link">Start free</Link></div></div>
-        <img src={guide.image} alt={guide.title} loading="eager" decoding="async" />
-      </section>
+      <PremiumHero eyebrow="Fantasy guide" title={guide.title} description={guide.description} image="/images/fmm-experience/fighter-action-blue.jpg" accentIcon={FaShieldAlt}>
+        <div className="phase4-hero-actions"><Link href="/upcomingfights">Find fights <FaArrowRight /></Link><Link href="/playforfree" className="phase4-secondary-link">Start free</Link></div>
+      </PremiumHero>
       <section className="phase4-guide-steps">
         {safeArray(guide.steps).map((step, index) => <article key={step.title}><strong>{String(index + 1).padStart(2, '0')}</strong><h3>{step.title}</h3><p>{step.copy}</p></article>)}
       </section>
-      <section className="phase4-faq-section"><p className="phase4-eyebrow"><FaShieldAlt /> Common questions</p><h2>Guide FAQs</h2><div className="phase4-faq-grid">{safeArray(guide.faqs).map(([q, a]) => <article key={q}><h3>{q}</h3><p>{a}</p></article>)}</div></section>
-    </main>
+      <section className="phase4-faq-section"><p className="phase4-eyebrow"><FaShieldAlt /> Common questions</p><h2>Quick guide FAQs</h2><div className="phase4-faq-grid">{safeArray(guide.faqs).map(([q, a]) => <article key={q}><h3>{q}</h3><p>{a}</p></article>)}</div></section>
+    </PageShell>
   );
 };

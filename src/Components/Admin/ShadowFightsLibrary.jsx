@@ -15,10 +15,12 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import EditMatch from './EditMatch';
+import AdminPredictions from './AdminPredictions';
+import ShowScores from './ShowScores';
 import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { fetchMatches } from '@/Redux/matchSlice';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
 
@@ -35,6 +37,8 @@ const ShadowFightsLibrary = () => {
   const [showAffiliatesPopup, setShowAffiliatesPopup] = useState(false);
   const [affiliates, setAffiliates] = useState([]);
   const [editingMatchId, setEditingMatchId] = useState(null);
+  const [selectedScore, setSelectedScore] = useState(null);
+  const [selectedScoresView, setSelectedScoresView] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -110,6 +114,20 @@ const ShadowFightsLibrary = () => {
     setEditingMatchId(id);
   };
 
+  const openScoring = (match = selectedMatch) => {
+    const id = getId(match);
+    if (!id) return;
+    setShowFightPopup(false);
+    setSelectedScore(id);
+  };
+
+  const openScores = (match = selectedMatch) => {
+    const id = getId(match);
+    if (!id) return;
+    setShowFightPopup(false);
+    setSelectedScoresView(id);
+  };
+
   const handleDeleteClick = async (matchToDelete = selectedMatch) => {
     if (!matchToDelete) return;
     const matchId = getId(matchToDelete);
@@ -140,6 +158,30 @@ const ShadowFightsLibrary = () => {
     });
   };
 
+  if (selectedScore) {
+    return (
+      <div className="admin-workspace admin-shadow-score-workspace">
+        <section className="admin-page-heading admin-page-heading-compact">
+          <div><span>Shadow scoring</span><h2>Submit shadow fight scores</h2><p>Score this shadow fight using the same round and video scoring tools as regular fights.</p></div>
+          <button type="button" className="admin-action-secondary" onClick={() => setSelectedScore(null)}><FaArrowLeft /> Back to shadow library</button>
+        </section>
+        <AdminPredictions matchId={selectedScore} filter="shadowTemplate" />
+      </div>
+    );
+  }
+
+  if (selectedScoresView) {
+    return (
+      <div className="admin-workspace admin-shadow-score-workspace">
+        <section className="admin-page-heading admin-page-heading-compact">
+          <div><span>Shadow results</span><h2>View shadow fight scores</h2><p>Review submitted scoring output for this shadow fight.</p></div>
+          <button type="button" className="admin-action-secondary" onClick={() => setSelectedScoresView(null)}><FaArrowLeft /> Back to shadow library</button>
+        </section>
+        <ShowScores matchId={selectedScoresView} filter="shadowTemplate" />
+      </div>
+    );
+  }
+
   if (editingMatchId) {
     return (
       <div className="admin-workspace admin-shadow-editor-workspace">
@@ -155,7 +197,7 @@ const ShadowFightsLibrary = () => {
   return (
     <div className="admin-workspace admin-shadow-library-workspace">
       <section className="admin-page-heading">
-        <div><span>Fight operations</span><h2>Shadow fights library</h2><p>Search, inspect, edit, delete, and review affiliate usage from a unified registry-style table.</p></div>
+        <div><span>Fight operations</span><h2>Shadow fights library</h2><p>Search, inspect, score, edit, delete, and review affiliate usage for shadow fight templates only.</p></div>
         <div className="admin-heading-actions">
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={() => { fetchMatchesData(); fetchAffiliatesData(); }}><FaSyncAlt className={loading ? 'xp-spin' : ''} /> Refresh</button>
@@ -196,6 +238,8 @@ const ShadowFightsLibrary = () => {
                     <td>
                       <div className="admin-row-actions">
                         <button type="button" onClick={() => openDetails(match)}><FaEye /> Details</button>
+                        <button type="button" onClick={() => openScoring(match)}><FaBolt /> Score</button>
+                        <button type="button" onClick={() => openScores(match)}><FaEye /> Scores</button>
                         <button type="button" onClick={() => openEditor(match)}><FaEdit /> Edit</button>
                         <button type="button" className="is-danger" onClick={() => handleDeleteClick(match)}><FaTrashAlt /> Delete</button>
                       </div>
@@ -229,6 +273,7 @@ const ShadowFightsLibrary = () => {
             </div>
             <footer>
               <button type="button" className="admin-action-secondary" onClick={() => openAffiliates(selectedMatch)}><FaUsers /> View affiliates</button>
+              <button type="button" className="admin-action-secondary" onClick={() => openScoring(selectedMatch)}><FaBolt /> Score fight</button>
               <button type="button" className="admin-action-secondary" onClick={() => openEditor(selectedMatch)}><FaEdit /> Edit template</button>
               <button type="button" className="admin-action-danger" onClick={() => handleDeleteClick(selectedMatch)}><FaTrashAlt /> Delete match</button>
               <button type="button" className="admin-action-secondary" onClick={() => setShowFightPopup(false)}>Close</button>

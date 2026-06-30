@@ -258,3 +258,125 @@
   .phase4-hero-card img, .phase4-detail-hero > img, .phase4-profile-hero > img { min-height: 280px; }
   .phase4-hero-copy h1, .phase4-detail-hero h1, .phase4-profile-hero h1 { font-size: clamp(2.1rem, 14vw, 3.4rem); }
 }
+
+/* Phase 5 refinement: simpler premium SEO/static pages inspired by homepage/user/affiliate theme */
+.phase4-page {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(223, 17, 27, 0.18), transparent 30rem),
+    radial-gradient(circle at 82% 18%, rgba(36, 121, 255, 0.12), transparent 34rem),
+    linear-gradient(180deg, #05080d 0%, #08101a 48%, #05070b 100%) !important;
+  padding-top: 104px !important;
+}
+.phase4-page::before {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,.025) 1px, transparent 1px) !important;
+  background-size: 72px 72px !important;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.76), transparent 78%) !important;
+}
+.phase4-premium-hero {
+  align-items: stretch;
+  display: grid;
+  gap: clamp(22px, 4vw, 44px);
+  grid-template-columns: minmax(0, 1fr) minmax(310px, .72fr);
+  margin: 0 auto 28px;
+  max-width: 1240px;
+}
+.phase4-premium-copy,
+.phase4-premium-visual,
+.phase4-premium-panel,
+.phase4-statbar div,
+.phase4-story-card,
+.phase4-empty-card,
+.phase4-faq-grid article,
+.phase4-guide-steps article,
+.phase4-matchup-panel article,
+.phase4-matchup-panel > strong {
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.026)) !important;
+  border: 1px solid rgba(255,255,255,.115) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.34) !important;
+}
+.phase4-premium-copy { padding: clamp(28px, 5vw, 58px); }
+.phase4-premium-copy h1 {
+  color: #fff;
+  font-family: var(--ff-display, Impact, sans-serif);
+  font-size: clamp(2.25rem, 6vw, 5.4rem);
+  letter-spacing: -.055em;
+  line-height: .93;
+  margin: 10px 0 16px;
+  text-transform: uppercase;
+}
+.phase4-premium-copy > p { color: rgba(255,255,255,.74); font-size: clamp(1rem, 1.35vw, 1.14rem); line-height: 1.78; max-width: 780px; }
+.phase4-premium-visual { min-height: 390px; overflow: hidden; position: relative; }
+.phase4-premium-visual::after {
+  background: linear-gradient(180deg, transparent, rgba(2,5,8,.86));
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+.phase4-premium-visual img { display: block; height: 100%; min-height: 390px; object-fit: cover; opacity: .86; width: 100%; }
+.phase4-premium-vs {
+  align-items: center;
+  background: linear-gradient(135deg, #df111b, #7d060b);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 999px;
+  bottom: 22px;
+  color: #fff;
+  display: flex;
+  font-family: var(--ff-display, Impact, sans-serif);
+  font-size: 28px;
+  height: 74px;
+  justify-content: center;
+  position: absolute;
+  right: 22px;
+  width: 74px;
+  z-index: 2;
+}
+.phase4-premium-panel { margin: 0 auto 34px; max-width: 1240px; padding: clamp(24px, 4vw, 38px); }
+.phase4-content-brief { align-items: center; display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr) minmax(280px, .75fr); }
+.phase4-content-brief h2,
+.phase4-section-head h2,
+.phase4-faq-section h2 {
+  color: #fff;
+  font-family: var(--ff-display, Impact, sans-serif);
+  font-size: clamp(1.8rem, 3.7vw, 3.45rem);
+  letter-spacing: -.045em;
+  line-height: .98;
+  text-transform: uppercase;
+}
+.phase4-eyebrow { color: #ff3b45 !important; }
+.phase4-hero-actions a,
+.phase4-fight-card a,
+.phase4-story-card a,
+.phase4-empty-card a {
+  background: linear-gradient(135deg, #df111b, #9f070e) !important;
+  box-shadow: 0 18px 42px rgba(223,17,27,.2) !important;
+}
+.phase4-hero-actions .phase4-secondary-link { background: rgba(255,255,255,.08) !important; }
+.phase4-statbar { max-width: 1240px !important; }
+.phase4-card-grid,
+.phase4-section-head,
+.phase4-faq-section,
+.phase4-matchup-panel { max-width: 1240px !important; }
+.phase4-fight-card {
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.022)) !important;
+  border: 1px solid rgba(255,255,255,.115) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.34) !important;
+}
+.phase4-fight-card img { height: 190px !important; opacity: .9; }
+.phase4-story-card { min-height: 190px !important; }
+.phase4-faq-grid article,
+.phase4-guide-steps article { min-height: 160px; }
+.phase4-guide-page .phase4-premium-visual { display: none; }
+.phase4-guide-page .phase4-premium-hero { grid-template-columns: 1fr; }
+.phase4-guide-page .phase4-premium-copy { text-align: left; }
+@media (max-width: 900px) {
+  .phase4-premium-hero,
+  .phase4-content-brief { grid-template-columns: 1fr; }
+  .phase4-premium-copy { padding: 24px; }
+  .phase4-premium-visual { min-height: 260px; }
+  .phase4-premium-visual img { min-height: 260px; }
+  .phase4-premium-vs { height: 60px; width: 60px; }
+}

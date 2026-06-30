@@ -20,7 +20,7 @@ import AdminPredictions from './AdminPredictions';
 import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
 
@@ -35,20 +35,17 @@ const TAB_COPY = [
   { key: 'ongoing', label: 'Active scoring' },
   { key: 'finished', label: 'Completed' },
   { key: 'live', label: 'Promote live' },
-  { key: 'shadow', label: 'Shadow templates' },
 ];
 
-const normalizeRows = (matches, shadowTemplates) => [
-  ...(Array.isArray(matches) ? matches.map((fight) => ({ ...fight, __source: 'normal' })) : []),
-  ...(Array.isArray(shadowTemplates) ? shadowTemplates.map((fight) => ({ ...fight, __source: 'shadowTemplate', matchType: fight.matchType || 'SHADOW' })) : []),
-];
+const normalizeRows = (matches) => (
+  Array.isArray(matches) ? matches.map((fight) => ({ ...fight, __source: 'normal' })) : []
+);
 
 export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'registry' }) {
   const dispatch = useDispatch();
-  const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
-  const [shadowTemplates, setShadowTemplates] = useState([]);
-  const [shadowLoading, setShadowLoading] = useState(false);
+  const [matches, setMatches] = useState([]);
+  const [matchRowsLoading, setMatchRowsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [search, setSearch] = useState('');
   const [selectedScore, setSelectedScore] = useState(null);
@@ -57,37 +54,40 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true }));
-  }, [dispatch, matchStatus]);
-
-  const loadShadowTemplates = async () => {
-    setShadowLoading(true);
+  const loadNormalMatches = async () => {
+    setMatchRowsLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/shadow`);
+      const response = await fetch(`${API_BASE}/match?includeDrafts=true`);
       const data = await response.json();
-      setShadowTemplates(Array.isArray(data) ? data : []);
+      const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setMatches(rows.filter((fight) => {
+        const source = String(fight?.__source || fight?.sourceType || fight?.collection || '').toLowerCase();
+        const type = String(fight?.matchType || fight?.type || '').toLowerCase();
+        return source !== 'shadow' && source !== 'shadowtemplate' && type !== 'shadow';
+      }));
     } catch (error) {
-      console.error('Error fetching shadow templates:', error);
+      console.error('Error fetching regular fights:', error);
+      setMatches([]);
     } finally {
-      setShadowLoading(false);
+      setMatchRowsLoading(false);
     }
   };
 
-  useEffect(() => { loadShadowTemplates(); }, []);
+  useEffect(() => {
+    if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true }));
+    loadNormalMatches();
+  }, [dispatch, matchStatus]);
 
-  const allRows = useMemo(() => normalizeRows(matches, shadowTemplates), [matches, shadowTemplates]);
+  const allRows = useMemo(() => normalizeRows(matches), [matches]);
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     return allRows.filter((fight) => {
       const status = String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase();
       const type = String(fight.matchType || '').toLowerCase();
-      const source = fight.__source;
       const tabMatch = activeTab === 'all'
         || (activeTab === 'ongoing' && status === 'ongoing')
         || (activeTab === 'finished' && status === 'finished')
-        || (activeTab === 'live' && type === 'live')
-        || (activeTab === 'shadow' && source === 'shadowTemplate');
+        || (activeTab === 'live' && type === 'live');
       if (!tabMatch) return false;
       if (!normalizedSearch) return true;
       return [fight.matchName, fight.matchFighterA, fight.matchFighterB, getSport(fight), fight.matchDescription]
@@ -106,10 +106,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     total: allRows.length,
     active: allRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'ongoing').length,
     finished: allRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'finished').length,
-    shadows: allRows.filter((fight) => fight.__source === 'shadowTemplate').length,
   }), [allRows]);
 
-  const getSourceType = (fight) => fight.__source === 'shadowTemplate' || fight.__source === 'shadow' ? 'shadow' : 'match';
+  const getSourceType = () => 'match';
 
   const selectedFights = useMemo(() => (
     allRows.filter((fight) => selectedFightIds.includes(String(getId(fight))))
@@ -132,7 +131,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   const refreshFightRows = () => {
     dispatch(fetchMatches({ includeDrafts: true }));
-    loadShadowTemplates();
+    loadNormalMatches();
   };
 
   const bulkDeleteFights = async (fightsToDelete = selectedFights) => {
@@ -165,8 +164,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     }
   };
 
-  const openScoring = (fight) => setSelectedScore({ id: getId(fight), filter: fight.__source === 'shadowTemplate' ? 'shadowTemplate' : 'normal' });
-  const openScores = (fight) => setSelectedScoresView({ id: getId(fight), filter: fight.__source === 'shadowTemplate' ? 'shadowTemplate' : 'normal' });
+  const openScoring = (fight) => setSelectedScore({ id: getId(fight), filter: 'normal' });
+  const openScores = (fight) => setSelectedScoresView({ id: getId(fight), filter: 'normal' });
   const openPromotion = (fight) => setSelectedPromotion(fight);
 
   const deleteFight = async (fight) => {
@@ -216,19 +215,18 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <div>
           <span>Fight operations</span>
           <h2>{mode === 'score' ? 'Score center and fight tables' : 'Unified fight registry'}</h2>
-          <p>Search, filter, promote, inspect, score, and view completed fights from one source-style administration table while preserving the existing match and shadow APIs.</p>
+          <p>Search, filter, promote, inspect, score, and delete regular fight records. Shadow templates are managed separately in the Shadow Fights Library.</p>
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
-          <button type="button" className="admin-action-secondary" onClick={refreshFightRows}><FaSyncAlt className={matchStatus === 'loading' || shadowLoading ? 'xp-spin' : ''} /> Refresh</button>
+          <button type="button" className="admin-action-secondary" onClick={refreshFightRows}><FaSyncAlt className={matchStatus === 'loading' || matchRowsLoading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
 
       <section className="admin-inline-metrics">
-        <article><span>Total loaded</span><strong>{metrics.total}</strong><small>Live + shadow records</small></article>
+        <article><span>Total fights</span><strong>{metrics.total}</strong><small>Match records only</small></article>
         <article><span>Active scoring</span><strong>{metrics.active}</strong><small>Open result workflows</small></article>
         <article><span>Completed</span><strong>{metrics.finished}</strong><small>Score review available</small></article>
-        <article><span>Shadow templates</span><strong>{metrics.shadows}</strong><small>Affiliate-ready cards</small></article>
       </section>
 
       <section className="admin-table-panel">
@@ -257,7 +255,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <tbody>
               {filteredRows.length ? filteredRows.map((fight, index) => {
                 const id = getId(fight);
-                const status = fight.matchStatus || fight.matchShadowStatus || (fight.__source === 'shadowTemplate' ? 'Template' : 'Draft');
+                const status = fight.matchStatus || 'Draft';
                 const isFinished = String(status).toLowerCase() === 'finished';
                 const isLive = String(fight.matchType || '').toUpperCase() === 'LIVE';
                 return (
@@ -274,10 +272,10 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                       </div>
                     </td>
                     <td>{getSport(fight)}</td>
-                    <td><span className="admin-cell-stack"><strong>{fight.__source === 'shadowTemplate' ? 'Reusable template' : formatDate(fight)}</strong><small>{fight.__source === 'shadowTemplate' ? 'No lock time' : formatTime(fight)}</small></span></td>
+                    <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
                     <td><span className={`admin-status-badge ${isFinished ? 'is-success' : status === 'Ongoing' ? 'is-warning' : ''}`}>{status}</span></td>
-                    <td>{fight.__source === 'shadowTemplate' ? 'Template' : `${Number(fight.matchTokens || 0).toLocaleString()} tokens`}</td>
-                    <td>{fight.__source === 'shadowTemplate' ? '—' : Number(fight.pot || 0) ? `$${Number(fight.pot).toLocaleString()}` : '—'}</td>
+                    <td>{`${Number(fight.matchTokens || 0).toLocaleString()} tokens`}</td>
+                    <td>{Number(fight.pot || 0) ? `$${Number(fight.pot).toLocaleString()}` : '—'}</td>
                     <td>
                       <div className="admin-row-actions admin-table-actions">
                         {isFinished ? <button type="button" onClick={() => openScores(fight)}><FaEye /> Scores</button> : <button type="button" onClick={() => openScoring(fight)}><FaTrophy /> Score</button>}
