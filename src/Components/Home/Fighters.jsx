@@ -7,12 +7,12 @@ import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 
 const FALLBACK_FIGHTERS = [
-  `${FMM_ASSET_BASE}/fighter-jadden-addison.png`,
-  `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`,
-  `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
-  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.png`,
-  `${FMM_ASSET_BASE}/fighter-anthony-yarde.png`,
-  `${FMM_ASSET_BASE}/fighter-david-benavidez.png`,
+  `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`,
+  `${FMM_ASSET_BASE}/fighter-zaveer-davis.webp`,
+  `${FMM_ASSET_BASE}/fighter-conor-benn.webp`,
+  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.webp`,
+  `${FMM_ASSET_BASE}/fighter-anthony-yarde.webp`,
+  `${FMM_ASSET_BASE}/fighter-david-benavidez.webp`,
 ];
 
 const Fighters = ({ fighters = [] }) => {
@@ -30,6 +30,7 @@ const Fighters = ({ fighters = [] }) => {
     });
   }, [category, normalized, search]);
   const featured = normalized[0];
+  const featuredFallback = FALLBACK_FIGHTERS[0];
 
   return (
     <>
@@ -57,7 +58,7 @@ const Fighters = ({ fighters = [] }) => {
         >
           <div className="xp-featured-fighter-card">
             <div className="xp-featured-fighter-glow" />
-            <OptimizedImage src="/images/fmm-pages/our-fighters-featured-sharp.webp" alt={featured?.name || 'Featured fighter'} width={520} height={620} sizes="(max-width: 768px) 80vw, 38vw" />
+            <OptimizedImage src={featured?.image || featuredFallback} fallbackSrc={featuredFallback} alt={featured?.name || 'Featured fighter'} width={520} height={620} sizes="(max-width: 768px) 80vw, 38vw" />
             <div className="xp-featured-fighter-copy">
               <span>Featured athlete</span>
               <h2>{featured?.name || 'Fight Night Contender'}</h2>
@@ -93,7 +94,7 @@ const Fighters = ({ fighters = [] }) => {
                       <div className="xp-fighter-card-number">{String(index + 1).padStart(2, '0')}</div>
                       <div className="xp-fighter-card-media">
                         <div className="xp-fighter-card-light" />
-                        <OptimizedImage src={fighter.image || FALLBACK_FIGHTERS[index % FALLBACK_FIGHTERS.length]} alt={fighter.name} width={360} height={420} sizes="(max-width: 768px) 80vw, 280px" />
+                        <OptimizedImage src={fighter.image || FALLBACK_FIGHTERS[index % FALLBACK_FIGHTERS.length]} fallbackSrc={FALLBACK_FIGHTERS[index % FALLBACK_FIGHTERS.length]} alt={fighter.name} width={360} height={420} sizes="(max-width: 768px) 80vw, 280px" />
                         <span>{fighter.category || 'Combat sports'}</span>
                       </div>
                       <div className="xp-fighter-card-copy">

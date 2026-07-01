@@ -56,6 +56,7 @@ const navigationGroups = [
     items: [
       { label: 'Fight registry', href: '/administration/fights', icon: FaLayerGroup, matchPrefixes: ['/administration/PreviousMatches', '/administration/DeleteUpdateMatches', '/administration/upcomingFights'] },
       { label: 'Scoring rules', href: '/administration/scoring-rules', icon: FaTrophy },
+      { label: 'Data quality', href: '/administration/fight-data-quality', icon: FaShieldAlt },
       { label: 'Create fight', href: '/administration/AddNewMatch', icon: FaPlus },
       { label: 'Fight calendar', href: '/administration/Calendar', icon: FaCalendarAlt },
       { label: 'Prediction scoring', href: '/administration/predictions', icon: FaChartBar },
@@ -102,6 +103,7 @@ const navigationGroups = [
     icon: FaRobot,
     items: [
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
+      { label: 'July 10K growth', href: '/administration/july-growth', icon: FaBolt },
       { label: 'SEO growth center', href: '/administration/seo-growth', icon: FaSearch },
       { label: 'Content assistants', href: '/administration/BlogsAiBot', icon: FaRobot, matchPrefixes: ['/administration/SocialAiBot'] },
       { label: 'Social publishing', href: '/administration/MakePost', icon: FaPlus, matchPrefixes: ['/administration/tweet', '/administration/tiktok'] },

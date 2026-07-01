@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FaArrowLeft, FaCheckCircle, FaFilm, FaPlus, FaSave, FaTrophy } from 'react-icons/fa';
 import { getWinnerDetails } from '../../CustomFunctions/winnerUtils';
+import { SCORE_POINTS } from '@/Utils/scoringRules';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
@@ -80,14 +81,14 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   const computeFighterTwoStats = () => ({ ...fighterTwoStats });
 
   const handleRWSelect = (value) => {
-    setFighterOneStats((prevStats) => ({ ...prevStats, RW: value, ...(category === 'boxing' ? { RL: value === 100 ? 25 : 100 } : {}) }));
-    setFighterTwoStats((prevStats) => ({ ...prevStats, RW: value === 100 ? 25 : 100, RL: value }));
+    setFighterOneStats((prevStats) => ({ ...prevStats, RW: value, ...(category === 'boxing' ? { RL: value === SCORE_POINTS.RW ? SCORE_POINTS.RL : SCORE_POINTS.RW } : {}) }));
+    setFighterTwoStats((prevStats) => ({ ...prevStats, RW: value === SCORE_POINTS.RW ? SCORE_POINTS.RL : SCORE_POINTS.RW, RL: value }));
     setShowRWPopup(false);
   };
 
   const handleKOSelect = (value) => {
-    setFighterOneStats((prevStats) => ({ ...prevStats, KO: value, ...(category === 'boxing' ? { SP: value === 500 ? 25 : 500 } : {}) }));
-    setFighterTwoStats((prevStats) => ({ ...prevStats, KO: value === 500 ? 25 : 500, SP: value }));
+    setFighterOneStats((prevStats) => ({ ...prevStats, KO: value, ...(category === 'boxing' ? { SP: value === SCORE_POINTS.KO ? SCORE_POINTS.SP : SCORE_POINTS.KO } : {}) }));
+    setFighterTwoStats((prevStats) => ({ ...prevStats, KO: value === SCORE_POINTS.KO ? SCORE_POINTS.SP : SCORE_POINTS.KO, SP: value }));
     setShowKOPopup(false);
   };
 
@@ -275,8 +276,8 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         <section className="admin-score-select-modal">
           <header><span>Quick assignment</span><h3>Select value for Fighter A</h3><button type="button" onClick={onClose}>×</button></header>
           <div>
-            {stat === 'RW' && <><button type="button" onClick={() => { onSelect(100); onClose(); }}>RW · 100</button><button type="button" onClick={() => { onSelect(25); onClose(); }}>RL · 25</button></>}
-            {stat === 'KO' && <><button type="button" onClick={() => { onSelect(500); onClose(); }}>KO · 500</button><button type="button" onClick={() => { onSelect(25); onClose(); }}>SP · 25</button></>}
+            {stat === 'RW' && <><button type="button" onClick={() => { onSelect(SCORE_POINTS.RW); onClose(); }}>RW · {SCORE_POINTS.RW}</button><button type="button" onClick={() => { onSelect(SCORE_POINTS.RL); onClose(); }}>RL · {SCORE_POINTS.RL}</button></>}
+            {stat === 'KO' && <><button type="button" onClick={() => { onSelect(SCORE_POINTS.KO); onClose(); }}>KO · {SCORE_POINTS.KO}</button><button type="button" onClick={() => { onSelect(SCORE_POINTS.SP); onClose(); }}>SP · {SCORE_POINTS.SP}</button></>}
           </div>
         </section>
       </div>

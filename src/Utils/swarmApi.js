@@ -27,6 +27,7 @@ export const SWARM_CAMPAIGN_TYPES = [
   { value: 'pro_wrestling_match_campaign', label: 'Pro-wrestling match campaign', sport: 'pro_wrestling', copy: 'Wrestling match preview or recap automation pack.' },
   { value: 'blog_promotion_campaign', label: 'Blog promotion campaign', sport: 'combat', copy: 'Promote an approved blog across SEO, social, image, and newsletter drafts.' },
   { value: 'contest_promotion_campaign', label: 'Contest promotion campaign', sport: 'combat', copy: 'Rules/explainer, reminders, and winner announcement support.' },
+  { value: 'july_10000_signup_growth_system', label: 'July 10,000 signup growth system', sport: 'combat', copy: 'Daily event calendar, fight-card, Instagram, Facebook, X, YouTube, Shorts, blog/SEO, media, and retention draft agents.' },
   { value: 'custom_campaign', label: 'Custom campaign', sport: 'combat', copy: 'Choose exactly which agents should run together.' },
 ];
 
@@ -82,6 +83,16 @@ export const QUICK_CAMPAIGN_PRESETS = [
     copy: 'Wrestling preview/recap, social, SEO, and content pack.',
   },
   {
+    id: 'july-growth',
+    label: 'July 10K Signup System',
+    campaignType: 'july_10000_signup_growth_system',
+    sport: 'combat',
+    vertical: 'combat',
+    includeAll: true,
+    title: 'Fantasy MMadness July 10,000 Signup Growth System',
+    copy: 'Run the safe daily growth pack for 30-60 approval-first content assets.',
+  },
+  {
     id: 'blog-promo',
     label: 'Promote Approved Blog',
     campaignType: 'blog_promotion_campaign',
@@ -110,6 +121,7 @@ export const SWARM_TRIGGER_OPTIONS = [
   { value: 'blog_approved', label: 'Blog approved' },
   { value: 'daily_schedule', label: 'Daily schedule' },
   { value: 'weekly_schedule', label: 'Weekly schedule' },
+  { value: 'july_growth_daily', label: 'July 10K daily growth run' },
 ];
 
 export const SWARM_GROUP_LABELS = {
@@ -117,6 +129,9 @@ export const SWARM_GROUP_LABELS = {
   seo: 'SEO automation',
   social: 'Social automation',
   data: 'Data and traffic automation',
+  analytics: 'Analytics and growth planning',
+  media: 'Media and image briefs',
+  notification: 'Community and retention',
   wrestling: 'Pro-wrestling automation',
   automation: 'System and dashboard automation',
   system: 'System health',
@@ -191,6 +206,17 @@ const CORE_JOB_TYPES = [
   ['automation.traffic-growth-dashboard', 'Traffic growth dashboard', 'automation', ['combat', 'pro_wrestling']],
   ['automation.user-dashboard-fight-opportunities', 'User dashboard fight opportunities', 'automation', ['combat', 'pro_wrestling']],
   ['automation.growth-plan-1000-users', '1000-new-users growth plan', 'automation', ['combat', 'pro_wrestling']],
+  ['analytics.july-10000-signup-growth-plan', 'July 10K signup growth plan', 'analytics', ['combat']],
+  ['data.event-calendar-daily-update', 'Event calendar daily update', 'data', ['combat']],
+  ['content.fight-card-daily-package', 'Fight-card daily package', 'content', ['combat']],
+  ['content.blog-seo-daily-articles', 'Blog and SEO daily articles', 'content', ['combat']],
+  ['social.instagram-growth-posts', 'Instagram growth posts', 'social', ['combat']],
+  ['social.facebook-growth-posts', 'Facebook growth posts', 'social', ['combat']],
+  ['social.x-growth-posts', 'X growth posts', 'social', ['combat']],
+  ['social.youtube-growth-video-draft', 'YouTube growth video draft', 'social', ['combat']],
+  ['social.short-form-video-pack', 'Short-form video pack', 'social', ['combat']],
+  ['notification.community-retention-daily', 'Community retention daily', 'notification', ['combat']],
+  ['media.branded-post-image-prompt', 'Branded post image prompt', 'media', ['combat']],
   ['data.fight-schedule-calendar-refresh', 'Fight schedule calendar refresh', 'data', ['combat', 'pro_wrestling']],
   ['system.health-check', 'System health check', 'system', ['combat', 'pro_wrestling']],
 ];
@@ -290,6 +316,11 @@ export const swarmApi = {
   createFullFightCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/fight/full', { method: 'POST', body }),
   createTonightFightCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/fight/tonight', { method: 'POST', body }),
   createBoxingCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/boxing', { method: 'POST', body }),
+  createJulyGrowthCampaign: (body = {}) => swarmRequest('/api/admin/swarm/campaigns/july-growth', { method: 'POST', body }),
+  julyGrowthConfig: () => swarmRequest('/api/admin/swarm/growth/july-10000/config'),
+  julyGrowthDashboard: () => swarmRequest('/api/admin/swarm/growth/july-10000/dashboard'),
+  runJulyGrowth: (body = {}) => swarmRequest('/api/admin/swarm/growth/july-10000/run', { method: 'POST', body }),
+  runDailyJulyGrowth: (body = {}) => swarmRequest('/api/admin/swarm/schedules/daily/july-growth', { method: 'POST', body }),
   listJobs: (query = {}) => swarmRequest('/api/admin/swarm/jobs', { query }),
   createJob: (body) => swarmRequest('/api/admin/swarm/jobs', { method: 'POST', body }),
   cancelJob: (jobId, reason) => swarmRequest(`/api/admin/swarm/jobs/${encodeURIComponent(jobId)}/cancel`, { method: 'POST', body: { reason } }),

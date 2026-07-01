@@ -1,0 +1,29 @@
+/* End-user public page corrections.
+   Keeps admin/sidebar borders intact while removing the unintended vertical
+   red/blue guide lines that appeared down the left side of public page heroes. */
+
+.site-experience-main .xp-hero::after,
+.site-experience-main .route-experience-hero::after,
+.site-experience-main .premium-fights-phase-two-hero::after,
+.site-experience-main .premium-fighters-phase-two-hero::after,
+.site-experience-main .premium-sponsors-phase-two-hero::after,
+.site-experience-main .premium-faq-phase-two-hero::after {
+  background: none !important;
+  content: none !important;
+  display: none !important;
+}
+
+.site-experience-main .xp-hero,
+.site-experience-main .route-experience-hero,
+.site-experience-main .premium-fights-phase-two-hero,
+.site-experience-main .premium-fighters-phase-two-hero {
+  border-left: 0 !important;
+}
+
+.site-experience-main .xp-featured-fighter-card img,
+.site-experience-main .xp-fighter-card-media img,
+.site-experience-main .xp-fight-card-media img,
+.site-experience-main .xp-featured-fighters img,
+.site-experience-main .xp-timeline-portraits img {
+  image-rendering: auto;
+}

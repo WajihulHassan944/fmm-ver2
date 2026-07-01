@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import {
   FaBolt,
   FaBullhorn,
@@ -55,6 +56,7 @@ import {
   summarizeJobInput,
 } from '@/Utils/swarmApi';
 import AdminSeoGrowthCenter from './AdminSeoGrowthCenter';
+import JulyGrowthCommandCenter from './JulyGrowthCommandCenter';
 
 const DEFAULT_FORM = {
   vertical: 'combat',
@@ -171,6 +173,7 @@ const inferVerticalFromSport = (sport) => (sport === 'pro_wrestling' ? 'pro_wres
 const buildPromptFallback = (title, topic, fallback) => topic || title || fallback || 'Run automation for the selected item.';
 
 const SwarmCommandCenter = () => {
+  const router = useRouter();
   const messageRef = useRef(null);
   const [activeTab, setActiveTab] = useState('campaigns');
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -198,6 +201,13 @@ const SwarmCommandCenter = () => {
   const [expandedCampaignId, setExpandedCampaignId] = useState('');
   const [seoTargetByArtifact, setSeoTargetByArtifact] = useState({});
   const [autoRefresh, setAutoRefresh] = useState(true);
+
+  useEffect(() => {
+    const requestedTab = String(router.query?.tab || '');
+    if (['campaigns', 'julyGrowth', 'overview', 'seoGrowth', 'create', 'automations', 'events', 'artifacts', 'jobs'].includes(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, [router.query?.tab]);
 
   const catalog = useMemo(() => getAutomationCatalogFromPayload(catalogPayload), [catalogPayload]);
   const settings = useMemo(() => getAutomationSettingsFromPayload(settingsPayload), [settingsPayload]);
@@ -620,6 +630,7 @@ const SwarmCommandCenter = () => {
   const runScheduleAction = async (action) => {
     const actionMap = {
       daily: { label: 'Full daily automation', call: swarmApi.runDailySchedule },
+      july: { label: 'July 10K signup daily pack', call: swarmApi.runDailyJulyGrowth },
       weekly: { label: 'Weekly traffic opportunity report', call: swarmApi.runWeeklySchedule },
       seo: { label: 'Daily SEO audit', call: swarmApi.runDailySeo },
       social: { label: 'Multiple daily social drafts', call: swarmApi.runDailySocial },
@@ -690,6 +701,7 @@ const SwarmCommandCenter = () => {
 
       <section className="admin-swarm-tabs" aria-label="Swarm sections">
         <button type="button" className={tabButtonClass('campaigns')} onClick={() => setActiveTab('campaigns')}><FaRocket /> All Agents campaigns</button>
+        <button type="button" className={tabButtonClass('julyGrowth')} onClick={() => setActiveTab('julyGrowth')}><FaUserPlus /> July 10K Growth</button>
         <button type="button" className={tabButtonClass('overview')} onClick={() => setActiveTab('overview')}><FaChartLine /> Overview</button>
         <button type="button" className={tabButtonClass('seoGrowth')} onClick={() => setActiveTab('seoGrowth')}><FaSearch /> SEO growth</button>
         <button type="button" className={tabButtonClass('create')} onClick={() => setActiveTab('create')}><FaPaperPlane /> Single job</button>
@@ -799,6 +811,10 @@ const SwarmCommandCenter = () => {
         </section>
       )}
 
+      {activeTab === 'julyGrowth' && (
+        <JulyGrowthCommandCenter onSubmitted={(submission) => setRecentSubmission(submission)} />
+      )}
+
       {activeTab === 'overview' && (
         <section className="admin-swarm-layout">
           <aside className="admin-swarm-panel admin-swarm-health">
@@ -838,6 +854,7 @@ const SwarmCommandCenter = () => {
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('seo')}><FaSearch /><strong>Daily SEO</strong><span>Audit metadata, schema, links, and page opportunities.</span></button>
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('calendar')}><FaCalendarAlt /><strong>Calendar refresh</strong><span>Refresh fight schedule opportunities for website/user dashboard.</span></button>
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('social')}><FaBullhorn /><strong>Social drafts</strong><span>Create multiple daily drafts for X, Instagram, and Facebook.</span></button>
+                <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('july')}><FaUserPlus /><strong>July 10K daily pack</strong><span>Event calendar, fight card, blogs, YouTube, Shorts, and retention drafts.</span></button>
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runManualAutomation('automation.growth-plan-1000-users')}><FaUserPlus /><strong>1000-user plan</strong><span>Generate the next traffic and acquisition action plan.</span></button>
               </div>
               <div className="admin-swarm-social-platform-line">

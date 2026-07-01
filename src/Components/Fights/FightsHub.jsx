@@ -12,6 +12,7 @@ import {
   getFightCategory,
   getFightId,
   getFightSearchText,
+  dedupePublicFights,
   safeArray,
   splitFightsByStatus,
 } from '@/Utils/fightExperience';
@@ -52,9 +53,10 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
     setActiveFilter(FILTERS.some((item) => item.value === requested) ? requested : (FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all'));
   }, [initialStatus, router.isReady, router.query.status]);
 
-  const groups = useMemo(() => splitFightsByStatus(safeArray(matches)), [matches]);
+  const publicMatches = useMemo(() => dedupePublicFights(safeArray(matches)), [matches]);
+  const groups = useMemo(() => splitFightsByStatus(publicMatches), [publicMatches]);
 
-  const categories = useMemo(() => Array.from(new Set(safeArray(matches).map(getFightCategory))).sort(), [matches]);
+  const categories = useMemo(() => Array.from(new Set(publicMatches.map(getFightCategory))).sort(), [publicMatches]);
 
   const sourceFights = useMemo(() => {
     if (activeFilter === 'upcoming') return groups.upcoming;

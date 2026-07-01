@@ -26,30 +26,41 @@ export async function getServerSideProps() {
     const matches = await matchesRes.json();
     const shadowFighters = await shadowRes.json();
     
-    const uniqueFighters = [];
+    const fightersByName = new Map();
+    const normalizeName = (value = '') => String(value || '').trim().replace(/\s+/g, ' ');
+    const normalizeKey = (value = '') => normalizeName(value).toLowerCase();
+    const hasImage = (value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null';
+
+    const upsertFighter = ({ name, category, image, matchName }) => {
+      const cleanName = normalizeName(name);
+      if (!cleanName) return;
+      const key = normalizeKey(cleanName);
+      const current = fightersByName.get(key);
+      const next = {
+        name: cleanName,
+        category: category || 'Combat sports',
+        image: hasImage(image) ? image : current?.image || '',
+        description: `${cleanName} is known for ${category || 'combat sports'} matchups and has been part of Fantasy MMAdness fight cards like ${matchName || 'featured events'}.`,
+      };
+
+      if (!current) {
+        fightersByName.set(key, next);
+        return;
+      }
+
+      fightersByName.set(key, {
+        ...current,
+        category: current.category || next.category,
+        image: hasImage(current.image) ? current.image : next.image,
+        description: current.description || next.description,
+      });
+    };
     
     const processFighters = (fighterList) => {
       fighterList.forEach((match) => {
-        const categoryA = match.matchCategoryTwo || match.matchCategory;
-        const categoryB = match.matchCategoryTwo || match.matchCategory;
-
-        if (!uniqueFighters.some((fighter) => fighter.name === match.matchFighterA)) {
-          uniqueFighters.push({
-            name: match.matchFighterA,
-            category: categoryA,
-            image: match.fighterAImage,
-            description: `${match.matchFighterA} is known for his fights in ${categoryA} and has been a part of thrilling matchups like ${match.matchName}.`,
-          });
-        }
-
-        if (!uniqueFighters.some((fighter) => fighter.name === match.matchFighterB)) {
-          uniqueFighters.push({
-            name: match.matchFighterB,
-            category: categoryB,
-            image: match.fighterBImage,
-            description: `${match.matchFighterB} is known for his fights in ${categoryB} and has been a part of thrilling matchups like ${match.matchName}.`,
-          });
-        }
+        const category = match.matchCategoryTwo || match.matchCategory || 'Combat sports';
+        upsertFighter({ name: match.matchFighterA, category, image: match.fighterAId?.primaryImage || match.fighterAImage, matchName: match.matchName });
+        upsertFighter({ name: match.matchFighterB, category, image: match.fighterBId?.primaryImage || match.fighterBImage, matchName: match.matchName });
       });
     };
 
@@ -57,7 +68,7 @@ export async function getServerSideProps() {
     processFighters(shadowFighters);
 
     return {
-      props: { fighters: uniqueFighters },
+      props: { fighters: Array.from(fightersByName.values()) },
     };
   } catch (error) {
     console.error("Error fetching fighters:", error);

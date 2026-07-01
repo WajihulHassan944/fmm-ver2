@@ -10,6 +10,7 @@ import {
   FaTrophy,
 } from 'react-icons/fa';
 import { FMM_ASSET_BASE, getFighterImage } from '@/Utils/fightExperience';
+import { SCORE_POINTS } from '@/Utils/scoringRules';
 
 const buildRound = (round) => ({
   round,
@@ -116,8 +117,8 @@ const MakePredictions = ({ matchId }) => {
       const fighterAWins = side === 'A';
       return {
         ...round,
-        rwPrediction1: fighterAWins ? 100 : 25,
-        rwPrediction2: fighterAWins ? 25 : 100,
+        rwPrediction1: fighterAWins ? SCORE_POINTS.RW : SCORE_POINTS.RL,
+        rwPrediction2: fighterAWins ? SCORE_POINTS.RL : SCORE_POINTS.RW,
         rwText: fighterAWins ? 'RW' : 'RL',
         rlText: fighterAWins ? 'RL' : 'RW',
         rwBorder: fighterAWins ? '2px solid #2f9cff' : '2px solid rgba(255,255,255,.16)',
@@ -132,8 +133,8 @@ const MakePredictions = ({ matchId }) => {
       const fighterAFinishes = side === 'A';
       return {
         ...round,
-        koPrediction1: fighterAFinishes ? 500 : 25,
-        koPrediction2: fighterAFinishes ? 25 : 500,
+        koPrediction1: fighterAFinishes ? SCORE_POINTS.KO : SCORE_POINTS.SP,
+        koPrediction2: fighterAFinishes ? SCORE_POINTS.SP : SCORE_POINTS.KO,
         koText: fighterAFinishes ? 'KO' : 'SP',
         spText: fighterAFinishes ? 'SP' : 'KO',
         koBorder: fighterAFinishes ? '2px solid #2f9cff' : '2px solid rgba(255,255,255,.16)',
@@ -143,14 +144,14 @@ const MakePredictions = ({ matchId }) => {
   };
 
   const getWinnerSide = (round) => {
-    if (Number(round.rwPrediction1) === 100) return 'A';
-    if (Number(round.rwPrediction2) === 100) return 'B';
+    if (Number(round.rwPrediction1) === SCORE_POINTS.RW) return 'A';
+    if (Number(round.rwPrediction2) === SCORE_POINTS.RW) return 'B';
     return '';
   };
 
   const getFinishSide = (round) => {
-    if (Number(round.koPrediction1) === 500) return 'A';
-    if (Number(round.koPrediction2) === 500) return 'B';
+    if (Number(round.koPrediction1) === SCORE_POINTS.KO) return 'A';
+    if (Number(round.koPrediction2) === SCORE_POINTS.KO) return 'B';
     return '';
   };
 

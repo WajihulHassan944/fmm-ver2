@@ -1,15 +1,21 @@
 export const FMM_ASSET_BASE = '/images/fmm-experience';
 
 const FALLBACK_FIGHTERS = [
-  'fighter-jadden-addison.png',
-  'fighter-zaveer-davis.png',
-  'fighter-conor-benn.png',
-  'fighter-chris-eubank-jr.png',
-  'fighter-anthony-yarde.png',
-  'fighter-david-benavidez.png',
+  'fighter-jadden-addison.webp',
+  'fighter-zaveer-davis.webp',
+  'fighter-conor-benn.webp',
+  'fighter-chris-eubank-jr.webp',
+  'fighter-anthony-yarde.webp',
+  'fighter-david-benavidez.webp',
 ];
 
 export const safeArray = (value) => (Array.isArray(value) ? value.filter(Boolean) : []);
+
+export const getFallbackFighterImage = (side = 'A', index = 0) => {
+  const isA = String(side).toUpperCase() === 'A';
+  const offset = isA ? index * 2 : index * 2 + 1;
+  return `${FMM_ASSET_BASE}/${FALLBACK_FIGHTERS[offset % FALLBACK_FIGHTERS.length]}`;
+};
 
 export const getFightId = (match) => match?._id || match?.id || match?.matchId || '';
 
@@ -26,12 +32,11 @@ export const getFightName = (match) => {
 export const getFighterImage = (match, side = 'A', index = 0) => {
   const isA = String(side).toUpperCase() === 'A';
   const candidates = isA
-    ? [match?.fighterAImage, match?.matchFighterAImage, match?.fighterA?.image, match?.fighterOneImage, match?.imageA]
-    : [match?.fighterBImage, match?.matchFighterBImage, match?.fighterB?.image, match?.fighterTwoImage, match?.imageB];
-  const direct = candidates.find((value) => typeof value === 'string' && value.trim());
+    ? [match?.fighterAId?.primaryImage, match?.fighterA?.primaryImage, match?.fighterAImage, match?.matchFighterAImage, match?.fighterA?.image, match?.fighterOneImage, match?.imageA]
+    : [match?.fighterBId?.primaryImage, match?.fighterB?.primaryImage, match?.fighterBImage, match?.matchFighterBImage, match?.fighterB?.image, match?.fighterTwoImage, match?.imageB];
+  const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
   if (direct) return direct;
-  const offset = isA ? index * 2 : index * 2 + 1;
-  return `${FMM_ASSET_BASE}/${FALLBACK_FIGHTERS[offset % FALLBACK_FIGHTERS.length]}`;
+  return getFallbackFighterImage(side, index);
 };
 
 const normalizeTime = (value) => {
@@ -116,6 +121,53 @@ export const getFightSearchText = (match) => [
   match?.location,
   match?.venue,
 ].filter(Boolean).join(' ').toLowerCase();
+
+
+const normalizeFightKeyPart = (value = '') => String(value || '')
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const hasRenderableImage = (value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null';
+
+const getFightQualityScore = (match = {}) => {
+  const status = getFightStatus(match);
+  const statusScore = status === 'live' ? 9000 : status === 'upcoming' ? 7000 : 5000;
+  const typeScore = String(match?.matchType || '').toUpperCase() === 'LIVE' ? 400 : 0;
+  const imageScore = [match?.fighterAId?.primaryImage, match?.fighterBId?.primaryImage, match?.fighterAImage, match?.fighterBImage, match?.promotionBackground]
+    .filter(hasRenderableImage).length * 40;
+  const statScore = safeArray(match?.BoxingMatch?.fighterOneStats).length || safeArray(match?.MMAMatch?.fighterOneStats).length ? 80 : 0;
+  const videoScore = hasRenderableImage(match?.matchVideoUrl) ? 25 : 0;
+  const dateScore = parseFightDate(match)?.getTime() || 0;
+  return statusScore + typeScore + imageScore + statScore + videoScore + Math.min(dateScore / 100000000000, 50);
+};
+
+export const getPublicFightDuplicateKey = (match = {}) => {
+  const fighterA = normalizeFightKeyPart(match?.matchFighterA || match?.fighterAId?.displayName || match?.fighterA?.name);
+  const fighterB = normalizeFightKeyPart(match?.matchFighterB || match?.fighterBId?.displayName || match?.fighterB?.name);
+  const orderedPair = [fighterA, fighterB].sort().join('::');
+  return [
+    normalizeFightKeyPart(match?.matchName),
+    orderedPair,
+    normalizeFightKeyPart(getFightCategory(match)),
+    String(match?.maxRounds || match?.rounds || ''),
+  ].join('|');
+};
+
+export const dedupePublicFights = (matches = []) => {
+  const map = new Map();
+  safeArray(matches).forEach((match) => {
+    const key = getPublicFightDuplicateKey(match);
+    if (!key.replace(/[|:]/g, '').trim()) return;
+    const existing = map.get(key);
+    if (!existing || getFightQualityScore(match) > getFightQualityScore(existing)) {
+      map.set(key, match);
+    }
+  });
+  return Array.from(map.values());
+};
 
 export const sortFights = (matches, direction = 'asc') => [...safeArray(matches)].sort((a, b) => {
   const aDate = parseFightDate(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;

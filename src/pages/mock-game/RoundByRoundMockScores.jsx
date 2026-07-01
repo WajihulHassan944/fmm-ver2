@@ -1,30 +1,31 @@
 import React, { useMemo } from 'react';
 import { FaBolt, FaCheck, FaFlagCheckered, FaShieldAlt, FaTimes, FaTrophy } from 'react-icons/fa';
 import MockLeaderboard from './MockLeaderboard';
+import { SCORE_POINTS } from '@/Utils/scoringRules';
 
 const OFFICIAL_SCORECARD = {
   Boxing: {
     fighterOne: [
-      { HP: 18, BP: 9, TP: 27, RW: 100, KO: 25 },
-      { HP: 14, BP: 12, TP: 26, RW: 25, KO: 25 },
-      { HP: 19, BP: 8, TP: 27, RW: 100, KO: 25 },
+      { HP: 18, BP: 9, TP: 27, RW: SCORE_POINTS.RW, KO: SCORE_POINTS.SP },
+      { HP: 14, BP: 12, TP: 26, RW: SCORE_POINTS.RL, KO: SCORE_POINTS.SP },
+      { HP: 19, BP: 8, TP: 27, RW: SCORE_POINTS.RW, KO: SCORE_POINTS.SP },
     ],
     fighterTwo: [
-      { HP: 15, BP: 10, TP: 25, RW: 25, KO: 25 },
-      { HP: 17, BP: 13, TP: 30, RW: 100, KO: 25 },
-      { HP: 15, BP: 11, TP: 26, RW: 25, KO: 500 },
+      { HP: 15, BP: 10, TP: 25, RW: SCORE_POINTS.RL, KO: SCORE_POINTS.SP },
+      { HP: 17, BP: 13, TP: 30, RW: SCORE_POINTS.RW, KO: SCORE_POINTS.SP },
+      { HP: 15, BP: 11, TP: 26, RW: SCORE_POINTS.RL, KO: SCORE_POINTS.KO },
     ],
   },
   MMA: {
     fighterOne: [
-      { ST: 51, KI: 12, KN: 2, EL: 2, RW: 100, KO: 25 },
-      { ST: 48, KI: 11, KN: 5, EL: 2, RW: 25, KO: 25 },
-      { ST: 49, KI: 13, KN: 2, EL: 5, RW: 100, KO: 25 },
+      { ST: 51, KI: 12, KN: 2, EL: 2, RW: SCORE_POINTS.RW, KO: SCORE_POINTS.SP },
+      { ST: 48, KI: 11, KN: 5, EL: 2, RW: SCORE_POINTS.RL, KO: SCORE_POINTS.SP },
+      { ST: 49, KI: 13, KN: 2, EL: 5, RW: SCORE_POINTS.RW, KO: SCORE_POINTS.SP },
     ],
     fighterTwo: [
-      { ST: 47, KI: 16, KN: 2, EL: 2, RW: 25, KO: 25 },
-      { ST: 47, KI: 8, KN: 1, EL: 1, RW: 100, KO: 25 },
-      { ST: 52, KI: 14, KN: 3, EL: 2, RW: 25, KO: 500 },
+      { ST: 47, KI: 16, KN: 2, EL: 2, RW: SCORE_POINTS.RL, KO: SCORE_POINTS.SP },
+      { ST: 47, KI: 8, KN: 1, EL: 1, RW: SCORE_POINTS.RW, KO: SCORE_POINTS.SP },
+      { ST: 52, KI: 14, KN: 3, EL: 2, RW: SCORE_POINTS.RL, KO: SCORE_POINTS.KO },
     ],
   },
 };
@@ -49,8 +50,8 @@ const asNumber = (value) => {
 };
 
 const outcomeLabel = (value, type) => {
-  if (type === 'winner') return value === 100 ? 'Selected' : 'Not selected';
-  if (type === 'finish') return value === 500 ? 'KO selected' : 'No KO';
+  if (type === 'winner') return value === SCORE_POINTS.RW ? 'Selected' : 'Not selected';
+  if (type === 'finish') return value === SCORE_POINTS.KO ? 'KO selected' : 'No KO';
   return '—';
 };
 
@@ -175,13 +176,13 @@ const RoundByRoundMockScores = ({ predictions = [], matchCategory = 'Boxing', fi
                     <div className="mock-round-result-row is-outcome">
                       <span><b>Round winner</b><em>RW</em></span>
                       <strong>{outcomeLabel(fighter.score.winnerPrediction, 'winner')}</strong>
-                      <strong>{fighter.score.winnerActual === 100 ? 'Won round' : 'Lost round'}</strong>
+                      <strong>{fighter.score.winnerActual === SCORE_POINTS.RW ? 'Won round' : 'Lost round'}</strong>
                       <span className={fighter.score.winnerEarned ? 'is-hit' : 'is-miss'}>{fighter.score.winnerEarned ? <FaCheck /> : <FaTimes />}{fighter.score.winnerEarned ? `+${fighter.score.winnerEarned}` : '0'}</span>
                     </div>
                     <div className="mock-round-result-row is-outcome">
                       <span><b>Finish call</b><em>KO</em></span>
                       <strong>{outcomeLabel(fighter.score.finishPrediction, 'finish')}</strong>
-                      <strong>{fighter.score.finishActual === 500 ? 'KO finish' : 'No KO'}</strong>
+                      <strong>{fighter.score.finishActual === SCORE_POINTS.KO ? 'KO finish' : 'No KO'}</strong>
                       <span className={fighter.score.finishEarned ? 'is-hit' : 'is-miss'}>{fighter.score.finishEarned ? <FaCheck /> : <FaTimes />}{fighter.score.finishEarned ? `+${fighter.score.finishEarned}` : '0'}</span>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
   FaCalendarAlt,
+  FaDatabase,
   FaChartBar,
   FaEdit,
   FaEye,
@@ -19,6 +20,8 @@ import { fetchMatches } from '@/Redux/matchSlice';
 import AdminPredictions from './AdminPredictions';
 import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
+import FightDataQualityCenter from './FightDataQualityCenter';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
@@ -53,6 +56,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showDataQuality, setShowDataQuality] = useState(false);
 
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
@@ -173,6 +177,18 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     return bulkDeleteFights([fight]);
   };
 
+
+  if (showDataQuality) {
+    return (
+      <div className="admin-workspace admin-fights-workspace">
+        <FightDataQualityCenter
+          onBack={() => setShowDataQuality(false)}
+          onRefresh={refreshFightRows}
+        />
+      </div>
+    );
+  }
+
   if (selectedScore?.id) {
     return (
       <div className="admin-workspace admin-score-workspace-shell">
@@ -219,6 +235,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
+          <button type="button" className="admin-action-secondary" onClick={() => setShowDataQuality(true)}><FaDatabase /> Data quality</button>
           <button type="button" className="admin-action-secondary" onClick={refreshFightRows}><FaSyncAlt className={matchStatus === 'loading' || matchRowsLoading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
@@ -267,7 +284,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><img src={fight.fighterAImage || FALLBACK_A} alt="" /><img src={fight.fighterBImage || FALLBACK_B} alt="" /></span>
+                        <span><OptimizedImage src={fight.fighterAId?.primaryImage || fight.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={fight.fighterBId?.primaryImage || fight.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
                         <div><strong>{getTitle(fight)}</strong><small>{fight.matchFighterA || 'Fighter A'} vs {fight.matchFighterB || 'Fighter B'}</small></div>
                       </div>
                     </td>

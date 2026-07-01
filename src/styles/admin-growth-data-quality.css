@@ -1,0 +1,154 @@
+.admin-july-growth-panel,
+.admin-fight-quality-center {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-july-growth-hero,
+.admin-fight-quality-hero {
+  background:
+    radial-gradient(circle at top right, rgba(237, 31, 49, .24), transparent 38%),
+    linear-gradient(135deg, rgba(10, 12, 18, .98), rgba(26, 8, 13, .96));
+}
+
+.admin-july-target-grid,
+.admin-july-schedule-list,
+.admin-quality-suggestion-list,
+.admin-quality-group-list,
+.admin-quality-status-list {
+  display: grid;
+  gap: .85rem;
+}
+
+.admin-july-target-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-july-target-grid article,
+.admin-july-schedule-list article,
+.admin-quality-group-card,
+.admin-quality-suggestion-list article,
+.admin-july-growth-rule-card {
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  border-radius: 18px;
+  padding: 1rem;
+}
+
+.admin-july-target-grid article {
+  display: grid;
+  gap: .3rem;
+}
+
+.admin-july-target-grid svg,
+.admin-july-growth-rule-card svg,
+.admin-july-schedule-list svg {
+  color: #ed1f31;
+}
+
+.admin-july-target-grid small,
+.admin-july-schedule-list span,
+.admin-quality-suggestion-list span,
+.admin-quality-suggestion-list em,
+.admin-quality-group-card small {
+  color: rgba(255,255,255,.64);
+  font-size: .78rem;
+}
+
+.admin-july-target-grid strong {
+  color: #fff;
+  font-size: 1.45rem;
+}
+
+.admin-july-growth-rule-card {
+  display: flex;
+  gap: .8rem;
+  align-items: flex-start;
+  margin-top: .85rem;
+}
+
+.admin-july-growth-rule-card strong,
+.admin-quality-group-card strong,
+.admin-quality-suggestion-list strong {
+  color: #fff;
+}
+
+.admin-july-growth-rule-card p {
+  color: rgba(255,255,255,.72);
+  margin: .25rem 0 0;
+}
+
+.admin-july-schedule-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-july-schedule-list article {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+
+.admin-july-schedule-list strong {
+  color: #fff;
+  min-width: 54px;
+}
+
+.admin-quality-tabs {
+  margin-top: 0;
+}
+
+.admin-quality-group-card header,
+.admin-quality-suggestion-list article {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-quality-group-card header {
+  margin-bottom: .85rem;
+}
+
+.admin-quality-table small {
+  display: block;
+  color: rgba(255,255,255,.55);
+  margin-top: .25rem;
+}
+
+.admin-quality-table .is-preserve-row {
+  background: rgba(52, 211, 153, .07);
+}
+
+.admin-quality-status-list {
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  justify-content: flex-start;
+}
+
+.admin-quality-suggestion-list article {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.admin-quality-suggestion-list a {
+  color: #f87171;
+}
+
+@media (max-width: 980px) {
+  .admin-july-target-grid,
+  .admin-july-schedule-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-quality-group-card header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-july-target-grid,
+  .admin-july-schedule-list,
+  .admin-quality-status-list {
+    grid-template-columns: 1fr;
+  }
+}

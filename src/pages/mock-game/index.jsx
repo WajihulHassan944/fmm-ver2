@@ -19,6 +19,7 @@ import {
 import RoundByRoundMockScores from './RoundByRoundMockScores';
 import { ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
+import { SCORE_POINTS } from '@/Utils/scoringRules';
 
 const createInitialRounds = () => Array.from({ length: 3 }, (_, index) => ({
   round: index + 1,
@@ -49,8 +50,8 @@ const fightCards = [
     date: 'Sunday · 8:30 PM',
     venue: 'Madness performance center',
     crowd: '936 mock entries',
-    fighterOne: { name: 'Jadden Addison', shortName: 'J. Addison', image: `${FMM_ASSET_BASE}/fighter-jadden-addison.png`, record: '13-1-0' },
-    fighterTwo: { name: 'Zaveer Davis', shortName: 'Z. Davis', image: `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`, record: '12-2-0' },
+    fighterOne: { name: 'Jadden Addison', shortName: 'J. Addison', image: `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`, record: '13-1-0' },
+    fighterTwo: { name: 'Zaveer Davis', shortName: 'Z. Davis', image: `${FMM_ASSET_BASE}/fighter-zaveer-davis.webp`, record: '12-2-0' },
   },
   {
     id: 'fmm-boxing-series',
@@ -60,8 +61,8 @@ const fightCards = [
     date: 'Friday · 9:15 PM',
     venue: 'Red corner arena',
     crowd: '782 mock entries',
-    fighterOne: { name: 'Chris Eubank Jr.', shortName: 'C. Eubank Jr.', image: `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.png`, record: '34-3-0' },
-    fighterTwo: { name: 'Conor Benn', shortName: 'C. Benn', image: `${FMM_ASSET_BASE}/fighter-conor-benn.png`, record: '23-0-0' },
+    fighterOne: { name: 'Chris Eubank Jr.', shortName: 'C. Eubank Jr.', image: `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.webp`, record: '34-3-0' },
+    fighterTwo: { name: 'Conor Benn', shortName: 'C. Benn', image: `${FMM_ASSET_BASE}/fighter-conor-benn.webp`, record: '23-0-0' },
   },
 ];
 
@@ -146,22 +147,22 @@ export default function MockGamePage() {
       const updated = { ...round };
 
       if (buttonType === 'rw') {
-        if (updated.rwPrediction1 === 100) {
-          updated.rwPrediction1 = 25;
-          updated.rwPrediction2 = 100;
+        if (updated.rwPrediction1 === SCORE_POINTS.RW) {
+          updated.rwPrediction1 = SCORE_POINTS.RL;
+          updated.rwPrediction2 = SCORE_POINTS.RW;
         } else {
-          updated.rwPrediction1 = 100;
-          updated.rwPrediction2 = 25;
+          updated.rwPrediction1 = SCORE_POINTS.RW;
+          updated.rwPrediction2 = SCORE_POINTS.RL;
         }
       }
 
       if (buttonType === 'ko') {
-        if (updated.koPrediction1 === 500) {
-          updated.koPrediction1 = 25;
-          updated.koPrediction2 = 500;
+        if (updated.koPrediction1 === SCORE_POINTS.KO) {
+          updated.koPrediction1 = SCORE_POINTS.SP;
+          updated.koPrediction2 = SCORE_POINTS.KO;
         } else {
-          updated.koPrediction1 = 500;
-          updated.koPrediction2 = 25;
+          updated.koPrediction1 = SCORE_POINTS.KO;
+          updated.koPrediction2 = SCORE_POINTS.SP;
         }
       }
 
@@ -338,10 +339,10 @@ export default function MockGamePage() {
 
                   <div className="practice-round-list mock-round-list mock-real-round-list">
                     {rounds.map((round, roundIndex) => {
-                      const winnerA = round.rwPrediction1 === 100;
-                      const winnerB = round.rwPrediction2 === 100;
-                      const finishA = round.koPrediction1 === 500;
-                      const finishB = round.koPrediction2 === 500;
+                      const winnerA = round.rwPrediction1 === SCORE_POINTS.RW;
+                      const winnerB = round.rwPrediction2 === SCORE_POINTS.RW;
+                      const finishA = round.koPrediction1 === SCORE_POINTS.KO;
+                      const finishB = round.koPrediction2 === SCORE_POINTS.KO;
                       const winnerLabel = winnerA ? selectedFight.fighterOne.shortName : winnerB ? selectedFight.fighterTwo.shortName : 'Choose winner';
                       const finishLabel = finishA ? `${selectedFight.fighterOne.shortName} KO` : finishB ? `${selectedFight.fighterTwo.shortName} KO` : 'Choose finish';
                       return (

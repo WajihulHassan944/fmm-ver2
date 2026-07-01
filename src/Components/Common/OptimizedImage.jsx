@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Image from "next/image";
 
 const LOCAL_IMAGE_REWRITES = {
@@ -32,9 +33,15 @@ const NEXT_IMAGE_REMOTE_HOSTS = new Set([
   "fantasymmadness-game-server-three.vercel.app",
 ]);
 
+const optimizeCloudinarySrc = (src) => {
+  if (!src || typeof src !== "string" || !src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
+  if (/\/image\/upload\/(?:[^/]+,)*f_auto/.test(src) || src.includes("/image/upload/f_auto")) return src;
+  return src.replace("/image/upload/", "/image/upload/f_auto,q_auto,c_limit,w_1200/");
+};
+
 export const normalizeOptimizedImageSrc = (src) => {
   if (!src || typeof src !== "string") return src;
-  return LOCAL_IMAGE_REWRITES[src] || src;
+  return optimizeCloudinarySrc(LOCAL_IMAGE_REWRITES[src] || src);
 };
 
 export const isNextImageEligible = (src) => {
@@ -60,9 +67,17 @@ const OptimizedImage = ({
   loading,
   decoding = "async",
   fill = false,
+  fallbackSrc = "",
+  onError,
   ...props
 }) => {
-  const normalizedSrc = normalizeOptimizedImageSrc(src);
+  const [failed, setFailed] = useState(false);
+  const normalizedSrc = normalizeOptimizedImageSrc(failed && fallbackSrc ? fallbackSrc : src);
+
+  const handleError = (event) => {
+    if (fallbackSrc && !failed) setFailed(true);
+    onError?.(event);
+  };
 
   if (!isNextImageEligible(normalizedSrc)) {
     return (
@@ -74,6 +89,7 @@ const OptimizedImage = ({
         height={fill ? undefined : height}
         loading={priority ? "eager" : loading || "lazy"}
         decoding={decoding}
+        onError={handleError}
       />
     );
   }
@@ -85,6 +101,7 @@ const OptimizedImage = ({
     decoding,
     fill,
     ...props,
+    onError: handleError,
   };
 
   if (!fill) {
