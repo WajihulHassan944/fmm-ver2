@@ -81,6 +81,32 @@ const buildImportBody = ({ dryRun, offset = 0 }) => ({
   remoteConcurrency: 3,
 });
 
+const buildCleanupBody = (dryRun = true) => ({
+  dryRun,
+  batchSize: 50,
+  includeMatches: true,
+  includeShadows: true,
+  resolveMissingRefs: true,
+  removeLegacyNames: true,
+  removeLegacyImages: true,
+  removeLegacyDeleteUrls: true,
+});
+
+const mergeCleanupPayload = (current, payload) => ({
+  ...(payload || {}),
+  dryRun: false,
+  inspectedMatches: getCount(current, 'inspectedMatches') + getCount(payload, 'inspectedMatches'),
+  inspectedShadows: getCount(current, 'inspectedShadows') + getCount(payload, 'inspectedShadows'),
+  modifiedMatches: getCount(current, 'modifiedMatches') + getCount(payload, 'modifiedMatches'),
+  modifiedShadows: getCount(current, 'modifiedShadows') + getCount(payload, 'modifiedShadows'),
+  eligibleUpdates: getCount(current, 'eligibleUpdates') + getCount(payload, 'eligibleUpdates'),
+  linkedByNameCount: getCount(current, 'linkedByNameCount') + getCount(payload, 'linkedByNameCount'),
+  legacyFieldsUnsetCount: getCount(current, 'legacyFieldsUnsetCount') + getCount(payload, 'legacyFieldsUnsetCount'),
+  unresolvedSideCount: getCount(current, 'unresolvedSideCount') + getCount(payload, 'unresolvedSideCount'),
+  initialTotalTargets: current?.initialTotalTargets || payload?.totalTargets || 0,
+  batchHistory: [...(current?.batchHistory || []), payload?.batch].filter(Boolean),
+});
+
 export default function CombatFightersAdmin() {
   const [fightersPayload, setFightersPayload] = useState(null);
   const [search, setSearch] = useState('');
@@ -93,6 +119,9 @@ export default function CombatFightersAdmin() {
   const [importPreview, setImportPreview] = useState(null);
   const [importProgress, setImportProgress] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [cleanupPreview, setCleanupPreview] = useState(null);
+  const [cleanupProgress, setCleanupProgress] = useState(null);
+  const [cleaningLegacyFields, setCleaningLegacyFields] = useState(false);
 
   const fighters = useMemo(() => getRows(fightersPayload), [fightersPayload]);
 
@@ -252,6 +281,79 @@ export default function CombatFightersAdmin() {
   };
 
 
+
+  const runCleanup = async (dryRun = true) => {
+    if (!dryRun) {
+      const confirmed = window.confirm('Normalize existing fights to fighter-library references and remove duplicated fight-side fighter names/images when a valid fighter ref exists? Run dry-run first if you want to preview.');
+      if (!confirmed) return;
+    }
+
+    setCleaningLegacyFields(true);
+    setCleanupProgress({
+      dryRun,
+      status: dryRun ? 'Checking linked fight records...' : 'Starting cleanup batches...',
+      processed: 0,
+      total: 0,
+      hasMore: false,
+    });
+
+    try {
+      if (dryRun) {
+        const payload = await combatFightersApi.cleanupFightFighterFields(buildCleanupBody(true));
+        setCleanupPreview(payload);
+        setCleanupProgress({
+          dryRun: true,
+          status: 'Cleanup dry-run ready',
+          processed: payload?.batch?.processedRecords || 0,
+          total: payload?.totalTargets || 0,
+          hasMore: Boolean(payload?.batch?.hasMore),
+        });
+        toast.success(`${payload?.eligibleUpdates || 0} fight records can be normalized safely.`);
+        return;
+      }
+
+      let aggregate = { dryRun: false, batchHistory: [] };
+      let guard = 0;
+      const maxBatches = 250;
+
+      while (guard < maxBatches) {
+        guard += 1;
+        const payload = await combatFightersApi.cleanupFightFighterFields(buildCleanupBody(false));
+        const batch = payload?.batch || {};
+        aggregate = mergeCleanupPayload(aggregate, payload);
+        aggregate.batch = batch;
+        aggregate.note = payload?.note;
+        aggregate.totalTargets = payload?.totalTargets || aggregate.totalTargets || 0;
+
+        const processed = getCount(aggregate, 'modifiedMatches') + getCount(aggregate, 'modifiedShadows');
+        const total = aggregate.initialTotalTargets || payload?.totalTargets || processed;
+        setCleanupPreview(aggregate);
+        setCleanupProgress({
+          dryRun: false,
+          status: batch.hasMore ? 'Cleanup batch completed. Continuing...' : 'Cleanup completed',
+          processed,
+          total,
+          hasMore: Boolean(batch.hasMore),
+          batchNumber: guard,
+        });
+
+        if (!batch.hasMore) break;
+      }
+
+      if (guard >= maxBatches) {
+        toast.warning('Cleanup paused after the safety batch limit. Run cleanup again to continue if anything remains.');
+      } else {
+        toast.success(`${(aggregate.modifiedMatches || 0) + (aggregate.modifiedShadows || 0)} fight records normalized; ${aggregate.legacyFieldsUnsetCount || 0} duplicated fighter fields removed.`);
+      }
+
+      await loadFighters();
+    } catch (error) {
+      toast.error(error.message || 'Fight fighter-field cleanup failed.');
+    } finally {
+      setCleaningLegacyFields(false);
+    }
+  };
+
   return (
     <div className="admin-workspace admin-combat-fighters-page">
       <Head><title>Combat Fighter Library | FMM Administration</title></Head>
@@ -263,8 +365,10 @@ export default function CombatFightersAdmin() {
           <p>Create, edit, deactivate, restore, and automatically import reusable fighters for normal LIVE/SHADOW fight creation.</p>
         </div>
         <div className="admin-heading-actions">
-          <button type="button" className="admin-action-secondary" onClick={() => runImport(true)} disabled={importing}><FaMagic /> Dry-run import</button>
-          <button type="button" className="admin-primary-action" onClick={() => runImport(false)} disabled={importing}><FaRedo className={importing ? 'xp-spin' : ''} /> {importing ? 'Importing batches...' : 'Run automatic import'}</button>
+          <button type="button" className="admin-action-secondary" onClick={() => runImport(true)} disabled={importing || cleaningLegacyFields}><FaMagic /> Dry-run import</button>
+          <button type="button" className="admin-primary-action" onClick={() => runImport(false)} disabled={importing || cleaningLegacyFields}><FaRedo className={importing ? 'xp-spin' : ''} /> {importing ? 'Importing batches...' : 'Run automatic import'}</button>
+          <button type="button" className="admin-action-secondary" onClick={() => runCleanup(true)} disabled={importing || cleaningLegacyFields}><FaMagic /> Dry-run cleanup</button>
+          <button type="button" className="admin-primary-action" onClick={() => runCleanup(false)} disabled={importing || cleaningLegacyFields}><FaRedo className={cleaningLegacyFields ? 'xp-spin' : ''} /> {cleaningLegacyFields ? 'Cleaning batches...' : 'Normalize fight links'}</button>
           <button type="button" className="admin-action-secondary" onClick={loadFighters}><FaSyncAlt className={loading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
@@ -282,6 +386,26 @@ export default function CombatFightersAdmin() {
             {(importPreview.createdCount !== undefined || importPreview.updatedCount !== undefined) && <small>Created/updated: {(importPreview.createdCount || 0)} / {(importPreview.updatedCount || 0)}</small>}
             {(importPreview.linkedMatchCount !== undefined || importPreview.linkedShadowCount !== undefined) && <small>Linked fights: {(importPreview.linkedMatchCount || 0) + (importPreview.linkedShadowCount || 0)}</small>}
             {importProgress && <small>Batch progress: {importProgress.processed || 0} / {importProgress.total || 0}</small>}
+          </div>
+        </section>
+      )}
+
+
+      {cleanupPreview && (
+        <section className="admin-success-panel admin-fighter-import-panel admin-fighter-cleanup-panel">
+          <div>
+            <span>{cleanupPreview.dryRun ? 'Cleanup dry-run ready' : cleaningLegacyFields ? 'Cleanup running' : 'Cleanup completed'}</span>
+            <strong>{cleanupPreview.eligibleUpdates || cleanupPreview.modifiedMatches + cleanupPreview.modifiedShadows || 0} fight records normalized/eligible</strong>
+            <p>{cleanupPreview.note || 'Fight records now resolve fighter names and images from the reusable fighter library. Legacy fields are removed only where a valid fighter ref exists.'}</p>
+          </div>
+          <div>
+            <small>Total targets: {cleanupPreview.totalTargets || cleanupPreview.initialTotalTargets || 0}</small>
+            <small>Inspected match/shadow: {cleanupPreview.inspectedMatches || 0} / {cleanupPreview.inspectedShadows || 0}</small>
+            <small>Modified match/shadow: {cleanupPreview.modifiedMatches || 0} / {cleanupPreview.modifiedShadows || 0}</small>
+            <small>Legacy fields removed: {cleanupPreview.legacyFieldsUnsetCount || 0}</small>
+            <small>Resolved by name: {cleanupPreview.linkedByNameCount || 0}</small>
+            <small>Unresolved sides preserved: {cleanupPreview.unresolvedSideCount || 0}</small>
+            {cleanupProgress && <small>Cleanup progress: {cleanupProgress.processed || 0} / {cleanupProgress.total || 0}</small>}
           </div>
         </section>
       )}

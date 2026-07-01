@@ -182,3 +182,21 @@
   .admin-combat-fighter-layout,
   .admin-fighter-library-toolbar { grid-template-columns: 1fr; }
 }
+.admin-fighter-select-loading,
+.admin-fighter-select-load-more {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(255,255,255,.16) !important;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(255,255,255,.72) !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+.admin-fighter-select-load-more { cursor: pointer; }
+.admin-fighter-cleanup-panel { border-color: rgba(45, 212, 191, .28); }

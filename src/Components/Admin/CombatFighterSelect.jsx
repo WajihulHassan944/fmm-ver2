@@ -1,12 +1,27 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronDown, FaSearch, FaSyncAlt, FaUserPlus } from 'react-icons/fa';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { combatFightersApi, getCombatFighterId, getCombatFighterImage, getCombatFighterName } from '@/Utils/combatFightersApi';
 
 const FALLBACK_IMAGE = '/images/fmm-experience/fighter-action-red.webp';
 const BLUE_FALLBACK_IMAGE = '/images/fmm-experience/fighter-action-blue.webp';
+const PAGE_SIZE = 25;
 
 const findById = (items, id) => items.find((item) => String(getCombatFighterId(item)) === String(id));
+const getRows = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  return payload?.items || payload?.fighters || payload?.data || payload?.rows || [];
+};
+const getPagination = (payload = {}) => payload.pagination || payload.meta || {};
+
+const mergeById = (current = [], rows = []) => {
+  const map = new Map();
+  [...current, ...rows].forEach((item) => {
+    const id = getCombatFighterId(item);
+    if (id) map.set(String(id), item);
+  });
+  return Array.from(map.values());
+};
 
 export default function CombatFighterSelect({
   label,
@@ -22,35 +37,62 @@ export default function CombatFighterSelect({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [fighters, setFighters] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, hasNextPage: false, nextPage: null, total: 0 });
   const rootRef = useRef(null);
+  const listRef = useRef(null);
+  const requestRef = useRef(0);
 
   const selected = useMemo(() => findById(fighters, value), [fighters, value]);
 
-  const loadFighters = async (term = search) => {
-    setLoading(true);
+  const loadFighters = useCallback(async ({ page = 1, term = '', append = false } = {}) => {
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
+    if (append) setLoadingMore(true);
+    else setLoading(true);
+
     try {
       const payload = await combatFightersApi.list({
-        limit: 100,
+        page,
+        limit: PAGE_SIZE,
+        status: 'active',
         search: term,
         ...(category ? { category } : {}),
       });
-      const rows = Array.isArray(payload?.items) ? payload.items : [];
-      setFighters((current) => {
-        const map = new Map([...current, ...rows].map((item) => [String(getCombatFighterId(item)), item]));
-        return Array.from(map.values());
+      if (requestRef.current !== requestId) return;
+      const rows = getRows(payload);
+      setFighters((current) => (append ? mergeById(current, rows) : rows));
+      const meta = getPagination(payload);
+      setPagination({
+        page: Number(meta.page || page),
+        limit: Number(meta.limit || PAGE_SIZE),
+        total: Number(meta.total || rows.length),
+        pages: Number(meta.pages || 1),
+        hasNextPage: Boolean(meta.hasNextPage || (meta.nextPage && Number(meta.nextPage) > Number(meta.page || page))),
+        nextPage: meta.nextPage ?? null,
       });
     } catch (error) {
       console.warn('Unable to load combat fighters:', error.message);
     } finally {
-      setLoading(false);
+      if (append) setLoadingMore(false);
+      else setLoading(false);
     }
-  };
+  }, [category]);
 
   useEffect(() => {
-    loadFighters('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
+    setSearch('');
+    setPagination({ page: 1, hasNextPage: false, nextPage: null, total: 0 });
+    loadFighters({ page: 1, term: '', append: false });
+  }, [category, loadFighters]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const timer = setTimeout(() => {
+      loadFighters({ page: 1, term: search, append: false });
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [open, search, loadFighters]);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -60,21 +102,23 @@ export default function CombatFighterSelect({
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  const visibleFighters = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return fighters;
-    return fighters.filter((fighter) => [
-      getCombatFighterName(fighter),
-      fighter.normalizedName,
-      fighter.category,
-      ...(fighter.aliases || []),
-    ].filter(Boolean).join(' ').toLowerCase().includes(term));
-  }, [fighters, search]);
+  const loadNextPage = useCallback(() => {
+    if (loading || loadingMore || !pagination.hasNextPage || !pagination.nextPage) return;
+    loadFighters({ page: pagination.nextPage, term: search, append: true });
+  }, [loadFighters, loading, loadingMore, pagination.hasNextPage, pagination.nextPage, search]);
+
+  const handleListScroll = (event) => {
+    const node = event.currentTarget;
+    const remaining = node.scrollHeight - node.scrollTop - node.clientHeight;
+    if (remaining < 72) loadNextPage();
+  };
 
   const selectFighter = (fighter) => {
     onChange?.(fighter);
     setOpen(false);
   };
+
+  const empty = !loading && fighters.length === 0;
 
   return (
     <div className={`admin-fighter-select ${open ? 'is-open' : ''}`} ref={rootRef}>
@@ -98,7 +142,7 @@ export default function CombatFighterSelect({
         />
         <span>
           <strong>{selected ? getCombatFighterName(selected) : 'Select fighter from library'}</strong>
-          <small>{selected ? `${selected.category || 'combat'} · ${selected.status || 'active'}` : helper || 'Name and image are pulled from the fighter library'}</small>
+          <small>{selected ? `${selected.category || 'combat'} · ${selected.status || 'active'}` : helper || 'Infinite-scroll fighter library with name and image'}</small>
         </span>
         <FaChevronDown aria-hidden="true" />
       </button>
@@ -115,19 +159,19 @@ export default function CombatFighterSelect({
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  loadFighters(search);
+                  loadFighters({ page: 1, term: search, append: false });
                 }
               }}
               placeholder="Search fighter name"
               autoFocus
             />
-            <button type="button" onClick={() => loadFighters(search)} aria-label="Refresh fighter search">
+            <button type="button" onClick={() => loadFighters({ page: 1, term: search, append: false })} aria-label="Refresh fighter search">
               <FaSyncAlt className={loading ? 'xp-spin' : ''} />
             </button>
           </label>
 
-          <div className="admin-fighter-select-list">
-            {visibleFighters.length ? visibleFighters.map((fighter) => {
+          <div className="admin-fighter-select-list" ref={listRef} onScroll={handleListScroll}>
+            {fighters.map((fighter) => {
               const id = getCombatFighterId(fighter);
               return (
                 <button
@@ -140,7 +184,17 @@ export default function CombatFighterSelect({
                   <span><strong>{getCombatFighterName(fighter)}</strong><small>{fighter.category || 'combat'} · {fighter.primaryImage ? 'image ready' : 'needs image'}</small></span>
                 </button>
               );
-            }) : (
+            })}
+
+            {(loading || loadingMore) && (
+              <div className="admin-fighter-select-loading"><FaSyncAlt className="xp-spin" /> {loadingMore ? 'Loading more fighters...' : 'Loading fighters...'}</div>
+            )}
+
+            {pagination.hasNextPage && !loadingMore && !loading && (
+              <button type="button" className="admin-fighter-select-load-more" onClick={loadNextPage}>Load more fighters</button>
+            )}
+
+            {empty && (
               <div className="admin-fighter-select-empty">
                 <FaUserPlus />
                 <strong>No fighter found</strong>

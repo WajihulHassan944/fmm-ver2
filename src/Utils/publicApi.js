@@ -335,44 +335,43 @@ const filterByText = (items, terms = []) => {
   });
 };
 
+const normalizePublicFighter = (fighter = {}) => {
+  const id = fighter.id || fighter._id || fighter.slug || fighter.normalizedName || fighter.displayName || fighter.name;
+  const name = fighter.displayName || fighter.name || fighter.fighterName || 'Unnamed fighter';
+  const image = fighter.primaryImage || fighter.image || fighter.fighterImage || '';
+  const category = fighter.category || fighter.discipline || 'Combat sports';
+  return {
+    ...fighter,
+    id,
+    _id: fighter._id || id,
+    name,
+    displayName: fighter.displayName || name,
+    image,
+    primaryImage: fighter.primaryImage || image,
+    category,
+    description: fighter.description || fighter.bio || `${name} is part of the Fantasy MMAdness fighter library and appears across combat sports cards.`,
+  };
+};
+
 export const fetchPublicFighters = async (query = {}) => {
-  try {
-    const payload = await safeFetchJson("/api/public/fighters", {
-      limit: 80,
-      ...query,
-    });
-    return normalizeListPayload(payload);
-  } catch (error) {
-    console.warn(
-      "Public fighters API unavailable, deriving fighters from fights:",
-      error.message,
-    );
-    const fights = await fetchPublicFights({ limit: 100 });
-    const map = new Map();
-    fights.forEach((fight) => {
-      [
-        {
-          name: fight.matchFighterA || fight.fighterAName,
-          image: fight.fighterAImage || fight.matchFighterAImage,
-        },
-        {
-          name: fight.matchFighterB || fight.fighterBName,
-          image: fight.fighterBImage || fight.matchFighterBImage,
-        },
-      ].forEach((fighter) => {
-        if (!fighter.name || map.has(fighter.name)) return;
-        map.set(fighter.name, {
-          id: fighter.name,
-          _id: fighter.name,
-          name: fighter.name,
-          image: fighter.image,
-          category: fight.matchCategoryTwo || fight.matchCategory,
-          description: `${fighter.name} appears in Fantasy MMAdness fight cards and prediction opportunities.`,
-        });
-      });
-    });
-    return Array.from(map.values());
+  const requestQuery = { limit: 80, page: 1, ...query };
+  const endpoints = [
+    '/api/public/combat-fighters',
+    '/api/public/fighters',
+    '/api/combat-fighters',
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const payload = await safeFetchJson(endpoint, requestQuery);
+      const rows = normalizeListPayload(payload).map(normalizePublicFighter);
+      if (rows.length || payload?.ok) return rows;
+    } catch (error) {
+      console.warn(`${endpoint} unavailable for public fighters:`, error.message);
+    }
   }
+
+  return [];
 };
 
 export const fetchPublicWrestlers = async (query = {}) => {

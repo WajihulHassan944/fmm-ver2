@@ -59,25 +59,50 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [showDataQuality, setShowDataQuality] = useState(false);
 
+  const normalizeMatchFeedRows = (payload) => (
+    Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.items)
+          ? payload.items
+          : Array.isArray(payload?.rows)
+            ? payload.rows
+            : []
+  );
+
+  const loadLegacyMatchFeed = async () => {
+    const response = await fetch(`${API_BASE}/match?limit=200&includeDrafts=true`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) throw new Error(`Legacy match feed failed with ${response.status}`);
+    const data = await response.json();
+    return normalizeMatchFeedRows(data);
+  };
+
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
-      const payload = await fightDataQualityApi.adminLiveFights({ limit: 200, includeDrafts: true });
-      const rows = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload?.data) ? payload.data : [];
-      setMatches(rows);
-    } catch (adminApiError) {
-      console.warn('Admin LIVE fights endpoint unavailable, falling back to legacy match feed:', adminApiError.message);
+      // /administration/fights is the fight registry for records stored in the legacy `/match` collection.
+      // Do not filter by matchType here: some real fight records are stored with matchType=SHADOW,
+      // while Shadow Fights Library is a separate template/library endpoint.
+      const rows = await loadLegacyMatchFeed();
+      if (rows.length) {
+        setMatches(rows);
+        return;
+      }
+
+      const payload = await fightDataQualityApi.adminFights({ limit: 200, includeDrafts: true });
+      const adminRows = normalizeMatchFeedRows(payload);
+      setMatches(adminRows);
+    } catch (legacyError) {
+      console.warn('Legacy match feed unavailable, trying admin fights endpoint:', legacyError.message);
       try {
-        const response = await fetch(`${API_BASE}/match?limit=200&includeDrafts=true`);
-        const data = await response.json();
-        const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-        setMatches(rows.filter((fight) => {
-          const source = String(fight?.__source || fight?.sourceType || fight?.collection || '').toLowerCase();
-          const type = String(fight?.matchType || fight?.type || '').toLowerCase();
-          return source !== 'shadow' && source !== 'shadowtemplate' && type === 'live';
-        }));
-      } catch (fallbackError) {
-        console.error('Error fetching regular LIVE fights:', fallbackError);
+        const payload = await fightDataQualityApi.adminFights({ limit: 200, includeDrafts: true });
+        const rows = normalizeMatchFeedRows(payload);
+        setMatches(rows);
+      } catch (adminApiError) {
+        console.error('Error fetching fight registry rows:', adminApiError);
         setMatches([]);
       }
     } finally {
@@ -239,7 +264,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <div>
           <span>Fight operations</span>
           <h2>{mode === 'score' ? 'Score center and fight tables' : 'Unified fight registry'}</h2>
-          <p>Search, filter, promote, inspect, score, and delete regular fight records. Shadow templates are managed separately in the Shadow Fights Library.</p>
+          <p>Search, filter, promote, inspect, score, and delete all fight records from the /match registry. Shadow templates are managed separately in the Shadow Fights Library.</p>
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
@@ -249,7 +274,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       </section>
 
       <section className="admin-inline-metrics">
-        <article><span>Total fights</span><strong>{metrics.total}</strong><small>LIVE match records only</small></article>
+        <article><span>Total fights</span><strong>{metrics.total}</strong><small>/match registry records</small></article>
         <article><span>Active scoring</span><strong>{metrics.active}</strong><small>Open result workflows</small></article>
         <article><span>Completed</span><strong>{metrics.finished}</strong><small>Score review available</small></article>
       </section>
@@ -312,7 +337,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                   </tr>
                 );
-              }) : <tr><td colSpan="8"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term or filter tab.</span></div></td></tr>}
+              }) : <tr><td colSpan="8"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term, clear filters, or click Refresh to reload the /match registry.</span></div></td></tr>}
             </tbody>
           </table>
         </div>

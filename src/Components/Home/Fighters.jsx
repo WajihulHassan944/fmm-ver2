@@ -53,7 +53,7 @@ const Fighters = ({ fighters = [] }) => {
           stats={[
             { value: normalized.length, label: 'Featured fighters', icon: FaUsers },
             { value: categories.length, label: 'Disciplines', icon: FaFistRaised },
-            { value: 'Live', label: 'Fight-card data', icon: FaShieldAlt },
+            { value: 'Library', label: 'Fighter library', icon: FaShieldAlt },
           ]}
         >
           <div className="xp-featured-fighter-card">
@@ -74,7 +74,7 @@ const Fighters = ({ fighters = [] }) => {
               <ExperienceSectionHeading
                 eyebrow="Athlete roster"
                 title="Meet the fighters"
-                description="Search by name or narrow the roster by combat discipline. Fighter imagery is pulled from the live fight-card feed with premium visual fallbacks."
+                description="Search by name or narrow the roster by combat discipline. Fighter names and imagery are pulled from the reusable fighter library with premium visual fallbacks."
               />
 
               <div className="xp-directory-toolbar xp-fighter-toolbar">
@@ -101,7 +101,7 @@ const Fighters = ({ fighters = [] }) => {
                         <p>Featured fighter</p>
                         <h3>{fighter.name}</h3>
                         <div className="xp-fighter-rule"><i /><FaTrophy /><i /></div>
-                        <p>{fighter.description || `${fighter.name} has appeared in competitive ${fighter.category || 'combat sports'} matchups across the Fantasy MMAdness fight card.`}</p>
+                        <p>{fighter.description || `${fighter.name} is listed in the Fantasy MMAdness fighter library for ${fighter.category || 'combat sports'} matchups.`}</p>
                         <Link href={`/fights?search=${encodeURIComponent(fighter.name)}`}>View fight cards <FaArrowRight /></Link>
                       </div>
                     </article>
