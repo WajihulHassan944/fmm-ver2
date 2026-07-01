@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 import { FaChartBar, FaCheckCircle, FaFistRaised, FaTrophy } from 'react-icons/fa';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
-const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
-const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 
 const BOXING_FIELDS = [
   { key: 'HP', label: 'Head punches' },

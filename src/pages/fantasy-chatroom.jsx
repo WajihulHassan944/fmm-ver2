@@ -5,7 +5,32 @@ import { FiSend, FiMessageCircle, FiTrash2, FiMoreVertical, FiEdit } from 'react
 import { useSelector } from 'react-redux';
 import { usePathname } from 'next/navigation';
 import Pusher from 'pusher-js';
-import moment from 'moment';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
+
+
+const formatDateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const formatMessageTime = (date = new Date()) =>
+  date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+const formatChatDate = (value) => {
+  const parsed = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
 
 const ChatRoom = () => {
   const pathname = usePathname();
@@ -37,7 +62,7 @@ const ChatRoom = () => {
   const fetchMessages = async () => {
     if (!activeUser?._id) return;
     try {
-      const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/messages/get');
+      const res = await fetch(buildPublicApiUrl('/api/messages/get'));
       const data = await res.json();
       const formatted = {};
       for (const date in data) {
@@ -59,7 +84,7 @@ const ChatRoom = () => {
 
     if (editId) {
       try {
-        const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/messages/${editId}`, {
+        const res = await fetch(buildPublicApiUrl(`/api/messages/${editId}`), {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text }),
@@ -74,8 +99,9 @@ const ChatRoom = () => {
       return;
     }
 
-    const date = moment().format('YYYY-MM-DD');
-    const time = moment().format('hh:mm A');
+    const now = new Date();
+    const date = formatDateKey(now);
+    const time = formatMessageTime(now);
     const payload = {
       senderId: activeUser._id,
       senderName: activeUser.firstName,
@@ -89,7 +115,7 @@ const ChatRoom = () => {
     scrollToBottom();
 
     try {
-      await fetch('https://fantasymmadness-game-server-three.vercel.app/api/messages/send', {
+      await fetch(buildPublicApiUrl('/api/messages/send'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -107,7 +133,7 @@ const ChatRoom = () => {
 
 const handleDelete = async (msgId) => {
   try {
-    const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/message-to-del/${msgId}`, {
+    const res = await fetch(buildPublicApiUrl(`/api/message-to-del/${msgId}`), {
       method: 'DELETE',
     });
     if (res.ok) {
@@ -121,7 +147,7 @@ const handleDelete = async (msgId) => {
   const handleDeleteAll = async () => {
     if (!window.confirm('Are you sure you want to delete all messages?')) return;
     try {
-      await fetch('https://fantasymmadness-game-server-three.vercel.app/api/messages/delete-all', {
+      await fetch(buildPublicApiUrl('/api/messages/delete-all'), {
         method: 'DELETE',
       });
     } catch (err) {
@@ -205,7 +231,7 @@ const handleDelete = async (msgId) => {
       <div className="chat-messages" ref={chatMessagesRef}>
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <div key={date} className="oneDateMessages">
-            <div className="chat-date">{moment(date).format('MMMM D, YYYY')}</div>
+            <div className="chat-date">{formatChatDate(date)}</div>
             {msgs.map((msg) => (
               <div key={msg._id} className={`chat-message ${msg.isMe ? 'right' : 'left'}`}>
                 {!msg.isMe && <img src={msg.profileUrl} alt="User" className="message-user-img" />}

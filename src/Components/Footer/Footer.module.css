@@ -1,7 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap');
-
-
-  @font-face {
+@font-face {
     font-family: 'UfcSansRegular';
     src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
     font-weight: normal;

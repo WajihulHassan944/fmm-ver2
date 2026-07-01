@@ -71,7 +71,7 @@ const HowItWorks = () => {
           title="Create. Promote."
           accent="Build the crowd."
           description="A clear fight-night workflow for approved creators: configure shadow fights, bring players into your league, and manage promotion earnings without changing the existing platform flow."
-          backgroundImage="/images/fmm-pages/premium-affiliate-banner.png"
+          backgroundImage="/images/fmm-pages/premium-affiliate-banner.webp"
           actions={[
             { href: '/AffiliateDashboard', label: 'Open dashboard' },
             { href: '/affiliate-guides', label: 'Affiliate guides', variant: 'secondary' },

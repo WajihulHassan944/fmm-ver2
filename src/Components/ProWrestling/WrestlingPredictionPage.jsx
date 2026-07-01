@@ -190,7 +190,7 @@ const WrestlingPredictionPage = () => {
           </section>
 
           <section className="pw-prediction-help">
-            <img src="/images/pro-wrestling/prediction-mockup.png" alt="Fantasy MMADNESS wrestling scorecard visual" />
+            <img src="/images/pro-wrestling/prediction-mockup.webp" alt="Fantasy MMADNESS wrestling scorecard visual" />
             <div><p className="pw-eyebrow"><FaCoins /> Scoring mindset</p><h2>Accuracy beats volume.</h2><p>Do not simply enter the highest possible numbers. Exact values earn the strongest multiplier, with reduced credit as the prediction moves farther from the official total.</p><Link href="/pro-wrestling/how-to-play">Review category weights and tie-breaks <FaArrowRight /></Link></div>
           </section>
         </main>

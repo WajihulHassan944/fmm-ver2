@@ -72,8 +72,8 @@ export default function AddNewMatch() {
   const [showAdminPredictions, setShowAdminPredictions] = useState(false);
 
   const previews = useMemo(() => ({
-    fighterAImage: form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : '/images/fmm-experience/fighter-action-red.jpg',
-    fighterBImage: form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : '/images/fmm-experience/fighter-action-blue.jpg',
+    fighterAImage: form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : '/images/fmm-experience/fighter-action-red.webp',
+    fighterBImage: form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : '/images/fmm-experience/fighter-action-blue.webp',
     promotionBackground: form.promotionBackground ? URL.createObjectURL(form.promotionBackground) : '/images/fmm-pages/admin-command-hd.webp',
   }), [form.fighterAImage, form.fighterBImage, form.promotionBackground]);
 

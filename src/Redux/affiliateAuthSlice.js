@@ -1,11 +1,12 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { setAffiliateUser } from '../Redux/affiliateSlice'; 
 
 // Async thunk for logging in
 export const loginAffiliate = createAsyncThunk('authAffiliate/loginAffiliate', async ({ email, password }, { dispatch, rejectWithValue }) => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/loginAffiliate', {
+    const response = await fetch(buildPublicApiUrl('/loginAffiliate'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,7 +22,7 @@ export const loginAffiliate = createAsyncThunk('authAffiliate/loginAffiliate', a
 
     // Fetch user data with token
     const token = data.token;
-    const userResponse = await fetch('https://fantasymmadness-game-server-three.vercel.app/profileAffiliate', {
+    const userResponse = await fetch(buildPublicApiUrl('/profileAffiliate'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +50,7 @@ export const loginAffiliate = createAsyncThunk('authAffiliate/loginAffiliate', a
 // Async thunk for fetching user data based on token
 export const fetchAffiliate = createAsyncThunk('authAffiliate/fetchAffiliate', async (token, { dispatch, rejectWithValue }) => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/profileAffiliate', {
+    const response = await fetch(buildPublicApiUrl('/profileAffiliate'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

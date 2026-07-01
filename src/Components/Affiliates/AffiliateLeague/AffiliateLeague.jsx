@@ -193,7 +193,7 @@ const AffiliateLeague = () => {
           title="Your audience."
           accent="One fight community."
           description="Review every member connected to your affiliate league, search the roster, and keep the invitation link ready for your next promotion."
-          backgroundImage="/images/fmm-pages/premium-duel-banner.png"
+          backgroundImage="/images/fmm-pages/premium-duel-banner.webp"
           actions={[
             { href: '/AffiliateDashboard', label: 'Affiliate dashboard' },
             { href: '/AffiliateProfile', label: 'Creator profile', variant: 'secondary' },

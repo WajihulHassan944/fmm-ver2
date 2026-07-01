@@ -56,7 +56,7 @@ export default function FAQsPage({ faqs = [] }) {
           title="Answers before"
           accent="the bell."
           description="A premium support library for account access, prediction scoring, wallet tokens, league activity, fight entries, and platform rules. The FAQ feed still uses the existing production endpoint."
-          backgroundImage="/images/fmm-pages/premium-arena-banner.png"
+          backgroundImage="/images/fmm-pages/premium-arena-banner.webp"
           className="premium-faq-phase-two-hero"
           actions={[
             { href: '#faq-board', label: 'Search answers' },

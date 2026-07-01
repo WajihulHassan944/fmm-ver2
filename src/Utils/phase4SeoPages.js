@@ -8,7 +8,7 @@ export const SPORT_LANDING_CONFIG = {
     title: 'Play Fantasy MMA Prediction Contests With Real Fight-Night Energy',
     description: 'Build picks for MMA fight cards, follow live fight opportunities, and compete on Fantasy MMAdness with a premium fight-night experience.',
     keywords: 'fantasy MMA, MMA prediction contests, UFC fantasy picks, fantasy fight games, MMA fight card predictions',
-    heroImage: '/images/fmm-experience/homepage-fight-hero.jpg',
+    heroImage: '/images/fmm-experience/homepage-fight-hero.webp',
     accent: 'red',
     categoryAliases: ['MMA', 'UFC', 'Combat', 'Mixed Martial Arts'],
     bullets: ['Pick winners and fight outcomes', 'Track upcoming and live cards', 'Use fantasy scoring to climb leaderboards'],
@@ -42,7 +42,7 @@ export const SPORT_LANDING_CONFIG = {
     title: 'Fantasy Kickboxing Predictions For Striking-Focused Fight Cards',
     description: 'Create prediction opportunities for kickboxing cards, highlight striking matchups, and connect fight-night content with Fantasy MMAdness campaigns.',
     keywords: 'fantasy kickboxing, kickboxing predictions, kickboxing fight card, combat sports fantasy',
-    heroImage: '/images/fmm-pages/premium-arena-banner.png',
+    heroImage: '/images/fmm-pages/premium-arena-banner.webp',
     accent: 'orange',
     categoryAliases: ['Kickboxing', 'KICKBOXING'],
     bullets: ['Striking-card presentation', 'Sport-specific landing content', 'Related fight and blog modules'],
@@ -59,7 +59,7 @@ export const SPORT_LANDING_CONFIG = {
     title: 'Fantasy Bare-Knuckle Fight Contests With Fresh Fight Opportunities',
     description: 'Promote bare-knuckle fight cards with dedicated fantasy prediction content, public fight opportunities, and SEO-ready landing content.',
     keywords: 'fantasy bare knuckle, bare-knuckle predictions, bare knuckle fight cards, combat sports contests',
-    heroImage: '/images/fmm-pages/premium-duel-banner.png',
+    heroImage: '/images/fmm-pages/premium-duel-banner.webp',
     accent: 'steel',
     categoryAliases: ['Bare Knuckle', 'Bare-Knuckle', 'Bareknuckle', 'BKFC'],
     bullets: ['Dedicated bare-knuckle traffic page', 'Fight-card CTA sections', 'Content bridge to blogs and fight details'],
@@ -76,7 +76,7 @@ export const SPORT_LANDING_CONFIG = {
     title: 'Fantasy Pro Wrestling Match Predictions, Scorecards & Leaderboards',
     description: 'Play Fantasy MMAdness Pro Wrestling with match predictions, scorecards, wrestler profiles, and a premium wrestling-style contest experience.',
     keywords: 'fantasy pro wrestling, wrestling predictions, pro wrestling scorecards, wrestler profiles, wrestling fantasy game',
-    heroImage: '/images/pro-wrestling/pro-wrestling-hero.jpg',
+    heroImage: '/images/pro-wrestling/pro-wrestling-hero.webp',
     accent: 'purple',
     categoryAliases: ['Pro Wrestling', 'Wrestling', 'PRO_WRESTLING'],
     bullets: ['Wrestling-specific match cards', 'Wrestler profile SEO paths', 'Leaderboards and scoring explainers'],
@@ -103,7 +103,7 @@ export const getMatchTitle = (match = {}) => match.matchName || match.title || `
 
 export const getMatchSport = (match = {}) => match.matchCategoryTwo || match.matchCategory || match.sport || match.category || 'Combat Sports';
 
-export const getMatchImage = (match = {}) => match.fightImage || match.matchImage || match.heroImage || match.fighterAImage || match.fighterBImage || '/images/fmm-pages/premium-duel-banner.png';
+export const getMatchImage = (match = {}) => match.fightImage || match.matchImage || match.heroImage || match.fighterAImage || match.fighterBImage || '/images/fmm-pages/premium-duel-banner.webp';
 
 export const getMatchDateLabel = (match = {}) => {
   const raw = match.matchDate || match.date || match.scheduledAt || match.createdAt;
@@ -153,6 +153,6 @@ export const buildArticleSchema = (blog = {}, path = '/') => ({
   publisher: {
     '@type': 'Organization',
     name: 'Fantasy MMAdness',
-    logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/fmm-experience/fantasy-mmadness-logo.png` },
+    logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/fmm-experience/fantasy-mmadness-logo.webp` },
   },
 });

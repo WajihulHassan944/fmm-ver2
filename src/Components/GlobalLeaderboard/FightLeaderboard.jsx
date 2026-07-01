@@ -14,6 +14,7 @@ import {
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const DEFAULT_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
@@ -30,8 +31,8 @@ const FightLeaderboard = ({ matchId }) => {
     setRefreshed(true);
     try {
       const [scoresResponse, usersResponse] = await Promise.all([
-        fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores'),
-        fetch('https://fantasymmadness-game-server-three.vercel.app/users'),
+        fetch(buildPublicApiUrl('/api/scores', { matchId })),
+        fetch(buildPublicApiUrl('/users')),
       ]);
       const [scoresPayload, usersPayload] = await Promise.all([scoresResponse.json(), usersResponse.json()]);
       setScores(Array.isArray(scoresPayload) ? scoresPayload.filter((score) => score.matchId === matchId) : []);

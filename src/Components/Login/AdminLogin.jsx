@@ -37,7 +37,7 @@ const AdminLogin = () => {
     <div className="admin-login-experience">
       <section className="admin-login-art" aria-label="Fantasy MMAdness administration">
         <div className="admin-login-art-copy">
-          <img src="/images/fmm-experience/fantasy-mmadness-logo.png" alt="Fantasy MMAdness" />
+          <img src="/images/fmm-experience/fantasy-mmadness-logo.webp" alt="Fantasy MMAdness" />
           <span>Secure operations portal</span>
           <h1>Run every <strong>fight night.</strong></h1>
           <p>Manage matches, players, affiliates, payouts, editorial content, and community operations from one focused command center.</p>

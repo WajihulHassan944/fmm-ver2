@@ -66,9 +66,9 @@ import "@/styles/pro-wrestling-client-corrections.css";
 import "@/styles/adminswarm.css";
 import "@/styles/phase4-seo-pages.css";
 import Script from "next/script";
+import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -79,57 +79,106 @@ import { fetchUser } from "@/Redux/authSlice";
 import { fetchAffiliate } from "@/Redux/affiliateAuthSlice";
 import { playMusic, stopMusic } from "@/Redux/musicSlice";
 import Header from "@/Components/Header/Header";
-import Footer from "@/Components/Footer/Footer";
 import SeoHead from "@/Components/SEO/SeoHead";
 import { API_BASE_URL } from "@/Utils/swarmApi";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import "react-calendar/dist/Calendar.css";
-import AdminHeader from "@/Components/Header/AdminHeader";
-import ChatbaseWidget from "@/Components/ChatbaseWidget";
-import RouteExperienceFrame, { shouldUseRouteExperienceFrame } from "@/Components/Theme/RouteExperienceFrame";
+import { shouldUseRouteExperienceFrame } from "@/Utils/routeExperience";
 
+const scheduleWhenIdle = (callback, timeout = 2500) => {
+  if (typeof window === "undefined") return undefined;
 
+  if ("requestIdleCallback" in window) {
+    const id = window.requestIdleCallback(callback, { timeout });
+    return () => window.cancelIdleCallback?.(id);
+  }
+
+  const id = window.setTimeout(callback, Math.min(timeout, 2500));
+  return () => window.clearTimeout(id);
+};
+
+const Footer = dynamic(() => import("@/Components/Footer/Footer"), {
+  loading: () => null,
+});
+
+const AdminHeader = dynamic(() => import("@/Components/Header/AdminHeader"), {
+  loading: () => null,
+});
+
+const ChatbaseWidget = dynamic(() => import("@/Components/ChatbaseWidget"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const RouteExperienceFrame = dynamic(
+  () => import("@/Components/Theme/RouteExperienceFrame"),
+  {
+    loading: ({ children }) => <>{children}</>,
+  },
+);
+
+const AUTH_PROFILE_CRITICAL_PREFIXES = [
+  "/UserDashboard",
+  "/YourFights",
+  "/profile",
+  "/account-settings",
+  "/checkout",
+  "/my-fantasy-team",
+  "/AffiliateDashboard",
+  "/AffiliateProfile",
+  "/AffiliateAccountSettings",
+  "/AffiliatePromotion",
+  "/administration",
+];
+
+const routeMatchesPrefix = (pathname = "", prefixes = []) =>
+  prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 function App({ Component, ...rest }) {
   const { store, props } = wrapper.useWrappedStore(rest); // Wrapped store for SSR
 
   const router = useRouter();
+  const loadMarketingScripts = !router.pathname.startsWith("/administration");
+  const loadAds = loadMarketingScripts &&
+    !["/auth", "/login", "/CreateAccount", "/AffiliateCreateAccount", "/affiliate-create-account", "/checkout"].includes(router.pathname);
 
   return (
     <>
       <SeoHead />
-      <Script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=AW-16787825610"
-      ></Script>
+      {loadMarketingScripts && (
+        <>
+          <Script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=AW-16787825610"
+            strategy="lazyOnload"
+          />
 
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-16787825610');
-        `}
-      </Script>
+          <Script id="google-analytics" strategy="lazyOnload">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-16787825610');
+            `}
+          </Script>
+        </>
+      )}
 
-      {/* Google AdSense Script - Only One Instance */}
-      <Script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7572941850845854"
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-      />
+      {loadAds && (
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7572941850845854"
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
+      )}
 
-      
-      <GoogleOAuthProvider clientId="261076841125-1n3ps24u5fco1js6o1u212nac7agp9dg.apps.googleusercontent.com">
-        <Provider store={store}>
-          <AppContent>
-            <Component {...props.pageProps} />
-          </AppContent>
-        </Provider>
-      </GoogleOAuthProvider>
+      <Provider store={store}>
+        <AppContent>
+          <Component {...props.pageProps} />
+        </AppContent>
+      </Provider>
     </>
   );
 }
@@ -141,70 +190,127 @@ function AppContent({ children }) {
   const seekPosition = useSelector((state) => state.music.seekPosition);
   const howlerRef = useRef(null);
   const { isAdminAuthenticated } = useSelector((state) => state.adminAuth);
-  
+
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const hideLayout = isAdministrationRoute;
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
-  const useRouteExperienceFrame = shouldUseRouteExperienceFrame(router.pathname);
+  const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
+    router.pathname,
+  );
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady) return undefined;
 
-    setTimeout(() => {
+    let cleanupScroll = () => {};
+    const timer = window.setTimeout(() => {
       const header = document.querySelector(".header");
       if (!header) return;
 
       const handleScroll = () => {
         if (window.scrollY > 0) {
           header.style.backgroundColor = "black";
+          return;
+        }
+
+        const darkRoutes = [
+          "/community-forum",
+          "/Sponsors",
+          "/guides",
+          "/our-fighters",
+          "/faqs",
+          "/about",
+          "/past-fights-records",
+          "/fights-rewards",
+          "/sponsor-dashboard",
+          "/global-leaderboard",
+          "/testimonials",
+          "/spin-wheel",
+          "/calendar-of-fights",
+          "/AffiliateDashboard",
+          "/AffiliateProfile",
+          "/AffiliateAccountSettings",
+          "/past-promotions",
+          "/past-fights",
+          "/referral-leaderboard",
+          "/HowItWorks",
+          "/affiliate-league",
+          "/fantasy-tips",
+          "/FantasyLeagues",
+          "/invite",
+          "/fighter-performance-tracker",
+          "/leaderboard",
+          "/mock-game",
+          "/UserDashboard",
+          "/YourFights",
+          "/trashed-fights",
+          "/profile",
+          "/account-settings",
+          "/checkout",
+          "/my-fantasy-team",
+          "/pro-wrestling",
+        ];
+
+        const redRoutes = ["/fights-news"];
+        const baseRoute = "/" + router.asPath.split("/")[1];
+
+        if (darkRoutes.includes(baseRoute)) {
+          header.style.backgroundColor = "#000000";
+        } else if (redRoutes.includes(baseRoute)) {
+          header.style.backgroundColor = "#dc1606";
         } else {
-          const darkRoutes = [
-            "/community-forum", "/Sponsors", "/guides", "/our-fighters",
-            "/faqs", "/about", "/past-fights-records", "/fights-rewards",
-            "/sponsor-dashboard", "/global-leaderboard", "/testimonials",
-            "/spin-wheel", "/calendar-of-fights", "/AffiliateDashboard", "/AffiliateProfile", "/AffiliateAccountSettings",
-            "/past-promotions", "/past-fights","/referral-leaderboard", "/HowItWorks", "/affiliate-league", "/fantasy-tips","/FantasyLeagues", "/invite", "/fighter-performance-tracker", "/leaderboard", "/mock-game",
-            "/UserDashboard", "/YourFights", "/trashed-fights", "/profile", "/account-settings", "/checkout", "/fights-rewards", "/my-fantasy-team", "/pro-wrestling"
-          ];
-
-          const redRoutes = ["/fights-news"];
-          const baseRoute = '/' + router.asPath.split('/')[1];
-
-          if (darkRoutes.includes(baseRoute)) {
-            header.style.backgroundColor = "#000000";
-          } else if (redRoutes.includes(baseRoute)) {
-            header.style.backgroundColor = "#dc1606";
-          } else {
-            header.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
-          }
+          header.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
         }
       };
 
       handleScroll();
-      window.addEventListener("scroll", handleScroll);
-      return () => window.removeEventListener("scroll", handleScroll);
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      cleanupScroll = () => window.removeEventListener("scroll", handleScroll);
     }, 100);
+
+    return () => {
+      window.clearTimeout(timer);
+      cleanupScroll();
+    };
   }, [router.pathname, router.asPath, router.isReady]);
 
   useEffect(() => {
-    const userToken = typeof window !== "undefined" && localStorage.getItem("authToken");
+    if (typeof window === "undefined") return undefined;
+
+    const shouldFetchProfilesImmediately = routeMatchesPrefix(
+      router.pathname,
+      AUTH_PROFILE_CRITICAL_PREFIXES,
+    );
+    const cleanupFns = [];
+    const runProfileFetch = (callback) => {
+      if (shouldFetchProfilesImmediately) {
+        callback();
+        return undefined;
+      }
+      return scheduleWhenIdle(callback, 1800);
+    };
+
+    const userToken = localStorage.getItem("authToken");
     if (userToken) {
       dispatch(setUser({ token: userToken }));
-      dispatch(fetchUser(userToken));
+      const cleanup = runProfileFetch(() => dispatch(fetchUser(userToken)));
+      if (cleanup) cleanupFns.push(cleanup);
     }
 
-    const affiliateToken = typeof window !== "undefined" && localStorage.getItem("affiliateAuthToken");
+    const affiliateToken = localStorage.getItem("affiliateAuthToken");
     if (affiliateToken) {
       dispatch(setAffiliateUser({ token: affiliateToken }));
-      dispatch(fetchAffiliate(affiliateToken));
+      const cleanup = runProfileFetch(() => dispatch(fetchAffiliate(affiliateToken)));
+      if (cleanup) cleanupFns.push(cleanup);
     }
 
-    const adminToken = typeof window !== "undefined" && localStorage.getItem("adminAuthToken");
+    const adminToken = localStorage.getItem("adminAuthToken");
     if (adminToken) {
       dispatch(setAdminAuthenticated({ token: adminToken }));
     }
-  }, [dispatch]);
+
+    return () => cleanupFns.forEach((cleanup) => cleanup?.());
+  }, [dispatch, router.pathname]);
 
   useEffect(() => {
     if (isPlaying && howlerRef.current) {
@@ -214,23 +320,31 @@ function AppContent({ children }) {
   }, [isPlaying, seekPosition]);
 
   const getOrCreateDeviceId = () => {
-    let deviceId = typeof window !== "undefined" && localStorage.getItem("deviceId");
+    let deviceId =
+      typeof window !== "undefined" && localStorage.getItem("deviceId");
     if (!deviceId) {
-      deviceId = crypto.randomUUID(); // Generate unique ID
+      deviceId =
+        globalThis.crypto?.randomUUID?.() ||
+        `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       localStorage.setItem("deviceId", deviceId);
     }
     return deviceId;
   };
 
   useEffect(() => {
-    const deviceId = getOrCreateDeviceId();
+    const cleanupIdle = scheduleWhenIdle(() => {
+      const deviceId = getOrCreateDeviceId();
 
-    fetch(`${API_BASE_URL}/track-click`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId }), // Send deviceId
-    }).catch((err) => console.error("Error tracking page view:", err));
-  }, []); // Runs only on mount
+      fetch(`${API_BASE_URL}/track-click`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+        keepalive: true,
+      }).catch((err) => console.error("Error tracking page view:", err));
+    }, 4000);
+
+    return () => cleanupIdle?.();
+  }, []);
 
   const handleTogglePlayPause = () => {
     if (isPlaying) {
@@ -245,17 +359,30 @@ function AppContent({ children }) {
 
   return (
     <>
-    <div style={{zIndex:'99999999999'}}>
-     <ToastContainer  /></div>
-   
+      <div style={{ zIndex: "99999999999" }}>
+        <ToastContainer />
+      </div>
+
       {!hideLayout && <Header />}
       {showAdminChrome && <AdminHeader />}
       {!hideLayout && <ChatbaseWidget />}
 
-      <main className={isAdministrationRoute ? (isAdminLoginRoute ? "admin-login-main" : "admin-experience-main") : "site-experience-main"}>
+      <main
+        className={
+          isAdministrationRoute
+            ? isAdminLoginRoute
+              ? "admin-login-main"
+              : "admin-experience-main"
+            : "site-experience-main"
+        }
+      >
         {useRouteExperienceFrame ? (
-          <RouteExperienceFrame pathname={router.pathname}>{children}</RouteExperienceFrame>
-        ) : children}
+          <RouteExperienceFrame pathname={router.pathname}>
+            {children}
+          </RouteExperienceFrame>
+        ) : (
+          children
+        )}
       </main>
       {!hideLayout && <Footer />}
     </>

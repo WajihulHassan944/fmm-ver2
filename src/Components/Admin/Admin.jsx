@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   FaArrowRight,
   FaBell,
@@ -16,8 +17,13 @@ import {
   FaUserFriends,
   FaUsers,
 } from 'react-icons/fa';
-import VisitorsAnalytics from './VisitorsAnalytics';
 import SwarmStatusPanel from './SwarmStatusPanel';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
+
+const VisitorsAnalytics = dynamic(() => import('./VisitorsAnalytics'), {
+  ssr: false,
+  loading: () => <p>Loading analytics...</p>,
+});
 
 const Admin = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -34,7 +40,7 @@ const Admin = () => {
   useEffect(() => {
     const fetchDashboardCounts = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/dashboard-counts');
+        const response = await fetch(buildPublicApiUrl('/dashboard-counts'));
         const data = await response.json();
         setDashboardCounts(data);
       } catch (error) {
@@ -49,7 +55,7 @@ const Admin = () => {
 
   const handleResetStats = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/reset-stats', {
+      const response = await fetch(buildPublicApiUrl('/reset-stats'), {
         method: 'POST',
       });
       if (response.ok) {

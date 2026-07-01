@@ -75,7 +75,7 @@ const WrestlingAdminDashboard = () => {
     <div className="pw-admin-page">
       <section className="pw-admin-hero">
         <div><p><FaFistRaised /> Additional game mode</p><h1>Pro Wrestling <span>command center.</span></h1><p>Create wrestling cards, manage the roster, open predictions, enter live action totals, monitor rankings, and finalize the pot without touching the existing MMA and boxing workflows.</p><div><Link href="/administration/pro-wrestling/new" className="pw-admin-primary"><FaPlus /> Create wrestling contest</Link><Link href="/pro-wrestling" target="_blank" className="pw-admin-secondary"><FaEye /> View public game mode</Link></div></div>
-        <aside><img src="/images/pro-wrestling/wrestling-match-premium.jpg" alt="Pro Wrestling arena" /><span><small>Backend mode</small><strong>PRO_WRESTLING</strong><em>Full-match predictions</em></span></aside>
+        <aside><img src="/images/pro-wrestling/wrestling-match-premium.webp" alt="Pro Wrestling arena" /><span><small>Backend mode</small><strong>PRO_WRESTLING</strong><em>Full-match predictions</em></span></aside>
       </section>
 
       <section className="pw-admin-metrics">

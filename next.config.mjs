@@ -12,6 +12,7 @@ const nextConfig = {
 
   images: {
     formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     deviceSizes: [360, 414, 640, 768, 1024, 1280, 1536, 1920],
     imageSizes: [64, 96, 128, 256, 384],
     remotePatterns: [
@@ -49,6 +50,7 @@ const nextConfig = {
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
       },
     ];

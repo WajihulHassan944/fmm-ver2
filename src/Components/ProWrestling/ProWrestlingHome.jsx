@@ -83,7 +83,7 @@ const ProWrestlingHome = () => {
         >
           <div className="pw-featured-poster">
             <div className="pw-featured-poster-label"><FaCrown /> New game mode</div>
-            <img src="/images/pro-wrestling/wrestling-match-premium.jpg" alt="Fantasy MMADNESS Pro Wrestling arena" />
+            <img src="/images/pro-wrestling/wrestling-match-premium.webp" alt="Fantasy MMADNESS Pro Wrestling arena" />
             <div><small>Full-match scorecard</small><strong>HP · BP · K · PM · FM</strong><span>Predict both wrestlers plus the official winner.</span></div>
           </div>
         </WrestlingHero>
@@ -143,7 +143,7 @@ const ProWrestlingHome = () => {
                 ].map(([number, title, copy]) => <article key={number}><span>{number}</span><div><strong>{title}</strong><p>{copy}</p></div></article>)}
               </div>
             </div>
-            <div className="pw-flow-art"><img src="/images/pro-wrestling/prediction-mockup.png" alt="Pro Wrestling prediction interface preview" /><div><FaTrophy /><strong>Accuracy creates the edge.</strong><span>Exact and near-exact predictions earn the strongest category scores.</span></div></div>
+            <div className="pw-flow-art"><img src="/images/pro-wrestling/prediction-mockup.webp" alt="Pro Wrestling prediction interface preview" /><div><FaTrophy /><strong>Accuracy creates the edge.</strong><span>Exact and near-exact predictions earn the strongest category scores.</span></div></div>
           </section>
 
           <section className="pw-section">

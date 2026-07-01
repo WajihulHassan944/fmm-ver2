@@ -182,9 +182,9 @@ const CalenderOfMatches = () => {
             <h2>{currentMatch.matchName || `${currentMatch.matchFighterA || 'Fighter A'} vs ${currentMatch.matchFighterB || 'Fighter B'}`}</h2>
             <p>{currentMatch.matchDescription || 'Fight-card details are provided by the existing match feed.'}</p>
             <div className="premium-calendar-fighter-pair">
-              <figure><img src={currentMatch.fighterAImage || '/images/fmm-experience/fighter-jadden-addison.png'} alt={currentMatch.matchFighterA || 'Fighter A'} /><figcaption>{currentMatch.matchFighterA || 'Fighter A'}</figcaption></figure>
+              <figure><img src={currentMatch.fighterAImage || '/images/fmm-experience/fighter-jadden-addison.webp'} alt={currentMatch.matchFighterA || 'Fighter A'} /><figcaption>{currentMatch.matchFighterA || 'Fighter A'}</figcaption></figure>
               <span>VS</span>
-              <figure><img src={currentMatch.fighterBImage || '/images/fmm-experience/fighter-zaveer-davis.png'} alt={currentMatch.matchFighterB || 'Fighter B'} /><figcaption>{currentMatch.matchFighterB || 'Fighter B'}</figcaption></figure>
+              <figure><img src={currentMatch.fighterBImage || '/images/fmm-experience/fighter-zaveer-davis.webp'} alt={currentMatch.matchFighterB || 'Fighter B'} /><figcaption>{currentMatch.matchFighterB || 'Fighter B'}</figcaption></figure>
             </div>
             <div className="premium-calendar-fight-meta">
               <span><FaCalendarAlt /> {formatDateKey(currentMatch.matchDate) || 'Date TBA'}</span>

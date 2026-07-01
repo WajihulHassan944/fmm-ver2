@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { FaArrowRight, FaFistRaised, FaSearch, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
 import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
@@ -42,7 +43,7 @@ const Fighters = ({ fighters = [] }) => {
           title="Names that move the crowd."
           accent="Fighters who define the card."
           description="Explore the athletes appearing across Fantasy MMAdness fight cards—from championship-calibre boxers to explosive MMA and kickboxing specialists."
-          backgroundImage="/images/fmm-pages/premium-duel-banner.png"
+          backgroundImage="/images/fmm-pages/premium-duel-banner.webp"
           className="premium-fighters-phase-two-hero"
           actions={[
             { href: '/fights', label: 'Browse fight cards' },
@@ -56,7 +57,7 @@ const Fighters = ({ fighters = [] }) => {
         >
           <div className="xp-featured-fighter-card">
             <div className="xp-featured-fighter-glow" />
-            <img src="/images/fmm-pages/our-fighters-featured-sharp.webp" alt={featured?.name || 'Featured fighter'} />
+            <OptimizedImage src="/images/fmm-pages/our-fighters-featured-sharp.webp" alt={featured?.name || 'Featured fighter'} width={520} height={620} sizes="(max-width: 768px) 80vw, 38vw" />
             <div className="xp-featured-fighter-copy">
               <span>Featured athlete</span>
               <h2>{featured?.name || 'Fight Night Contender'}</h2>
@@ -92,7 +93,7 @@ const Fighters = ({ fighters = [] }) => {
                       <div className="xp-fighter-card-number">{String(index + 1).padStart(2, '0')}</div>
                       <div className="xp-fighter-card-media">
                         <div className="xp-fighter-card-light" />
-                        <img src={fighter.image || FALLBACK_FIGHTERS[index % FALLBACK_FIGHTERS.length]} alt={fighter.name} loading="lazy" />
+                        <OptimizedImage src={fighter.image || FALLBACK_FIGHTERS[index % FALLBACK_FIGHTERS.length]} alt={fighter.name} width={360} height={420} sizes="(max-width: 768px) 80vw, 280px" />
                         <span>{fighter.category || 'Combat sports'}</span>
                       </div>
                       <div className="xp-fighter-card-copy">
@@ -118,7 +119,7 @@ const Fighters = ({ fighters = [] }) => {
                 <Link href="/fighter-performance-tracker" className="theme-btn theme-btn-primary">Explore performance tracker</Link>
               </div>
               <div className="xp-fighter-editorial-art">
-                <img src={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`} alt="Combat athlete in arena" loading="lazy" />
+                <OptimizedImage src={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`} alt="Combat athlete in arena" width={620} height={420} sizes="(max-width: 768px) 100vw, 42vw" />
               </div>
             </section>
           </div>

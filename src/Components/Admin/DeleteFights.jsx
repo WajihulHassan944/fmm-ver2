@@ -8,8 +8,8 @@ import { fetchMatches } from '@/Redux/matchSlice';
 import EditMatch from './EditMatch';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
-const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
-const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 
 const DeleteFights = () => {
   const dispatch = useDispatch();

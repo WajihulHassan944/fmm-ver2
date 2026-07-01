@@ -196,7 +196,7 @@ export default function MockGamePage() {
           title="Pick the card."
           accent="Enter the arena."
           description="A realistic front-end practice flow: select a fight card, enter the bout, submit round predictions, reveal your score, and compare the mock leaderboard. It remains fully local and does not call an API."
-          backgroundImage="/images/fmm-pages/premium-arena-banner.png"
+          backgroundImage="/images/fmm-pages/premium-arena-banner.webp"
           actions={[
             { href: '#mock-fight-cards', label: 'Choose a fight', icon: FaTicketAlt },
             { href: '/leaderboard', label: 'Global leaderboard', variant: 'secondary', icon: FaTrophy },

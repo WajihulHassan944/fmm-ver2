@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 const PublicFightLeaderboard = ({ matchId ,name, plan, profileUrl }) => {
    const router = useRouter();
   
@@ -10,12 +11,12 @@ const PublicFightLeaderboard = ({ matchId ,name, plan, profileUrl }) => {
   const match = matches.find((m) => m._id === matchId);
 
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores')
+    fetch(buildPublicApiUrl('/api/scores', { matchId }))
       .then(response => response.json())
       .then(data => setScores(data.filter(score => score.matchId === matchId))) // Filter scores by matchId
       .catch(error => console.error('Error fetching scores:', error));
 
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+    fetch(buildPublicApiUrl('/users'))
       .then(response => response.json())
       .then(data => setUsers(data))
       .catch(error => console.error('Error fetching users:', error));

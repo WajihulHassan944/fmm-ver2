@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { GoogleLogin } from '@react-oauth/google';
+import GoogleOAuthBoundary from './GoogleOAuthBoundary';
 import { toast } from 'react-toastify';
 import {
   FaArrowRight,
@@ -25,9 +26,10 @@ import { loginAffiliate, fetchAffiliate } from '@/Redux/affiliateAuthSlice';
 import UploadAvatar from '@/Components/CreateAccount/UploadAvatar';
 import Membership from '@/Components/CreateAccount/Membership';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 
-const API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE_URL = PUBLIC_API_BASE_URL;
 
 const parseApiPayload = async (response) => {
   const contentType = response.headers.get('content-type') || '';
@@ -366,7 +368,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   })();
 
   return (
-    <>
+    <GoogleOAuthBoundary>
+      <>
       <Head>
         <title>{mode === 'login' ? 'Login' : 'Create Account'} | Fantasy MMAdness</title>
         <meta name="description" content="One secure access point for Fantasy MMAdness players, affiliates, and sponsors." />
@@ -499,7 +502,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
           </main>
         </div>
       </div>
-    </>
+      </>
+    </GoogleOAuthBoundary>
   );
 };
 

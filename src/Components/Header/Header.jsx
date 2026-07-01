@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../Redux/authSlice';
 import { logoutAffiliate } from '../../Redux/affiliateAuthSlice';
 import Link from 'next/link';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
@@ -31,7 +32,7 @@ import {
   FaVideo,
 } from 'react-icons/fa';
 
-const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.png';
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
@@ -265,7 +266,7 @@ const Header = () => {
       return (
         <>
           <div className="theme-user-chip">
-            {affiliate?.profileUrl ? <img src={affiliate.profileUrl} alt="Affiliate profile" loading="lazy" /> : <span>{userInitial}</span>}
+            {affiliate?.profileUrl ? <OptimizedImage src={affiliate.profileUrl} alt="Affiliate profile" width={36} height={36} sizes="36px" /> : <span>{userInitial}</span>}
             <strong>{affiliate?.firstName || 'Affiliate'}</strong>
           </div>
           <button type="button" className="theme-btn theme-btn-secondary theme-logout-btn" onClick={handleLogoutAffiliate}>
@@ -310,7 +311,7 @@ const Header = () => {
   return (
     <header className="header theme-header">
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
-        <img src={LOGO_URL} alt="Fantasy MMAdness" loading="eager" />
+        <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={188} height={84} sizes="188px" priority />
       </Link>
 
       <nav className="theme-nav" aria-label="Primary navigation">

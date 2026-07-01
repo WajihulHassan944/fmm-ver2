@@ -1,11 +1,4 @@
-import dynamic from 'next/dynamic';
-
-const HomeAnother = dynamic(
-  () => import('@/Components/HomeAnother/HomeAnother'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
+import HomeAnother from "@/Components/HomeAnother/HomeAnother";
 
 const HomePage = () => <HomeAnother />;
 

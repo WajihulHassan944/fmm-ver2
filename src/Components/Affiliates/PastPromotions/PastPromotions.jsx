@@ -130,7 +130,7 @@ const PastPromotions = () => {
           title="Past promotions."
           accent="Permanent fight history."
           description="Review completed affiliate fight cards, reopen available results, and maintain a polished record of every campaign your league has promoted."
-          backgroundImage="/images/fmm-pages/premium-arena-banner.png"
+          backgroundImage="/images/fmm-pages/premium-arena-banner.webp"
           actions={[
             { href: '/AffiliateDashboard', label: 'Affiliate dashboard' },
             { href: '/affiliate-league', label: 'League manager', variant: 'secondary' },

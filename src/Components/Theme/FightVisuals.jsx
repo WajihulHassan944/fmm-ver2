@@ -1,4 +1,5 @@
 import React from 'react';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 import {
   FaCalendarAlt,
   FaClock,
@@ -31,10 +32,10 @@ export const FeaturedFight = ({ match, index = 0, onAction, actionLabel }) => {
       <div className="xp-featured-grid" aria-hidden="true" />
       <div className="xp-featured-fighters">
         <figure className="is-blue">
-          <img src={getFighterImage(match, 'A', index)} alt={match.matchFighterA || 'Fighter A'} />
+          <OptimizedImage src={getFighterImage(match, 'A', index)} alt={match.matchFighterA || 'Fighter A'} width={220} height={260} sizes="(max-width: 768px) 42vw, 220px" />
         </figure>
         <figure className="is-red">
-          <img src={getFighterImage(match, 'B', index)} alt={match.matchFighterB || 'Fighter B'} />
+          <OptimizedImage src={getFighterImage(match, 'B', index)} alt={match.matchFighterB || 'Fighter B'} width={220} height={260} sizes="(max-width: 768px) 42vw, 220px" />
         </figure>
       </div>
       <div className="xp-featured-date"><strong>{day}</strong><span>{month}</span></div>
@@ -70,8 +71,8 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
   return (
     <article className={`xp-fight-card is-${status} ${compact ? 'is-compact' : ''}`}>
       <div className="xp-fight-card-media">
-        <figure className="is-blue"><img src={getFighterImage(match, 'A', index)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" /></figure>
-        <figure className="is-red"><img src={getFighterImage(match, 'B', index)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" /></figure>
+        <figure className="is-blue"><OptimizedImage src={getFighterImage(match, 'A', index)} alt={match?.matchFighterA || 'Fighter A'} width={190} height={220} sizes="(max-width: 768px) 42vw, 190px" /></figure>
+        <figure className="is-red"><OptimizedImage src={getFighterImage(match, 'B', index)} alt={match?.matchFighterB || 'Fighter B'} width={190} height={220} sizes="(max-width: 768px) 42vw, 190px" /></figure>
         <span className="xp-fight-category">{category}</span>
         <span className="xp-fight-status"><i /> {getFightStatusLabel(match)}</span>
         <span className="xp-fight-vs">VS</span>
@@ -108,8 +109,8 @@ export const FightTimelineRow = ({ match, index = 0, onAction, actionLabel }) =>
     <article className={`xp-fight-timeline-row is-${status}`}>
       <div className="xp-timeline-date"><strong>{day}</strong><span>{month}</span></div>
       <div className="xp-timeline-portraits">
-        <img src={getFighterImage(match, 'A', index)} alt={match?.matchFighterA || ''} loading="lazy" />
-        <img src={getFighterImage(match, 'B', index)} alt={match?.matchFighterB || ''} loading="lazy" />
+        <OptimizedImage src={getFighterImage(match, 'A', index)} alt={match?.matchFighterA || ''} width={96} height={96} sizes="96px" />
+        <OptimizedImage src={getFighterImage(match, 'B', index)} alt={match?.matchFighterB || ''} width={96} height={96} sizes="96px" />
       </div>
       <div className="xp-timeline-main">
         <span>{getFightCategory(match)} · {getFightStatusLabel(match)}</span>

@@ -1712,7 +1712,7 @@
 
 .xp-dashboard-hero,
 .xp-affiliate-hero,
-.xp-sponsor-dashboard-hero { background: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76)), url('/images/fmm-experience/fighter-duel-arena.jpg') center / cover; border-bottom: 1px solid var(--xp-border); min-height: 570px; overflow: hidden; padding: 146px 0 64px; position: relative; }
+.xp-sponsor-dashboard-hero { background: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76)), url('/images/fmm-experience/fighter-duel-arena.webp') center / cover; border-bottom: 1px solid var(--xp-border); min-height: 570px; overflow: hidden; padding: 146px 0 64px; position: relative; }
 .xp-dashboard-hero::before { background: radial-gradient(circle at 82% 30%, rgba(223, 17, 27, 0.27), transparent 29rem); content: ''; inset: 0; position: absolute; }
 
 .player-dashboard-rich-page {
@@ -1725,7 +1725,7 @@
 .player-dashboard-hero-rich {
   background:
     linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.78)),
-    url('/images/fmm-pages/premium-affiliate-banner.png') center / cover !important;
+    url('/images/fmm-pages/premium-affiliate-banner.webp') center / cover !important;
   min-height: 600px;
   padding-top: 118px;
 }
@@ -1795,7 +1795,7 @@
    Affiliate dashboard
    -------------------------------------------------------------------------- */
 
-.xp-affiliate-hero { background-image: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.74)), url('/images/fmm-experience/fighter-action-blue.jpg'); }
+.xp-affiliate-hero { background-image: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.74)), url('/images/fmm-experience/fighter-action-blue.webp'); }
 .xp-affiliate-hero-fighter,
 .xp-sponsor-dashboard-fighter { bottom: -5%; filter: saturate(0.75) contrast(1.1); height: 94%; object-fit: contain; object-position: right bottom; opacity: 0.36; pointer-events: none; position: absolute; right: -5%; width: 44%; }
 .xp-affiliate-hero-layout { align-items: center; display: grid; gap: 38px; grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr); position: relative; z-index: 2; }
@@ -1854,7 +1854,7 @@
    Sponsor dashboard
    -------------------------------------------------------------------------- */
 
-.xp-sponsor-dashboard-hero { background-image: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76)), url('/images/fmm-experience/fighter-action-red.jpg'); }
+.xp-sponsor-dashboard-hero { background-image: linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76)), url('/images/fmm-experience/fighter-action-red.webp'); }
 .xp-sponsor-dashboard-hero-layout { align-items: center; display: grid; gap: 42px; grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr); position: relative; z-index: 2; }
 .xp-sponsor-dashboard-intro > div { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .xp-sponsor-dashboard-brand-card { align-items: center; background: linear-gradient(145deg, rgba(15, 22, 31, 0.97), rgba(32, 8, 14, 0.94)); border: 1px solid var(--xp-border-strong); border-radius: 20px; box-shadow: var(--xp-shadow), var(--xp-glow-red); display: flex; flex-direction: column; min-height: 345px; justify-content: center; padding: 26px; text-align: center; }

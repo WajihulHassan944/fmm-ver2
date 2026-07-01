@@ -54,7 +54,7 @@ export const WrestlingHero = ({
   description,
   actions = [],
   stats = [],
-  background = '/images/pro-wrestling/wrestling-match-premium.jpg',
+  background = '/images/pro-wrestling/wrestling-match-premium.webp',
   children,
   compact = false,
 }) => (

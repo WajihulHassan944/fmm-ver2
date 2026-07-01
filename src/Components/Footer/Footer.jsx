@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 import {
   FaArrowRight,
   FaEnvelope,
@@ -16,7 +17,7 @@ import {
   FaYoutube,
 } from 'react-icons/fa';
 
-const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.png';
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
 
 const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/fantasymmadness', icon: FaInstagram },
@@ -88,7 +89,7 @@ const Footer = () => {
 
         <div className="fmm-footer-feature-grid">
           <section className="fmm-footer-feature fmm-footer-affiliate-card">
-            <img className="fmm-footer-card-art" src="/images/hero-fight.png" alt="" loading="lazy" aria-hidden="true" />
+            <OptimizedImage className="fmm-footer-card-art" src="/images/hero-fight.webp" alt="" width={420} height={260} sizes="(max-width: 768px) 100vw, 25vw" aria-hidden="true" />
             <div className="fmm-footer-feature-icon"><FaUserFriends aria-hidden="true" /></div>
             <h3>Affiliates &amp; Creators</h3>
             <p>Earn tokens and cash by referring players. Join our affiliate program today.</p>
@@ -98,7 +99,7 @@ const Footer = () => {
           </section>
 
           <section className="fmm-footer-feature fmm-footer-sponsor-card">
-            <img className="fmm-footer-card-art" src="/images/hero-fight-original.png" alt="" loading="lazy" aria-hidden="true" />
+            <OptimizedImage className="fmm-footer-card-art" src="/images/hero-fight-original.webp" alt="" width={420} height={260} sizes="(max-width: 768px) 100vw, 25vw" aria-hidden="true" />
             <div className="fmm-footer-feature-icon"><FaHandshake aria-hidden="true" /></div>
             <h3>Sponsor Your Brand</h3>
             <p>Reach a highly engaged combat sports audience across our platform.</p>
@@ -133,7 +134,7 @@ const Footer = () => {
 
         <div className="fmm-footer-bottom">
           <Link href={dashboardHomeHref} className="fmm-footer-logo" aria-label="Fantasy MMAdness home">
-            <img src={LOGO_URL} alt="Fantasy MMAdness" loading="lazy" />
+            <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={180} height={80} sizes="180px" />
           </Link>
           <nav aria-label="Footer navigation">
             {quickLinks.map(([label, href]) => (

@@ -15,8 +15,8 @@ import {
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
 
-const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
-const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 
 const toCalendarKey = (value) => {
   if (!value) return '';

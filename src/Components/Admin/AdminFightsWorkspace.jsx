@@ -21,8 +21,8 @@ import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
-const FALLBACK_A = '/images/fmm-experience/fighter-action-red.jpg';
-const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.jpg';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 
 const getId = (fight) => fight?._id || fight?.id;
 const getSport = (fight) => fight?.matchCategoryTwo || fight?.matchCategory || 'combat';

@@ -48,7 +48,7 @@
   background:
     linear-gradient(90deg, rgba(2, 5, 9, .98) 0%, rgba(3, 7, 12, .78) 50%, rgba(3, 7, 12, .34) 100%),
     linear-gradient(180deg, transparent 58%, #04070b 100%),
-    url('/images/pro-wrestling/wrestling-live-premium.jpg') center / cover !important;
+    url('/images/pro-wrestling/wrestling-live-premium.webp') center / cover !important;
 }
 
 .pw-prediction-page .pw-prediction-hero,
@@ -56,7 +56,7 @@
 .pw-leaderboard-page .pw-leaderboard-hero {
   background-image:
     linear-gradient(90deg, rgba(2, 5, 9, .98), rgba(3, 7, 12, .76)),
-    url('/images/pro-wrestling/wrestling-match-premium.jpg') !important;
+    url('/images/pro-wrestling/wrestling-match-premium.webp') !important;
   background-position: center !important;
   background-size: cover !important;
 }
@@ -279,7 +279,7 @@
 .player-prediction-scorecard-v2 {
   background:
     linear-gradient(180deg, rgba(3, 7, 12, .91), rgba(3, 7, 12, .97)),
-    url('/images/fmm-pages/premium-duel-banner.png') center / cover fixed;
+    url('/images/fmm-pages/premium-duel-banner.webp') center / cover fixed;
 }
 
 .player-round-board-v2 { display: grid; gap: 26px; margin-top: 28px; }

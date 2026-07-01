@@ -5,7 +5,9 @@ import ReCAPTCHA from "react-google-recaptcha";  // Import reCAPTCHA
 import { toast } from 'react-toastify';
 import Login from '../Login/Login';
 import { GoogleLogin } from '@react-oauth/google';
+import GoogleOAuthBoundary from '../Auth/GoogleOAuthBoundary';
 import { useRouter } from 'next/router';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const AffiliateLogin = () => {
   const router = useRouter();
@@ -110,7 +112,7 @@ const AffiliateLogin = () => {
     const googleLoginPromise = new Promise(async (resolve, reject) => {
       try {
         // Send the Google token to your backend API for verification and user handling
-        const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliate-google-login', {
+        const res = await fetch(buildPublicApiUrl('/affiliate-google-login'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -191,7 +193,7 @@ const AffiliateLogin = () => {
       }
       try {
         // Call the forgot password API
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/forgotPassword', {
+        const response = await fetch(buildPublicApiUrl('/forgotPassword'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -245,8 +247,9 @@ const AffiliateLogin = () => {
 
 
     return (
-      <div className='login-wrapper'>
-        <div className='loginCard'>
+      <GoogleOAuthBoundary>
+        <div className='login-wrapper'>
+          <div className='loginCard'>
           <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp" alt="Logo" />
           <h1>Please Login Below</h1>
   
@@ -315,8 +318,9 @@ const AffiliateLogin = () => {
   Public User? Click here
 </button>
 
+          </div>
         </div>
-      </div>
+      </GoogleOAuthBoundary>
     );
   };
   

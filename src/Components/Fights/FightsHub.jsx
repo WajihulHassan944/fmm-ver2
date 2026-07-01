@@ -98,8 +98,8 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
 
   const heroCopy = PAGE_COPY[activeFilter] || PAGE_COPY[initialStatus] || PAGE_COPY.all;
   const heroBackground = activeFilter === 'past'
-    ? '/images/fmm-pages/premium-arena-banner.png'
-    : '/images/fmm-pages/premium-duel-banner.png';
+    ? '/images/fmm-pages/premium-arena-banner.webp'
+    : '/images/fmm-pages/premium-duel-banner.webp';
   const visibleUpcoming = filteredFights.filter((match) => !groups.past.some((item) => getFightId(item) === getFightId(match)));
   const visiblePast = filteredFights.filter((match) => groups.past.some((item) => getFightId(item) === getFightId(match)));
 

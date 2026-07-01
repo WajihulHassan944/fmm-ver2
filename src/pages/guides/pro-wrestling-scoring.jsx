@@ -3,7 +3,7 @@ import { GuideSeoPage } from '@/Components/SEO/PremiumSeoBlocks';
 const guide = {
   title: 'Fantasy Pro Wrestling Scoring Guide',
   description: 'Learn how Fantasy MMAdness Pro Wrestling uses prediction categories, match context, and scorecard-style engagement.',
-  image: '/images/pro-wrestling/wrestling-live-premium.jpg',
+  image: '/images/pro-wrestling/wrestling-live-premium.webp',
   steps: [
     { title: 'Open the wrestling hub', copy: 'Use the Pro Wrestling area to browse matches, scorecards, and wrestler-focused content.' },
     { title: 'Review match categories', copy: 'Understand head punches, body punches, kicks, power moves, finishers, and winner picks before playing.' },

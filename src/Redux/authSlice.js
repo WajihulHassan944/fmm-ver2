@@ -1,11 +1,12 @@
 "use client";
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { setUser } from '../Redux/userSlice'; // Import setUser action
 
 // Async thunk for logging in
 export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, password }, { dispatch, rejectWithValue }) => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/login', {
+    const response = await fetch(buildPublicApiUrl('/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,7 +22,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
 
     // Fetch user data with token
     const token = data.token;
-    const userResponse = await fetch('https://fantasymmadness-game-server-three.vercel.app/profile', {
+    const userResponse = await fetch(buildPublicApiUrl('/profile'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +51,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
 // Async thunk for fetching user data based on token
 export const fetchUser = createAsyncThunk('auth/fetchUser', async (token, { dispatch, rejectWithValue }) => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/profile', {
+    const response = await fetch(buildPublicApiUrl('/profile'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

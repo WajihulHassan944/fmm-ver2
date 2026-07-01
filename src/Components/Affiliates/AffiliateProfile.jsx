@@ -141,7 +141,7 @@ const AffiliateProfile = () => {
           title="Your identity."
           accent="Your fight community."
           description="Shape the public creator identity attached to promotions and league invitations. Private payment and payout controls now live in a separate account workspace."
-          backgroundImage="/images/fmm-pages/premium-affiliate-banner.png"
+          backgroundImage="/images/fmm-pages/premium-affiliate-banner.webp"
           actions={[
             { href: '/AffiliateAccountSettings', label: 'Account settings', icon: FaCog },
             { href: '/AffiliateDashboard', label: 'Affiliate dashboard', variant: 'secondary' },

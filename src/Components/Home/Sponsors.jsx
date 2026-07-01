@@ -1,6 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { FaArrowRight, FaBullhorn, FaChartLine, FaHandshake, FaLayerGroup, FaUsers } from 'react-icons/fa';
 import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
@@ -28,7 +29,7 @@ const Sponsors = ({ sponsors = [] }) => {
           title="Enter where fight fans"
           accent="already care."
           description="Connect your brand with an active combat-sports audience through fight cards, creator leagues, rewards, and measurable fan participation."
-          backgroundImage="/images/fmm-pages/premium-affiliate-banner.png"
+          backgroundImage="/images/fmm-pages/premium-affiliate-banner.webp"
           className="premium-sponsors-phase-two-hero"
           actions={[
             { href: '/contact', label: 'Become a sponsor' },
@@ -41,7 +42,7 @@ const Sponsors = ({ sponsors = [] }) => {
           ]}
         >
           <div className="xp-sponsor-hero-card">
-            <div className="xp-sponsor-hero-art"><img src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fight night partnership" /></div>
+            <div className="xp-sponsor-hero-art"><OptimizedImage src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fight night partnership" width={520} height={420} sizes="(max-width: 768px) 100vw, 40vw" /></div>
             <div className="xp-sponsor-hero-copy">
               <span>Fight-night visibility</span>
               <h2>Own a moment before, during, and after the bell.</h2>
@@ -67,7 +68,7 @@ const Sponsors = ({ sponsors = [] }) => {
                     <article className="xp-sponsor-card" key={sponsor._id || `${sponsor.name}-${index}`}>
                       <div className="xp-sponsor-card-index">{String(index + 1).padStart(2, '0')}</div>
                       <div className="xp-sponsor-logo-wrap">
-                        {sponsor.image ? <img src={sponsor.image} alt={sponsor.name || 'Sponsor'} loading="lazy" /> : <FaHandshake />}
+                        {sponsor.image ? <OptimizedImage src={sponsor.image} alt={sponsor.name || 'Sponsor'} width={220} height={140} sizes="(max-width: 768px) 50vw, 180px" /> : <FaHandshake />}
                       </div>
                       <div className="xp-sponsor-card-copy">
                         <span>{formatWebsite(sponsor.websiteLink)}</span>

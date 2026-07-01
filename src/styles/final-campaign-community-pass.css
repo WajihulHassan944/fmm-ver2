@@ -6,7 +6,7 @@
   align-items: center;
   background:
     linear-gradient(115deg, rgba(4, 8, 13, 0.97), rgba(4, 8, 13, 0.68)),
-    url('/images/fmm-pages/premium-duel-banner.png') center / cover;
+    url('/images/fmm-pages/premium-duel-banner.webp') center / cover;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
   color: #fff;
@@ -762,7 +762,7 @@
 .affiliate-campaign-side-card.is-owner {
   background:
     linear-gradient(180deg, rgba(4, 8, 13, 0.22), rgba(4, 8, 13, 0.98) 68%),
-    url('/images/fmm-experience/fighter-duel-panel.jpg') center / cover;
+    url('/images/fmm-experience/fighter-duel-panel.webp') center / cover;
   min-height: 350px;
   padding-top: 48px;
   text-align: center;
@@ -1021,7 +1021,7 @@
 .public-promo-experience {
   background:
     linear-gradient(100deg, rgba(2, 5, 9, 0.98), rgba(3, 7, 12, 0.72)),
-    url('/images/fmm-pages/premium-duel-banner.png') center / cover;
+    url('/images/fmm-pages/premium-duel-banner.webp') center / cover;
   min-height: 720px;
   overflow: hidden;
   padding: clamp(48px, 7vw, 92px) clamp(16px, 5vw, 72px);
@@ -1520,7 +1520,7 @@
 .premium-testimonials {
   background:
     linear-gradient(100deg, rgba(3, 7, 12, 0.99), rgba(4, 8, 13, 0.82)),
-    url('/images/fmm-pages/premium-duel-banner.png') center / cover;
+    url('/images/fmm-pages/premium-duel-banner.webp') center / cover;
   color: #fff;
   min-height: 720px;
   overflow: hidden;
@@ -1862,7 +1862,7 @@
 .premium-community-forum {
   background:
     linear-gradient(100deg, rgba(3, 7, 12, 0.99), rgba(4, 8, 13, 0.88)),
-    url('/images/fmm-pages/premium-arena-banner.png') center / cover fixed;
+    url('/images/fmm-pages/premium-arena-banner.webp') center / cover fixed;
   color: #fff;
   min-height: 760px;
   overflow: hidden;
@@ -2116,7 +2116,7 @@
 .premium-community-side-card.is-community {
   background:
     linear-gradient(180deg, rgba(4, 8, 13, 0.25), rgba(4, 8, 13, 0.98) 66%),
-    url('/images/fmm-experience/fighter-action-red.jpg') center / cover;
+    url('/images/fmm-experience/fighter-action-red.webp') center / cover;
   min-height: 320px;
   padding-top: 128px;
 }
@@ -2225,7 +2225,7 @@
 .mock-premium-leaderboard {
   background:
     linear-gradient(110deg, rgba(4, 8, 13, 0.99), rgba(5, 10, 16, 0.9)),
-    url('/images/fmm-experience/fighter-duel-panel.jpg') center / cover;
+    url('/images/fmm-experience/fighter-duel-panel.webp') center / cover;
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 22px;
   box-shadow: 0 34px 95px rgba(0, 0, 0, 0.42);

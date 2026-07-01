@@ -1,14 +1,15 @@
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 export const getWinnerDetails = async (matchId) => {
     try {
         // Fetch match details
-        const matchResponse = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/matches/${matchId}`);
+        const matchResponse = await fetch(buildPublicApiUrl(`/api/matches/${matchId}`));
         const match = await matchResponse.json();
         
-        const scoresResponse = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores');
+        const scoresResponse = await fetch(buildPublicApiUrl('/api/scores', { matchId }));
         const scoresData = await scoresResponse.json();
 
         // Fetch all users
-        const usersResponse = await fetch('https://fantasymmadness-game-server-three.vercel.app/users');
+        const usersResponse = await fetch(buildPublicApiUrl('/users'));
         const usersData = await usersResponse.json();
         
         const scoresHigh = scoresData.filter(score => score.matchId === matchId);

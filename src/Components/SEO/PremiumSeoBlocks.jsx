@@ -230,7 +230,7 @@ export const BlogCategorySeoPage = ({ category = 'fight-news', blogs = [], fight
   return (
     <PageShell className="phase4-editorial-page" accent="steel">
       <SeoHead title={`${label} Blogs | Fantasy MMAdness`} description={description} schemas={[buildArticleSchema({ title: `${label} Blog Category`, description }, `/blogs/${category}`)]} />
-      <PremiumHero eyebrow="Blog category" title={`${label} intelligence`} description={description} image="/images/fmm-experience/fighter-action-red.jpg" accentIcon={FaNewspaper} />
+      <PremiumHero eyebrow="Blog category" title={`${label} intelligence`} description={description} image="/images/fmm-experience/fighter-action-red.webp" accentIcon={FaNewspaper} />
       <section className="phase4-card-grid">
         {safeArray(blogs).length ? safeArray(blogs).map((blog) => (
           <article className="phase4-story-card" key={entityId(blog)}><h3>{getBlogTitle(blog)}</h3><p>{getBlogDescription(blog)}</p><Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link></article>
@@ -253,7 +253,7 @@ export const GuideSeoPage = ({ guide }) => {
   return (
     <PageShell className="phase4-guide-page" accent="red">
       <SeoHead title={guide.title} description={guide.description} image={`${SITE_URL}${guide.image}`} schemas={[schema]} />
-      <PremiumHero eyebrow="Fantasy guide" title={guide.title} description={guide.description} image="/images/fmm-experience/fighter-action-blue.jpg" accentIcon={FaShieldAlt}>
+      <PremiumHero eyebrow="Fantasy guide" title={guide.title} description={guide.description} image="/images/fmm-experience/fighter-action-blue.webp" accentIcon={FaShieldAlt}>
         <div className="phase4-hero-actions"><Link href="/upcomingfights">Find fights <FaArrowRight /></Link><Link href="/playforfree" className="phase4-secondary-link">Start free</Link></div>
       </PremiumHero>
       <section className="phase4-guide-steps">

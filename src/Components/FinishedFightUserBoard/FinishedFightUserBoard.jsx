@@ -4,17 +4,14 @@ import { getWinnerDetails } from '../../CustomFunctions/winnerUtils';
 import { useDispatch } from 'react-redux';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import { useRouter } from 'next/router';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { FaCoins, FaDownload, FaFistRaised, FaMedal, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa';
 import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const FinishedFightUserBoard = ({ matchId }) => {
      const router = useRouter();
     
     const [scores, setScores] = useState([]);
-    const [scoresHigh, setScoresHigh] = useState([]);
-    const [users, setUsers] = useState([]);
     const [winner, setWinner] = useState({
         firstName: '',
         lastName: '',
@@ -31,21 +28,13 @@ const FinishedFightUserBoard = ({ matchId }) => {
 
     useEffect(() => {
         dispatch(stopMusic());
-        fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores')
+        fetch(buildPublicApiUrl('/api/scores', { matchId, playerId: user._id }))
         .then(response => response.json())
         .then(data => {
-          const userScores = data.filter(score => score.matchId === matchId && score.playerId === user._id);
-          setScores(userScores);
-      
-          const highScores = data.filter(score => score.matchId === matchId);
-          setScoresHigh(highScores);
+          const rows = Array.isArray(data) ? data : [];
+          setScores(rows.filter(score => score.matchId === matchId && score.playerId === user._id));
         })
         .catch(error => console.error('Error fetching scores:', error));
-
-        fetch('https://fantasymmadness-game-server-three.vercel.app/users')
-            .then(response => response.json())
-            .then(data => setUsers(data))
-            .catch(error => console.error('Error fetching users:', error));
             return () => dispatch(playMusic());
     }, [matchId, user._id, dispatch]);
 
@@ -345,6 +334,11 @@ const FinishedFightUserBoard = ({ matchId }) => {
 const downloadPredictionPDF = async () => {
   const input = document.getElementById('pdfContent');
   if (!input) return;
+
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ]);
 
   // Ensure it's fully rendered and visible
   input.style.maxHeight = 'none';

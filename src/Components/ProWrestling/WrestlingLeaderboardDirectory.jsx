@@ -73,7 +73,7 @@ const WrestlingLeaderboardDirectory = () => {
             { value: matches.length, label: 'Ranked cards', icon: FaTrophy },
             { value: totalPlayers, label: 'Contest entries', icon: FaUsers },
           ]}
-          background="/images/pro-wrestling/leaderboard-celebration.jpg"
+          background="/images/pro-wrestling/leaderboard-celebration.webp"
         />
         <WrestlingModeNav active="leaderboards" />
 

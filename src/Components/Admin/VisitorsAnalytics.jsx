@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 import {
   FaChartLine,
   FaEye,
@@ -42,7 +43,7 @@ const VisitorsAnalytics = () => {
 
       try {
         const response = await fetch(
-          `https://fantasymmadness-game-server-three.vercel.app/get-total-clicks?domain=${encodeURIComponent(selectedDomain)}`,
+          buildPublicApiUrl('/get-total-clicks', { domain: selectedDomain }),
         );
         if (!response.ok) throw new Error(`Analytics request failed with status ${response.status}`);
 
@@ -118,13 +119,13 @@ const VisitorsAnalytics = () => {
   };
 
   const handleResetAllVisitors = () => resetAnalytics({
-    endpoint: 'https://fantasymmadness-game-server-three.vercel.app/reset-all-visitors',
+    endpoint: buildPublicApiUrl('/reset-all-visitors'),
     confirmation: 'Are you sure you want to reset all visitor stats?',
     fallbackMessage: 'Failed to reset all visitor stats.',
   });
 
   const handleResetUniqueVisitors = () => resetAnalytics({
-    endpoint: 'https://fantasymmadness-game-server-three.vercel.app/reset-unique-visitors',
+    endpoint: buildPublicApiUrl('/reset-unique-visitors'),
     confirmation: 'Are you sure you want to reset unique visitor stats?',
     fallbackMessage: 'Failed to reset unique visitor stats.',
   });

@@ -12,7 +12,7 @@
 .user-rewards-premium {
   background:
     linear-gradient(180deg, rgba(3, 7, 12, 0.94), rgba(3, 7, 12, 0.98)),
-    url('/images/fmm-pages/premium-arena-banner.png') center / cover fixed;
+    url('/images/fmm-pages/premium-arena-banner.webp') center / cover fixed;
   min-height: 100vh;
 }
 
@@ -243,7 +243,7 @@
 .premium-fighter-tracker-page .popup-content { background: linear-gradient(160deg, rgba(8,12,18,0.98), rgba(8,12,18,0.92)); color:#fff; border-radius:24px; }
 
 .user-rewards-premium {
-  padding-top: 140px; background: linear-gradient(180deg, rgba(3,7,12,0.92), rgba(3,7,12,0.96)), url('/images/fmm-pages/premium-duel-banner.png') center / cover fixed !important;
+  padding-top: 140px; background: linear-gradient(180deg, rgba(3,7,12,0.92), rgba(3,7,12,0.96)), url('/images/fmm-pages/premium-duel-banner.webp') center / cover fixed !important;
 }
 .user-rewards-premium .reward-items-wrap { max-width: 1160px; margin: 30px auto 0; }
 .user-rewards-premium .reward-item { background: rgba(8,12,18,0.9); border:1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow:0 18px 40px rgba(0,0,0,0.28); }
@@ -254,7 +254,7 @@
 .player-dashboard-rich-page .xp-dashboard-hero.player-dashboard-hero-rich {
   background:
     linear-gradient(90deg, rgba(3, 6, 10, 0.98), rgba(3, 6, 10, 0.76) 52%, rgba(3,6,10,0.4)),
-    url('/images/fmm-pages/premium-affiliate-banner.png') center right / cover !important;
+    url('/images/fmm-pages/premium-affiliate-banner.webp') center right / cover !important;
   min-height: 640px;
   box-shadow: 0 28px 64px rgba(0,0,0,0.4);
 }

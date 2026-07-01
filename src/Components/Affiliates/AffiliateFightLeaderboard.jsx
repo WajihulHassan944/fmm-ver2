@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const AffiliateFightLeaderboard = ({ matchId }) => {
     const [scores, setScores] = useState([]);
@@ -25,12 +26,12 @@ const AffiliateFightLeaderboard = ({ matchId }) => {
     
     
     useEffect(() => {
-      fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores')
+      fetch(buildPublicApiUrl('/api/scores', { matchId }))
         .then(response => response.json())
         .then(data => setScores(data.filter(score => score.matchId === matchId))) // Filter scores by matchId
         .catch(error => console.error('Error fetching scores:', error));
   
-      fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+      fetch(buildPublicApiUrl('/users'))
         .then(response => response.json())
         .then(data => setUsers(data))
         .catch(error => console.error('Error fetching users:', error));
