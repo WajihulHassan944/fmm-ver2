@@ -15,8 +15,11 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
+import CombatFighterSelect from './CombatFighterSelect';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
+import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 const FALLBACK_PROMOTION = 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png';
@@ -41,6 +44,8 @@ const parseScoreConfig = (label, value) => {
   try { return JSON.parse(value); } catch (error) { throw new Error(`${label} must be valid JSON before saving.`); }
 };
 
+const getFighterNameSafe = (fighter) => fighter ? getCombatFighterName(fighter) : '';
+
 const EditMatch = ({ matchId, isShadow }) => {
   const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
@@ -52,6 +57,8 @@ const EditMatch = ({ matchId, isShadow }) => {
     matchName: '',
     matchFighterA: '',
     matchFighterB: '',
+    fighterAId: '',
+    fighterBId: '',
     matchDescription: '',
     matchVideoUrl: '',
     matchPromotionalVideoUrl: '',
@@ -74,6 +81,32 @@ const EditMatch = ({ matchId, isShadow }) => {
 
   const [buttonText, setButtonText] = useState('Edit Match');
   const [displayCategory, setDisplayCategory] = useState('boxing');
+  const [selectedFighterA, setSelectedFighterA] = useState(null);
+  const [selectedFighterB, setSelectedFighterB] = useState(null);
+
+  const getFighterRef = (record, side) => {
+    const resolved = side === 'A' ? record?.fighterA || record?.fighterAId : record?.fighterB || record?.fighterBId;
+    return resolved && typeof resolved === 'object' ? resolved : null;
+  };
+
+  const getFighterRefId = (record, side) => {
+    const ref = getFighterRef(record, side);
+    if (ref) return getCombatFighterId(ref);
+    const raw = side === 'A' ? record?.fighterAId : record?.fighterBId;
+    return typeof raw === 'string' ? raw : '';
+  };
+
+  const chooseFighter = (side, fighter) => {
+    const id = getCombatFighterId(fighter);
+    const name = getCombatFighterName(fighter);
+    if (side === 'A') {
+      setSelectedFighterA(fighter);
+      setFormData((current) => ({ ...current, fighterAId: id, matchFighterA: name }));
+    } else {
+      setSelectedFighterB(fighter);
+      setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name }));
+    }
+  };
 
   useEffect(() => {
     if (!isShadow && matchStatus === 'idle') {
@@ -97,8 +130,10 @@ const EditMatch = ({ matchId, isShadow }) => {
               ...current,
               matchCategory: specificMatch.matchCategory || 'boxing',
               matchName: specificMatch.matchName || '',
-              matchFighterA: specificMatch.matchFighterA || '',
-              matchFighterB: specificMatch.matchFighterB || '',
+              matchFighterA: specificMatch.matchFighterA || getFighterNameSafe(getFighterRef(specificMatch, 'A')) || '',
+              matchFighterB: specificMatch.matchFighterB || getFighterNameSafe(getFighterRef(specificMatch, 'B')) || '',
+              fighterAId: getFighterRefId(specificMatch, 'A'),
+              fighterBId: getFighterRefId(specificMatch, 'B'),
               matchDescription: specificMatch.matchDescription || '',
               matchVideoUrl: specificMatch.matchVideoUrl || '',
               matchPromotionalVideoUrl: specificMatch.matchPromotionalVideoUrl || specificMatch.promotionalVideoUrl || '',
@@ -114,6 +149,8 @@ const EditMatch = ({ matchId, isShadow }) => {
               MMAMatch: stringifyScoreConfig(specificMatch.MMAMatch),
               addToShadowTemplates: false,
             }));
+            setSelectedFighterA(getFighterRef(specificMatch, 'A'));
+            setSelectedFighterB(getFighterRef(specificMatch, 'B'));
             setDisplayCategory(resolveDisplayCategory(specificMatch.matchCategory, specificMatch.matchCategoryTwo));
           }
         } catch (error) {
@@ -127,8 +164,10 @@ const EditMatch = ({ matchId, isShadow }) => {
       setFormData({
         matchCategory: match.matchCategory || 'boxing',
         matchName: match.matchName || '',
-        matchFighterA: match.matchFighterA || '',
-        matchFighterB: match.matchFighterB || '',
+        matchFighterA: match.matchFighterA || getFighterNameSafe(getFighterRef(match, 'A')) || '',
+        matchFighterB: match.matchFighterB || getFighterNameSafe(getFighterRef(match, 'B')) || '',
+        fighterAId: getFighterRefId(match, 'A'),
+        fighterBId: getFighterRefId(match, 'B'),
         matchDescription: match.matchDescription || '',
         matchVideoUrl: match.matchVideoUrl || '',
         matchPromotionalVideoUrl: match.matchPromotionalVideoUrl || match.promotionalVideoUrl || '',
@@ -148,6 +187,8 @@ const EditMatch = ({ matchId, isShadow }) => {
         MMAMatch: stringifyScoreConfig(match.MMAMatch),
         addToShadowTemplates: match.shadowTemplatesAdditionStatus || false,
       });
+      setSelectedFighterA(getFighterRef(match, 'A'));
+      setSelectedFighterB(getFighterRef(match, 'B'));
       setDisplayCategory(resolveDisplayCategory(match.matchCategory, match.matchCategoryTwo));
     }
   }, [match, matchStatus, isShadow, dispatch, matchId]);
@@ -200,6 +241,8 @@ const EditMatch = ({ matchId, isShadow }) => {
     data.append('matchName', formData.matchName);
     data.append('matchFighterA', formData.matchFighterA);
     data.append('matchFighterB', formData.matchFighterB);
+    data.append('fighterAId', formData.fighterAId || '');
+    data.append('fighterBId', formData.fighterBId || '');
     data.append('matchDescription', formData.matchDescription);
     data.append('matchVideoUrl', formData.matchVideoUrl || '');
     data.append('matchPromotionalVideoUrl', formData.matchPromotionalVideoUrl || '');
@@ -238,6 +281,8 @@ const EditMatch = ({ matchId, isShadow }) => {
           shadowData.append('matchName', formData.matchName);
           shadowData.append('matchFighterA', formData.matchFighterA);
           shadowData.append('matchFighterB', formData.matchFighterB);
+          shadowData.append('fighterAId', formData.fighterAId || '');
+          shadowData.append('fighterBId', formData.fighterBId || '');
           shadowData.append('matchDescription', formData.matchDescription);
           shadowData.append('matchVideoUrl', formData.matchVideoUrl);
           shadowData.append('maxRounds', formData.maxRounds);
@@ -270,6 +315,9 @@ const EditMatch = ({ matchId, isShadow }) => {
     }
   };
 
+  const fighterAPreview = getCombatFighterImage(selectedFighterA) || previewSource(formData.fighterAImage, FALLBACK_A);
+  const fighterBPreview = getCombatFighterImage(selectedFighterB) || previewSource(formData.fighterBImage, FALLBACK_B);
+
   return (
     <div className="admin-edit-fight-workspace">
       <section className="admin-edit-fight-banner">
@@ -279,9 +327,9 @@ const EditMatch = ({ matchId, isShadow }) => {
           <p>Every original edit field and submission flow remains available in a structured fight-operations form.</p>
         </div>
         <div className="admin-edit-fight-faceoff" aria-hidden="true">
-          <img src={previewSource(formData.fighterAImage, FALLBACK_A)} alt="" />
+          <OptimizedImage src={fighterAPreview} fallbackSrc={FALLBACK_A} alt="" width={86} height={86} sizes="86px" />
           <b>VS</b>
-          <img src={previewSource(formData.fighterBImage, FALLBACK_B)} alt="" />
+          <OptimizedImage src={fighterBPreview} fallbackSrc={FALLBACK_B} alt="" width={86} height={86} sizes="86px" />
         </div>
       </section>
 
@@ -291,8 +339,12 @@ const EditMatch = ({ matchId, isShadow }) => {
           <div className="admin-edit-form-grid">
             <label><span>Select category</span><select name="matchCategory" value={displayCategory} onChange={handleChange}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
             <label><span>Match name</span><input type="text" name="matchName" value={formData.matchName} onChange={handleChange} /></label>
-            <label><span>Fighter A</span><input type="text" name="matchFighterA" value={formData.matchFighterA} onChange={handleChange} /></label>
-            <label><span>Fighter B</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
+            <div className="admin-fighter-select-grid is-wide">
+              <CombatFighterSelect label="Fighter A" side="A" value={formData.fighterAId} category={normalizeCombatCategory(formData.matchCategory)} onChange={(fighter) => chooseFighter('A', fighter)} />
+              <CombatFighterSelect label="Fighter B" side="B" value={formData.fighterBId} category={normalizeCombatCategory(formData.matchCategory)} onChange={(fighter) => chooseFighter('B', fighter)} />
+            </div>
+            <label><span>Legacy fighter A name</span><input type="text" name="matchFighterA" value={formData.matchFighterA} onChange={handleChange} /></label>
+            <label><span>Legacy fighter B name</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
             <label className="is-wide"><span>Match description</span><textarea name="matchDescription" value={formData.matchDescription} onChange={handleChange} rows="5" /></label>
             <label><span>Max rounds</span><input type="number" name="maxRounds" value={formData.maxRounds} onChange={handleChange} /></label>
           </div>
@@ -330,22 +382,20 @@ const EditMatch = ({ matchId, isShadow }) => {
         )}
 
         <section className="admin-edit-form-section">
-          <header><span><FaUsers /></span><div><small>Fight artwork</small><h4>Fighter images</h4><p>Review the current artwork and optionally upload replacement fighter assets.</p></div></header>
+          <header><span><FaUsers /></span><div><small>Fighter library artwork</small><h4>Linked fighter images</h4><p>Fighter images are now reused from the Combat Fighter Library. Update fighter photos there instead of uploading one-off images per fight.</p></div></header>
           <div className="admin-edit-media-grid">
-            <label className="admin-edit-upload-card is-red">
+            <article className="admin-edit-upload-card is-red admin-edit-linked-fighter-card">
               <span>Fighter A image</span>
-              <img src={previewSource(formData.fighterAImage, FALLBACK_A)} alt={formData.matchFighterA || 'Fighter A'} />
-              <strong><FaImage /> Choose replacement</strong>
-              <input type="file" name="fighterAImage" onChange={handleChange} />
-              <small>{formData.matchFighterA || 'Red corner'}</small>
-            </label>
-            <label className="admin-edit-upload-card is-blue">
+              <OptimizedImage src={fighterAPreview} fallbackSrc={FALLBACK_A} alt={formData.matchFighterA || 'Fighter A'} width={160} height={160} sizes="160px" />
+              <strong>{formData.matchFighterA || 'Red corner'}</strong>
+              <small>{formData.fighterAId ? 'Linked to fighter library' : 'Legacy fallback image shown'}</small>
+            </article>
+            <article className="admin-edit-upload-card is-blue admin-edit-linked-fighter-card">
               <span>Fighter B image</span>
-              <img src={previewSource(formData.fighterBImage, FALLBACK_B)} alt={formData.matchFighterB || 'Fighter B'} />
-              <strong><FaImage /> Choose replacement</strong>
-              <input type="file" name="fighterBImage" onChange={handleChange} />
-              <small>{formData.matchFighterB || 'Blue corner'}</small>
-            </label>
+              <OptimizedImage src={fighterBPreview} fallbackSrc={FALLBACK_B} alt={formData.matchFighterB || 'Fighter B'} width={160} height={160} sizes="160px" />
+              <strong>{formData.matchFighterB || 'Blue corner'}</strong>
+              <small>{formData.fighterBId ? 'Linked to fighter library' : 'Legacy fallback image shown'}</small>
+            </article>
           </div>
         </section>
 

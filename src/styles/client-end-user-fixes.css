@@ -27,3 +27,158 @@
 .site-experience-main .xp-timeline-portraits img {
   image-rendering: auto;
 }
+
+/* Combat fighter library / reusable fighter selectors */
+.admin-fighter-select-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.admin-fighter-select-grid.is-wide { grid-column: 1 / -1; }
+.admin-fighter-select { position: relative; min-width: 0; }
+.admin-fighter-select-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: rgba(255,255,255,.78);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.admin-fighter-select-label em {
+  color: #ffb85c;
+  font-size: 10px;
+  font-style: normal;
+}
+.admin-fighter-select-trigger {
+  width: 100%;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  background: rgba(255,255,255,.055);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-fighter-select-trigger:disabled { cursor: not-allowed; opacity: .62; }
+.admin-fighter-select-trigger img,
+.admin-fighter-select-trigger span img { border-radius: 14px; object-fit: cover; }
+.admin-fighter-select-trigger strong,
+.admin-fighter-select-list strong { display: block; color: #fff; font-size: 14px; }
+.admin-fighter-select-trigger small,
+.admin-fighter-select-list small { color: rgba(255,255,255,.56); font-size: 11px; }
+.admin-fighter-select-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(8,10,18,.98), rgba(25,7,12,.98));
+  box-shadow: 0 26px 80px rgba(0,0,0,.46);
+}
+.admin-fighter-select-search {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+}
+.admin-fighter-select-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+}
+.admin-fighter-select-search button {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.admin-fighter-select-list {
+  display: grid;
+  gap: 8px;
+  max-height: 290px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+.admin-fighter-select-list button {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,.045);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-fighter-select-list button:hover,
+.admin-fighter-select-list button.is-selected {
+  border-color: rgba(237,31,49,.65);
+  background: rgba(237,31,49,.16);
+}
+.admin-fighter-select-list img,
+.admin-fighter-select-list span img { border-radius: 12px; object-fit: cover; }
+.admin-fighter-select-empty {
+  padding: 18px;
+  border: 1px dashed rgba(255,255,255,.16);
+  border-radius: 16px;
+  color: rgba(255,255,255,.72);
+  text-align: center;
+}
+.admin-combat-fighter-layout { grid-template-columns: minmax(320px, 420px) minmax(0, 1fr); align-items: start; }
+.admin-fighter-editor-preview,
+.admin-fighter-library-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.admin-fighter-editor-preview {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+}
+.admin-fighter-editor-preview img,
+.admin-fighter-library-cell img,
+.admin-fighter-library-cell span img { border-radius: 16px; object-fit: cover; }
+.admin-fighter-library-cell strong { display: block; color: #fff; }
+.admin-fighter-library-cell small { color: rgba(255,255,255,.55); }
+.admin-combat-fighter-table .is-muted-row { opacity: .68; }
+.admin-fighter-library-toolbar { grid-template-columns: minmax(240px, 1fr) 160px 160px auto; }
+.admin-fighter-library-toolbar select {
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,.055);
+  color: #fff;
+  padding: 0 12px;
+}
+.admin-fighter-import-panel small { display: block; color: rgba(255,255,255,.68); }
+.admin-edit-linked-fighter-card { cursor: default; }
+.admin-edit-linked-fighter-card img,
+.admin-edit-linked-fighter-card span img { object-fit: cover; }
+@media (max-width: 980px) {
+  .admin-fighter-select-grid,
+  .admin-combat-fighter-layout,
+  .admin-fighter-library-toolbar { grid-template-columns: 1fr; }
+}

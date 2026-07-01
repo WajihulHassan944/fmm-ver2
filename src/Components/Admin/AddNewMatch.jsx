@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { FaBolt, FaCalendarAlt, FaCloudUploadAlt, FaPlus, FaSave, FaTrophy } from 'react-icons/fa';
+import { FaBolt, FaCalendarAlt, FaCloudUploadAlt, FaPlus, FaSave, FaTrophy, FaUsers } from 'react-icons/fa';
 import AdminPredictions from './AdminPredictions';
+import CombatFighterSelect from './CombatFighterSelect';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
+import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
 
 const EMPTY = {
   matchCategory: 'boxing',
@@ -9,6 +12,8 @@ const EMPTY = {
   matchName: '',
   matchFighterA: '',
   matchFighterB: '',
+  fighterAId: '',
+  fighterBId: '',
   matchDescription: '',
   matchVideoUrl: '',
   matchDate: '',
@@ -19,12 +24,13 @@ const EMPTY = {
   maxRounds: '12',
   notify: true,
   addToShadowTemplates: false,
-  fighterAImage: null,
-  fighterBImage: null,
   promotionBackground: null,
 };
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
+const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
+const FALLBACK_PROMOTION = '/images/fmm-pages/admin-command-hd.webp';
 
 const normaliseCategory = (value) => {
   if (value === 'kickboxing') return { matchCategory: 'mma', matchCategoryTwo: 'kickboxing' };
@@ -38,12 +44,12 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
   data.append('matchName', form.matchName);
   data.append('matchFighterA', form.matchFighterA);
   data.append('matchFighterB', form.matchFighterB);
+  data.append('fighterAId', form.fighterAId);
+  data.append('fighterBId', form.fighterBId);
   data.append('matchDescription', form.matchDescription);
   data.append('matchVideoUrl', form.matchVideoUrl);
-  if (form.fighterAImage) data.append('fighterAImage', form.fighterAImage);
-  if (form.fighterBImage) data.append('fighterBImage', form.fighterBImage);
   data.append('maxRounds', form.maxRounds);
-  data.append('matchType', form.matchType);
+  data.append('matchType', shadow ? 'SHADOW' : form.matchType);
   data.append('notify', form.notify);
   if (form.promotionBackground) data.append('promotionBackground', form.promotionBackground);
 
@@ -64,6 +70,8 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
 export default function AddNewMatch() {
   const [form, setForm] = useState(EMPTY);
   const [displayCategory, setDisplayCategory] = useState('boxing');
+  const [selectedFighterA, setSelectedFighterA] = useState(null);
+  const [selectedFighterB, setSelectedFighterB] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [created, setCreated] = useState(null);
@@ -72,10 +80,10 @@ export default function AddNewMatch() {
   const [showAdminPredictions, setShowAdminPredictions] = useState(false);
 
   const previews = useMemo(() => ({
-    fighterAImage: form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : '/images/fmm-experience/fighter-action-red.webp',
-    fighterBImage: form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : '/images/fmm-experience/fighter-action-blue.webp',
-    promotionBackground: form.promotionBackground ? URL.createObjectURL(form.promotionBackground) : '/images/fmm-pages/admin-command-hd.webp',
-  }), [form.fighterAImage, form.fighterBImage, form.promotionBackground]);
+    fighterAImage: getCombatFighterImage(selectedFighterA) || FALLBACK_A,
+    fighterBImage: getCombatFighterImage(selectedFighterB) || FALLBACK_B,
+    promotionBackground: form.promotionBackground ? URL.createObjectURL(form.promotionBackground) : FALLBACK_PROMOTION,
+  }), [form.promotionBackground, selectedFighterA, selectedFighterB]);
 
   const change = (event) => {
     const { name, type, checked, value, files } = event.target;
@@ -87,6 +95,25 @@ export default function AddNewMatch() {
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : type === 'file' ? files?.[0] || null : value }));
   };
 
+  const chooseFighter = (side, fighter) => {
+    const id = getCombatFighterId(fighter);
+    const name = getCombatFighterName(fighter);
+    if (side === 'A') {
+      setSelectedFighterA(fighter);
+      setForm((current) => ({ ...current, fighterAId: id, matchFighterA: name }));
+    } else {
+      setSelectedFighterB(fighter);
+      setForm((current) => ({ ...current, fighterBId: id, matchFighterB: name }));
+    }
+  };
+
+  const resetAfterCreate = () => {
+    setForm(EMPTY);
+    setDisplayCategory('boxing');
+    setSelectedFighterA(null);
+    setSelectedFighterB(null);
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     setSaving(true);
@@ -95,12 +122,10 @@ export default function AddNewMatch() {
     setShowShadowPredictionChoice(false);
 
     try {
-      if (!form.matchName.trim() || !form.matchFighterA.trim() || !form.matchFighterB.trim()) {
-        throw new Error('Fight name and both fighters are required.');
-      }
-      if (form.matchType === 'LIVE' && (!form.matchDate || !form.matchTime)) {
-        throw new Error('Date and time are required for a live fight card.');
-      }
+      if (!form.matchName.trim()) throw new Error('Fight/card name is required.');
+      if (!form.fighterAId || !form.fighterBId) throw new Error('Select both fighters from the fighter library.');
+      if (form.fighterAId === form.fighterBId) throw new Error('Fighter A and Fighter B must be different fighters.');
+      if (form.matchType === 'LIVE' && (!form.matchDate || !form.matchTime)) throw new Error('Date and time are required for a live fight card.');
 
       const data = new FormData();
       appendLegacyFight(data, form);
@@ -123,8 +148,7 @@ export default function AddNewMatch() {
         setCreatedShadowId(matchId);
         setShowShadowPredictionChoice(true);
       } else {
-        setForm(EMPTY);
-        setDisplayCategory('boxing');
+        resetAfterCreate();
       }
     } catch (requestError) {
       setError(requestError.message || 'Unable to create the fight card.');
@@ -143,9 +167,10 @@ export default function AddNewMatch() {
         <div>
           <span>Fight operations</span>
           <h2>Create a fight card</h2>
-          <p>Build a production fight or reusable shadow template in one structured workspace. The existing addMatch/addShadow backend contracts are preserved.</p>
+          <p>Select reusable fighters from the combat fighter library. Old fight name/image fields remain backend fallback, but new fights now use fighter IDs.</p>
         </div>
         <div className="admin-heading-actions">
+          <Link className="admin-action-secondary" href="/administration/fighters"><FaUsers /> Fighter library</Link>
           <Link className="admin-action-secondary" href="/administration/fights"><FaTrophy /> Fight registry</Link>
           <Link className="admin-action-secondary" href="/administration/ShadowFightsLibrary"><FaBolt /> Shadow library</Link>
         </div>
@@ -165,7 +190,7 @@ export default function AddNewMatch() {
           <div><span>Shadow prediction setup</span><strong>Add official prediction values now?</strong><p>This is the same follow-up step used by the original shadow fight creation flow.</p></div>
           <div>
             <button type="button" onClick={() => setShowAdminPredictions(true)}>Yes, open predictions</button>
-            <button type="button" onClick={() => { setShowShadowPredictionChoice(false); setForm(EMPTY); setDisplayCategory('boxing'); }}>No, finish later</button>
+            <button type="button" onClick={() => { setShowShadowPredictionChoice(false); resetAfterCreate(); }}>No, finish later</button>
           </div>
         </section>
       )}
@@ -174,13 +199,15 @@ export default function AddNewMatch() {
       <form className="admin-create-fight-layout" onSubmit={submit}>
         <main>
           <section className="admin-form-card">
-            <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and define its operating mode.</p></div></header>
+            <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and choose two saved fighters with images.</p></div></header>
             <div className="admin-form-grid">
               <label><span>Fight type</span><select name="matchType" value={form.matchType} onChange={change}><option value="LIVE">Live production fight</option><option value="SHADOW">Shadow template</option></select></label>
               <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
               <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
-              <label><span>Fighter A</span><input name="matchFighterA" value={form.matchFighterA} onChange={change} placeholder="Red corner" required /></label>
-              <label><span>Fighter B</span><input name="matchFighterB" value={form.matchFighterB} onChange={change} placeholder="Blue corner" required /></label>
+              <div className="admin-fighter-select-grid is-wide">
+                <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('A', fighter)} required />
+                <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('B', fighter)} required />
+              </div>
               <label><span>Maximum rounds</span><input type="number" min="1" max="30" name="maxRounds" value={form.maxRounds} onChange={change} /></label>
               <label><span>Video URL</span><input type="url" name="matchVideoUrl" value={form.matchVideoUrl} onChange={change} placeholder="https://…" /></label>
               <label className="is-wide"><span>Description</span><textarea name="matchDescription" value={form.matchDescription} onChange={change} rows="5" placeholder="Give players the context they need before predicting." /></label>
@@ -212,18 +239,17 @@ export default function AddNewMatch() {
           <section className="admin-fight-visual-card" style={{ backgroundImage: `linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.95)),url(${previews.promotionBackground})` }}>
             <span>Live preview</span>
             <h3>{form.matchName || 'Untitled fight card'}</h3>
-            <div><article><img src={previews.fighterAImage} alt="Fighter A preview" /><strong>{form.matchFighterA || 'Fighter A'}</strong></article><b>VS</b><article><img src={previews.fighterBImage} alt="Fighter B preview" /><strong>{form.matchFighterB || 'Fighter B'}</strong></article></div>
+            <div>
+              <article><OptimizedImage src={previews.fighterAImage} fallbackSrc={FALLBACK_A} alt="Fighter A preview" width={94} height={94} sizes="94px" /><strong>{form.matchFighterA || 'Fighter A'}</strong></article>
+              <b>VS</b>
+              <article><OptimizedImage src={previews.fighterBImage} fallbackSrc={FALLBACK_B} alt="Fighter B preview" width={94} height={94} sizes="94px" /><strong>{form.matchFighterB || 'Fighter B'}</strong></article>
+            </div>
             <small><FaCalendarAlt /> {form.matchDate || 'Schedule pending'} · {form.matchTime || 'TBA'} EST</small>
           </section>
           <section className="admin-upload-stack">
-            {[
-              ['fighterAImage', 'Fighter A image'],
-              ['fighterBImage', 'Fighter B image'],
-              ['promotionBackground', 'Fight background'],
-            ].map(([name, label]) => (
-              <label key={name}><FaCloudUploadAlt /><span><strong>{label}</strong><small>{form[name]?.name || 'Select a high-resolution image'}</small></span><input hidden type="file" accept="image/*" name={name} onChange={change} /></label>
-            ))}
+            <label><FaCloudUploadAlt /><span><strong>Fight background</strong><small>{form.promotionBackground?.name || 'Select a high-resolution promotion image'}</small></span><input hidden type="file" accept="image/*" name="promotionBackground" onChange={change} /></label>
           </section>
+          <div className="admin-inline-notice"><strong>Fighter images now come from Fighter Library.</strong> Add or update fighter photos from the Fighter Library screen instead of uploading per fight.</div>
           <button className="admin-primary-action admin-create-submit" type="submit" disabled={saving}><FaSave /> {saving ? 'Publishing fight…' : <><FaPlus /> Publish fight card</>}</button>
         </aside>
       </form>

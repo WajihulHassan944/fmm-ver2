@@ -2,6 +2,9 @@ import { swarmRequest } from './swarmApi';
 
 export const fightDataQualityApi = {
   scoringConfig: () => swarmRequest('/api/admin/fights/scoring-config'),
+  adminFights: (query = {}) => swarmRequest('/api/admin/fights', { query }),
+  adminLiveFights: (query = {}) => swarmRequest('/api/admin/fights/live', { query }),
+  adminShadowLibrary: (query = {}) => swarmRequest('/api/admin/shadow-fights/library', { query }),
   duplicateFights: (query = {}) => swarmRequest('/api/admin/fights/data-quality/duplicates', { query }),
   deleteDuplicateFights: (ids = [], dryRun = true) => swarmRequest('/api/admin/fights/data-quality/duplicates/delete', {
     method: 'POST',
@@ -9,8 +12,11 @@ export const fightDataQualityApi = {
   }),
   imageHealth: (query = {}) => swarmRequest('/api/admin/fights/data-quality/image-health', { query }),
   combatFighters: (query = {}) => swarmRequest('/api/admin/combat-fighters', { query }),
+  importCombatFighters: (body = {}) => swarmRequest('/api/admin/combat-fighters/import-from-fights', { method: 'POST', body }),
   createCombatFighter: (body = {}) => swarmRequest('/api/admin/combat-fighters', { method: 'POST', body }),
   updateCombatFighter: (id, body = {}) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}`, { method: 'PATCH', body }),
+  deleteCombatFighter: (id) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  restoreCombatFighter: (id) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}/restore`, { method: 'POST' }),
   suggestCombatFighters: (body = {}) => swarmRequest('/api/admin/combat-fighters/suggest-from-matches', { method: 'POST', body }),
   linkFightFighters: (matchId, body = {}) => swarmRequest(`/api/admin/fights/${encodeURIComponent(matchId)}/link-fighters`, { method: 'POST', body }),
 };

@@ -4,6 +4,7 @@ import {
   FaBolt,
   FaCheck,
   FaDatabase,
+  FaEdit,
   FaExclamationTriangle,
   FaFistRaised,
   FaImage,
@@ -281,7 +282,7 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
           <section className="admin-swarm-panel">
             <header>
               <div><span>Combat fighter library</span><h2>Reusable fighters for future fights</h2></div>
-              <button type="button" className="admin-action-secondary" onClick={loadFighters} disabled={loading}><FaSyncAlt /> Refresh</button>
+              <div className="admin-heading-actions"><a className="admin-action-secondary" href="/administration/fighters"><FaEdit /> Manage fighters</a><button type="button" className="admin-action-secondary" onClick={loadFighters} disabled={loading}><FaSyncAlt /> Refresh</button></div>
             </header>
             <label className="admin-swarm-field-full"><span>Search fighters</span><input value={fighterSearch} onChange={(event) => setFighterSearch(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') loadFighters(); }} placeholder="Search name, alias, or category" /></label>
             <div className="admin-data-table-scroll">

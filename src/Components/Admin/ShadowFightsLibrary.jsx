@@ -19,6 +19,8 @@ import AdminPredictions from './AdminPredictions';
 import ShowScores from './ShowScores';
 import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { fetchMatches } from '@/Redux/matchSlice';
+import { fightDataQualityApi } from '@/Utils/fightDataQualityApi';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
@@ -45,12 +47,19 @@ const ShadowFightsLibrary = () => {
   const fetchMatchesData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/shadow`);
-      const data = await response.json();
-      setMatches(orderFightsForDisplay(Array.isArray(data) ? data : []));
-    } catch (error) {
-      console.error('Error fetching matches:', error);
-      setMatches([]);
+      const payload = await fightDataQualityApi.adminShadowLibrary({ limit: 200, matchType: 'all' });
+      const rows = Array.isArray(payload?.items) ? payload.items : [];
+      setMatches(orderFightsForDisplay(rows));
+    } catch (adminApiError) {
+      console.warn('Admin shadow library endpoint unavailable, falling back to legacy shadow feed:', adminApiError.message);
+      try {
+        const response = await fetch(`${API_BASE}/shadow`);
+        const data = await response.json();
+        setMatches(orderFightsForDisplay(Array.isArray(data) ? data : []));
+      } catch (error) {
+        console.error('Error fetching matches:', error);
+        setMatches([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -226,7 +235,7 @@ const ShadowFightsLibrary = () => {
                   <tr key={getId(match) || index}>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><img src={match.fighterAImage || FALLBACK_A} alt="" /><img src={match.fighterBImage || FALLBACK_B} alt="" /></span>
+                        <span><OptimizedImage src={match.fighterA?.primaryImage || match.fighterAId?.primaryImage || match.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={match.fighterB?.primaryImage || match.fighterBId?.primaryImage || match.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
                         <div><strong>{getFightTitle(match)}</strong><small>{match.matchFighterA || 'Fighter A'} vs {match.matchFighterB || 'Fighter B'}</small></div>
                       </div>
                     </td>
@@ -261,9 +270,9 @@ const ShadowFightsLibrary = () => {
           <section className="admin-shadow-details-modal" role="dialog" aria-modal="true">
             <button type="button" className="admin-modal-close" onClick={() => setShowFightPopup(false)}>×</button>
             <div className="admin-shadow-detail-faceoff">
-              <article><img src={selectedMatch.fighterAImage || FALLBACK_A} alt={selectedMatch.matchFighterA || 'Fighter A'} /><strong>{selectedMatch.matchFighterA || 'Fighter A'}</strong></article>
+              <article><OptimizedImage src={selectedMatch.fighterA?.primaryImage || selectedMatch.fighterAId?.primaryImage || selectedMatch.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt={selectedMatch.matchFighterA || 'Fighter A'} width={132} height={132} sizes="132px" /><strong>{selectedMatch.matchFighterA || 'Fighter A'}</strong></article>
               <b>VS</b>
-              <article><img src={selectedMatch.fighterBImage || FALLBACK_B} alt={selectedMatch.matchFighterB || 'Fighter B'} /><strong>{selectedMatch.matchFighterB || 'Fighter B'}</strong></article>
+              <article><OptimizedImage src={selectedMatch.fighterB?.primaryImage || selectedMatch.fighterBId?.primaryImage || selectedMatch.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt={selectedMatch.matchFighterB || 'Fighter B'} width={132} height={132} sizes="132px" /><strong>{selectedMatch.matchFighterB || 'Fighter B'}</strong></article>
             </div>
             <div className="admin-shadow-detail-copy">
               <span>{selectedMatch.matchType || 'SHADOW'} · {selectedMatch.matchCategoryTwo || selectedMatch.matchCategory || 'Combat'}</span>

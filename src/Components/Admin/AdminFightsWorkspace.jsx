@@ -17,6 +17,7 @@ import {
   FaVideo,
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
+import { fightDataQualityApi } from '@/Utils/fightDataQualityApi';
 import AdminPredictions from './AdminPredictions';
 import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
@@ -61,17 +62,24 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/match?includeDrafts=true`);
-      const data = await response.json();
-      const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-      setMatches(rows.filter((fight) => {
-        const source = String(fight?.__source || fight?.sourceType || fight?.collection || '').toLowerCase();
-        const type = String(fight?.matchType || fight?.type || '').toLowerCase();
-        return source !== 'shadow' && source !== 'shadowtemplate' && type !== 'shadow';
-      }));
-    } catch (error) {
-      console.error('Error fetching regular fights:', error);
-      setMatches([]);
+      const payload = await fightDataQualityApi.adminLiveFights({ limit: 200, includeDrafts: true });
+      const rows = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload?.data) ? payload.data : [];
+      setMatches(rows);
+    } catch (adminApiError) {
+      console.warn('Admin LIVE fights endpoint unavailable, falling back to legacy match feed:', adminApiError.message);
+      try {
+        const response = await fetch(`${API_BASE}/match?limit=200&includeDrafts=true`);
+        const data = await response.json();
+        const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        setMatches(rows.filter((fight) => {
+          const source = String(fight?.__source || fight?.sourceType || fight?.collection || '').toLowerCase();
+          const type = String(fight?.matchType || fight?.type || '').toLowerCase();
+          return source !== 'shadow' && source !== 'shadowtemplate' && type === 'live';
+        }));
+      } catch (fallbackError) {
+        console.error('Error fetching regular LIVE fights:', fallbackError);
+        setMatches([]);
+      }
     } finally {
       setMatchRowsLoading(false);
     }
@@ -241,7 +249,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       </section>
 
       <section className="admin-inline-metrics">
-        <article><span>Total fights</span><strong>{metrics.total}</strong><small>Match records only</small></article>
+        <article><span>Total fights</span><strong>{metrics.total}</strong><small>LIVE match records only</small></article>
         <article><span>Active scoring</span><strong>{metrics.active}</strong><small>Open result workflows</small></article>
         <article><span>Completed</span><strong>{metrics.finished}</strong><small>Score review available</small></article>
       </section>
@@ -284,7 +292,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><OptimizedImage src={fight.fighterAId?.primaryImage || fight.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={fight.fighterBId?.primaryImage || fight.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
+                        <span><OptimizedImage src={fight.fighterA?.primaryImage || fight.fighterAId?.primaryImage || fight.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={fight.fighterB?.primaryImage || fight.fighterBId?.primaryImage || fight.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
                         <div><strong>{getTitle(fight)}</strong><small>{fight.matchFighterA || 'Fighter A'} vs {fight.matchFighterB || 'Fighter B'}</small></div>
                       </div>
                     </td>
