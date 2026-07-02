@@ -53,13 +53,17 @@ const getFighterDisplayName = (value, fallback = "") => {
 };
 
 const getFighterDisplayImage = (value, fallback = "") => {
-  if (typeof value === "string") return "";
+  if (!value || typeof value === "string") return "";
   return pickUsableString(
     value?.primaryImage,
+    value?.resolvedImage,
+    value?.imageUrl,
     value?.profileImage,
-    value?.image,
     value?.fighterImage,
     value?.avatar,
+    value?.image,
+    value?.imageHealth?.url,
+    value?.imageHealth?.secure_url,
     fallback,
   );
 };
@@ -140,6 +144,12 @@ export const normalizePublicFightRow = (fight = {}) => {
     ...fight,
     matchFighterA: fighterAName,
     matchFighterB: fighterBName,
+    // Keep explicit normalized image aliases so all public cards/banners can
+    // prefer fighter-library uploads before any old fight-side image fields.
+    fighterAPrimaryImage: fighterAImage || fight.fighterAPrimaryImage || "",
+    fighterBPrimaryImage: fighterBImage || fight.fighterBPrimaryImage || "",
+    resolvedFighterAImage: fighterAImage || fight.resolvedFighterAImage || "",
+    resolvedFighterBImage: fighterBImage || fight.resolvedFighterBImage || "",
     fighterAImage: fighterAImage || fight.fighterAImage,
     fighterBImage: fighterBImage || fight.fighterBImage,
     effectiveCategory,
@@ -320,6 +330,70 @@ const fetchLegacyCombinedFights = async (query = {}, includeDrafts = false) => {
   return dedupeFightRows([...matchRows, ...shadowRows]);
 };
 
+const mergeRowsWithMatchFeedFighterImages = async (rows = [], query = {}, includeDrafts = false) => {
+  if (!Array.isArray(rows) || !rows.length) return rows;
+
+  try {
+    const matchRows = await fetchLegacyFightRows(
+      "/match",
+      { ...query, limit: Math.max(Number(query.limit || 100), rows.length, 100) },
+      includeDrafts,
+      "match-image-hydration",
+    );
+
+    if (!matchRows.length) return rows;
+
+    const byId = new Map();
+    matchRows.forEach((fight) => {
+      const id = getFightIdentity(fight);
+      if (id) byId.set(id, fight);
+    });
+
+    return rows.map((row) => {
+      const matched = byId.get(getFightIdentity(row));
+      if (!matched) return row;
+
+      const fighterAImage = pickUsableString(
+        row.fighterAPrimaryImage,
+        getFighterDisplayImage(row.fighterA),
+        getFighterDisplayImage(row.fighterAId),
+        matched.fighterAPrimaryImage,
+        getFighterDisplayImage(matched.fighterA),
+        getFighterDisplayImage(matched.fighterAId),
+        row.fighterAImage,
+        matched.fighterAImage,
+      );
+      const fighterBImage = pickUsableString(
+        row.fighterBPrimaryImage,
+        getFighterDisplayImage(row.fighterB),
+        getFighterDisplayImage(row.fighterBId),
+        matched.fighterBPrimaryImage,
+        getFighterDisplayImage(matched.fighterB),
+        getFighterDisplayImage(matched.fighterBId),
+        row.fighterBImage,
+        matched.fighterBImage,
+      );
+
+      return {
+        ...row,
+        fighterA: row.fighterA || matched.fighterA,
+        fighterB: row.fighterB || matched.fighterB,
+        fighterOne: row.fighterOne || matched.fighterOne,
+        fighterTwo: row.fighterTwo || matched.fighterTwo,
+        fighterAPrimaryImage: fighterAImage || row.fighterAPrimaryImage || matched.fighterAPrimaryImage || "",
+        fighterBPrimaryImage: fighterBImage || row.fighterBPrimaryImage || matched.fighterBPrimaryImage || "",
+        resolvedFighterAImage: fighterAImage || row.resolvedFighterAImage || matched.resolvedFighterAImage || "",
+        resolvedFighterBImage: fighterBImage || row.resolvedFighterBImage || matched.resolvedFighterBImage || "",
+        fighterAImage: fighterAImage || row.fighterAImage || matched.fighterAImage,
+        fighterBImage: fighterBImage || row.fighterBImage || matched.fighterBImage,
+      };
+    });
+  } catch (error) {
+    console.warn("Match image hydration unavailable:", error.message);
+    return rows;
+  }
+};
+
 export const fetchPublicFights = async (query = {}) => {
   const includeDrafts = ["true", "1", "yes"].includes(
     String(query.includeDrafts || query.admin || "").toLowerCase(),
@@ -331,7 +405,10 @@ export const fetchPublicFights = async (query = {}) => {
     const rows = normalizePublicFightRows(filterPublicFights(normalizePaginatedPayload(payload).rows, {
       includeDrafts,
     }));
-    if (rows.length) return dedupePublicFights(rows);
+    if (rows.length) {
+      const hydratedRows = await mergeRowsWithMatchFeedFighterImages(rows, publicQuery, includeDrafts);
+      return dedupePublicFights(normalizePublicFightRows(hydratedRows));
+    }
   } catch (error) {
     console.warn(
       "Public fights API unavailable, falling back to legacy fight endpoints:",

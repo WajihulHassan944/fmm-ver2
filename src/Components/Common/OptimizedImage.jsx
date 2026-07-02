@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 const LOCAL_IMAGE_REWRITES = {
@@ -72,6 +72,11 @@ const OptimizedImage = ({
   ...props
 }) => {
   const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src, fallbackSrc]);
+
   const normalizedSrc = normalizeOptimizedImageSrc(failed && fallbackSrc ? fallbackSrc : src);
 
   const handleError = (event) => {

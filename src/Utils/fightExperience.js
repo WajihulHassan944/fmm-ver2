@@ -48,40 +48,59 @@ export const getFightName = (match) => {
   return `${getFighterName(match, 'A')} vs ${getFighterName(match, 'B')}`;
 };
 
+const pickRenderableImage = (...values) => values.find((value) => {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return text && !['null', 'undefined', 'none', 'n/a'].includes(text.toLowerCase());
+});
+
+const getNestedImageValue = (value) => {
+  if (!value || typeof value === 'string') return '';
+  return pickRenderableImage(
+    value.primaryImage,
+    value.resolvedImage,
+    value.imageUrl,
+    value.profileImage,
+    value.fighterImage,
+    value.avatar,
+    value.image,
+    value.imageHealth?.url,
+    value.imageHealth?.secure_url,
+    value.imageHealth?.primaryImage,
+  ) || '';
+};
+
 export const getFighterImage = (match, side = 'A', index = 0) => {
   const isA = String(side).toUpperCase() === 'A';
   const candidates = isA
     ? [
-        // Prefer the fighter-library image after fighter normalization. Legacy
-        // fight-side images are kept only as fallback for old records.
-        match?.fighterA?.primaryImage,
-        match?.fighterA?.image,
-        match?.fighterA?.profileImage,
-        match?.fighterAId?.primaryImage,
-        match?.fighterAId?.image,
-        match?.fighterAId?.profileImage,
-        match?.fighterOne?.primaryImage,
-        match?.fighterOne?.image,
+        // Highest priority: normalized fighter-library/database image fields.
+        match?.fighterAPrimaryImage,
+        match?.fighterAResolvedImage,
+        match?.resolvedFighterAImage,
+        getNestedImageValue(match?.fighterA),
+        getNestedImageValue(match?.fighterAId),
+        getNestedImageValue(match?.fighterOne),
+        getNestedImageValue(match?.fighterOneId),
+        // Fallback only: legacy fight-side images kept for old records.
         match?.fighterAImage,
         match?.matchFighterAImage,
         match?.fighterOneImage,
         match?.imageA,
       ]
     : [
-        match?.fighterB?.primaryImage,
-        match?.fighterB?.image,
-        match?.fighterB?.profileImage,
-        match?.fighterBId?.primaryImage,
-        match?.fighterBId?.image,
-        match?.fighterBId?.profileImage,
-        match?.fighterTwo?.primaryImage,
-        match?.fighterTwo?.image,
+        match?.fighterBPrimaryImage,
+        match?.fighterBResolvedImage,
+        match?.resolvedFighterBImage,
+        getNestedImageValue(match?.fighterB),
+        getNestedImageValue(match?.fighterBId),
+        getNestedImageValue(match?.fighterTwo),
+        getNestedImageValue(match?.fighterTwoId),
         match?.fighterBImage,
         match?.matchFighterBImage,
         match?.fighterTwoImage,
         match?.imageB,
       ];
-  const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
+  const direct = pickRenderableImage(...candidates);
   if (direct) return direct;
   return getFallbackFighterImage(side, index);
 };
