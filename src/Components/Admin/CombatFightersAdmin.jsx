@@ -13,6 +13,8 @@ import {
   FaSyncAlt,
   FaTrashAlt,
   FaUndo,
+  FaUpload,
+  FaTimes,
 } from 'react-icons/fa';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { combatFightersApi, getCombatFighterId, getCombatFighterImage, getCombatFighterName } from '@/Utils/combatFightersApi';
@@ -26,6 +28,7 @@ const EMPTY_FORM = {
 };
 
 const FALLBACK_IMAGE = '/images/fmm-experience/fighter-action-red.webp';
+const FIGHTER_PAGE_SIZE = 25;
 
 const getRows = (payload) => Array.isArray(payload?.items) ? payload.items : [];
 const formatDate = (value) => {
@@ -43,28 +46,36 @@ const toForm = (fighter) => ({
   status: fighter?.status || 'active',
 });
 
-const fromForm = (form) => ({
-  displayName: form.displayName.trim(),
-  category: form.category,
-  aliases: form.aliases.split(',').map((item) => item.trim()).filter(Boolean),
-  primaryImage: form.primaryImage.trim(),
-  status: form.status,
-  source: 'admin-fighter-library',
-});
-
 const buildFighterSavePayload = (form, imageFile) => {
-  const payload = fromForm(form);
-  if (!imageFile) return payload;
+  const aliases = form.aliases.split(',').map((item) => item.trim()).filter(Boolean);
 
-  const formData = new FormData();
-  formData.append('displayName', payload.displayName);
-  formData.append('category', payload.category);
-  formData.append('aliases', payload.aliases.join(', '));
-  formData.append('primaryImage', payload.primaryImage || '');
-  formData.append('status', payload.status);
-  formData.append('source', payload.source);
-  formData.append('image', imageFile);
-  return formData;
+  if (imageFile) {
+    const payload = new FormData();
+    payload.append('displayName', form.displayName.trim());
+    payload.append('category', form.category);
+    payload.append('aliases', aliases.join(', '));
+    payload.append('status', form.status);
+    payload.append('source', 'admin-fighter-library');
+    payload.append('image', imageFile);
+    return payload;
+  }
+
+  return {
+    displayName: form.displayName.trim(),
+    category: form.category,
+    aliases,
+    primaryImage: form.primaryImage.trim(),
+    status: form.status,
+    source: 'admin-fighter-library',
+  };
+};
+
+const getPagination = (payload) => payload?.pagination || {};
+const getTotalPages = (payload) => {
+  const pagination = getPagination(payload);
+  const total = Number(pagination.total || 0);
+  const limit = Number(pagination.limit || FIGHTER_PAGE_SIZE);
+  return Number(pagination.pages || pagination.totalPages || (total && limit ? Math.ceil(total / limit) : 1)) || 1;
 };
 
 const getCount = (payload, key) => Number(payload?.[key] || 0);
@@ -133,8 +144,8 @@ export default function CombatFightersAdmin() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [imageInputKey, setImageInputKey] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
   const [importPreview, setImportPreview] = useState(null);
   const [importProgress, setImportProgress] = useState(null);
   const [importing, setImporting] = useState(false);
@@ -143,20 +154,26 @@ export default function CombatFightersAdmin() {
   const [cleaningLegacyFields, setCleaningLegacyFields] = useState(false);
 
   const fighters = useMemo(() => getRows(fightersPayload), [fightersPayload]);
+  const pagination = useMemo(() => getPagination(fightersPayload), [fightersPayload]);
+  const totalPages = useMemo(() => getTotalPages(fightersPayload), [fightersPayload]);
+  const totalFighters = Number(pagination.total || fighters.length || 0);
+  const hasPreviousPage = page > 1;
+  const hasNextPage = Boolean(pagination.hasNextPage || page < totalPages);
+  const previewImageSrc = imagePreview || form.primaryImage || FALLBACK_IMAGE;
 
-  const loadFighters = async (targetPage = page, targetLimit = pageSize) => {
+  const loadFighters = async (pageOverride = page) => {
+    const nextPage = Math.max(1, Number(pageOverride) || 1);
     setLoading(true);
     try {
       const payload = await combatFightersApi.list({
-        page: targetPage,
-        limit: targetLimit,
+        page: nextPage,
+        limit: FIGHTER_PAGE_SIZE,
         search,
         status: statusFilter,
         category: categoryFilter,
       });
+      setPage(nextPage);
       setFightersPayload(payload);
-      setPage(payload?.pagination?.page || targetPage);
-      setPageSize(payload?.pagination?.limit || targetLimit);
     } catch (error) {
       toast.error(error.message || 'Could not load fighters.');
     } finally {
@@ -165,46 +182,51 @@ export default function CombatFightersAdmin() {
   };
 
   useEffect(() => {
-    loadFighters();
+    loadFighters(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+  }, [imagePreview]);
+
+  const clearSelectedImageFile = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview('');
+    setImageInputKey((current) => current + 1);
+  };
 
   const resetForm = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
-    setImageFile(null);
-    setImagePreview('');
+    clearSelectedImageFile();
   };
 
   const startEdit = (fighter) => {
     setEditing(fighter);
     setForm(toForm(fighter));
-    setImageFile(null);
-    setImagePreview('');
+    clearSelectedImageFile();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleImageFileChange = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      setImageFile(null);
-      setImagePreview('');
-      return;
-    }
-
+    const file = event.target.files?.[0] || null;
+    if (!file) return clearSelectedImageFile();
     if (!file.type?.startsWith('image/')) {
-      toast.warning('Please upload a valid fighter image file.');
+      toast.warning('Please select a valid image file.');
       event.target.value = '';
       return;
     }
-
+    if (file.size > 5 * 1024 * 1024) {
+      toast.warning('Please upload an image smaller than 5MB.');
+      event.target.value = '';
+      return;
+    }
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
-
-  useEffect(() => () => {
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-  }, [imagePreview]);
 
   const saveFighter = async (event) => {
     event.preventDefault();
@@ -220,7 +242,7 @@ export default function CombatFightersAdmin() {
         toast.success('Fighter created.');
       }
       resetForm();
-      await loadFighters(page, pageSize);
+      await loadFighters(editing ? page : 1);
     } catch (error) {
       toast.error(error.message || 'Could not save fighter.');
     } finally {
@@ -418,7 +440,7 @@ export default function CombatFightersAdmin() {
           <button type="button" className="admin-primary-action" onClick={() => runImport(false)} disabled={importing || cleaningLegacyFields}><FaRedo className={importing ? 'xp-spin' : ''} /> {importing ? 'Importing batches...' : 'Run automatic import'}</button>
           <button type="button" className="admin-action-secondary" onClick={() => runCleanup(true)} disabled={importing || cleaningLegacyFields}><FaMagic /> Dry-run cleanup</button>
           <button type="button" className="admin-primary-action" onClick={() => runCleanup(false)} disabled={importing || cleaningLegacyFields}><FaRedo className={cleaningLegacyFields ? 'xp-spin' : ''} /> {cleaningLegacyFields ? 'Cleaning batches...' : 'Normalize fight links'}</button>
-          <button type="button" className="admin-action-secondary" onClick={() => loadFighters(page, pageSize)}><FaSyncAlt className={loading ? 'xp-spin' : ''} /> Refresh</button>
+          <button type="button" className="admin-action-secondary" onClick={() => loadFighters(page)}><FaSyncAlt className={loading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
 
@@ -467,24 +489,27 @@ export default function CombatFightersAdmin() {
             <label><span>Category</span><select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="combat">Combat</option></select></label>
             <label><span>Status</span><select value={form.status} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}><option value="active">Active</option><option value="needs_review">Needs review</option><option value="inactive">Inactive</option></select></label>
             <label className="is-wide"><span>Aliases</span><input value={form.aliases} onChange={(event) => setForm((current) => ({ ...current, aliases: event.target.value }))} placeholder="Tank, G Davis" /></label>
-            <label className="is-wide admin-fighter-upload-field"><span>Upload fighter image</span><input type="file" accept="image/*" onChange={handleImageFileChange} /></label>
-            <label className="is-wide admin-fighter-url-fallback"><span>Image URL fallback</span><input type="url" value={form.primaryImage} onChange={(event) => setForm((current) => ({ ...current, primaryImage: event.target.value }))} placeholder="Optional existing Cloudinary/external URL" /></label>
+            <label className="is-wide admin-fighter-file-field">
+              <span>Upload fighter image</span>
+              <input key={imageInputKey} type="file" accept="image/*" onChange={handleImageFileChange} />
+              <div><FaUpload /><strong>{imageFile ? imageFile.name : 'Choose image from device'}</strong><small>Uploads directly to Cloudinary through backend. Max 5MB.</small></div>
+            </label>
+            <label className="is-wide admin-fighter-url-field"><span>Image URL fallback</span><input type="url" value={form.primaryImage} onChange={(event) => setForm((current) => ({ ...current, primaryImage: event.target.value }))} placeholder="Optional existing Cloudinary/external URL" disabled={Boolean(imageFile)} /></label>
           </div>
           <div className="admin-fighter-editor-preview">
-            <OptimizedImage src={imagePreview || form.primaryImage || FALLBACK_IMAGE} fallbackSrc={FALLBACK_IMAGE} alt={form.displayName || 'Fighter preview'} width={84} height={84} sizes="84px" />
-            <div><strong>{form.displayName || 'Fighter preview'}</strong><small>{form.category} · {form.status}{imageFile ? ` · ${imageFile.name}` : ''}</small></div>
+            <OptimizedImage src={previewImageSrc} fallbackSrc={FALLBACK_IMAGE} alt={form.displayName || 'Fighter preview'} width={84} height={84} sizes="84px" />
+            <div><strong>{form.displayName || 'Fighter preview'}</strong><small>{form.category} · {form.status}{imageFile ? ' · new upload selected' : ''}</small>{imageFile && <button type="button" className="admin-fighter-clear-upload" onClick={clearSelectedImageFile}><FaTimes /> Remove selected image</button>}</div>
           </div>
           <button type="submit" className="admin-primary-action" disabled={saving}><FaSave /> {saving ? 'Saving...' : editing ? 'Save fighter' : 'Create fighter'}</button>
         </form>
 
         <section className="admin-swarm-panel admin-combat-fighter-table-panel">
-          <header><div><span>Reusable fighters</span><h2>{fightersPayload?.pagination?.total || fighters.length} fighters</h2></div></header>
+          <header><div><span>Reusable fighters</span><h2>{totalFighters} fighters</h2><small>Page {page} of {totalPages}</small></div></header>
           <div className="admin-table-toolbar admin-fighter-library-toolbar">
-            <label className="admin-table-search"><FaSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') loadFighters(1, pageSize); }} placeholder="Search fighter name or alias" /></label>
+            <label className="admin-table-search"><FaSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') loadFighters(1); }} placeholder="Search fighter name or alias" /></label>
             <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option value="">All categories</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="combat">Combat</option></select>
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option><option value="active">Active</option><option value="needs_review">Needs review</option><option value="inactive">Inactive</option></select>
-            <select value={pageSize} onChange={(event) => loadFighters(1, Number(event.target.value))}><option value={25}>25 / page</option><option value={50}>50 / page</option><option value={100}>100 / page</option></select>
-            <button type="button" className="admin-action-secondary" onClick={() => loadFighters(1, pageSize)}><FaSearch /> Apply</button>
+            <button type="button" className="admin-action-secondary" onClick={() => loadFighters(1)}><FaSearch /> Apply</button>
           </div>
           <div className="admin-data-table-scroll">
             <table className="admin-data-table admin-quality-table admin-combat-fighter-table">
@@ -499,22 +524,21 @@ export default function CombatFightersAdmin() {
                       <td>{fighter.primaryImage ? <a href={fighter.primaryImage} target="_blank" rel="noreferrer"><FaImage /> Open</a> : 'Needs image'}</td>
                       <td><span className={`admin-status-badge ${inactive ? 'is-danger' : fighter.status === 'needs_review' ? 'is-warning' : 'is-success'}`}>{fighter.status || 'active'}</span></td>
                       <td>{formatDate(fighter.updatedAt)}</td>
-                      <td><div className="admin-row-actions"><button type="button" onClick={() => startEdit(fighter)}><FaEdit /> Edit</button>{inactive ? <button type="button" onClick={() => restoreFighter(fighter)}><FaUndo /> Restore</button> : <button type="button" className="is-danger" onClick={() => softDeleteFighter(fighter)}><FaTrashAlt /> Delete</button>}</div></td>
+                      <td><div className="admin-row-actions admin-fighter-row-actions"><button type="button" title="Edit fighter" onClick={() => startEdit(fighter)}><FaEdit /><span>Edit</span></button>{inactive ? <button type="button" title="Restore fighter" onClick={() => restoreFighter(fighter)}><FaUndo /><span>Restore</span></button> : <button type="button" title="Deactivate fighter" className="is-danger" onClick={() => softDeleteFighter(fighter)}><FaTrashAlt /><span>Delete</span></button>}</div></td>
                     </tr>
                   );
                 }) : <tr><td colSpan="6"><div className="admin-empty-table"><FaFistRaised /><strong>No fighters found</strong><span>Run automatic import or create a fighter manually.</span></div></td></tr>}
               </tbody>
             </table>
           </div>
-          {fightersPayload?.pagination && (
-            <div className="admin-fighter-pagination">
-              <span>Page {fightersPayload.pagination.page || page} of {fightersPayload.pagination.pages || 1} · {fightersPayload.pagination.total || fighters.length} fighters</span>
-              <div>
-                <button type="button" className="admin-action-secondary" onClick={() => loadFighters(Math.max(1, page - 1), pageSize)} disabled={loading || page <= 1}>Previous</button>
-                <button type="button" className="admin-primary-action" onClick={() => loadFighters(page + 1, pageSize)} disabled={loading || !fightersPayload.pagination.hasNextPage}>Next page</button>
-              </div>
+          <footer className="admin-fighter-pagination">
+            <span>Showing {fighters.length} of {totalFighters} fighters</span>
+            <div>
+              <button type="button" className="admin-action-secondary" onClick={() => loadFighters(page - 1)} disabled={loading || !hasPreviousPage}>Previous</button>
+              <strong>{page} / {totalPages}</strong>
+              <button type="button" className="admin-action-secondary" onClick={() => loadFighters(page + 1)} disabled={loading || !hasNextPage}>Next</button>
             </div>
-          )}
+          </footer>
         </section>
       </section>
     </div>

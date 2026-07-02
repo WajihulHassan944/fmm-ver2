@@ -48,15 +48,15 @@ const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-match-premium.webp";
 
 const HOME_FIGHT_SPORT_TABS = [
-  { key: "all", label: "All Fights" },
   { key: "boxing", label: "Boxing" },
-  { key: "kickboxing", label: "Kickboxing" },
   { key: "mma", label: "MMA" },
-  { key: "bareknuckle", label: "Bareknuckle" },
+  { key: "bareknuckle", label: "Bare-knuckle" },
+  { key: "kickboxing", label: "Kickboxing" },
   { key: "pro-wrestling", label: "Pro Wrestling" },
 ];
 
 const HOME_FIGHT_FEED_LIMIT = 200;
+const HOME_CATEGORY_PREVIEW_LIMIT = 4;
 
 const SCORING_ROWS = [
   ["Correct Winner", "100"],
@@ -341,13 +341,7 @@ const getLeaderboardName = (player) =>
 const HomeAnother = () => {
   const dispatch = useDispatch();
   const howlerRef = useRef(null);
-  const contestRailRef = useRef(null);
-  const contestDragRef = useRef({
-    active: false,
-    startX: 0,
-    scrollLeft: 0,
-    moved: false,
-  });
+  const homeSportSectionRefs = useRef({});
   const [homepageMatches, setHomepageMatches] = useState([]);
   const [homepageLeaderboard, setHomepageLeaderboard] = useState([]);
   const [matchStatus, setMatchStatus] = useState("loading");
@@ -355,7 +349,8 @@ const HomeAnother = () => {
   const [buttonText, setButtonText] = useState("Send Message");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [now, setNow] = useState(null);
-  const [activeFightSport, setActiveFightSport] = useState("all");
+  const [activeFightSport, setActiveFightSport] = useState("boxing");
+  const [expandedHomeSports, setExpandedHomeSports] = useState({ boxing: true });
   const [wrestlingMatches, setWrestlingMatches] = useState([]);
 
   useEffect(() => {
@@ -447,37 +442,46 @@ const HomeAnother = () => {
     () => wrestlingMatches.map(normalizeWrestlingFightForHome),
     [wrestlingMatches],
   );
-  const sportCounts = useMemo(
+  const homeFightSections = useMemo(
     () =>
-      HOME_FIGHT_SPORT_TABS.reduce((acc, tab) => {
-        if (tab.key === "pro-wrestling") {
-          acc[tab.key] = normalizedWrestlingFights.length;
-          return acc;
-        }
-        acc[tab.key] =
-          tab.key === "all"
-            ? homepageFightPool.length + normalizedWrestlingFights.length
+      HOME_FIGHT_SPORT_TABS.map((tab) => {
+        const fights =
+          tab.key === "pro-wrestling"
+            ? normalizedWrestlingFights
             : homepageFightPool.filter(
                 (fight) => getFightSportKey(fight) === tab.key,
-              ).length;
-        return acc;
-      }, {}),
+              );
+
+        return {
+          ...tab,
+          count: fights.length,
+          fights,
+        };
+      }),
     [homepageFightPool, normalizedWrestlingFights],
   );
+
+  const sportCounts = useMemo(
+    () =>
+      homeFightSections.reduce((acc, section) => {
+        acc[section.key] = section.count;
+        return acc;
+      }, {}),
+    [homeFightSections],
+  );
+
+  const totalHomeFightCount = useMemo(
+    () => homeFightSections.reduce((total, section) => total + section.count, 0),
+    [homeFightSections],
+  );
+
   const contestMatches = useMemo(() => {
-    if (activeFightSport === "pro-wrestling")
-      return normalizedWrestlingFights.slice(0, 12);
-    const rows =
-      activeFightSport === "all"
-        ? [...homepageFightPool, ...normalizedWrestlingFights]
-        : homepageFightPool.filter(
-            (fight) => getFightSportKey(fight) === activeFightSport,
-          );
-    return rows.slice(0, 12);
-  }, [activeFightSport, homepageFightPool, normalizedWrestlingFights]);
-  const selectedSportLabel =
-    HOME_FIGHT_SPORT_TABS.find((tab) => tab.key === activeFightSport)?.label ||
-    "All Fights";
+    const activeSection = homeFightSections.find(
+      (section) => section.key === activeFightSport,
+    );
+    return activeSection?.fights?.slice(0, HOME_CATEGORY_PREVIEW_LIMIT) || [];
+  }, [activeFightSport, homeFightSections]);
+
   const primaryFight = homepageFightPool[0] || null;
   const primaryCountdown = getCountdownParts(primaryFight, now);
 
@@ -530,50 +534,112 @@ const HomeAnother = () => {
     }
   };
 
-  const getPointerX = (event) =>
-    event?.pageX || event?.clientX || event?.touches?.[0]?.pageX || 0;
+  const handleHomeSportJump = (sportKey) => {
+    setActiveFightSport(sportKey);
+    setExpandedHomeSports((current) => ({ ...current, [sportKey]: true }));
 
-  const handleContestRailPointerDown = (event) => {
-    const rail = contestRailRef.current;
-    if (!rail) return;
-    if (typeof event.button === "number" && event.button !== 0) return;
-
-    contestDragRef.current = {
-      active: true,
-      startX: getPointerX(event),
-      scrollLeft: rail.scrollLeft,
-      moved: false,
-    };
-    rail.classList.add("is-dragging");
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(() => {
+      const section = homeSportSectionRefs.current?.[sportKey];
+      section?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+    });
   };
 
-  const handleContestRailPointerMove = (event) => {
-    const rail = contestRailRef.current;
-    const drag = contestDragRef.current;
-    if (!rail || !drag.active) return;
-
-    const delta = getPointerX(event) - drag.startX;
-    if (Math.abs(delta) > 5) {
-      drag.moved = true;
-      rail.scrollLeft = drag.scrollLeft - delta;
-      event.preventDefault();
-    }
+  const toggleHomeSportSection = (sportKey) => {
+    setActiveFightSport(sportKey);
+    setExpandedHomeSports((current) => ({
+      ...current,
+      [sportKey]: !current?.[sportKey],
+    }));
   };
 
-  const handleContestRailPointerEnd = () => {
-    const rail = contestRailRef.current;
-    if (rail) rail.classList.remove("is-dragging");
-    setTimeout(() => {
-      contestDragRef.current.active = false;
-      contestDragRef.current.moved = false;
-    }, 0);
-  };
+  const renderHomeFightCard = (match, index, sectionKey) => {
+    const category = getCategory(match);
+    const categoryClass = getCategoryClass(match);
+    const isFinished = String(match?.matchStatus || "")
+      .toLowerCase()
+      .includes("finished");
 
-  const handleContestRailClickCapture = (event) => {
-    if (contestDragRef.current.moved) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
+    return (
+      <article
+        className={`fmm-contest-card ${categoryClass}`}
+        key={`${sectionKey}-${match._id || getFightTitle(match)}`}
+      >
+        <div className="fmm-contest-card-top">
+          <span className="fmm-category-pill">{category}</span>
+          <span className="fmm-fresh-pill">
+            {index === 0 ? "Newest" : getLockLabel(match, now)}
+          </span>
+          {index === 0 && (
+            <span className="fmm-featured-pill">
+              <FaStar aria-hidden="true" /> First in section
+            </span>
+          )}
+        </div>
+
+        <div className="fmm-contest-fighters">
+          <figure>
+            <FightImage
+              src={match.fighterAImage}
+              alt={match.matchFighterA || "Fighter A"}
+              width={184}
+              height={184}
+              sizes="(max-width: 760px) 42vw, 92px"
+            />
+            <figcaption>{match.matchFighterA || "Fighter A"}</figcaption>
+          </figure>
+          <span>VS</span>
+          <figure>
+            <FightImage
+              src={match.fighterBImage}
+              alt={match.matchFighterB || "Fighter B"}
+              width={184}
+              height={184}
+              sizes="(max-width: 760px) 42vw, 92px"
+            />
+            <figcaption>{match.matchFighterB || "Fighter B"}</figcaption>
+          </figure>
+        </div>
+
+        <h3>{match.matchName || getFightTitle(match)}</h3>
+        <p className="fmm-contest-matchup">
+          {match.matchFighterA || "Fighter A"} vs {match.matchFighterB || "Fighter B"}
+        </p>
+
+        <div className="fmm-contest-card-meta">
+          <span>
+            <FaCalendarAlt aria-hidden="true" /> {formatDateTime(match)}
+          </span>
+          <span>
+            <FaUsers aria-hidden="true" /> {getPlayerCount(match).toLocaleString()} Players
+          </span>
+          <span>
+            <FaDollarSign aria-hidden="true" /> {getPrizePool(match)} <small>Prize Pool</small>
+          </span>
+        </div>
+
+        <div className="fmm-contest-lock">
+          <span>Locks In</span>
+          <strong>{getLockLabel(match, now)}</strong>
+        </div>
+
+        <Link
+          href={
+            match.__source === "pro-wrestling"
+              ? `/pro-wrestling/matches/${match._id}`
+              : "/upcomingfights"
+          }
+          className="fmm-card-action"
+        >
+          {match.__source === "pro-wrestling"
+            ? "Open Wrestling"
+            : isFinished
+              ? "View Contest"
+              : "Enter Free"}{" "}
+          <FaChevronRight aria-hidden="true" />
+        </Link>
+      </article>
+    );
   };
 
   return (
@@ -667,7 +733,7 @@ const HomeAnother = () => {
                 aria-label="Fantasy MMAdness live experience stats"
               >
                 <div>
-                  <strong>{contestMatches.length || 0}</strong>
+                  <strong>{totalHomeFightCount || contestMatches.length || 0}</strong>
                   <span>Fresh fights</span>
                 </div>
                 <div>
@@ -803,7 +869,7 @@ const HomeAnother = () => {
                   type="button"
                   key={tab.key}
                   className={activeFightSport === tab.key ? "is-active" : ""}
-                  onClick={() => setActiveFightSport(tab.key)}
+                  onClick={() => handleHomeSportJump(tab.key)}
                 >
                   {tab.label.replace(" Fights", "")}
                   <small>{sportCounts[tab.key] || 0}</small>
@@ -824,41 +890,32 @@ const HomeAnother = () => {
                 <h2 id="active-contests-title">Active Contests</h2>
               </div>
               <div className="fmm-section-actions">
-                <span className="fmm-swipe-hint">Drag fight cards</span>
+                <span className="fmm-swipe-hint">Tap a section below</span>
                 <Link href="/upcomingfights">
-                  View All Contests <FaArrowRight aria-hidden="true" />
+                  View fight page <FaArrowRight aria-hidden="true" />
                 </Link>
               </div>
             </div>
 
             <div
-              className="fmm-home-fight-tabs"
+              className="fmm-home-fight-tabs fmm-home-section-nav"
               role="tablist"
-              aria-label="Filter homepage fight cards by sport"
+              aria-label="Jump to homepage fight sections"
             >
-              {HOME_FIGHT_SPORT_TABS.map((tab) => (
+              {homeFightSections.map((section) => (
                 <button
                   type="button"
-                  key={tab.key}
-                  className={activeFightSport === tab.key ? "is-active" : ""}
-                  onClick={() => setActiveFightSport(tab.key)}
+                  key={section.key}
+                  className={activeFightSport === section.key ? "is-active" : ""}
+                  onClick={() => handleHomeSportJump(section.key)}
                 >
-                  <span>{tab.label}</span>
-                  <strong>{sportCounts[tab.key] || 0}</strong>
+                  <span>{section.label}</span>
+                  <strong>{section.count}</strong>
                 </button>
               ))}
             </div>
 
-            <div
-              className="fmm-contest-grid"
-              ref={contestRailRef}
-              onPointerDown={handleContestRailPointerDown}
-              onPointerMove={handleContestRailPointerMove}
-              onPointerUp={handleContestRailPointerEnd}
-              onPointerCancel={handleContestRailPointerEnd}
-              onPointerLeave={handleContestRailPointerEnd}
-              onClickCapture={handleContestRailClickCapture}
-            >
+            <div className="fmm-home-category-stack">
               {matchStatus === "loading" && (
                 <div className="fmm-empty-card">Loading active contests...</div>
               )}
@@ -867,111 +924,64 @@ const HomeAnother = () => {
                   Unable to load fights: {matchError}
                 </div>
               )}
+
               {matchStatus !== "loading" &&
                 matchStatus !== "failed" &&
-                contestMatches.length === 0 && (
-                  <div className="fmm-empty-card">
-                    No {selectedSportLabel.toLowerCase()} contests are currently
-                    available.
-                  </div>
-                )}
+                homeFightSections.map((section) => {
+                  const isExpanded = Boolean(expandedHomeSports?.[section.key]);
+                  const visibleFights = isExpanded
+                    ? section.fights
+                    : section.fights.slice(0, HOME_CATEGORY_PREVIEW_LIMIT);
+                  const hasMore = section.fights.length > HOME_CATEGORY_PREVIEW_LIMIT;
 
-              {contestMatches.map((match, index) => {
-                const category = getCategory(match);
-                const categoryClass = getCategoryClass(match);
-                const isFinished = String(match?.matchStatus || "")
-                  .toLowerCase()
-                  .includes("finished");
-
-                return (
-                  <article
-                    className={`fmm-contest-card ${categoryClass}`}
-                    key={match._id || getFightTitle(match)}
-                  >
-                    <div className="fmm-contest-card-top">
-                      <span className="fmm-category-pill">{category}</span>
-                      <span className="fmm-fresh-pill">
-                        {index === 0 ? "Top now" : getLockLabel(match, now)}
-                      </span>
-                      {index === 0 && (
-                        <span className="fmm-featured-pill">
-                          <FaStar aria-hidden="true" /> Featured
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="fmm-contest-fighters">
-                      <figure>
-                        <FightImage
-                          src={match.fighterAImage}
-                          alt={match.matchFighterA || "Fighter A"}
-                          width={184}
-                          height={184}
-                          sizes="(max-width: 760px) 42vw, 92px"
-                        />
-                        <figcaption>
-                          {match.matchFighterA || "Fighter A"}
-                        </figcaption>
-                      </figure>
-                      <span>VS</span>
-                      <figure>
-                        <FightImage
-                          src={match.fighterBImage}
-                          alt={match.matchFighterB || "Fighter B"}
-                          width={184}
-                          height={184}
-                          sizes="(max-width: 760px) 42vw, 92px"
-                        />
-                        <figcaption>
-                          {match.matchFighterB || "Fighter B"}
-                        </figcaption>
-                      </figure>
-                    </div>
-
-                    <h3>{match.matchName || getFightTitle(match)}</h3>
-                    <p className="fmm-contest-matchup">
-                      {match.matchFighterA || "Fighter A"} vs{" "}
-                      {match.matchFighterB || "Fighter B"}
-                    </p>
-
-                    <div className="fmm-contest-card-meta">
-                      <span>
-                        <FaCalendarAlt aria-hidden="true" />{" "}
-                        {formatDateTime(match)}
-                      </span>
-                      <span>
-                        <FaUsers aria-hidden="true" />{" "}
-                        {getPlayerCount(match).toLocaleString()} Players
-                      </span>
-                      <span>
-                        <FaDollarSign aria-hidden="true" />{" "}
-                        {getPrizePool(match)} <small>Prize Pool</small>
-                      </span>
-                    </div>
-
-                    <div className="fmm-contest-lock">
-                      <span>Locks In</span>
-                      <strong>{getLockLabel(match, now)}</strong>
-                    </div>
-
-                    <Link
-                      href={
-                        match.__source === "pro-wrestling"
-                          ? `/pro-wrestling/matches/${match._id}`
-                          : "/upcomingfights"
-                      }
-                      className="fmm-card-action"
+                  return (
+                    <section
+                      className={`fmm-home-sport-section ${getCategoryClass(section.key)} ${
+                        isExpanded ? "is-expanded" : ""
+                      }`}
+                      id={`home-${section.key}-fights`}
+                      key={section.key}
+                      ref={(node) => {
+                        homeSportSectionRefs.current[section.key] = node;
+                      }}
                     >
-                      {match.__source === "pro-wrestling"
-                        ? "Open Wrestling"
-                        : isFinished
-                          ? "View Contest"
-                          : "Enter Free"}{" "}
-                      <FaChevronRight aria-hidden="true" />
-                    </Link>
-                  </article>
-                );
-              })}
+                      <header className="fmm-home-sport-section-head">
+                        <div>
+                          <span className="fmm-section-kicker">
+                            <FaBullseye aria-hidden="true" /> {section.count} contest{section.count === 1 ? "" : "s"}
+                          </span>
+                          <h3>{section.label} section</h3>
+                          <p>Newest uploaded fights appear first in this section.</p>
+                        </div>
+                        <div className="fmm-home-sport-section-actions">
+                          {hasMore && (
+                            <button
+                              type="button"
+                              onClick={() => toggleHomeSportSection(section.key)}
+                            >
+                              {isExpanded ? "Show less" : `Open all ${section.label}`}
+                            </button>
+                          )}
+                          <Link href="/upcomingfights">
+                            View page <FaArrowRight aria-hidden="true" />
+                          </Link>
+                        </div>
+                      </header>
+
+                      <div className="fmm-contest-grid fmm-category-contest-grid">
+                        {visibleFights.length === 0 ? (
+                          <div className="fmm-empty-card">
+                            No {section.label.toLowerCase()} contests are currently available.
+                          </div>
+                        ) : (
+                          visibleFights.map((match, index) =>
+                            renderHomeFightCard(match, index, section.key),
+                          )
+                        )}
+                      </div>
+                    </section>
+                  );
+                })}
             </div>
           </section>
 

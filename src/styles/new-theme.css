@@ -3403,3 +3403,195 @@ a[class*="Button"] {
     padding: 5px 6px 4px;
   }
 }
+
+/* Homepage category-section fight experience */
+.fmm-home-section-nav {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  position: sticky;
+  top: 76px;
+  z-index: 5;
+  padding: 8px 0;
+  backdrop-filter: blur(14px);
+}
+
+.fmm-home-category-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fmm-home-sport-section {
+  scroll-margin-top: 112px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(223, 17, 27, 0.12), transparent 12rem),
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 20px 50px rgba(0,0,0,.28);
+  overflow: hidden;
+  padding: 18px;
+}
+
+.fmm-home-sport-section.is-boxing {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(22, 143, 230, 0.18), transparent 12rem),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.018));
+}
+
+.fmm-home-sport-section.is-kickboxing {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(249, 180, 22, 0.18), transparent 12rem),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.018));
+}
+
+.fmm-home-sport-section.is-bare-knuckle {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(157, 66, 216, 0.2), transparent 12rem),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.018));
+}
+
+.fmm-home-sport-section.is-pro-wrestling {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(249, 180, 22, 0.2), transparent 12rem),
+    radial-gradient(circle at 100% 0%, rgba(223, 17, 27, 0.16), transparent 12rem),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.018));
+}
+
+.fmm-home-sport-section-head {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.fmm-home-sport-section-head h3 {
+  color: #fff;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900;
+  letter-spacing: .04em;
+  line-height: .92;
+  margin: 6px 0 4px;
+  text-transform: uppercase;
+}
+
+.fmm-home-sport-section-head p {
+  color: rgba(255,255,255,.62);
+  font-family: var(--fmm-font-ui, Arial, sans-serif);
+  font-size: 13px;
+  margin: 0;
+}
+
+.fmm-home-sport-section-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.fmm-home-sport-section-actions button,
+.fmm-home-sport-section-actions a {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-family: var(--fmm-font-display, Impact, sans-serif);
+  font-size: 11px;
+  font-weight: 900;
+  gap: 7px;
+  height: 40px;
+  justify-content: center;
+  letter-spacing: .08em;
+  padding: 0 16px;
+  text-decoration: none !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fmm-home-sport-section-actions button {
+  background: linear-gradient(135deg, #df111b, #ff5964);
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 16px 34px rgba(223,17,27,.22);
+  color: #fff;
+  cursor: pointer;
+}
+
+.fmm-home-sport-section-actions a {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.82) !important;
+}
+
+.fmm-category-contest-grid {
+  margin-top: 0;
+}
+
+.fmm-category-contest-grid .fmm-empty-card {
+  min-height: 96px;
+}
+
+@media (min-width: 761px) {
+  .fmm-category-contest-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .fmm-home-sport-section.is-expanded .fmm-category-contest-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .fmm-home-section-nav {
+    margin-right: 0;
+    padding: 8px 0 10px;
+    position: sticky;
+    top: 58px;
+  }
+
+  .fmm-home-category-stack {
+    gap: 14px;
+  }
+
+  .fmm-home-sport-section {
+    border-radius: 24px;
+    margin-right: 0;
+    padding: 14px 0 16px 14px;
+    scroll-margin-top: 92px;
+  }
+
+  .fmm-home-sport-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 14px;
+  }
+
+  .fmm-home-sport-section-head h3 {
+    font-size: 30px;
+  }
+
+  .fmm-home-sport-section-head p {
+    font-size: 12px;
+  }
+
+  .fmm-home-sport-section-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .fmm-home-sport-section-actions button,
+  .fmm-home-sport-section-actions a {
+    flex: 1 1 auto;
+    min-width: 128px;
+  }
+
+  .fmm-category-contest-grid {
+    padding-bottom: 8px;
+    padding-right: 14px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-card {
+    flex-basis: min(82vw, 330px);
+  }
+}
