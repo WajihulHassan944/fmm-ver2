@@ -23,6 +23,11 @@ import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 import FightDataQualityCenter from './FightDataQualityCenter';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
+import {
+  getFighterImage,
+  getFighterName,
+  getPublicFightDuplicateKey,
+} from '@/Utils/fightExperience';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
@@ -41,6 +46,39 @@ const TAB_COPY = [
   { key: 'live', label: 'Promote live' },
 ];
 
+const REGISTRY_VIEW_COPY = [
+  { key: 'unique', label: 'Unique fights' },
+  { key: 'all', label: 'All records' },
+  { key: 'live', label: 'LIVE only' },
+  { key: 'shadow', label: 'SHADOW only' },
+];
+
+const isRenderable = (value) => typeof value === 'string' && value.trim() && !['null', 'undefined'].includes(value.trim().toLowerCase());
+
+const adminFightQualityScore = (fight = {}) => {
+  const typeScore = String(fight?.matchType || '').toUpperCase() === 'LIVE' ? 10000 : 0;
+  const status = String(fight?.matchStatus || fight?.matchShadowStatus || '').toLowerCase();
+  const statusScore = status === 'ongoing' ? 600 : status === 'finished' ? 400 : 100;
+  const imageScore = [getFighterImage(fight, 'A'), getFighterImage(fight, 'B'), fight?.promotionBackground].filter(isRenderable).length * 50;
+  const statsScore = (Array.isArray(fight?.BoxingMatch?.fighterOneStats) && fight.BoxingMatch.fighterOneStats.length)
+    || (Array.isArray(fight?.MMAMatch?.fighterOneStats) && fight.MMAMatch.fighterOneStats.length)
+    ? 120 : 0;
+  return typeScore + statusScore + imageScore + statsScore;
+};
+
+const dedupeAdminFightRows = (rows = []) => {
+  const selected = new Map();
+  (Array.isArray(rows) ? rows : []).forEach((fight) => {
+    const key = getPublicFightDuplicateKey(fight) || String(getId(fight) || '');
+    if (!key) return;
+    const current = selected.get(key);
+    if (!current || adminFightQualityScore(fight) > adminFightQualityScore(current)) {
+      selected.set(key, fight);
+    }
+  });
+  return Array.from(selected.values());
+};
+
 const normalizeRows = (matches) => (
   Array.isArray(matches) ? matches.map((fight) => ({ ...fight, __source: 'normal' })) : []
 );
@@ -51,6 +89,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [matches, setMatches] = useState([]);
   const [matchRowsLoading, setMatchRowsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [registryView, setRegistryView] = useState('unique');
   const [search, setSearch] = useState('');
   const [selectedScore, setSelectedScore] = useState(null);
   const [selectedScoresView, setSelectedScoresView] = useState(null);
@@ -116,9 +155,17 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   }, [dispatch, matchStatus]);
 
   const allRows = useMemo(() => normalizeRows(matches), [matches]);
+
+  const registryRows = useMemo(() => {
+    const rows = registryView === 'unique' ? dedupeAdminFightRows(allRows) : allRows;
+    if (registryView === 'live') return rows.filter((fight) => String(fight.matchType || '').toUpperCase() === 'LIVE');
+    if (registryView === 'shadow') return rows.filter((fight) => String(fight.matchType || '').toUpperCase() === 'SHADOW');
+    return rows;
+  }, [allRows, registryView]);
+
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
-    return allRows.filter((fight) => {
+    return registryRows.filter((fight) => {
       const status = String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase();
       const type = String(fight.matchType || '').toLowerCase();
       const tabMatch = activeTab === 'all'
@@ -127,23 +174,36 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         || (activeTab === 'live' && type === 'live');
       if (!tabMatch) return false;
       if (!normalizedSearch) return true;
-      return [fight.matchName, fight.matchFighterA, fight.matchFighterB, getSport(fight), fight.matchDescription]
+      return [
+        getId(fight),
+        fight.id,
+        fight.matchId,
+        fight.fighterAId?._id || fight.fighterAId,
+        fight.fighterBId?._id || fight.fighterBId,
+        fight.matchName,
+        getFighterName(fight, 'A'),
+        getFighterName(fight, 'B'),
+        fight.matchFighterA,
+        fight.matchFighterB,
+        getSport(fight),
+        fight.matchDescription,
+      ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
         .includes(normalizedSearch);
     });
-  }, [activeTab, allRows, search]);
+  }, [activeTab, registryRows, search]);
 
   useEffect(() => {
     setSelectedFightIds((current) => current.filter((id) => filteredRows.some((fight) => String(getId(fight)) === String(id))));
   }, [filteredRows]);
 
   const metrics = useMemo(() => ({
-    total: allRows.length,
-    active: allRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'ongoing').length,
-    finished: allRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'finished').length,
-  }), [allRows]);
+    total: registryRows.length,
+    active: registryRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'ongoing').length,
+    finished: registryRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'finished').length,
+  }), [registryRows]);
 
   const getSourceType = () => 'match';
 
@@ -264,7 +324,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <div>
           <span>Fight operations</span>
           <h2>{mode === 'score' ? 'Score center and fight tables' : 'Unified fight registry'}</h2>
-          <p>Search, filter, promote, inspect, score, and delete all fight records from the /match registry. Shadow templates are managed separately in the Shadow Fights Library.</p>
+          <p>Search by fight name, fighter, sport, description, or fight ID. Unique view hides duplicated LIVE/SHADOW copies while the all-records filter remains available.</p>
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
@@ -274,16 +334,28 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       </section>
 
       <section className="admin-inline-metrics">
-        <article><span>Total fights</span><strong>{metrics.total}</strong><small>/match registry records</small></article>
+        <article><span>Total fights</span><strong>{metrics.total}</strong><small>{registryView === 'unique' ? 'unique display rows' : '/match registry records'}</small></article>
         <article><span>Active scoring</span><strong>{metrics.active}</strong><small>Open result workflows</small></article>
         <article><span>Completed</span><strong>{metrics.finished}</strong><small>Score review available</small></article>
       </section>
 
       <section className="admin-table-panel">
         <div className="admin-table-toolbar admin-fight-toolbar">
-          <label className="admin-table-search"><FaSearch /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search fight, fighter, description, or sport" /></label>
+          <label className="admin-table-search"><FaSearch /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search fight, fighter, sport, description, or ID" /></label>
           <div className="admin-filter-tabs">
             {TAB_COPY.map((tab) => <button key={tab.key} type="button" className={`admin-filter-tab ${activeTab === tab.key ? 'is-active' : ''}`} onClick={() => setActiveTab(tab.key)}>{tab.label}</button>)}
+          </div>
+          <div className="admin-filter-tabs admin-registry-view-tabs">
+            {REGISTRY_VIEW_COPY.map((view) => (
+              <button
+                key={view.key}
+                type="button"
+                className={`admin-filter-tab ${registryView === view.key ? 'is-active' : ''}`}
+                onClick={() => setRegistryView(view.key)}
+              >
+                {view.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -317,8 +389,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><OptimizedImage src={fight.fighterA?.primaryImage || fight.fighterAId?.primaryImage || fight.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={fight.fighterB?.primaryImage || fight.fighterBId?.primaryImage || fight.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
-                        <div><strong>{getTitle(fight)}</strong><small>{fight.matchFighterA || 'Fighter A'} vs {fight.matchFighterB || 'Fighter B'}</small></div>
+                        <span><OptimizedImage src={getFighterImage(fight, 'A') || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={getFighterImage(fight, 'B') || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
+                        <div><strong>{getTitle(fight)}</strong><small>{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')}</small><small>ID: {id}</small></div>
                       </div>
                     </td>
                     <td>{getSport(fight)}</td>

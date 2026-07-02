@@ -1,3 +1,4 @@
+import { dedupePublicFights } from "@/Utils/fightExperience";
 export const DEFAULT_PUBLIC_API_BASE_URL =
   "https://fantasymmadness-game-server-three.vercel.app";
 
@@ -117,22 +118,22 @@ export const normalizePublicFightRow = (fight = {}) => {
     "Fighter B",
   );
   const fighterAImage = pickUsableString(
-    fight.fighterAImage,
-    fight.matchFighterAImage,
-    fight.fighterA?.primaryImage,
-    fight.fighterA?.image,
     getFighterDisplayImage(fight.fighterAId),
     getFighterDisplayImage(fight.fighterA),
     getFighterDisplayImage(fight.fighterOne),
+    fight.fighterA?.primaryImage,
+    fight.fighterA?.image,
+    fight.matchFighterAImage,
+    fight.fighterAImage,
   );
   const fighterBImage = pickUsableString(
-    fight.fighterBImage,
-    fight.matchFighterBImage,
-    fight.fighterB?.primaryImage,
-    fight.fighterB?.image,
     getFighterDisplayImage(fight.fighterBId),
     getFighterDisplayImage(fight.fighterB),
     getFighterDisplayImage(fight.fighterTwo),
+    fight.fighterB?.primaryImage,
+    fight.fighterB?.image,
+    fight.matchFighterBImage,
+    fight.fighterBImage,
   );
 
   return {
@@ -330,7 +331,7 @@ export const fetchPublicFights = async (query = {}) => {
     const rows = normalizePublicFightRows(filterPublicFights(normalizePaginatedPayload(payload).rows, {
       includeDrafts,
     }));
-    if (rows.length) return rows;
+    if (rows.length) return dedupePublicFights(rows);
   } catch (error) {
     console.warn(
       "Public fights API unavailable, falling back to legacy fight endpoints:",
@@ -339,7 +340,7 @@ export const fetchPublicFights = async (query = {}) => {
   }
 
   try {
-    return await fetchLegacyCombinedFights(publicQuery, includeDrafts);
+    return dedupePublicFights(await fetchLegacyCombinedFights(publicQuery, includeDrafts));
   } catch (fallbackError) {
     console.warn("Legacy fight endpoints unavailable:", fallbackError.message);
     return [];
@@ -368,7 +369,7 @@ export const fetchPublicPredictionFights = async (query = {}) => {
       requestQuery,
     );
     const rows = normalizePlayableRows(payload);
-    if (rows.length) return rows;
+    if (rows.length) return dedupePublicFights(rows);
   } catch (error) {
     console.warn(
       "Prediction-ready fights API unavailable, falling back to legacy playable filters:",
@@ -382,12 +383,12 @@ export const fetchPublicPredictionFights = async (query = {}) => {
       includeDrafts,
     );
     if (legacyRows.length)
-      return legacyRows.map((fight) => ({ ...fight, __playable: true }));
+      return dedupePublicFights(legacyRows.map((fight) => ({ ...fight, __playable: true })));
   } catch (error) {
     console.warn("Legacy playable fight filters unavailable:", error.message);
   }
 
-  return fetchPublicFights(requestQuery);
+  return dedupePublicFights(await fetchPublicFights(requestQuery));
 };
 
 export const fetchPublicLeaderboard = async (query = {}) => {

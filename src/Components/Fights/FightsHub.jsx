@@ -14,6 +14,7 @@ import {
   getFightSearchText,
   safeArray,
   splitFightsByStatus,
+  dedupePublicFights,
 } from '@/Utils/fightExperience';
 
 const FILTERS = [
@@ -58,7 +59,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
     setVisibleLimit(FIGHTS_PAGE_BATCH_SIZE);
   }, [activeFilter, category, search]);
 
-  const publicMatches = useMemo(() => safeArray(matches), [matches]);
+  const publicMatches = useMemo(() => dedupePublicFights(safeArray(matches)), [matches]);
   const groups = useMemo(() => splitFightsByStatus(publicMatches), [publicMatches]);
 
   const categories = useMemo(() => Array.from(new Set(publicMatches.map(getFightCategory))).sort(), [publicMatches]);
@@ -155,7 +156,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
                     onClick={() => handleFilter(item.value)}
                   >
                     {item.label}
-                    <span>{item.value === 'all' ? safeArray(matches).length : groups[item.value]?.length || 0}</span>
+                    <span>{item.value === 'all' ? publicMatches.length : groups[item.value]?.length || 0}</span>
                   </button>
                 ))}
               </div>

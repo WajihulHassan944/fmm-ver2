@@ -2193,3 +2193,26 @@ input[type='submit'],
 @media (max-width: 780px) {
   .xp-guide-page-shell { padding: 82px 14px 44px; }
 }
+
+/* Phase: admin fight registry duplicate/type controls. */
+.admin-fight-toolbar {
+  align-items: center;
+  gap: 10px;
+}
+.admin-registry-view-tabs {
+  background: rgba(249,180,22,.06);
+  border-color: rgba(249,180,22,.22);
+}
+.admin-registry-view-tabs .admin-filter-tab.is-active {
+  background: linear-gradient(135deg,#a56a00,#f3a51f)!important;
+  border-color: rgba(249,180,22,.56)!important;
+}
+.admin-fights-table .admin-fight-cell small + small {
+  color: rgba(255,255,255,.45);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

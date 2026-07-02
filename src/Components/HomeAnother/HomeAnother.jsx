@@ -851,7 +851,7 @@ const HomeAnother = () => {
 
               <div className="fmm-hero-actions">
                 <Link
-                  href="/upcomingfights"
+                  href={primaryFight ? getFightDetailHref(primaryFight) : "/upcomingfights"}
                   className="theme-btn theme-btn-primary"
                 >
                   Start Playing <FaPlay aria-hidden="true" />

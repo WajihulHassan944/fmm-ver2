@@ -51,8 +51,36 @@ export const getFightName = (match) => {
 export const getFighterImage = (match, side = 'A', index = 0) => {
   const isA = String(side).toUpperCase() === 'A';
   const candidates = isA
-    ? [match?.fighterAImage, match?.matchFighterAImage, match?.fighterAId?.primaryImage, match?.fighterAId?.image, match?.fighterAId?.profileImage, match?.fighterA?.primaryImage, match?.fighterA?.image, match?.fighterOneImage, match?.imageA]
-    : [match?.fighterBImage, match?.matchFighterBImage, match?.fighterBId?.primaryImage, match?.fighterBId?.image, match?.fighterBId?.profileImage, match?.fighterB?.primaryImage, match?.fighterB?.image, match?.fighterTwoImage, match?.imageB];
+    ? [
+        // Prefer the fighter-library image after fighter normalization. Legacy
+        // fight-side images are kept only as fallback for old records.
+        match?.fighterA?.primaryImage,
+        match?.fighterA?.image,
+        match?.fighterA?.profileImage,
+        match?.fighterAId?.primaryImage,
+        match?.fighterAId?.image,
+        match?.fighterAId?.profileImage,
+        match?.fighterOne?.primaryImage,
+        match?.fighterOne?.image,
+        match?.fighterAImage,
+        match?.matchFighterAImage,
+        match?.fighterOneImage,
+        match?.imageA,
+      ]
+    : [
+        match?.fighterB?.primaryImage,
+        match?.fighterB?.image,
+        match?.fighterB?.profileImage,
+        match?.fighterBId?.primaryImage,
+        match?.fighterBId?.image,
+        match?.fighterBId?.profileImage,
+        match?.fighterTwo?.primaryImage,
+        match?.fighterTwo?.image,
+        match?.fighterBImage,
+        match?.matchFighterBImage,
+        match?.fighterTwoImage,
+        match?.imageB,
+      ];
   const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
   if (direct) return direct;
   return getFallbackFighterImage(side, index);
@@ -82,7 +110,7 @@ export const getFightStatus = (match, now = new Date()) => {
   if (/\blive\b/.test(source)) return 'live';
   // Legacy records use "Ongoing" for every non-finished fight. Only call it
   // live once the scheduled start has arrived; future cards remain upcoming.
-  if (/(ongoing|active)/.test(source) && (!date || date.getTime() <= now.getTime())) return 'live';
+  if (/(ongoing|active)/.test(source) && date && date.getTime() <= now.getTime()) return 'live';
   if (date && date.getTime() < now.getTime()) return 'past';
   return 'upcoming';
 };
@@ -170,15 +198,31 @@ export const getPublicFightDuplicateKey = (match = {}) => {
     return normalizeFightKeyPart(getFightId(match)) || normalizeFightKeyPart(match?.matchName);
   }
   const orderedPair = [fighterA, fighterB].sort().join('::');
+  const rawDate = String(match?.matchDate || match?.date || match?.scheduledAt || '').split('T')[0];
+  const datePart = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : '';
   return [
-    normalizeFightKeyPart(match?.matchName),
     orderedPair,
     normalizeFightKeyPart(getFightCategory(match)),
     String(match?.maxRounds || match?.rounds || ''),
-  ].join('|');
+    datePart,
+  ].filter(Boolean).join('|');
 };
 
-export const dedupePublicFights = (matches = []) => safeArray(matches);
+export const dedupePublicFights = (matches = []) => {
+  const selected = new Map();
+
+  safeArray(matches).forEach((match) => {
+    const key = getPublicFightDuplicateKey(match) || normalizeFightKeyPart(getFightId(match));
+    if (!key) return;
+
+    const current = selected.get(key);
+    if (!current || getFightQualityScore(match) > getFightQualityScore(current)) {
+      selected.set(key, match);
+    }
+  });
+
+  return Array.from(selected.values());
+};
 
 export const sortFights = (matches, direction = 'asc') => [...safeArray(matches)].sort((a, b) => {
   const aDate = parseFightDate(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;
