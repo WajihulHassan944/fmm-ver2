@@ -342,6 +342,14 @@ const HomeAnother = () => {
   const dispatch = useDispatch();
   const howlerRef = useRef(null);
   const homeSportSectionRefs = useRef({});
+  const homeFightRailDragRef = useRef({
+    activeRail: null,
+    startX: 0,
+    startY: 0,
+    scrollLeft: 0,
+    moved: false,
+    pointerId: null,
+  });
   const [homepageMatches, setHomepageMatches] = useState([]);
   const [homepageLeaderboard, setHomepageLeaderboard] = useState([]);
   const [matchStatus, setMatchStatus] = useState("loading");
@@ -534,15 +542,112 @@ const HomeAnother = () => {
     }
   };
 
-  const handleHomeSportJump = (sportKey) => {
+  const handleHomeSportJump = (sportKey, event) => {
     setActiveFightSport(sportKey);
     setExpandedHomeSports((current) => ({ ...current, [sportKey]: true }));
 
     if (typeof window === "undefined") return;
+    event?.currentTarget?.scrollIntoView?.({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+
     window.requestAnimationFrame(() => {
       const section = homeSportSectionRefs.current?.[sportKey];
-      section?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      if (!section) return;
+
+      const scrollOffset = window.innerWidth > 760 ? 104 : 86;
+      const targetTop =
+        section.getBoundingClientRect().top + window.pageYOffset - scrollOffset;
+
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: "smooth",
+      });
     });
+  };
+
+  const stopHomeFightRailDrag = (rail, pointerId) => {
+    const dragState = homeFightRailDragRef.current;
+    const activeRail = rail || dragState.activeRail;
+
+    if (activeRail) {
+      activeRail.classList.remove("is-dragging");
+      if (dragState.pointerId !== null) {
+        try {
+          activeRail.releasePointerCapture?.(pointerId || dragState.pointerId);
+        } catch (_) {
+          // Pointer capture can already be released by the browser.
+        }
+      }
+      window.setTimeout(() => {
+        if (activeRail?.dataset?.dragMoved === "true") {
+          activeRail.dataset.dragMoved = "false";
+        }
+      }, 80);
+    }
+
+    homeFightRailDragRef.current = {
+      activeRail: null,
+      startX: 0,
+      startY: 0,
+      scrollLeft: 0,
+      moved: false,
+      pointerId: null,
+    };
+  };
+
+  const handleFightRailPointerDown = (event) => {
+    const rail = event.currentTarget;
+    if (!rail || rail.scrollWidth <= rail.clientWidth) return;
+
+    homeFightRailDragRef.current = {
+      activeRail: rail,
+      startX: event.clientX,
+      startY: event.clientY,
+      scrollLeft: rail.scrollLeft,
+      moved: false,
+      pointerId: event.pointerId,
+    };
+
+    rail.dataset.dragMoved = "false";
+    rail.classList.add("is-dragging");
+    try {
+      rail.setPointerCapture?.(event.pointerId);
+    } catch (_) {
+      // Some mobile browsers do not allow capture for every pointer type.
+    }
+  };
+
+  const handleFightRailPointerMove = (event) => {
+    const dragState = homeFightRailDragRef.current;
+    const rail = event.currentTarget;
+
+    if (dragState.activeRail !== rail) return;
+
+    const deltaX = event.clientX - dragState.startX;
+    const deltaY = event.clientY - dragState.startY;
+    const isHorizontalDrag = Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 4;
+
+    if (!isHorizontalDrag && !dragState.moved) return;
+
+    event.preventDefault();
+    dragState.moved = true;
+    rail.dataset.dragMoved = "true";
+    rail.scrollLeft = dragState.scrollLeft - deltaX;
+  };
+
+  const handleFightRailPointerUp = (event) => {
+    stopHomeFightRailDrag(event.currentTarget, event.pointerId);
+  };
+
+  const handleFightRailClickCapture = (event) => {
+    if (event.currentTarget?.dataset?.dragMoved === "true") {
+      event.preventDefault();
+      event.stopPropagation();
+      event.currentTarget.dataset.dragMoved = "false";
+    }
   };
 
   const toggleHomeSportSection = (sportKey) => {
@@ -869,7 +974,7 @@ const HomeAnother = () => {
                   type="button"
                   key={tab.key}
                   className={activeFightSport === tab.key ? "is-active" : ""}
-                  onClick={() => handleHomeSportJump(tab.key)}
+                  onClick={(event) => handleHomeSportJump(tab.key, event)}
                 >
                   {tab.label.replace(" Fights", "")}
                   <small>{sportCounts[tab.key] || 0}</small>
@@ -907,7 +1012,7 @@ const HomeAnother = () => {
                   type="button"
                   key={section.key}
                   className={activeFightSport === section.key ? "is-active" : ""}
-                  onClick={() => handleHomeSportJump(section.key)}
+                  onClick={(event) => handleHomeSportJump(section.key, event)}
                 >
                   <span>{section.label}</span>
                   <strong>{section.count}</strong>
@@ -968,7 +1073,15 @@ const HomeAnother = () => {
                         </div>
                       </header>
 
-                      <div className="fmm-contest-grid fmm-category-contest-grid">
+                      <div
+                        className="fmm-contest-grid fmm-category-contest-grid"
+                        onPointerDown={handleFightRailPointerDown}
+                        onPointerMove={handleFightRailPointerMove}
+                        onPointerUp={handleFightRailPointerUp}
+                        onPointerCancel={handleFightRailPointerUp}
+                        onPointerLeave={handleFightRailPointerUp}
+                        onClickCapture={handleFightRailClickCapture}
+                      >
                         {visibleFights.length === 0 ? (
                           <div className="fmm-empty-card">
                             No {section.label.toLowerCase()} contests are currently available.

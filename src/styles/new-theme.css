@@ -3190,9 +3190,10 @@ a[class*="Button"] {
     overflow-y: visible;
     padding: 3px 14px 24px 0;
     scroll-padding-left: 0;
-    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
     scrollbar-width: none;
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
     user-select: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -3203,6 +3204,8 @@ a[class*="Button"] {
 
   .fmm-contest-grid.is-dragging {
     cursor: grabbing;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
   }
 
   .fmm-contest-grid .fmm-empty-card {
@@ -3587,11 +3590,118 @@ a[class*="Button"] {
   }
 
   .fmm-category-contest-grid {
-    padding-bottom: 8px;
-    padding-right: 14px;
+    cursor: grab;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 10px;
+    padding-right: 18px;
+    scroll-padding-left: 0;
+    -ms-overflow-style: none;
+  }
+
+  .fmm-category-contest-grid.is-dragging {
+    cursor: grabbing;
   }
 
   .fmm-category-contest-grid .fmm-contest-card {
-    flex-basis: min(82vw, 330px);
+    flex-basis: min(74vw, 286px);
+    min-height: 318px;
+    padding: 13px 13px 58px;
   }
+
+  .fmm-category-contest-grid .fmm-contest-card-top {
+    gap: 6px;
+  }
+
+  .fmm-category-contest-grid .fmm-featured-pill {
+    display: none;
+  }
+
+  .fmm-category-contest-grid .fmm-category-pill,
+  .fmm-category-contest-grid .fmm-fresh-pill {
+    font-size: 8px;
+    padding: 5px 8px 4px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-fighters {
+    gap: 7px;
+    grid-template-columns: minmax(0,1fr) 36px minmax(0,1fr);
+    margin: 12px 0 10px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-fighters img {
+    height: 96px;
+    width: 96px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-fighters figcaption {
+    font-size: 9px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-fighters > span {
+    font-size: 10px;
+    height: 36px;
+    width: 36px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-card h3 {
+    font-size: 16px !important;
+    line-height: 1;
+    margin: 8px 0 6px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-matchup {
+    font-size: 11px;
+    margin-right: 58px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-card-meta {
+    gap: 4px;
+    margin-right: 58px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-card-meta span {
+    font-size: 9.5px;
+    gap: 5px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-lock {
+    border-width: 3px;
+    bottom: 50px;
+    height: 54px;
+    right: 10px;
+    width: 54px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-lock span {
+    font-size: 6px;
+  }
+
+  .fmm-category-contest-grid .fmm-contest-lock strong {
+    font-size: 8px;
+    max-width: 42px;
+  }
+
+  .fmm-category-contest-grid .fmm-card-action {
+    border-radius: 16px;
+    bottom: 12px;
+    font-size: 10px;
+    height: 38px;
+    left: 12px;
+    right: 12px;
+  }
+}
+
+
+/* Phase: homepage mobile fight rail drag + smooth tab scrolling */
+.fmm-home {
+  scroll-behavior: smooth;
+}
+
+.fmm-category-contest-grid {
+  scroll-behavior: smooth;
+}
+
+.fmm-category-contest-grid.is-dragging {
+  scroll-behavior: auto;
 }
