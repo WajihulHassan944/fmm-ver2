@@ -334,6 +334,12 @@
   scroll-margin-top: 110px;
 }
 
+.xp-load-more-row {
+  display: flex;
+  justify-content: center;
+  margin: -34px 0 78px;
+}
+
 .xp-section-heading {
   align-items: end;
   display: flex;

@@ -1899,6 +1899,8 @@ html{background:var(--theme-bg);scroll-behavior:smooth}body{background:radial-gr
   aspect-ratio: 1;
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
+  display: block;
+  height: 46px;
   object-fit: cover;
   object-position: top center;
   width: 46px;
@@ -2038,12 +2040,14 @@ html{background:var(--theme-bg);scroll-behavior:smooth}body{background:radial-gr
 .fmm-contest-fighters img {
   background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
+  border-radius: 999px;
   display: block;
   height: 92px;
   object-fit: cover;
   object-position: top center;
-  width: 100%;
+  width: 92px;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .fmm-contest-fighters figcaption {
@@ -2482,6 +2486,7 @@ html{background:var(--theme-bg);scroll-behavior:smooth}body{background:radial-gr
 
   .fmm-contest-fighters img {
     height: 82px;
+    width: 82px;
   }
 }
 
@@ -3239,8 +3244,8 @@ a[class*="Button"] {
   }
 
   .fmm-contest-fighters img {
-    border-radius: 20px;
     height: 128px;
+    width: 128px;
   }
 
   .fmm-contest-fighters > span {

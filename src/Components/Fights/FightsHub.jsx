@@ -23,6 +23,8 @@ const FILTERS = [
   { value: 'past', label: 'Past fights' },
 ];
 
+const FIGHTS_PAGE_BATCH_SIZE = 24;
+
 const PAGE_COPY = {
   all: { eyebrow: 'The complete fight room', title: 'Every fight.', accent: 'One arena.', description: 'Move from the next opening bell to verified past results without leaving the page. Search the full combat archive, filter by discipline, and enter active prediction contests from one cinematic fight hub.' },
   upcoming: { eyebrow: 'Upcoming fight cards', title: 'Next cards.', accent: 'Built for predictions.', description: 'Browse the scheduled cards, inspect each matchup, and enter the existing prediction flow with a premium fight-night presentation.' },
@@ -41,6 +43,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   const [activeFilter, setActiveFilter] = useState(FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [visibleLimit, setVisibleLimit] = useState(FIGHTS_PAGE_BATCH_SIZE);
 
   useEffect(() => {
     if (matchStatus === 'idle') dispatch(fetchMatches());
@@ -51,6 +54,10 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
     const requested = Array.isArray(router.query.status) ? router.query.status[0] : router.query.status;
     setActiveFilter(FILTERS.some((item) => item.value === requested) ? requested : (FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all'));
   }, [initialStatus, router.isReady, router.query.status]);
+
+  useEffect(() => {
+    setVisibleLimit(FIGHTS_PAGE_BATCH_SIZE);
+  }, [activeFilter, category, search]);
 
   const publicMatches = useMemo(() => safeArray(matches), [matches]);
   const groups = useMemo(() => splitFightsByStatus(publicMatches), [publicMatches]);
@@ -101,8 +108,11 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   const heroBackground = activeFilter === 'past'
     ? '/images/fmm-pages/premium-arena-banner.webp'
     : '/images/fmm-pages/premium-duel-banner.webp';
-  const visibleUpcoming = filteredFights.filter((match) => !groups.past.some((item) => getFightId(item) === getFightId(match)));
-  const visiblePast = filteredFights.filter((match) => groups.past.some((item) => getFightId(item) === getFightId(match)));
+  const allVisibleUpcoming = filteredFights.filter((match) => !groups.past.some((item) => getFightId(item) === getFightId(match)));
+  const allVisiblePast = filteredFights.filter((match) => groups.past.some((item) => getFightId(item) === getFightId(match)));
+  const visibleUpcoming = allVisibleUpcoming.slice(0, visibleLimit);
+  const visiblePast = allVisiblePast.slice(0, visibleLimit);
+  const hasMoreFights = allVisibleUpcoming.length > visibleUpcoming.length || allVisiblePast.length > visiblePast.length;
 
   return (
     <>
@@ -230,6 +240,18 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
                   </div>
                 </div>
               </section>
+            )}
+
+            {hasMoreFights && (
+              <div className="xp-load-more-row">
+                <button
+                  type="button"
+                  className="theme-btn theme-btn-secondary"
+                  onClick={() => setVisibleLimit((current) => current + FIGHTS_PAGE_BATCH_SIZE)}
+                >
+                  Load more fights
+                </button>
+              </div>
             )}
 
             <section className="xp-fights-cta">

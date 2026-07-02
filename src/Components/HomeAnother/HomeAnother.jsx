@@ -56,6 +56,8 @@ const HOME_FIGHT_SPORT_TABS = [
   { key: "pro-wrestling", label: "Pro Wrestling" },
 ];
 
+const HOME_FIGHT_FEED_LIMIT = 200;
+
 const SCORING_ROWS = [
   ["Correct Winner", "100"],
   ["Correct Method", "75"],
@@ -370,17 +372,21 @@ const HomeAnother = () => {
       setMatchError(null);
 
       try {
-        const summary = await fetchPublicHomeSummary({
-          fightLimit: 12,
-          leaderboardLimit: 5,
-        });
-        let fights = Array.isArray(summary.featuredFights)
+        const [summaryResult, predictionResult] = await Promise.allSettled([
+          fetchPublicHomeSummary({
+            fightLimit: HOME_FIGHT_FEED_LIMIT,
+            leaderboardLimit: 5,
+          }),
+          fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
+        ]);
+        const summary = summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
+        const summaryFights = Array.isArray(summary.featuredFights)
           ? summary.featuredFights
           : [];
-
-        if (!fights.length) {
-          fights = await fetchPublicPredictionFights({ limit: 12 });
-        }
+        const predictionFights = predictionResult.status === "fulfilled" && Array.isArray(predictionResult.value)
+          ? predictionResult.value
+          : [];
+        const fights = predictionFights.length >= summaryFights.length ? predictionFights : summaryFights;
 
         if (!active) return;
 
