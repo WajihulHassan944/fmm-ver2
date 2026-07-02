@@ -255,17 +255,18 @@ export async function swarmRequest(path, options = {}) {
   const { query, body, headers, ...fetchOptions } = options;
   const token = getAdminToken();
   const method = fetchOptions.method || (body ? 'POST' : 'GET');
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
 
   const response = await fetch(buildUrl(path, query), {
     ...fetchOptions,
     method,
     headers: {
       Accept: 'application/json',
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
+      ...(body && !isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(headers || {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   });
 
   const contentType = response.headers.get('content-type') || '';
