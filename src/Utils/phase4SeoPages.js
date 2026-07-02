@@ -99,11 +99,20 @@ export const normalizeSlug = (value = '') => String(value || '').toLowerCase().t
 
 export const cleanText = (value = '') => String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
-export const getMatchTitle = (match = {}) => match.matchName || match.title || `${match.matchFighterA || match.fighterAName || 'Fighter A'} vs ${match.matchFighterB || match.fighterBName || 'Fighter B'}`;
+const getMatchFighterName = (match = {}, side = 'A') => {
+  const isA = String(side).toUpperCase() === 'A';
+  const ref = isA ? match.fighterAId : match.fighterBId;
+  const fighter = isA ? match.fighterA : match.fighterB;
+  return isA
+    ? (match.matchFighterA || match.fighterAName || fighter?.displayName || fighter?.name || ref?.displayName || ref?.name || 'Fighter A')
+    : (match.matchFighterB || match.fighterBName || fighter?.displayName || fighter?.name || ref?.displayName || ref?.name || 'Fighter B');
+};
 
-export const getMatchSport = (match = {}) => match.matchCategoryTwo || match.matchCategory || match.sport || match.category || 'Combat Sports';
+export const getMatchTitle = (match = {}) => match.matchName || match.title || `${getMatchFighterName(match, 'A')} vs ${getMatchFighterName(match, 'B')}`;
 
-export const getMatchImage = (match = {}) => match.fightImage || match.matchImage || match.heroImage || match.fighterAImage || match.fighterBImage || '/images/fmm-pages/premium-duel-banner.webp';
+export const getMatchSport = (match = {}) => match.matchCategoryTwo || match.effectiveCategory || match.displayCategory || match.categoryLabel || match.matchCategory || match.sport || match.category || 'Combat Sports';
+
+export const getMatchImage = (match = {}) => match.fightImage || match.matchImage || match.heroImage || match.fighterAImage || match.fighterBImage || match.fighterAId?.primaryImage || match.fighterBId?.primaryImage || match.fighterA?.primaryImage || match.fighterB?.primaryImage || '/images/fmm-pages/premium-duel-banner.webp';
 
 export const getMatchDateLabel = (match = {}) => {
   const raw = match.matchDate || match.date || match.scheduledAt || match.createdAt;

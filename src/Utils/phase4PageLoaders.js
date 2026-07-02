@@ -1,7 +1,31 @@
 import { fetchPublicBlogs, fetchPublicFights, fetchPublicFighters, fetchPublicProWrestlingMatches, fetchPublicRelatedBlogs, fetchPublicWrestlers } from './publicApi';
-import { getSportConfigByKey } from './phase4SeoPages';
+import { getMatchSport, getSportConfigByKey, normalizeSlug } from './phase4SeoPages';
 
 const jsonSafe = (value) => JSON.parse(JSON.stringify(value || null));
+
+const matchesSportConfig = (fight = {}, config = {}) => {
+  const aliases = [config.sport, config.slug, ...(Array.isArray(config.categoryAliases) ? config.categoryAliases : [])]
+    .filter(Boolean)
+    .map(normalizeSlug);
+  const fightValues = [
+    fight.matchCategoryTwo,
+    fight.effectiveCategory,
+    fight.displayCategory,
+    fight.categoryLabel,
+    fight.categorySlug,
+    fight.effectiveCategorySlug,
+    getMatchSport(fight),
+    fight.matchCategory,
+  ].filter(Boolean).map(normalizeSlug);
+  return fightValues.some((value) => aliases.includes(value));
+};
+
+const filterFightsForSportConfig = (fights = [], config = {}, limit = 12) => {
+  const rows = Array.isArray(fights) ? fights : [];
+  const filtered = rows.filter((fight) => matchesSportConfig(fight, config));
+  return (filtered.length ? filtered : rows).slice(0, limit);
+};
+
 
 export const getSportLandingServerProps = async (sportKey = 'mma', res) => {
   const config = getSportConfigByKey(sportKey);
@@ -10,10 +34,10 @@ export const getSportLandingServerProps = async (sportKey = 'mma', res) => {
     const [fights, blogPayload] = await Promise.all([
       sportKey === 'pro-wrestling'
         ? fetchPublicProWrestlingMatches({ limit: 12 })
-        : fetchPublicFights({ sport: config.sport, category: config.sport, limit: 12 }),
+        : fetchPublicFights({ sport: config.sport, category: config.sport, categorySlug: sportKey, limit: 100 }),
       fetchPublicBlogs({ category: config.sport, limit: 6 }),
     ]);
-    return { props: { config: jsonSafe(config), fights: jsonSafe(fights || []), blogs: jsonSafe(blogPayload?.rows || []) } };
+    return { props: { config: jsonSafe(config), fights: jsonSafe(sportKey === 'pro-wrestling' ? (fights || []) : filterFightsForSportConfig(fights, config, 24)), blogs: jsonSafe(blogPayload?.rows || []) } };
   } catch (error) {
     console.error(`Error loading ${sportKey} landing page:`, error);
     return { props: { config: jsonSafe(config), fights: [], blogs: [] } };

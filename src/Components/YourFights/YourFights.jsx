@@ -21,12 +21,23 @@ import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
 import FightCosting from '../Dashboard/FightCosting';
 import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
 import UserWorkspaceNav from '../UserProfile/UserWorkspaceNav';
-import { getFightCategory, getFightId, getFighterImage } from '@/Utils/fightExperience';
+import { getFightCategory, getFightId, getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
 const sameId = (left, right) => String(left || '') === String(right || '');
+const isSubmittedByUser = (match, userId) => {
+  const status = String(match?.userPredictionStatus || match?.predictionStatus || '').toLowerCase();
+  const bucket = String(match?.userFightBucket || '').toLowerCase();
+  return Boolean(
+    match?.predictionSubmitted === true ||
+    match?.userPredictionSubmitted === true ||
+    bucket === 'completed' ||
+    ['submitted', 'complete', 'completed'].includes(status) ||
+    safePredictions(match).some((prediction) => sameId(prediction.userId, userId) && prediction.predictionStatus === 'submitted')
+  );
+};
 
 const YourFights = () => {
   const dispatch = useDispatch();
@@ -49,7 +60,12 @@ const YourFights = () => {
 
   useEffect(() => {
     let active = true;
-    fetchPublicPredictionFights({ limit: 100 })
+    const requestQuery = { limit: 120 };
+    if (user?._id) {
+      requestQuery.userId = user._id;
+      requestQuery.playerId = user._id;
+    }
+    fetchPublicPredictionFights(requestQuery)
       .then((rows) => {
         if (active) setPlayableMatches(Array.isArray(rows) ? rows : []);
       })
@@ -58,7 +74,7 @@ const YourFights = () => {
         if (active) setPlayableMatches([]);
       });
     return () => { active = false; };
-  }, []);
+  }, [user?._id]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -107,12 +123,12 @@ const YourFights = () => {
   }, [matches, playableMatches]);
 
   const completedMatches = useMemo(() => allFightRows.filter((match) => (
-    safePredictions(match).some((prediction) => sameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')
+    isSubmittedByUser(match, user?._id)
     && !removedMatches.includes(getFightId(match))
   )), [allFightRows, removedMatches, user?._id]);
 
   const pendingMatches = useMemo(() => upcomingMatches.filter((match) => (
-    !safePredictions(match).some((prediction) => sameId(prediction.userId, user?._id) && prediction.predictionStatus === 'submitted')
+    !isSubmittedByUser(match, user?._id)
     && !removedMatches.includes(getFightId(match))
   )), [upcomingMatches, removedMatches, user?._id]);
 
@@ -192,13 +208,13 @@ const YourFights = () => {
       <article className={`player-fight-library-card ${match.blurred ? 'is-locked' : ''}`} key={`${type}-${matchId}`}>
         <button type="button" className="player-fight-library-remove" onClick={() => handleRemoveMatch(matchId)}><FaTrashAlt /> Remove</button>
         <div className="player-fight-library-art">
-          <figure><img src={getFighterImage(match, 'A', 0)} alt={match.matchFighterA || 'Fighter A'} /><figcaption>{match.matchFighterA}</figcaption></figure>
+          <figure><img src={getFighterImage(match, 'A', 0)} alt={getFighterName(match, 'A')} /><figcaption>{getFighterName(match, 'A')}</figcaption></figure>
           <span>VS</span>
-          <figure><img src={getFighterImage(match, 'B', 1)} alt={match.matchFighterB || 'Fighter B'} /><figcaption>{match.matchFighterB}</figcaption></figure>
+          <figure><img src={getFighterImage(match, 'B', 1)} alt={getFighterName(match, 'B')} /><figcaption>{getFighterName(match, 'B')}</figcaption></figure>
         </div>
         <div className="player-fight-library-copy">
           <div className="player-fight-library-kicker"><span>{getFightCategory(match)}</span><b>{match.matchType}</b></div>
-          <h3>{match.matchFighterA} <em>vs</em> {match.matchFighterB}</h3>
+          <h3>{getFighterName(match, 'A')} <em>vs</em> {getFighterName(match, 'B')}</h3>
           <div className="player-fight-library-meta">
             <span><FaCalendarAlt /> {match.matchDate?.split('T')[0] || 'Date TBA'}</span>
             <span><FaUsers /> {safePredictions(match).length} players</span>

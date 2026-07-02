@@ -5,6 +5,155 @@ export const PUBLIC_API_BASE_URL = String(
   process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_PUBLIC_API_BASE_URL,
 ).replace(/\/$/, "");
 
+
+const cleanString = (value) => String(value ?? "").trim();
+
+const isUsableString = (value) => {
+  const text = cleanString(value);
+  if (!text) return false;
+  return !["null", "undefined", "none", "n/a"].includes(text.toLowerCase());
+};
+
+const pickUsableString = (...values) => {
+  for (const value of values) {
+    if (isUsableString(value)) return cleanString(value);
+  }
+  return "";
+};
+
+const normalizeCategorySlug = (value = "") => {
+  const normalized = cleanString(value)
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[_-]+/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) return "combat";
+  if (normalized.includes("bare") || normalized.includes("bkfc")) return "bareknuckle";
+  if (normalized.includes("kick")) return "kickboxing";
+  if (normalized.includes("box")) return "boxing";
+  if (normalized.includes("mma") || normalized.includes("ufc") || normalized.includes("mixed martial")) return "mma";
+  if (normalized.includes("wrestl")) return "pro-wrestling";
+  return normalized.replace(/\s+/g, "-");
+};
+
+const getFighterDisplayName = (value, fallback = "") => {
+  if (typeof value === "string") return "";
+  return pickUsableString(
+    value?.displayName,
+    value?.name,
+    value?.fighterName,
+    value?.fullName,
+    value?.nickname,
+    fallback,
+  );
+};
+
+const getFighterDisplayImage = (value, fallback = "") => {
+  if (typeof value === "string") return "";
+  return pickUsableString(
+    value?.primaryImage,
+    value?.profileImage,
+    value?.image,
+    value?.fighterImage,
+    value?.avatar,
+    fallback,
+  );
+};
+
+export const getEffectiveFightCategory = (fight = {}) => {
+  const secondary = pickUsableString(
+    fight.matchCategoryTwo,
+    fight.effectiveCategory,
+    fight.displayCategory,
+    fight.categoryLabel,
+  );
+  if (secondary) return secondary;
+  return pickUsableString(
+    fight.matchCategory,
+    fight.sport,
+    fight.matchSport,
+    fight.category,
+    fight.fightSport,
+    fight.discipline,
+    "MMA",
+  );
+};
+
+export const normalizePublicFightRow = (fight = {}) => {
+  if (!fight || typeof fight !== "object") return fight;
+
+  const effectiveCategory = getEffectiveFightCategory(fight);
+  const effectiveSlug = normalizeCategorySlug(
+    fight.effectiveCategorySlug || fight.categorySlug || effectiveCategory,
+  );
+  const primaryCategorySlug = normalizeCategorySlug(fight.matchCategory || "");
+  const hasSecondaryCategory = Boolean(
+    pickUsableString(fight.matchCategoryTwo) ||
+      (effectiveSlug && primaryCategorySlug && effectiveSlug !== primaryCategorySlug),
+  );
+  const fighterAName = pickUsableString(
+    fight.matchFighterA,
+    fight.fighterAName,
+    fight.fighterOneName,
+    fight.fighterA?.displayName,
+    fight.fighterA?.name,
+    getFighterDisplayName(fight.fighterAId),
+    getFighterDisplayName(fight.fighterA),
+    getFighterDisplayName(fight.fighterOne),
+    "Fighter A",
+  );
+  const fighterBName = pickUsableString(
+    fight.matchFighterB,
+    fight.fighterBName,
+    fight.fighterTwoName,
+    fight.fighterB?.displayName,
+    fight.fighterB?.name,
+    getFighterDisplayName(fight.fighterBId),
+    getFighterDisplayName(fight.fighterB),
+    getFighterDisplayName(fight.fighterTwo),
+    "Fighter B",
+  );
+  const fighterAImage = pickUsableString(
+    fight.fighterAImage,
+    fight.matchFighterAImage,
+    fight.fighterA?.primaryImage,
+    fight.fighterA?.image,
+    getFighterDisplayImage(fight.fighterAId),
+    getFighterDisplayImage(fight.fighterA),
+    getFighterDisplayImage(fight.fighterOne),
+  );
+  const fighterBImage = pickUsableString(
+    fight.fighterBImage,
+    fight.matchFighterBImage,
+    fight.fighterB?.primaryImage,
+    fight.fighterB?.image,
+    getFighterDisplayImage(fight.fighterBId),
+    getFighterDisplayImage(fight.fighterB),
+    getFighterDisplayImage(fight.fighterTwo),
+  );
+
+  return {
+    ...fight,
+    matchFighterA: fighterAName,
+    matchFighterB: fighterBName,
+    fighterAImage: fighterAImage || fight.fighterAImage,
+    fighterBImage: fighterBImage || fight.fighterBImage,
+    effectiveCategory,
+    effectiveCategorySlug: fight.effectiveCategorySlug || effectiveSlug,
+    displayCategory: fight.displayCategory || effectiveCategory,
+    categoryLabel: fight.categoryLabel || effectiveCategory,
+    categorySlug: fight.categorySlug || effectiveSlug,
+    hasSecondaryCategory,
+    matchCategoryTwo: pickUsableString(fight.matchCategoryTwo) || (hasSecondaryCategory ? effectiveCategory : ""),
+  };
+};
+
+export const normalizePublicFightRows = (rows = []) =>
+  (Array.isArray(rows) ? rows : []).map(normalizePublicFightRow);
+
 const DEFAULT_TIMEOUT_MS = 12000;
 
 const withTimeout = (executor, timeoutMs = DEFAULT_TIMEOUT_MS) => {
@@ -157,9 +306,9 @@ const fetchLegacyFightRows = async (
   );
   if (!response.ok) return [];
   const payload = await response.json();
-  return filterPublicFights(normalizePaginatedPayload(payload).rows, {
+  return normalizePublicFightRows(filterPublicFights(normalizePaginatedPayload(payload).rows, {
     includeDrafts,
-  }).map((fight) => ({ ...fight, __source: fight.__source || sourceType }));
+  })).map((fight) => ({ ...fight, __source: fight.__source || sourceType }));
 };
 
 const fetchLegacyCombinedFights = async (query = {}, includeDrafts = false) => {
@@ -177,30 +326,23 @@ export const fetchPublicFights = async (query = {}) => {
   const publicQuery = { limit: 100, ...query };
 
   try {
-    const legacyRows = await fetchLegacyCombinedFights(
-      publicQuery,
-      includeDrafts,
-    );
-    if (legacyRows.length) return legacyRows;
-
     const payload = await safeFetchJson("/api/public/fights", publicQuery);
-    return filterPublicFights(normalizePaginatedPayload(payload).rows, {
+    const rows = normalizePublicFightRows(filterPublicFights(normalizePaginatedPayload(payload).rows, {
       includeDrafts,
-    });
+    }));
+    if (rows.length) return rows;
   } catch (error) {
     console.warn(
-      "Legacy fight endpoints unavailable, falling back to public fights API:",
+      "Public fights API unavailable, falling back to legacy fight endpoints:",
       error.message,
     );
-    try {
-      const payload = await safeFetchJson("/api/public/fights", publicQuery);
-      return filterPublicFights(normalizePaginatedPayload(payload).rows, {
-        includeDrafts,
-      });
-    } catch (fallbackError) {
-      console.warn("Public fights API unavailable:", fallbackError.message);
-      return [];
-    }
+  }
+
+  try {
+    return await fetchLegacyCombinedFights(publicQuery, includeDrafts);
+  } catch (fallbackError) {
+    console.warn("Legacy fight endpoints unavailable:", fallbackError.message);
+    return [];
   }
 };
 
@@ -211,9 +353,9 @@ export const fetchPublicPredictionFights = async (query = {}) => {
   const requestQuery = { limit: 100, ...query };
 
   const normalizePlayableRows = (payload) =>
-    filterPublicFights(normalizePaginatedPayload(payload).rows, {
+    normalizePublicFightRows(filterPublicFights(normalizePaginatedPayload(payload).rows, {
       includeDrafts,
-    }).map((fight) => ({
+    })).map((fight) => ({
       ...fight,
       __source:
         fight.__source || fight.sourceType || fight.collection || "playable",
@@ -282,7 +424,7 @@ export const fetchPublicHomeSummary = async (query = {}) => {
 
     return {
       featuredFights: Array.isArray(payload?.featuredFights)
-        ? payload.featuredFights
+        ? normalizePublicFightRows(payload.featuredFights)
         : [],
       leaderboard: Array.isArray(payload?.leaderboard)
         ? payload.leaderboard

@@ -20,20 +20,39 @@ export const getFallbackFighterImage = (side = 'A', index = 0) => {
 export const getFightId = (match) => match?._id || match?.id || match?.matchId || '';
 
 export const getFightCategory = (match) => {
-  const value = match?.matchCategoryTwo || match?.matchCategory || match?.category || 'MMA';
+  const value = match?.matchCategoryTwo
+    || match?.effectiveCategory
+    || match?.displayCategory
+    || match?.categoryLabel
+    || match?.matchCategory
+    || match?.sport
+    || match?.category
+    || 'MMA';
   return String(value || 'MMA').trim() || 'MMA';
+};
+
+
+export const getFighterName = (match, side = 'A') => {
+  const isA = String(side).toUpperCase() === 'A';
+  const ref = isA ? match?.fighterAId : match?.fighterBId;
+  const fighter = isA ? match?.fighterA : match?.fighterB;
+  const candidates = isA
+    ? [match?.matchFighterA, match?.fighterAName, match?.fighterOneName, fighter?.displayName, fighter?.name, ref?.displayName, ref?.name]
+    : [match?.matchFighterB, match?.fighterBName, match?.fighterTwoName, fighter?.displayName, fighter?.name, ref?.displayName, ref?.name];
+  const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
+  return direct || (isA ? 'Fighter A' : 'Fighter B');
 };
 
 export const getFightName = (match) => {
   if (match?.matchName) return match.matchName;
-  return `${match?.matchFighterA || 'Fighter A'} vs ${match?.matchFighterB || 'Fighter B'}`;
+  return `${getFighterName(match, 'A')} vs ${getFighterName(match, 'B')}`;
 };
 
 export const getFighterImage = (match, side = 'A', index = 0) => {
   const isA = String(side).toUpperCase() === 'A';
   const candidates = isA
-    ? [match?.fighterAId?.primaryImage, match?.fighterA?.primaryImage, match?.fighterAImage, match?.matchFighterAImage, match?.fighterA?.image, match?.fighterOneImage, match?.imageA]
-    : [match?.fighterBId?.primaryImage, match?.fighterB?.primaryImage, match?.fighterBImage, match?.matchFighterBImage, match?.fighterB?.image, match?.fighterTwoImage, match?.imageB];
+    ? [match?.fighterAImage, match?.matchFighterAImage, match?.fighterAId?.primaryImage, match?.fighterAId?.image, match?.fighterAId?.profileImage, match?.fighterA?.primaryImage, match?.fighterA?.image, match?.fighterOneImage, match?.imageA]
+    : [match?.fighterBImage, match?.matchFighterBImage, match?.fighterBId?.primaryImage, match?.fighterBId?.image, match?.fighterBId?.profileImage, match?.fighterB?.primaryImage, match?.fighterB?.image, match?.fighterTwoImage, match?.imageB];
   const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
   if (direct) return direct;
   return getFallbackFighterImage(side, index);
@@ -115,8 +134,8 @@ export const getFightRounds = (match) => {
 
 export const getFightSearchText = (match) => [
   match?.matchName,
-  match?.matchFighterA,
-  match?.matchFighterB,
+  getFighterName(match, 'A'),
+  getFighterName(match, 'B'),
   getFightCategory(match),
   match?.location,
   match?.venue,
@@ -145,8 +164,11 @@ const getFightQualityScore = (match = {}) => {
 };
 
 export const getPublicFightDuplicateKey = (match = {}) => {
-  const fighterA = normalizeFightKeyPart(match?.matchFighterA || match?.fighterAId?.displayName || match?.fighterA?.name);
-  const fighterB = normalizeFightKeyPart(match?.matchFighterB || match?.fighterBId?.displayName || match?.fighterB?.name);
+  const fighterA = normalizeFightKeyPart(getFighterName(match, 'A'));
+  const fighterB = normalizeFightKeyPart(getFighterName(match, 'B'));
+  if (!fighterA || !fighterB || fighterA === 'fighter a' || fighterB === 'fighter b') {
+    return normalizeFightKeyPart(getFightId(match)) || normalizeFightKeyPart(match?.matchName);
+  }
   const orderedPair = [fighterA, fighterB].sort().join('::');
   return [
     normalizeFightKeyPart(match?.matchName),
@@ -156,18 +178,7 @@ export const getPublicFightDuplicateKey = (match = {}) => {
   ].join('|');
 };
 
-export const dedupePublicFights = (matches = []) => {
-  const map = new Map();
-  safeArray(matches).forEach((match) => {
-    const key = getPublicFightDuplicateKey(match);
-    if (!key.replace(/[|:]/g, '').trim()) return;
-    const existing = map.get(key);
-    if (!existing || getFightQualityScore(match) > getFightQualityScore(existing)) {
-      map.set(key, match);
-    }
-  });
-  return Array.from(map.values());
-};
+export const dedupePublicFights = (matches = []) => safeArray(matches);
 
 export const sortFights = (matches, direction = 'asc') => [...safeArray(matches)].sort((a, b) => {
   const aDate = parseFightDate(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;

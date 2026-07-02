@@ -110,7 +110,7 @@ const getMatchPriorityScore = (match, now = new Date()) => {
       "",
   ).toLowerCase();
   const category = String(
-    match?.matchCategoryTwo || match?.matchCategory || "",
+    match?.matchCategoryTwo || match?.effectiveCategory || match?.displayCategory || match?.categoryLabel || match?.matchCategory || "",
   ).toLowerCase();
   const matchTime = getMatchTimestamp(match);
   const today = new Date(now);
@@ -135,7 +135,9 @@ const getMatchPriorityScore = (match, now = new Date()) => {
   const sportBoost =
     category.includes("box") ||
     category.includes("mma") ||
-    category.includes("kick")
+    category.includes("kick") ||
+    category.includes("bare") ||
+    category.includes("bkfc")
       ? 5
       : 0;
 

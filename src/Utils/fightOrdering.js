@@ -18,6 +18,9 @@ export const normalizeCombatSportKey = (value = '') => {
 
 export const getFightSport = (fight) => {
   const raw = fight?.matchCategoryTwo
+    || fight?.effectiveCategory
+    || fight?.displayCategory
+    || fight?.categoryLabel
     || fight?.matchCategory
     || fight?.sport
     || fight?.matchSport
@@ -35,7 +38,7 @@ export const getFightSportKey = (fight) => normalizeCombatSportKey(getFightSport
 
 export const getFightSportLabel = (fight) => {
   const key = getFightSportKey(fight);
-  if (key === 'bareknuckle') return 'Bareknuckle';
+  if (key === 'bareknuckle') return 'Bare-knuckle';
   if (key === 'kickboxing') return 'Kickboxing';
   if (key === 'boxing') return 'Boxing';
   if (key === 'mma') return 'MMA';

@@ -76,7 +76,7 @@ const EmptyCard = ({ title, copy, href = '/upcomingfights', linkLabel = 'View fi
 );
 
 export const PremiumSportLanding = ({ config, fights = [], blogs = [] }) => {
-  const visibleFights = safeArray(fights).slice(0, 6);
+  const visibleFights = safeArray(fights).slice(0, 12);
   const visibleBlogs = safeArray(blogs).slice(0, 3);
   const schema = {
     '@context': 'https://schema.org',
