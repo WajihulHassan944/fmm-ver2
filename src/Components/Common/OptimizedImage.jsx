@@ -36,7 +36,7 @@ const NEXT_IMAGE_REMOTE_HOSTS = new Set([
 const optimizeCloudinarySrc = (src) => {
   if (!src || typeof src !== "string" || !src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
   if (/\/image\/upload\/(?:[^/]+,)*f_auto/.test(src) || src.includes("/image/upload/f_auto")) return src;
-  return src.replace("/image/upload/", "/image/upload/f_auto,q_auto,c_limit,w_1200/");
+  return src.replace("/image/upload/", "/image/upload/f_auto,q_auto:good,c_limit,w_1600/");
 };
 
 export const normalizeOptimizedImageSrc = (src) => {

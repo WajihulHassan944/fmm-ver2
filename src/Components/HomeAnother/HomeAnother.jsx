@@ -18,9 +18,11 @@ import {
 import {
   diversifyFightsBySport,
   getFightSportKey,
+  getFightId,
   getFightSportLabel,
   orderFightsForDisplay,
 } from "@/Utils/fightOrdering";
+import { getPublicFightDuplicateKey } from "@/Utils/fightExperience";
 import {
   FaArrowRight,
   FaBolt,
@@ -152,6 +154,39 @@ const getMatchPriorityScore = (match, now = new Date()) => {
 };
 
 const getOrderedMatches = (matches) => orderFightsForDisplay(matches);
+
+const hasUsableFightImage = (value) =>
+  typeof value === "string" && value.trim() && value.trim().toLowerCase() !== "null";
+
+const getHomepageFightQualityScore = (fight = {}) => {
+  const sourceScore = String(fight?.matchType || "").toUpperCase() === "LIVE" ? 600 : 0;
+  const imageScore = [fight?.fighterAImage, fight?.fighterBImage, fight?.promotionBackground]
+    .filter(hasUsableFightImage).length * 80;
+  const playerScore = getPlayerCount(fight) * 2;
+  return getMatchPriorityScore(fight) + sourceScore + imageScore + playerScore;
+};
+
+const dedupeHomepageFights = (matches = []) => {
+  const selected = new Map();
+
+  (Array.isArray(matches) ? matches : []).forEach((fight) => {
+    if (!fight) return;
+    const key = getPublicFightDuplicateKey(fight) || getFightId(fight) || getFightTitle(fight);
+    const current = selected.get(key);
+    if (!current || getHomepageFightQualityScore(fight) > getHomepageFightQualityScore(current)) {
+      selected.set(key, fight);
+    }
+  });
+
+  return orderFightsForDisplay(Array.from(selected.values()));
+};
+
+const getFightDetailHref = (match = {}) => {
+  const id = getFightId(match);
+  if (!id) return "/upcomingfights";
+  if (match.__source === "pro-wrestling") return `/pro-wrestling/matches/${id}`;
+  return `/fight/${id}`;
+};
 
 const pad = (value) => String(value).padStart(2, "0");
 
@@ -443,7 +478,7 @@ const HomeAnother = () => {
     [homepageMatches],
   );
   const homepageFightPool = useMemo(
-    () => diversifyFightsBySport(orderedMatches),
+    () => diversifyFightsBySport(dedupeHomepageFights(orderedMatches)),
     [orderedMatches],
   );
   const normalizedWrestlingFights = useMemo(
@@ -729,11 +764,7 @@ const HomeAnother = () => {
         </div>
 
         <Link
-          href={
-            match.__source === "pro-wrestling"
-              ? `/pro-wrestling/matches/${match._id}`
-              : "/upcomingfights"
-          }
+          href={getFightDetailHref(match)}
           className="fmm-card-action"
         >
           {match.__source === "pro-wrestling"
@@ -859,7 +890,7 @@ const HomeAnother = () => {
                   <strong>
                     {primaryFight.matchName || getFightTitle(primaryFight)}
                   </strong>
-                  <Link href="/upcomingfights">
+                  <Link href={getFightDetailHref(primaryFight)}>
                     Play this fight free <FaArrowRight aria-hidden="true" />
                   </Link>
                 </div>

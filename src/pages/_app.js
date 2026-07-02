@@ -67,6 +67,7 @@ import "@/styles/adminswarm.css";
 import "@/styles/admin-growth-data-quality.css";
 import "@/styles/phase4-seo-pages.css";
 import "@/styles/client-end-user-fixes.css";
+import "@/styles/public-fight-detail.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -127,6 +128,7 @@ const AUTH_PROFILE_CRITICAL_PREFIXES = [
   "/account-settings",
   "/checkout",
   "/my-fantasy-team",
+  "/fight",
   "/AffiliateDashboard",
   "/AffiliateProfile",
   "/AffiliateAccountSettings",
@@ -234,6 +236,7 @@ function AppContent({ children }) {
           "/AffiliateAccountSettings",
           "/past-promotions",
           "/past-fights",
+          "/fight",
           "/referral-leaderboard",
           "/HowItWorks",
           "/affiliate-league",

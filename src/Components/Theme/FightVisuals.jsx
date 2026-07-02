@@ -34,10 +34,10 @@ export const FeaturedFight = ({ match, index = 0, onAction, actionLabel }) => {
       <div className="xp-featured-grid" aria-hidden="true" />
       <div className="xp-featured-fighters">
         <figure className="is-blue">
-          <OptimizedImage src={getFighterImage(match, 'A', index)} fallbackSrc={getFallbackFighterImage('A', index)} alt={getFighterName(match, 'A')} width={220} height={260} sizes="(max-width: 768px) 42vw, 220px" />
+          <OptimizedImage src={getFighterImage(match, 'A', index)} fallbackSrc={getFallbackFighterImage('A', index)} alt={getFighterName(match, 'A')} width={520} height={620} sizes="(max-width: 768px) 50vw, 420px" />
         </figure>
         <figure className="is-red">
-          <OptimizedImage src={getFighterImage(match, 'B', index)} fallbackSrc={getFallbackFighterImage('B', index)} alt={getFighterName(match, 'B')} width={220} height={260} sizes="(max-width: 768px) 42vw, 220px" />
+          <OptimizedImage src={getFighterImage(match, 'B', index)} fallbackSrc={getFallbackFighterImage('B', index)} alt={getFighterName(match, 'B')} width={520} height={620} sizes="(max-width: 768px) 50vw, 420px" />
         </figure>
       </div>
       <div className="xp-featured-date"><strong>{day}</strong><span>{month}</span></div>
@@ -73,8 +73,8 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
   return (
     <article className={`xp-fight-card is-${status} ${compact ? 'is-compact' : ''}`}>
       <div className="xp-fight-card-media">
-        <figure className="is-blue"><OptimizedImage src={getFighterImage(match, 'A', index)} fallbackSrc={getFallbackFighterImage('A', index)} alt={getFighterName(match, 'A')} width={190} height={220} sizes="(max-width: 768px) 42vw, 190px" /></figure>
-        <figure className="is-red"><OptimizedImage src={getFighterImage(match, 'B', index)} fallbackSrc={getFallbackFighterImage('B', index)} alt={getFighterName(match, 'B')} width={190} height={220} sizes="(max-width: 768px) 42vw, 190px" /></figure>
+        <figure className="is-blue"><OptimizedImage src={getFighterImage(match, 'A', index)} fallbackSrc={getFallbackFighterImage('A', index)} alt={getFighterName(match, 'A')} width={360} height={420} sizes="(max-width: 768px) 48vw, 260px" /></figure>
+        <figure className="is-red"><OptimizedImage src={getFighterImage(match, 'B', index)} fallbackSrc={getFallbackFighterImage('B', index)} alt={getFighterName(match, 'B')} width={360} height={420} sizes="(max-width: 768px) 48vw, 260px" /></figure>
         <span className="xp-fight-category">{category}</span>
         <span className="xp-fight-status"><i /> {getFightStatusLabel(match)}</span>
         <span className="xp-fight-vs">VS</span>

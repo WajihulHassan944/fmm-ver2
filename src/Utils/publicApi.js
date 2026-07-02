@@ -556,7 +556,7 @@ export const fetchPublicFightById = async (matchId) => {
       payload
     );
   } catch (error) {
-    const fights = await fetchPublicFights({ limit: 100 });
+    const fights = await fetchPublicFights({ limit: 240 });
     return (
       fights.find(
         (fight) =>

@@ -38,11 +38,11 @@ const buildRound = (round) => ({
 
 const metricIcon = `${FMM_ASSET_BASE}/fight-slashes.svg`;
 
-const MakePredictions = ({ matchId }) => {
+const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const router = useRouter();
   const user = useSelector((state) => state.user);
   const matches = useSelector((state) => state.matches.data);
-  const match = Array.isArray(matches) ? matches.find((item) => item._id === matchId) : null;
+  const match = matchOverride || (Array.isArray(matches) ? matches.find((item) => String(item?._id || item?.id || item?.matchId) === String(matchId)) : null);
   const roundCount = Math.max(Number(match?.maxRounds) || 3, 1);
   const isBoxing = String(match?.matchCategory || '').toLowerCase() === 'boxing';
 
@@ -181,6 +181,7 @@ const MakePredictions = ({ matchId }) => {
         }),
       });
 
+      onSubmitted?.();
       window.location.reload();
     } catch (error) {
       console.error('Error saving predictions:', error);

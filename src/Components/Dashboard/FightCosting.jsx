@@ -16,11 +16,22 @@ import {
 import MakePredictions from '../MakePredictions/MakePredictions';
 import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
 
-const FightCosting = ({ matchId }) => {
+const isSameId = (left, right) => String(left || '') === String(right || '');
+
+const hasSubmittedFightPrediction = (match, userId) => {
+  if (!match || !userId) return false;
+  const directStatus = String(match?.userPredictionStatus || match?.predictionStatus || '').toLowerCase();
+  if (match?.userPredictionSubmitted || directStatus === 'submitted') return true;
+  return Array.isArray(match?.userPredictions) && match.userPredictions.some((prediction) =>
+    isSameId(prediction?.userId, userId) && String(prediction?.predictionStatus || '').toLowerCase() === 'submitted'
+  );
+};
+
+const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
   const router = useRouter();
   const user = useSelector((state) => state.user);
   const matches = useSelector((state) => state.matches.data);
-  const match = Array.isArray(matches) ? matches.find((item) => item._id === matchId) : null;
+  const match = matchOverride || (Array.isArray(matches) ? matches.find((item) => String(item?._id || item?.id || item?.matchId) === String(matchId)) : null);
 
   const [timeRemaining, setTimeRemaining] = useState({
     diffHrs: 0,
@@ -62,7 +73,13 @@ const FightCosting = ({ matchId }) => {
     );
   }
 
+  const submittedPrediction = hasSubmittedFightPrediction(match, user?._id || user?.id);
+
   const handleMatchClick = async () => {
+    if (submittedPrediction) {
+      alert('You have already submitted predictions for this fight.');
+      return;
+    }
     setIsEntering(true);
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/deduct-tokens', {
@@ -96,7 +113,7 @@ const FightCosting = ({ matchId }) => {
             <FaArrowLeft /> Back to fight details
           </button>
         </div>
-        <MakePredictions matchId={matchId} />
+        <MakePredictions matchId={matchId} matchOverride={match} onSubmitted={onSubmitted} />
       </section>
     );
   }
@@ -172,8 +189,8 @@ const FightCosting = ({ matchId }) => {
             <FaShieldAlt />
             <span><strong>Original entry flow preserved</strong><small>Token deduction and prediction submission use the existing endpoints.</small></span>
           </div>
-          <button type="button" onClick={handleMatchClick} disabled={isEntering}>
-            {isEntering ? 'Opening scorecard…' : 'Make predictions'} <FaArrowRight />
+          <button type="button" onClick={handleMatchClick} disabled={isEntering || submittedPrediction}>
+            {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : 'Make predictions'} <FaArrowRight />
           </button>
         </section>
       </div>

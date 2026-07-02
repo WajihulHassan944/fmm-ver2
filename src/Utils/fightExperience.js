@@ -1,12 +1,12 @@
 export const FMM_ASSET_BASE = '/images/fmm-experience';
 
 const FALLBACK_FIGHTERS = [
-  'fighter-jadden-addison.webp',
-  'fighter-zaveer-davis.webp',
-  'fighter-conor-benn.webp',
-  'fighter-chris-eubank-jr.webp',
-  'fighter-anthony-yarde.webp',
-  'fighter-david-benavidez.webp',
+  'fighter-jadden-addison.png',
+  'fighter-zaveer-davis.png',
+  'fighter-conor-benn.png',
+  'fighter-chris-eubank-jr.png',
+  'fighter-anthony-yarde.png',
+  'fighter-david-benavidez.png',
 ];
 
 export const safeArray = (value) => (Array.isArray(value) ? value.filter(Boolean) : []);

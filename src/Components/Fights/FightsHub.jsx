@@ -39,7 +39,6 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   const matches = safeArray(reduxMatches).length ? reduxMatches : initialMatches;
   const matchStatus = useSelector((state) => state.matches.status);
   const matchError = useSelector((state) => state.matches.error);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [activeFilter, setActiveFilter] = useState(FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -92,16 +91,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
 
   const handleFightAction = (match) => {
     const id = getFightId(match);
-    const isPast = groups.past.some((item) => getFightId(item) === id);
-    if (isPast) {
-      router.push(id ? `/past-fight/${id}` : '/fights?status=past');
-      return;
-    }
-    if (!isAuthenticated) {
-      router.push({ pathname: '/auth', query: { mode: 'login', role: 'player', next: '/UserDashboard' } });
-      return;
-    }
-    router.push('/UserDashboard');
+    router.push(id ? `/fight/${id}` : '/upcomingfights');
   };
 
   const heroCopy = PAGE_COPY[activeFilter] || PAGE_COPY[initialStatus] || PAGE_COPY.all;

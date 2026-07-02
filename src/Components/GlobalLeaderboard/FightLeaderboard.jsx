@@ -18,13 +18,13 @@ import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const DEFAULT_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
-const FightLeaderboard = ({ matchId }) => {
+const FightLeaderboard = ({ matchId, matchOverride = null }) => {
   const [scores, setScores] = useState([]);
   const [users, setUsers] = useState([]);
   const [refreshed, setRefreshed] = useState(false);
   const user = useSelector((state) => state.user);
   const matches = useSelector((state) => state.matches.data);
-  const match = Array.isArray(matches) ? matches.find((item) => item._id === matchId) : null;
+  const match = matchOverride || (Array.isArray(matches) ? matches.find((item) => String(item?._id || item?.id || item?.matchId) === String(matchId)) : null);
   const dispatch = useDispatch();
 
   const fetchLeaderboardData = async () => {

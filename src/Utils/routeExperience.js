@@ -11,6 +11,7 @@ const CORE_ROUTES = new Set([
   '/fights',
   '/upcomingfights',
   '/past-fights',
+  '/fight/[matchId]',
   '/our-fighters',
   '/Sponsors',
   '/faqs',
