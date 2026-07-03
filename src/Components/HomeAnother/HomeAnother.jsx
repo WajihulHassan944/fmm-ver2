@@ -22,7 +22,10 @@ import {
   getFightSportLabel,
   orderFightsForDisplay,
 } from "@/Utils/fightOrdering";
-import { getPublicFightDuplicateKey } from "@/Utils/fightExperience";
+import {
+  getPublicFightDuplicateKey,
+  getFighterName as getResolvedFighterName,
+} from "@/Utils/fightExperience";
 import {
   FaArrowRight,
   FaBolt,
@@ -58,7 +61,8 @@ const HOME_FIGHT_SPORT_TABS = [
 ];
 
 const HOME_FIGHT_FEED_LIMIT = 200;
-const HOME_CATEGORY_PREVIEW_LIMIT = 4;
+const HOME_CATEGORY_PREVIEW_LIMIT = 3;
+const PLAYER_SIGNUP_HREF = "/CreateAccount";
 
 const SCORING_ROWS = [
   ["Correct Winner", "100"],
@@ -155,13 +159,96 @@ const getMatchPriorityScore = (match, now = new Date()) => {
 
 const getOrderedMatches = (matches) => orderFightsForDisplay(matches);
 
-const hasUsableFightImage = (value) =>
-  typeof value === "string" && value.trim() && value.trim().toLowerCase() !== "null";
+const hasUsableFightImage = (value) => {
+  const text = typeof value === "string" ? value.trim() : "";
+  return Boolean(text && !["null", "undefined", "none", "n/a"].includes(text.toLowerCase()));
+};
+
+const pickHomeValue = (...values) => {
+  for (const value of values) {
+    if (hasUsableFightImage(value)) return value.trim();
+  }
+  return "";
+};
+
+const getNestedHomeValue = (value, fields = []) => {
+  if (!value || typeof value === "string") return "";
+  for (const field of fields) {
+    const parts = String(field).split(".");
+    let current = value;
+    for (const part of parts) current = current?.[part];
+    if (hasUsableFightImage(current)) return String(current).trim();
+  }
+  return "";
+};
+
+const getHomeFighterName = (match = {}, side = "A") => {
+  const isA = String(side).toUpperCase() === "A";
+  const fighter = isA ? match?.fighterA : match?.fighterB;
+  const fighterRef = isA ? match?.fighterAId : match?.fighterBId;
+  const fallback = getResolvedFighterName(match, side);
+
+  return pickHomeValue(
+    getNestedHomeValue(fighter, ["displayName", "name", "fighterName", "fullName"]),
+    getNestedHomeValue(fighterRef, ["displayName", "name", "fighterName", "fullName"]),
+    isA ? match?.fighterAName : match?.fighterBName,
+    isA ? match?.fighterOneName : match?.fighterTwoName,
+    isA ? match?.matchFighterA : match?.matchFighterB,
+    fallback,
+    isA ? "Fighter A" : "Fighter B",
+  );
+};
+
+const getHomeFighterImage = (match = {}, side = "A", index = 0, options = {}) => {
+  const isA = String(side).toUpperCase() === "A";
+  const fighter = isA ? match?.fighterA : match?.fighterB;
+  const fighterRef = isA ? match?.fighterAId : match?.fighterBId;
+  const direct = isA
+    ? pickHomeValue(
+        match?.fighterAPrimaryImage,
+        match?.resolvedFighterAImage,
+        match?.fighterAResolvedImage,
+        getNestedHomeValue(fighter, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
+        getNestedHomeValue(fighterRef, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
+        match?.fighterAImage,
+        match?.matchFighterAImage,
+        match?.fighterOneImage,
+        match?.imageA,
+      )
+    : pickHomeValue(
+        match?.fighterBPrimaryImage,
+        match?.resolvedFighterBImage,
+        match?.fighterBResolvedImage,
+        getNestedHomeValue(fighter, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
+        getNestedHomeValue(fighterRef, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
+        match?.fighterBImage,
+        match?.matchFighterBImage,
+        match?.fighterTwoImage,
+        match?.imageB,
+      );
+
+  if (direct) return direct;
+  return options.allowFallback === false ? "" : getFighterImage("");
+};
+
+const hasCompleteHomeFightVisuals = (fight = {}) =>
+  Boolean(getHomeFighterImage(fight, "A", 0, { allowFallback: false }) && getHomeFighterImage(fight, "B", 1, { allowFallback: false }));
+
+const hydrateHomeFightVisuals = (fight = {}) => ({
+  ...fight,
+  matchFighterA: getHomeFighterName(fight, "A"),
+  matchFighterB: getHomeFighterName(fight, "B"),
+  fighterAImage: getHomeFighterImage(fight, "A", 0, { allowFallback: false }) || fight?.fighterAImage,
+  fighterBImage: getHomeFighterImage(fight, "B", 1, { allowFallback: false }) || fight?.fighterBImage,
+});
 
 const getHomepageFightQualityScore = (fight = {}) => {
   const sourceScore = String(fight?.matchType || "").toUpperCase() === "LIVE" ? 600 : 0;
-  const imageScore = [fight?.fighterAImage, fight?.fighterBImage, fight?.promotionBackground]
-    .filter(hasUsableFightImage).length * 80;
+  const imageScore = [
+    getHomeFighterImage(fight, "A", 0, { allowFallback: false }),
+    getHomeFighterImage(fight, "B", 1, { allowFallback: false }),
+    fight?.promotionBackground,
+  ].filter(hasUsableFightImage).length * 80;
   const playerScore = getPlayerCount(fight) * 2;
   return getMatchPriorityScore(fight) + sourceScore + imageScore + playerScore;
 };
@@ -274,8 +361,8 @@ const getCategoryClass = (matchOrCategory) => {
 
 const getFightTitle = (match) => {
   if (!match) return "Next Fight Loading";
-  const fighterA = match.matchFighterA || "Fighter A";
-  const fighterB = match.matchFighterB || "Fighter B";
+  const fighterA = getHomeFighterName(match, "A");
+  const fighterB = getHomeFighterName(match, "B");
   return `${fighterA} vs ${fighterB}`;
 };
 
@@ -477,10 +564,11 @@ const HomeAnother = () => {
     () => getOrderedMatches(homepageMatches),
     [homepageMatches],
   );
-  const homepageFightPool = useMemo(
-    () => diversifyFightsBySport(dedupeHomepageFights(orderedMatches)),
-    [orderedMatches],
-  );
+  const homepageFightPool = useMemo(() => {
+    const hydrated = dedupeHomepageFights(orderedMatches).map(hydrateHomeFightVisuals);
+    const completeVisuals = hydrated.filter(hasCompleteHomeFightVisuals);
+    return diversifyFightsBySport(completeVisuals);
+  }, [orderedMatches]);
   const normalizedWrestlingFights = useMemo(
     () => wrestlingMatches.map(normalizeWrestlingFightForHome),
     [wrestlingMatches],
@@ -720,30 +808,30 @@ const HomeAnother = () => {
         <div className="fmm-contest-fighters">
           <figure>
             <FightImage
-              src={match.fighterAImage}
-              alt={match.matchFighterA || "Fighter A"}
+              src={getHomeFighterImage(match, "A", index)}
+              alt={getHomeFighterName(match, "A")}
               width={184}
               height={184}
               sizes="(max-width: 760px) 42vw, 92px"
             />
-            <figcaption>{match.matchFighterA || "Fighter A"}</figcaption>
+            <figcaption>{getHomeFighterName(match, "A")}</figcaption>
           </figure>
           <span>VS</span>
           <figure>
             <FightImage
-              src={match.fighterBImage}
-              alt={match.matchFighterB || "Fighter B"}
+              src={getHomeFighterImage(match, "B", index)}
+              alt={getHomeFighterName(match, "B")}
               width={184}
               height={184}
               sizes="(max-width: 760px) 42vw, 92px"
             />
-            <figcaption>{match.matchFighterB || "Fighter B"}</figcaption>
+            <figcaption>{getHomeFighterName(match, "B")}</figcaption>
           </figure>
         </div>
 
         <h3>{match.matchName || getFightTitle(match)}</h3>
         <p className="fmm-contest-matchup">
-          {match.matchFighterA || "Fighter A"} vs {match.matchFighterB || "Fighter B"}
+          {getHomeFighterName(match, "A")} vs {getHomeFighterName(match, "B")}
         </p>
 
         <div className="fmm-contest-card-meta">
@@ -834,33 +922,32 @@ const HomeAnother = () => {
           <div className="theme-container fmm-hero-grid">
             <div className="fmm-hero-copy">
               <div className="fmm-premium-eyebrow">
-                <FaBolt aria-hidden="true" /> Live fight feed refreshed from the
-                back office
+                <FaBolt aria-hidden="true" /> Free fight predictions are open
               </div>
               <h1>
-                Step Into The Fight.
+                Sign Up Free.
                 <span>
-                  Predict. <em>Win.</em> Repeat.
+                  Pick A Fight. <em>Win.</em>
                 </span>
               </h1>
               <p className="fmm-hero-subtitle">
-                A premium fantasy fight app for MMA, Boxing, Kickboxing,
-                Bare-Knuckle, and Pro Wrestling fans. Fresh fights move forward,
-                big moments stay visible, and every contest feels ready to play.
+                Create a player account fast, enter a featured fight, and make
+                your picks before the card locks. No crowded front page, just a
+                clean path from traffic to signup.
               </p>
 
               <div className="fmm-hero-actions">
                 <Link
-                  href={primaryFight ? getFightDetailHref(primaryFight) : "/upcomingfights"}
+                  href={PLAYER_SIGNUP_HREF}
                   className="theme-btn theme-btn-primary"
                 >
-                  Start Playing <FaPlay aria-hidden="true" />
+                  Sign Up Free <FaArrowRight aria-hidden="true" />
                 </Link>
                 <Link
-                  href="/calendar-of-fights"
+                  href={primaryFight ? getFightDetailHref(primaryFight) : "/upcomingfights"}
                   className="theme-btn theme-btn-secondary"
                 >
-                  Fight Calendar <FaCalendarAlt aria-hidden="true" />
+                  Enter Featured Fight <FaPlay aria-hidden="true" />
                 </Link>
               </div>
 
@@ -870,7 +957,7 @@ const HomeAnother = () => {
               >
                 <div>
                   <strong>{totalHomeFightCount || contestMatches.length || 0}</strong>
-                  <span>Fresh fights</span>
+                  <span>Ready fights</span>
                 </div>
                 <div>
                   <strong>
@@ -879,19 +966,19 @@ const HomeAnother = () => {
                   <span>Next lock</span>
                 </div>
                 <div>
-                  <strong>5</strong>
-                  <span>Combat modes</span>
+                  <strong>Free</strong>
+                  <span>Player signup</span>
                 </div>
               </div>
 
               {primaryFight && (
                 <div className="fmm-tonight-callout">
-                  <span>Featured now</span>
+                  <span>Fight-first entry</span>
                   <strong>
                     {primaryFight.matchName || getFightTitle(primaryFight)}
                   </strong>
                   <Link href={getFightDetailHref(primaryFight)}>
-                    Play this fight free <FaArrowRight aria-hidden="true" />
+                    Enter this fight <FaArrowRight aria-hidden="true" />
                   </Link>
                 </div>
               )}
@@ -924,15 +1011,15 @@ const HomeAnother = () => {
               {primaryFight && (
                 <aside className="fmm-hero-event-card">
                   <div className="fmm-hero-event-main">
-                    <p>Fresh Featured Fight</p>
+                    <p>Featured Fight</p>
                     <h2>
-                      <span>{primaryFight.matchFighterA}</span>
+                      <span>{getHomeFighterName(primaryFight, "A")}</span>
                       <small>vs</small>
-                      <span>{primaryFight.matchFighterB}</span>
+                      <span>{getHomeFighterName(primaryFight, "B")}</span>
                     </h2>
                     <div className="fmm-hero-fighters" aria-hidden="true">
                       <FightImage
-                        src={primaryFight.fighterAImage}
+                        src={getHomeFighterImage(primaryFight, "A", 0)}
                         alt=""
                         width={64}
                         height={64}
@@ -941,7 +1028,7 @@ const HomeAnother = () => {
                       />
                       <span>VS</span>
                       <FightImage
-                        src={primaryFight.fighterBImage}
+                        src={getHomeFighterImage(primaryFight, "B", 1)}
                         alt=""
                         width={64}
                         height={64}
@@ -980,37 +1067,18 @@ const HomeAnother = () => {
         </section>
 
         <main className="theme-container fmm-home-main">
-          <section
-            className="fmm-mobile-fight-app"
-            aria-label="Mobile fight app preview"
-          >
-            <div className="fmm-mobile-app-top">
-              <div>
-                <span>
-                  <FaMobileAlt aria-hidden="true" /> App-style fight feed
-                </span>
-                <h2>Swipe tonight's fight opportunities.</h2>
-              </div>
-              <Link href="/upcomingfights" aria-label="Open all fights">
-                <FaChevronRight aria-hidden="true" />
-              </Link>
+          <section className="fmm-signup-fast-strip" aria-label="Fast player signup">
+            <div>
+              <span><FaMobileAlt aria-hidden="true" /> Quick signup path</span>
+              <h2>Traffic is landing here. Move them straight into a free player account.</h2>
             </div>
-            <div
-              className="fmm-mobile-app-chips"
-              role="tablist"
-              aria-label="Homepage fight sport filters"
-            >
-              {HOME_FIGHT_SPORT_TABS.map((tab) => (
-                <button
-                  type="button"
-                  key={tab.key}
-                  className={activeFightSport === tab.key ? "is-active" : ""}
-                  onClick={(event) => handleHomeSportJump(tab.key, event)}
-                >
-                  {tab.label.replace(" Fights", "")}
-                  <small>{sportCounts[tab.key] || 0}</small>
-                </button>
-              ))}
+            <div className="fmm-signup-fast-actions">
+              <Link href={PLAYER_SIGNUP_HREF} className="theme-btn theme-btn-primary">
+                Sign Up Free <FaArrowRight aria-hidden="true" />
+              </Link>
+              <Link href={primaryFight ? getFightDetailHref(primaryFight) : "/upcomingfights"} className="theme-btn theme-btn-secondary">
+                Enter featured fight <FaPlay aria-hidden="true" />
+              </Link>
             </div>
           </section>
 
@@ -1021,14 +1089,14 @@ const HomeAnother = () => {
             <div className="fmm-section-title-row">
               <div>
                 <span className="fmm-section-kicker">
-                  <FaFire aria-hidden="true" /> Fresh fight opportunities
+                  <FaFire aria-hidden="true" /> Fight-first browsing
                 </span>
-                <h2 id="active-contests-title">Active Contests</h2>
+                <h2 id="active-contests-title">Choose Your Fight Category</h2>
               </div>
               <div className="fmm-section-actions">
-                <span className="fmm-swipe-hint">Tap a section below</span>
+                <span className="fmm-swipe-hint">Tap a category and jump straight to that section</span>
                 <Link href="/upcomingfights">
-                  View fight page <FaArrowRight aria-hidden="true" />
+                  All fight cards <FaArrowRight aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -1087,7 +1155,7 @@ const HomeAnother = () => {
                             <FaBullseye aria-hidden="true" /> {section.count} contest{section.count === 1 ? "" : "s"}
                           </span>
                           <h3>{section.label} section</h3>
-                          <p>Newest uploaded fights appear first in this section.</p>
+                          <p>Newest uploaded fights appear first. Cards without fighter images stay off the front page.</p>
                         </div>
                         <div className="fmm-home-sport-section-actions">
                           {hasMore && (
@@ -1095,11 +1163,11 @@ const HomeAnother = () => {
                               type="button"
                               onClick={() => toggleHomeSportSection(section.key)}
                             >
-                              {isExpanded ? "Show less" : `Open all ${section.label}`}
+                              {isExpanded ? "Show less" : `Show ${section.label}`}
                             </button>
                           )}
-                          <Link href="/upcomingfights">
-                            View page <FaArrowRight aria-hidden="true" />
+                          <Link href={`/upcomingfights?category=${section.key}`}>
+                            View all <FaArrowRight aria-hidden="true" />
                           </Link>
                         </div>
                       </header>
@@ -1440,6 +1508,9 @@ const HomeAnother = () => {
             </form>
           </section>
         </main>
+        <Link href={PLAYER_SIGNUP_HREF} className="fmm-sticky-signup-cta">
+          Sign Up Free <FaArrowRight aria-hidden="true" />
+        </Link>
       </div>
     </>
   );

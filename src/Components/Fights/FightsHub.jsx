@@ -3,8 +3,9 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
-import { FaCalendarAlt, FaFire, FaSearch, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FaArrowRight, FaCalendarAlt, FaFire, FaSearch, FaTrophy, FaUsers } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
+import { getFightSportKey } from '@/Utils/fightOrdering';
 import { ExperienceEmptyState, ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FeaturedFight, FightTimelineRow, FightVisualCard } from '@/Components/Theme/FightVisuals';
 import {
@@ -25,6 +26,7 @@ const FILTERS = [
 ];
 
 const FIGHTS_PAGE_BATCH_SIZE = 24;
+const PLAYER_SIGNUP_HREF = '/CreateAccount';
 
 const PAGE_COPY = {
   all: { eyebrow: 'The complete fight room', title: 'Every fight.', accent: 'One arena.', description: 'Move from the next opening bell to verified past results without leaving the page. Search the full combat archive, filter by discipline, and enter active prediction contests from one cinematic fight hub.' },
@@ -56,13 +58,27 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   }, [initialStatus, router.isReady, router.query.status]);
 
   useEffect(() => {
+    const requestedCategory = Array.isArray(router.query.category) ? router.query.category[0] : router.query.category;
+    if (!router.isReady || requestedCategory === undefined) return;
+    setCategory(requestedCategory || 'all');
+  }, [router.isReady, router.query.category]);
+
+  useEffect(() => {
     setVisibleLimit(FIGHTS_PAGE_BATCH_SIZE);
   }, [activeFilter, category, search]);
 
   const publicMatches = useMemo(() => dedupePublicFights(safeArray(matches)), [matches]);
   const groups = useMemo(() => splitFightsByStatus(publicMatches), [publicMatches]);
 
-  const categories = useMemo(() => Array.from(new Set(publicMatches.map(getFightCategory))).sort(), [publicMatches]);
+  const categories = useMemo(() => {
+    const options = new Map();
+    publicMatches.forEach((match) => {
+      const key = getFightSportKey(match);
+      const label = getFightCategory(match);
+      if (key && key !== 'combat') options.set(key, label);
+    });
+    return Array.from(options.entries()).map(([key, label]) => ({ key, label })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [publicMatches]);
 
   const sourceFights = useMemo(() => {
     if (activeFilter === 'upcoming') return groups.upcoming;
@@ -75,7 +91,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
     const needle = search.trim().toLowerCase();
     return sourceFights.filter((match) => {
       const matchesSearch = !needle || getFightSearchText(match).includes(needle);
-      const matchesCategory = category === 'all' || getFightCategory(match) === category;
+      const matchesCategory = category === 'all' || getFightSportKey(match) === category || getFightCategory(match) === category;
       return matchesSearch && matchesCategory;
     });
   }, [category, search, sourceFights]);
@@ -144,6 +160,18 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
 
         <main className="xp-page-main" id="fight-directory">
           <div className="theme-container">
+            <section className="xp-signup-inline-cta" aria-label="Quick player signup">
+              <div>
+                <p className="xp-eyebrow"><FaUsers /> Start free</p>
+                <h2>Sign up once, then enter any open fight card.</h2>
+                <span>No missing detours — create a player account and make predictions from the fight detail page.</span>
+              </div>
+              <div>
+                <Link href={PLAYER_SIGNUP_HREF} className="theme-btn theme-btn-primary">Sign Up Free <FaArrowRight /></Link>
+                <Link href="#fight-directory" className="theme-btn theme-btn-secondary">Browse fights</Link>
+              </div>
+            </section>
+
             <section className="xp-filter-dock" aria-label="Fight filters">
               <div className="xp-filter-tabs" role="tablist" aria-label="Fight status">
                 {FILTERS.map((item) => (
@@ -169,7 +197,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
                   <span>Discipline</span>
                   <select value={category} onChange={(event) => setCategory(event.target.value)}>
                     <option value="all">All disciplines</option>
-                    {categories.map((item) => <option value={item} key={item}>{item}</option>)}
+                    {categories.map((item) => <option value={item.key} key={item.key}>{item.label}</option>)}
                   </select>
                 </label>
               </div>

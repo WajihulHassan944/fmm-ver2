@@ -110,7 +110,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
       router.push({
         pathname: '/auth',
         query: {
-          mode: 'login',
+          mode: 'signup',
           role: 'player',
           next: `/fight/${matchId}`,
           fight: matchId,
@@ -166,7 +166,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
             </div>
             <div className="public-fight-detail-actions">
               <button type="button" className="theme-btn theme-btn-primary" onClick={handleEnterFight} disabled={hasSubmitted || status === 'past'}>
-                {hasSubmitted ? 'Predictions submitted' : status === 'past' ? 'Entry closed' : userId ? 'Enter fight' : 'Login to enter'} <FaArrowRight />
+                {hasSubmitted ? 'Predictions submitted' : status === 'past' ? 'Entry closed' : userId ? 'Enter fight' : 'Sign up free to enter'} <FaArrowRight />
               </button>
               <a href="#fight-leaderboard" className="theme-btn theme-btn-secondary">View leaderboard <FaTrophy /></a>
             </div>
@@ -211,9 +211,9 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
         <article className="public-fight-info-card public-fight-entry-card-mini">
           <p className="public-fight-eyebrow"><FaShieldAlt /> Prediction access</p>
           <h2>{hasSubmitted ? 'Entry already confirmed' : playable ? 'Ready to participate' : 'Entry not available'}</h2>
-          <p>{hasSubmitted ? 'Your prediction card is already submitted for this fight.' : playable ? 'Log in or continue as a player to open the fight entry room and make predictions.' : 'This card is no longer open for new predictions.'}</p>
+          <p>{hasSubmitted ? 'Your prediction card is already submitted for this fight.' : playable ? 'Create a free player account or continue as a player to open the fight entry room and make predictions.' : 'This card is no longer open for new predictions.'}</p>
           <button type="button" onClick={handleEnterFight} disabled={hasSubmitted || !playable}>
-            {hasSubmitted ? 'Already played' : userId ? 'Start predictions' : 'Login and play'} <FaArrowRight />
+            {hasSubmitted ? 'Already played' : userId ? 'Start predictions' : 'Sign up and play'} <FaArrowRight />
           </button>
         </article>
       </section>
