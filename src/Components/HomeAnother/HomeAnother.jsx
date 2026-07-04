@@ -61,7 +61,7 @@ const HOME_FIGHT_SPORT_TABS = [
 ];
 
 const HOME_FIGHT_FEED_LIMIT = 200;
-const HOME_CATEGORY_PREVIEW_LIMIT = 3;
+const HOME_CATEGORY_PREVIEW_LIMIT = 4;
 const PLAYER_SIGNUP_HREF = "/CreateAccount";
 
 const SCORING_ROWS = [
@@ -935,9 +935,9 @@ const HomeAnother = () => {
                 </span>
               </h1>
               <p className="fmm-hero-subtitle">
-                Create a player account fast, enter a featured fight, and make
-                your picks before the card locks. No crowded front page, just a
-                clean path from traffic to signup.
+                Create a player account, enter an open fight card, and make
+                your picks before the card locks. The homepage now keeps every
+                category easy to browse without hiding the prediction path.
               </p>
 
               <div className="fmm-hero-actions">
@@ -1074,7 +1074,7 @@ const HomeAnother = () => {
           <section className="fmm-signup-fast-strip" aria-label="Fast player signup">
             <div>
               <span><FaMobileAlt aria-hidden="true" /> Quick signup path</span>
-              <h2>Traffic is landing here. Move them straight into a free player account.</h2>
+              <h2>Find open fight cards and make your predictions on Fantasy MMADNESS.</h2>
             </div>
             <div className="fmm-signup-fast-actions">
               <Link href={PLAYER_SIGNUP_HREF} className="theme-btn theme-btn-primary">
@@ -1512,9 +1512,6 @@ const HomeAnother = () => {
             </form>
           </section>
         </main>
-        <Link href={PLAYER_SIGNUP_HREF} className="fmm-sticky-signup-cta">
-          Sign Up Free <FaArrowRight aria-hidden="true" />
-        </Link>
       </div>
     </>
   );

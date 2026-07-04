@@ -34,10 +34,88 @@ import {
   getFighterName,
   safeArray,
 } from '@/Utils/fightExperience';
-import { fetchPublicPredictionFights } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, normalizePublicFightRow } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
 
 const sameId = (left, right) => String(left || '') === String(right || '');
+
+const hasUsableDetailImage = (value) => {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return Boolean(text && !['null', 'undefined', 'none', 'n/a'].includes(text.toLowerCase()));
+};
+
+const getNestedDetailImage = (value) => {
+  if (!value || typeof value === 'string') return '';
+  return [
+    value.primaryImage,
+    value.resolvedImage,
+    value.imageUrl,
+    value.profileImage,
+    value.fighterImage,
+    value.avatar,
+    value.image,
+    value.imageHealth?.url,
+    value.imageHealth?.secure_url,
+  ].find(hasUsableDetailImage) || '';
+};
+
+const pickDetailImage = (...values) => values.find(hasUsableDetailImage) || '';
+
+const mergeFightForDetail = (base = {}, candidate = {}) => {
+  if (!candidate || typeof candidate !== 'object') return normalizePublicFightRow(base || {});
+
+  const merged = {
+    ...base,
+    ...candidate,
+    matchDescription: candidate.matchDescription || base.matchDescription,
+    matchVideoUrl: candidate.matchVideoUrl || base.matchVideoUrl,
+    promotionBackground: candidate.promotionBackground || base.promotionBackground,
+    BoxingMatch: candidate.BoxingMatch || base.BoxingMatch,
+    MMAMatch: candidate.MMAMatch || base.MMAMatch,
+    AffiliateIds: candidate.AffiliateIds || base.AffiliateIds,
+    userPredictions: candidate.userPredictions || base.userPredictions,
+  };
+
+  const fighterAImage = pickDetailImage(
+    candidate.fighterAPrimaryImage,
+    candidate.resolvedFighterAImage,
+    candidate.fighterAResolvedImage,
+    getNestedDetailImage(candidate.fighterA),
+    getNestedDetailImage(candidate.fighterAId),
+    candidate.fighterAImage,
+    base.fighterAPrimaryImage,
+    base.resolvedFighterAImage,
+    base.fighterAResolvedImage,
+    getNestedDetailImage(base.fighterA),
+    getNestedDetailImage(base.fighterAId),
+    base.fighterAImage,
+  );
+
+  const fighterBImage = pickDetailImage(
+    candidate.fighterBPrimaryImage,
+    candidate.resolvedFighterBImage,
+    candidate.fighterBResolvedImage,
+    getNestedDetailImage(candidate.fighterB),
+    getNestedDetailImage(candidate.fighterBId),
+    candidate.fighterBImage,
+    base.fighterBPrimaryImage,
+    base.resolvedFighterBImage,
+    base.fighterBResolvedImage,
+    getNestedDetailImage(base.fighterB),
+    getNestedDetailImage(base.fighterBId),
+    base.fighterBImage,
+  );
+
+  return normalizePublicFightRow({
+    ...merged,
+    fighterAPrimaryImage: fighterAImage || merged.fighterAPrimaryImage || '',
+    fighterBPrimaryImage: fighterBImage || merged.fighterBPrimaryImage || '',
+    resolvedFighterAImage: fighterAImage || merged.resolvedFighterAImage || '',
+    resolvedFighterBImage: fighterBImage || merged.resolvedFighterBImage || '',
+    fighterAImage: fighterAImage || merged.fighterAImage,
+    fighterBImage: fighterBImage || merged.fighterBImage,
+  });
+};
 
 const hasUserSubmittedFight = (fight, userId) => {
   if (!fight || !userId) return false;
@@ -62,7 +140,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   const liveMatch = useMemo(() => (
     safeArray(matches).find((item) => sameId(getFightId(item), matchId)) || null
   ), [matches, matchId]);
-  const fight = liveMatch || initialFight || {};
+  const fight = useMemo(() => mergeFightForDetail(initialFight || {}, liveMatch || null), [initialFight, liveMatch]);
   const userId = user?._id || user?.id;
   const [showEntryRoom, setShowEntryRoom] = useState(false);
   const [submittedOverride, setSubmittedOverride] = useState(false);
@@ -86,7 +164,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
     return () => { active = false; };
   }, [matchId, userId]);
 
-  const resolvedFight = userScopedFight || fight;
+  const resolvedFight = useMemo(() => mergeFightForDetail(fight || {}, userScopedFight || null), [fight, userScopedFight]);
   const hasSubmitted = submittedOverride || hasUserSubmittedFight(resolvedFight, userId);
   const status = getFightStatus(resolvedFight);
   const playable = status !== 'past' && !hasSubmitted;

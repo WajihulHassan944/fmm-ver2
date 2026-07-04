@@ -616,28 +616,57 @@ export const fetchPublicProWrestlingMatches = async (query = {}) => {
   }
 };
 
+const sameFightIdentity = (fight = {}, matchId = '') =>
+  String(fight._id || fight.id || fight.matchId || '') === String(matchId || '');
+
+const mergeFightDetailWithListRow = (detailFight = {}, listFight = {}) => {
+  if (!listFight) return normalizePublicFightRow(detailFight);
+
+  return normalizePublicFightRow({
+    ...detailFight,
+    ...listFight,
+    matchDescription: pickUsableString(listFight.matchDescription, detailFight.matchDescription),
+    matchVideoUrl: pickUsableString(listFight.matchVideoUrl, detailFight.matchVideoUrl),
+    promotionBackground: pickUsableString(listFight.promotionBackground, detailFight.promotionBackground),
+    BoxingMatch: detailFight.BoxingMatch || listFight.BoxingMatch,
+    MMAMatch: detailFight.MMAMatch || listFight.MMAMatch,
+    AffiliateIds: detailFight.AffiliateIds || listFight.AffiliateIds,
+    userPredictions: detailFight.userPredictions || listFight.userPredictions,
+  });
+};
+
 export const fetchPublicFightById = async (matchId) => {
   if (!matchId) return null;
+
+  let detailFight = null;
+
   try {
     const payload = await safeFetchJson(
       `/api/public/fights/${encodeURIComponent(matchId)}`,
     );
-    return (
+    detailFight = normalizePublicFightRow(
       payload?.data ||
       payload?.item ||
       payload?.fight ||
       payload?.match ||
-      payload
+      payload,
     );
   } catch (error) {
-    const fights = await fetchPublicFights({ limit: 240 });
-    return (
-      fights.find(
-        (fight) =>
-          String(fight._id || fight.id || fight.matchId) === String(matchId),
-      ) || null
-    );
+    detailFight = null;
   }
+
+  try {
+    const predictionRows = await fetchPublicPredictionFights({ limit: 240 });
+    const listFight = predictionRows.find((fight) => sameFightIdentity(fight, matchId));
+    if (listFight) return mergeFightDetailWithListRow(detailFight || {}, listFight);
+  } catch (error) {
+    console.warn('Prediction fight hydration unavailable for detail page:', error.message);
+  }
+
+  if (detailFight) return detailFight;
+
+  const fights = await fetchPublicFights({ limit: 240 });
+  return fights.find((fight) => sameFightIdentity(fight, matchId)) || null;
 };
 
 export const fetchPublicFighterById = async (fighterId) => {

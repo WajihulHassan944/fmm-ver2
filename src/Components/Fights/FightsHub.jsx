@@ -28,6 +28,13 @@ const FILTERS = [
 const FIGHTS_PAGE_BATCH_SIZE = 24;
 const PLAYER_SIGNUP_HREF = '/CreateAccount';
 
+const DISCIPLINE_FILTERS = [
+  { key: 'boxing', label: 'Boxing' },
+  { key: 'mma', label: 'MMA' },
+  { key: 'bareknuckle', label: 'Bare-knuckle' },
+  { key: 'kickboxing', label: 'Kickboxing' },
+];
+
 const normalizeCategoryFilterValue = (value) => {
   const raw = Array.isArray(value) ? value[0] : value;
   const clean = String(raw || '').trim();
@@ -79,13 +86,22 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [], initialCategory
   const groups = useMemo(() => splitFightsByStatus(publicMatches), [publicMatches]);
 
   const categories = useMemo(() => {
-    const options = new Map();
+    const options = new Map(DISCIPLINE_FILTERS.map((item) => [item.key, item.label]));
+
     publicMatches.forEach((match) => {
       const key = getFightSportKey(match);
       const label = getFightCategory(match);
       if (key && key !== 'combat') options.set(key, label);
     });
-    return Array.from(options.entries()).map(([key, label]) => ({ key, label })).sort((a, b) => a.label.localeCompare(b.label));
+
+    return Array.from(options.entries())
+      .map(([key, label]) => ({ key, label }))
+      .sort((a, b) => {
+        const orderA = DISCIPLINE_FILTERS.findIndex((item) => item.key === a.key);
+        const orderB = DISCIPLINE_FILTERS.findIndex((item) => item.key === b.key);
+        if (orderA !== -1 || orderB !== -1) return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+        return a.label.localeCompare(b.label);
+      });
   }, [publicMatches]);
 
   const sourceFights = useMemo(() => {
@@ -195,7 +211,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [], initialCategory
               </div>
             </section>
 
-            <section className="xp-filter-dock" aria-label="Fight filters">
+            <section className="xp-filter-dock xp-fights-filter-dock" aria-label="Fight filters">
               <div className="xp-filter-tabs" role="tablist" aria-label="Fight status">
                 {FILTERS.map((item) => (
                   <button

@@ -1,30 +1,25 @@
 export const FMM_ASSET_BASE = '/images/fmm-experience';
 
-const FALLBACK_FIGHTERS = [
-  'fighter-jadden-addison.png',
-  'fighter-zaveer-davis.png',
-  'fighter-conor-benn.png',
-  'fighter-chris-eubank-jr.png',
-  'fighter-anthony-yarde.png',
-  'fighter-david-benavidez.png',
-];
+const GENERIC_FIGHTER_FALLBACKS = {
+  A: 'fighter-action-blue.webp',
+  B: 'fighter-action-red.webp',
+};
 
 export const safeArray = (value) => (Array.isArray(value) ? value.filter(Boolean) : []);
 
-export const getFallbackFighterImage = (side = 'A', index = 0) => {
-  const isA = String(side).toUpperCase() === 'A';
-  const offset = isA ? index * 2 : index * 2 + 1;
-  return `${FMM_ASSET_BASE}/${FALLBACK_FIGHTERS[offset % FALLBACK_FIGHTERS.length]}`;
+export const getFallbackFighterImage = (side = 'A') => {
+  const key = String(side).toUpperCase() === 'A' ? 'A' : 'B';
+  return `${FMM_ASSET_BASE}/${GENERIC_FIGHTER_FALLBACKS[key]}`;
 };
 
 export const getFightId = (match) => match?._id || match?.id || match?.matchId || '';
 
 export const getFightCategory = (match) => {
   const value = match?.matchCategoryTwo
-    || match?.matchCategory
     || match?.effectiveCategory
     || match?.displayCategory
     || match?.categoryLabel
+    || match?.matchCategory
     || match?.sport
     || match?.category
     || 'MMA';

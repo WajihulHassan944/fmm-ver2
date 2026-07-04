@@ -2130,3 +2130,36 @@
   .xp-dashboard-timeline-wrap .xp-dashboard-remove-inline { top: auto; bottom: 10px; right: 12px; }
   .xp-sponsor-profile-panel dl > div { grid-template-columns: 1fr; gap: 5px; }
 }
+
+/* Phase: upcoming fights filter/CTA layout correction */
+.fights-experience-page .xp-signup-inline-cta {
+  margin-bottom: 20px;
+}
+
+.fights-experience-page .xp-fights-filter-dock {
+  margin-top: 0 !important;
+  margin-bottom: 54px;
+  position: relative;
+  z-index: 3;
+}
+
+.fights-experience-page .xp-directory-toolbar {
+  flex-wrap: wrap;
+}
+
+.fights-experience-page .xp-select-wrap {
+  background: rgba(0, 0, 0, .92) !important;
+}
+
+.fights-experience-page .xp-select-wrap select,
+.fights-experience-page .xp-select-wrap option {
+  background: #05070c !important;
+  color: #fff !important;
+}
+
+@media (max-width: 720px) {
+  .fights-experience-page .xp-fights-filter-dock {
+    margin-top: 0 !important;
+    margin-bottom: 42px;
+  }
+}
