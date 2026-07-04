@@ -442,7 +442,21 @@ export const fetchPublicPredictionFights = async (query = {}) => {
       requestQuery,
     );
     const rows = normalizePlayableRows(payload);
-    if (rows.length) return dedupePublicFights(rows);
+    if (rows.length) {
+      const hydratedRows = await mergeRowsWithMatchFeedFighterImages(
+        rows,
+        requestQuery,
+        includeDrafts,
+      );
+      return dedupePublicFights(
+        normalizePublicFightRows(hydratedRows).map((fight) => ({
+          ...fight,
+          __source:
+            fight.__source || fight.sourceType || fight.collection || "playable",
+          __playable: fight.__playable !== false,
+        })),
+      );
+    }
   } catch (error) {
     console.warn(
       "Prediction-ready fights API unavailable, falling back to legacy playable filters:",

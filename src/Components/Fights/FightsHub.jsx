@@ -63,7 +63,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [], initialCategory
   const [visibleLimit, setVisibleLimit] = useState(FIGHTS_PAGE_BATCH_SIZE);
 
   useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches());
+    if (matchStatus === 'idle') dispatch(fetchMatches({ predictionReady: true, limit: 240 }));
   }, [dispatch, matchStatus]);
 
   useEffect(() => {

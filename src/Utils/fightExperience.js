@@ -16,10 +16,10 @@ export const getFightId = (match) => match?._id || match?.id || match?.matchId |
 
 export const getFightCategory = (match) => {
   const value = match?.matchCategoryTwo
+    || match?.matchCategory
     || match?.effectiveCategory
     || match?.displayCategory
     || match?.categoryLabel
-    || match?.matchCategory
     || match?.sport
     || match?.category
     || 'MMA';
@@ -197,8 +197,21 @@ const getFightQualityScore = (match = {}) => {
   const status = getFightStatus(match);
   const statusScore = status === 'live' ? 9000 : status === 'upcoming' ? 7000 : 5000;
   const typeScore = String(match?.matchType || '').toUpperCase() === 'LIVE' ? 400 : 0;
-  const imageScore = [match?.fighterAId?.primaryImage, match?.fighterBId?.primaryImage, match?.fighterAImage, match?.fighterBImage, match?.promotionBackground]
-    .filter(hasRenderableImage).length * 40;
+  const imageScore = [
+    match?.fighterAPrimaryImage,
+    match?.fighterBPrimaryImage,
+    match?.resolvedFighterAImage,
+    match?.resolvedFighterBImage,
+    match?.fighterAResolvedImage,
+    match?.fighterBResolvedImage,
+    getNestedImageValue(match?.fighterA),
+    getNestedImageValue(match?.fighterB),
+    getNestedImageValue(match?.fighterAId),
+    getNestedImageValue(match?.fighterBId),
+    match?.fighterAImage,
+    match?.fighterBImage,
+    match?.promotionBackground,
+  ].filter(hasRenderableImage).length * 40;
   const statScore = safeArray(match?.BoxingMatch?.fighterOneStats).length || safeArray(match?.MMAMatch?.fighterOneStats).length ? 80 : 0;
   const videoScore = hasRenderableImage(match?.matchVideoUrl) ? 25 : 0;
   const dateScore = parseFightDate(match)?.getTime() || 0;

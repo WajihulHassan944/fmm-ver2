@@ -1,12 +1,15 @@
 "use client";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { orderFightsForDisplay } from "@/Utils/fightOrdering";
-import { fetchPublicFights } from "@/Utils/publicApi";
+import { fetchPublicFights, fetchPublicPredictionFights } from "@/Utils/publicApi";
 
 // ✅ Fetch Matches for Redux (Client-Side)
 export const fetchMatches = createAsyncThunk("matches/fetchMatches", async (query = {}) => {
-  const data = await fetchPublicFights(query);
-  return { rows: orderFightsForDisplay(data, { includeDrafts: Boolean(query?.includeDrafts) }), includeDrafts: Boolean(query?.includeDrafts) };
+  const usePredictionSource = Boolean(query?.predictionReady || query?.playableOnly);
+  const fetcher = usePredictionSource ? fetchPublicPredictionFights : fetchPublicFights;
+  const { predictionReady, playableOnly, ...requestQuery } = query || {};
+  const data = await fetcher(requestQuery);
+  return { rows: orderFightsForDisplay(data, { includeDrafts: Boolean(requestQuery?.includeDrafts) }), includeDrafts: Boolean(requestQuery?.includeDrafts) };
 });
 
 // ✅ Fetch Matches for getServerSideProps (Server-Side)
