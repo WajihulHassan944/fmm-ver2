@@ -28,6 +28,14 @@ const FILTERS = [
 const FIGHTS_PAGE_BATCH_SIZE = 24;
 const PLAYER_SIGNUP_HREF = '/CreateAccount';
 
+const normalizeCategoryFilterValue = (value) => {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const clean = String(raw || '').trim();
+  if (!clean || clean.toLowerCase() === 'all') return 'all';
+  const normalized = getFightSportKey({ matchCategoryTwo: clean });
+  return normalized || clean;
+};
+
 const PAGE_COPY = {
   all: { eyebrow: 'The complete fight room', title: 'Every fight.', accent: 'One arena.', description: 'Move from the next opening bell to verified past results without leaving the page. Search the full combat archive, filter by discipline, and enter active prediction contests from one cinematic fight hub.' },
   upcoming: { eyebrow: 'Upcoming fight cards', title: 'Next cards.', accent: 'Built for predictions.', description: 'Browse the scheduled cards, inspect each matchup, and enter the existing prediction flow with a premium fight-night presentation.' },
@@ -35,16 +43,16 @@ const PAGE_COPY = {
   past: { eyebrow: 'Completed fight archive', title: 'Past fights.', accent: 'Verified records.', description: 'Review completed contests, fight history, and result pages in a searchable premium archive.' },
 };
 
-const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
+const FightsHub = ({ initialStatus = 'all', initialMatches = [], initialCategory = 'all' }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const reduxMatches = useSelector((state) => state.matches.data);
-  const matches = safeArray(reduxMatches).length ? reduxMatches : initialMatches;
+  const matches = useMemo(() => dedupePublicFights([...safeArray(initialMatches), ...safeArray(reduxMatches)]), [initialMatches, reduxMatches]);
   const matchStatus = useSelector((state) => state.matches.status);
   const matchError = useSelector((state) => state.matches.error);
   const [activeFilter, setActiveFilter] = useState(FILTERS.some((item) => item.value === initialStatus) ? initialStatus : 'all');
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState(() => normalizeCategoryFilterValue(initialCategory));
   const [visibleLimit, setVisibleLimit] = useState(FIGHTS_PAGE_BATCH_SIZE);
 
   useEffect(() => {
@@ -58,10 +66,10 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
   }, [initialStatus, router.isReady, router.query.status]);
 
   useEffect(() => {
+    if (!router.isReady) return;
     const requestedCategory = Array.isArray(router.query.category) ? router.query.category[0] : router.query.category;
-    if (!router.isReady || requestedCategory === undefined) return;
-    setCategory(requestedCategory || 'all');
-  }, [router.isReady, router.query.category]);
+    setCategory(normalizeCategoryFilterValue(requestedCategory === undefined ? initialCategory : requestedCategory));
+  }, [initialCategory, router.isReady, router.query.category]);
 
   useEffect(() => {
     setVisibleLimit(FIGHTS_PAGE_BATCH_SIZE);
@@ -91,7 +99,8 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
     const needle = search.trim().toLowerCase();
     return sourceFights.filter((match) => {
       const matchesSearch = !needle || getFightSearchText(match).includes(needle);
-      const matchesCategory = category === 'all' || getFightSportKey(match) === category || getFightCategory(match) === category;
+      const selectedCategory = normalizeCategoryFilterValue(category);
+      const matchesCategory = selectedCategory === 'all' || getFightSportKey(match) === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [category, search, sourceFights]);
@@ -101,9 +110,23 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
     return groups.live[0] || groups.upcoming[0] || groups.past[0];
   }, [activeFilter, groups]);
 
+  const buildDirectoryQuery = (nextStatus = activeFilter, nextCategory = category) => {
+    const query = {};
+    const normalizedCategory = normalizeCategoryFilterValue(nextCategory);
+    if (nextStatus && nextStatus !== 'all') query.status = nextStatus;
+    if (normalizedCategory && normalizedCategory !== 'all') query.category = normalizedCategory;
+    return query;
+  };
+
   const handleFilter = (value) => {
     setActiveFilter(value);
-    router.replace({ pathname: router.pathname || '/fights', query: value === 'all' ? {} : { status: value } }, undefined, { shallow: true, scroll: false });
+    router.replace({ pathname: router.pathname || '/fights', query: buildDirectoryQuery(value, category) }, undefined, { shallow: true, scroll: false });
+  };
+
+  const handleCategoryChange = (value) => {
+    const normalizedCategory = normalizeCategoryFilterValue(value);
+    setCategory(normalizedCategory);
+    router.replace({ pathname: router.pathname || '/fights', query: buildDirectoryQuery(activeFilter, normalizedCategory) }, undefined, { shallow: true, scroll: false });
   };
 
   const handleFightAction = (match) => {
@@ -195,7 +218,7 @@ const FightsHub = ({ initialStatus = 'all', initialMatches = [] }) => {
                 </label>
                 <label className="xp-select-wrap">
                   <span>Discipline</span>
-                  <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                  <select value={category} onChange={(event) => handleCategoryChange(event.target.value)}>
                     <option value="all">All disciplines</option>
                     {categories.map((item) => <option value={item.key} key={item.key}>{item.label}</option>)}
                   </select>

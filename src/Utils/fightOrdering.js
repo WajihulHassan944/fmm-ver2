@@ -18,10 +18,10 @@ export const normalizeCombatSportKey = (value = '') => {
 
 export const getFightSport = (fight) => {
   const raw = fight?.matchCategoryTwo
+    || fight?.matchCategory
     || fight?.effectiveCategory
     || fight?.displayCategory
     || fight?.categoryLabel
-    || fight?.matchCategory
     || fight?.sport
     || fight?.matchSport
     || fight?.category

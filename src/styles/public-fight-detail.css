@@ -474,3 +474,50 @@
   .public-fight-detail-copy h1 { font-size: 43px; letter-spacing: -.04em; }
   .public-fight-detail-copy h1 span { font-size: .52em; }
 }
+
+/* Phase: fight detail theme/font consistency fix */
+.public-fight-detail-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(237, 31, 49, .14), transparent 24rem),
+    radial-gradient(circle at 90% 8%, rgba(22, 143, 230, .10), transparent 24rem),
+    #03070c;
+  font-family: var(--fmm-font-body, Inter, Roboto, Arial, sans-serif) !important;
+}
+
+.public-fight-back-link,
+.public-fight-eyebrow,
+.public-fight-detail-pills span,
+.public-fight-detail-actions .theme-btn,
+.public-fight-entry-card-mini button,
+.public-fight-data-strip small,
+.public-fight-info-card li strong,
+.public-fight-entry-topbar button,
+.public-fight-entry-topbar span,
+.public-fight-related-stories a {
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.public-fight-detail-copy h1,
+.public-fight-corner strong,
+.public-fight-vs-badge,
+.public-fight-data-strip strong,
+.public-fight-info-card h2,
+.public-fight-related-stories h2 {
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: .015em !important;
+  text-transform: uppercase !important;
+}
+
+.public-fight-detail-copy h1 {
+  line-height: .88;
+}
+
+.public-fight-info-card li span,
+.public-fight-entry-card-mini p,
+.public-fight-detail-copy > p:not(.public-fight-eyebrow),
+.public-fight-related-stories p {
+  font-family: var(--fmm-font-body, Inter, Roboto, Arial, sans-serif) !important;
+}

@@ -69,15 +69,16 @@ const getFighterDisplayImage = (value, fallback = "") => {
 };
 
 export const getEffectiveFightCategory = (fight = {}) => {
-  const secondary = pickUsableString(
-    fight.matchCategoryTwo,
+  const secondary = pickUsableString(fight.matchCategoryTwo);
+  if (secondary) return secondary;
+
+  const primary = pickUsableString(fight.matchCategory);
+  if (primary) return primary;
+
+  return pickUsableString(
     fight.effectiveCategory,
     fight.displayCategory,
     fight.categoryLabel,
-  );
-  if (secondary) return secondary;
-  return pickUsableString(
-    fight.matchCategory,
     fight.sport,
     fight.matchSport,
     fight.category,
@@ -91,34 +92,29 @@ export const normalizePublicFightRow = (fight = {}) => {
   if (!fight || typeof fight !== "object") return fight;
 
   const effectiveCategory = getEffectiveFightCategory(fight);
-  const effectiveSlug = normalizeCategorySlug(
-    fight.effectiveCategorySlug || fight.categorySlug || effectiveCategory,
-  );
-  const primaryCategorySlug = normalizeCategorySlug(fight.matchCategory || "");
-  const hasSecondaryCategory = Boolean(
-    pickUsableString(fight.matchCategoryTwo) ||
-      (effectiveSlug && primaryCategorySlug && effectiveSlug !== primaryCategorySlug),
-  );
+  const effectiveSlug = normalizeCategorySlug(effectiveCategory);
+  const secondaryCategory = pickUsableString(fight.matchCategoryTwo);
+  const hasSecondaryCategory = Boolean(secondaryCategory);
   const fighterAName = pickUsableString(
-    fight.matchFighterA,
-    fight.fighterAName,
-    fight.fighterOneName,
+    getFighterDisplayName(fight.fighterA),
+    getFighterDisplayName(fight.fighterAId),
+    getFighterDisplayName(fight.fighterOne),
     fight.fighterA?.displayName,
     fight.fighterA?.name,
-    getFighterDisplayName(fight.fighterAId),
-    getFighterDisplayName(fight.fighterA),
-    getFighterDisplayName(fight.fighterOne),
+    fight.fighterAName,
+    fight.fighterOneName,
+    fight.matchFighterA,
     "Fighter A",
   );
   const fighterBName = pickUsableString(
-    fight.matchFighterB,
-    fight.fighterBName,
-    fight.fighterTwoName,
+    getFighterDisplayName(fight.fighterB),
+    getFighterDisplayName(fight.fighterBId),
+    getFighterDisplayName(fight.fighterTwo),
     fight.fighterB?.displayName,
     fight.fighterB?.name,
-    getFighterDisplayName(fight.fighterBId),
-    getFighterDisplayName(fight.fighterB),
-    getFighterDisplayName(fight.fighterTwo),
+    fight.fighterBName,
+    fight.fighterTwoName,
+    fight.matchFighterB,
     "Fighter B",
   );
   const fighterAImage = pickUsableString(
@@ -153,12 +149,12 @@ export const normalizePublicFightRow = (fight = {}) => {
     fighterAImage: fighterAImage || fight.fighterAImage,
     fighterBImage: fighterBImage || fight.fighterBImage,
     effectiveCategory,
-    effectiveCategorySlug: fight.effectiveCategorySlug || effectiveSlug,
-    displayCategory: fight.displayCategory || effectiveCategory,
-    categoryLabel: fight.categoryLabel || effectiveCategory,
-    categorySlug: fight.categorySlug || effectiveSlug,
+    effectiveCategorySlug: effectiveSlug,
+    displayCategory: effectiveCategory,
+    categoryLabel: effectiveCategory,
+    categorySlug: effectiveSlug,
     hasSecondaryCategory,
-    matchCategoryTwo: pickUsableString(fight.matchCategoryTwo) || (hasSecondaryCategory ? effectiveCategory : ""),
+    matchCategoryTwo: secondaryCategory,
   };
 };
 

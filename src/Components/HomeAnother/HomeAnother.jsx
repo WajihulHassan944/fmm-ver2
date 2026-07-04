@@ -480,7 +480,7 @@ const HomeAnother = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [now, setNow] = useState(null);
   const [activeFightSport, setActiveFightSport] = useState("boxing");
-  const [expandedHomeSports, setExpandedHomeSports] = useState({ boxing: true });
+  const [expandedHomeSports, setExpandedHomeSports] = useState({});
   const [wrestlingMatches, setWrestlingMatches] = useState([]);
 
   useEffect(() => {
@@ -667,7 +667,6 @@ const HomeAnother = () => {
 
   const handleHomeSportJump = (sportKey, event) => {
     setActiveFightSport(sportKey);
-    setExpandedHomeSports((current) => ({ ...current, [sportKey]: true }));
 
     if (typeof window === "undefined") return;
     event?.currentTarget?.scrollIntoView?.({
@@ -780,6 +779,11 @@ const HomeAnother = () => {
       [sportKey]: !current?.[sportKey],
     }));
   };
+
+  const getHomeSportViewAllHref = (sportKey) =>
+    sportKey === "pro-wrestling"
+      ? "/pro-wrestling"
+      : `/upcomingfights?category=${encodeURIComponent(sportKey)}`;
 
   const renderHomeFightCard = (match, index, sectionKey) => {
     const category = getCategory(match);
@@ -1166,7 +1170,7 @@ const HomeAnother = () => {
                               {isExpanded ? "Show less" : `Show ${section.label}`}
                             </button>
                           )}
-                          <Link href={`/upcomingfights?category=${section.key}`}>
+                          <Link href={getHomeSportViewAllHref(section.key)}>
                             View all <FaArrowRight aria-hidden="true" />
                           </Link>
                         </div>

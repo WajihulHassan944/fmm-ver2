@@ -21,10 +21,10 @@ export const getFightId = (match) => match?._id || match?.id || match?.matchId |
 
 export const getFightCategory = (match) => {
   const value = match?.matchCategoryTwo
+    || match?.matchCategory
     || match?.effectiveCategory
     || match?.displayCategory
     || match?.categoryLabel
-    || match?.matchCategory
     || match?.sport
     || match?.category
     || 'MMA';
@@ -37,8 +37,8 @@ export const getFighterName = (match, side = 'A') => {
   const ref = isA ? match?.fighterAId : match?.fighterBId;
   const fighter = isA ? match?.fighterA : match?.fighterB;
   const candidates = isA
-    ? [match?.matchFighterA, match?.fighterAName, match?.fighterOneName, fighter?.displayName, fighter?.name, ref?.displayName, ref?.name]
-    : [match?.matchFighterB, match?.fighterBName, match?.fighterTwoName, fighter?.displayName, fighter?.name, ref?.displayName, ref?.name];
+    ? [fighter?.displayName, fighter?.name, ref?.displayName, ref?.name, match?.fighterAName, match?.fighterOneName, match?.matchFighterA]
+    : [fighter?.displayName, fighter?.name, ref?.displayName, ref?.name, match?.fighterBName, match?.fighterTwoName, match?.matchFighterB];
   const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
   return direct || (isA ? 'Fighter A' : 'Fighter B');
 };

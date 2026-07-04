@@ -3937,3 +3937,13 @@ a[class*="Button"] {
     margin-bottom: 72px;
   }
 }
+
+/* Phase: end-user category/font consistency fix */
+.fmm-home .fmm-signup-fast-strip h2,
+.fmm-home .fmm-section-title-row h2,
+.fmm-home .fmm-home-sport-section-head h3 {
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.015em !important;
+  text-transform: uppercase !important;
+}
