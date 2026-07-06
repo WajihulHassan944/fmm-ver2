@@ -323,6 +323,8 @@ export const swarmApi = {
   runJulyGrowth: (body = {}) => swarmRequest('/api/admin/swarm/growth/july-10000/run', { method: 'POST', body }),
   runDailyJulyGrowth: (body = {}) => swarmRequest('/api/admin/swarm/schedules/daily/july-growth', { method: 'POST', body }),
   listJobs: (query = {}) => swarmRequest('/api/admin/swarm/jobs', { query }),
+  getJob: (jobId, query = {}) => swarmRequest(`/api/admin/swarm/jobs/${encodeURIComponent(jobId)}`, { query }),
+  getJobSummary: (jobId, query = {}) => swarmRequest(`/api/admin/swarm/jobs/${encodeURIComponent(jobId)}/summary`, { query }),
   createJob: (body) => swarmRequest('/api/admin/swarm/jobs', { method: 'POST', body }),
   cancelJob: (jobId, reason) => swarmRequest(`/api/admin/swarm/jobs/${encodeURIComponent(jobId)}/cancel`, { method: 'POST', body: { reason } }),
   retryJob: (jobId, reason) => swarmRequest(`/api/admin/swarm/jobs/${encodeURIComponent(jobId)}/retry`, { method: 'POST', body: { reason } }),

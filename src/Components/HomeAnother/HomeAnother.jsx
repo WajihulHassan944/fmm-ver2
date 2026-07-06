@@ -12,6 +12,7 @@ import {
 } from "@/Utils/proWrestling";
 import {
   buildPublicApiUrl,
+  fetchPromotedHomeFights,
   fetchPublicHomeSummary,
   fetchPublicPredictionFights,
 } from "@/Utils/publicApi";
@@ -279,12 +280,13 @@ const pad = (value) => String(value).padStart(2, "0");
 
 const parseMatchDate = (match) => {
   const rawDate = match?.matchDate?.split?.("T")?.[0];
-  const rawTime = String(match?.matchTime || "").trim();
+  const rawTime = String(match?.matchTime || "00:00").trim() || "00:00";
   const timeMatch = rawTime.match(/^(\d{1,2}):(\d{2})/);
 
-  if (!rawDate || !timeMatch) return null;
+  if (!rawDate) return null;
 
-  const [, hour, minute] = timeMatch;
+  const hour = timeMatch?.[1] || "00";
+  const minute = timeMatch?.[2] || "00";
   const date = new Date(`${rawDate}T${pad(hour)}:${minute}:00`);
   return Number.isNaN(date.getTime()) ? null : date;
 };
@@ -325,6 +327,42 @@ const getCountdownParts = (match, now) => {
     { label: "Min", value: pad(minutes) },
     { label: "Sec", value: pad(seconds) },
   ];
+};
+
+const getMiniCalendarDays = (match) => {
+  const date = parseMatchDate(match);
+  if (!date) return { date: null, days: [] };
+  const first = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const offset = first.getDay();
+  const days = [];
+  for (let i = 0; i < offset; i += 1) days.push({ key: `blank-${i}`, label: '', blank: true });
+  for (let day = 1; day <= lastDay; day += 1) {
+    days.push({ key: String(day), label: day, active: day === date.getDate() });
+  }
+  return { date, days };
+};
+
+const MiniFightCalendar = ({ match }) => {
+  const { date, days } = getMiniCalendarDays(match);
+  if (!date) return null;
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+  return (
+    <div className="fmm-promoted-calendar" aria-label="Featured fight calendar date">
+      <div className="fmm-promoted-calendar-head">
+        <span>{month}</span>
+        <strong>{date.getDate()}</strong>
+        <small>{weekday}</small>
+      </div>
+      <div className="fmm-mini-calendar-grid" aria-hidden="true">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <b key={`${day}-${index}`}>{day}</b>)}
+        {days.slice(0, 42).map((day) => (
+          <i key={day.key} className={day.active ? 'is-fight-day' : day.blank ? 'is-blank' : ''}>{day.label}</i>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const getLockLabel = (match, now) => {
@@ -473,6 +511,8 @@ const HomeAnother = () => {
     pointerId: null,
   });
   const [homepageMatches, setHomepageMatches] = useState([]);
+  const [promotedHeroFights, setPromotedHeroFights] = useState([]);
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [homepageLeaderboard, setHomepageLeaderboard] = useState([]);
   const [matchStatus, setMatchStatus] = useState("loading");
   const [matchError, setMatchError] = useState(null);
@@ -497,12 +537,13 @@ const HomeAnother = () => {
       setMatchError(null);
 
       try {
-        const [summaryResult, predictionResult] = await Promise.allSettled([
+        const [summaryResult, predictionResult, promotedResult] = await Promise.allSettled([
           fetchPublicHomeSummary({
             fightLimit: HOME_FIGHT_FEED_LIMIT,
             leaderboardLimit: 5,
           }),
           fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
+          fetchPromotedHomeFights({ limit: 10 }),
         ]);
         const summary = summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
         const summaryFights = Array.isArray(summary.featuredFights)
@@ -511,16 +552,21 @@ const HomeAnother = () => {
         const predictionFights = predictionResult.status === "fulfilled" && Array.isArray(predictionResult.value)
           ? predictionResult.value
           : [];
+        const promotedFights = promotedResult.status === "fulfilled" && Array.isArray(promotedResult.value)
+          ? promotedResult.value
+          : [];
         const fights = predictionFights.length >= summaryFights.length ? predictionFights : summaryFights;
 
         if (!active) return;
 
         setHomepageMatches(orderFightsForDisplay(fights || []));
+        setPromotedHeroFights(orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals)));
         setHomepageLeaderboard(Array.isArray(summary.leaderboard) ? summary.leaderboard : []);
         setMatchStatus("succeeded");
       } catch (error) {
         if (!active) return;
         setHomepageMatches([]);
+        setPromotedHeroFights([]);
         setMatchStatus("failed");
         setMatchError(error.message || "Unable to load fights");
       }
@@ -614,7 +660,21 @@ const HomeAnother = () => {
   }, [activeFightSport, homeFightSections]);
 
   const primaryFight = homepageFightPool[0] || null;
-  const primaryCountdown = getCountdownParts(primaryFight, now);
+  const heroSlides = promotedHeroFights.length ? promotedHeroFights : (primaryFight ? [primaryFight] : []);
+  const activeHeroFight = heroSlides.length ? heroSlides[activeHeroIndex % heroSlides.length] : primaryFight;
+  const primaryCountdown = getCountdownParts(activeHeroFight, now);
+
+  useEffect(() => {
+    setActiveHeroIndex(0);
+  }, [promotedHeroFights.length]);
+
+  useEffect(() => {
+    if (heroSlides.length <= 1) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveHeroIndex((current) => (current + 1) % heroSlides.length);
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, [heroSlides.length]);
 
   const liveLeaderboardRows = useMemo(() => {
     if (!Array.isArray(homepageLeaderboard) || homepageLeaderboard.length === 0)
@@ -948,7 +1008,7 @@ const HomeAnother = () => {
                   Sign Up Free <FaArrowRight aria-hidden="true" />
                 </Link>
                 <Link
-                  href={primaryFight ? getFightDetailHref(primaryFight) : "/upcomingfights"}
+                  href={activeHeroFight ? getFightDetailHref(activeHeroFight) : "/upcomingfights"}
                   className="theme-btn theme-btn-secondary"
                 >
                   Enter Featured Fight <FaPlay aria-hidden="true" />
@@ -965,7 +1025,7 @@ const HomeAnother = () => {
                 </div>
                 <div>
                   <strong>
-                    {primaryFight ? getLockLabel(primaryFight, now) : "OPEN"}
+                    {activeHeroFight ? getLockLabel(activeHeroFight, now) : "OPEN"}
                   </strong>
                   <span>Next lock</span>
                 </div>
@@ -975,13 +1035,13 @@ const HomeAnother = () => {
                 </div>
               </div>
 
-              {primaryFight && (
+              {activeHeroFight && (
                 <div className="fmm-tonight-callout">
                   <span>Fight-first entry</span>
                   <strong>
-                    {primaryFight.matchName || getFightTitle(primaryFight)}
+                    {activeHeroFight.matchName || getFightTitle(activeHeroFight)}
                   </strong>
-                  <Link href={getFightDetailHref(primaryFight)}>
+                  <Link href={getFightDetailHref(activeHeroFight)}>
                     Enter this fight <FaArrowRight aria-hidden="true" />
                   </Link>
                 </div>
@@ -1012,18 +1072,18 @@ const HomeAnother = () => {
             </div>
 
             <div className="fmm-hero-fight-area">
-              {primaryFight && (
-                <aside className="fmm-hero-event-card">
+              {activeHeroFight && (
+                <aside key={getFightId(activeHeroFight) || activeHeroIndex} className="fmm-hero-event-card fmm-promoted-slide-card">
                   <div className="fmm-hero-event-main">
                     <p>Featured Fight</p>
                     <h2>
-                      <span>{getHomeFighterName(primaryFight, "A")}</span>
+                      <span>{getHomeFighterName(activeHeroFight, "A")}</span>
                       <small>vs</small>
-                      <span>{getHomeFighterName(primaryFight, "B")}</span>
+                      <span>{getHomeFighterName(activeHeroFight, "B")}</span>
                     </h2>
                     <div className="fmm-hero-fighters" aria-hidden="true">
                       <FightImage
-                        src={getHomeFighterImage(primaryFight, "A", 0)}
+                        src={getHomeFighterImage(activeHeroFight, "A", 0)}
                         alt=""
                         width={64}
                         height={64}
@@ -1032,7 +1092,7 @@ const HomeAnother = () => {
                       />
                       <span>VS</span>
                       <FightImage
-                        src={getHomeFighterImage(primaryFight, "B", 1)}
+                        src={getHomeFighterImage(activeHeroFight, "B", 1)}
                         alt=""
                         width={64}
                         height={64}
@@ -1042,9 +1102,16 @@ const HomeAnother = () => {
                     </div>
                     <div className="fmm-hero-event-meta">
                       <FaClock aria-hidden="true" />
-                      <span>{formatDateTime(primaryFight)}</span>
+                      <span>{formatDateTime(activeHeroFight)}</span>
+                    </div>
+                    <div className="fmm-promoted-details">
+                      <span><FaBullseye aria-hidden="true" /> {getFightSportLabel(activeHeroFight)}</span>
+                      <span><FaCalendarAlt aria-hidden="true" /> {activeHeroFight.matchStatus || 'Open'}</span>
+                      <span><FaUsers aria-hidden="true" /> {getPlayerCount(activeHeroFight)} players</span>
                     </div>
                   </div>
+
+                  <MiniFightCalendar match={activeHeroFight} />
 
                   <div
                     className="fmm-countdown-box"
@@ -1059,11 +1126,24 @@ const HomeAnother = () => {
                       ))
                     ) : (
                       <div className="fmm-countdown-state">
-                        <strong>{primaryFight.matchStatus || "Open"}</strong>
-                        <span>{primaryFight.matchName || "Contest"}</span>
+                        <strong>{activeHeroFight.matchStatus || "Open"}</strong>
+                        <span>{activeHeroFight.matchName || "Contest"}</span>
                       </div>
                     )}
                   </div>
+                  {heroSlides.length > 1 && (
+                    <div className="fmm-promoted-dots" aria-label="Promoted fight slides">
+                      {heroSlides.map((fight, index) => (
+                        <button
+                          key={getFightId(fight) || index}
+                          type="button"
+                          className={index === activeHeroIndex % heroSlides.length ? 'is-active' : ''}
+                          onClick={() => setActiveHeroIndex(index)}
+                          aria-label={`Show promoted fight ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </aside>
               )}
             </div>
@@ -1080,7 +1160,7 @@ const HomeAnother = () => {
               <Link href={PLAYER_SIGNUP_HREF} className="theme-btn theme-btn-primary">
                 Sign Up Free <FaArrowRight aria-hidden="true" />
               </Link>
-              <Link href={primaryFight ? getFightDetailHref(primaryFight) : "/upcomingfights"} className="theme-btn theme-btn-secondary">
+              <Link href={activeHeroFight ? getFightDetailHref(activeHeroFight) : "/upcomingfights"} className="theme-btn theme-btn-secondary">
                 Enter featured fight <FaPlay aria-hidden="true" />
               </Link>
             </div>

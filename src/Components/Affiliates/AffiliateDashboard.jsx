@@ -33,7 +33,7 @@ import {
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const MAX_CARDS = 5;
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
 
 const AffiliateDashboard = () => {
   const dispatch = useDispatch();
@@ -45,6 +45,7 @@ const AffiliateDashboard = () => {
   const [shadowMatchId, setShadowMatchId] = useState(null);
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null });
   const [promoMatches, setPromoMatches] = useState([]);
+  const [affiliatePromotedFights, setAffiliatePromotedFights] = useState([]);
   const [promoLoading, setPromoLoading] = useState(true);
   const [promoError, setPromoError] = useState('');
   const [copiedId, setCopiedId] = useState(null);
@@ -109,6 +110,30 @@ const AffiliateDashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const affiliateId = affiliate?._id ? String(affiliate._id) : '';
+    if (!affiliateId) {
+      setAffiliatePromotedFights([]);
+      return undefined;
+    }
+
+    let active = true;
+    const fetchAffiliatePromotedFights = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights`);
+        if (!response.ok) throw new Error(`Promoted fights failed with ${response.status}`);
+        const payload = await response.json();
+        if (active) setAffiliatePromotedFights(Array.isArray(payload?.items) ? payload.items : []);
+      } catch (error) {
+        console.info('Affiliate promoted fights endpoint unavailable:', error.message);
+        if (active) setAffiliatePromotedFights([]);
+      }
+    };
+
+    fetchAffiliatePromotedFights();
+    return () => { active = false; };
+  }, [affiliate?._id]);
+
   const affiliateId = affiliate?._id ? String(affiliate._id) : '';
   const liveMatches = safeArray(matches);
   const joinedMembers = safeArray(affiliate?.usersJoined);
@@ -123,7 +148,7 @@ const AffiliateDashboard = () => {
     [affiliateId, promoMatches],
   );
 
-  const promotedFights = useMemo(
+  const legacyPromotedFights = useMemo(
     () => safeArray(promoMatches).filter((match) => safeArray(match?.AffiliateIds).some(
       (affiliateObject) => (
         String(affiliateObject?.AffiliateId || '') === affiliateId
@@ -134,6 +159,11 @@ const AffiliateDashboard = () => {
       ),
     )),
     [affiliateId, liveMatches, promoMatches],
+  );
+
+  const promotedFights = useMemo(
+    () => (safeArray(affiliatePromotedFights).length ? safeArray(affiliatePromotedFights) : legacyPromotedFights),
+    [affiliatePromotedFights, legacyPromotedFights],
   );
 
   const totalPromotions = liveMatches.filter(

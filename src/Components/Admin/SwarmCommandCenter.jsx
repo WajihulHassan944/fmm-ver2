@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   FaBolt,
@@ -9,6 +10,7 @@ import {
   FaCog,
   FaEnvelope,
   FaExclamationTriangle,
+  FaEye,
   FaFacebook,
   FaFileAlt,
   FaGlobe,
@@ -249,6 +251,28 @@ const SwarmCommandCenter = () => {
     showMessage({ type: 'error', text: error?.message || fallback || 'Action failed.' });
   }, [showMessage]);
 
+  const getFirstJobIdFromResult = useCallback((payload) => (
+    payload?.job?.jobId
+    || payload?.job?.id
+    || payload?.createdJobs?.find?.((item) => item?.job?.jobId || item?.jobId)?.job?.jobId
+    || payload?.createdJobs?.find?.((item) => item?.job?.jobId || item?.jobId)?.jobId
+    || payload?.jobs?.find?.((item) => item?.jobId || item?.id)?.jobId
+    || payload?.jobs?.find?.((item) => item?.jobId || item?.id)?.id
+    || payload?.campaign?.jobIds?.[0]
+    || payload?.data?.campaign?.jobIds?.[0]
+    || payload?.jobIds?.[0]
+    || ''
+  ), []);
+
+  const redirectToJobSummary = useCallback((payload, extraQuery = {}) => {
+    const jobId = getFirstJobIdFromResult(payload);
+    if (!jobId || typeof window === 'undefined') return;
+    const query = Object.fromEntries(Object.entries(extraQuery).filter(([, value]) => value));
+    window.setTimeout(() => {
+      router.push({ pathname: `/administration/swarm/jobs/${encodeURIComponent(jobId)}`, query });
+    }, 350);
+  }, [getFirstJobIdFromResult, router]);
+
   const loadSwarm = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
     try {
@@ -408,6 +432,7 @@ const SwarmCommandCenter = () => {
 
       const result = await swarmApi.createJob(payload);
       setRecentSubmission({ type: 'job', id: result?.job?.jobId || result?.job?.id, title: title || topic, status: result?.job?.status || 'submitted', createdAt: new Date().toISOString() });
+      redirectToJobSummary(result);
       setAutoRefresh(true);
       showMessage({ type: 'success', text: `Job submitted${result?.job?.jobId ? `: ${result.job.jobId}` : ''}. Latest jobs will refresh automatically.` });
       setForm((current) => ({ ...DEFAULT_FORM, sport: current.sport, vertical, jobType: current.jobType, mode: current.mode }));
@@ -478,6 +503,7 @@ const SwarmCommandCenter = () => {
       const campaign = result?.campaign || result?.data?.campaign || result;
       const jobCount = result?.createdJobs?.length || campaign?.jobIds?.length || campaign?.counts?.jobs || 0;
       setRecentSubmission({ type: 'campaign', id: campaign?.campaignId || result?.backendCorrelationId, title: payload.input.title, status: campaign?.status || 'queued', count: jobCount, createdAt: new Date().toISOString() });
+      redirectToJobSummary(result, { campaignId: campaign?.campaignId || result?.backendCorrelationId || '' });
       setAutoRefresh(true);
       showMessage({ type: 'success', text: `Campaign submitted${campaign?.campaignId ? `: ${campaign.campaignId}` : ''}. ${jobCount ? `${jobCount} automation jobs created.` : 'Jobs will appear shortly.'}` });
       setCampaignForm((current) => ({ ...DEFAULT_CAMPAIGN_FORM, sport: current.sport, campaignType: current.campaignType, mode: current.mode }));
@@ -508,6 +534,7 @@ const SwarmCommandCenter = () => {
       const campaign = result?.campaign || result?.data?.campaign || result;
       const jobCount = result?.createdJobs?.length || campaign?.jobIds?.length || 0;
       setRecentSubmission({ type: 'campaign', id: campaign?.campaignId || result?.backendCorrelationId, title: payload.input.title, status: campaign?.status || 'queued', count: jobCount, createdAt: new Date().toISOString() });
+      redirectToJobSummary(result, { campaignId: campaign?.campaignId || result?.backendCorrelationId || '' });
       setAutoRefresh(true);
       showMessage({ type: 'success', text: `${preset.label} started. ${jobCount ? `${jobCount} jobs created.` : 'Refresh for job count.'}` });
       await loadSwarm({ silent: true });
@@ -542,6 +569,7 @@ const SwarmCommandCenter = () => {
       const result = await swarmApi.triggerEvent(payload);
       const createdCount = result?.createdJobs?.length || result?.campaign?.jobIds?.length || 0;
       setRecentSubmission({ type: result?.campaignMode ? 'campaign' : 'event', id: result?.campaign?.campaignId || result?.event?.eventId || eventForm.trigger, title: title || eventForm.trigger, status: 'submitted', count: createdCount, createdAt: new Date().toISOString() });
+      redirectToJobSummary(result, { campaignId: result?.campaign?.campaignId || '' });
       setAutoRefresh(true);
       showMessage({ type: 'success', text: `${eventForm.runAsCampaign ? 'Campaign event' : 'Automation event'} submitted. Created jobs: ${createdCount}.` });
       setEventForm((current) => ({ ...DEFAULT_EVENT_FORM, trigger: current.trigger, vertical: current.vertical, sport: current.sport, mode: current.mode, runAsCampaign: current.runAsCampaign }));
@@ -567,6 +595,7 @@ const SwarmCommandCenter = () => {
         input: { title: catalogItem?.label || formatJobTypeLabel(jobType, catalog), topic: eventForm.topic || catalogItem?.description || catalogItem?.label || jobType, prompt: eventForm.topic || catalogItem?.description || catalogItem?.label || jobType, sport: eventForm.sport },
       });
       setRecentSubmission({ type: 'job', id: result?.job?.jobId, title: catalogItem?.label || jobType, status: result?.job?.status || 'submitted', createdAt: new Date().toISOString() });
+      redirectToJobSummary(result);
       showMessage({ type: 'success', text: `Manual automation started${result?.job?.jobId ? `: ${result.job.jobId}` : ''}.` });
       await loadSwarm({ silent: true });
     } catch (error) {
@@ -992,7 +1021,7 @@ const SwarmCommandCenter = () => {
       {activeTab === 'jobs' && (
         <section className="admin-swarm-panel admin-swarm-list-panel">
           <header><div><span>Runtime</span><h2>Recent jobs</h2></div><div className="admin-swarm-filters"><label><FaSearch /><select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}><option value="">All job states</option><option value="queued">Queued</option><option value="running">Running</option><option value="awaiting_review">Awaiting review</option><option value="published">Published</option><option value="failed">Failed</option><option value="dead_letter">Dead letter</option></select></label><button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.failed-job-retry-report')} disabled={Boolean(actionId)}><FaRedo /> Retry report</button><button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.agent-performance-dashboard')} disabled={Boolean(actionId)}><FaChartLine /> Agent dashboard</button><button type="button" className="admin-action-secondary" onClick={() => loadSwarm()}><FaSyncAlt /> Refresh</button></div></header>
-          <div className="admin-data-table-scroll"><table className="admin-data-table admin-swarm-table"><thead><tr><th>Job</th><th>Campaign</th><th>Sport</th><th>Type</th><th>Input</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>{jobs.length === 0 ? <tr><td colSpan="8">No jobs found.</td></tr> : jobs.map((job) => <tr key={job.jobId || job.id}><td><strong>{job.jobId || job.id || '—'}</strong></td><td>{job.campaignId || job.metadata?.campaignId || '—'}</td><td>{job.input?.sport || job.metadata?.sport || '—'}</td><td>{formatJobTypeLabel(job.jobType, catalog)}</td><td>{summarizeJobInput(job.input)}</td><td><span className={`admin-status-badge ${statusClass(job.status)}`}>{job.status || 'unknown'}</span></td><td>{formatSwarmDate(job.createdAt)}</td><td><div className="admin-swarm-row-actions"><button type="button" onClick={() => runJobAction(job, 'retry')} disabled={!job.jobId || Boolean(actionId)}><FaRedo /> Retry</button><button type="button" onClick={() => runJobAction(job, 'cancel')} disabled={!job.jobId || Boolean(actionId)}><FaTimes /> Cancel</button></div></td></tr>)}</tbody></table></div>
+          <div className="admin-data-table-scroll"><table className="admin-data-table admin-swarm-table"><thead><tr><th>Job</th><th>Campaign</th><th>Sport</th><th>Type</th><th>Input</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>{jobs.length === 0 ? <tr><td colSpan="8">No jobs found.</td></tr> : jobs.map((job) => <tr key={job.jobId || job.id}><td><strong>{job.jobId || job.id || '—'}</strong></td><td>{job.campaignId || job.metadata?.campaignId || '—'}</td><td>{job.input?.sport || job.metadata?.sport || '—'}</td><td>{formatJobTypeLabel(job.jobType, catalog)}</td><td>{summarizeJobInput(job.input)}</td><td><span className={`admin-status-badge ${statusClass(job.status)}`}>{job.status || 'unknown'}</span></td><td>{formatSwarmDate(job.createdAt)}</td><td><div className="admin-swarm-row-actions"><Link href={`/administration/swarm/jobs/${encodeURIComponent(job.jobId || job.id || '')}`}><FaEye /> Details</Link><button type="button" onClick={() => runJobAction(job, 'retry')} disabled={!job.jobId || Boolean(actionId)}><FaRedo /> Retry</button><button type="button" onClick={() => runJobAction(job, 'cancel')} disabled={!job.jobId || Boolean(actionId)}><FaTimes /> Cancel</button></div></td></tr>)}</tbody></table></div>
         </section>
       )}
     </div>

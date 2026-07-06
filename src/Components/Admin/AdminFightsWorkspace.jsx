@@ -15,9 +15,11 @@ import {
   FaTrophy,
   FaTrashAlt,
   FaVideo,
+  FaBullhorn,
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
 import { fightDataQualityApi } from '@/Utils/fightDataQualityApi';
+import { getAdminToken } from '@/Utils/swarmApi';
 import AdminPredictions from './AdminPredictions';
 import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
@@ -96,6 +98,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [promotionUpdatingId, setPromotionUpdatingId] = useState('');
   const [showDataQuality, setShowDataQuality] = useState(false);
 
   const normalizeMatchFeedRows = (payload) => (
@@ -205,7 +208,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     finished: registryRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'finished').length,
   }), [registryRows]);
 
-  const getSourceType = () => 'match';
+  const getSourceType = (fight) => String(fight?.sourceType || fight?.__source || 'match').toLowerCase() === 'shadow' ? 'shadow' : 'match';
+
+  const isHomepagePromoted = (fight) => Boolean(fight?.homepagePromoted || fight?.homepagePromotion?.isPromoted);
 
   const selectedFights = useMemo(() => (
     allRows.filter((fight) => selectedFightIds.includes(String(getId(fight))))
@@ -264,6 +269,38 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const openScoring = (fight) => setSelectedScore({ id: getId(fight), filter: 'normal' });
   const openScores = (fight) => setSelectedScoresView({ id: getId(fight), filter: 'normal' });
   const openPromotion = (fight) => setSelectedPromotion(fight);
+
+  const toggleHomepagePromotion = async (fight) => {
+    const id = getId(fight);
+    if (!id || promotionUpdatingId) return;
+    const shouldPromote = !isHomepagePromoted(fight);
+    setPromotionUpdatingId(String(id));
+    try {
+      const token = getAdminToken();
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(id)}/homepage-promotion`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          homepagePromoted: shouldPromote,
+          sourceType: getSourceType(fight),
+          homepagePromotionTitle: fight.matchName || getTitle(fight),
+          homepagePromotionSubtitle: `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to update homepage banner.');
+      toast.success(payload?.message || (shouldPromote ? 'Fight added to homepage banner.' : 'Fight removed from homepage banner.'));
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update homepage banner.');
+    } finally {
+      setPromotionUpdatingId('');
+    }
+  };
 
   const deleteFight = async (fight) => {
     if (!getId(fight)) return;
@@ -403,6 +440,14 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                         {isFinished ? <button type="button" onClick={() => openScores(fight)}><FaEye /> Scores</button> : <button type="button" onClick={() => openScoring(fight)}><FaTrophy /> Score</button>}
                         {isFinished && <button type="button" onClick={() => openScoring(fight)}><FaEdit /> Edit scores</button>}
                         {isLive && <button type="button" onClick={() => openPromotion(fight)}><FaVideo /> Promote</button>}
+                        <button
+                          type="button"
+                          className={isHomepagePromoted(fight) ? 'is-warning' : ''}
+                          disabled={promotionUpdatingId === String(id)}
+                          onClick={() => toggleHomepagePromotion(fight)}
+                        >
+                          <FaBullhorn /> {promotionUpdatingId === String(id) ? 'Updating...' : isHomepagePromoted(fight) ? 'Remove banner' : 'Homepage banner'}
+                        </button>
                         <Link href={`/administration/DeleteUpdateMatches?matchId=${id}`}><FaEdit /> Edit fight</Link>
                         <button type="button" className="is-danger" onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>
                       </div>

@@ -3991,3 +3991,273 @@ a[class*="Button"] {
 
 /* Phase: remove floating bottom-right signup CTA */
 .fmm-sticky-signup-cta { display: none !important; }
+
+/* Phase: promoted homepage banner + calendar slide support */
+.fmm-promoted-slide-card {
+  animation: fmmPromotedSlideLeft 0.58s ease both;
+}
+
+@keyframes fmmPromotedSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.fmm-promoted-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fmm-promoted-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.055);
+  color: rgba(255,255,255,0.78);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fmm-promoted-details svg { color: var(--theme-red, #ff173d); }
+
+.fmm-promoted-calendar {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin: 18px 0;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 174, 255, 0.18);
+  background: linear-gradient(135deg, rgba(0, 174, 255, 0.12), rgba(255, 23, 61, 0.07));
+}
+
+.fmm-promoted-calendar-head {
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  padding: 10px 8px;
+  background: rgba(0,0,0,0.36);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.fmm-promoted-calendar-head span,
+.fmm-promoted-calendar-head small {
+  font-family: Inter, Roboto, Arial, sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.72);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.fmm-promoted-calendar-head strong {
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.fmm-mini-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.fmm-mini-calendar-grid b,
+.fmm-mini-calendar-grid i {
+  display: grid;
+  place-items: center;
+  min-height: 18px;
+  border-radius: 6px;
+  font-style: normal;
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+}
+
+.fmm-mini-calendar-grid b {
+  color: rgba(255,255,255,0.38);
+  font-size: 8px;
+}
+
+.fmm-mini-calendar-grid i.is-fight-day {
+  color: #fff;
+  background: linear-gradient(135deg, #ff173d, #008cff);
+  box-shadow: 0 0 18px rgba(255, 23, 61, 0.38);
+}
+
+.fmm-mini-calendar-grid i.is-blank {
+  opacity: 0;
+}
+
+.fmm-promoted-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.fmm-promoted-dots button {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(255,255,255,0.25);
+}
+
+.fmm-promoted-dots button.is-active {
+  width: 24px;
+  background: #ff173d;
+}
+
+@media (max-width: 760px) {
+  .fmm-promoted-calendar {
+    grid-template-columns: 1fr;
+  }
+  .fmm-promoted-calendar-head {
+    grid-template-columns: repeat(3, auto);
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+/* Phase: swarm job live summary details page */
+.admin-swarm-job-detail-page .admin-swarm-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.admin-swarm-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.admin-swarm-detail-list div {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.admin-swarm-detail-list dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.48);
+}
+
+.admin-swarm-detail-list dd {
+  margin: 4px 0 0;
+  color: #fff;
+  word-break: break-word;
+}
+
+.admin-swarm-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-swarm-timeline div {
+  position: relative;
+  padding: 12px 12px 12px 34px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+}
+
+.admin-swarm-timeline i {
+  position: absolute;
+  left: 12px;
+  top: 17px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ff173d;
+  box-shadow: 0 0 14px rgba(255, 23, 61, 0.45);
+}
+
+.admin-swarm-timeline strong,
+.admin-swarm-timeline span,
+.admin-swarm-timeline small {
+  display: block;
+}
+
+.admin-swarm-timeline span,
+.admin-swarm-timeline small {
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.admin-swarm-output-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-swarm-output-list article {
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255,255,255,0.045);
+}
+
+.admin-swarm-output-list h4 {
+  margin: 10px 0 6px;
+  color: #fff;
+}
+
+.admin-swarm-output-list p {
+  color: rgba(255,255,255,0.68);
+}
+
+.admin-swarm-output-actions,
+.admin-swarm-related-jobs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.admin-swarm-output-actions button,
+.admin-swarm-output-actions a,
+.admin-swarm-related-jobs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.32);
+  color: #fff;
+  text-decoration: none;
+}
+
+.admin-swarm-related-jobs a {
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 190px;
+}
+
+@media (max-width: 980px) {
+  .admin-swarm-job-detail-page .admin-swarm-detail-grid,
+  .admin-swarm-detail-list {
+    grid-template-columns: 1fr;
+  }
+}

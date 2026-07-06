@@ -498,6 +498,28 @@ export const fetchPublicLeaderboard = async (query = {}) => {
   }
 };
 
+export const fetchPromotedHomeFights = async (query = {}) => {
+  try {
+    const payload = await safeFetchJson(
+      "/api/public/homepage/promoted-fights",
+      { limit: 8, ...query },
+      { timeoutMs: 9000 },
+    );
+    return normalizePublicFightRows(
+      Array.isArray(payload?.items)
+        ? payload.items
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.rows)
+            ? payload.rows
+            : [],
+    );
+  } catch (error) {
+    console.warn("Public homepage promoted fights API unavailable:", error.message);
+    return [];
+  }
+};
+
 export const fetchPublicHomeSummary = async (query = {}) => {
   try {
     const payload = await safeFetchJson(
