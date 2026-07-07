@@ -1,70 +1,86 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import AffiliateFightLeaderboard from "@/Components/Affiliates/AffiliateFightLeaderboard";
-import Head from "next/head";
-import Image from "next/image";
-const index = ({ affiliate, matchData }) => {
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Link from 'next/link';
+import { FaCalendarAlt, FaClock, FaCoins, FaShareAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import AffiliateFightLeaderboard from '@/Components/Affiliates/AffiliateFightLeaderboard';
+import {
+  formatFightDate,
+  getFightCategory,
+  getFightDayParts,
+  getFightRounds,
+  getFighterImage,
+  getFighterName,
+} from '@/Utils/fightExperience';
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
+
+const normalizeRouteValue = (value = '') => String(value || '')
+  .trim()
+  .toLowerCase()
+  .replace(/-/g, ' ')
+  .replace(/\s+/g, ' ');
+
+const PromoShadowPage = ({ affiliate, matchData }) => {
   const router = useRouter();
-  const { matchName, fullName } = router.query;
-  const [isMobile, setIsMobile] = useState(false);
   const [navigateDashboard, setNavigateDashboard] = useState(null);
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth <= 768);
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const fighterAName = getFighterName(matchData, 'A');
+  const fighterBName = getFighterName(matchData, 'B');
+  const fighterAImage = getFighterImage(matchData, 'A');
+  const fighterBImage = getFighterImage(matchData, 'B');
+  const categoryLabel = getFightCategory(matchData);
+  const scheduleLabel = formatFightDate(matchData);
+  const dayParts = getFightDayParts(matchData);
+  const backgroundImage = matchData?.promotionBackground || '/images/fmm-experience/fighter-duel-arena.webp';
+  const matchTitle = matchData?.matchName || `${fighterAName} vs ${fighterBName}`;
+  const affiliateName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'Affiliate';
+  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(matchTitle)}/${encodeURIComponent(affiliateName)}`;
+  const safeMetaImage = String(backgroundImage || '').startsWith('http') ? backgroundImage : 'https://fantasymmadness.com/images/fmm-experience/fighter-duel-arena.webp';
 
   useEffect(() => {
     const incrementViews = async () => {
       try {
-        await fetch(
-          `https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/incrementViews`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
+        if (!affiliate?._id) return;
+        await fetch(`${API_BASE}/affiliate/${affiliate._id}/incrementViews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
       } catch (error) {
-        console.error("Error incrementing view count:", error);
+        console.error('Error incrementing view count:', error);
       }
     };
 
-    if (affiliate) {
-      incrementViews();
-    }
-  }, [affiliate]);
+    incrementViews();
+  }, [affiliate?._id]);
 
   const handleJoinLeague = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
-      window.open("/login", "_blank");
+      router.push(`/auth?mode=signup&next=${encodeURIComponent(router.asPath)}`);
       return;
     }
 
     const { _id: userId, email: userEmail } = user;
 
     try {
-      const response = await fetch(
-        `https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/join`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, userEmail }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, userEmail }),
+      });
 
       if (response.ok) {
-        alert("Successfully joined the league");
+        alert('Successfully joined the league');
         window.location.reload();
-      } else {
-        const data = await response.json();
-        alert(`${data.message}`);
-        router.push("/UserDashboard");
+        return;
       }
+
+      const data = await response.json();
+      alert(`${data.message}`);
+      router.push('/UserDashboard');
     } catch (error) {
-      console.error("Error joining league:", error);
+      console.error('Error joining league:', error);
     }
   };
 
@@ -73,193 +89,140 @@ const index = ({ affiliate, matchData }) => {
   }
 
   if (!matchData || !affiliate) {
-    return <p>Loading...</p>;
+    return <div className="shadow-promo-loading">Loading promotion…</div>;
   }
 
   return (
     <>
-<Head>
-  {(() => {
-    const categoryLabel = matchData.matchCategoryTwo?.trim()
-      ? `${matchData.matchCategoryTwo}`
-      : `${matchData.matchCategory}`;
-
-    const fullCategoryLabel = matchData.matchCategoryTwo?.trim()
-      ? `${matchData.matchCategory}, ${matchData.matchCategoryTwo}`
-      : `${matchData.matchCategory}`;
-
-    const matchUrl = `https://fantasymmadness.com/shadow/${matchData.matchName.replace(/\s+/g, '-').toLowerCase()}/${matchData.matchFighterA.replace(/\s+/g, '-')}-vs-${matchData.matchFighterB.replace(/\s+/g, '-')}`;
-    const matchImage = matchData.promotionBackground.replace('/upload/', '/upload/c_fill,g_north,h_630,w_1200/');
-
-    return (
-      <>
-        <title>{`Fantasy MMAadness | ${matchData.matchFighterA} vs ${matchData.matchFighterB} | ${categoryLabel} Fantasy Fight`}</title>
-
+      <Head>
+        <title>{`${fighterAName} vs ${fighterBName} | Fantasy MMADNESS ${categoryLabel}`}</title>
         <meta
           name="description"
-          content={`Watch the fantasy showdown between ${matchData.matchFighterA} and ${matchData.matchFighterB} in ${fullCategoryLabel}. ${matchData.matchDescription}. Participate and win from a pot of ${matchData.pot} tokens.`}
+          content={`Join ${affiliateName}'s Fantasy MMADNESS promotion for ${fighterAName} vs ${fighterBName}. Make predictions, follow the card, and compete with the league.`}
         />
-
-        {/* Open Graph Meta Tags */}
-        <meta
-          property="og:title"
-          content={`${matchData.matchFighterA} vs ${matchData.matchFighterB} | Fantasy ${categoryLabel} - Fantasy MMAadness`}
-        />
-        <meta
-          property="og:description"
-          content={`Join Fantasy MMAadness to play the ${categoryLabel} fantasy fight between ${matchData.matchFighterA} and ${matchData.matchFighterB}. ${matchData.matchDescription} – ${matchData.maxRounds} rounds.`}
-        />
-        <meta property="og:url" content={matchUrl} />
-        <meta property="og:image" content={matchImage} />
+        <meta property="og:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMADNESS`} />
+        <meta property="og:description" content={matchData?.matchDescription || `Fantasy fight promotion by ${affiliateName}.`} />
+        <meta property="og:url" content={promotionUrl} />
+        <meta property="og:image" content={safeMetaImage} />
         <meta property="og:type" content="website" />
-
-        {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={`${matchData.matchFighterA} vs ${matchData.matchFighterB} | Fantasy ${categoryLabel} - Fantasy MMAadness`}
-        />
-        <meta
-          name="twitter:description"
-          content={`Fantasy fight: ${matchData.matchFighterA} vs ${matchData.matchFighterB} in ${categoryLabel}. Win tokens, climb ranks, and enjoy shadow-mode matchups!`}
-        />
-        <meta name="twitter:image" content={matchImage} />
-        <meta name="twitter:site" content="@fantasymmadness" />
-
-        {/* SEO Keywords */}
-        <meta
-          name="keywords"
-          content={`Fantasy ${matchData.matchCategory}, Fantasy ${matchData.matchCategoryTwo || ''}, ${matchData.matchFighterA} vs ${matchData.matchFighterB}, Fantasy Combat Sports, Fantasy Fighting, Fantasy MMA, Fantasy UFC, Fantasy BKFC, Fantasy Boxing, Shadow Match, Fighter Rankings`}
-        />
-
-        {/* Structured Data */}
+        <meta name="twitter:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMADNESS`} />
+        <meta name="twitter:description" content={`Join the ${categoryLabel} fantasy promotion and make your fight picks.`} />
+        <meta name="twitter:image" content={safeMetaImage} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "SportsEvent",
-              "name": `${matchData.matchFighterA} vs ${matchData.matchFighterB}`,
-              "startDate": matchData.matchDate,
-              "url": matchUrl,
-              "description": matchData.matchDescription,
-              "eventStatus":
-                matchData.matchStatus === "Finished"
-                  ? "https://schema.org/EventCompleted"
-                  : "https://schema.org/EventScheduled",
-              "location": {
-                "@type": "VirtualLocation",
-                "url": matchUrl,
-              },
-              "image": matchData.promotionBackground,
-              "performer": [
-                {
-                  "@type": "Person",
-                  "name": matchData.matchFighterA,
-                  "image": matchData.fighterAImage,
-                },
-                {
-                  "@type": "Person",
-                  "name": matchData.matchFighterB,
-                  "image": matchData.fighterBImage,
-                },
+              '@context': 'https://schema.org',
+              '@type': 'SportsEvent',
+              name: `${fighterAName} vs ${fighterBName}`,
+              startDate: matchData?.matchDate || undefined,
+              url: promotionUrl,
+              description: matchData?.matchDescription || `${categoryLabel} fantasy promotion`,
+              image: safeMetaImage,
+              eventStatus: matchData?.matchStatus === 'Finished'
+                ? 'https://schema.org/EventCompleted'
+                : 'https://schema.org/EventScheduled',
+              location: { '@type': 'VirtualLocation', url: promotionUrl },
+              performer: [
+                { '@type': 'Person', name: fighterAName, image: fighterAImage },
+                { '@type': 'Person', name: fighterBName, image: fighterBImage },
               ],
-              "organizer": {
-                "@type": "Organization",
-                "name": "Fantasy MMAadness",
-                "url": "https://fantasymmadness.com",
-              },
+              organizer: { '@type': 'Organization', name: 'Fantasy MMADNESS', url: 'https://fantasymmadness.com' },
             }),
           }}
         />
-      </>
-    );
-  })()}
-</Head>
+      </Head>
 
-      <div className="promotional-updated-design">
-        <div className="fighter-images-promotional">
-          <div className="img-container">
-            <img src={matchData.fighterAImage} alt={matchData.matchFighterA} />
+      <main className="shadow-promo-page">
+        <section className="shadow-promo-hero" style={{ '--shadow-promo-bg': `url(${backgroundImage})` }}>
+          <div className="shadow-promo-bg" aria-hidden="true" />
+          <div className="shadow-promo-grid" aria-hidden="true" />
+
+          <div className="shadow-promo-shell">
+            <div className="shadow-promo-copy">
+              <p className="shadow-promo-eyebrow"><FaShareAlt /> Affiliate fight promotion</p>
+              <h1>{fighterAName} <span>vs</span> {fighterBName}</h1>
+              <p>{matchData?.matchDescription || 'Join the fight-night campaign, make predictions, and compete with the league.'}</p>
+
+              <div className="shadow-promo-meta-row">
+                <span><FaTrophy /> {categoryLabel}</span>
+                <span><FaClock /> {scheduleLabel}</span>
+                <span><FaCoins /> ${Number(matchData?.matchTokens || 0).toLocaleString()} ticket</span>
+                <span><FaUsers /> {affiliateName}'s league</span>
+              </div>
+
+              <div className="shadow-promo-actions">
+                <button type="button" onClick={handleJoinLeague}>Join {affiliate?.firstName || 'affiliate'}'s league</button>
+                <Link href={`/auth?mode=signup&next=${encodeURIComponent(router.asPath)}`}>Free signup</Link>
+              </div>
+            </div>
+
+            <aside className="shadow-promo-calendar-card">
+              <FaCalendarAlt />
+              <strong>{dayParts.day}</strong>
+              <span>{dayParts.month}</span>
+              <small>{getFightRounds(matchData)}</small>
+            </aside>
           </div>
-          <div className="img-container">
-            <img src={matchData.fighterBImage} alt={matchData.matchFighterB} />
+
+          <div className="shadow-promo-faceoff" aria-label={`${fighterAName} versus ${fighterBName}`}>
+            <figure>
+              <img src={fighterAImage} alt={fighterAName} />
+              <figcaption>{fighterAName}</figcaption>
+            </figure>
+            <div className="shadow-promo-vs"><span>{categoryLabel}</span><strong>VS</strong><small>{matchTitle}</small></div>
+            <figure>
+              <img src={fighterBImage} alt={fighterBName} />
+              <figcaption>{fighterBName}</figcaption>
+            </figure>
           </div>
-        </div>
+        </section>
 
-        <div className="fighters-names">
-          <h1>
-            {isMobile ? matchData.matchFighterA.split(" ")[0] : matchData.matchFighterA}
-          </h1>
-          <h2>VS</h2>
-          <h1>
-            {isMobile ? matchData.matchFighterB.split(" ")[0] : matchData.matchFighterB}
-          </h1>
-        </div>
-
-        <h1 className="category">
-          {matchData.matchCategoryTwo ? matchData.matchCategoryTwo : matchData.matchCategory}
-        </h1>
-        <h1 className="type">{affiliate.firstName}</h1>
-        <h2 className="round-show">${matchData.matchTokens} Ticket Hurry Up</h2>
-
-        <div className="title-wrap">
-          <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743307001/home/ssticbvxqjqkwjmdwpnn.png" className="fancy-title-img" />
-          <h1 className="fancy-title">
-            POT: ${matchData.pot}, Max Rounds: {matchData.maxRounds}
-          </h1>
-        </div>
-
-        <h3 className="second-last" onClick={handleJoinLeague}>
-          Join {affiliate.firstName}'s league
-        </h3>
-        <p className="lastp">Affiliate: {affiliate.firstName} - Free Signup</p>
-{matchData.promotionBackground && (
-        <div className="promotionImageContainer">
-         <Image src={matchData.promotionBackground} width={350} height={350} style={{objectFit:'contain', margin:'10px 0'}} />
-         </div>
-      )}
-      {matchData.matchPromotionalVideoUrl && (
-        <div className="videoContainer">
-          <video className="responsiveVideo" controls>
-            <source src={matchData.matchPromotionalVideoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      )}
-      </div>
-
+        <section className="shadow-promo-details">
+          <div>
+            <p className="shadow-promo-eyebrow">Prize and entry</p>
+            <h2>${Number(matchData?.pot || 0).toLocaleString()} pot</h2>
+            <p>Max rounds: {matchData?.maxRounds || 'TBA'} · Ticket: ${Number(matchData?.matchTokens || 0).toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="shadow-promo-eyebrow">How it works</p>
+            <h2>Join, predict, compete</h2>
+            <p>Sign up, join the affiliate league, open the fight card, and submit picks before the card locks.</p>
+          </div>
+          {matchData?.matchPromotionalVideoUrl && (
+            <div className="shadow-promo-video-card">
+              <p className="shadow-promo-eyebrow">Campaign media</p>
+              <video controls>
+                <source src={matchData.matchPromotionalVideoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+        </section>
+      </main>
     </>
   );
 };
 
-// ✅ Fetch data on the server side
 export const getServerSideProps = async ({ params }) => {
   const { matchName, fullName } = params;
 
   try {
-    // Fetch affiliate data
-    const affiliateRes = await fetch(
-      `https://fantasymmadness-game-server-three.vercel.app/affiliateByName?fullName=${encodeURIComponent(
-        fullName
-      )}`
-    );
+    const affiliateRes = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(fullName)}`);
     const affiliate = await affiliateRes.json();
 
     if (!affiliateRes.ok || !affiliate) {
       return { notFound: true };
     }
 
-    // Fetch matches data
-    const matchesRes = await fetch(
-      "https://fantasymmadness-game-server-three.vercel.app/match"
-    );
+    const matchesRes = await fetch(`${API_BASE}/match?includeDrafts=true`);
     const matches = await matchesRes.json();
+    const expectedName = normalizeRouteValue(matchName);
 
-    // Find the match related to this affiliate
-    const matchData = matches.find(
-      (m) => m.matchName === matchName && m.affiliateId === affiliate._id
-    );
+    const matchData = Array.isArray(matches)
+      ? matches.find((m) => normalizeRouteValue(m?.matchName) === expectedName && String(m?.affiliateId || '') === String(affiliate?._id || ''))
+      : null;
 
     if (!matchData) {
       return { notFound: true };
@@ -272,11 +235,9 @@ export const getServerSideProps = async ({ params }) => {
       },
     };
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return {
-      notFound: true,
-    };
+    console.error('Error fetching affiliate promotion page data:', error);
+    return { notFound: true };
   }
 };
 
-export default index;
+export default PromoShadowPage;

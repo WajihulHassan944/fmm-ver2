@@ -2794,3 +2794,111 @@
     padding: 24px 16px 17px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Targeted affiliate dashboard polish: campaign detail loading, card media,
+   and tighter hero/nav spacing.
+   -------------------------------------------------------------------------- */
+.affiliate-dashboard-hero-final {
+  min-height: clamp(470px, 54vw, 560px) !important;
+  padding-top: clamp(88px, 8vw, 104px) !important;
+  padding-bottom: clamp(34px, 5vw, 58px) !important;
+}
+
+.affiliate-dashboard-main-final,
+.affiliate-dashboard-main-final.xp-page-main {
+  padding-top: clamp(20px, 3vw, 38px) !important;
+}
+
+.affiliate-dashboard-main-final .xp-dashboard-stat-grid {
+  margin-bottom: clamp(38px, 5vw, 58px) !important;
+}
+
+.affiliate-dashboard-main-final .xp-page-section {
+  margin-bottom: clamp(48px, 6vw, 72px) !important;
+}
+
+.affiliate-dashboard-experience-page .affiliate-experience-nav {
+  margin-top: 0 !important;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media {
+  align-items: stretch !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  height: clamp(230px, 20vw, 280px) !important;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media figure {
+  align-items: flex-end !important;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(0,0,0,0.22));
+  display: flex !important;
+  height: 100% !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  position: relative;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media figure:first-of-type {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media img {
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  width: 100% !important;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media > span {
+  left: 50% !important;
+  top: 50% !important;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-fight-copy h3 {
+  min-height: 48px;
+}
+
+.affiliate-campaign-loading {
+  align-items: center;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(223,17,27,0.16), transparent 30%),
+    radial-gradient(circle at 78% 46%, rgba(22,143,230,0.14), transparent 34%),
+    #03060a;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  color: #fff;
+  display: flex;
+  font-family: var(--ff-display, var(--xp-display, Impact, sans-serif));
+  font-size: 18px;
+  justify-content: center;
+  letter-spacing: 0.04em;
+  margin: 0 auto;
+  max-width: 900px;
+  min-height: 360px;
+  padding: 32px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.affiliate-campaign-loading.is-error {
+  color: #ffb6bc;
+}
+
+@media (max-width: 760px) {
+  .affiliate-dashboard-hero-final {
+    padding-top: 84px !important;
+  }
+
+  .affiliate-dashboard-experience-page .xp-affiliate-fight-media {
+    height: 250px !important;
+  }
+}

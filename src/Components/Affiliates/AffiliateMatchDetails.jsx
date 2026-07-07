@@ -34,10 +34,31 @@ import {
   FaUsers,
   FaVideo,
 } from 'react-icons/fa';
+import {
+  formatFightDate,
+  getFightCategory,
+  getFightId,
+  getFightRounds,
+  getFighterImage,
+  getFighterName,
+} from '@/Utils/fightExperience';
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
 
+const normalizeId = (value) => String(value || '').trim();
 
-const AffiliateMatchDetails = ({ matchId, affiliateId }) => {
+const isSameFightId = (match, targetId) => {
+  const id = normalizeId(targetId);
+  if (!id || !match) return false;
+  return [
+    match?._id,
+    match?.id,
+    match?.matchId,
+    match?.shadowFightId,
+  ].some((candidate) => normalizeId(candidate) === id);
+};
+
+const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null }) => {
   const [showUsersPlayed, setShowUsersPlayed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
   const canvasRef = useRef(null);
@@ -45,7 +66,13 @@ const AffiliateMatchDetails = ({ matchId, affiliateId }) => {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
-  const match = matches.find((m) => m.shadowFightId === matchId && m.affiliateId === affiliateId);
+  const reduxMatch = Array.isArray(matches)
+    ? matches.find((m) => isSameFightId(m, matchId) && (!affiliateId || normalizeId(m?.affiliateId) === normalizeId(affiliateId) || normalizeId(m?.affiliateId?._id) === normalizeId(affiliateId)))
+    : null;
+  const [remoteMatch, setRemoteMatch] = useState(initialMatch || null);
+  const [detailLoading, setDetailLoading] = useState(Boolean(matchId));
+  const [detailError, setDetailError] = useState('');
+  const match = remoteMatch || reduxMatch || initialMatch;
   const [navigateDashboard, setNavigateToDash] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
  const [isOpenPodcast, setOpenPodcast] = useState(false);
@@ -55,6 +82,20 @@ const AffiliateMatchDetails = ({ matchId, affiliateId }) => {
     logoImage: "https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp"
   };
   const [backgroundImgVar, setBackgroundImgVar] = useState("https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png");
+
+  const userPredictions = Array.isArray(match?.userPredictions) ? match.userPredictions : [];
+  const userPredictionCount = userPredictions.length;
+  const minimumUsers = Number.isFinite(Number(requiredUsers)) ? Math.ceil(Number(requiredUsers)) : 0;
+  const fighterAName = getFighterName(match, 'A');
+  const fighterBName = getFighterName(match, 'B');
+  const fighterAImage = getFighterImage(match, 'A');
+  const fighterBImage = getFighterImage(match, 'B');
+  const campaignMatchId = getFightId(match) || matchId;
+  const affiliateFullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'affiliate';
+  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(match?.matchName || 'fight')}/${encodeURIComponent(affiliateFullName)}`;
+  const fightCategory = getFightCategory(match) || 'Fight campaign';
+  const fightStatus = match?.matchShadowStatus || 'inactive';
+  const scheduledDate = formatFightDate(match, { short: true });
   
   useEffect(() => {
     if (match?.matchTokens > 0) {
@@ -101,6 +142,50 @@ const actualProfit = extraActualProfit / 2;
   }, [matchStatus, dispatch]);
 
   useEffect(() => {
+    if (!matchId) {
+      setDetailLoading(false);
+      setDetailError('Campaign id is missing.');
+      return undefined;
+    }
+
+    if (reduxMatch && reduxMatch?.pot !== undefined) {
+      setRemoteMatch(reduxMatch);
+      setDetailLoading(false);
+      setDetailError('');
+      return undefined;
+    }
+
+    let active = true;
+    const controller = new AbortController();
+
+    const loadCampaign = async () => {
+      setDetailLoading(true);
+      setDetailError('');
+      try {
+        const response = await fetch(`${API_BASE}/api/matches/${encodeURIComponent(matchId)}`, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Campaign request failed with ${response.status}`);
+        const payload = await response.json();
+        if (active) setRemoteMatch(payload);
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        console.error('Failed to load affiliate campaign details:', error);
+        if (active) {
+          setDetailError('Campaign details could not be loaded. Please refresh or open the campaign again.');
+          if (initialMatch) setRemoteMatch(initialMatch);
+        }
+      } finally {
+        if (active) setDetailLoading(false);
+      }
+    };
+
+    loadCampaign();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [matchId, reduxMatch, initialMatch]);
+
+  useEffect(() => {
     if (!match) return; // Exit if match is not available yet
    
     const canvas = canvasRef.current;
@@ -118,11 +203,11 @@ const actualProfit = extraActualProfit / 2;
 
     const fighterOneImage = new Image();
     fighterOneImage.crossOrigin = "anonymous";
-    fighterOneImage.src = match.fighterAImage;
+    fighterOneImage.src = fighterAImage;
 
     const fighterTwoImage = new Image();
     fighterTwoImage.crossOrigin = "anonymous";
-    fighterTwoImage.src = match.fighterBImage;
+    fighterTwoImage.src = fighterBImage;
 
     let imagesLoaded = 0;
     const totalImages = match.promotionBackground ? 2 : 4; // Adjust based on rendering flow
@@ -202,8 +287,8 @@ const actualProfit = extraActualProfit / 2;
                     ctx.fillText(name, x, y + radius + 25);
                 };
 
-                drawImageWithShadow(fighterOneImage, 110, 140, match.matchFighterA);
-                drawImageWithShadow(fighterTwoImage, 380, 140, match.matchFighterB);
+                drawImageWithShadow(fighterOneImage, 110, 140, fighterAName);
+                drawImageWithShadow(fighterTwoImage, 380, 140, fighterBName);
 
                 // Generate QR code
                 const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
@@ -232,19 +317,27 @@ const actualProfit = extraActualProfit / 2;
         fighterOneImage.onload = handleImageLoad;
         fighterTwoImage.onload = handleImageLoad;
     }
-}, [match, affiliate, backgroundImgVar]);
+}, [match, affiliate, backgroundImgVar, fighterAImage, fighterBImage, fighterAName, fighterBName]);
+
+  if (!match && detailLoading) {
+    return <div className="affiliate-campaign-loading">Loading campaign details…</div>;
+  }
 
   if (!match) {
-    return <p>Loading...</p>;
+    return (
+      <div className="affiliate-campaign-loading is-error">
+        {detailError || 'Campaign details could not be loaded.'}
+      </div>
+    );
   }
   
   if (!affiliate) {
-    return <div>Loading...</div>;
+    return <div className="affiliate-campaign-loading">Loading affiliate profile…</div>;
   }
 
   const handleDeleteFight = async (id) => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/matches/${id}?affiliateId=${affiliateId}`, {
+      const response = await fetch(`${API_BASE}/api/matches/${id}?affiliateId=${affiliateId}`, {
         method: 'DELETE',
       });
   
@@ -366,7 +459,7 @@ const handleSave = async (blobUrl) => {
   
   
   const saveVideoUrlToDatabase = (videoUrl) => {
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/api/matches/${match._id}/promotional-video`, {
+    fetch(`${API_BASE}/api/matches/${campaignMatchId}/promotional-video`, {
       method: 'POST', // Change to POST
       headers: {
         'Content-Type': 'application/json',
@@ -387,7 +480,7 @@ const handleSave = async (blobUrl) => {
  
   const handleActiveFight = async (id) => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/activate-match/${id}`, {
+      const response = await fetch(`${API_BASE}/activate-match/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -412,7 +505,7 @@ const handleSave = async (blobUrl) => {
     toast.loading("Updating match status...");
   
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-match-status-shadow/${matchId}`, {
+      const response = await fetch(`${API_BASE}/update-match-status-shadow/${matchId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -437,14 +530,6 @@ const handleSave = async (blobUrl) => {
     }
   };
 
-
-  const userPredictions = Array.isArray(match.userPredictions) ? match.userPredictions : [];
-  const userPredictionCount = userPredictions.length;
-  const minimumUsers = Number.isFinite(Number(requiredUsers)) ? Math.ceil(Number(requiredUsers)) : 0;
-  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(match.matchName)}/${encodeURIComponent(`${affiliate.firstName} ${affiliate.lastName}`)}`;
-  const fightCategory = match.matchCategoryTwo || match.matchCategory || 'Fight campaign';
-  const fightStatus = match.matchShadowStatus || 'inactive';
-  const scheduledDate = match.matchDate ? String(match.matchDate).split('T')[0] : 'Schedule pending';
 
   if (showUsersPlayed) {
     return (
@@ -481,15 +566,15 @@ const handleSave = async (blobUrl) => {
           </div>
         </div>
 
-        <div className="affiliate-campaign-faceoff" aria-label={`${match.matchFighterA} versus ${match.matchFighterB}`}>
+        <div className="affiliate-campaign-faceoff" aria-label={`${fighterAName} versus ${fighterBName}`}>
           <figure>
-            <img src={match.fighterAImage} alt={match.matchFighterA || 'Fighter A'} />
-            <figcaption>{match.matchFighterA || 'Fighter A'}</figcaption>
+            <img src={fighterAImage} alt={fighterAName} />
+            <figcaption>{fighterAName}</figcaption>
           </figure>
-          <div><span>{fightCategory}</span><strong>VS</strong><small>{match.maxRounds || '—'} rounds max</small></div>
+          <div><span>{fightCategory}</span><strong>VS</strong><small>{getFightRounds(match)}</small></div>
           <figure>
-            <img src={match.fighterBImage} alt={match.matchFighterB || 'Fighter B'} />
-            <figcaption>{match.matchFighterB || 'Fighter B'}</figcaption>
+            <img src={fighterBImage} alt={fighterBName} />
+            <figcaption>{fighterBName}</figcaption>
           </figure>
         </div>
       </section>
@@ -525,10 +610,10 @@ const handleSave = async (blobUrl) => {
                 {match.matchShadowStatus === 'inactive' ? <FaCheckCircle /> : <FaPause />}
                 <span><strong>{match.matchShadowStatus === 'inactive' ? 'Activate fight' : 'Deactivate fight'}</strong><small>Control whether the campaign accepts audience activity.</small></span>
               </button>
-              <button type="button" className="affiliate-campaign-action" onClick={() => handleDashboardOpening(match._id)}>
+              <button type="button" className="affiliate-campaign-action" onClick={() => handleDashboardOpening(campaignMatchId)}>
                 <FaChartLine /><span><strong>Open dashboard</strong><small>Review fight leaderboard and campaign performance.</small></span>
               </button>
-              <button type="button" className="affiliate-campaign-action is-danger" onClick={() => handleDeleteFight(match._id)}>
+              <button type="button" className="affiliate-campaign-action is-danger" onClick={() => handleDeleteFight(campaignMatchId)}>
                 <FaTrash /><span><strong>Delete fight</strong><small>Remove this promotion using the existing delete workflow.</small></span>
               </button>
             </div>

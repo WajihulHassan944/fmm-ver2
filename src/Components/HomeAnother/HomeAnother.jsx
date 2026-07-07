@@ -119,7 +119,12 @@ const getMatchPriorityScore = (match, now = new Date()) => {
       "",
   ).toLowerCase();
   const category = String(
-    match?.matchCategoryTwo || match?.effectiveCategory || match?.displayCategory || match?.categoryLabel || match?.matchCategory || "",
+    match?.matchCategoryTwo ||
+      match?.effectiveCategory ||
+      match?.displayCategory ||
+      match?.categoryLabel ||
+      match?.matchCategory ||
+      "",
   ).toLowerCase();
   const matchTime = getMatchTimestamp(match);
   const today = new Date(now);
@@ -162,7 +167,9 @@ const getOrderedMatches = (matches) => orderFightsForDisplay(matches);
 
 const hasUsableFightImage = (value) => {
   const text = typeof value === "string" ? value.trim() : "";
-  return Boolean(text && !["null", "undefined", "none", "n/a"].includes(text.toLowerCase()));
+  return Boolean(
+    text && !["null", "undefined", "none", "n/a"].includes(text.toLowerCase()),
+  );
 };
 
 const pickHomeValue = (...values) => {
@@ -190,8 +197,18 @@ const getHomeFighterName = (match = {}, side = "A") => {
   const fallback = getResolvedFighterName(match, side);
 
   return pickHomeValue(
-    getNestedHomeValue(fighter, ["displayName", "name", "fighterName", "fullName"]),
-    getNestedHomeValue(fighterRef, ["displayName", "name", "fighterName", "fullName"]),
+    getNestedHomeValue(fighter, [
+      "displayName",
+      "name",
+      "fighterName",
+      "fullName",
+    ]),
+    getNestedHomeValue(fighterRef, [
+      "displayName",
+      "name",
+      "fighterName",
+      "fullName",
+    ]),
     isA ? match?.fighterAName : match?.fighterBName,
     isA ? match?.fighterOneName : match?.fighterTwoName,
     isA ? match?.matchFighterA : match?.matchFighterB,
@@ -200,7 +217,12 @@ const getHomeFighterName = (match = {}, side = "A") => {
   );
 };
 
-const getHomeFighterImage = (match = {}, side = "A", index = 0, options = {}) => {
+const getHomeFighterImage = (
+  match = {},
+  side = "A",
+  index = 0,
+  options = {},
+) => {
   const isA = String(side).toUpperCase() === "A";
   const fighter = isA ? match?.fighterA : match?.fighterB;
   const fighterRef = isA ? match?.fighterAId : match?.fighterBId;
@@ -209,8 +231,26 @@ const getHomeFighterImage = (match = {}, side = "A", index = 0, options = {}) =>
         match?.fighterAPrimaryImage,
         match?.resolvedFighterAImage,
         match?.fighterAResolvedImage,
-        getNestedHomeValue(fighter, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
-        getNestedHomeValue(fighterRef, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
+        getNestedHomeValue(fighter, [
+          "primaryImage",
+          "resolvedImage",
+          "imageHealth.url",
+          "imageHealth.secure_url",
+          "profileImage",
+          "fighterImage",
+          "image",
+          "avatar",
+        ]),
+        getNestedHomeValue(fighterRef, [
+          "primaryImage",
+          "resolvedImage",
+          "imageHealth.url",
+          "imageHealth.secure_url",
+          "profileImage",
+          "fighterImage",
+          "image",
+          "avatar",
+        ]),
         match?.fighterAImage,
         match?.matchFighterAImage,
         match?.fighterOneImage,
@@ -220,8 +260,26 @@ const getHomeFighterImage = (match = {}, side = "A", index = 0, options = {}) =>
         match?.fighterBPrimaryImage,
         match?.resolvedFighterBImage,
         match?.fighterBResolvedImage,
-        getNestedHomeValue(fighter, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
-        getNestedHomeValue(fighterRef, ["primaryImage", "resolvedImage", "imageHealth.url", "imageHealth.secure_url", "profileImage", "fighterImage", "image", "avatar"]),
+        getNestedHomeValue(fighter, [
+          "primaryImage",
+          "resolvedImage",
+          "imageHealth.url",
+          "imageHealth.secure_url",
+          "profileImage",
+          "fighterImage",
+          "image",
+          "avatar",
+        ]),
+        getNestedHomeValue(fighterRef, [
+          "primaryImage",
+          "resolvedImage",
+          "imageHealth.url",
+          "imageHealth.secure_url",
+          "profileImage",
+          "fighterImage",
+          "image",
+          "avatar",
+        ]),
         match?.fighterBImage,
         match?.matchFighterBImage,
         match?.fighterTwoImage,
@@ -233,23 +291,32 @@ const getHomeFighterImage = (match = {}, side = "A", index = 0, options = {}) =>
 };
 
 const hasCompleteHomeFightVisuals = (fight = {}) =>
-  Boolean(getHomeFighterImage(fight, "A", 0, { allowFallback: false }) && getHomeFighterImage(fight, "B", 1, { allowFallback: false }));
+  Boolean(
+    getHomeFighterImage(fight, "A", 0, { allowFallback: false }) &&
+    getHomeFighterImage(fight, "B", 1, { allowFallback: false }),
+  );
 
 const hydrateHomeFightVisuals = (fight = {}) => ({
   ...fight,
   matchFighterA: getHomeFighterName(fight, "A"),
   matchFighterB: getHomeFighterName(fight, "B"),
-  fighterAImage: getHomeFighterImage(fight, "A", 0, { allowFallback: false }) || fight?.fighterAImage,
-  fighterBImage: getHomeFighterImage(fight, "B", 1, { allowFallback: false }) || fight?.fighterBImage,
+  fighterAImage:
+    getHomeFighterImage(fight, "A", 0, { allowFallback: false }) ||
+    fight?.fighterAImage,
+  fighterBImage:
+    getHomeFighterImage(fight, "B", 1, { allowFallback: false }) ||
+    fight?.fighterBImage,
 });
 
 const getHomepageFightQualityScore = (fight = {}) => {
-  const sourceScore = String(fight?.matchType || "").toUpperCase() === "LIVE" ? 600 : 0;
-  const imageScore = [
-    getHomeFighterImage(fight, "A", 0, { allowFallback: false }),
-    getHomeFighterImage(fight, "B", 1, { allowFallback: false }),
-    fight?.promotionBackground,
-  ].filter(hasUsableFightImage).length * 80;
+  const sourceScore =
+    String(fight?.matchType || "").toUpperCase() === "LIVE" ? 600 : 0;
+  const imageScore =
+    [
+      getHomeFighterImage(fight, "A", 0, { allowFallback: false }),
+      getHomeFighterImage(fight, "B", 1, { allowFallback: false }),
+      fight?.promotionBackground,
+    ].filter(hasUsableFightImage).length * 80;
   const playerScore = getPlayerCount(fight) * 2;
   return getMatchPriorityScore(fight) + sourceScore + imageScore + playerScore;
 };
@@ -259,9 +326,16 @@ const dedupeHomepageFights = (matches = []) => {
 
   (Array.isArray(matches) ? matches : []).forEach((fight) => {
     if (!fight) return;
-    const key = getPublicFightDuplicateKey(fight) || getFightId(fight) || getFightTitle(fight);
+    const key =
+      getPublicFightDuplicateKey(fight) ||
+      getFightId(fight) ||
+      getFightTitle(fight);
     const current = selected.get(key);
-    if (!current || getHomepageFightQualityScore(fight) > getHomepageFightQualityScore(current)) {
+    if (
+      !current ||
+      getHomepageFightQualityScore(fight) >
+        getHomepageFightQualityScore(current)
+    ) {
       selected.set(key, fight);
     }
   });
@@ -333,10 +407,15 @@ const getMiniCalendarDays = (match) => {
   const date = parseMatchDate(match);
   if (!date) return { date: null, days: [] };
   const first = new Date(date.getFullYear(), date.getMonth(), 1);
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const lastDay = new Date(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    0,
+  ).getDate();
   const offset = first.getDay();
   const days = [];
-  for (let i = 0; i < offset; i += 1) days.push({ key: `blank-${i}`, label: '', blank: true });
+  for (let i = 0; i < offset; i += 1)
+    days.push({ key: `blank-${i}`, label: "", blank: true });
   for (let day = 1; day <= lastDay; day += 1) {
     days.push({ key: String(day), label: day, active: day === date.getDate() });
   }
@@ -346,19 +425,31 @@ const getMiniCalendarDays = (match) => {
 const MiniFightCalendar = ({ match }) => {
   const { date, days } = getMiniCalendarDays(match);
   if (!date) return null;
-  const month = date.toLocaleDateString('en-US', { month: 'short' });
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   return (
-    <div className="fmm-promoted-calendar" aria-label="Featured fight calendar date">
+    <div
+      className="fmm-promoted-calendar"
+      aria-label="Featured fight calendar date"
+    >
       <div className="fmm-promoted-calendar-head">
         <span>{month}</span>
         <strong>{date.getDate()}</strong>
         <small>{weekday}</small>
       </div>
       <div className="fmm-mini-calendar-grid" aria-hidden="true">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <b key={`${day}-${index}`}>{day}</b>)}
+        {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+          <b key={`${day}-${index}`}>{day}</b>
+        ))}
         {days.slice(0, 42).map((day) => (
-          <i key={day.key} className={day.active ? 'is-fight-day' : day.blank ? 'is-blank' : ''}>{day.label}</i>
+          <i
+            key={day.key}
+            className={
+              day.active ? "is-fight-day" : day.blank ? "is-blank" : ""
+            }
+          >
+            {day.label}
+          </i>
         ))}
       </div>
     </div>
@@ -537,31 +628,44 @@ const HomeAnother = () => {
       setMatchError(null);
 
       try {
-        const [summaryResult, predictionResult, promotedResult] = await Promise.allSettled([
-          fetchPublicHomeSummary({
-            fightLimit: HOME_FIGHT_FEED_LIMIT,
-            leaderboardLimit: 5,
-          }),
-          fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
-          fetchPromotedHomeFights({ limit: 10 }),
-        ]);
-        const summary = summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
+        const [summaryResult, predictionResult, promotedResult] =
+          await Promise.allSettled([
+            fetchPublicHomeSummary({
+              fightLimit: HOME_FIGHT_FEED_LIMIT,
+              leaderboardLimit: 5,
+            }),
+            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
+            fetchPromotedHomeFights({ limit: 10 }),
+          ]);
+        const summary =
+          summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
         const summaryFights = Array.isArray(summary.featuredFights)
           ? summary.featuredFights
           : [];
-        const predictionFights = predictionResult.status === "fulfilled" && Array.isArray(predictionResult.value)
-          ? predictionResult.value
-          : [];
-        const promotedFights = promotedResult.status === "fulfilled" && Array.isArray(promotedResult.value)
-          ? promotedResult.value
-          : [];
-        const fights = predictionFights.length >= summaryFights.length ? predictionFights : summaryFights;
+        const predictionFights =
+          predictionResult.status === "fulfilled" &&
+          Array.isArray(predictionResult.value)
+            ? predictionResult.value
+            : [];
+        const promotedFights =
+          promotedResult.status === "fulfilled" &&
+          Array.isArray(promotedResult.value)
+            ? promotedResult.value
+            : [];
+        const fights =
+          predictionFights.length >= summaryFights.length
+            ? predictionFights
+            : summaryFights;
 
         if (!active) return;
 
         setHomepageMatches(orderFightsForDisplay(fights || []));
-        setPromotedHeroFights(orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals)));
-        setHomepageLeaderboard(Array.isArray(summary.leaderboard) ? summary.leaderboard : []);
+        setPromotedHeroFights(
+          orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals)),
+        );
+        setHomepageLeaderboard(
+          Array.isArray(summary.leaderboard) ? summary.leaderboard : [],
+        );
         setMatchStatus("succeeded");
       } catch (error) {
         if (!active) return;
@@ -588,7 +692,9 @@ const HomeAnother = () => {
   useEffect(() => {
     let active = true;
     const timer = window.setTimeout(() => {
-      wrestlingRequest("/api/wrestling/matches?limit=3&status=OPEN,LIVE,SCORING")
+      wrestlingRequest(
+        "/api/wrestling/matches?limit=3&status=OPEN,LIVE,SCORING",
+      )
         .then((payload) => {
           if (active) setWrestlingMatches(safeWrestlingArray(payload?.data));
         })
@@ -611,7 +717,9 @@ const HomeAnother = () => {
     [homepageMatches],
   );
   const homepageFightPool = useMemo(() => {
-    const hydrated = dedupeHomepageFights(orderedMatches).map(hydrateHomeFightVisuals);
+    const hydrated = dedupeHomepageFights(orderedMatches).map(
+      hydrateHomeFightVisuals,
+    );
     const completeVisuals = hydrated.filter(hasCompleteHomeFightVisuals);
     return diversifyFightsBySport(completeVisuals);
   }, [orderedMatches]);
@@ -648,7 +756,8 @@ const HomeAnother = () => {
   );
 
   const totalHomeFightCount = useMemo(
-    () => homeFightSections.reduce((total, section) => total + section.count, 0),
+    () =>
+      homeFightSections.reduce((total, section) => total + section.count, 0),
     [homeFightSections],
   );
 
@@ -660,8 +769,14 @@ const HomeAnother = () => {
   }, [activeFightSport, homeFightSections]);
 
   const primaryFight = homepageFightPool[0] || null;
-  const heroSlides = promotedHeroFights.length ? promotedHeroFights : (primaryFight ? [primaryFight] : []);
-  const activeHeroFight = heroSlides.length ? heroSlides[activeHeroIndex % heroSlides.length] : primaryFight;
+  const heroSlides = promotedHeroFights.length
+    ? promotedHeroFights
+    : primaryFight
+      ? [primaryFight]
+      : [];
+  const activeHeroFight = heroSlides.length
+    ? heroSlides[activeHeroIndex % heroSlides.length]
+    : primaryFight;
   const primaryCountdown = getCountdownParts(activeHeroFight, now);
 
   useEffect(() => {
@@ -810,7 +925,8 @@ const HomeAnother = () => {
 
     const deltaX = event.clientX - dragState.startX;
     const deltaY = event.clientY - dragState.startY;
-    const isHorizontalDrag = Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 4;
+    const isHorizontalDrag =
+      Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 4;
 
     if (!isHorizontalDrag && !dragState.moved) return;
 
@@ -843,7 +959,7 @@ const HomeAnother = () => {
   const getHomeSportViewAllHref = (sportKey) =>
     sportKey === "pro-wrestling"
       ? "/pro-wrestling"
-      : `/upcomingfights?category=${encodeURIComponent(sportKey)}`;
+      : `/upcomingfights?status=all&category=${encodeURIComponent(sportKey)}`;
 
   const renderHomeFightCard = (match, index, sectionKey) => {
     const category = getCategory(match);
@@ -903,10 +1019,12 @@ const HomeAnother = () => {
             <FaCalendarAlt aria-hidden="true" /> {formatDateTime(match)}
           </span>
           <span>
-            <FaUsers aria-hidden="true" /> {getPlayerCount(match).toLocaleString()} Players
+            <FaUsers aria-hidden="true" />{" "}
+            {getPlayerCount(match).toLocaleString()} Players
           </span>
           <span>
-            <FaDollarSign aria-hidden="true" /> {getPrizePool(match)} <small>Prize Pool</small>
+            <FaDollarSign aria-hidden="true" /> {getPrizePool(match)}{" "}
+            <small>Prize Pool</small>
           </span>
         </div>
 
@@ -915,10 +1033,7 @@ const HomeAnother = () => {
           <strong>{getLockLabel(match, now)}</strong>
         </div>
 
-        <Link
-          href={getFightDetailHref(match)}
-          className="fmm-card-action"
-        >
+        <Link href={getFightDetailHref(match)} className="fmm-card-action">
           {match.__source === "pro-wrestling"
             ? "Open Wrestling"
             : isFinished
@@ -995,8 +1110,8 @@ const HomeAnother = () => {
                 </span>
               </h1>
               <p className="fmm-hero-subtitle">
-                Create a player account, enter an open fight card, and make
-                your picks before the card locks. The homepage now keeps every
+                Create a player account, enter an open fight card, and make your
+                picks before the card locks. The homepage now keeps every
                 category easy to browse without hiding the prediction path.
               </p>
 
@@ -1008,7 +1123,11 @@ const HomeAnother = () => {
                   Sign Up Free <FaArrowRight aria-hidden="true" />
                 </Link>
                 <Link
-                  href={activeHeroFight ? getFightDetailHref(activeHeroFight) : "/upcomingfights"}
+                  href={
+                    activeHeroFight
+                      ? getFightDetailHref(activeHeroFight)
+                      : "/upcomingfights"
+                  }
                   className="theme-btn theme-btn-secondary"
                 >
                   Enter Featured Fight <FaPlay aria-hidden="true" />
@@ -1020,12 +1139,16 @@ const HomeAnother = () => {
                 aria-label="Fantasy MMAdness live experience stats"
               >
                 <div>
-                  <strong>{totalHomeFightCount || contestMatches.length || 0}</strong>
+                  <strong>
+                    {totalHomeFightCount || contestMatches.length || 0}
+                  </strong>
                   <span>Ready fights</span>
                 </div>
                 <div>
                   <strong>
-                    {activeHeroFight ? getLockLabel(activeHeroFight, now) : "OPEN"}
+                    {activeHeroFight
+                      ? getLockLabel(activeHeroFight, now)
+                      : "OPEN"}
                   </strong>
                   <span>Next lock</span>
                 </div>
@@ -1039,7 +1162,8 @@ const HomeAnother = () => {
                 <div className="fmm-tonight-callout">
                   <span>Fight-first entry</span>
                   <strong>
-                    {activeHeroFight.matchName || getFightTitle(activeHeroFight)}
+                    {activeHeroFight.matchName ||
+                      getFightTitle(activeHeroFight)}
                   </strong>
                   <Link href={getFightDetailHref(activeHeroFight)}>
                     Enter this fight <FaArrowRight aria-hidden="true" />
@@ -1073,7 +1197,10 @@ const HomeAnother = () => {
 
             <div className="fmm-hero-fight-area">
               {activeHeroFight && (
-                <aside key={getFightId(activeHeroFight) || activeHeroIndex} className="fmm-hero-event-card fmm-promoted-slide-card">
+                <aside
+                  key={getFightId(activeHeroFight) || activeHeroIndex}
+                  className="fmm-hero-event-card fmm-promoted-slide-card"
+                >
                   <div className="fmm-hero-event-main">
                     <p>Featured Fight</p>
                     <h2>
@@ -1105,9 +1232,18 @@ const HomeAnother = () => {
                       <span>{formatDateTime(activeHeroFight)}</span>
                     </div>
                     <div className="fmm-promoted-details">
-                      <span><FaBullseye aria-hidden="true" /> {getFightSportLabel(activeHeroFight)}</span>
-                      <span><FaCalendarAlt aria-hidden="true" /> {activeHeroFight.matchStatus || 'Open'}</span>
-                      <span><FaUsers aria-hidden="true" /> {getPlayerCount(activeHeroFight)} players</span>
+                      <span>
+                        <FaBullseye aria-hidden="true" />{" "}
+                        {getFightSportLabel(activeHeroFight)}
+                      </span>
+                      <span>
+                        <FaCalendarAlt aria-hidden="true" />{" "}
+                        {activeHeroFight.matchStatus || "Open"}
+                      </span>
+                      <span>
+                        <FaUsers aria-hidden="true" />{" "}
+                        {getPlayerCount(activeHeroFight)} players
+                      </span>
                     </div>
                   </div>
 
@@ -1132,12 +1268,19 @@ const HomeAnother = () => {
                     )}
                   </div>
                   {heroSlides.length > 1 && (
-                    <div className="fmm-promoted-dots" aria-label="Promoted fight slides">
+                    <div
+                      className="fmm-promoted-dots"
+                      aria-label="Promoted fight slides"
+                    >
                       {heroSlides.map((fight, index) => (
                         <button
                           key={getFightId(fight) || index}
                           type="button"
-                          className={index === activeHeroIndex % heroSlides.length ? 'is-active' : ''}
+                          className={
+                            index === activeHeroIndex % heroSlides.length
+                              ? "is-active"
+                              : ""
+                          }
                           onClick={() => setActiveHeroIndex(index)}
                           aria-label={`Show promoted fight ${index + 1}`}
                         />
@@ -1151,16 +1294,34 @@ const HomeAnother = () => {
         </section>
 
         <main className="theme-container fmm-home-main">
-          <section className="fmm-signup-fast-strip" aria-label="Fast player signup">
+          <section
+            className="fmm-signup-fast-strip"
+            aria-label="Fast player signup"
+          >
             <div>
-              <span><FaMobileAlt aria-hidden="true" /> Quick signup path</span>
-              <h2>Find open fight cards and make your predictions on Fantasy MMADNESS.</h2>
+              <span>
+                <FaMobileAlt aria-hidden="true" /> Quick signup path
+              </span>
+              <h2>
+                Find open fight cards and make your predictions on Fantasy
+                MMADNESS.
+              </h2>
             </div>
             <div className="fmm-signup-fast-actions">
-              <Link href={PLAYER_SIGNUP_HREF} className="theme-btn theme-btn-primary">
+              <Link
+                href={PLAYER_SIGNUP_HREF}
+                className="theme-btn theme-btn-primary"
+              >
                 Sign Up Free <FaArrowRight aria-hidden="true" />
               </Link>
-              <Link href={activeHeroFight ? getFightDetailHref(activeHeroFight) : "/upcomingfights"} className="theme-btn theme-btn-secondary">
+              <Link
+                href={
+                  activeHeroFight
+                    ? getFightDetailHref(activeHeroFight)
+                    : "/upcomingfights"
+                }
+                className="theme-btn theme-btn-secondary"
+              >
                 Enter featured fight <FaPlay aria-hidden="true" />
               </Link>
             </div>
@@ -1178,8 +1339,10 @@ const HomeAnother = () => {
                 <h2 id="active-contests-title">Choose Your Fight Category</h2>
               </div>
               <div className="fmm-section-actions">
-                <span className="fmm-swipe-hint">Tap a category and jump straight to that section</span>
-                <Link href="/upcomingfights">
+                <span className="fmm-swipe-hint">
+                  Tap a category and jump straight to that section
+                </span>
+                <Link href="/upcomingfights?status=all">
                   All fight cards <FaArrowRight aria-hidden="true" />
                 </Link>
               </div>
@@ -1194,7 +1357,9 @@ const HomeAnother = () => {
                 <button
                   type="button"
                   key={section.key}
-                  className={activeFightSport === section.key ? "is-active" : ""}
+                  className={
+                    activeFightSport === section.key ? "is-active" : ""
+                  }
                   onClick={(event) => handleHomeSportJump(section.key, event)}
                 >
                   <span>{section.label}</span>
@@ -1220,7 +1385,8 @@ const HomeAnother = () => {
                   const visibleFights = isExpanded
                     ? section.fights
                     : section.fights.slice(0, HOME_CATEGORY_PREVIEW_LIMIT);
-                  const hasMore = section.fights.length > HOME_CATEGORY_PREVIEW_LIMIT;
+                  const hasMore =
+                    section.fights.length > HOME_CATEGORY_PREVIEW_LIMIT;
 
                   return (
                     <section
@@ -1236,22 +1402,31 @@ const HomeAnother = () => {
                       <header className="fmm-home-sport-section-head">
                         <div>
                           <span className="fmm-section-kicker">
-                            <FaBullseye aria-hidden="true" /> {section.count} contest{section.count === 1 ? "" : "s"}
+                            <FaBullseye aria-hidden="true" /> {section.count}{" "}
+                            contest{section.count === 1 ? "" : "s"}
                           </span>
                           <h3>{section.label} section</h3>
-                          <p>Newest uploaded fights appear first. Cards without fighter images stay off the front page.</p>
+                          <p>
+                            Newest uploaded fights appear first. Cards without
+                            fighter images stay off the front page.
+                          </p>
                         </div>
                         <div className="fmm-home-sport-section-actions">
                           {hasMore && (
                             <button
                               type="button"
-                              onClick={() => toggleHomeSportSection(section.key)}
+                              onClick={() =>
+                                toggleHomeSportSection(section.key)
+                              }
                             >
-                              {isExpanded ? "Show less" : `Show ${section.label}`}
+                              {isExpanded
+                                ? "Show less"
+                                : `Show ${section.label}`}
                             </button>
                           )}
                           <Link href={getHomeSportViewAllHref(section.key)}>
-                            View all <FaArrowRight aria-hidden="true" />
+                            Browse all {section.label} fights{" "}
+                            <FaArrowRight aria-hidden="true" />
                           </Link>
                         </div>
                       </header>
@@ -1267,7 +1442,8 @@ const HomeAnother = () => {
                       >
                         {visibleFights.length === 0 ? (
                           <div className="fmm-empty-card">
-                            No {section.label.toLowerCase()} contests are currently available.
+                            No {section.label.toLowerCase()} contests are
+                            currently available.
                           </div>
                         ) : (
                           visibleFights.map((match, index) =>

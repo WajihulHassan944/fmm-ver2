@@ -43,7 +43,7 @@ const AffiliateDashboard = () => {
   const matchStatus = useSelector((state) => state.matches.status);
 
   const [shadowMatchId, setShadowMatchId] = useState(null);
-  const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null });
+  const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null, initialMatch: null });
   const [promoMatches, setPromoMatches] = useState([]);
   const [affiliatePromotedFights, setAffiliatePromotedFights] = useState([]);
   const [promoLoading, setPromoLoading] = useState(true);
@@ -217,13 +217,14 @@ const AffiliateDashboard = () => {
         <button
           type="button"
           className="xp-dashboard-back"
-          onClick={() => setPromoMatchDetails({ matchId: null, affiliateId: null })}
+          onClick={() => setPromoMatchDetails({ matchId: null, affiliateId: null, initialMatch: null })}
         >
           <FaArrowLeft /> Back to affiliate dashboard
         </button>
         <AffiliateMatchDetails
           matchId={promoMatchDetails.matchId}
           affiliateId={promoMatchDetails.affiliateId}
+          initialMatch={promoMatchDetails.initialMatch}
         />
       </div>
     );
@@ -378,7 +379,7 @@ const AffiliateDashboard = () => {
                         <article
                           className="xp-affiliate-fight-card is-promoted"
                           key={fightId || displayIndex}
-                          onClick={() => setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id })}
+                          onClick={() => setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match })}
                         >
                           <div className="xp-affiliate-live-badge"><i /> Live promotion</div>
                           <div className="xp-affiliate-fight-media">
@@ -397,7 +398,7 @@ const AffiliateDashboard = () => {
                                 className="theme-btn theme-btn-primary"
                                 onClick={(event) => {
                                   event.stopPropagation();
-                                  setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id });
+                                  setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match });
                                 }}
                               >
                                 Open campaign <FaChartLine />
