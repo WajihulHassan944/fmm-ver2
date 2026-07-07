@@ -1307,3 +1307,50 @@ body table td {
     linear-gradient(110deg, rgba(4, 8, 13, 0.985), rgba(5, 10, 16, 0.78)),
     url('/images/fmm-pages/player-fight-night-premium.webp') center 38% / cover !important;
 }
+
+/* --------------------------------------------------------------------------
+   Targeted affiliate dashboard fold alignment
+   --------------------------------------------------------------------------
+   Keeps the premium affiliate command-center hero, but removes the excessive
+   empty vertical space between the global navbar and the hero content.
+*/
+.affiliate-dashboard-experience-page .affiliate-dashboard-hero-final {
+  min-height: auto !important;
+  padding-top: clamp(34px, 4vw, 58px) !important;
+  padding-bottom: clamp(24px, 3vw, 40px) !important;
+}
+
+.affiliate-dashboard-experience-page .affiliate-dashboard-hero-final .xp-affiliate-hero-layout {
+  align-items: center !important;
+  min-height: clamp(340px, 34vw, 430px) !important;
+}
+
+.affiliate-dashboard-experience-page .affiliate-dashboard-hero-final .xp-affiliate-profile-card,
+.affiliate-dashboard-experience-page .affiliate-dashboard-hero-final .xp-affiliate-pipeline-card {
+  align-self: center !important;
+}
+
+.affiliate-dashboard-experience-page .affiliate-experience-nav {
+  margin-top: 0 !important;
+}
+
+@media (min-width: 1280px) {
+  .affiliate-dashboard-experience-page .affiliate-dashboard-hero-final {
+    padding-top: 44px !important;
+  }
+
+  .affiliate-dashboard-experience-page .affiliate-dashboard-hero-final .xp-affiliate-hero-layout {
+    min-height: 390px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .affiliate-dashboard-experience-page .affiliate-dashboard-hero-final {
+    padding-top: 28px !important;
+    padding-bottom: 28px !important;
+  }
+
+  .affiliate-dashboard-experience-page .affiliate-dashboard-hero-final .xp-affiliate-hero-layout {
+    min-height: auto !important;
+  }
+}
