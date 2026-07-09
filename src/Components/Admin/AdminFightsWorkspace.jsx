@@ -16,6 +16,7 @@ import {
   FaTrashAlt,
   FaVideo,
   FaBullhorn,
+  FaRobot,
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
 import { fightDataQualityApi } from '@/Utils/fightDataQualityApi';
@@ -125,26 +126,30 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
-      // /administration/fights is the fight registry for records stored in the legacy `/match` collection.
-      // Do not filter by matchType here: some real fight records are stored with matchType=SHADOW,
-      // while Shadow Fights Library is a separate template/library endpoint.
-      const rows = await loadLegacyMatchFeed();
-      if (rows.length) {
-        setMatches(rows);
+      const payload = await fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' });
+      const adminRows = normalizeMatchFeedRows(payload);
+      if (adminRows.length) {
+        setMatches(adminRows);
         return;
       }
 
-      const payload = await fightDataQualityApi.adminFights({ limit: 200, includeDrafts: true });
-      const adminRows = normalizeMatchFeedRows(payload);
-      setMatches(adminRows);
-    } catch (legacyError) {
-      console.warn('Legacy match feed unavailable, trying admin fights endpoint:', legacyError.message);
+      // Safety fallback for older backend deployments that do not yet expose the combined admin registry.
+      const [legacyRows, shadowPayload] = await Promise.allSettled([
+        loadLegacyMatchFeed(),
+        fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
+      ]);
+      const rows = [
+        ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
+        ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
+      ];
+      setMatches(rows);
+    } catch (adminApiError) {
+      console.warn('Combined admin fight registry unavailable, trying legacy match feed:', adminApiError.message);
       try {
-        const payload = await fightDataQualityApi.adminFights({ limit: 200, includeDrafts: true });
-        const rows = normalizeMatchFeedRows(payload);
+        const rows = await loadLegacyMatchFeed();
         setMatches(rows);
-      } catch (adminApiError) {
-        console.error('Error fetching fight registry rows:', adminApiError);
+      } catch (legacyError) {
+        console.error('Error fetching fight registry rows:', legacyError);
         setMatches([]);
       }
     } finally {
@@ -350,7 +355,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <div><span>Promotion builder</span><h2>{getTitle(selectedPromotion)}</h2><p>Promote this live fight through the existing promotional module.</p></div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedPromotion(null)}>Back to fight registry</button>
         </section>
-        <MatchDetailsPromotion matchId={getId(selectedPromotion)} />
+        <MatchDetailsPromotion matchId={getId(selectedPromotion)} fight={selectedPromotion} />
       </div>
     );
   }
@@ -448,6 +453,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                         >
                           <FaBullhorn /> {promotionUpdatingId === String(id) ? 'Updating...' : isHomepagePromoted(fight) ? 'Remove banner' : 'Homepage banner'}
                         </button>
+                        <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
                         <Link href={`/administration/DeleteUpdateMatches?matchId=${id}`}><FaEdit /> Edit fight</Link>
                         <button type="button" className="is-danger" onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>
                       </div>

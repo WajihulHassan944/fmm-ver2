@@ -174,6 +174,14 @@ const inferVerticalFromSport = (sport) => (sport === 'pro_wrestling' ? 'pro_wres
 
 const buildPromptFallback = (title, topic, fallback) => topic || title || fallback || 'Run automation for the selected item.';
 
+const getFightScopeFromItem = (item) => item?.fightId || item?.matchId || item?.metadata?.fightId || item?.metadata?.matchId || item?.input?.fightId || item?.input?.matchId || item?.sourceEntity?.fightId || item?.sourceEntity?.matchId || item?.sourceEntity?.id || '';
+const getCampaignScopeFromItem = (item) => item?.campaignId || item?.metadata?.campaignId || item?.input?.campaignId || item?.sourceEntity?.campaignId || '';
+const getScopeLabel = ({ fightId, campaignId, label }) => {
+  if (fightId) return label ? `Fight: ${label}` : `Fight ID: ${fightId}`;
+  if (campaignId) return `Campaign ID: ${campaignId}`;
+  return '';
+};
+
 const SwarmCommandCenter = () => {
   const router = useRouter();
   const messageRef = useRef(null);
@@ -181,7 +189,7 @@ const SwarmCommandCenter = () => {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [campaignForm, setCampaignForm] = useState(DEFAULT_CAMPAIGN_FORM);
   const [eventForm, setEventForm] = useState(DEFAULT_EVENT_FORM);
-  const [filters, setFilters] = useState({ vertical: '', status: '', reviewStatus: '', group: '', search: '', sport: '' });
+  const [filters, setFilters] = useState({ vertical: '', status: '', reviewStatus: '', group: '', search: '', sport: '', fightId: '', campaignId: '' });
   const [config, setConfig] = useState(null);
   const [health, setHealth] = useState(null);
   const [catalogPayload, setCatalogPayload] = useState(null);
@@ -203,6 +211,10 @@ const SwarmCommandCenter = () => {
   const [expandedCampaignId, setExpandedCampaignId] = useState('');
   const [seoTargetByArtifact, setSeoTargetByArtifact] = useState({});
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const requestedArtifactId = String(router.query?.artifactId || '').trim();
+  const requestedFightId = String(router.query?.fightId || router.query?.matchId || '').trim();
+  const requestedCampaignId = String(router.query?.campaignId || '').trim();
+  const requestedScopeLabel = String(router.query?.scopeLabel || router.query?.fightLabel || '').trim();
 
   useEffect(() => {
     const requestedTab = String(router.query?.tab || '');
@@ -211,12 +223,30 @@ const SwarmCommandCenter = () => {
     }
   }, [router.query?.tab]);
 
+  useEffect(() => {
+    if (!requestedArtifactId) return;
+    setActiveTab('artifacts');
+    setExpandedArtifactId(requestedArtifactId);
+  }, [requestedArtifactId]);
+
+  useEffect(() => {
+    if (!requestedFightId && !requestedCampaignId) return;
+    setFilters((current) => ({
+      ...current,
+      fightId: requestedFightId,
+      campaignId: requestedCampaignId,
+    }));
+  }, [requestedCampaignId, requestedFightId]);
+
   const catalog = useMemo(() => getAutomationCatalogFromPayload(catalogPayload), [catalogPayload]);
   const settings = useMemo(() => getAutomationSettingsFromPayload(settingsPayload), [settingsPayload]);
   const dashboard = useMemo(() => getAutomationDashboardFromPayload(dashboardPayload), [dashboardPayload]);
   const catalogRows = useMemo(() => buildCatalogRows(catalog), [catalog]);
   const counts = useMemo(() => normalizeDashboardCounts(dashboard, health), [dashboard, health]);
   const displayedCampaigns = useMemo(() => campaigns.map(normalizeCampaignDisplay), [campaigns]);
+  const activeFightScope = filters.fightId.trim();
+  const activeCampaignScope = filters.campaignId.trim();
+  const activeScopeLabel = getScopeLabel({ fightId: activeFightScope, campaignId: activeCampaignScope, label: requestedScopeLabel });
 
   const availableJobTypes = useMemo(
     () => catalogRows.filter((item) => !Array.isArray(item.verticals) || item.verticals.length === 0 || item.verticals.includes(form.vertical)),
@@ -287,6 +317,22 @@ const SwarmCommandCenter = () => {
       if (filters.status) jobQuery.status = filters.status;
       if (filters.reviewStatus) artifactQuery.reviewStatus = filters.reviewStatus;
       if (filters.sport) campaignQuery.sport = filters.sport;
+      if (filters.fightId) {
+        jobQuery.fightId = filters.fightId;
+        artifactQuery.fightId = filters.fightId;
+        campaignQuery.fightId = filters.fightId;
+      }
+      if (filters.campaignId) {
+        jobQuery.campaignId = filters.campaignId;
+        artifactQuery.campaignId = filters.campaignId;
+        campaignQuery.campaignId = filters.campaignId;
+      }
+      if (filters.search) {
+        jobQuery.search = filters.search;
+        artifactQuery.search = filters.search;
+        campaignQuery.search = filters.search;
+      }
+      if (requestedArtifactId) artifactQuery.artifactId = requestedArtifactId;
 
       const [configResult, healthResult, jobsResult, artifactsResult, catalogResult, settingsResult, dashboardResult, eventsResult, campaignPacksResult, campaignsResult] = await Promise.allSettled([
         swarmApi.config(),
@@ -324,7 +370,7 @@ const SwarmCommandCenter = () => {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [filters.reviewStatus, filters.sport, filters.status, filters.vertical, handleError, showMessage]);
+  }, [filters.campaignId, filters.fightId, filters.reviewStatus, filters.search, filters.sport, filters.status, filters.vertical, handleError, requestedArtifactId, showMessage]);
 
   useEffect(() => {
     loadSwarm();
@@ -464,6 +510,7 @@ const SwarmCommandCenter = () => {
         vertical,
         sport,
         campaignType,
+        fightId: override.fightId || campaignForm.fightId || undefined,
       }),
       input: {
         title: title || campaignLabel(campaignType),
@@ -476,7 +523,12 @@ const SwarmCommandCenter = () => {
         sections: override.sections || campaignForm.sections,
         adminInstruction: 'Generate all selected campaign artifacts as reviewable drafts for the website admin.',
       },
-      metadata: { submittedFrom: 'frontend-campaign-center', adminUXIntent: 'all_agents_campaign', sport },
+      metadata: {
+        submittedFrom: 'frontend-campaign-center',
+        adminUXIntent: 'all_agents_campaign',
+        sport,
+        ...(override.fightId || campaignForm.fightId ? { fightId: override.fightId || campaignForm.fightId, matchId: override.fightId || campaignForm.fightId } : {}),
+      },
       reason: 'admin-created-campaign-from-frontend',
     };
   };
@@ -605,6 +657,18 @@ const SwarmCommandCenter = () => {
     }
   };
 
+  const findArtifactForJob = useCallback((job) => {
+    const jobId = String(job?.jobId || job?.id || '');
+    const artifactId = String(job?.artifactId || '');
+    if (!jobId && !artifactId) return null;
+    return artifacts.find((artifact) => String(artifact?.artifactId || '') === artifactId || String(artifact?.jobId || '') === jobId) || null;
+  }, [artifacts]);
+
+  const isReviewableArtifact = (artifact) => {
+    const status = String(artifact?.reviewStatus || 'AWAITING_REVIEW').toUpperCase();
+    return Boolean(artifact?.artifactId) && !['APPROVED', 'PUBLISHED', 'REJECTED'].includes(status);
+  };
+
   const runArtifactAction = async (artifact, action) => {
     const artifactId = artifact?.artifactId || artifact?.id;
     if (!artifactId) return;
@@ -686,6 +750,13 @@ const SwarmCommandCenter = () => {
     }
   };
 
+  const clearScopeFilters = () => {
+    setFilters((current) => ({ ...current, fightId: '', campaignId: '' }));
+    if (typeof window !== 'undefined') {
+      router.push({ pathname: '/administration/swarm', query: { tab: activeTab } }, undefined, { shallow: true });
+    }
+  };
+
   const tabButtonClass = (tab) => `admin-swarm-tab${activeTab === tab ? ' is-active' : ''}`;
   const activePackCount = campaignPacks.length || SWARM_CAMPAIGN_TYPES.length;
 
@@ -718,6 +789,21 @@ const SwarmCommandCenter = () => {
             <p>{recentSubmission.type} · {recentSubmission.id || 'pending id'} · {recentSubmission.count ? `${recentSubmission.count} jobs` : recentSubmission.status}</p>
           </div>
           <button type="button" className="admin-topbar-primary" onClick={() => { setActiveTab('jobs'); loadSwarm(); }}><FaHistory /> View progress</button>
+        </section>
+      )}
+
+      {(activeFightScope || activeCampaignScope) && (
+        <section className="admin-swarm-scope-card" aria-label="Filtered swarm scope">
+          <div>
+            <span>Scoped review mode</span>
+            <strong>{activeScopeLabel}</strong>
+            <p>Showing only jobs, artifacts, and campaigns connected to this {activeFightScope ? 'fight' : 'campaign'}.</p>
+          </div>
+          <div className="admin-swarm-scope-actions">
+            {activeFightScope && <Link href={`/administration/swarm?tab=artifacts&fightId=${encodeURIComponent(activeFightScope)}${requestedScopeLabel ? `&scopeLabel=${encodeURIComponent(requestedScopeLabel)}` : ''}`}><FaFileAlt /> Fight outputs</Link>}
+            {activeCampaignScope && <Link href={`/administration/swarm?tab=artifacts&campaignId=${encodeURIComponent(activeCampaignScope)}`}><FaFileAlt /> Campaign outputs</Link>}
+            <button type="button" className="admin-action-secondary" onClick={clearScopeFilters}><FaList /> View all swarm work</button>
+          </div>
         </section>
       )}
 
@@ -830,6 +916,11 @@ const SwarmCommandCenter = () => {
                   <strong>{campaign.title}</strong>
                   <small>{campaignLabel(campaign.type)} · {campaign.sport} · {formatSwarmDate(campaign.createdAt)}</small>
                   <p>{Number(campaign.jobIds?.length || campaign.counts?.jobs || 0)} jobs attached</p>
+                  <div className="admin-swarm-campaign-actions">
+                    <Link href={`/administration/swarm?tab=jobs&campaignId=${encodeURIComponent(campaign.id || '')}`}><FaHistory /> View campaign jobs</Link>
+                    <Link href={`/administration/swarm?tab=artifacts&campaignId=${encodeURIComponent(campaign.id || '')}`}><FaFileAlt /> View outputs</Link>
+                    {campaign.fightId && <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(campaign.fightId)}&scopeLabel=${encodeURIComponent(campaign.title || campaign.fightId)}`}><FaRobot /> Fight jobs</Link>}
+                  </div>
                   <button type="button" className="admin-swarm-json-toggle" onClick={() => setExpandedCampaignId(expandedCampaignId === campaign.id ? '' : campaign.id)}>{expandedCampaignId === campaign.id ? 'Hide campaign' : 'View campaign'}</button>
                   {expandedCampaignId === campaign.id && <pre className="admin-swarm-json">{compactJson(campaigns.find((item) => (item.campaignId || item.id || item._id) === campaign.id) || campaign)}</pre>}
                 </article>
@@ -1004,24 +1095,101 @@ const SwarmCommandCenter = () => {
       {activeTab === 'artifacts' && (
         <section className="admin-swarm-panel admin-swarm-list-panel">
           <header>
-            <div><span>Review queue</span><h2>Generated artifacts</h2></div>
-            <div className="admin-swarm-filters"><label><FaGlobe /><select value={filters.vertical} onChange={(event) => setFilters((current) => ({ ...current, vertical: event.target.value }))}><option value="">All verticals</option><option value="combat">Combat</option><option value="pro_wrestling">Pro wrestling</option></select></label><label><FaSearch /><select value={filters.reviewStatus} onChange={(event) => setFilters((current) => ({ ...current, reviewStatus: event.target.value }))}><option value="">All review states</option><option value="AWAITING_REVIEW">Awaiting review</option><option value="DRAFT">Draft</option><option value="APPROVED">Approved</option><option value="PUBLISHED">Published</option><option value="REJECTED">Rejected</option></select></label><button type="button" className="admin-action-secondary" onClick={() => loadSwarm()}><FaSyncAlt /> Refresh</button></div>
+            <div>
+              <span>Review queue</span>
+              <h2>{requestedArtifactId ? 'Selected artifact' : 'Generated artifacts'}</h2>
+            </div>
+            <div className="admin-swarm-filters">
+              <label>
+                <FaSearch />
+                <input
+                  type="search"
+                  value={filters.search}
+                  onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+                  placeholder="Search artifact, job, campaign, or ID"
+                />
+              </label>
+              <label><FaRobot /><input type="search" value={filters.fightId} onChange={(event) => setFilters((current) => ({ ...current, fightId: event.target.value }))} placeholder="Fight ID" /></label>
+              <label><FaRocket /><input type="search" value={filters.campaignId} onChange={(event) => setFilters((current) => ({ ...current, campaignId: event.target.value }))} placeholder="Campaign ID" /></label>
+              <label><FaGlobe /><select value={filters.vertical} onChange={(event) => setFilters((current) => ({ ...current, vertical: event.target.value }))}><option value="">All verticals</option><option value="combat">Combat</option><option value="pro_wrestling">Pro wrestling</option></select></label>
+              <label><FaSearch /><select value={filters.reviewStatus} onChange={(event) => setFilters((current) => ({ ...current, reviewStatus: event.target.value }))}><option value="">All review states</option><option value="AWAITING_REVIEW">Awaiting review</option><option value="DRAFT">Draft</option><option value="APPROVED">Approved</option><option value="PUBLISHED">Published</option><option value="REJECTED">Rejected</option></select></label>
+              {requestedArtifactId && <Link className="admin-action-secondary" href="/administration/swarm?tab=artifacts"><FaList /> All artifacts</Link>}
+              <button type="button" className="admin-action-secondary" onClick={() => loadSwarm()}><FaSyncAlt /> Refresh</button>
+            </div>
           </header>
-          {artifacts.length === 0 ? <div className="admin-swarm-empty"><FaFileAlt /><strong>No artifacts yet</strong><span>Create a campaign or trigger automation, then refresh after the worker completes it.</span></div> : <div className="admin-swarm-artifacts">{artifacts.map((artifact) => {
+          {requestedArtifactId && <div className="admin-swarm-alert is-info"><FaFileAlt /><span>Showing artifact ID: {requestedArtifactId}</span></div>}
+          {artifacts.length === 0 ? <div className="admin-swarm-empty"><FaFileAlt /><strong>No artifacts found</strong><span>{requestedArtifactId ? 'No generated output matches this artifact ID yet. Refresh after the worker completes the job.' : 'Create a campaign or trigger automation, then refresh after the worker completes it.'}</span></div> : <div className="admin-swarm-artifacts">{artifacts.map((artifact) => {
             const artifactId = artifact.artifactId || artifact.id;
             const payload = getArtifactPayload(artifact);
-            const expanded = expandedArtifactId === artifactId;
+            const expanded = expandedArtifactId === artifactId || requestedArtifactId === artifactId;
             const blogLike = isBlogLikeArtifact(artifact);
             const seoLike = isSeoArtifact(artifact);
-            return <article className="admin-swarm-artifact" key={artifactId}><div className="admin-swarm-artifact-main"><div><span className={`admin-status-badge ${statusClass(artifact.reviewStatus)}`}>{artifact.reviewStatus || 'AWAITING_REVIEW'}</span><small>{artifact.vertical} · {artifact.artifactType || artifact.jobType} {artifact.campaignId ? `· Campaign ${artifact.campaignId}` : ''}</small><h3>{getArtifactTitle(artifact)}</h3><p>{String(getArtifactSummary(artifact)).slice(0, 300)}</p>{seoLike && <div className="admin-swarm-seo-target"><label><span>Target blog ID for SEO apply</span><input value={seoTargetByArtifact[artifactId] || ''} onChange={(event) => setSeoTargetByArtifact((current) => ({ ...current, [artifactId]: event.target.value }))} placeholder="Optional blog id" /></label><small>Without a target blog, SEO stays approved as an application plan.</small></div>}</div><div className="admin-swarm-artifact-actions"><button type="button" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)} className="admin-topbar-primary"><FaCheck /> {blogLike ? 'Approve & publish blog' : 'Approve'}</button>{seoLike && <button type="button" onClick={() => runArtifactAction(artifact, 'applySeo')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaSearch /> Apply SEO</button>}{blogLike && <button type="button" onClick={() => runArtifactAction(artifact, 'approveOnly')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaShieldAlt /> Approve only</button>}<button type="button" onClick={() => runArtifactAction(artifact, 'regenerate')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaRedo /> Regenerate</button><button type="button" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)} className="admin-action-secondary is-danger"><FaTimes /> Reject</button></div></div>{Array.isArray(payload.sections) && payload.sections.length > 0 && <div className="admin-swarm-section-preview">{payload.sections.slice(0, 3).map((section, index) => <section key={`${artifactId}-section-${index}`}><strong>{section.title || `Section ${index + 1}`}</strong><p>{String(section.content || section.body || '').slice(0, 220)}</p></section>)}</div>}{payload.applicationPlan && <div className="admin-swarm-application-plan"><FaCog /><div><strong>Application plan</strong><p>{payload.applicationPlan.summary || payload.applicationPlan.reason || 'Review this plan before applying it to the live site.'}</p></div></div>}<button type="button" className="admin-swarm-json-toggle" onClick={() => setExpandedArtifactId(expanded ? '' : artifactId)}>{expanded ? 'Hide payload' : 'View payload'}</button>{expanded && <pre className="admin-swarm-json">{compactJson(payload)}</pre>}</article>;
+            return <article className="admin-swarm-artifact" key={artifactId} id={`artifact-${artifactId}`}><div className="admin-swarm-artifact-main"><div><span className={`admin-status-badge ${statusClass(artifact.reviewStatus)}`}>{artifact.reviewStatus || 'AWAITING_REVIEW'}</span><small>{artifact.vertical} · {artifact.artifactType || artifact.jobType} {artifact.campaignId ? `· Campaign ${artifact.campaignId}` : ''}</small><h3>{getArtifactTitle(artifact)}</h3><p>{String(getArtifactSummary(artifact)).slice(0, 300)}</p>{seoLike && <div className="admin-swarm-seo-target"><label><span>Target blog ID for SEO apply</span><input value={seoTargetByArtifact[artifactId] || ''} onChange={(event) => setSeoTargetByArtifact((current) => ({ ...current, [artifactId]: event.target.value }))} placeholder="Optional blog id" /></label><small>Without a target blog, SEO stays approved as an application plan.</small></div>}</div><div className="admin-swarm-artifact-actions"><button type="button" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)} className="admin-topbar-primary"><FaCheck /> {blogLike ? 'Approve & publish blog' : 'Approve'}</button>{seoLike && <button type="button" onClick={() => runArtifactAction(artifact, 'applySeo')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaSearch /> Apply SEO</button>}{blogLike && <button type="button" onClick={() => runArtifactAction(artifact, 'approveOnly')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaShieldAlt /> Approve only</button>}<button type="button" onClick={() => runArtifactAction(artifact, 'regenerate')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaRedo /> Regenerate</button><button type="button" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)} className="admin-action-secondary is-danger"><FaTimes /> Reject</button></div></div>{Array.isArray(payload.sections) && payload.sections.length > 0 && <div className="admin-swarm-section-preview">{payload.sections.slice(0, 3).map((section, index) => <section key={`${artifactId}-section-${index}`}><strong>{section.title || `Section ${index + 1}`}</strong><p>{String(section.content || section.body || '').slice(0, 220)}</p></section>)}</div>}{payload.applicationPlan && <div className="admin-swarm-application-plan"><FaCog /><div><strong>Application plan</strong><p>{payload.applicationPlan.summary || payload.applicationPlan.reason || 'Review this plan before applying it to the live site.'}</p></div></div>}<button type="button" className="admin-swarm-json-toggle" onClick={() => setExpandedArtifactId(expanded ? '' : artifactId)}>{expanded ? 'Hide payload' : 'View payload'}</button>{expanded && <pre className="admin-swarm-json">{compactJson(payload)}</pre>}</article>;
           })}</div>}
         </section>
       )}
 
       {activeTab === 'jobs' && (
         <section className="admin-swarm-panel admin-swarm-list-panel">
-          <header><div><span>Runtime</span><h2>Recent jobs</h2></div><div className="admin-swarm-filters"><label><FaSearch /><select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}><option value="">All job states</option><option value="queued">Queued</option><option value="running">Running</option><option value="awaiting_review">Awaiting review</option><option value="published">Published</option><option value="failed">Failed</option><option value="dead_letter">Dead letter</option></select></label><button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.failed-job-retry-report')} disabled={Boolean(actionId)}><FaRedo /> Retry report</button><button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.agent-performance-dashboard')} disabled={Boolean(actionId)}><FaChartLine /> Agent dashboard</button><button type="button" className="admin-action-secondary" onClick={() => loadSwarm()}><FaSyncAlt /> Refresh</button></div></header>
-          <div className="admin-data-table-scroll"><table className="admin-data-table admin-swarm-table"><thead><tr><th>Job</th><th>Campaign</th><th>Sport</th><th>Type</th><th>Input</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>{jobs.length === 0 ? <tr><td colSpan="8">No jobs found.</td></tr> : jobs.map((job) => <tr key={job.jobId || job.id}><td><strong>{job.jobId || job.id || '—'}</strong></td><td>{job.campaignId || job.metadata?.campaignId || '—'}</td><td>{job.input?.sport || job.metadata?.sport || '—'}</td><td>{formatJobTypeLabel(job.jobType, catalog)}</td><td>{summarizeJobInput(job.input)}</td><td><span className={`admin-status-badge ${statusClass(job.status)}`}>{job.status || 'unknown'}</span></td><td>{formatSwarmDate(job.createdAt)}</td><td><div className="admin-swarm-row-actions"><Link href={`/administration/swarm/jobs/${encodeURIComponent(job.jobId || job.id || '')}`}><FaEye /> Details</Link><button type="button" onClick={() => runJobAction(job, 'retry')} disabled={!job.jobId || Boolean(actionId)}><FaRedo /> Retry</button><button type="button" onClick={() => runJobAction(job, 'cancel')} disabled={!job.jobId || Boolean(actionId)}><FaTimes /> Cancel</button></div></td></tr>)}</tbody></table></div>
+          <header>
+            <div><span>Runtime</span><h2>Recent jobs</h2></div>
+            <div className="admin-swarm-filters">
+              <label>
+                <FaSearch />
+                <input
+                  type="search"
+                  value={filters.search}
+                  onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+                  placeholder="Search job, artifact, campaign, fight, or ID"
+                />
+              </label>
+              <label><FaRobot /><input type="search" value={filters.fightId} onChange={(event) => setFilters((current) => ({ ...current, fightId: event.target.value }))} placeholder="Fight ID" /></label>
+              <label><FaRocket /><input type="search" value={filters.campaignId} onChange={(event) => setFilters((current) => ({ ...current, campaignId: event.target.value }))} placeholder="Campaign ID" /></label>
+              <label><FaSearch /><select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}><option value="">All job states</option><option value="queued">Queued</option><option value="running">Running</option><option value="awaiting_review">Awaiting review</option><option value="published">Published</option><option value="failed">Failed</option><option value="dead_letter">Dead letter</option></select></label>
+              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.failed-job-retry-report')} disabled={Boolean(actionId)}><FaRedo /> Retry report</button>
+              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.agent-performance-dashboard')} disabled={Boolean(actionId)}><FaChartLine /> Agent dashboard</button>
+              <button type="button" className="admin-action-secondary" onClick={() => loadSwarm()}><FaSyncAlt /> Refresh</button>
+            </div>
+          </header>
+          <div className="admin-data-table-scroll">
+            <table className="admin-data-table admin-swarm-table">
+              <thead><tr><th>Job</th><th>Campaign</th><th>Sport</th><th>Type</th><th>Input</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
+              <tbody>
+                {jobs.length === 0 ? <tr><td colSpan="8">No jobs found.</td></tr> : jobs.map((job) => {
+                  const jobId = job.jobId || job.id || '';
+                  const artifact = findArtifactForJob(job) || (job.artifactId ? { artifactId: job.artifactId, jobId, reviewStatus: job.status === 'awaiting_review' ? 'AWAITING_REVIEW' : undefined } : null);
+                  const reviewable = isReviewableArtifact(artifact);
+                  return (
+                    <tr key={jobId || job.backendCorrelationId}>
+                      <td>
+                        <strong>{jobId || '—'}</strong>
+                        {getFightScopeFromItem(job) && <small>Fight: {getFightScopeFromItem(job)}</small>}
+                        {artifact?.artifactId && <small>Output: {artifact.artifactId}</small>}
+                      </td>
+                      <td>{job.campaignId || job.metadata?.campaignId || '—'}</td>
+                      <td>{job.input?.sport || job.metadata?.sport || '—'}</td>
+                      <td>{formatJobTypeLabel(job.jobType, catalog)}</td>
+                      <td>{summarizeJobInput(job.input)}</td>
+                      <td><span className={`admin-status-badge ${statusClass(job.status)}`}>{job.status || 'unknown'}</span></td>
+                      <td>{formatSwarmDate(job.createdAt)}</td>
+                      <td>
+                        <div className="admin-swarm-row-actions">
+                          <Link href={`/administration/swarm/jobs/${encodeURIComponent(jobId)}`}><FaEye /> Details</Link>
+                          {getFightScopeFromItem(job) && <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(getFightScopeFromItem(job))}`}><FaRobot /> Fight jobs</Link>}
+                          {getCampaignScopeFromItem(job) && <Link href={`/administration/swarm?tab=jobs&campaignId=${encodeURIComponent(getCampaignScopeFromItem(job))}`}><FaRocket /> Campaign jobs</Link>}
+                          {artifact?.artifactId && <Link href={`/administration/swarm?tab=artifacts&artifactId=${encodeURIComponent(artifact.artifactId)}`}><FaFileAlt /> Output</Link>}
+                          {reviewable && <button type="button" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)}><FaCheck /> Approve</button>}
+                          {reviewable && <button type="button" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)}><FaTimes /> Reject</button>}
+                          <button type="button" onClick={() => runJobAction(job, 'retry')} disabled={!jobId || Boolean(actionId)}><FaRedo /> Retry</button>
+                          <button type="button" onClick={() => runJobAction(job, 'cancel')} disabled={!jobId || Boolean(actionId)}><FaTimes /> Cancel</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
     </div>

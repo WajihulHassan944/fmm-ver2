@@ -4,15 +4,18 @@ import { useEffect, useState, useRef }  from 'react';
 import QRCode from 'qrcode'; 
 import { toast } from 'react-toastify';
 import { fetchMatches } from '@/Redux/matchSlice';
+import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
+import { fetchPublicPredictionFights } from '@/Utils/publicApi';
 
 
 
-const MatchDetailsPromotion = ({matchId}) => {
+const MatchDetailsPromotion = ({ matchId, fight: initialFight = null }) => {
     const canvasRef = useRef(null);
     const dispatch = useDispatch();
     const matches = useSelector((state) => state.matches.data);
     const matchStatus = useSelector((state) => state.matches.status);
-    const match = matches.find((m) => m._id === matchId);
+    const [resolvedMatch, setResolvedMatch] = useState(initialFight);
+    const match = matches.find((m) => String(m._id || m.id) === String(matchId)) || resolvedMatch || initialFight;
     const [isModalOpen, setIsModalOpen] = useState(false);
    
     const imageData = {
@@ -31,9 +34,27 @@ const MatchDetailsPromotion = ({matchId}) => {
   
     useEffect(() => {
       if (matchStatus === 'idle') {
-        dispatch(fetchMatches({ includeDrafts: true }));
+        dispatch(fetchMatches({ includeDrafts: true, predictionReady: true, limit: 500 }));
       }
     }, [matchStatus, dispatch]);
+
+    useEffect(() => {
+      setResolvedMatch(initialFight || null);
+    }, [initialFight, matchId]);
+
+    useEffect(() => {
+      let cancelled = false;
+      const hasSelectedMatch = matches.some((m) => String(m?._id || m?.id) === String(matchId));
+      if (!matchId || initialFight || hasSelectedMatch) return undefined;
+      fetchPublicPredictionFights({ limit: 500, includeDrafts: true })
+        .then((rows) => {
+          if (cancelled) return;
+          const found = (Array.isArray(rows) ? rows : []).find((item) => String(item?._id || item?.id) === String(matchId));
+          if (found) setResolvedMatch(found);
+        })
+        .catch((error) => console.warn('Promotion builder fight lookup failed:', error.message));
+      return () => { cancelled = true; };
+    }, [initialFight, matchId, matches]);
   
     useEffect(() => {
       if (!match) return; // Exit if match is not available yet
@@ -51,13 +72,16 @@ const MatchDetailsPromotion = ({matchId}) => {
       logoImage.crossOrigin = "anonymous";
       logoImage.src = imageData.logoImage;
   
+      const fighterAImageUrl = getFighterImage(match, 'A') || match.fighterAImageResolved || match.fighterAImage || '/images/fmm-experience/fighter-action-red.webp';
+      const fighterBImageUrl = getFighterImage(match, 'B') || match.fighterBImageResolved || match.fighterBImage || '/images/fmm-experience/fighter-action-blue.webp';
+
       const fighterOneImage = new Image();
       fighterOneImage.crossOrigin = "anonymous";
-      fighterOneImage.src = match.fighterAImage;
+      fighterOneImage.src = fighterAImageUrl;
   
       const fighterTwoImage = new Image();
       fighterTwoImage.crossOrigin = "anonymous";
-      fighterTwoImage.src = match.fighterBImage;
+      fighterTwoImage.src = fighterBImageUrl;
   
       let imagesLoaded = 0;
       const totalImages = match.promotionBackground ? 2 : 4; // Adjust based on rendering flow
@@ -135,8 +159,8 @@ const MatchDetailsPromotion = ({matchId}) => {
                       ctx.fillText(name, x, y + radius + 25);
                   };
   
-                  drawImageWithShadow(fighterOneImage, 110, 140, match.matchFighterA);
-                  drawImageWithShadow(fighterTwoImage, 380, 140, match.matchFighterB);
+                  drawImageWithShadow(fighterOneImage, 110, 140, getFighterName(match, 'A') || match.matchFighterA);
+                  drawImageWithShadow(fighterTwoImage, 380, 140, getFighterName(match, 'B') || match.matchFighterB);
   
                   // Generate QR code
                   const id = `${match._id}`;
@@ -166,7 +190,7 @@ const MatchDetailsPromotion = ({matchId}) => {
   }, [match, backgroundImgVar]);
   
     if (!match) {
-      return <p>Loading...</p>;
+      return <p>Loading promotion builder...</p>;
     }
     
   
@@ -214,11 +238,11 @@ const MatchDetailsPromotion = ({matchId}) => {
           <h1 className='fightDetailsContainerFirstHeading'>Fight: <span>{match.matchName}</span></h1>
           <div className='fightersImagesInFightDetails'>
             <div className='imgWrapFights'>
-              <img src={match.fighterAImage} alt="Fighter A" />
+              <img src={getFighterImage(match, 'A') || match.fighterAImageResolved || match.fighterAImage || '/images/fmm-experience/fighter-action-red.webp'} alt="Fighter A" />
             </div>
             <h1>VS</h1>
             <div className='imgWrapFights'>
-              <img src={match.fighterBImage} alt="Fighter B" />
+              <img src={getFighterImage(match, 'B') || match.fighterBImageResolved || match.fighterBImage || '/images/fmm-experience/fighter-action-blue.webp'} alt="Fighter B" />
             </div>
           </div>
   
@@ -228,7 +252,7 @@ const MatchDetailsPromotion = ({matchId}) => {
   
           <h1 className='fightTypeInFightDetails' style={{ fontSize: '21.5px' }}>
             Fight type: <span>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory}</span>
-            - <span style={{ color: '#3fd50b' }}>{match.matchType} </span> - <span>{match.matchFighterA} </span> VS <span> {match.matchFighterB} </span>
+            - <span style={{ color: '#3fd50b' }}>{match.matchType} </span> - <span>{getFighterName(match, 'A') || match.matchFighterA} </span> VS <span> {getFighterName(match, 'B') || match.matchFighterB} </span>
           </h1>
   
           <div className='fightDetailsPot'>

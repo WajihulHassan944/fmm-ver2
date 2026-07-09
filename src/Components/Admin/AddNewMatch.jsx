@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FaBolt, FaCalendarAlt, FaCloudUploadAlt, FaPlus, FaSave, FaTrophy, FaUsers } from 'react-icons/fa';
 import AdminPredictions from './AdminPredictions';
@@ -78,6 +78,15 @@ export default function AddNewMatch() {
   const [showShadowPredictionChoice, setShowShadowPredictionChoice] = useState(false);
   const [createdShadowId, setCreatedShadowId] = useState(null);
   const [showAdminPredictions, setShowAdminPredictions] = useState(false);
+  const createdNoticeRef = useRef(null);
+
+  useEffect(() => {
+    if (!created) return;
+    if (typeof window === 'undefined') return;
+    window.setTimeout(() => {
+      createdNoticeRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }, [created]);
 
   const previews = useMemo(() => ({
     fighterAImage: getCombatFighterImage(selectedFighterA) || FALLBACK_A,
@@ -177,7 +186,7 @@ export default function AddNewMatch() {
       </section>
 
       {created && (
-        <section className="admin-success-panel">
+        <section ref={createdNoticeRef} className="admin-success-panel">
           <div><span>Fight created</span><strong>{created.name}</strong><p>The fight is available to the appropriate registry and scoring workflow.</p></div>
           <div>
             {created.id && <Link href={`/administration/upcomingFights?matchId=${created.id}`}>Open score centre</Link>}

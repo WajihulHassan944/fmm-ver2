@@ -386,16 +386,22 @@ export const getItemsFromPayload = (payload) => {
   return [];
 };
 
-export const buildManualSourceEntity = ({ title, topic, jobType, vertical, trigger, sport, campaignType, campaignId }) => ({
-  type: trigger ? 'manual_automation_event' : campaignType ? 'manual_campaign' : 'manual_prompt',
-  label: title || topic || campaignType || jobType || 'Manual swarm request',
-  vertical,
-  trigger,
-  sport,
-  campaignType,
-  campaignId,
-  origin: 'frontend_admin_panel',
-});
+export const buildManualSourceEntity = ({ title, topic, jobType, vertical, trigger, sport, campaignType, campaignId, fightId, matchId }) => {
+  const scopedFightId = fightId || matchId || '';
+  return {
+    type: trigger ? 'manual_automation_event' : campaignType ? 'manual_campaign' : scopedFightId ? 'combat_fight' : 'manual_prompt',
+    id: scopedFightId || undefined,
+    fightId: scopedFightId || undefined,
+    matchId: scopedFightId || undefined,
+    label: title || topic || campaignType || jobType || 'Manual swarm request',
+    vertical,
+    trigger,
+    sport,
+    campaignType,
+    campaignId,
+    origin: 'frontend_admin_panel',
+  };
+};
 
 export const normalizeCampaignDisplay = (campaign) => ({
   id: campaign?.campaignId || campaign?.id || campaign?._id,

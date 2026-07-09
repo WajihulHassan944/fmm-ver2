@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   FaArrowLeft,
+  FaCheck,
   FaClock,
   FaExternalLinkAlt,
   FaFileAlt,
   FaHistory,
   FaRobot,
+  FaRedo,
   FaSyncAlt,
+  FaTimes,
 } from 'react-icons/fa';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 import {
@@ -35,6 +38,9 @@ const statusClass = (status = '') => {
   return '';
 };
 
+const getFightScopeFromJob = (job) => job?.fightId || job?.matchId || job?.metadata?.fightId || job?.metadata?.matchId || job?.input?.fightId || job?.input?.matchId || job?.sourceEntity?.fightId || job?.sourceEntity?.matchId || job?.sourceEntity?.id || '';
+const getCampaignScopeFromJob = (job) => job?.campaignId || job?.metadata?.campaignId || job?.input?.campaignId || job?.sourceEntity?.campaignId || '';
+
 function SwarmJobSummaryPage() {
   const router = useRouter();
   const jobId = String(router.query?.jobId || '').trim();
@@ -43,6 +49,7 @@ function SwarmJobSummaryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedOutputId, setExpandedOutputId] = useState('');
+  const [actionId, setActionId] = useState('');
 
   const loadSummary = useCallback(async ({ silent = false } = {}) => {
     if (!jobId) return;
@@ -71,6 +78,8 @@ function SwarmJobSummaryPage() {
   }, [jobId, loadSummary]);
 
   const job = summary?.job || null;
+  const scopedFightId = summary?.fightId || getFightScopeFromJob(job);
+  const scopedCampaignId = summary?.campaignId || getCampaignScopeFromJob(job);
   const artifacts = Array.isArray(summary?.artifacts) ? summary.artifacts : [];
   const relatedJobs = Array.isArray(summary?.relatedJobs) ? summary.relatedJobs : [];
   const mainTitle = job ? formatJobTypeLabel(job.jobType) : 'Swarm job summary';
@@ -79,6 +88,28 @@ function SwarmJobSummaryPage() {
     if (!job?.statusHistory?.length) return job?.status || 'pending';
     return job.statusHistory[job.statusHistory.length - 1]?.status || job.status || 'pending';
   }, [job]);
+
+  const isReviewableArtifact = (artifact) => {
+    const status = String(artifact?.reviewStatus || 'DRAFT').toUpperCase();
+    return Boolean(artifact?.artifactId) && !['APPROVED', 'PUBLISHED', 'REJECTED'].includes(status);
+  };
+
+  const runArtifactAction = async (artifact, action) => {
+    const artifactId = artifact?.artifactId || artifact?.id;
+    if (!artifactId) return;
+    setActionId(`${action}:${artifactId}`);
+    setError('');
+    try {
+      if (action === 'approve') await swarmApi.approveArtifact(artifactId, { publish: false, reason: 'Approved from swarm job detail page.' });
+      if (action === 'reject') await swarmApi.rejectArtifact(artifactId, { reason: 'Rejected from swarm job detail page.' });
+      if (action === 'regenerate') await swarmApi.regenerateArtifact(artifactId, { reason: 'Regenerated from swarm job detail page.' });
+      await loadSummary({ silent: true });
+    } catch (requestError) {
+      if (!requestError?.shouldLogin) setError(requestError.message || 'Artifact action failed.');
+    } finally {
+      setActionId('');
+    }
+  };
 
   return (
     <AdminPrivateRoute>
@@ -95,6 +126,8 @@ function SwarmJobSummaryPage() {
           </div>
           <div className="admin-heading-actions">
             <Link href="/administration/swarm?tab=jobs" className="admin-action-secondary"><FaArrowLeft /> Back to Swarm</Link>
+            {scopedFightId && <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(scopedFightId)}`} className="admin-action-secondary"><FaRobot /> This fight jobs</Link>}
+            {scopedCampaignId && <Link href={`/administration/swarm?tab=jobs&campaignId=${encodeURIComponent(scopedCampaignId)}`} className="admin-action-secondary"><FaHistory /> This campaign</Link>}
             <button type="button" className="admin-action-secondary" onClick={() => loadSummary()} disabled={loading}><FaSyncAlt className={loading ? 'xp-spin' : ''} /> Refresh</button>
           </div>
         </section>
@@ -107,6 +140,7 @@ function SwarmJobSummaryPage() {
             <section className="admin-inline-metrics admin-swarm-job-metrics">
               <article><span>Status</span><strong>{latestStatus}</strong><small>{formatSwarmDate(job.updatedAt || job.createdAt)}</small></article>
               <article><span>Job ID</span><strong>{job.jobId}</strong><small>{job.mode || 'DRAFT_ONLY'}</small></article>
+              <article><span>Scope</span><strong>{scopedCampaignId ? 'Campaign' : scopedFightId ? 'Fight' : 'Single job'}</strong><small>{scopedCampaignId || scopedFightId || 'No linked scope'}</small></article>
               <article><span>Output</span><strong>{artifacts.length}</strong><small>{summary?.outputReady ? 'artifact ready' : 'waiting for output'}</small></article>
             </section>
 
@@ -157,6 +191,9 @@ function SwarmJobSummaryPage() {
                         <button type="button" onClick={() => setExpandedOutputId(expandedOutputId === artifact.artifactId ? '' : artifact.artifactId)}>
                           {expandedOutputId === artifact.artifactId ? 'Hide output' : 'View output'}
                         </button>
+                        {isReviewableArtifact(artifact) && <button type="button" className="admin-topbar-primary" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)}><FaCheck /> Approve</button>}
+                        {isReviewableArtifact(artifact) && <button type="button" className="admin-action-secondary is-danger" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)}><FaTimes /> Reject</button>}
+                        <button type="button" className="admin-action-secondary" onClick={() => runArtifactAction(artifact, 'regenerate')} disabled={Boolean(actionId)}><FaRedo /> Regenerate</button>
                         <Link href={`/administration/swarm?tab=artifacts&artifactId=${encodeURIComponent(artifact.artifactId || '')}`}>
                           Open in swarm <FaExternalLinkAlt />
                         </Link>
@@ -175,7 +212,7 @@ function SwarmJobSummaryPage() {
                 <header><div><span>Campaign jobs</span><h3>Related automation jobs</h3></div></header>
                 <div className="admin-swarm-related-jobs">
                   {relatedJobs.map((related) => (
-                    <Link key={related.jobId || related.id} href={`/administration/swarm/jobs/${encodeURIComponent(related.jobId || related.id)}`}>
+                    <Link key={related.jobId || related.id} href={{ pathname: `/administration/swarm/jobs/${encodeURIComponent(related.jobId || related.id)}`, query: { ...(scopedCampaignId ? { campaignId: scopedCampaignId } : {}), ...(scopedFightId ? { fightId: scopedFightId } : {}) } }}>
                       <strong>{formatJobTypeLabel(related.jobType)}</strong>
                       <span>{related.status || 'queued'}</span>
                     </Link>
