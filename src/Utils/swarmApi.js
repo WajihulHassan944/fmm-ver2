@@ -333,6 +333,8 @@ export const swarmApi = {
   approveArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/approve`, { method: 'POST', body }),
   applySeoArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/apply-seo`, { method: 'POST', body }),
   rejectArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/reject`, { method: 'POST', body }),
+  updateArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}`, { method: 'PATCH', body }),
+  generateBlogBanner: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/generate-blog-banner`, { method: 'POST', body }),
   regenerateArtifact: (artifactId, body = {}) => swarmRequest(`/api/admin/swarm/artifacts/${encodeURIComponent(artifactId)}/regenerate`, { method: 'POST', body }),
 };
 

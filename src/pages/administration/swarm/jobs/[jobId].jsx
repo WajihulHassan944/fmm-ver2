@@ -6,9 +6,11 @@ import {
   FaArrowLeft,
   FaCheck,
   FaClock,
+  FaEdit,
   FaExternalLinkAlt,
   FaFileAlt,
   FaHistory,
+  FaImage,
   FaRobot,
   FaRedo,
   FaSyncAlt,
@@ -94,6 +96,8 @@ function SwarmJobSummaryPage() {
     return Boolean(artifact?.artifactId) && !['APPROVED', 'PUBLISHED', 'REJECTED'].includes(status);
   };
 
+  const isBlogArtifact = (artifact) => String(artifact?.artifactType || '').startsWith('content.') || String(artifact?.jobType || '').startsWith('content.');
+
   const runArtifactAction = async (artifact, action) => {
     const artifactId = artifact?.artifactId || artifact?.id;
     if (!artifactId) return;
@@ -103,6 +107,7 @@ function SwarmJobSummaryPage() {
       if (action === 'approve') await swarmApi.approveArtifact(artifactId, { publish: false, reason: 'Approved from swarm job detail page.' });
       if (action === 'reject') await swarmApi.rejectArtifact(artifactId, { reason: 'Rejected from swarm job detail page.' });
       if (action === 'regenerate') await swarmApi.regenerateArtifact(artifactId, { reason: 'Regenerated from swarm job detail page.' });
+      if (action === 'generateBanner') await swarmApi.generateBlogBanner(artifactId, { reason: 'Generate blog banner from job detail page.' });
       await loadSummary({ silent: true });
     } catch (requestError) {
       if (!requestError?.shouldLogin) setError(requestError.message || 'Artifact action failed.');
@@ -191,6 +196,8 @@ function SwarmJobSummaryPage() {
                         <button type="button" onClick={() => setExpandedOutputId(expandedOutputId === artifact.artifactId ? '' : artifact.artifactId)}>
                           {expandedOutputId === artifact.artifactId ? 'Hide output' : 'View output'}
                         </button>
+                        {isBlogArtifact(artifact) && <button type="button" className="admin-action-secondary" onClick={() => runArtifactAction(artifact, 'generateBanner')} disabled={Boolean(actionId)}><FaImage /> Generate banner</button>}
+                        {isBlogArtifact(artifact) && <Link href={`/administration/swarm?tab=artifacts&artifactId=${encodeURIComponent(artifact.artifactId || '')}`}><FaEdit /> Edit output</Link>}
                         {isReviewableArtifact(artifact) && <button type="button" className="admin-topbar-primary" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)}><FaCheck /> Approve</button>}
                         {isReviewableArtifact(artifact) && <button type="button" className="admin-action-secondary is-danger" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)}><FaTimes /> Reject</button>}
                         <button type="button" className="admin-action-secondary" onClick={() => runArtifactAction(artifact, 'regenerate')} disabled={Boolean(actionId)}><FaRedo /> Regenerate</button>

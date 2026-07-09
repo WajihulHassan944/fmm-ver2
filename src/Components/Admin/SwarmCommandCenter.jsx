@@ -9,12 +9,14 @@ import {
   FaCheck,
   FaCog,
   FaEnvelope,
+  FaEdit,
   FaExclamationTriangle,
   FaEye,
   FaFacebook,
   FaFileAlt,
   FaGlobe,
   FaHistory,
+  FaImage,
   FaInstagram,
   FaList,
   FaMagic,
@@ -25,6 +27,7 @@ import {
   FaRobot,
   FaRocket,
   FaSearch,
+  FaSave,
   FaShieldAlt,
   FaSlidersH,
   FaSyncAlt,
@@ -210,6 +213,9 @@ const SwarmCommandCenter = () => {
   const [expandedEventId, setExpandedEventId] = useState('');
   const [expandedCampaignId, setExpandedCampaignId] = useState('');
   const [seoTargetByArtifact, setSeoTargetByArtifact] = useState({});
+  const [editingArtifactId, setEditingArtifactId] = useState('');
+  const [artifactDraftById, setArtifactDraftById] = useState({});
+  const [artifactFileById, setArtifactFileById] = useState({});
   const [autoRefresh, setAutoRefresh] = useState(true);
   const requestedArtifactId = String(router.query?.artifactId || '').trim();
   const requestedFightId = String(router.query?.fightId || router.query?.matchId || '').trim();
@@ -704,6 +710,107 @@ const SwarmCommandCenter = () => {
     }
   };
 
+  const buildArtifactDraft = (artifact) => {
+    const payload = getArtifactPayload(artifact);
+    const safeSections = Array.isArray(payload.sections) && payload.sections.length
+      ? payload.sections.map((section) => ({
+        title: section.title || '',
+        content: section.content || section.body || section.text || '',
+        headings: Array.isArray(section.headings) ? section.headings : [],
+      }))
+      : [{ title: 'Overview', content: payload.body || payload.content || artifact.summary || '', headings: [] }];
+    return {
+      metaTitle: payload.metaTitle || artifact.title || '',
+      metaDescription: payload.metaDescription || artifact.summary || '',
+      header: payload.header || artifact.title || '',
+      blogHeaderImageUrl: payload.blogHeaderImage || payload.blogImage?.url || '',
+      blogHeaderImageAlt: payload.blogHeaderImageAlt || payload.blogImage?.alt || '',
+      blogImagePrompt: payload.blogImagePrompt || payload.blogImage?.prompt || '',
+      sections: safeSections,
+    };
+  };
+
+  const startArtifactEdit = (artifact) => {
+    const artifactId = artifact?.artifactId || artifact?.id;
+    if (!artifactId) return;
+    setArtifactDraftById((current) => ({ ...current, [artifactId]: buildArtifactDraft(artifact) }));
+    setEditingArtifactId(artifactId);
+    setExpandedArtifactId(artifactId);
+  };
+
+  const updateArtifactDraft = (artifactId, field, value) => {
+    setArtifactDraftById((current) => ({
+      ...current,
+      [artifactId]: { ...(current[artifactId] || {}), [field]: value },
+    }));
+  };
+
+  const updateArtifactSectionDraft = (artifactId, index, field, value) => {
+    setArtifactDraftById((current) => {
+      const draft = current[artifactId] || { sections: [] };
+      const sections = Array.isArray(draft.sections) ? [...draft.sections] : [];
+      sections[index] = { ...(sections[index] || {}), [field]: value };
+      return { ...current, [artifactId]: { ...draft, sections } };
+    });
+  };
+
+  const addArtifactSectionDraft = (artifactId) => {
+    setArtifactDraftById((current) => {
+      const draft = current[artifactId] || { sections: [] };
+      return { ...current, [artifactId]: { ...draft, sections: [...(draft.sections || []), { title: '', content: '', headings: [] }] } };
+    });
+  };
+
+  const saveArtifactEdit = async (artifact) => {
+    const artifactId = artifact?.artifactId || artifact?.id;
+    if (!artifactId) return;
+    const draft = artifactDraftById[artifactId] || buildArtifactDraft(artifact);
+    setActionId(`edit:${artifactId}`);
+    showMessage({ type: '', text: '' }, { scroll: false });
+    try {
+      const formData = new FormData();
+      formData.append('metaTitle', draft.metaTitle || '');
+      formData.append('metaDescription', draft.metaDescription || '');
+      formData.append('header', draft.header || '');
+      formData.append('summary', draft.metaDescription || artifact.summary || '');
+      formData.append('blogHeaderImageUrl', draft.blogHeaderImageUrl || '');
+      formData.append('blogHeaderImageAlt', draft.blogHeaderImageAlt || '');
+      formData.append('blogImagePrompt', draft.blogImagePrompt || '');
+      formData.append('sections', JSON.stringify(draft.sections || []));
+      formData.append('reason', 'Edited from Swarm Command Center.');
+      if (artifactFileById[artifactId]) formData.append('blogHeaderImage', artifactFileById[artifactId]);
+      await swarmApi.updateArtifact(artifactId, formData);
+      showMessage({ type: 'success', text: 'Artifact/blog draft updated. If this artifact was already published, the published blog was updated too.' });
+      setEditingArtifactId('');
+      setArtifactFileById((current) => ({ ...current, [artifactId]: null }));
+      await loadSwarm({ silent: true });
+    } catch (error) {
+      handleError(error, 'Could not save artifact edits.');
+    } finally {
+      setActionId('');
+    }
+  };
+
+  const generateArtifactBanner = async (artifact) => {
+    const artifactId = artifact?.artifactId || artifact?.id;
+    if (!artifactId) return;
+    setActionId(`banner:${artifactId}`);
+    showMessage({ type: '', text: '' }, { scroll: false });
+    try {
+      const result = await swarmApi.generateBlogBanner(artifactId, { reason: 'Generate blog banner from fighter images.' });
+      const updated = result?.artifact || artifact;
+      setArtifactDraftById((current) => ({ ...current, [artifactId]: buildArtifactDraft(updated) }));
+      setEditingArtifactId(artifactId);
+      setExpandedArtifactId(artifactId);
+      showMessage({ type: 'success', text: 'Blog banner generated from the fight/fighter image context. Review and save/publish as needed.' });
+      await loadSwarm({ silent: true });
+    } catch (error) {
+      handleError(error, 'Could not generate blog banner.');
+    } finally {
+      setActionId('');
+    }
+  };
+
   const runJobAction = async (job, action) => {
     const jobId = job?.jobId || job?.id;
     if (!jobId) return;
@@ -1124,7 +1231,62 @@ const SwarmCommandCenter = () => {
             const expanded = expandedArtifactId === artifactId || requestedArtifactId === artifactId;
             const blogLike = isBlogLikeArtifact(artifact);
             const seoLike = isSeoArtifact(artifact);
-            return <article className="admin-swarm-artifact" key={artifactId} id={`artifact-${artifactId}`}><div className="admin-swarm-artifact-main"><div><span className={`admin-status-badge ${statusClass(artifact.reviewStatus)}`}>{artifact.reviewStatus || 'AWAITING_REVIEW'}</span><small>{artifact.vertical} · {artifact.artifactType || artifact.jobType} {artifact.campaignId ? `· Campaign ${artifact.campaignId}` : ''}</small><h3>{getArtifactTitle(artifact)}</h3><p>{String(getArtifactSummary(artifact)).slice(0, 300)}</p>{seoLike && <div className="admin-swarm-seo-target"><label><span>Target blog ID for SEO apply</span><input value={seoTargetByArtifact[artifactId] || ''} onChange={(event) => setSeoTargetByArtifact((current) => ({ ...current, [artifactId]: event.target.value }))} placeholder="Optional blog id" /></label><small>Without a target blog, SEO stays approved as an application plan.</small></div>}</div><div className="admin-swarm-artifact-actions"><button type="button" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)} className="admin-topbar-primary"><FaCheck /> {blogLike ? 'Approve & publish blog' : 'Approve'}</button>{seoLike && <button type="button" onClick={() => runArtifactAction(artifact, 'applySeo')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaSearch /> Apply SEO</button>}{blogLike && <button type="button" onClick={() => runArtifactAction(artifact, 'approveOnly')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaShieldAlt /> Approve only</button>}<button type="button" onClick={() => runArtifactAction(artifact, 'regenerate')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaRedo /> Regenerate</button><button type="button" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)} className="admin-action-secondary is-danger"><FaTimes /> Reject</button></div></div>{Array.isArray(payload.sections) && payload.sections.length > 0 && <div className="admin-swarm-section-preview">{payload.sections.slice(0, 3).map((section, index) => <section key={`${artifactId}-section-${index}`}><strong>{section.title || `Section ${index + 1}`}</strong><p>{String(section.content || section.body || '').slice(0, 220)}</p></section>)}</div>}{payload.applicationPlan && <div className="admin-swarm-application-plan"><FaCog /><div><strong>Application plan</strong><p>{payload.applicationPlan.summary || payload.applicationPlan.reason || 'Review this plan before applying it to the live site.'}</p></div></div>}<button type="button" className="admin-swarm-json-toggle" onClick={() => setExpandedArtifactId(expanded ? '' : artifactId)}>{expanded ? 'Hide payload' : 'View payload'}</button>{expanded && <pre className="admin-swarm-json">{compactJson(payload)}</pre>}</article>;
+            const draft = artifactDraftById[artifactId] || buildArtifactDraft(artifact);
+            const editing = editingArtifactId === artifactId;
+            const previewImage = draft.blogHeaderImageUrl || payload.blogHeaderImage || payload.blogImage?.url || '';
+            return (
+              <article className="admin-swarm-artifact" key={artifactId} id={`artifact-${artifactId}`}>
+                <div className="admin-swarm-artifact-main">
+                  <div>
+                    <span className={`admin-status-badge ${statusClass(artifact.reviewStatus)}`}>{artifact.reviewStatus || 'AWAITING_REVIEW'}</span>
+                    <small>{artifact.vertical} · {artifact.artifactType || artifact.jobType} {artifact.campaignId ? `· Campaign ${artifact.campaignId}` : ''}</small>
+                    <h3>{getArtifactTitle(artifact)}</h3>
+                    <p>{String(getArtifactSummary(artifact)).slice(0, 300)}</p>
+                    {previewImage && <div className="admin-swarm-blog-image-preview"><img src={previewImage} alt={draft.blogHeaderImageAlt || getArtifactTitle(artifact)} /></div>}
+                    {seoLike && <div className="admin-swarm-seo-target"><label><span>Target blog ID for SEO apply</span><input value={seoTargetByArtifact[artifactId] || ''} onChange={(event) => setSeoTargetByArtifact((current) => ({ ...current, [artifactId]: event.target.value }))} placeholder="Optional blog id" /></label><small>Without a target blog, SEO stays approved as an application plan.</small></div>}
+                  </div>
+                  <div className="admin-swarm-artifact-actions">
+                    {blogLike && <button type="button" onClick={() => startArtifactEdit(artifact)} disabled={Boolean(actionId)} className="admin-action-secondary"><FaEdit /> Edit</button>}
+                    {blogLike && <button type="button" onClick={() => generateArtifactBanner(artifact)} disabled={Boolean(actionId)} className="admin-action-secondary"><FaImage /> Generate banner</button>}
+                    <button type="button" onClick={() => runArtifactAction(artifact, 'approve')} disabled={Boolean(actionId)} className="admin-topbar-primary"><FaCheck /> {blogLike ? 'Approve & publish blog' : 'Approve'}</button>
+                    {seoLike && <button type="button" onClick={() => runArtifactAction(artifact, 'applySeo')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaSearch /> Apply SEO</button>}
+                    {blogLike && <button type="button" onClick={() => runArtifactAction(artifact, 'approveOnly')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaShieldAlt /> Approve only</button>}
+                    <button type="button" onClick={() => runArtifactAction(artifact, 'regenerate')} disabled={Boolean(actionId)} className="admin-action-secondary"><FaRedo /> Regenerate</button>
+                    <button type="button" onClick={() => runArtifactAction(artifact, 'reject')} disabled={Boolean(actionId)} className="admin-action-secondary is-danger"><FaTimes /> Reject</button>
+                  </div>
+                </div>
+                {editing && (
+                  <div className="admin-swarm-artifact-editor">
+                    <div className="admin-swarm-editor-grid">
+                      <label><span>Meta title</span><input value={draft.metaTitle || ''} onChange={(event) => updateArtifactDraft(artifactId, 'metaTitle', event.target.value)} /></label>
+                      <label><span>Header</span><input value={draft.header || ''} onChange={(event) => updateArtifactDraft(artifactId, 'header', event.target.value)} /></label>
+                      <label className="is-wide"><span>Meta description</span><textarea rows={3} value={draft.metaDescription || ''} onChange={(event) => updateArtifactDraft(artifactId, 'metaDescription', event.target.value)} /></label>
+                      <label className="is-wide"><span>Banner image URL</span><input value={draft.blogHeaderImageUrl || ''} onChange={(event) => updateArtifactDraft(artifactId, 'blogHeaderImageUrl', event.target.value)} placeholder="Generated, uploaded, or external image URL" /></label>
+                      <label><span>Banner alt text</span><input value={draft.blogHeaderImageAlt || ''} onChange={(event) => updateArtifactDraft(artifactId, 'blogHeaderImageAlt', event.target.value)} /></label>
+                      <label><span>Upload banner image</span><input type="file" accept="image/*" onChange={(event) => setArtifactFileById((current) => ({ ...current, [artifactId]: event.target.files?.[0] || null }))} /></label>
+                      <label className="is-wide"><span>AI image prompt / banner brief</span><textarea rows={4} value={draft.blogImagePrompt || ''} onChange={(event) => updateArtifactDraft(artifactId, 'blogImagePrompt', event.target.value)} /></label>
+                    </div>
+                    <div className="admin-swarm-editor-sections">
+                      <div className="admin-swarm-editor-head"><strong>Blog sections</strong><button type="button" className="admin-action-secondary" onClick={() => addArtifactSectionDraft(artifactId)}>+ Add section</button></div>
+                      {(draft.sections || []).map((section, sectionIndex) => (
+                        <section key={`${artifactId}-edit-section-${sectionIndex}`}>
+                          <input value={section.title || ''} onChange={(event) => updateArtifactSectionDraft(artifactId, sectionIndex, 'title', event.target.value)} placeholder={`Section ${sectionIndex + 1} title`} />
+                          <textarea rows={5} value={section.content || ''} onChange={(event) => updateArtifactSectionDraft(artifactId, sectionIndex, 'content', event.target.value)} placeholder="Section content" />
+                        </section>
+                      ))}
+                    </div>
+                    <div className="admin-swarm-editor-actions">
+                      <button type="button" className="admin-topbar-primary" disabled={Boolean(actionId)} onClick={() => saveArtifactEdit(artifact)}><FaSave /> Save edits</button>
+                      <button type="button" className="admin-action-secondary" onClick={() => setEditingArtifactId('')}>Cancel edit</button>
+                    </div>
+                  </div>
+                )}
+                {Array.isArray(payload.sections) && payload.sections.length > 0 && <div className="admin-swarm-section-preview">{payload.sections.slice(0, 3).map((section, index) => <section key={`${artifactId}-section-${index}`}><strong>{section.title || `Section ${index + 1}`}</strong><p>{String(section.content || section.body || '').slice(0, 220)}</p></section>)}</div>}
+                {payload.applicationPlan && <div className="admin-swarm-application-plan"><FaCog /><div><strong>Application plan</strong><p>{payload.applicationPlan.summary || payload.applicationPlan.reason || 'Review this plan before applying it to the live site.'}</p></div></div>}
+                <button type="button" className="admin-swarm-json-toggle" onClick={() => setExpandedArtifactId(expanded ? '' : artifactId)}>{expanded ? 'Hide payload' : 'View payload'}</button>
+                {expanded && <pre className="admin-swarm-json">{compactJson(payload)}</pre>}
+              </article>
+            );
           })}</div>}
         </section>
       )}
