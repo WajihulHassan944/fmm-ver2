@@ -312,6 +312,9 @@ const Header = () => {
     <header className="header theme-header">
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
         <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={188} height={84} sizes="188px" priority />
+        <span className="theme-mobile-logo-art" aria-hidden="true">
+          <img src="/images/mobile-home/fantasy-mmadness-mobile-logo.png" alt="" loading="eager" />
+        </span>
         <span className="theme-mobile-wordmark" aria-hidden="true">
           <b>Fantasy</b>
           <strong>MMAdness</strong>
