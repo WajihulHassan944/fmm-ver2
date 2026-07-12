@@ -118,13 +118,24 @@ export const parseFightDate = (match) => {
 };
 
 export const getFightStatus = (match, now = new Date()) => {
-  const source = `${match?.matchStatus || ''} ${match?.matchShadowStatus || ''} ${match?.matchShadowOpenStatus || ''}`.toLowerCase();
-  if (/(finished|completed|closed|past|result)/.test(source)) return 'past';
+  const source = `${match?.matchStatus || ''} ${match?.matchShadowStatus || ''} ${match?.matchShadowOpenStatus || ''} ${match?.timelineBucket || ''}`.toLowerCase();
+  const type = `${match?.matchType || ''} ${match?.sourceType || ''} ${match?.__source || ''} ${match?.collection || ''}`.toLowerCase();
   const date = parseFightDate(match);
-  if (/\blive\b/.test(source)) return 'live';
-  // Legacy records use "Ongoing" for every non-finished fight. Only call it
-  // live once the scheduled start has arrived; future cards remain upcoming.
-  if (/(ongoing|active)/.test(source) && date && date.getTime() <= now.getTime()) return 'live';
+  const isFuture = date && date.getTime() >= now.getTime();
+
+  if (source.includes('upcoming')) return 'upcoming';
+  if (source.includes('past')) return 'past';
+
+  // Product rule: all LIVE fight records are upcoming cards. They move to
+  // Shadow/past after the scheduled date rollover handled by the backend.
+  if (type.includes('live') || source.includes('live fight')) return 'upcoming';
+
+  // Product rule: Shadow templates are past/template records unless an
+  // affiliate gives them a future promotion date, then they become upcoming.
+  if (type.includes('shadow')) return isFuture ? 'upcoming' : 'past';
+
+  if (/(finished|completed|closed|past|result)/.test(source)) return 'past';
+  if (/live now|scoring/.test(source)) return 'live';
   if (date && date.getTime() < now.getTime()) return 'past';
   return 'upcoming';
 };

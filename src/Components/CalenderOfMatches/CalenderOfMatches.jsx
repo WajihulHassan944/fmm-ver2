@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
+import { fetchPublicFightCalendar } from '@/Utils/publicApi';
 import Calendar from 'react-calendar';
 import {
   FaArrowLeft,
@@ -31,7 +32,10 @@ const CalenderOfMatches = () => {
   const dispatch = useDispatch();
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
-  const safeMatches = Array.isArray(matches) ? matches : [];
+  const reduxMatches = Array.isArray(matches) ? matches : [];
+  const [calendarMatches, setCalendarMatches] = useState([]);
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const safeMatches = calendarMatches.length ? calendarMatches : reduxMatches;
 
   const [date, setDate] = useState(null);
   const [viewDate, setViewDate] = useState(new Date());
@@ -42,12 +46,47 @@ const CalenderOfMatches = () => {
   const [dateModalVisible, setDateModalVisible] = useState(false);
 
   useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches());
+    if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true, limit: 500 }));
   }, [matchStatus, dispatch]);
+
+  useEffect(() => {
+    let active = true;
+    setCalendarLoading(true);
+    fetchPublicFightCalendar({ includeDrafts: true, limit: 500 })
+      .then((rows) => {
+        if (active) setCalendarMatches(Array.isArray(rows) ? rows : []);
+      })
+      .catch((error) => {
+        console.warn('Public fight calendar unavailable:', error.message);
+        if (active) setCalendarMatches([]);
+      })
+      .finally(() => {
+        if (active) setCalendarLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     setHighlightedDates(new Set(safeMatches.map((match) => formatDateKey(match?.matchDate)).filter(Boolean)));
   }, [safeMatches]);
+
+  const matchesByDate = useMemo(() => safeMatches.reduce((map, match) => {
+    const key = formatDateKey(match?.matchDate || match?.date || match?.scheduledAt);
+    if (!key) return map;
+    const existing = map.get(key) || [];
+    existing.push(match);
+    map.set(key, existing);
+    return map;
+  }, new Map()), [safeMatches]);
+
+  const getDateHoverTitle = (tileDate) => {
+    const rows = matchesByDate.get(formatDateKey(tileDate)) || [];
+    if (!rows.length) return '';
+    return rows.slice(0, 4).map((match) => {
+      const title = match?.matchName || `${match?.matchFighterA || 'Fighter A'} vs ${match?.matchFighterB || 'Fighter B'}`;
+      return `${formatTime(match?.matchTime)} — ${title}`;
+    }).join('\n');
+  };
 
   const upcomingCount = useMemo(() => {
     const today = formatDateKey(new Date());
@@ -105,7 +144,7 @@ const CalenderOfMatches = () => {
             </p>
           </div>
           <div className="premium-calendar-phase-two-stats">
-            <article><FaFistRaised /><strong>{safeMatches.length}</strong><span>Total fights</span></article>
+            <article><FaFistRaised /><strong>{calendarLoading ? '—' : safeMatches.length}</strong><span>Total fights</span></article>
             <article><FaTrophy /><strong>{upcomingCount}</strong><span>Upcoming</span></article>
             <article><FaCalendarAlt /><strong>{currentMonthCount}</strong><span>This month</span></article>
           </div>
@@ -141,6 +180,12 @@ const CalenderOfMatches = () => {
                   ? 'premium-calendar-highlighted'
                   : null
               )}
+              tileContent={({ date: tileDate, view }) => {
+                if (view !== 'month') return null;
+                const rows = matchesByDate.get(formatDateKey(tileDate)) || [];
+                if (!rows.length) return null;
+                return <span className="premium-calendar-day-dot" title={getDateHoverTitle(tileDate)}>{rows.length}</span>;
+              }}
               showNavigation={false}
             />
 

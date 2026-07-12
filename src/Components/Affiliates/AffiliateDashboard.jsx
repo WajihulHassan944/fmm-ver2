@@ -30,10 +30,53 @@ import {
   getFighterImage,
   safeArray,
 } from '@/Utils/fightExperience';
+import { fetchPublicFights, normalizePublicFightRows } from '@/Utils/publicApi';
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const MAX_CARDS = 5;
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
+
+const isShadowLikeFight = (match = {}) => {
+  const source = `${match?.matchType || ''} ${match?.sourceType || ''} ${match?.__source || ''} ${match?.collection || ''}`.toLowerCase();
+  return source.includes('shadow');
+};
+
+const isPromotedByAffiliate = (match = {}, affiliateId = '') => {
+  if (!affiliateId) return false;
+  if (String(match?.affiliateId || match?.promotedByAffiliateId || '') === affiliateId) return true;
+  if (match?.affiliatePromoted || match?.isPromotedByCurrentAffiliate) return true;
+  return safeArray(match?.AffiliateIds || match?.affiliateIds).some((affiliateObject) => (
+    String(affiliateObject?.AffiliateId || affiliateObject?.affiliateId || affiliateObject?.id || '') === affiliateId
+  ));
+};
+
+const dedupeAffiliateFightRows = (rows = []) => {
+  const selected = new Map();
+  safeArray(rows).forEach((fight) => {
+    const id = getFightId(fight) || `${fight?.matchName || ''}-${fight?.matchFighterA || ''}-${fight?.matchFighterB || ''}`;
+    if (!id) return;
+    const current = selected.get(id);
+    if (!current || (isPromotedByAffiliate(fight, fight?.affiliateId) && !isPromotedByAffiliate(current, current?.affiliateId))) {
+      selected.set(id, fight);
+    }
+  });
+  return Array.from(selected.values());
+};
+
+const extractAffiliatePromotedRows = (payload = {}) => normalizePublicFightRows(
+  Array.isArray(payload?.items)
+    ? payload.items
+    : Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.promotedFights)
+        ? payload.promotedFights
+        : Array.isArray(payload?.fights)
+          ? payload.fights
+          : Array.isArray(payload)
+            ? payload
+            : [],
+);
+
 
 const AffiliateDashboard = () => {
   const dispatch = useDispatch();
@@ -89,10 +132,22 @@ const AffiliateDashboard = () => {
       setPromoError('');
 
       try {
-        const response = await fetch(`${API_BASE}/shadow`);
-        if (!response.ok) throw new Error('Failed to fetch promo matches');
-        const data = await response.json();
-        if (active) setPromoMatches(Array.isArray(data) ? data : []);
+        const [legacyResult, publicRows] = await Promise.allSettled([
+          fetch(`${API_BASE}/shadow?limit=500&includeDrafts=true`).then(async (response) => {
+            if (!response.ok) throw new Error('Failed to fetch shadow templates');
+            return response.json();
+          }),
+          fetchPublicFights({ limit: 500, includeDrafts: true }),
+        ]);
+
+        const legacyRows = legacyResult.status === 'fulfilled'
+          ? normalizePublicFightRows(Array.isArray(legacyResult.value) ? legacyResult.value : legacyResult.value?.items || legacyResult.value?.data || [])
+          : [];
+        const publicShadowRows = publicRows.status === 'fulfilled'
+          ? safeArray(publicRows.value).filter(isShadowLikeFight)
+          : [];
+
+        if (active) setPromoMatches(dedupeAffiliateFightRows([...legacyRows, ...publicShadowRows]));
       } catch (error) {
         console.error(error);
         if (active) {
@@ -108,7 +163,7 @@ const AffiliateDashboard = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [shadowMatchId]);
 
   useEffect(() => {
     const affiliateId = affiliate?._id ? String(affiliate._id) : '';
@@ -120,10 +175,10 @@ const AffiliateDashboard = () => {
     let active = true;
     const fetchAffiliatePromotedFights = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights`);
+        const response = await fetch(`${API_BASE}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights?limit=500&includeShadow=true`);
         if (!response.ok) throw new Error(`Promoted fights failed with ${response.status}`);
         const payload = await response.json();
-        if (active) setAffiliatePromotedFights(Array.isArray(payload?.items) ? payload.items : []);
+        if (active) setAffiliatePromotedFights(dedupeAffiliateFightRows(extractAffiliatePromotedRows(payload)));
       } catch (error) {
         console.info('Affiliate promoted fights endpoint unavailable:', error.message);
         if (active) setAffiliatePromotedFights([]);
@@ -132,37 +187,24 @@ const AffiliateDashboard = () => {
 
     fetchAffiliatePromotedFights();
     return () => { active = false; };
-  }, [affiliate?._id]);
+  }, [affiliate?._id, shadowMatchId]);
 
   const affiliateId = affiliate?._id ? String(affiliate._id) : '';
   const liveMatches = safeArray(matches);
   const joinedMembers = safeArray(affiliate?.usersJoined);
 
   const promotionFights = useMemo(
-    () => safeArray(promoMatches).filter((match) => (
-      match?.matchType === 'SHADOW'
-      && !safeArray(match?.AffiliateIds).some(
-        (affiliateObject) => String(affiliateObject?.AffiliateId || '') === affiliateId,
-      )
-    )),
-    [affiliateId, promoMatches],
+    () => dedupeAffiliateFightRows(safeArray(promoMatches).filter(isShadowLikeFight)),
+    [promoMatches],
   );
 
   const legacyPromotedFights = useMemo(
-    () => safeArray(promoMatches).filter((match) => safeArray(match?.AffiliateIds).some(
-      (affiliateObject) => (
-        String(affiliateObject?.AffiliateId || '') === affiliateId
-        && liveMatches.some(
-          (liveMatch) => String(getFightId(liveMatch)) === String(affiliateObject?.matchId || '')
-            && liveMatch?.matchShadowOpenStatus === 'open',
-        )
-      ),
-    )),
-    [affiliateId, liveMatches, promoMatches],
+    () => dedupeAffiliateFightRows(safeArray(promoMatches).filter((match) => isPromotedByAffiliate(match, affiliateId))),
+    [affiliateId, promoMatches],
   );
 
   const promotedFights = useMemo(
-    () => (safeArray(affiliatePromotedFights).length ? safeArray(affiliatePromotedFights) : legacyPromotedFights),
+    () => dedupeAffiliateFightRows([...safeArray(affiliatePromotedFights), ...legacyPromotedFights]),
     [affiliatePromotedFights, legacyPromotedFights],
   );
 
@@ -309,8 +351,8 @@ const AffiliateDashboard = () => {
             <section className="xp-page-section" id="shadow-templates">
               <ExperienceSectionHeading
                 eyebrow="Approved fight inventory"
-                title="Shadow templates"
-                description="Choose an approved fight template and continue through the existing promotion creation flow."
+                title="Shadow fight templates"
+                description="All available Shadow/template fights appear here. Create a new promotion, or reopen a campaign you already promoted."
               />
 
               {promoLoading ? (
@@ -335,8 +377,14 @@ const AffiliateDashboard = () => {
                             <p>Template {String(displayIndex + 1).padStart(2, '0')}</p>
                             <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
                             <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Fight promotion'}</span></div>
-                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => setShadowMatchId(fightId)}>
-                              Create promotion <FaArrowRight />
+                            <button
+                              type="button"
+                              className="theme-btn theme-btn-primary"
+                              onClick={() => isPromotedByAffiliate(match, affiliateId)
+                                ? setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match })
+                                : setShadowMatchId(fightId)}
+                            >
+                              {isPromotedByAffiliate(match, affiliateId) ? 'Open campaign' : 'Create promotion'} <FaArrowRight />
                             </button>
                           </div>
                         </article>

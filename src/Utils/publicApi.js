@@ -520,6 +520,57 @@ export const fetchPromotedHomeFights = async (query = {}) => {
   }
 };
 
+
+const extractCalendarFightRows = (payload = {}) => {
+  if (Array.isArray(payload)) return payload;
+
+  const directRows = Array.isArray(payload?.items)
+    ? payload.items
+    : Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.rows)
+        ? payload.rows
+        : Array.isArray(payload?.fights)
+          ? payload.fights
+          : null;
+
+  if (directRows) {
+    return directRows.flatMap((item) => {
+      if (Array.isArray(item?.fights)) {
+        return item.fights.map((fight) => ({ ...fight, matchDate: fight.matchDate || item.date || item.dateKey }));
+      }
+      if (Array.isArray(item?.items)) {
+        return item.items.map((fight) => ({ ...fight, matchDate: fight.matchDate || item.date || item.dateKey }));
+      }
+      return item;
+    });
+  }
+
+  const grouped = payload?.calendar || payload?.byDate || payload?.fightsByDate || payload?.dates;
+  if (grouped && typeof grouped === 'object') {
+    return Object.entries(grouped).flatMap(([dateKey, value]) => {
+      const rows = Array.isArray(value) ? value : Array.isArray(value?.fights) ? value.fights : Array.isArray(value?.items) ? value.items : [];
+      return rows.map((fight) => ({ ...fight, matchDate: fight.matchDate || dateKey }));
+    });
+  }
+
+  return [];
+};
+
+export const fetchPublicFightCalendar = async (query = {}) => {
+  try {
+    const payload = await safeFetchJson(
+      "/api/public/fight-calendar",
+      { limit: 500, ...query },
+      { timeoutMs: 10000 },
+    );
+    return normalizePublicFightRows(extractCalendarFightRows(payload));
+  } catch (error) {
+    console.warn("Public fight calendar API unavailable, falling back to public fights:", error.message);
+    return fetchPublicFights({ limit: 500, includeDrafts: true, ...query });
+  }
+};
+
 export const fetchPublicHomeSummary = async (query = {}) => {
   try {
     const payload = await safeFetchJson(

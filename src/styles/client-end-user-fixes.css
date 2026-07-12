@@ -361,3 +361,401 @@
   .admin-fighter-pagination { align-items: stretch; flex-direction: column; }
   .admin-fighter-pagination > div { justify-content: space-between; }
 }
+
+/* Phase: mobile + desktop featured homepage fight banner redesign */
+.fmm-home .fmm-home-hero {
+  min-height: auto !important;
+  padding: 104px 0 52px !important;
+}
+.fmm-home .fmm-hero-grid {
+  align-items: center !important;
+  display: grid !important;
+  gap: 28px !important;
+  grid-template-columns: 1fr !important;
+  min-height: auto !important;
+}
+.fmm-home .fmm-hero-copy {
+  margin: 0 auto !important;
+  max-width: 860px !important;
+  text-align: center !important;
+}
+.fmm-home .fmm-hero-copy h1 {
+  font-size: clamp(42px, 5vw, 74px) !important;
+}
+.fmm-home .fmm-hero-subtitle {
+  margin-inline: auto !important;
+  max-width: 640px !important;
+}
+.fmm-home .fmm-proof-strip,
+.fmm-home .fmm-tonight-callout {
+  display: none !important;
+}
+.fmm-home .fmm-hero-fight-area {
+  align-items: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  min-height: auto !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+.fmm-featured-fight-banner {
+  background:
+    radial-gradient(circle at 16% 28%, rgba(223, 17, 27, 0.32), transparent 22rem),
+    radial-gradient(circle at 84% 28%, rgba(30, 151, 255, 0.32), transparent 22rem),
+    linear-gradient(180deg, rgba(5, 7, 13, 0.84), rgba(3, 6, 10, 0.98)) !important;
+  border: 2px solid rgba(255,255,255,.18) !important;
+  border-radius: 34px !important;
+  box-shadow: 0 34px 100px rgba(0,0,0,.56), inset 0 0 0 1px rgba(255,255,255,.06) !important;
+  display: block !important;
+  isolation: isolate !important;
+  max-width: 1280px !important;
+  min-height: 610px !important;
+  overflow: hidden !important;
+  padding: 34px !important;
+  position: relative !important;
+  width: 100% !important;
+}
+.fmm-featured-fight-banner::before {
+  background:
+    linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 10%, rgba(255,255,255,.18), transparent 16rem);
+  background-size: 96px 96px, 96px 96px, 100% 100%;
+  content: '';
+  inset: 0;
+  opacity: .52;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+.fmm-featured-fight-banner::after {
+  background: linear-gradient(90deg, rgba(0,0,0,.55), transparent 25%, transparent 75%, rgba(0,0,0,.55));
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+.fmm-featured-badge {
+  align-items: center;
+  background: linear-gradient(135deg, #bb101a, #e50914);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 12px;
+  box-shadow: 0 16px 34px rgba(229,9,20,.25);
+  color: #fff;
+  display: inline-flex;
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif;
+  font-size: 17px;
+  gap: 10px;
+  letter-spacing: .05em;
+  padding: 12px 16px;
+  position: relative;
+  text-transform: uppercase;
+  z-index: 3;
+}
+.fmm-featured-duel-stage {
+  align-items: center;
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .82fr) minmax(0, 1fr);
+  inset: 0;
+  min-height: 500px;
+  position: relative;
+  z-index: 2;
+}
+.fmm-featured-fighter {
+  align-self: end;
+  display: flex;
+  filter: drop-shadow(0 28px 42px rgba(0,0,0,.62));
+  height: 510px;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+}
+.fmm-featured-fighter img {
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  width: 100% !important;
+}
+.fmm-featured-fighter.is-left img { border-radius: 26px 0 0 26px; }
+.fmm-featured-fighter.is-right img { border-radius: 0 26px 26px 0; }
+.fmm-featured-center {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  text-align: center;
+  z-index: 4;
+}
+.fmm-featured-center > p {
+  color: #ff173d;
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif;
+  font-size: 22px;
+  letter-spacing: .18em;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+.fmm-featured-center h2 {
+  color: #fff;
+  display: grid;
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif;
+  font-size: clamp(42px, 5.2vw, 82px);
+  gap: 10px;
+  letter-spacing: .03em;
+  line-height: .92;
+  margin: 0 0 22px;
+  text-transform: uppercase;
+  text-shadow: 0 7px 22px rgba(0,0,0,.7);
+}
+.fmm-featured-center h2 small {
+  align-items: center;
+  color: #ff173d;
+  display: inline-flex;
+  font-size: 24px;
+  gap: 14px;
+  justify-content: center;
+  line-height: 1;
+}
+.fmm-featured-center h2 small::before,
+.fmm-featured-center h2 small::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25));
+  content: '';
+  height: 1px;
+  width: 72px;
+}
+.fmm-featured-center h2 small::after { background: linear-gradient(90deg, rgba(255,255,255,.25), transparent); }
+.fmm-featured-center .fmm-hero-event-meta {
+  background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 999px;
+  margin: 4px 0 14px;
+  padding: 11px 18px;
+}
+.fmm-featured-center .fmm-promoted-details {
+  justify-content: center;
+  margin-top: 0;
+}
+.fmm-featured-center .fmm-countdown-box {
+  background: transparent !important;
+  border: 0 !important;
+  gap: 12px !important;
+  grid-template-columns: repeat(3, minmax(70px, 1fr)) !important;
+  margin: 18px 0 16px !important;
+  max-width: 360px;
+  padding: 0 !important;
+}
+.fmm-featured-center .fmm-countdown-box div {
+  background: rgba(0,0,0,.56);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  min-height: 76px;
+}
+.fmm-featured-center .fmm-countdown-box strong {
+  color: #ff173d !important;
+  font-size: 34px !important;
+}
+.fmm-featured-primary-cta {
+  align-items: center;
+  background: linear-gradient(135deg, #ff173d, #b70411);
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(229,9,20,.35);
+  color: #fff !important;
+  display: inline-flex;
+  font-family: "FMMUFCBold", Inter, Roboto, Arial, sans-serif;
+  font-size: 18px;
+  gap: 12px;
+  justify-content: center;
+  letter-spacing: .04em;
+  min-height: 54px;
+  min-width: 220px;
+  padding: 0 22px;
+  text-transform: uppercase;
+}
+.fmm-featured-fight-banner > .fmm-promoted-calendar {
+  bottom: 26px;
+  margin: 0;
+  position: absolute;
+  right: 30px;
+  width: 230px;
+  z-index: 5;
+}
+.fmm-featured-arrow {
+  align-items: center;
+  background: linear-gradient(135deg, #ff173d, #b70411);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: 52px;
+  height: 64px;
+  justify-content: center;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64px;
+  z-index: 6;
+}
+.fmm-featured-arrow.is-left { left: 28px; }
+.fmm-featured-arrow.is-right { right: 28px; }
+.fmm-featured-fight-banner > .fmm-promoted-dots {
+  bottom: 30px;
+  left: 50%;
+  margin: 0;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 6;
+}
+
+@media (max-width: 760px) {
+  .fmm-home .fmm-home-hero {
+    padding: 82px 0 18px !important;
+  }
+  .fmm-home .fmm-hero-copy {
+    display: none !important;
+  }
+  .fmm-featured-fight-banner {
+    border-radius: 22px !important;
+    min-height: 318px !important;
+    padding: 14px !important;
+  }
+  .fmm-featured-badge {
+    border-radius: 9px;
+    font-size: 11px;
+    gap: 7px;
+    padding: 8px 10px;
+  }
+  .fmm-featured-duel-stage {
+    gap: 4px;
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 1.02fr) minmax(0, 1fr);
+    min-height: 250px;
+  }
+  .fmm-featured-fighter {
+    height: 230px;
+    margin-top: 34px;
+  }
+  .fmm-featured-center > p {
+    font-size: 12px;
+    letter-spacing: .12em;
+    margin-bottom: 8px;
+  }
+  .fmm-featured-center h2 {
+    font-size: clamp(20px, 8vw, 34px);
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .fmm-featured-center h2 small {
+    font-size: 18px;
+  }
+  .fmm-featured-center h2 small::before,
+  .fmm-featured-center h2 small::after {
+    width: 18px;
+  }
+  .fmm-featured-center .fmm-hero-event-meta {
+    border-radius: 12px;
+    font-size: 10px !important;
+    margin: 0 0 8px;
+    padding: 7px 9px;
+  }
+  .fmm-featured-center .fmm-promoted-details {
+    display: none;
+  }
+  .fmm-featured-center .fmm-countdown-box {
+    gap: 4px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    margin: 8px 0 9px !important;
+    max-width: 160px;
+  }
+  .fmm-featured-center .fmm-countdown-box div {
+    border-radius: 9px;
+    min-height: 44px;
+    padding: 3px;
+  }
+  .fmm-featured-center .fmm-countdown-box strong {
+    font-size: 18px !important;
+  }
+  .fmm-featured-center .fmm-countdown-box span {
+    font-size: 7px !important;
+  }
+  .fmm-featured-primary-cta {
+    border-radius: 10px;
+    font-size: 12px;
+    min-height: 40px;
+    min-width: 150px;
+  }
+  .fmm-featured-fight-banner > .fmm-promoted-calendar {
+    bottom: auto;
+    display: block !important;
+    padding: 0;
+    right: 12px;
+    top: 12px;
+    width: 58px;
+  }
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid {
+    display: none;
+  }
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-promoted-calendar-head {
+    border-radius: 10px;
+    gap: 0;
+    grid-template-columns: 1fr;
+    padding: 8px 4px;
+  }
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-promoted-calendar-head strong {
+    font-size: 24px;
+  }
+  .fmm-featured-arrow {
+    display: none;
+  }
+  .fmm-featured-fight-banner > .fmm-promoted-dots {
+    bottom: 10px;
+  }
+}
+
+/* Phase: calendar fight-date visibility and hover counts */
+.premium-calendar-control .premium-calendar-day-dot {
+  align-items: center;
+  background: linear-gradient(135deg, #ff173d, #1d9bf0);
+  border-radius: 999px;
+  box-shadow: 0 0 15px rgba(255, 23, 61, .36);
+  color: #fff;
+  display: inline-flex;
+  font-family: Inter, Roboto, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+  height: 18px;
+  justify-content: center;
+  margin-top: 4px;
+  min-width: 18px;
+  padding: 0 5px;
+}
+.premium-calendar-control .premium-calendar-highlighted abbr {
+  color: #fff !important;
+  font-weight: 900;
+}
+
+/* Phase: affiliate shadow template visibility and card balance */
+.affiliate-dashboard-experience-page .xp-affiliate-fight-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media {
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr) !important;
+  height: 250px !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media figure {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media img {
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  width: 100% !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-card.is-template .xp-affiliate-fight-copy p::after {
+  color: #22c55e;
+  content: ' · Shadow';
+}

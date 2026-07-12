@@ -428,12 +428,11 @@ const FightsHub = ({
             >
               <div>
                 <p className="xp-eyebrow">
-                  <FaUsers /> Start free
+                  <FaUsers /> Fight access
                 </p>
-                <h2>Sign up once, then enter any open fight card.</h2>
+                <h2>Create your player profile and enter open cards.</h2>
                 <span>
-                  No missing detours — create a player account and make
-                  predictions from the fight detail page.
+                  Browse the matchup, open the detail page, and lock your prediction from there.
                 </span>
               </div>
               <div>
@@ -441,7 +440,7 @@ const FightsHub = ({
                   href={PLAYER_SIGNUP_HREF}
                   className="theme-btn theme-btn-primary"
                 >
-                  Sign Up Free <FaArrowRight />
+                  Create Account <FaArrowRight />
                 </Link>
                 <Link
                   href="#fight-directory"
