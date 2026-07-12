@@ -496,9 +496,26 @@ const getFightTitle = (match) => {
 };
 
 const getPrizePool = (match) => {
-  const amount = Number(match?.pot || 0);
+  const amount = Number(match?.pot || match?.currentPot || match?.prizePool || 0);
   if (!amount) return "Prize TBA";
   return `$${amount.toLocaleString()}`;
+};
+
+const getPotTokenLabel = (match) => {
+  const amount = Number(
+    match?.potTokens ||
+      match?.tokenPot ||
+      match?.currentPot ||
+      match?.pot ||
+      match?.prizePool ||
+      0,
+  );
+  return amount > 0 ? `${amount.toLocaleString()} POT` : "POT TBA";
+};
+
+const getRoundLabel = (match) => {
+  const rounds = Number(match?.maxRounds || match?.rounds || match?.scheduledRounds || 0);
+  return rounds > 0 ? `${rounds} rounds` : "Rounds TBA";
 };
 
 const getFighterImage = (imageUrl) => imageUrl || FALLBACK_FIGHT_IMAGE;
@@ -1244,10 +1261,13 @@ const HomeAnother = () => {
                         <FaCalendarAlt aria-hidden="true" />
                         <span>{formatDateTime(activeHeroFight)}</span>
                       </div>
-                      <div className="fmm-promoted-details">
+                      <div className="fmm-promoted-details fmm-featured-details-grid">
                         <span><FaBullseye aria-hidden="true" /> {getFightSportLabel(activeHeroFight)}</span>
                         <span><FaClock aria-hidden="true" /> {activeHeroFight.matchStatus || "Open"}</span>
-                        <span><FaUsers aria-hidden="true" /> {getPlayerCount(activeHeroFight)} players</span>
+                        <span><FaUsers aria-hidden="true" /> {getPlayerCount(activeHeroFight).toLocaleString()} players</span>
+                        <span><FaCoins aria-hidden="true" /> {getPotTokenLabel(activeHeroFight)}</span>
+                        <span><FaTrophy aria-hidden="true" /> {getPrizePool(activeHeroFight)}</span>
+                        <span><FaShieldAlt aria-hidden="true" /> {getRoundLabel(activeHeroFight)}</span>
                       </div>
                       <div className="fmm-countdown-box" aria-label="Fight countdown">
                         {primaryCountdown ? (
