@@ -1147,6 +1147,9 @@ const HomeAnother = () => {
                 >
                   Open Featured Fight <FaPlay aria-hidden="true" />
                 </Link>
+                <Link href="/mock-game" className="theme-btn theme-btn-secondary fmm-mock-game-link">
+                  Mock Game <FaBolt aria-hidden="true" />
+                </Link>
               </div>
 
               <div
@@ -1284,9 +1287,14 @@ const HomeAnother = () => {
                           </div>
                         )}
                       </div>
-                      <Link href={getFightDetailHref(activeHeroFight)} className="fmm-featured-primary-cta">
-                        Pick fights <FaArrowRight aria-hidden="true" />
-                      </Link>
+                      <div className="fmm-featured-actions">
+                        <Link href={getFightDetailHref(activeHeroFight)} className="fmm-featured-primary-cta theme-btn theme-btn-primary">
+                          Pick fights <FaArrowRight aria-hidden="true" />
+                        </Link>
+                        <Link href={getFightDetailHref(activeHeroFight)} className="fmm-featured-secondary-cta theme-btn theme-btn-secondary">
+                          View details <FaPlay aria-hidden="true" />
+                        </Link>
+                      </div>
                     </div>
                     <div className="fmm-featured-fighter is-right">
                       <FightImage
@@ -1351,6 +1359,9 @@ const HomeAnother = () => {
                 className="theme-btn theme-btn-secondary"
               >
                 Open featured fight <FaPlay aria-hidden="true" />
+              </Link>
+              <Link href="/mock-game" className="theme-btn theme-btn-secondary">
+                Mock game <FaBolt aria-hidden="true" />
               </Link>
             </div>
           </section>
