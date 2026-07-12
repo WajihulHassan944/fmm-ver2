@@ -312,6 +312,10 @@ const Header = () => {
     <header className="header theme-header">
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
         <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={188} height={84} sizes="188px" priority />
+        <span className="theme-mobile-wordmark" aria-hidden="true">
+          <b>Fantasy</b>
+          <strong>MMAdness</strong>
+        </span>
       </Link>
 
       <nav className="theme-nav" aria-label="Primary navigation">
@@ -319,6 +323,9 @@ const Header = () => {
       </nav>
 
       <div className="theme-header-actions">
+        <Link href="/CreateAccount" className="theme-mobile-signup-icon" aria-label="Create account">
+          <FaUserCircle aria-hidden="true" />
+        </Link>
         {renderAuthActions()}
         <button
           type="button"

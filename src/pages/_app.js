@@ -68,6 +68,7 @@ import "@/styles/admin-growth-data-quality.css";
 import "@/styles/phase4-seo-pages.css";
 import "@/styles/client-end-user-fixes.css";
 import "@/styles/public-fight-detail.css";
+import "@/styles/home-mobile-design-phone.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -197,11 +198,17 @@ function AppContent({ children }) {
 
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
+  const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
   const hideLayout = isAdministrationRoute;
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
   );
+  const mainClassName = isAdministrationRoute
+    ? isAdminLoginRoute
+      ? "admin-login-main"
+      : "admin-experience-main"
+    : `site-experience-main${isHomeExperienceRoute ? " is-home-experience-main" : ""}`;
 
   useEffect(() => {
     if (!router.isReady) return undefined;
@@ -372,15 +379,7 @@ function AppContent({ children }) {
       {showAdminChrome && <AdminHeader />}
       {!hideLayout && <ChatbaseWidget />}
 
-      <main
-        className={
-          isAdministrationRoute
-            ? isAdminLoginRoute
-              ? "admin-login-main"
-              : "admin-experience-main"
-            : "site-experience-main"
-        }
-      >
+      <main className={mainClassName}>
         {useRouteExperienceFrame ? (
           <RouteExperienceFrame pathname={router.pathname}>
             {children}
