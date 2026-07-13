@@ -420,6 +420,27 @@ const formatDateTime = (match) => {
   return `${datePart} • ${timePart} EST`;
 };
 
+const getFeaturedDateLabel = (match) => {
+  const date = parseMatchDate(match);
+  if (!date) return "Schedule pending";
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    weekday: "short",
+  });
+};
+
+const getFeaturedTimeLabel = (match) => {
+  const date = parseMatchDate(match);
+  if (!date) return "Time TBA";
+
+  return `${date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  })} EST`;
+};
+
 const getCountdownParts = (match, now) => {
   const date = parseMatchDate(match);
   if (!date || !now) return null;
@@ -464,7 +485,9 @@ const MiniFightCalendar = ({ match }) => {
   const { date, days } = getMiniCalendarDays(match);
   if (!date) return null;
   const month = date.toLocaleDateString("en-US", { month: "short" });
+  const monthLong = date.toLocaleDateString("en-US", { month: "long" });
   const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+
   return (
     <div
       className="fmm-promoted-calendar"
@@ -475,20 +498,29 @@ const MiniFightCalendar = ({ match }) => {
         <strong>{date.getDate()}</strong>
         <small>{weekday}</small>
       </div>
-      <div className="fmm-mini-calendar-grid" aria-hidden="true">
-        {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-          <b key={`${day}-${index}`}>{day}</b>
-        ))}
-        {days.slice(0, 42).map((day) => (
-          <i
-            key={day.key}
-            className={
-              day.active ? "is-fight-day" : day.blank ? "is-blank" : ""
-            }
-          >
-            {day.label}
-          </i>
-        ))}
+      <div className="fmm-mini-calendar-body">
+        <div className="fmm-mini-calendar-title" aria-hidden="true">
+          <span>‹</span>
+          <i>✦</i>
+          <strong>{monthLong} {date.getFullYear()}</strong>
+          <i>↯</i>
+          <span>›</span>
+        </div>
+        <div className="fmm-mini-calendar-grid" aria-hidden="true">
+          {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+            <b key={`${day}-${index}`}>{day}</b>
+          ))}
+          {days.slice(0, 42).map((day) => (
+            <i
+              key={day.key}
+              className={
+                day.active ? "is-fight-day" : day.blank ? "is-blank" : ""
+              }
+            >
+              {day.label}
+            </i>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -1734,7 +1766,10 @@ const HomeAnother = () => {
                       </h2>
                       <div className="fmm-hero-event-meta">
                         <FaCalendarAlt aria-hidden="true" />
-                        <span>{formatDateTime(activeHeroFight)}</span>
+                        <span>{getFeaturedDateLabel(activeHeroFight)}</span>
+                        <span className="fmm-featured-date-divider" aria-hidden="true" />
+                        <FaClock aria-hidden="true" />
+                        <span>{getFeaturedTimeLabel(activeHeroFight)}</span>
                       </div>
                       <div className="fmm-promoted-details fmm-featured-details-grid">
                         <span><FaBullseye aria-hidden="true" /> {getFightSportLabel(activeHeroFight)}</span>

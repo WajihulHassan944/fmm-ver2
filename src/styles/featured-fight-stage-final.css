@@ -1,20 +1,19 @@
-/* Final client polish: desktop featured fight stage + smaller mobile featured fighters. */
+/* Desktop featured-fight banner correction + mobile fighter-size polish. */
 @media (min-width: 768px) {
   .fmm-home .fmm-home-hero {
     background:
-      radial-gradient(circle at 50% -12%, rgba(255, 255, 255, 0.14), transparent 18rem),
-      radial-gradient(circle at 10% 20%, rgba(230, 16, 32, 0.18), transparent 28rem),
-      radial-gradient(circle at 92% 22%, rgba(36, 132, 255, 0.14), transparent 30rem),
-      linear-gradient(180deg, #030509 0%, #05070d 100%) !important;
+      radial-gradient(circle at 12% 4%, rgba(229, 9, 20, 0.18), transparent 28rem),
+      radial-gradient(circle at 88% 6%, rgba(29, 155, 240, 0.18), transparent 30rem),
+      linear-gradient(180deg, #02050a 0%, #05070d 100%) !important;
     min-height: auto !important;
-    padding: 88px 0 30px !important;
+    padding: 96px 0 30px !important;
   }
 
   .fmm-home .fmm-hero-grid {
     display: flex !important;
     justify-content: center !important;
     min-height: auto !important;
-    padding-inline: clamp(20px, 4vw, 54px) !important;
+    padding-inline: clamp(18px, 3.5vw, 54px) !important;
     width: 100% !important;
   }
 
@@ -33,93 +32,120 @@
 
   .fmm-featured-fight-banner {
     background:
-      linear-gradient(90deg, rgba(2, 4, 8, 0.78), rgba(2, 4, 8, 0.26) 31%, rgba(2, 4, 8, 0.3) 68%, rgba(2, 4, 8, 0.82)),
-      linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.72)),
-      url('/images/fmm-pages/featured-fight-stage-desktop-home-bg.webp') center / cover no-repeat !important;
-    border: 2px solid rgba(255, 255, 255, 0.28) !important;
-    border-radius: 30px !important;
+      linear-gradient(90deg, rgba(1, 3, 7, 0.68), rgba(1, 3, 7, 0.17) 28%, rgba(1, 3, 7, 0.22) 72%, rgba(1, 3, 7, 0.72)),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.74)),
+      url('/images/fmm-pages/featured-fight-stage-desktop-home-bg-clean.webp') center / cover no-repeat !important;
+    border: 2px solid rgba(255, 255, 255, 0.32) !important;
+    border-radius: 32px !important;
     box-shadow: 0 34px 100px rgba(0, 0, 0, 0.66), inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
-    height: min(620px, calc(100vh - 128px)) !important;
-    max-width: min(1240px, calc(100vw - 72px)) !important;
-    min-height: 500px !important;
+    display: block !important;
+    height: clamp(620px, calc(100vh - 152px), 720px) !important;
+    isolation: isolate !important;
+    max-width: min(1420px, calc(100vw - 64px)) !important;
+    min-height: 610px !important;
     overflow: hidden !important;
-    padding: 22px 28px 26px !important;
+    padding: 28px 38px 34px !important;
     position: relative !important;
     width: 100% !important;
   }
 
   .fmm-featured-fight-banner::before {
     background:
-      radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.18), transparent 18rem),
-      radial-gradient(circle at 18% 48%, rgba(229, 9, 20, 0.24), transparent 21rem),
-      radial-gradient(circle at 82% 48%, rgba(29, 155, 240, 0.24), transparent 21rem),
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) !important;
-    background-size: 100% 100%, 100% 100%, 100% 100%, 72px 72px, 72px 72px !important;
-    opacity: 0.9 !important;
+      radial-gradient(circle at 22% 38%, rgba(229, 9, 20, 0.22), transparent 22rem),
+      radial-gradient(circle at 78% 36%, rgba(29, 155, 240, 0.22), transparent 23rem),
+      radial-gradient(circle at 50% 17%, rgba(255, 255, 255, 0.12), transparent 17rem),
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 88px 88px, 88px 88px !important;
+    content: '' !important;
+    inset: 0 !important;
+    opacity: 0.86 !important;
+    pointer-events: none !important;
+    position: absolute !important;
     z-index: 0 !important;
   }
 
   .fmm-featured-fight-banner::after {
     background:
-      linear-gradient(0deg, rgba(0, 0, 0, 0.9), transparent 34%, transparent 68%, rgba(0, 0, 0, 0.14)),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.46), transparent 28%, transparent 72%, rgba(0, 0, 0, 0.48)) !important;
+      linear-gradient(0deg, rgba(0, 0, 0, 0.9), transparent 30%, transparent 68%, rgba(0, 0, 0, 0.18)),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.34), transparent 27%, transparent 73%, rgba(0, 0, 0, 0.38)) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
     z-index: 0 !important;
   }
 
   .fmm-featured-badge {
     align-items: center !important;
-    background: linear-gradient(135deg, #c60915, #eb1b2d) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 14px 30px rgba(229, 9, 20, 0.34) !important;
-    font-size: clamp(12px, 1.2vw, 16px) !important;
-    gap: 8px !important;
+    background: linear-gradient(135deg, #c60915, #f11b2e) !important;
+    border: 1px solid rgba(255, 255, 255, 0.24) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 32px rgba(229, 9, 20, 0.34) !important;
+    color: #fff !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, "FMMUFCBold", Impact, sans-serif) !important;
+    font-size: clamp(14px, 1.2vw, 18px) !important;
+    font-weight: 1000 !important;
+    gap: 10px !important;
     letter-spacing: 0.055em !important;
-    padding: 10px 14px !important;
+    line-height: 1 !important;
+    padding: 13px 18px !important;
     position: relative !important;
-    z-index: 6 !important;
+    text-transform: uppercase !important;
+    z-index: 8 !important;
   }
 
   .fmm-featured-duel-stage {
     align-items: center !important;
+    bottom: 158px !important;
     display: grid !important;
-    gap: clamp(18px, 3vw, 34px) !important;
-    grid-template-columns: minmax(190px, 0.88fr) minmax(330px, 0.86fr) minmax(190px, 0.88fr) !important;
-    height: calc(100% - 124px) !important;
-    min-height: 342px !important;
-    padding: 0 clamp(16px, 2vw, 28px) 74px !important;
-    position: relative !important;
-    z-index: 3 !important;
+    gap: clamp(22px, 3.4vw, 50px) !important;
+    grid-template-columns: minmax(230px, 0.88fr) minmax(400px, 0.9fr) minmax(230px, 0.88fr) !important;
+    left: clamp(68px, 6vw, 106px) !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    right: clamp(68px, 6vw, 106px) !important;
+    top: 90px !important;
+    z-index: 4 !important;
   }
 
   .fmm-featured-fighter {
     align-self: center !important;
+    aspect-ratio: 1 / 1 !important;
     background:
-      radial-gradient(circle at 50% 26%, rgba(255, 255, 255, 0.12), transparent 44%),
-      rgba(0, 0, 0, 0.22) !important;
+      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.13), transparent 44%),
+      rgba(0, 0, 0, 0.24) !important;
     border-radius: 999px !important;
-    height: clamp(210px, 23vw, 282px) !important;
-    max-width: clamp(210px, 23vw, 282px) !important;
-    min-width: 190px !important;
+    display: flex !important;
+    filter: drop-shadow(0 25px 48px rgba(0, 0, 0, 0.62)) !important;
+    height: clamp(236px, 20vw, 320px) !important;
+    justify-content: center !important;
+    max-width: clamp(236px, 20vw, 320px) !important;
+    min-width: 210px !important;
     overflow: hidden !important;
+    position: relative !important;
     width: 100% !important;
+    z-index: 3 !important;
   }
 
   .fmm-featured-fighter.is-left {
-    border: 3px solid rgba(255, 23, 61, 0.82) !important;
-    box-shadow: 0 0 0 6px rgba(229, 9, 20, 0.1), 0 20px 56px rgba(229, 9, 20, 0.22) !important;
-    justify-self: center !important;
+    border: 4px solid rgba(255, 23, 61, 0.82) !important;
+    box-shadow: 0 0 0 7px rgba(229, 9, 20, 0.12), 0 22px 70px rgba(229, 9, 20, 0.22) !important;
+    justify-self: start !important;
   }
 
   .fmm-featured-fighter.is-right {
-    border: 3px solid rgba(29, 155, 240, 0.78) !important;
-    box-shadow: 0 0 0 6px rgba(29, 155, 240, 0.1), 0 20px 56px rgba(29, 155, 240, 0.2) !important;
-    justify-self: center !important;
+    border: 4px solid rgba(29, 155, 240, 0.78) !important;
+    box-shadow: 0 0 0 7px rgba(29, 155, 240, 0.12), 0 22px 70px rgba(29, 155, 240, 0.22) !important;
+    justify-self: end !important;
   }
 
   .fmm-featured-fighter img {
     border-radius: 999px !important;
     height: 100% !important;
+    max-width: none !important;
     object-fit: cover !important;
     object-position: center top !important;
     transform: scale(1.04) !important;
@@ -127,65 +153,137 @@
   }
 
   .fmm-featured-center {
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-width: 0 !important;
     padding: 0 !important;
     position: relative !important;
-    z-index: 5 !important;
+    text-align: center !important;
+    z-index: 6 !important;
   }
 
   .fmm-featured-center > p {
     color: #ff173d !important;
-    font-size: clamp(14px, 1.5vw, 19px) !important;
-    letter-spacing: 0.16em !important;
-    margin: 0 0 12px !important;
+    font-family: var(--fmm-font-display, "FMMUFCBold", Impact, sans-serif) !important;
+    font-size: clamp(15px, 1.5vw, 23px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.18em !important;
+    line-height: 1 !important;
+    margin: 0 0 17px !important;
+    max-width: min(100%, 560px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
   }
 
   .fmm-featured-center h2 {
-    font-size: clamp(38px, 4.4vw, 64px) !important;
-    gap: 7px !important;
-    letter-spacing: 0.035em !important;
-    line-height: 0.88 !important;
-    margin-bottom: 18px !important;
-    text-shadow: 0 8px 26px rgba(0, 0, 0, 0.72) !important;
+    color: #fff !important;
+    display: grid !important;
+    font-family: var(--fmm-font-display, "FMMUFCBold", Impact, sans-serif) !important;
+    font-size: clamp(34px, 3.75vw, 60px) !important;
+    font-weight: 1000 !important;
+    gap: 9px !important;
+    letter-spacing: 0.045em !important;
+    line-height: 0.9 !important;
+    margin: 0 0 19px !important;
+    max-width: 540px !important;
+    text-shadow: 0 8px 28px rgba(0, 0, 0, 0.78), 0 0 20px rgba(255, 255, 255, 0.14) !important;
+    text-transform: uppercase !important;
+    width: 100% !important;
+  }
+
+  .fmm-featured-center h2 span {
+    display: block !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
   }
 
   .fmm-featured-center h2 small {
+    align-items: center !important;
     color: #ff173d !important;
-    font-size: clamp(16px, 1.7vw, 21px) !important;
+    display: inline-flex !important;
+    font-size: clamp(16px, 1.45vw, 22px) !important;
+    gap: 14px !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
   }
 
   .fmm-featured-center h2 small::before,
   .fmm-featured-center h2 small::after {
-    width: clamp(34px, 4vw, 66px) !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28)) !important;
+    content: '' !important;
+    height: 1px !important;
+    width: clamp(42px, 4vw, 72px) !important;
+  }
+
+  .fmm-featured-center h2 small::after {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.28), transparent) !important;
   }
 
   .fmm-featured-center .fmm-hero-event-meta {
-    background: rgba(0, 0, 0, 0.52) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    align-items: center !important;
+    background: rgba(0, 0, 0, 0.56) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
     border-radius: 999px !important;
-    color: #ffffff !important;
-    font-size: clamp(12px, 1.25vw, 15px) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 15px 38px rgba(0, 0, 0, 0.36) !important;
+    color: #fff !important;
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    font-size: clamp(12px, 1.12vw, 16px) !important;
     font-weight: 900 !important;
-    margin: 0 0 12px !important;
-    padding: 9px 16px !important;
+    gap: 12px !important;
+    line-height: 1 !important;
+    margin: 0 0 15px !important;
+    padding: 12px 20px !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-featured-center .fmm-hero-event-meta svg,
+  .fmm-featured-details-grid svg {
+    color: #ff173d !important;
+    flex: 0 0 auto !important;
+  }
+
+  .fmm-featured-date-divider {
+    background: rgba(255, 255, 255, 0.28) !important;
+    display: inline-block !important;
+    height: 22px !important;
+    width: 1px !important;
   }
 
   .fmm-featured-details-grid {
     display: grid !important;
-    gap: 9px !important;
+    gap: 12px !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    max-width: 390px !important;
+    margin: 0 !important;
+    max-width: 430px !important;
     width: 100% !important;
   }
 
   .fmm-featured-details-grid span {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.16) !important;
+    align-items: center !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 999px !important;
-    font-size: clamp(10px, 1vw, 13px) !important;
+    color: #fff !important;
+    display: inline-flex !important;
+    font-family: Inter, Roboto, Arial, sans-serif !important;
+    font-size: clamp(10px, 0.92vw, 13px) !important;
+    font-weight: 900 !important;
+    gap: 7px !important;
     justify-content: center !important;
+    letter-spacing: 0.025em !important;
+    line-height: 1 !important;
     min-height: 40px !important;
     padding: 8px 12px !important;
     text-align: center !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
   }
 
   .fmm-featured-details-grid span:nth-child(n + 4),
@@ -195,115 +293,317 @@
   }
 
   .fmm-featured-status-panel {
-    align-items: center;
+    align-items: center !important;
     background:
-      radial-gradient(circle at 8% 50%, rgba(229, 9, 20, 0.24), transparent 15rem),
-      linear-gradient(95deg, rgba(7, 8, 12, 0.86), rgba(28, 9, 13, 0.78), rgba(4, 6, 10, 0.86));
-    border: 1px solid rgba(255, 23, 61, 0.38);
-    border-radius: 18px;
-    bottom: 30px;
-    box-shadow: inset 0 0 28px rgba(229, 9, 20, 0.1);
-    display: grid;
-    justify-items: center;
-    left: 42px;
-    min-height: 92px;
-    padding: 16px 230px 16px 24px;
-    position: absolute;
-    right: 64px;
-    text-align: center;
-    z-index: 4;
+      radial-gradient(circle at 8% 50%, rgba(229, 9, 20, 0.24), transparent 18rem),
+      linear-gradient(95deg, rgba(7, 8, 12, 0.9), rgba(30, 8, 14, 0.82), rgba(4, 6, 10, 0.9)) !important;
+    border: 1px solid rgba(255, 23, 61, 0.42) !important;
+    border-radius: 20px !important;
+    bottom: 48px !important;
+    box-shadow: inset 0 0 32px rgba(229, 9, 20, 0.12), 0 20px 60px rgba(0, 0, 0, 0.35) !important;
+    display: grid !important;
+    justify-items: center !important;
+    left: clamp(54px, 4vw, 80px) !important;
+    min-height: 112px !important;
+    overflow: hidden !important;
+    padding: 18px 292px 18px 30px !important;
+    position: absolute !important;
+    right: clamp(270px, 18vw, 320px) !important;
+    text-align: center !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-featured-status-panel::before {
+    background-image: radial-gradient(rgba(229, 9, 20, 0.32) 1px, transparent 1px) !important;
+    background-size: 11px 11px !important;
+    content: '' !important;
+    inset: 0 auto 0 0 !important;
+    opacity: 0.42 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: min(260px, 28%) !important;
   }
 
   .fmm-featured-status-panel span {
-    color: #ff173d;
-    font-family: var(--fmm-font-display, Impact, sans-serif);
-    font-size: clamp(19px, 2.1vw, 28px);
-    font-weight: 1000;
-    letter-spacing: 0.08em;
-    line-height: 1;
-    text-transform: capitalize;
+    color: #ff173d !important;
+    font-family: var(--fmm-font-display, "FMMUFCBold", Impact, sans-serif) !important;
+    font-size: clamp(22px, 1.85vw, 30px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.09em !important;
+    line-height: 1 !important;
+    position: relative !important;
+    text-transform: capitalize !important;
+    z-index: 1 !important;
   }
 
   .fmm-featured-status-panel strong {
-    color: rgba(255, 255, 255, 0.76);
-    font-size: clamp(13px, 1.25vw, 18px);
-    letter-spacing: 0.06em;
-    line-height: 1.15;
-    margin-top: 8px;
-    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78) !important;
+    font-family: Inter, Roboto, Arial, sans-serif !important;
+    font-size: clamp(14px, 1.1vw, 18px) !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.055em !important;
+    line-height: 1.15 !important;
+    margin-top: 9px !important;
+    max-width: 720px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    z-index: 1 !important;
   }
 
   .fmm-featured-fight-banner > .fmm-promoted-calendar {
-    bottom: 20px !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, rgba(0, 40, 80, 0.72), rgba(28, 7, 14, 0.78)) !important;
+    border: 1px solid rgba(255, 23, 61, 0.42) !important;
+    border-radius: 20px !important;
+    bottom: 32px !important;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
+    display: grid !important;
+    gap: 14px !important;
+    grid-template-columns: 74px minmax(0, 1fr) !important;
     margin: 0 !important;
+    padding: 14px !important;
     position: absolute !important;
-    right: 36px !important;
+    right: clamp(44px, 3.7vw, 66px) !important;
     top: auto !important;
-    width: 198px !important;
-    z-index: 7 !important;
+    width: 246px !important;
+    z-index: 8 !important;
   }
 
   .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-promoted-calendar-head {
-    border-radius: 14px 14px 0 0 !important;
-    padding: 9px 10px !important;
+    background: rgba(0, 0, 0, 0.44) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 0 !important;
+    display: grid !important;
+    min-height: 84px !important;
+    padding: 10px 7px !important;
+    place-items: center !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-promoted-calendar-head span,
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-promoted-calendar-head small {
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-family: Inter, Roboto, Arial, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.14em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
   }
 
   .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-promoted-calendar-head strong {
-    font-size: 21px !important;
+    color: #fff !important;
+    font-family: var(--fmm-font-display, "FMMUFCBold", Impact, sans-serif) !important;
+    font-size: 28px !important;
+    font-weight: 1000 !important;
+    line-height: 0.95 !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-body {
+    display: grid !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-title {
+    align-items: center !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    display: grid !important;
+    font-family: Inter, Roboto, Arial, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    gap: 6px !important;
+    grid-template-columns: 10px 9px 1fr 9px 10px !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-title strong {
+    color: #fff !important;
+    font-size: 11px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-title i,
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-title span {
+    color: rgba(255, 255, 255, 0.58) !important;
+    font-style: normal !important;
   }
 
   .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid {
-    gap: 2px !important;
-    padding: 9px !important;
+    display: grid !important;
+    gap: 3px !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    padding: 0 !important;
   }
 
   .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid b,
   .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid i {
+    align-items: center !important;
+    color: rgba(255, 255, 255, 0.66) !important;
+    display: flex !important;
     font-size: 9px !important;
-    min-height: 17px !important;
+    font-style: normal !important;
+    font-weight: 800 !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    min-height: 16px !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid b {
+    color: rgba(255, 255, 255, 0.44) !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid .is-fight-day {
+    background: #e50914 !important;
+    border-radius: 999px !important;
+    color: #fff !important;
   }
 
   .fmm-featured-arrow {
-    height: 48px !important;
-    width: 48px !important;
-    font-size: 42px !important;
-    z-index: 8 !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, #ff173d, #b70411) !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    box-shadow: 0 18px 44px rgba(229, 9, 20, 0.34) !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    font-size: 46px !important;
+    height: 56px !important;
+    justify-content: center !important;
+    line-height: 0.9 !important;
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 56px !important;
+    z-index: 9 !important;
   }
 
-  .fmm-featured-arrow.is-left { left: 24px !important; }
-  .fmm-featured-arrow.is-right { right: 24px !important; }
+  .fmm-featured-arrow.is-left { left: 30px !important; }
+  .fmm-featured-arrow.is-right { right: 30px !important; }
 
   .fmm-featured-fight-banner > .fmm-promoted-dots {
-    bottom: 8px !important;
-    z-index: 8 !important;
+    bottom: 12px !important;
+    left: 50% !important;
+    margin: 0 !important;
+    position: absolute !important;
+    transform: translateX(-50%) !important;
+    z-index: 9 !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-dots button {
+    height: 8px !important;
+    width: 8px !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-dots button.is-active {
+    width: 24px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1320px) {
+  .fmm-featured-fight-banner {
+    max-width: calc(100vw - 44px) !important;
+  }
+
+  .fmm-featured-duel-stage {
+    gap: 24px !important;
+    grid-template-columns: minmax(200px, 0.76fr) minmax(370px, 0.98fr) minmax(200px, 0.76fr) !important;
+    left: 72px !important;
+    right: 72px !important;
+  }
+
+  .fmm-featured-fighter {
+    height: clamp(210px, 19vw, 282px) !important;
+    max-width: clamp(210px, 19vw, 282px) !important;
+    min-width: 185px !important;
+  }
+
+  .fmm-featured-center h2 {
+    font-size: clamp(36px, 4vw, 58px) !important;
+  }
+
+  .fmm-featured-status-panel {
+    left: 48px !important;
+    right: 276px !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar {
+    right: 42px !important;
+    width: 232px !important;
   }
 }
 
 @media (min-width: 768px) and (max-width: 1040px) {
   .fmm-featured-fight-banner {
+    height: 610px !important;
     max-width: calc(100vw - 32px) !important;
-    min-height: 500px !important;
+    min-height: 590px !important;
+    padding: 24px 28px 30px !important;
   }
 
   .fmm-featured-duel-stage {
-    grid-template-columns: minmax(150px, 0.72fr) minmax(290px, 1fr) minmax(150px, 0.72fr) !important;
+    bottom: 164px !important;
+    gap: 16px !important;
+    grid-template-columns: minmax(150px, 0.7fr) minmax(300px, 1fr) minmax(150px, 0.7fr) !important;
+    left: 56px !important;
+    right: 56px !important;
+    top: 92px !important;
   }
 
   .fmm-featured-fighter {
-    height: clamp(178px, 21vw, 230px) !important;
-    max-width: clamp(178px, 21vw, 230px) !important;
-    min-width: 150px !important;
+    height: clamp(170px, 19vw, 218px) !important;
+    max-width: clamp(170px, 19vw, 218px) !important;
+    min-width: 145px !important;
+  }
+
+  .fmm-featured-center h2 {
+    font-size: clamp(32px, 4.4vw, 46px) !important;
+    max-width: 400px !important;
+  }
+
+  .fmm-featured-center .fmm-hero-event-meta {
+    font-size: 11px !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+  }
+
+  .fmm-featured-details-grid {
+    max-width: 335px !important;
+  }
+
+  .fmm-featured-details-grid span {
+    font-size: 10px !important;
+    min-height: 36px !important;
+    padding: 7px 9px !important;
   }
 
   .fmm-featured-status-panel {
-    left: 28px;
-    padding-right: 205px;
-    right: 38px;
+    bottom: 42px !important;
+    left: 36px !important;
+    min-height: 98px !important;
+    padding-right: 240px !important;
+    right: 240px !important;
   }
 
   .fmm-featured-fight-banner > .fmm-promoted-calendar {
-    right: 24px !important;
-    width: 178px !important;
+    bottom: 26px !important;
+    right: 30px !important;
+    width: 198px !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid b,
+  .fmm-featured-fight-banner > .fmm-promoted-calendar .fmm-mini-calendar-grid i {
+    font-size: 8px !important;
+    min-height: 14px !important;
   }
 }
 
