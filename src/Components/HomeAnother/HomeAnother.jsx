@@ -1780,6 +1780,11 @@ const HomeAnother = () => {
                     </div>
                   </div>
 
+                  <div className="fmm-featured-status-panel">
+                    <span>{activeHeroFight.matchStatus || activeHeroFight.matchShadowOpenStatus || "Ongoing"}</span>
+                    <strong>{activeHeroFight.matchName || getFightTitle(activeHeroFight)}</strong>
+                  </div>
+
                   <MiniFightCalendar match={activeHeroFight} />
 
                   {heroSlides.length > 1 && (
