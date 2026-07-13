@@ -193,6 +193,17 @@ const Header = () => {
     return '/home';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
+  const mobileAccountHref = useMemo(() => {
+    if (isAuthenticatedAffiliate) return '/AffiliateProfile';
+    if (authStatusSponsor) return '/sponsor-dashboard';
+    if (isAuthenticated) return '/profile';
+    return '/CreateAccount';
+  }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
+
+  const mobileAccountLabel = isAuthenticated || isAuthenticatedAffiliate || authStatusSponsor
+    ? 'Open account'
+    : 'Create account';
+
   const handleLogout = () => {
     dispatch(logout());
     toast.success('Successfully logged out 👋');
@@ -323,7 +334,7 @@ const Header = () => {
       </nav>
 
       <div className="theme-header-actions">
-        <Link href="/CreateAccount" className="theme-mobile-signup-icon" aria-label="Create account">
+        <Link href={mobileAccountHref} className="theme-mobile-signup-icon" aria-label={mobileAccountLabel}>
           <FaUserCircle aria-hidden="true" />
         </Link>
         {renderAuthActions()}
