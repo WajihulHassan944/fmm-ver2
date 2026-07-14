@@ -53,11 +53,31 @@ const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
 
 const HOME_FIGHT_SPORT_TABS = [
-  { key: "boxing", label: "Boxing" },
-  { key: "mma", label: "MMA" },
-  { key: "bareknuckle", label: "Bare-knuckle" },
-  { key: "kickboxing", label: "Kickboxing" },
-  { key: "pro-wrestling", label: "Pro Wrestling" },
+  {
+    key: "boxing",
+    label: "Boxing",
+    image: "/images/mobile-home/categories/boxing.png",
+  },
+  {
+    key: "mma",
+    label: "MMA",
+    image: "/images/mobile-home/categories/mma.png",
+  },
+  {
+    key: "bareknuckle",
+    label: "Bare-knuckle",
+    image: "/images/mobile-home/categories/bare-knuckle.png",
+  },
+  {
+    key: "kickboxing",
+    label: "Kickboxing",
+    image: "/images/mobile-home/categories/kickboxing.png",
+  },
+  {
+    key: "pro-wrestling",
+    label: "Pro Wrestling",
+    image: "/images/pro-wrestling/wrestling-live-premium.webp",
+  },
 ];
 
 const MOBILE_HOME_SPORT_TABS = [
@@ -1909,13 +1929,19 @@ const HomeAnother = () => {
                 <button
                   type="button"
                   key={section.key}
-                  className={
+                  className={`fmm-home-fight-tab-card is-${section.key} ${
                     activeFightSport === section.key ? "is-active" : ""
-                  }
+                  }`}
                   onClick={(event) => handleHomeSportJump(section.key, event)}
                 >
-                  <span>{section.label}</span>
-                  <strong>{section.count}</strong>
+                  <span className="fmm-home-tab-art" aria-hidden="true">
+                    <img src={section.image} alt="" loading="lazy" />
+                  </span>
+                  <span className="fmm-home-tab-copy">
+                    <span>{section.label}</span>
+                    <small>{section.count.toLocaleString()} fights</small>
+                  </span>
+                  <strong>{section.count.toLocaleString()}</strong>
                 </button>
               ))}
             </div>
