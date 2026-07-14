@@ -1091,16 +1091,22 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
-      <section className="fmm-mobile-bottom-cta fmm-mobile-wrestling-cta" aria-label="Pro wrestling promo">
-        <div className="fmm-mobile-wrestling-visual" aria-hidden="true" />
+      <section className="fmm-mobile-wrestling-spotlight" aria-label="Pro wrestling spotlight">
         <div className="fmm-mobile-wrestling-copy">
-          <span>New Game Mode</span>
-          <h2>Pro Wrestling Is Now Part Of Fantasy MMADNESS.</h2>
-          <p>Predict huge punches, body slams, kicks, power moves and win big.</p>
+          <h2>Pro Wrestling is now part of Fantasy MMAdness.</h2>
+          <p>Predict huge punches, body slams, kicks, power moves and win big!</p>
+          <Link href={wrestlingHref}>
+            Explore Wrestling <FaArrowRight aria-hidden="true" />
+          </Link>
         </div>
-        <Link href="/pro-wrestling">
-          Explore Wrestling <FaArrowRight aria-hidden="true" />
-        </Link>
+        <div className="fmm-mobile-wrestling-visual" aria-hidden="true">
+          <Image
+            src={HOME_WRESTLING_IMAGE}
+            alt=""
+            fill
+            sizes="(max-width: 767px) 62vw"
+          />
+        </div>
       </section>
 
       <section className="fmm-mobile-metrics" aria-label="Platform stats">
