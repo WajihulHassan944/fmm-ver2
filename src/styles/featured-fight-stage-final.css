@@ -4529,3 +4529,472 @@
     min-width: 136px !important;
   }
 }
+
+/* Client feedback pass: restore image-based wrestling spotlight, remove cramped mobile hero overflow, and enable draggable mobile fight cards. */
+@media (max-width: 767px) {
+  .fmm-mobile-home {
+    padding-bottom: 24px !important;
+  }
+
+  .fmm-mobile-featured-card {
+    background:
+      linear-gradient(96deg, rgba(47, 4, 10, 0.93) 0%, rgba(5, 7, 13, 0.72) 47%, rgba(3, 10, 27, 0.92) 100%),
+      radial-gradient(circle at 9% 48%, rgba(239, 21, 40, 0.62), transparent 32%),
+      radial-gradient(circle at 91% 48%, rgba(29, 139, 255, 0.58), transparent 33%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border-color: rgba(239, 32, 54, 0.62) !important;
+    border-radius: 20px !important;
+    box-shadow:
+      0 18px 54px rgba(0, 0, 0, 0.58),
+      inset 0 0 36px rgba(239, 21, 40, 0.18),
+      inset 0 0 46px rgba(29, 139, 255, 0.10) !important;
+    height: 226px !important;
+    margin-top: 12px !important;
+    overflow: hidden !important;
+    padding: 13px 15px 12px !important;
+  }
+
+  .fmm-mobile-featured-card::before {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 36%, transparent 64%, rgba(255, 255, 255, 0.05)),
+      linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 52px 52px, 52px 52px !important;
+    opacity: 0.78 !important;
+  }
+
+  .fmm-mobile-featured-bg {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 36%, rgba(0, 0, 0, 0.84) 100%),
+      radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.11), transparent 26%),
+      radial-gradient(circle at 80% 18%, rgba(255, 255, 255, 0.11), transparent 27%) !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-featured-label {
+    border-radius: 8px !important;
+    box-shadow: 0 10px 28px rgba(239, 21, 40, 0.30) !important;
+    font-size: 9px !important;
+    padding: 7px 10px 6px !important;
+    z-index: 10 !important;
+  }
+
+  .fmm-mobile-date-chip {
+    height: 58px !important;
+    right: 10px !important;
+    top: 10px !important;
+    width: 48px !important;
+    z-index: 10 !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar {
+    background: rgba(3, 6, 11, 0.82) !important;
+    height: 106px !important;
+    top: 74px !important;
+    width: 106px !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar::after {
+    background: linear-gradient(180deg, transparent 48%, rgba(0, 0, 0, 0.28) 100%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-left {
+    border-color: rgba(239, 21, 40, 0.86) !important;
+    left: -16px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-right {
+    border-color: rgba(29, 139, 255, 0.86) !important;
+    right: -16px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar img,
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar > span img,
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar span > img {
+    object-position: center 14% !important;
+    transform: scale(0.97) !important;
+  }
+
+  .fmm-mobile-hero-copy {
+    top: 53px !important;
+    width: min(58%, 218px) !important;
+    z-index: 8 !important;
+  }
+
+  .fmm-mobile-hero-copy h1 {
+    align-items: center !important;
+    font-size: clamp(13px, 3.95vw, 17px) !important;
+    gap: 5px !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    line-height: 0.97 !important;
+    margin: 0 0 6px !important;
+  }
+
+  .fmm-mobile-hero-copy h1 span {
+    display: -webkit-box !important;
+    max-height: 2.05em !important;
+    overflow: hidden !important;
+    overflow-wrap: normal !important;
+    text-overflow: ellipsis !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+  }
+
+  .fmm-mobile-hero-copy h1 em {
+    font-size: 20px !important;
+  }
+
+  .fmm-mobile-hero-copy p {
+    background: transparent !important;
+    border: 0 !important;
+    color: rgba(255, 255, 255, 0.84) !important;
+    display: inline-flex !important;
+    font-size: 8px !important;
+    gap: 4px !important;
+    line-height: 1.1 !important;
+    margin: 0 0 5px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-hero-note {
+    color: rgba(255, 255, 255, 0.90) !important;
+    display: block !important;
+    font-size: 8px !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.055em !important;
+    line-height: 1.12 !important;
+    margin: 0 0 5px !important;
+    max-width: 188px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-hero-status {
+    display: grid !important;
+    justify-items: center !important;
+    margin: 0 0 7px !important;
+    max-width: 186px !important;
+    position: relative !important;
+    z-index: 8 !important;
+  }
+
+  .fmm-mobile-hero-status strong {
+    color: #ff263c !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 19px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.055em !important;
+    line-height: 0.92 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-shadow: 0 0 16px rgba(255, 38, 60, 0.42) !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-hero-status span {
+    color: rgba(255, 255, 255, 0.72) !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 7px !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.09em !important;
+    line-height: 1 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-primary-btn {
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    min-height: 34px !important;
+    min-width: 150px !important;
+    padding: 8px 14px !important;
+  }
+
+  .fmm-mobile-dots {
+    bottom: 7px !important;
+    z-index: 11 !important;
+  }
+
+  .fmm-mobile-fight-rail {
+    -webkit-overflow-scrolling: touch !important;
+    cursor: grab !important;
+    scroll-padding-left: 14px !important;
+    scroll-snap-type: x mandatory !important;
+    touch-action: pan-y pinch-zoom !important;
+    user-select: none !important;
+  }
+
+  .fmm-mobile-fight-rail.is-dragging {
+    cursor: grabbing !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-mobile-fight-rail.is-dragging a {
+    pointer-events: none !important;
+  }
+
+  .fmm-mobile-upcoming-card {
+    scroll-snap-align: start !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    background:
+      linear-gradient(90deg, rgba(4, 6, 12, 0.98) 0%, rgba(5, 7, 13, 0.91) 39%, rgba(5, 8, 15, 0.40) 66%, rgba(5, 8, 15, 0.74) 100%),
+      radial-gradient(circle at 20% 18%, rgba(239, 21, 40, 0.34), transparent 32%),
+      radial-gradient(circle at 78% 22%, rgba(29, 139, 255, 0.26), transparent 34%) !important;
+    border: 1px solid rgba(239, 32, 54, 0.42) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.48), inset 0 0 36px rgba(239, 21, 40, 0.10) !important;
+    margin-top: 20px !important;
+    min-height: 222px !important;
+    overflow: hidden !important;
+    padding: 24px 18px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 44%, rgba(0, 0, 0, 0.46) 100%),
+      linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 56px 56px, 56px 56px !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    display: grid !important;
+    gap: 10px !important;
+    max-width: 250px !important;
+    position: relative !important;
+    width: 62% !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy::before {
+    color: #ff4c5d !important;
+    content: 'New Game Mode' !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 9px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.15em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(22px, 7.4vw, 31px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.035em !important;
+    line-height: 1.03 !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    color: rgba(255, 255, 255, 0.84) !important;
+    font-size: 13px !important;
+    font-weight: 750 !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight a {
+    align-items: center !important;
+    background: linear-gradient(180deg, #f32a3a, #b90512) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 14px 34px rgba(229, 9, 20, 0.34) !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 1000 !important;
+    gap: 10px !important;
+    justify-content: center !important;
+    letter-spacing: 0.045em !important;
+    margin-top: 4px !important;
+    min-height: 42px !important;
+    padding: 11px 16px !important;
+    text-transform: uppercase !important;
+    width: fit-content !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual {
+    bottom: 0 !important;
+    display: block !important;
+    left: 36% !important;
+    position: absolute !important;
+    right: -14% !important;
+    top: 0 !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual::after {
+    background:
+      linear-gradient(90deg, rgba(4, 6, 12, 0.94) 0%, rgba(4, 6, 12, 0.52) 28%, rgba(4, 6, 12, 0.08) 70%, rgba(4, 6, 12, 0.42) 100%),
+      linear-gradient(180deg, rgba(4, 6, 12, 0.02), rgba(4, 6, 12, 0.42) 100%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual img {
+    filter: saturate(1.08) contrast(1.08) !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card {
+    height: 218px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar {
+    height: 96px !important;
+    top: 78px !important;
+    width: 96px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-left {
+    left: -13px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-right {
+    right: -13px !important;
+  }
+
+  .fmm-mobile-hero-copy {
+    top: 53px !important;
+    width: min(58%, 198px) !important;
+  }
+
+  .fmm-mobile-hero-copy h1 {
+    font-size: clamp(12px, 3.85vw, 15px) !important;
+  }
+
+  .fmm-mobile-hero-note {
+    font-size: 7.5px !important;
+    max-width: 170px !important;
+  }
+
+  .fmm-mobile-hero-status strong {
+    font-size: 17px !important;
+  }
+
+  .fmm-mobile-primary-btn {
+    min-height: 32px !important;
+    min-width: 138px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 214px !important;
+    padding: 22px 17px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    width: 65% !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: clamp(20px, 7vw, 27px) !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .fmm-mobile-featured-card {
+    height: 210px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar {
+    height: 88px !important;
+    top: 82px !important;
+    width: 88px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-left {
+    left: -12px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-right {
+    right: -12px !important;
+  }
+
+  .fmm-mobile-hero-copy {
+    top: 53px !important;
+    width: min(60%, 178px) !important;
+  }
+
+  .fmm-mobile-hero-copy h1 {
+    font-size: 12px !important;
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .fmm-mobile-hero-copy h1 em {
+    font-size: 17px !important;
+  }
+
+  .fmm-mobile-hero-copy p {
+    font-size: 7.5px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .fmm-mobile-hero-note {
+    font-size: 6.8px !important;
+    max-width: 150px !important;
+  }
+
+  .fmm-mobile-hero-status strong {
+    font-size: 16px !important;
+  }
+
+  .fmm-mobile-hero-status span {
+    display: none !important;
+  }
+
+  .fmm-mobile-primary-btn {
+    min-height: 31px !important;
+    min-width: 128px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 206px !important;
+    padding: 20px 16px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight a {
+    min-height: 38px !important;
+    padding: 9px 13px !important;
+  }
+}

@@ -796,6 +796,104 @@ const getHomeSportViewAllHref = (sportKey) =>
     ? "/pro-wrestling"
     : `/upcomingfights?status=all&category=${encodeURIComponent(sportKey || "all")}`;
 
+const useHorizontalDragScroll = () => {
+  const railRef = useRef(null);
+  const dragRef = useRef({
+    active: false,
+    moved: false,
+    pointerId: null,
+    startX: 0,
+    scrollLeft: 0,
+  });
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return undefined;
+
+    const endDrag = (event) => {
+      const state = dragRef.current;
+      if (!state.active) return;
+
+      state.active = false;
+      rail.classList.remove("is-dragging");
+
+      if (state.pointerId !== null && rail.releasePointerCapture) {
+        try {
+          rail.releasePointerCapture(state.pointerId);
+        } catch {
+          // Pointer capture may already be released by the browser.
+        }
+      }
+
+      state.pointerId = null;
+      if (event?.type !== "click") {
+        window.setTimeout(() => {
+          dragRef.current.moved = false;
+        }, 0);
+      }
+    };
+
+    const handlePointerDown = (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      dragRef.current = {
+        active: true,
+        moved: false,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        scrollLeft: rail.scrollLeft,
+      };
+      rail.classList.add("is-dragging");
+
+      if (rail.setPointerCapture) {
+        try {
+          rail.setPointerCapture(event.pointerId);
+        } catch {
+          // Some mobile browsers can deny pointer capture for native scrolling.
+        }
+      }
+    };
+
+    const handlePointerMove = (event) => {
+      const state = dragRef.current;
+      if (!state.active) return;
+
+      const deltaX = event.clientX - state.startX;
+      if (Math.abs(deltaX) > 5) {
+        state.moved = true;
+        rail.scrollLeft = state.scrollLeft - deltaX;
+        event.preventDefault();
+      }
+    };
+
+    const handleClickCapture = (event) => {
+      if (!dragRef.current.moved) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      endDrag(event);
+    };
+
+    rail.addEventListener("pointerdown", handlePointerDown);
+    rail.addEventListener("pointermove", handlePointerMove);
+    rail.addEventListener("pointerup", endDrag);
+    rail.addEventListener("pointercancel", endDrag);
+    rail.addEventListener("pointerleave", endDrag);
+    rail.addEventListener("click", handleClickCapture, true);
+
+    return () => {
+      rail.removeEventListener("pointerdown", handlePointerDown);
+      rail.removeEventListener("pointermove", handlePointerMove);
+      rail.removeEventListener("pointerup", endDrag);
+      rail.removeEventListener("pointercancel", endDrag);
+      rail.removeEventListener("pointerleave", endDrag);
+      rail.removeEventListener("click", handleClickCapture, true);
+    };
+  }, []);
+
+  return railRef;
+};
+
 const MobilePhoneHome = ({
   activeFightSport,
   setActiveFightSport,
@@ -804,10 +902,8 @@ const MobilePhoneHome = ({
   setActiveHeroIndex,
   heroSlides,
   homeFightSections,
-  liveLeaderboardRows,
   matchError,
   matchStatus,
-  now,
 }) => {
   const mobileSections = useMemo(
     () =>
@@ -834,9 +930,12 @@ const MobilePhoneHome = ({
     Array.isArray(heroSlides) && heroSlides.length
       ? heroSlides
       : selectedUpcomingFights;
+  const heroSlideCount = mobileHeroSlides.length || 1;
+  const safeMobileHeroIndex = activeHeroIndex % heroSlideCount;
   const mobileHeroFight =
-    activeHeroFight || mobileHeroSlides[activeHeroIndex % mobileHeroSlides.length];
-  const heroCountdown = getCountdownParts(mobileHeroFight, now);
+    activeHeroFight ||
+    mobileHeroSlides[safeMobileHeroIndex] ||
+    getMobileFallbackFight(activeSection?.key || "mma", 0);
   const dateChip = getMobileDateChip(mobileHeroFight);
   const wrestlingSection = homeFightSections.find(
     (section) => section.key === "pro-wrestling",
@@ -845,8 +944,9 @@ const MobilePhoneHome = ({
     wrestlingSection?.fights,
     3,
   );
-  const topLeaderboard = (liveLeaderboardRows || FALLBACK_LEADERBOARD).slice(0, 3);
   const visibleHeroDots = mobileHeroSlides.slice(0, 4);
+  const mobileFightRailRef = useHorizontalDragScroll();
+  const wrestlingHref = "/pro-wrestling";
 
   return (
     <div className="fmm-mobile-home" aria-label="Fantasy MMAdness mobile homepage">
@@ -895,20 +995,9 @@ const MobilePhoneHome = ({
           <small className="fmm-mobile-hero-note">
             Sign up free. Pick winners. Play now.
           </small>
-          <div className="fmm-mobile-countdown" aria-label="Featured fight countdown">
-            {heroCountdown ? (
-              heroCountdown.slice(-3).map(({ label, value }) => (
-                <div key={label}>
-                  <strong>{value}</strong>
-                  <span>{label}</span>
-                </div>
-              ))
-            ) : (
-              <div className="is-wide">
-                <strong>{mobileHeroFight?.matchStatus || "Open"}</strong>
-                <span>Contest</span>
-              </div>
-            )}
+          <div className="fmm-mobile-hero-status" aria-label="Featured fight status">
+            <strong>{mobileHeroFight?.matchStatus || mobileHeroFight?.matchShadowOpenStatus || "Ongoing"}</strong>
+            <span>{mobileHeroFight?.matchName || "Contest"}</span>
           </div>
           <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-primary-btn">
             Play Now <FaArrowRight aria-hidden="true" />
@@ -921,7 +1010,7 @@ const MobilePhoneHome = ({
               key={getFightId(fight) || `mobile-dot-${index}`}
               type="button"
               aria-label={`Show fight ${index + 1}`}
-              className={index === activeHeroIndex % mobileHeroSlides.length ? "is-active" : ""}
+              className={index === safeMobileHeroIndex ? "is-active" : ""}
               onClick={() => setActiveHeroIndex(index)}
             />
           ))}
@@ -962,7 +1051,7 @@ const MobilePhoneHome = ({
           <div className="fmm-mobile-inline-alert">{matchError}</div>
         )}
 
-        <div className="fmm-mobile-fight-rail">
+        <div className="fmm-mobile-fight-rail" ref={mobileFightRailRef}>
           {selectedUpcomingFights.map((match, index) => (
             <Link
               href={getFightDetailHref(match)}
@@ -1058,35 +1147,6 @@ const MobilePhoneHome = ({
                 <small>{getMobileSpotsLeft(index, match)} spots left</small>
               </Link>
             </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="fmm-mobile-section fmm-mobile-leaderboard" aria-labelledby="mobile-leaderboard-title">
-        <div className="fmm-mobile-section-heading">
-          <h2 id="mobile-leaderboard-title">Leaderboard</h2>
-          <Link href="/leaderboard">
-            View Full <FaArrowRight aria-hidden="true" />
-          </Link>
-        </div>
-        <div className="fmm-mobile-leaderboard-podium">
-          {topLeaderboard.map((player, index) => (
-            <Link href="/leaderboard" className="fmm-mobile-rank-card" key={`${player.name}-${index}`}>
-              <span>{index + 1}</span>
-              {player.avatar ? (
-                <FightImage
-                  src={player.avatar}
-                  alt={player.name}
-                  width={58}
-                  height={58}
-                  sizes="42px"
-                />
-              ) : (
-                <b>{player.name.charAt(0).toUpperCase()}</b>
-              )}
-              <strong>{player.name}</strong>
-              <small>{Number(player.points || 0).toLocaleString()} PTS</small>
-            </Link>
           ))}
         </div>
       </section>
@@ -1648,10 +1708,8 @@ const HomeAnother = () => {
           setActiveHeroIndex={setActiveHeroIndex}
           heroSlides={heroSlides}
           homeFightSections={homeFightSections}
-          liveLeaderboardRows={liveLeaderboardRows}
           matchError={matchError}
           matchStatus={matchStatus}
-          now={now}
         />
         <div className="fmm-desktop-home-shell">
           <section
