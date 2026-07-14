@@ -33,7 +33,7 @@ const AffiliateProfile = () => {
 
   const [profileUrl, setProfileUrl] = useState(affiliate?.profileUrl || null);
   const [profilePreview, setProfilePreview] = useState(
-    affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
+    affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`,
   );
   const [firstName, setFirstName] = useState(affiliate?.firstName || '');
   const [lastName, setLastName] = useState(affiliate?.lastName || '');
@@ -63,7 +63,7 @@ const AffiliateProfile = () => {
       return () => URL.revokeObjectURL(objectUrl);
     }
 
-    setProfilePreview(profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`);
+    setProfilePreview(profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`);
     return undefined;
   }, [profileUrl]);
 
@@ -204,7 +204,7 @@ const AffiliateProfile = () => {
 
                 <aside className="affiliate-profile-preview-card">
                   <div className="affiliate-profile-preview-media" aria-hidden="true">
-                    <img src={`${FMM_ASSET_BASE}/fighter-david-benavidez.png`} alt="" />
+                    <img src={`${FMM_ASSET_BASE}/fighter-david-benavidez.webp`} alt="" />
                     <span>Creator card</span>
                   </div>
                   <div className="affiliate-profile-preview-content">

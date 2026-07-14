@@ -115,9 +115,10 @@ export const timeUntil = (value, now = new Date()) => {
 };
 export const formatWrestlingCountdown = (value, now = new Date()) => timeUntil(value, now).label;
 
-export const getWrestlingImage = (competitor, fallbackSide = 'A') => (
-  competitor?.image || competitor?.profileImage || `/images/pro-wrestling/wrestler-${String(fallbackSide).toLowerCase()}.jpg`
-);
+export const getWrestlingImage = (competitor, fallbackSide = 'A') => {
+  const fallbackKey = String(fallbackSide).toLowerCase() === 'b' ? 'b' : 'a';
+  return competitor?.image || competitor?.profileImage || `/images/pro-wrestling/wrestler-placeholder-${fallbackKey}.jpg`;
+};
 export const getWrestlerImage = getWrestlingImage;
 export const getWrestlingMatchHref = (match) => `/pro-wrestling/matches/${match?._id || match?.slug || ''}`;
 
