@@ -183,7 +183,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     <section className="affiliate-create-promotion affiliate-create-promotion-premium">
       <header className="affiliate-create-header">
         <div className="affiliate-create-identity">
-          <img src={affiliate.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`} alt={fullName} />
+          <img src={affiliate.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`} alt={fullName} />
           <span>
             <small><FaBullhorn /> Promotion owner</small>
             <strong>{fullName}</strong>

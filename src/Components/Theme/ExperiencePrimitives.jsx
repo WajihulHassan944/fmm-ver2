@@ -75,8 +75,8 @@ export const ExperienceEmptyState = ({ title = 'Nothing to show yet', descriptio
 
 export const FighterBackdrop = ({ left, right, leftAlt = '', rightAlt = '' }) => (
   <div className="xp-fighter-backdrop" aria-hidden={!leftAlt && !rightAlt}>
-    <img className="xp-fighter-backdrop-left" src={left || `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`} alt={leftAlt} />
+    <img className="xp-fighter-backdrop-left" src={left || `${FMM_ASSET_BASE}/fighter-jadden-addison.png`} alt={leftAlt} />
     <div className="xp-fighter-backdrop-vs">VS</div>
-    <img className="xp-fighter-backdrop-right" src={right || `${FMM_ASSET_BASE}/fighter-zaveer-davis.webp`} alt={rightAlt} />
+    <img className="xp-fighter-backdrop-right" src={right || `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`} alt={rightAlt} />
   </div>
 );

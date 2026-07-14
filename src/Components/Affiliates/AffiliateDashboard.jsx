@@ -215,7 +215,7 @@ const AffiliateDashboard = () => {
   const fullName = [affiliate?.firstName, affiliate?.lastName]
     .filter(Boolean)
     .join(' ') || affiliate?.playerName || 'Affiliate';
-  const profileImage = affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`;
+  const profileImage = affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`;
   const wrestlingMatches = safeWrestlingArray(wrestlingSummary?.matches);
   const wrestlingCommission = Number(wrestlingSummary?.totalCommissionTokens || 0);
 

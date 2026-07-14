@@ -10,12 +10,12 @@ import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 const getPlayerName = (player) => player?.playerName || player?.username || [player?.firstName, player?.lastName].filter(Boolean).join(' ') || player?.email?.split?.('@')?.[0] || 'Player';
 const getPlayerId = (player) => player?._id || player?.id || player?.email || getPlayerName(player);
 const FALLBACK_AVATARS = [
-  `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`,
-  `${FMM_ASSET_BASE}/fighter-zaveer-davis.webp`,
-  `${FMM_ASSET_BASE}/fighter-conor-benn.webp`,
-  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.webp`,
-  `${FMM_ASSET_BASE}/fighter-anthony-yarde.webp`,
-  `${FMM_ASSET_BASE}/fighter-david-benavidez.webp`,
+  `${FMM_ASSET_BASE}/fighter-jadden-addison.png`,
+  `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`,
+  `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
+  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.png`,
+  `${FMM_ASSET_BASE}/fighter-anthony-yarde.png`,
+  `${FMM_ASSET_BASE}/fighter-david-benavidez.png`,
 ];
 
 const GlobalLeaderboard = () => {
