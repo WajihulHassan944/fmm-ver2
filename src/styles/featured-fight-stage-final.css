@@ -661,3 +661,265 @@
     font-size: 15px !important;
   }
 }
+
+/* Client requested: use premium arena lights, stronger desktop border treatment, bigger phone hero, and wrestling CTA replacement. */
+@media (min-width: 768px) {
+  .fmm-home .fmm-home-hero {
+    background:
+      radial-gradient(circle at 12% 8%, rgba(229, 9, 20, 0.24), transparent 30rem),
+      radial-gradient(circle at 88% 8%, rgba(29, 155, 240, 0.24), transparent 32rem),
+      linear-gradient(180deg, #030408 0%, #05070d 58%, #020306 100%) !important;
+    padding: 108px 0 44px !important;
+  }
+
+  .fmm-home .fmm-home-hero::before {
+    background:
+      linear-gradient(90deg, rgba(3, 4, 8, 0.92) 0%, rgba(3, 4, 8, 0.52) 22%, rgba(3, 4, 8, 0.18) 52%, rgba(3, 4, 8, 0.48) 78%, rgba(3, 4, 8, 0.92) 100%),
+      linear-gradient(180deg, rgba(3, 4, 8, 0.10) 0%, rgba(3, 4, 8, 0.36) 72%, rgba(3, 4, 8, 0.96) 100%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    filter: blur(10px) scale(1.08) !important;
+    opacity: 0.72 !important;
+  }
+
+  .fmm-home .fmm-home-hero::after {
+    background:
+      radial-gradient(circle at 8% 10%, rgba(255, 255, 255, 0.14), transparent 7rem),
+      radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.13), transparent 7rem),
+      radial-gradient(circle at 50% 5%, rgba(255, 255, 255, 0.10), transparent 16rem),
+      linear-gradient(90deg, rgba(229, 9, 20, 0.14), transparent 38%, transparent 62%, rgba(29, 155, 240, 0.14)) !important;
+    opacity: 0.85 !important;
+  }
+
+  .fmm-featured-fight-banner {
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.74) 0%, rgba(0, 0, 0, 0.22) 27%, rgba(0, 0, 0, 0.18) 52%, rgba(0, 0, 0, 0.26) 73%, rgba(0, 0, 0, 0.76) 100%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.10) 48%, rgba(0, 0, 0, 0.84) 100%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border: 2px solid rgba(255, 255, 255, 0.42) !important;
+    border-radius: 36px !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 34px 110px rgba(0, 0, 0, 0.72),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+      inset 0 -120px 160px rgba(0, 0, 0, 0.48) !important;
+  }
+
+  .fmm-featured-fight-banner::before {
+    background:
+      radial-gradient(circle at 22% 22%, rgba(255, 255, 255, 0.14), transparent 12rem),
+      radial-gradient(circle at 23% 42%, rgba(229, 9, 20, 0.28), transparent 24rem),
+      radial-gradient(circle at 78% 42%, rgba(29, 155, 240, 0.28), transparent 24rem),
+      radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.18), transparent 18rem),
+      linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 96px 96px, 96px 96px !important;
+    opacity: 0.78 !important;
+  }
+
+  .fmm-featured-fight-banner::after {
+    background:
+      linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.42) 27%, transparent 60%, rgba(0, 0, 0, 0.20) 100%),
+      linear-gradient(90deg, rgba(110, 4, 12, 0.20) 0%, transparent 35%, transparent 65%, rgba(7, 40, 78, 0.24) 100%) !important;
+  }
+
+  .fmm-featured-status-panel {
+    background:
+      radial-gradient(circle at 0% 50%, rgba(229, 9, 20, 0.24), transparent 18rem),
+      linear-gradient(90deg, rgba(28, 4, 8, 0.94), rgba(7, 9, 14, 0.90) 45%, rgba(4, 7, 14, 0.88)) !important;
+    border: 1px solid rgba(255, 23, 61, 0.45) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-featured-fight-banner > .fmm-promoted-calendar {
+    background: linear-gradient(135deg, rgba(25, 5, 12, 0.92), rgba(6, 16, 30, 0.92)) !important;
+    border: 1px solid rgba(255, 23, 61, 0.50) !important;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.54), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-mobile-featured-card {
+    background:
+      linear-gradient(90deg, rgba(20, 3, 8, 0.88) 0%, rgba(2, 4, 9, 0.58) 48%, rgba(3, 8, 18, 0.88) 100%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.72)),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border-color: rgba(234, 24, 38, 0.52) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.56), inset 0 0 34px rgba(234, 24, 38, 0.16) !important;
+    height: 222px !important;
+    padding: 15px 16px 13px !important;
+  }
+
+  .fmm-mobile-featured-bg {
+    background:
+      radial-gradient(circle at 8% 54%, rgba(235, 23, 38, 0.58), transparent 31%),
+      radial-gradient(circle at 92% 54%, rgba(34, 98, 255, 0.46), transparent 32%),
+      linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.74) 100%) !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar {
+    height: 118px !important;
+    top: 68px !important;
+    width: 118px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-left {
+    left: -8px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-right {
+    right: -8px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar img,
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar > span img,
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar span > img {
+    background: #04070d !important;
+    object-position: center 18% !important;
+    transform: scale(0.94) !important;
+  }
+
+  .fmm-mobile-hero-copy {
+    top: 56px !important;
+    width: min(60%, 226px) !important;
+  }
+
+  .fmm-mobile-hero-copy h1 {
+    font-size: 17px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .fmm-mobile-hero-copy p {
+    font-size: 9px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .fmm-mobile-hero-note {
+    color: rgba(255, 255, 255, 0.78) !important;
+    display: block !important;
+    font-size: 8px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.055em !important;
+    line-height: 1.1 !important;
+    margin: 0 0 6px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-countdown {
+    margin-bottom: 8px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    font-size: 21px !important;
+  }
+
+  .fmm-mobile-primary-btn {
+    min-height: 36px !important;
+    min-width: 158px !important;
+  }
+
+  .fmm-mobile-wrestling-cta {
+    background:
+      linear-gradient(90deg, rgba(3, 5, 10, 0.96) 0%, rgba(3, 5, 10, 0.90) 38%, rgba(3, 5, 10, 0.44) 68%, rgba(3, 5, 10, 0.78) 100%),
+      radial-gradient(circle at 72% 24%, rgba(29, 155, 240, 0.28), transparent 36%),
+      radial-gradient(circle at 12% 18%, rgba(229, 9, 20, 0.34), transparent 36%),
+      url('/images/pro-wrestling/wrestling-live-premium.webp') 64% center / cover no-repeat !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+    border-radius: 14px !important;
+    display: block !important;
+    margin-top: 16px !important;
+    min-height: 178px !important;
+    padding: 18px 18px 70px !important;
+  }
+
+  .fmm-mobile-wrestling-visual,
+  .fmm-mobile-wrestling-cta .fmm-mobile-cta-cards {
+    display: none !important;
+  }
+
+  .fmm-mobile-wrestling-copy {
+    max-width: 218px !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-copy > span {
+    color: #ff4f5d !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 9px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.10em !important;
+    margin-bottom: 7px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-wrestling-cta h2 {
+    font-size: 20px !important;
+    letter-spacing: 0.035em !important;
+    line-height: 1.05 !important;
+    margin: 0 0 8px !important;
+    max-width: 210px !important;
+  }
+
+  .fmm-mobile-wrestling-cta p {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    line-height: 1.34 !important;
+    max-width: 210px !important;
+  }
+
+  .fmm-mobile-wrestling-cta > a {
+    background: linear-gradient(180deg, #ef2938, #b70411) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    bottom: 18px !important;
+    box-shadow: 0 12px 30px rgba(229, 9, 20, 0.34) !important;
+    left: 18px !important;
+    min-width: 166px !important;
+    right: auto !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-metrics {
+    margin-top: 16px !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .fmm-mobile-featured-card {
+    height: 218px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar {
+    height: 104px !important;
+    width: 104px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-left {
+    left: -10px !important;
+  }
+
+  .fmm-mobile-hero-fighters .mobile-fighter-avatar.is-right {
+    right: -10px !important;
+  }
+
+  .fmm-mobile-hero-copy {
+    width: min(62%, 206px) !important;
+  }
+
+  .fmm-mobile-hero-note {
+    font-size: 7px !important;
+  }
+
+  .fmm-mobile-wrestling-copy,
+  .fmm-mobile-wrestling-cta h2,
+  .fmm-mobile-wrestling-cta p {
+    max-width: 188px !important;
+  }
+
+  .fmm-mobile-wrestling-cta h2 {
+    font-size: 18px !important;
+  }
+}

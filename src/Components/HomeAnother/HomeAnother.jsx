@@ -325,7 +325,11 @@ const getHomeFighterImage = (
       );
 
   if (direct) return direct;
-  return options.allowFallback === false ? "" : getFighterImage("");
+  if (options.allowFallback === false) return "";
+
+  return MOBILE_FALLBACK_FIGHT_IMAGES[
+    (index + (isA ? 0 : 1)) % MOBILE_FALLBACK_FIGHT_IMAGES.length
+  ];
 };
 
 const hasCompleteHomeFightVisuals = (fight = {}) =>
@@ -867,6 +871,9 @@ const MobilePhoneHome = ({
             <FaCalendarAlt aria-hidden="true" />
             {formatDateTime(mobileHeroFight)}
           </p>
+          <small className="fmm-mobile-hero-note">
+            Sign up free. Pick winners. Play now.
+          </small>
           <div className="fmm-mobile-countdown" aria-label="Featured fight countdown">
             {heroCountdown ? (
               heroCountdown.slice(-3).map(({ label, value }) => (
@@ -882,8 +889,8 @@ const MobilePhoneHome = ({
               </div>
             )}
           </div>
-          <Link href={getFightDetailHref(mobileHeroFight)} className="fmm-mobile-primary-btn">
-            Pick Fights <FaArrowRight aria-hidden="true" />
+          <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-primary-btn">
+            Play Now <FaArrowRight aria-hidden="true" />
           </Link>
         </div>
 
@@ -1056,6 +1063,18 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
+      <section className="fmm-mobile-bottom-cta fmm-mobile-wrestling-cta" aria-label="Pro wrestling promo">
+        <div className="fmm-mobile-wrestling-visual" aria-hidden="true" />
+        <div className="fmm-mobile-wrestling-copy">
+          <span>New Game Mode</span>
+          <h2>Pro Wrestling Is Now Part Of Fantasy MMADNESS.</h2>
+          <p>Predict huge punches, body slams, kicks, power moves and win big.</p>
+        </div>
+        <Link href="/pro-wrestling">
+          Explore Wrestling <FaArrowRight aria-hidden="true" />
+        </Link>
+      </section>
+
       <section className="fmm-mobile-metrics" aria-label="Platform stats">
         <div>
           <FaUsers aria-hidden="true" />
@@ -1077,20 +1096,6 @@ const MobilePhoneHome = ({
           <strong>100%</strong>
           <span>Fair play and secure gaming</span>
         </div>
-      </section>
-
-      <section className="fmm-mobile-bottom-cta">
-        <div className="fmm-mobile-cta-cards" aria-hidden="true">
-          <span />
-          <span />
-        </div>
-        <div>
-          <h2>Find Open Fight Cards</h2>
-          <p>Make your predictions and compete to win big prizes.</p>
-        </div>
-        <Link href="/upcomingfights">
-          Browse Events <FaArrowRight aria-hidden="true" />
-        </Link>
       </section>
     </div>
   );
@@ -1639,7 +1644,7 @@ const HomeAnother = () => {
                   href={PLAYER_SIGNUP_HREF}
                   className="theme-btn theme-btn-primary"
                 >
-                  Create Account <FaArrowRight aria-hidden="true" />
+                  Sign Up Free <FaArrowRight aria-hidden="true" />
                 </Link>
                 <Link
                   href={
@@ -1848,11 +1853,11 @@ const HomeAnother = () => {
           >
             <div>
               <span>
-                <FaMobileAlt aria-hidden="true" /> Quick signup path
+                <FaMobileAlt aria-hidden="true" /> Sign up for free
               </span>
               <h2>
-                Find open fight cards and make your predictions on Fantasy
-                MMADNESS.
+                Create your free account, jump into a featured fight card, and
+                play now with live Fantasy MMADNESS predictions.
               </h2>
             </div>
             <div className="fmm-signup-fast-actions">
@@ -1860,7 +1865,7 @@ const HomeAnother = () => {
                 href={PLAYER_SIGNUP_HREF}
                 className="theme-btn theme-btn-primary"
               >
-                Create Account <FaArrowRight aria-hidden="true" />
+                Sign Up Free <FaArrowRight aria-hidden="true" />
               </Link>
               <Link
                 href={
@@ -1870,7 +1875,7 @@ const HomeAnother = () => {
                 }
                 className="theme-btn theme-btn-secondary"
               >
-                Open featured fight <FaPlay aria-hidden="true" />
+                Play Now <FaPlay aria-hidden="true" />
               </Link>
               <Link href="/mock-game" className="theme-btn theme-btn-secondary">
                 Mock game <FaBolt aria-hidden="true" />
