@@ -960,10 +960,10 @@ const MobilePhoneHome = ({
               <FightImage
                 src={getHomeFighterImage(mobileHeroFight, "A", 0)}
                 alt={getHomeFighterName(mobileHeroFight, "A")}
-                width={132}
-                height={132}
+                width={240}
+                height={260}
                 priority
-                sizes="24vw"
+                sizes="46vw"
               />
             </figure>
             <span>VS</span>
@@ -971,10 +971,10 @@ const MobilePhoneHome = ({
               <FightImage
                 src={getHomeFighterImage(mobileHeroFight, "B", 1)}
                 alt={getHomeFighterName(mobileHeroFight, "B")}
-                width={132}
-                height={132}
+                width={240}
+                height={260}
                 priority
-                sizes="24vw"
+                sizes="46vw"
               />
             </figure>
           </div>
