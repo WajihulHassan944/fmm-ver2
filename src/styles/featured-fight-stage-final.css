@@ -4998,3 +4998,3074 @@
     padding: 9px 13px !important;
   }
 }
+
+/* Phase 3 frontend: premium mobile homepage redesign matching the approved phone concept. */
+@media (max-width: 767px) {
+  .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    max-width: 460px !important;
+    padding: 88px 12px 26px !important;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(238, 25, 42, 0.22), transparent 34vw),
+      radial-gradient(circle at 88% 11%, rgba(25, 117, 255, 0.17), transparent 36vw),
+      linear-gradient(180deg, rgba(2, 4, 8, 0.96), #020306 34%, #010205 100%) !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    align-items: stretch !important;
+    background:
+      linear-gradient(90deg, rgba(3, 5, 10, 0.98) 0%, rgba(5, 7, 13, 0.86) 39%, rgba(5, 8, 15, 0.82) 100%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 22px !important;
+    box-shadow:
+      0 24px 72px rgba(0, 0, 0, 0.72),
+      0 0 0 1px rgba(239, 22, 40, 0.24),
+      inset 0 0 52px rgba(236, 16, 32, 0.12),
+      inset 0 0 56px rgba(16, 112, 255, 0.09) !important;
+    display: grid !important;
+    gap: 10px !important;
+    grid-template-columns: minmax(0, 1.03fr) minmax(0, 0.97fr) !important;
+    height: 438px !important;
+    margin: 0 0 16px !important;
+    min-height: 438px !important;
+    overflow: hidden !important;
+    padding: 18px 14px 20px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before {
+    background:
+      radial-gradient(circle at 12% 20%, rgba(243, 20, 36, 0.52), transparent 35%),
+      radial-gradient(circle at 86% 16%, rgba(35, 120, 255, 0.46), transparent 36%),
+      linear-gradient(90deg, rgba(238, 21, 38, 0.18), transparent 44%, rgba(0, 139, 255, 0.16)),
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 54px 54px, 54px 54px !important;
+    content: '' !important;
+    inset: 0 !important;
+    mix-blend-mode: screen !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::after {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 16%, rgba(0, 0, 0, 0.30) 100%),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.22), transparent 18%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    border-radius: inherit !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.18) 45%, rgba(0, 0, 0, 0.36)),
+      radial-gradient(circle at 18% 72%, rgba(238, 15, 34, 0.34), transparent 30%),
+      radial-gradient(circle at 82% 48%, rgba(0, 103, 255, 0.31), transparent 34%) !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-hero-intro,
+  .fmm-mobile-hero-event-card,
+  .fmm-mobile-signup-hero .fmm-mobile-dots {
+    position: relative !important;
+    z-index: 4 !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    align-self: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    padding: 8px 0 16px 2px !important;
+  }
+
+  .fmm-mobile-greeting {
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: clamp(10px, 3.2vw, 13px) !important;
+    font-weight: 650 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.25 !important;
+    margin: 0 0 9px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    color: #ffffff !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif) !important;
+    font-size: clamp(28px, 8.7vw, 42px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.006em !important;
+    line-height: 0.92 !important;
+    margin: 0 0 12px !important;
+    max-width: 205px !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.78) !important;
+  }
+
+  .fmm-mobile-hero-intro h1 span {
+    display: block !important;
+  }
+
+  .fmm-mobile-hero-intro h1 em {
+    color: #f31f32 !important;
+    font-style: normal !important;
+    text-shadow: 0 0 22px rgba(239, 25, 45, 0.62) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    color: rgba(255, 255, 255, 0.76) !important;
+    font-size: clamp(10px, 3.05vw, 13px) !important;
+    font-weight: 540 !important;
+    line-height: 1.45 !important;
+    margin: 0 0 16px !important;
+    max-width: 190px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    display: grid !important;
+    gap: 10px !important;
+    max-width: 188px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    align-items: center !important;
+    border-radius: 7px !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 1000 !important;
+    gap: 9px !important;
+    justify-content: center !important;
+    letter-spacing: 0.055em !important;
+    min-height: 44px !important;
+    padding: 12px 14px !important;
+    text-transform: uppercase !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-signup-btn {
+    background: linear-gradient(180deg, #fb3242 0%, #d9101e 56%, #a60612 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.17) !important;
+    box-shadow: 0 16px 36px rgba(229, 9, 20, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.21) !important;
+    color: #ffffff !important;
+  }
+
+  .fmm-mobile-event-btn {
+    background: rgba(6, 10, 16, 0.78) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    align-self: center !important;
+    background:
+      radial-gradient(circle at 20% 5%, rgba(237, 29, 45, 0.31), transparent 32%),
+      radial-gradient(circle at 85% 18%, rgba(25, 123, 255, 0.31), transparent 38%),
+      linear-gradient(180deg, rgba(9, 13, 21, 0.38), rgba(3, 5, 10, 0.76)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    border-radius: 18px !important;
+    box-shadow: inset 0 0 32px rgba(255, 255, 255, 0.04), 0 20px 50px rgba(0, 0, 0, 0.38) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    min-height: 300px !important;
+    overflow: hidden !important;
+    padding: 138px 10px 12px !important;
+  }
+
+  .fmm-mobile-hero-event-card::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 45%, rgba(0, 0, 0, 0.30)),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 45%, rgba(255, 255, 255, 0.03)) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    align-items: center !important;
+    display: flex !important;
+    gap: 6px !important;
+    justify-content: center !important;
+    left: 7px !important;
+    position: absolute !important;
+    right: 7px !important;
+    top: 18px !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    background: #05080d !important;
+    border-radius: 999px !important;
+    display: block !important;
+    flex: 0 0 74px !important;
+    height: 74px !important;
+    inset: auto !important;
+    overflow: hidden !important;
+    position: relative !important;
+    top: auto !important;
+    width: 74px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left {
+    border: 2px solid #ee1730 !important;
+    box-shadow: 0 0 0 4px rgba(238, 23, 48, 0.14), 0 0 28px rgba(238, 23, 48, 0.34) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    border: 2px solid #1687ff !important;
+    box-shadow: 0 0 0 4px rgba(22, 135, 255, 0.14), 0 0 28px rgba(22, 135, 255, 0.30) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar img {
+    height: 100% !important;
+    object-fit: cover !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    color: #ff2437 !important;
+    flex: 0 0 auto !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 21px !important;
+    font-style: italic !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.03em !important;
+    text-shadow: 0 0 20px rgba(237, 19, 37, 0.65) !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    align-self: flex-start !important;
+    background: linear-gradient(180deg, #f23a48, #b90816) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 10px 28px rgba(225, 8, 22, 0.32) !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+    font-size: 8.5px !important;
+    left: 10px !important;
+    letter-spacing: 0.08em !important;
+    padding: 6px 8px 5px !important;
+    position: absolute !important;
+    text-transform: uppercase !important;
+    top: 104px !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    background: linear-gradient(180deg, rgba(21, 25, 33, 0.98), rgba(7, 9, 13, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 9px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42) !important;
+    height: 58px !important;
+    padding: 5px !important;
+    position: absolute !important;
+    right: 10px !important;
+    top: 98px !important;
+    width: 46px !important;
+    z-index: 4 !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip span,
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip small {
+    font-size: 7px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip strong {
+    font-size: 23px !important;
+    line-height: 0.92 !important;
+  }
+
+  .fmm-mobile-event-copy {
+    position: relative !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    color: #ffffff !important;
+    display: grid !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(14px, 3.85vw, 18px) !important;
+    font-weight: 1000 !important;
+    gap: 2px !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1.02 !important;
+    margin: 0 0 8px !important;
+    max-width: 155px !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75) !important;
+  }
+
+  .fmm-mobile-event-copy h2 span {
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-event-copy h2 em {
+    color: #ff2135 !important;
+    font-size: 13px !important;
+    font-style: normal !important;
+    line-height: 1 !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    align-items: center !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    display: flex !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    gap: 5px !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.2 !important;
+    margin: 0 0 9px !important;
+    max-width: 170px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-event-copy p svg {
+    color: #ffffff !important;
+    flex: 0 0 auto !important;
+  }
+
+  .fmm-mobile-countdown {
+    display: grid !important;
+    gap: 4px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    position: relative !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-countdown span {
+    align-items: center !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.035)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 7px !important;
+    display: grid !important;
+    justify-items: center !important;
+    min-height: 45px !important;
+    padding: 5px 3px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 18px !important;
+    font-weight: 1000 !important;
+    line-height: 0.98 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-countdown small {
+    color: rgba(255, 255, 255, 0.68) !important;
+    font-size: 7px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-dots {
+    align-items: center !important;
+    bottom: 10px !important;
+    display: flex !important;
+    gap: 5px !important;
+    grid-column: 1 / -1 !important;
+    justify-content: center !important;
+    left: 50% !important;
+    position: absolute !important;
+    transform: translateX(-50%) !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-dots button {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    height: 6px !important;
+    padding: 0 !important;
+    width: 6px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-dots button.is-active {
+    background: #ef1b2f !important;
+    box-shadow: 0 0 14px rgba(239, 27, 47, 0.8) !important;
+    width: 18px !important;
+  }
+
+  .fmm-mobile-category-row {
+    display: grid !important;
+    gap: 10px !important;
+    grid-auto-columns: minmax(112px, 31vw) !important;
+    grid-auto-flow: column !important;
+    margin: 0 -12px 20px !important;
+    overflow-x: auto !important;
+    padding: 0 12px 4px !important;
+    scroll-padding-inline: 12px !important;
+    scroll-snap-type: x mandatory !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    align-items: center !important;
+    background:
+      linear-gradient(180deg, rgba(15, 21, 31, 0.94), rgba(4, 7, 12, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 13px !important;
+    box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.035), 0 14px 32px rgba(0, 0, 0, 0.42) !important;
+    color: #ffffff !important;
+    display: grid !important;
+    height: 106px !important;
+    justify-items: center !important;
+    min-width: 112px !important;
+    overflow: hidden !important;
+    padding: 12px 10px 10px !important;
+    position: relative !important;
+    scroll-snap-align: start !important;
+  }
+
+  .fmm-mobile-category-row button::before {
+    content: '' !important;
+    inset: 0 !important;
+    opacity: 0.92 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-category-row button.is-boxing::before {
+    background: radial-gradient(circle at 50% 12%, rgba(255, 35, 50, 0.48), transparent 44%), linear-gradient(135deg, rgba(235, 15, 31, 0.20), transparent 64%) !important;
+  }
+
+  .fmm-mobile-category-row button.is-mma::before,
+  .fmm-mobile-category-row button.is-bareknuckle::before {
+    background: radial-gradient(circle at 50% 13%, rgba(147, 57, 255, 0.56), transparent 45%), linear-gradient(135deg, rgba(110, 37, 255, 0.21), transparent 66%) !important;
+  }
+
+  .fmm-mobile-category-row button.is-kickboxing::before {
+    background: radial-gradient(circle at 50% 14%, rgba(255, 190, 36, 0.58), transparent 43%), linear-gradient(135deg, rgba(255, 170, 30, 0.20), transparent 64%) !important;
+  }
+
+  .fmm-mobile-category-row button.is-active {
+    border-color: rgba(239, 25, 45, 0.62) !important;
+    box-shadow: 0 18px 38px rgba(229, 9, 20, 0.20), inset 0 0 34px rgba(239, 25, 45, 0.13) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .fmm-mobile-category-row img {
+    filter: drop-shadow(0 0 16px currentColor) saturate(1.12) !important;
+    height: 38px !important;
+    object-fit: contain !important;
+    position: relative !important;
+    width: 42px !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1.05 !important;
+    position: relative !important;
+    text-transform: uppercase !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-category-row span {
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 9px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.045em !important;
+    position: relative !important;
+    text-transform: uppercase !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-section-heading {
+    margin-bottom: 12px !important;
+  }
+
+  .fmm-mobile-section-heading h2 {
+    color: #ffffff !important;
+    font-size: clamp(21px, 6.7vw, 30px) !important;
+    letter-spacing: 0.055em !important;
+    text-shadow: 0 0 18px rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .fmm-mobile-section-heading a {
+    color: #ff2639 !important;
+    font-size: 10px !important;
+    text-shadow: 0 0 14px rgba(239, 25, 45, 0.46) !important;
+  }
+
+  .fmm-mobile-upcoming-card {
+    background:
+      radial-gradient(circle at 25% 0%, rgba(239, 25, 45, 0.24), transparent 38%),
+      radial-gradient(circle at 90% 0%, rgba(36, 121, 255, 0.16), transparent 42%),
+      linear-gradient(180deg, rgba(15, 21, 31, 0.94), rgba(4, 7, 12, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.035), 0 16px 40px rgba(0, 0, 0, 0.42) !important;
+    min-height: 154px !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-boxing {
+    border-color: rgba(239, 25, 45, 0.30) !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-mma {
+    background:
+      radial-gradient(circle at 25% 0%, rgba(239, 25, 45, 0.20), transparent 38%),
+      radial-gradient(circle at 90% 0%, rgba(151, 65, 255, 0.22), transparent 42%),
+      linear-gradient(180deg, rgba(15, 21, 31, 0.94), rgba(4, 7, 12, 0.98)) !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar {
+    border-radius: 999px !important;
+    height: 64px !important;
+    overflow: hidden !important;
+    width: 64px !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar:first-child {
+    border: 2px solid rgba(239, 25, 45, 0.72) !important;
+    box-shadow: 0 0 20px rgba(239, 25, 45, 0.28) !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar:last-child {
+    border: 2px solid rgba(24, 135, 255, 0.68) !important;
+    box-shadow: 0 0 20px rgba(24, 135, 255, 0.24) !important;
+  }
+
+  .fmm-mobile-card-fighters img,
+  .fmm-mobile-contest-visual img {
+    height: 100% !important;
+    object-fit: cover !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-contest-row {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(239, 25, 45, 0.20), transparent 30%),
+      radial-gradient(circle at 100% 10%, rgba(30, 128, 255, 0.14), transparent 34%),
+      linear-gradient(180deg, rgba(12, 18, 27, 0.96), rgba(4, 7, 12, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 13px !important;
+    box-shadow: inset 0 0 28px rgba(255, 255, 255, 0.035), 0 14px 34px rgba(0, 0, 0, 0.38) !important;
+    min-height: 90px !important;
+  }
+
+  .fmm-mobile-contest-visual {
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-mobile-join {
+    background: linear-gradient(180deg, #ff3344, #d81020 58%, #b50714) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 14px 32px rgba(229, 9, 20, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.17) !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    background:
+      linear-gradient(90deg, rgba(4, 6, 11, 0.98) 0%, rgba(4, 6, 11, 0.92) 38%, rgba(4, 6, 11, 0.20) 66%, rgba(4, 6, 11, 0.48) 100%),
+      radial-gradient(circle at 10% 40%, rgba(238, 21, 38, 0.48), transparent 34%),
+      radial-gradient(circle at 84% 32%, rgba(28, 136, 255, 0.50), transparent 38%) !important;
+    border: 1px solid rgba(239, 26, 45, 0.48) !important;
+    border-radius: 17px !important;
+    box-shadow: 0 22px 56px rgba(0, 0, 0, 0.56), inset 0 0 42px rgba(239, 21, 40, 0.14), inset 0 0 44px rgba(35, 127, 255, 0.08) !important;
+    margin-top: 18px !important;
+    min-height: 222px !important;
+    overflow: hidden !important;
+    padding: 22px 18px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 42%, rgba(0, 0, 0, 0.44) 100%),
+      linear-gradient(90deg, rgba(238, 21, 38, 0.22), transparent 43%, rgba(29, 139, 255, 0.14)),
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 52px 52px, 52px 52px !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    max-width: 230px !important;
+    position: relative !important;
+    width: 58% !important;
+    z-index: 4 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy::before {
+    color: #ff4052 !important;
+    content: 'New Game Mode' !important;
+    font-size: 8.5px !important;
+    letter-spacing: 0.16em !important;
+    margin-bottom: 2px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: clamp(24px, 7.8vw, 34px) !important;
+    line-height: 1.02 !important;
+    margin: 0 0 10px !important;
+    max-width: 210px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: 12.5px !important;
+    line-height: 1.38 !important;
+    margin-bottom: 14px !important;
+    max-width: 190px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight a {
+    background: linear-gradient(180deg, #ff3344, #d81020 56%, #b50815) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 16px 34px rgba(229, 9, 20, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+    min-height: 42px !important;
+    padding: 11px 13px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual {
+    bottom: 0 !important;
+    display: block !important;
+    left: 34% !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    right: -9% !important;
+    top: 0 !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual::after {
+    background:
+      linear-gradient(90deg, rgba(4, 6, 11, 0.96) 0%, rgba(4, 6, 11, 0.72) 25%, rgba(4, 6, 11, 0.10) 62%, rgba(4, 6, 11, 0.34) 100%),
+      linear-gradient(180deg, rgba(4, 6, 11, 0.00), rgba(4, 6, 11, 0.22) 100%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual img {
+    filter: saturate(1.26) contrast(1.18) brightness(1.08) !important;
+    object-fit: cover !important;
+    object-position: 50% 50% !important;
+  }
+
+  .fmm-mobile-metrics {
+    background:
+      radial-gradient(circle at 10% 0%, rgba(239, 25, 45, 0.18), transparent 34%),
+      radial-gradient(circle at 90% 0%, rgba(30, 127, 255, 0.14), transparent 38%),
+      linear-gradient(180deg, rgba(12, 18, 27, 0.97), rgba(4, 7, 12, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 15px !important;
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.035), 0 18px 44px rgba(0, 0, 0, 0.42) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    gap: 8px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr) !important;
+    height: 420px !important;
+    min-height: 420px !important;
+    padding: 16px 12px 20px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(27px, 8.7vw, 36px) !important;
+    max-width: 174px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 10.5px !important;
+    line-height: 1.38 !important;
+    max-width: 166px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    max-width: 162px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    font-size: 10.5px !important;
+    min-height: 40px !important;
+    padding: 10px 11px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 292px !important;
+    padding: 132px 8px 11px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    flex-basis: 66px !important;
+    height: 66px !important;
+    width: 66px !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    font-size: 18px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    font-size: 7.5px !important;
+    left: 8px !important;
+    padding: 5px 6px !important;
+    top: 99px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    height: 54px !important;
+    right: 8px !important;
+    top: 94px !important;
+    width: 42px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: clamp(13px, 3.9vw, 16px) !important;
+    max-width: 138px !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    font-size: 8px !important;
+    max-width: 142px !important;
+  }
+
+  .fmm-mobile-countdown span {
+    min-height: 40px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    font-size: 15px !important;
+  }
+
+  .fmm-mobile-category-row {
+    grid-auto-columns: minmax(102px, 30vw) !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    height: 100px !important;
+    min-width: 102px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 218px !important;
+    padding: 21px 17px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    width: 60% !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: clamp(22px, 7.5vw, 30px) !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    height: 408px !important;
+    min-height: 408px !important;
+    padding: 15px 10px 20px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: 26px !important;
+    max-width: 150px !important;
+  }
+
+  .fmm-mobile-greeting {
+    font-size: 9px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 9.4px !important;
+    max-width: 146px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    max-width: 146px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    font-size: 9.3px !important;
+    min-height: 38px !important;
+    padding-inline: 8px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 282px !important;
+    padding-top: 126px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    flex-basis: 58px !important;
+    height: 58px !important;
+    width: 58px !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    gap: 4px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    top: 91px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    top: 88px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: 12px !important;
+    max-width: 118px !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    font-size: 7px !important;
+    max-width: 118px !important;
+  }
+
+  .fmm-mobile-countdown span {
+    min-height: 36px !important;
+    padding-inline: 1px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    font-size: 13px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 208px !important;
+  }
+}
+
+/* Phase 3 mobile-only homepage polish: match the approved phone concept while leaving desktop/navbar/footer intact. */
+@media (max-width: 767px) {
+  .site-experience-main.is-home-experience-main .fmm-mobile-home,
+  .fmm-mobile-home {
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 27, 48, 0.18), transparent 11rem),
+      radial-gradient(circle at 82% 7%, rgba(21, 124, 255, 0.16), transparent 13rem),
+      linear-gradient(180deg, #020306 0%, #03060b 100%) !important;
+    display: block !important;
+    overflow: hidden !important;
+    padding: 18px 10px 24px !important;
+  }
+
+  .fmm-desktop-home-shell {
+    display: none !important;
+  }
+
+  .fmm-mobile-signup-hero,
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    animation: fmmPremiumFadeUp 520ms ease both !important;
+    background:
+      linear-gradient(104deg, rgba(2, 4, 9, 0.98) 0%, rgba(3, 5, 11, 0.88) 38%, rgba(4, 8, 18, 0.74) 100%),
+      radial-gradient(circle at 18% 42%, rgba(247, 21, 42, 0.44), transparent 28%),
+      radial-gradient(circle at 81% 28%, rgba(24, 115, 255, 0.40), transparent 32%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center top / cover no-repeat !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    border-radius: 24px !important;
+    box-shadow:
+      0 22px 54px rgba(0, 0, 0, 0.62),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+      inset 0 -48px 90px rgba(0, 0, 0, 0.72),
+      inset 0 0 54px rgba(227, 10, 24, 0.13) !important;
+    column-gap: 10px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) !important;
+    height: 428px !important;
+    margin: 10px 0 0 !important;
+    overflow: hidden !important;
+    padding: 26px 14px 42px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-signup-hero::before {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+      radial-gradient(circle at 64% 13%, rgba(255, 255, 255, 0.20), transparent 18%),
+      linear-gradient(90deg, rgba(255, 18, 38, 0.14), transparent 38%, rgba(24, 115, 255, 0.14)) !important;
+    background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100% !important;
+    content: '' !important;
+    inset: 0 !important;
+    opacity: 0.74 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-signup-hero::after {
+    background:
+      linear-gradient(90deg, rgba(2, 4, 9, 0.35), transparent 45%, rgba(2, 5, 12, 0.18)),
+      radial-gradient(circle at 53% 23%, rgba(255, 255, 255, 0.12), transparent 20%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    background:
+      linear-gradient(180deg, rgba(2, 4, 9, 0.02), rgba(0, 0, 0, 0.70)),
+      radial-gradient(circle at 68% 42%, rgba(255, 255, 255, 0.10), transparent 24%) !important;
+    inset: 0 !important;
+    position: absolute !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    align-self: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    max-width: 178px !important;
+    min-width: 0 !important;
+    position: relative !important;
+    z-index: 4 !important;
+  }
+
+  .fmm-mobile-greeting,
+  .fmm-mobile-hero-intro .fmm-mobile-greeting {
+    color: rgba(255, 255, 255, 0.84) !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(26px, 9.2vw, 38px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.015em !important;
+    line-height: 0.97 !important;
+    margin: 0 !important;
+    text-shadow: 0 16px 28px rgba(0, 0, 0, 0.66) !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-hero-intro h1 span {
+    display: block !important;
+  }
+
+  .fmm-mobile-hero-intro h1 em {
+    color: #ff263c !important;
+    font-style: normal !important;
+    text-shadow: 0 0 22px rgba(255, 38, 60, 0.52) !important;
+  }
+
+  .fmm-mobile-intro-copy,
+  .fmm-mobile-hero-intro .fmm-mobile-intro-copy {
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-size: 11px !important;
+    font-weight: 520 !important;
+    line-height: 1.42 !important;
+    margin: 0 !important;
+    max-width: 174px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    display: grid !important;
+    gap: 9px !important;
+    margin-top: 4px !important;
+    width: min(100%, 164px) !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-secondary-btn {
+    align-items: center !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 1000 !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    letter-spacing: 0.045em !important;
+    line-height: 1 !important;
+    min-height: 42px !important;
+    padding: 12px 14px !important;
+    text-transform: uppercase !important;
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+  }
+
+  .fmm-mobile-signup-btn {
+    background: linear-gradient(180deg, #ff3344 0%, #d70718 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.17) !important;
+    box-shadow: 0 16px 34px rgba(229, 9, 20, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+    color: #ffffff !important;
+  }
+
+  .fmm-mobile-event-btn,
+  .fmm-mobile-secondary-btn {
+    background: rgba(5, 9, 16, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: rgba(255, 255, 255, 0.93) !important;
+  }
+
+  .fmm-mobile-signup-btn:hover,
+  .fmm-mobile-event-btn:hover,
+  .fmm-mobile-secondary-btn:hover {
+    transform: translateY(-1px) !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    align-self: end !important;
+    background:
+      linear-gradient(180deg, rgba(7, 11, 20, 0.92), rgba(5, 7, 12, 0.86)),
+      radial-gradient(circle at 0% 20%, rgba(255, 26, 46, 0.20), transparent 34%),
+      radial-gradient(circle at 100% 18%, rgba(24, 115, 255, 0.22), transparent 40%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    min-height: 225px !important;
+    min-width: 0 !important;
+    padding: 73px 12px 12px !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    align-items: center !important;
+    display: flex !important;
+    gap: 6px !important;
+    justify-content: center !important;
+    left: 4px !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    right: 4px !important;
+    top: -22px !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-mobile-hero-faceoff span {
+    color: #ff2038 !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 17px !important;
+    font-style: italic !important;
+    font-weight: 1000 !important;
+    text-shadow: 0 0 18px rgba(255, 32, 56, 0.48) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-signup-hero .fmm-mobile-hero-faceoff .mobile-fighter-avatar {
+    background: rgba(3, 6, 11, 0.86) !important;
+    border: 2px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 13px 28px rgba(0, 0, 0, 0.52), inset 0 0 24px rgba(255, 255, 255, 0.04) !important;
+    flex: 0 0 72px !important;
+    height: 72px !important;
+    inset: auto !important;
+    overflow: hidden !important;
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+    width: 72px !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left {
+    border-color: rgba(255, 31, 52, 0.88) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    border-color: rgba(26, 144, 255, 0.88) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar img,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar > span img,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar span > img {
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 18% !important;
+    transform: scale(1.02) !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-featured-label,
+  .fmm-mobile-featured-label {
+    align-items: center !important;
+    background: linear-gradient(180deg, #ff3041, #c40817) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 24px rgba(229, 9, 20, 0.34) !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 8px !important;
+    font-weight: 1000 !important;
+    justify-content: center !important;
+    left: 12px !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1 !important;
+    padding: 8px 9px 7px !important;
+    position: absolute !important;
+    text-transform: uppercase !important;
+    top: 55px !important;
+    z-index: 8 !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-date-chip,
+  .fmm-mobile-date-chip {
+    align-items: center !important;
+    background: rgba(7, 11, 18, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.42), 0 0 22px rgba(29, 155, 240, 0.16) !important;
+    color: #ffffff !important;
+    display: grid !important;
+    height: 58px !important;
+    justify-items: center !important;
+    padding: 6px 4px !important;
+    position: absolute !important;
+    right: 10px !important;
+    top: 54px !important;
+    width: 48px !important;
+    z-index: 8 !important;
+  }
+
+  .fmm-mobile-date-chip span,
+  .fmm-mobile-date-chip small {
+    color: rgba(255, 255, 255, 0.78) !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 8px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-date-chip strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 22px !important;
+    font-weight: 1000 !important;
+    line-height: 0.9 !important;
+  }
+
+  .fmm-mobile-event-copy {
+    display: grid !important;
+    gap: 8px !important;
+    margin-top: 15px !important;
+    padding-right: 44px !important;
+    position: relative !important;
+    z-index: 7 !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    color: #ffffff !important;
+    display: grid !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(16px, 4.6vw, 22px) !important;
+    font-weight: 1000 !important;
+    gap: 2px !important;
+    letter-spacing: 0.028em !important;
+    line-height: 1.02 !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-event-copy h2 span {
+    display: -webkit-box !important;
+    max-height: 2.05em !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .fmm-mobile-event-copy h2 em {
+    color: #ff263c !important;
+    font-size: 13px !important;
+    font-style: normal !important;
+    line-height: 1 !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    align-items: center !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    display: inline-flex !important;
+    font-size: 8px !important;
+    font-weight: 850 !important;
+    gap: 5px !important;
+    line-height: 1.1 !important;
+    margin: 0 !important;
+    max-width: 132px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-event-copy p svg {
+    color: #ffffff !important;
+    flex: 0 0 auto !important;
+  }
+
+  .fmm-mobile-countdown {
+    display: grid !important;
+    gap: 6px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    margin-top: 10px !important;
+    position: relative !important;
+    z-index: 7 !important;
+  }
+
+  .fmm-mobile-countdown span,
+  .fmm-mobile-countdown div {
+    align-items: center !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(5, 8, 14, 0.86)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    border-radius: 10px !important;
+    box-shadow: inset 0 0 20px rgba(229, 9, 20, 0.07) !important;
+    display: grid !important;
+    min-height: 52px !important;
+    padding: 7px 5px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    color: #ffffff !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 20px !important;
+    font-weight: 1000 !important;
+    line-height: 0.95 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-countdown small,
+  .fmm-mobile-countdown span span,
+  .fmm-mobile-countdown div span {
+    color: rgba(255, 255, 255, 0.72) !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 8px !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-dots {
+    bottom: 18px !important;
+    display: flex !important;
+    gap: 7px !important;
+    justify-content: center !important;
+    left: 0 !important;
+    position: absolute !important;
+    right: 0 !important;
+    z-index: 9 !important;
+  }
+
+  .fmm-mobile-dots button {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    height: 7px !important;
+    padding: 0 !important;
+    transition: width 180ms ease, background 180ms ease !important;
+    width: 7px !important;
+  }
+
+  .fmm-mobile-dots button.is-active {
+    background: #ff263c !important;
+    box-shadow: 0 0 14px rgba(255, 38, 60, 0.55) !important;
+    width: 22px !important;
+  }
+
+  .fmm-mobile-loading-line {
+    margin: 12px 0 0 !important;
+  }
+
+  .fmm-mobile-category-row {
+    display: flex !important;
+    gap: 10px !important;
+    margin: 16px -10px 0 0 !important;
+    overflow-x: auto !important;
+    padding: 0 10px 6px 0 !important;
+    scroll-padding-left: 10px !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .fmm-mobile-category-row::-webkit-scrollbar,
+  .fmm-mobile-fight-rail::-webkit-scrollbar,
+  .fmm-mobile-contest-list::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-tile {
+    align-items: center !important;
+    background: linear-gradient(180deg, rgba(15, 20, 31, 0.96), rgba(6, 9, 16, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    display: grid !important;
+    flex: 0 0 120px !important;
+    gap: 5px !important;
+    height: 102px !important;
+    justify-items: center !important;
+    overflow: hidden !important;
+    padding: 13px 8px 11px !important;
+    position: relative !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-category-row button::before {
+    background:
+      radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.12), transparent 28%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 60%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-category-row button.is-boxing,
+  .fmm-mobile-category-row button.is-active.is-boxing {
+    background:
+      radial-gradient(circle at 50% 14%, rgba(255, 38, 60, 0.54), transparent 42%),
+      linear-gradient(180deg, rgba(45, 9, 15, 0.98), rgba(8, 10, 16, 0.98)) !important;
+    border-color: rgba(255, 38, 60, 0.72) !important;
+  }
+
+  .fmm-mobile-category-row button.is-mma {
+    background:
+      radial-gradient(circle at 50% 14%, rgba(137, 60, 255, 0.58), transparent 42%),
+      linear-gradient(180deg, rgba(20, 12, 42, 0.98), rgba(8, 10, 16, 0.98)) !important;
+  }
+
+  .fmm-mobile-category-row button.is-bareknuckle {
+    background:
+      radial-gradient(circle at 50% 14%, rgba(163, 83, 255, 0.58), transparent 42%),
+      linear-gradient(180deg, rgba(24, 11, 42, 0.98), rgba(8, 10, 16, 0.98)) !important;
+  }
+
+  .fmm-mobile-category-row button.is-kickboxing {
+    background:
+      radial-gradient(circle at 50% 14%, rgba(255, 178, 33, 0.56), transparent 42%),
+      linear-gradient(180deg, rgba(42, 29, 9, 0.98), rgba(8, 10, 16, 0.98)) !important;
+  }
+
+  .fmm-mobile-category-row button.is-active {
+    box-shadow: 0 0 0 1px rgba(255, 38, 60, 0.22), 0 16px 34px rgba(229, 9, 20, 0.22), inset 0 -3px 0 rgba(255, 38, 60, 0.92) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .fmm-mobile-category-row button img {
+    filter: drop-shadow(0 0 16px currentColor) saturate(1.15) !important;
+    height: 34px !important;
+    object-fit: contain !important;
+    position: relative !important;
+    width: 34px !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-category-row button strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1 !important;
+    position: relative !important;
+    text-transform: uppercase !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-category-row button span {
+    color: rgba(255, 255, 255, 0.76) !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 9px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.04em !important;
+    position: relative !important;
+    text-transform: uppercase !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-section {
+    margin-top: 18px !important;
+  }
+
+  .fmm-mobile-section-heading {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-bottom: 10px !important;
+  }
+
+  .fmm-mobile-section-heading h2 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(19px, 6.6vw, 27px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.055em !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-section-heading a {
+    align-items: center !important;
+    color: #ff263c !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 1000 !important;
+    gap: 7px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-fight-rail,
+  .fmm-mobile-contest-list {
+    -webkit-overflow-scrolling: touch !important;
+    display: flex !important;
+    gap: 12px !important;
+    margin: 0 -10px 0 0 !important;
+    overflow-x: auto !important;
+    padding: 0 10px 4px 0 !important;
+    scroll-padding-left: 10px !important;
+    scroll-snap-type: x mandatory !important;
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  .fmm-mobile-fight-rail.is-dragging,
+  .fmm-mobile-contest-list.is-dragging {
+    cursor: grabbing !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-mobile-fight-rail.is-dragging a,
+  .fmm-mobile-contest-list.is-dragging a {
+    pointer-events: none !important;
+  }
+
+  .fmm-mobile-upcoming-card {
+    background:
+      linear-gradient(180deg, rgba(11, 16, 26, 0.92), rgba(5, 8, 14, 0.98)),
+      radial-gradient(circle at 18% 18%, rgba(255, 38, 60, 0.30), transparent 30%),
+      radial-gradient(circle at 82% 18%, rgba(24, 115, 255, 0.24), transparent 34%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 13px !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38), inset 0 0 26px rgba(255, 255, 255, 0.025) !important;
+    color: #ffffff !important;
+    flex: 0 0 232px !important;
+    min-height: 160px !important;
+    overflow: hidden !important;
+    padding: 12px !important;
+    position: relative !important;
+    scroll-snap-align: start !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-boxing,
+  .fmm-mobile-contest-row.is-boxing {
+    border-color: rgba(255, 39, 62, 0.34) !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-mma,
+  .fmm-mobile-contest-row.is-mma {
+    border-color: rgba(139, 85, 255, 0.36) !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-bare-knuckle,
+  .fmm-mobile-contest-row.is-bare-knuckle {
+    border-color: rgba(175, 91, 255, 0.36) !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-kickboxing,
+  .fmm-mobile-contest-row.is-kickboxing {
+    border-color: rgba(255, 185, 45, 0.38) !important;
+  }
+
+  .fmm-mobile-upcoming-top {
+    align-items: center !important;
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: space-between !important;
+    margin-bottom: 13px !important;
+    min-width: 0 !important;
+  }
+
+  .fmm-mobile-upcoming-top span {
+    background: #ff2439 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 9px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.05em !important;
+    padding: 6px 8px 5px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-upcoming-top small {
+    color: rgba(255, 255, 255, 0.80) !important;
+    flex: 1 1 auto !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 10px !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.055em !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-card-fighters {
+    align-items: center !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) !important;
+    justify-items: center !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar {
+    background: rgba(0, 0, 0, 0.36) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.36) !important;
+    height: 72px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    width: 72px !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar img,
+  .fmm-mobile-card-fighters .mobile-fighter-avatar span > img {
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 16% !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-card-fighters b {
+    color: #ff263c !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 22px !important;
+    font-style: italic !important;
+    font-weight: 1000 !important;
+    text-shadow: 0 0 14px rgba(255, 38, 60, 0.48) !important;
+  }
+
+  .fmm-mobile-card-names {
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    margin-top: 10px !important;
+  }
+
+  .fmm-mobile-card-names strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.045em !important;
+    line-height: 1.05 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-contest-list {
+    padding-bottom: 6px !important;
+  }
+
+  .fmm-mobile-contest-row {
+    background:
+      linear-gradient(180deg, rgba(12, 17, 27, 0.96), rgba(5, 8, 14, 0.99)),
+      radial-gradient(circle at 15% 15%, rgba(255, 38, 60, 0.26), transparent 30%),
+      radial-gradient(circle at 85% 15%, rgba(24, 115, 255, 0.20), transparent 36%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 13px !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.36) !important;
+    display: grid !important;
+    flex: 0 0 214px !important;
+    gap: 10px !important;
+    grid-template-columns: 1fr !important;
+    min-height: 218px !important;
+    overflow: hidden !important;
+    padding: 10px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .fmm-mobile-contest-visual {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.58)),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    display: block !important;
+    height: 84px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-contest-visual > span {
+    background: linear-gradient(180deg, #ff3041, #c40817) !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 8px !important;
+    font-weight: 1000 !important;
+    left: 8px !important;
+    letter-spacing: 0.04em !important;
+    padding: 5px 6px 4px !important;
+    position: absolute !important;
+    text-transform: uppercase !important;
+    top: 7px !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-contest-visual > div {
+    align-items: end !important;
+    bottom: 7px !important;
+    display: flex !important;
+    gap: 0 !important;
+    left: 50% !important;
+    position: absolute !important;
+    transform: translateX(-50%) !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-contest-visual .mobile-fighter-avatar {
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 999px !important;
+    height: 52px !important;
+    margin: 0 -6px !important;
+    overflow: hidden !important;
+    width: 52px !important;
+  }
+
+  .fmm-mobile-contest-info h3 {
+    color: #ffffff !important;
+    display: -webkit-box !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    margin: 0 !important;
+    min-height: 31px !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .fmm-mobile-contest-meta {
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    margin-top: 9px !important;
+  }
+
+  .fmm-mobile-contest-meta span:nth-child(3) {
+    display: none !important;
+  }
+
+  .fmm-mobile-contest-meta small {
+    color: rgba(255, 255, 255, 0.65) !important;
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+  }
+
+  .fmm-mobile-contest-meta strong {
+    color: #25e982 !important;
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    margin-top: 3px !important;
+  }
+
+  .fmm-mobile-join {
+    align-items: center !important;
+    background: transparent !important;
+    border: 1px solid rgba(255, 38, 60, 0.66) !important;
+    border-radius: 8px !important;
+    color: #ff3041 !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 1000 !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    letter-spacing: 0.05em !important;
+    min-height: 36px !important;
+    padding: 9px 10px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    background:
+      linear-gradient(90deg, rgba(6, 7, 13, 0.98) 0%, rgba(5, 7, 13, 0.92) 38%, rgba(5, 7, 13, 0.26) 66%, rgba(4, 7, 14, 0.42) 100%),
+      radial-gradient(circle at 12% 18%, rgba(255, 38, 60, 0.38), transparent 34%),
+      radial-gradient(circle at 78% 24%, rgba(24, 115, 255, 0.42), transparent 36%) !important;
+    border: 1px solid rgba(255, 38, 60, 0.42) !important;
+    border-radius: 15px !important;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.48), inset 0 0 38px rgba(255, 38, 60, 0.09) !important;
+    margin-top: 20px !important;
+    min-height: 196px !important;
+    overflow: hidden !important;
+    padding: 20px 16px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 55%, rgba(0, 0, 0, 0.46)),
+      linear-gradient(90deg, rgba(255, 38, 60, 0.16), transparent 45%, rgba(24, 115, 255, 0.20)) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-copy {
+    display: grid !important;
+    gap: 9px !important;
+    max-width: 204px !important;
+    position: relative !important;
+    width: 58% !important;
+    z-index: 4 !important;
+  }
+
+  .fmm-mobile-wrestling-copy::before {
+    color: #ff4354 !important;
+    content: 'New Game Mode' !important;
+    display: block !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 8px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.16em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-wrestling-copy h2 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(23px, 8.2vw, 32px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.025em !important;
+    line-height: 1.02 !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-wrestling-copy p {
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.28 !important;
+    margin: 0 !important;
+  }
+
+  .fmm-mobile-wrestling-copy a {
+    align-items: center !important;
+    background: linear-gradient(180deg, #ff3243, #cf0718) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 9px !important;
+    box-shadow: 0 13px 30px rgba(229, 9, 20, 0.36) !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 1000 !important;
+    gap: 9px !important;
+    justify-content: center !important;
+    letter-spacing: 0.04em !important;
+    margin-top: 3px !important;
+    min-height: 40px !important;
+    padding: 10px 13px !important;
+    text-transform: uppercase !important;
+    width: fit-content !important;
+  }
+
+  .fmm-mobile-wrestling-visual {
+    bottom: 0 !important;
+    display: block !important;
+    left: 34% !important;
+    position: absolute !important;
+    right: -18% !important;
+    top: 0 !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-wrestling-visual::after {
+    background:
+      linear-gradient(90deg, rgba(5, 7, 13, 0.96) 0%, rgba(5, 7, 13, 0.66) 30%, rgba(5, 7, 13, 0.10) 68%, rgba(5, 7, 13, 0.44) 100%),
+      linear-gradient(180deg, rgba(5, 7, 13, 0.06), rgba(5, 7, 13, 0.44) 100%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-visual img {
+    filter: saturate(1.18) contrast(1.10) brightness(1.06) !important;
+    object-fit: cover !important;
+    object-position: 58% center !important;
+  }
+
+  .fmm-mobile-metrics {
+    background: linear-gradient(180deg, rgba(13, 19, 29, 0.98), rgba(5, 8, 14, 0.99)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34) !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    margin-top: 18px !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-mobile-metrics div {
+    align-items: center !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    display: grid !important;
+    justify-items: center !important;
+    min-height: 92px !important;
+    padding: 11px 5px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-metrics div:last-child {
+    border-right: 0 !important;
+  }
+
+  .fmm-mobile-metrics svg {
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: 18px !important;
+  }
+
+  .fmm-mobile-metrics strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 17px !important;
+    font-weight: 1000 !important;
+    line-height: 1 !important;
+  }
+
+  .fmm-mobile-metrics span {
+    color: rgba(255, 255, 255, 0.76) !important;
+    font-size: 8px !important;
+    font-weight: 650 !important;
+    line-height: 1.15 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr) !important;
+    height: 410px !important;
+    padding: 23px 12px 38px !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    gap: 9px !important;
+    max-width: 158px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(25px, 9.1vw, 34px) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 10px !important;
+    line-height: 1.36 !important;
+    max-width: 154px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    width: min(100%, 150px) !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-secondary-btn {
+    font-size: 10.5px !important;
+    min-height: 39px !important;
+    padding: 10px 11px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 214px !important;
+    padding: 70px 10px 11px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar {
+    flex-basis: 66px !important;
+    height: 66px !important;
+    width: 66px !important;
+  }
+
+  .fmm-mobile-hero-faceoff span {
+    font-size: 15px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-featured-label {
+    font-size: 7px !important;
+    left: 10px !important;
+    padding: 7px 8px 6px !important;
+    top: 51px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-date-chip {
+    height: 54px !important;
+    right: 8px !important;
+    top: 50px !important;
+    width: 44px !important;
+  }
+
+  .fmm-mobile-date-chip strong {
+    font-size: 20px !important;
+  }
+
+  .fmm-mobile-event-copy {
+    margin-top: 12px !important;
+    padding-right: 39px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: clamp(15px, 4.45vw, 19px) !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    font-size: 7px !important;
+    max-width: 120px !important;
+  }
+
+  .fmm-mobile-countdown {
+    gap: 5px !important;
+    margin-top: 9px !important;
+  }
+
+  .fmm-mobile-countdown span,
+  .fmm-mobile-countdown div {
+    min-height: 47px !important;
+    padding: 6px 4px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    font-size: 17px !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-tile {
+    flex-basis: 116px !important;
+    height: 96px !important;
+  }
+
+  .fmm-mobile-upcoming-card {
+    flex-basis: 220px !important;
+  }
+
+  .fmm-mobile-contest-row {
+    flex-basis: 206px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 188px !important;
+    padding: 18px 15px !important;
+  }
+
+  .fmm-mobile-wrestling-copy {
+    width: 61% !important;
+  }
+
+  .fmm-mobile-wrestling-copy h2 {
+    font-size: clamp(21px, 7.6vw, 28px) !important;
+  }
+
+  .fmm-mobile-wrestling-copy p {
+    font-size: 11px !important;
+  }
+
+  .fmm-mobile-wrestling-copy a {
+    font-size: 10px !important;
+    min-height: 38px !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    height: 392px !important;
+    padding: 21px 10px 36px !important;
+  }
+
+  .fmm-mobile-greeting {
+    font-size: 10px !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    max-width: 146px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: 27px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 9px !important;
+    max-width: 140px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    width: 140px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-secondary-btn {
+    font-size: 9.5px !important;
+    min-height: 36px !important;
+    padding: 9px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 204px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar {
+    flex-basis: 58px !important;
+    height: 58px !important;
+    width: 58px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-featured-label {
+    font-size: 6.5px !important;
+    max-width: 76px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-date-chip {
+    height: 50px !important;
+    width: 40px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: 14px !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    display: none !important;
+  }
+
+  .fmm-mobile-countdown span,
+  .fmm-mobile-countdown div {
+    min-height: 43px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    font-size: 15px !important;
+  }
+
+  .fmm-mobile-countdown small,
+  .fmm-mobile-countdown span span,
+  .fmm-mobile-countdown div span {
+    font-size: 6.5px !important;
+  }
+
+  .fmm-mobile-upcoming-card {
+    flex-basis: 208px !important;
+  }
+
+  .fmm-mobile-contest-row {
+    flex-basis: 196px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 182px !important;
+    padding: 17px 14px !important;
+  }
+
+  .fmm-mobile-wrestling-copy h2 {
+    font-size: 21px !important;
+  }
+
+  .fmm-mobile-wrestling-copy p {
+    font-size: 10px !important;
+  }
+}
+
+/* Phase 3 frontend pass: mobile-only premium homepage from approved reference. */
+@media (max-width: 767px) {
+  .site-experience-main.is-home-experience-main .fmm-home.page-shell {
+    background:
+      radial-gradient(circle at 14% 4%, rgba(235, 22, 39, 0.28), transparent 36vw),
+      radial-gradient(circle at 92% 9%, rgba(30, 111, 255, 0.22), transparent 42vw),
+      linear-gradient(180deg, #020306 0%, #030710 52%, #020306 100%) !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    max-width: 430px !important;
+    padding: 86px 12px 22px !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    align-items: stretch !important;
+    background:
+      linear-gradient(110deg, rgba(2, 4, 8, 0.70) 0%, rgba(2, 4, 8, 0.84) 35%, rgba(3, 7, 15, 0.72) 100%),
+      radial-gradient(circle at 17% 16%, rgba(255, 35, 50, 0.38), transparent 31%),
+      radial-gradient(circle at 78% 13%, rgba(53, 137, 255, 0.32), transparent 34%),
+      linear-gradient(90deg, rgba(48, 2, 9, 0.86), rgba(3, 7, 15, 0.20) 48%, rgba(2, 13, 32, 0.86)),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 22px !important;
+    box-shadow:
+      0 24px 70px rgba(0, 0, 0, 0.72),
+      0 0 0 1px rgba(239, 32, 54, 0.24),
+      inset 0 0 70px rgba(229, 13, 30, 0.20),
+      inset 0 0 60px rgba(37, 115, 255, 0.13) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr) !important;
+    gap: 10px !important;
+    height: auto !important;
+    margin: 12px 0 0 !important;
+    min-height: 432px !important;
+    overflow: hidden !important;
+    padding: 18px 14px 21px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 44%, rgba(0, 0, 0, 0.38) 100%),
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 46px 46px, 46px 46px !important;
+    content: '' !important;
+    inset: 0 !important;
+    opacity: 0.72 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::after {
+    background:
+      linear-gradient(90deg, rgba(255, 0, 28, 0.34), transparent 32%, transparent 68%, rgba(41, 129, 255, 0.32)),
+      radial-gradient(circle at 53% 8%, rgba(255, 255, 255, 0.18), transparent 22%),
+      linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.72) 100%) !important;
+    border: 0 !important;
+    border-radius: inherit !important;
+    content: '' !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    background:
+      radial-gradient(circle at 10% 78%, rgba(245, 28, 45, 0.32), transparent 31%),
+      radial-gradient(circle at 88% 78%, rgba(47, 130, 255, 0.26), transparent 30%) !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-hero-intro,
+  .fmm-mobile-hero-event-card,
+  .fmm-mobile-signup-hero > .fmm-mobile-dots {
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    align-content: center !important;
+    display: grid !important;
+    min-width: 0 !important;
+    padding: 12px 0 34px 4px !important;
+  }
+
+  .fmm-mobile-greeting {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: clamp(10px, 2.9vw, 13px) !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+    margin: 0 0 7px !important;
+    text-transform: none !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif) !important;
+    font-size: clamp(24px, 8.4vw, 36px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.025em !important;
+    line-height: 0.96 !important;
+    margin: 0 0 12px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-hero-intro h1 span {
+    display: block !important;
+  }
+
+  .fmm-mobile-hero-intro h1 em {
+    color: #ff2437 !important;
+    font-style: normal !important;
+    text-shadow: 0 0 22px rgba(255, 36, 55, 0.62) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    color: rgba(255, 255, 255, 0.76) !important;
+    font-size: clamp(10px, 3vw, 13px) !important;
+    font-weight: 520 !important;
+    line-height: 1.44 !important;
+    margin: 0 0 16px !important;
+    max-width: 174px !important;
+    text-transform: none !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    display: grid !important;
+    gap: 9px !important;
+    width: min(100%, 178px) !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    align-items: center !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(10px, 3vw, 13px) !important;
+    font-weight: 1000 !important;
+    gap: 9px !important;
+    justify-content: center !important;
+    letter-spacing: 0.04em !important;
+    min-height: 42px !important;
+    padding: 11px 13px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-signup-btn {
+    background: linear-gradient(180deg, #ff3141 0%, #bf0714 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.17) !important;
+    box-shadow: 0 13px 34px rgba(237, 16, 32, 0.40) !important;
+    color: #ffffff !important;
+  }
+
+  .fmm-mobile-event-btn {
+    background: rgba(11, 15, 24, 0.70) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    align-content: end !important;
+    align-self: stretch !important;
+    background:
+      linear-gradient(180deg, rgba(1, 4, 10, 0.10) 0%, rgba(1, 4, 10, 0.32) 46%, rgba(1, 4, 10, 0.86) 100%),
+      radial-gradient(circle at 22% 31%, rgba(238, 19, 38, 0.20), transparent 28%),
+      radial-gradient(circle at 82% 26%, rgba(35, 133, 255, 0.22), transparent 30%) !important;
+    border-radius: 18px !important;
+    display: grid !important;
+    min-height: 360px !important;
+    overflow: hidden !important;
+    padding: 168px 0 12px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-hero-event-card::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 45%, rgba(0, 0, 0, 0.54)),
+      radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.15), transparent 22%) !important;
+    content: '' !important;
+    inset: 0 !important;
+    opacity: 0.9 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    inset: 44px -9px auto -9px !important;
+    align-items: center !important;
+    justify-items: center !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar {
+    background:
+      radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.17), transparent 35%),
+      rgba(2, 5, 10, 0.88) !important;
+    height: clamp(64px, 20vw, 88px) !important;
+    width: clamp(64px, 20vw, 88px) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left {
+    border: 2px solid rgba(255, 27, 48, 0.96) !important;
+    box-shadow: 0 0 26px rgba(255, 27, 48, 0.42) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    border: 2px solid rgba(31, 145, 255, 0.96) !important;
+    box-shadow: 0 0 26px rgba(31, 145, 255, 0.38) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar img,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar > span img,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar span > img {
+    object-position: center 16% !important;
+    transform: scale(1.01) !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    color: #ff1d32 !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(20px, 6vw, 27px) !important;
+    font-style: italic !important;
+    font-weight: 1000 !important;
+    line-height: 1 !important;
+    text-shadow: 0 0 18px rgba(255, 29, 50, 0.62) !important;
+    transform: translateY(6px) !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-featured-label {
+    background: linear-gradient(180deg, #ff3042, #bd0614) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 28px rgba(241, 25, 43, 0.36) !important;
+    font-size: 8px !important;
+    left: 6px !important;
+    max-width: calc(100% - 64px) !important;
+    padding: 7px 9px 6px !important;
+    position: absolute !important;
+    top: 8px !important;
+    z-index: 7 !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-date-chip {
+    border-radius: 9px !important;
+    height: 60px !important;
+    right: 5px !important;
+    top: 6px !important;
+    width: 48px !important;
+    z-index: 7 !important;
+  }
+
+  .fmm-mobile-event-copy {
+    display: grid !important;
+    justify-items: start !important;
+    margin: 0 6px 8px !important;
+    position: relative !important;
+    z-index: 6 !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    color: #ffffff !important;
+    display: grid !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(15px, 4.7vw, 22px) !important;
+    font-weight: 1000 !important;
+    gap: 2px !important;
+    letter-spacing: 0.045em !important;
+    line-height: 1.02 !important;
+    margin: 0 0 9px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-event-copy h2 span {
+    display: -webkit-box !important;
+    max-width: 128px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .fmm-mobile-event-copy h2 em {
+    color: #ff2437 !important;
+    font-size: 0.72em !important;
+    font-style: normal !important;
+    line-height: 0.9 !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    align-items: center !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    display: inline-flex !important;
+    font-size: clamp(8px, 2.6vw, 11px) !important;
+    font-weight: 900 !important;
+    gap: 5px !important;
+    letter-spacing: 0.035em !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    max-width: 160px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-event-copy p svg {
+    color: rgba(255, 255, 255, 0.78) !important;
+    flex: 0 0 auto !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-countdown {
+    display: grid !important;
+    gap: 5px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    margin: 0 6px !important;
+    position: relative !important;
+    z-index: 6 !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-countdown > span {
+    align-content: center !important;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(1, 4, 9, 0.86)),
+      radial-gradient(circle at 50% 0%, rgba(255, 28, 48, 0.20), transparent 62%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 9px !important;
+    display: grid !important;
+    min-height: 48px !important;
+    padding: 7px 4px 6px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-countdown strong {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: clamp(17px, 5.5vw, 24px) !important;
+    font-weight: 1000 !important;
+    line-height: 0.94 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.20) !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-countdown small {
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 7px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1 !important;
+    margin-top: 4px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-signup-hero > .fmm-mobile-dots {
+    align-items: center !important;
+    bottom: 8px !important;
+    display: flex !important;
+    gap: 5px !important;
+    grid-column: 1 / -1 !important;
+    justify-content: center !important;
+    left: 0 !important;
+    margin: 0 !important;
+    position: absolute !important;
+    right: 0 !important;
+    z-index: 8 !important;
+  }
+
+  .fmm-mobile-signup-hero > .fmm-mobile-dots button {
+    background: rgba(255, 255, 255, 0.22) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+    height: 6px !important;
+    width: 6px !important;
+  }
+
+  .fmm-mobile-signup-hero > .fmm-mobile-dots button.is-active {
+    background: #ff2538 !important;
+    box-shadow: 0 0 18px rgba(255, 37, 56, 0.72) !important;
+    width: 18px !important;
+  }
+
+  .fmm-mobile-category-row {
+    gap: 10px !important;
+    grid-auto-columns: 124px !important;
+    margin: 16px -12px 0 !important;
+    padding: 0 12px 8px !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(2, 5, 10, 0.90)),
+      radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.13), transparent 42%) !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+    border-radius: 13px !important;
+    box-shadow: 0 15px 34px rgba(0, 0, 0, 0.35), inset 0 0 24px rgba(255, 255, 255, 0.025) !important;
+    height: 96px !important;
+    overflow: hidden !important;
+    padding: 12px 9px 9px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile::before {
+    content: '' !important;
+    inset: 0 !important;
+    opacity: 0.92 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile > * {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-boxing::before {
+    background: radial-gradient(circle at 28% 18%, rgba(255, 24, 43, 0.46), transparent 40%), linear-gradient(135deg, rgba(90, 4, 12, 0.78), rgba(9, 13, 22, 0.92)) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-mma::before {
+    background: radial-gradient(circle at 36% 20%, rgba(154, 54, 255, 0.52), transparent 42%), linear-gradient(135deg, rgba(41, 11, 76, 0.78), rgba(9, 13, 22, 0.92)) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-bareknuckle::before {
+    background: radial-gradient(circle at 40% 18%, rgba(142, 58, 255, 0.48), transparent 42%), linear-gradient(135deg, rgba(46, 18, 74, 0.78), rgba(9, 13, 22, 0.92)) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-kickboxing::before {
+    background: radial-gradient(circle at 40% 18%, rgba(255, 189, 40, 0.50), transparent 42%), linear-gradient(135deg, rgba(82, 52, 7, 0.76), rgba(9, 13, 22, 0.92)) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-pro-wrestling::before {
+    background: radial-gradient(circle at 40% 18%, rgba(36, 126, 255, 0.50), transparent 42%), linear-gradient(135deg, rgba(6, 30, 68, 0.80), rgba(9, 13, 22, 0.92)) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-active {
+    border-color: rgba(255, 37, 56, 0.94) !important;
+    box-shadow:
+      0 16px 36px rgba(238, 20, 38, 0.23),
+      0 0 0 1px rgba(255, 37, 56, 0.22),
+      inset 0 0 32px rgba(255, 37, 56, 0.12) !important;
+  }
+
+  .fmm-mobile-category-row img {
+    filter: drop-shadow(0 0 16px currentColor) saturate(1.14) !important;
+    height: 38px !important;
+    width: 38px !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    font-size: 11px !important;
+    letter-spacing: 0.045em !important;
+  }
+
+  .fmm-mobile-category-row span {
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 8px !important;
+  }
+
+  .fmm-mobile-section {
+    margin-top: 22px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-section-heading {
+    margin-bottom: 11px !important;
+  }
+
+  .fmm-mobile-section-heading h2 {
+    font-size: clamp(18px, 5.5vw, 24px) !important;
+    letter-spacing: 0.055em !important;
+    text-shadow: 0 0 22px rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-mobile-section-heading a {
+    color: #ff2538 !important;
+    font-size: 10px !important;
+    text-shadow: 0 0 18px rgba(255, 37, 56, 0.28) !important;
+  }
+
+  .fmm-mobile-fight-rail {
+    gap: 11px !important;
+    grid-auto-columns: 206px !important;
+    margin: 0 -12px !important;
+    padding: 0 12px 6px !important;
+  }
+
+  .fmm-mobile-upcoming-card {
+    background:
+      linear-gradient(180deg, rgba(12, 17, 25, 0.50), rgba(3, 6, 11, 0.95)),
+      radial-gradient(circle at 16% 18%, rgba(255, 28, 45, 0.24), transparent 32%),
+      radial-gradient(circle at 86% 20%, rgba(28, 121, 255, 0.18), transparent 34%),
+      url('/images/fmm-experience/fighter-duel-arena.webp') center / cover no-repeat !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 13px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38), inset 0 0 30px rgba(255, 255, 255, 0.035) !important;
+    height: 132px !important;
+    padding: 10px 10px 9px !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-boxing {
+    border-color: rgba(255, 37, 56, 0.38) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38), inset 0 0 34px rgba(255, 37, 56, 0.12) !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-mma,
+  .fmm-mobile-upcoming-card.is-bare-knuckle {
+    border-color: rgba(157, 76, 255, 0.34) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38), inset 0 0 34px rgba(157, 76, 255, 0.11) !important;
+  }
+
+  .fmm-mobile-upcoming-card.is-kickboxing {
+    border-color: rgba(255, 194, 44, 0.34) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38), inset 0 0 34px rgba(255, 194, 44, 0.11) !important;
+  }
+
+  .fmm-mobile-upcoming-top span {
+    background: linear-gradient(180deg, #ff3141, #c20815) !important;
+    box-shadow: 0 8px 20px rgba(239, 20, 39, 0.28) !important;
+  }
+
+  .fmm-mobile-card-fighters {
+    margin-top: 9px !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar {
+    height: 58px !important;
+    width: 58px !important;
+  }
+
+  .fmm-mobile-contest-list {
+    display: grid !important;
+    gap: 12px !important;
+    grid-auto-columns: 178px !important;
+    grid-auto-flow: column !important;
+    margin: 0 -12px !important;
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain !important;
+    padding: 0 12px 8px !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    touch-action: pan-y pinch-zoom !important;
+    user-select: none !important;
+  }
+
+  .fmm-mobile-contest-list::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .fmm-mobile-contest-list.is-dragging {
+    cursor: grabbing !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-mobile-contest-list.is-dragging a {
+    pointer-events: none !important;
+  }
+
+  .fmm-mobile-contest-row {
+    align-content: start !important;
+    background:
+      linear-gradient(180deg, rgba(13, 19, 28, 0.58), rgba(3, 6, 11, 0.96)),
+      radial-gradient(circle at 20% 10%, rgba(255, 37, 56, 0.19), transparent 34%),
+      url('/images/fmm-experience/fighter-duel-panel.webp') center / cover no-repeat !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 13px !important;
+    box-shadow: 0 17px 42px rgba(0, 0, 0, 0.38), inset 0 0 28px rgba(255, 255, 255, 0.035) !important;
+    display: grid !important;
+    gap: 9px !important;
+    grid-template-columns: 1fr !important;
+    min-height: 200px !important;
+    overflow: hidden !important;
+    padding: 10px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .fmm-mobile-contest-row.is-mma,
+  .fmm-mobile-contest-row.is-bare-knuckle {
+    border-color: rgba(157, 76, 255, 0.28) !important;
+    box-shadow: 0 17px 42px rgba(0, 0, 0, 0.38), inset 0 0 30px rgba(157, 76, 255, 0.10) !important;
+  }
+
+  .fmm-mobile-contest-row.is-kickboxing {
+    border-color: rgba(255, 194, 44, 0.30) !important;
+    box-shadow: 0 17px 42px rgba(0, 0, 0, 0.38), inset 0 0 30px rgba(255, 194, 44, 0.10) !important;
+  }
+
+  .fmm-mobile-contest-visual {
+    align-items: end !important;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.44)),
+      radial-gradient(circle at 18% 15%, rgba(255, 37, 56, 0.24), transparent 35%),
+      url('/images/fmm-experience/fighter-duel-arena.webp') center / cover no-repeat !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+    border-radius: 10px !important;
+    height: 88px !important;
+    padding: 7px !important;
+  }
+
+  .fmm-mobile-contest-visual div {
+    align-items: end !important;
+    justify-content: space-between !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-contest-visual .mobile-fighter-avatar {
+    height: 48px !important;
+    margin-left: 0 !important;
+    width: 48px !important;
+  }
+
+  .fmm-mobile-contest-info h3 {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 9px !important;
+    white-space: normal !important;
+  }
+
+  .fmm-mobile-contest-meta {
+    gap: 7px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .fmm-mobile-contest-meta span:last-child {
+    display: none !important;
+  }
+
+  .fmm-mobile-contest-meta small {
+    font-size: 9px !important;
+  }
+
+  .fmm-mobile-contest-meta strong {
+    color: #22e069 !important;
+    font-size: 12px !important;
+  }
+
+  .fmm-mobile-join {
+    background: transparent !important;
+    border: 1px solid rgba(255, 37, 56, 0.72) !important;
+    border-radius: 8px !important;
+    box-shadow: inset 0 0 20px rgba(255, 37, 56, 0.08) !important;
+    color: #ff3649 !important;
+    display: inline-flex !important;
+    font-size: 11px !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    min-height: 36px !important;
+    padding: 9px 12px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    background:
+      linear-gradient(90deg, rgba(4, 5, 10, 0.98) 0%, rgba(5, 6, 11, 0.94) 33%, rgba(5, 7, 13, 0.48) 62%, rgba(4, 6, 12, 0.78) 100%),
+      radial-gradient(circle at 18% 20%, rgba(255, 30, 47, 0.36), transparent 32%),
+      radial-gradient(circle at 76% 16%, rgba(41, 141, 255, 0.28), transparent 34%) !important;
+    border-color: rgba(255, 37, 56, 0.50) !important;
+    border-radius: 18px !important;
+    box-shadow:
+      0 20px 54px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 37, 56, 0.10),
+      inset 0 0 46px rgba(255, 37, 56, 0.12),
+      inset 0 0 40px rgba(41, 141, 255, 0.08) !important;
+    margin-top: 20px !important;
+    min-height: 220px !important;
+    padding: 25px 18px 22px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    gap: 10px !important;
+    max-width: 248px !important;
+    width: 64% !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy::before {
+    content: 'New Game Mode' !important;
+    color: #ff4052 !important;
+    font-size: 9px !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: clamp(24px, 7.9vw, 34px) !important;
+    letter-spacing: 0.035em !important;
+    line-height: 1.02 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: clamp(12px, 3.45vw, 15px) !important;
+    font-weight: 780 !important;
+    line-height: 1.32 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight a {
+    border-radius: 9px !important;
+    font-size: 12px !important;
+    min-height: 43px !important;
+    padding: 12px 15px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual {
+    bottom: 0 !important;
+    display: block !important;
+    left: 36% !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    right: -10% !important;
+    top: 0 !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual::after {
+    background:
+      linear-gradient(90deg, rgba(4, 5, 10, 0.98) 0%, rgba(4, 5, 10, 0.58) 30%, rgba(4, 5, 10, 0.10) 70%, rgba(4, 5, 10, 0.52) 100%),
+      linear-gradient(180deg, rgba(4, 5, 10, 0.00), rgba(4, 5, 10, 0.56)) !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual img {
+    filter: saturate(1.20) contrast(1.12) brightness(0.94) !important;
+    object-fit: cover !important;
+    object-position: 58% center !important;
+    transform: scale(1.05) !important;
+  }
+
+  .fmm-mobile-metrics {
+    background:
+      linear-gradient(180deg, rgba(14, 20, 30, 0.94), rgba(3, 6, 11, 0.98)),
+      radial-gradient(circle at 15% 0%, rgba(255, 37, 56, 0.18), transparent 38%),
+      radial-gradient(circle at 84% 0%, rgba(41, 141, 255, 0.16), transparent 38%) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38), inset 0 0 26px rgba(255, 255, 255, 0.035) !important;
+    margin-top: 16px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr) !important;
+    min-height: 418px !important;
+    padding: 17px 12px 21px !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    padding-left: 2px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    max-width: 156px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    width: min(100%, 158px) !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    min-height: 39px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 344px !important;
+    padding-top: 156px !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    left: -8px !important;
+    right: -8px !important;
+    top: 44px !important;
+  }
+
+  .fmm-mobile-event-copy h2 span {
+    max-width: 112px !important;
+  }
+
+  .fmm-mobile-category-row {
+    grid-auto-columns: 118px !important;
+  }
+
+  .fmm-mobile-fight-rail {
+    grid-auto-columns: 198px !important;
+  }
+
+  .fmm-mobile-contest-list {
+    grid-auto-columns: 172px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 212px !important;
+    padding: 23px 17px 21px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    width: 65% !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    gap: 8px !important;
+    min-height: 394px !important;
+    padding: 15px 10px 20px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(21px, 7.8vw, 28px) !important;
+  }
+
+  .fmm-mobile-greeting {
+    font-size: 9px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 9px !important;
+    max-width: 136px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    gap: 7px !important;
+    width: min(100%, 136px) !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    font-size: 9px !important;
+    min-height: 36px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 322px !important;
+    padding-top: 146px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-featured-label {
+    font-size: 7px !important;
+    padding: 6px 7px 5px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-date-chip {
+    height: 54px !important;
+    width: 43px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar {
+    height: 58px !important;
+    width: 58px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: 14px !important;
+  }
+
+  .fmm-mobile-event-copy h2 span {
+    max-width: 96px !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    max-width: 132px !important;
+  }
+
+  .fmm-mobile-hero-event-card .fmm-mobile-countdown > span {
+    min-height: 43px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .fmm-mobile-category-row {
+    grid-auto-columns: 106px !important;
+    margin-left: -10px !important;
+    margin-right: -10px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .fmm-mobile-fight-rail,
+  .fmm-mobile-contest-list {
+    margin-left: -10px !important;
+    margin-right: -10px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .fmm-mobile-fight-rail {
+    grid-auto-columns: 186px !important;
+  }
+
+  .fmm-mobile-contest-list {
+    grid-auto-columns: 160px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 202px !important;
+    padding: 21px 15px 19px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: 22px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    font-size: 11px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight a {
+    font-size: 10px !important;
+    min-height: 38px !important;
+    padding: 9px 12px !important;
+  }
+}
