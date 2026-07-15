@@ -942,7 +942,7 @@ const MobilePhoneHome = ({
             </span>
           </h1>
           <p className="fmm-mobile-intro-copy">
-            Create a free account, enter an open fight card, and make your picks before the card locks. Every category stays easy to browse without hiding the action.
+            Create a free account, enter a fight card, and make your picks before it locks.
           </p>
           <div className="fmm-mobile-intro-actions">
             <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-signup-btn">
