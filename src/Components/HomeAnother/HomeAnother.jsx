@@ -51,6 +51,7 @@ const HOME_HERO_IMAGE = "/images/fmm-pages/premium-arena-banner.webp";
 const HOME_FIGHT_ART_IMAGE = "/images/hero-fight.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
+const MOBILE_HOME_WRESTLING_IMAGE = "/images/pro-wrestling/hero.webp";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -101,6 +102,11 @@ const MOBILE_HOME_SPORT_TABS = [
     label: "Kickboxing",
     image: "/images/mobile-home/categories/kickboxing.png",
   },
+  {
+    key: "pro-wrestling",
+    label: "Pro Wrestling",
+    image: "/images/pro-wrestling/wrestling-live-premium.webp",
+  },
 ];
 
 const MOBILE_FALLBACK_FIGHT_IMAGES = [
@@ -121,6 +127,73 @@ const MOBILE_FALLBACK_SPORT_LABELS = {
 const HOME_FIGHT_FEED_LIMIT = 200;
 const HOME_CATEGORY_PREVIEW_LIMIT = 4;
 const PLAYER_SIGNUP_HREF = "/CreateAccount";
+
+const FightCategoryIcon = ({ type }) => {
+  const key = String(type || "").toLowerCase();
+
+  if (key.includes("pro") || key.includes("wrestling")) {
+    return (
+      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+        <path d="M18 10c3.8-2.4 8.2-3.6 14-3.6S42.2 7.6 46 10c5 3.1 7.5 8.8 7.5 17 0 15.5-8.9 28.1-21.5 30.6C19.4 55.1 10.5 42.5 10.5 27c0-8.2 2.5-13.9 7.5-17Z" />
+        <path d="M19.3 17.2c2.9 3.9 7.1 6.2 12.7 6.2s9.8-2.3 12.7-6.2" />
+        <path d="M20.3 30.4c2.9-3.6 8.4-4 11.7-.6-3.4 3.8-8.7 4-11.7.6Z" />
+        <path d="M43.7 30.4c-2.9-3.6-8.4-4-11.7-.6 3.4 3.8 8.7 4 11.7.6Z" />
+        <path d="M25.1 45.3c4.2 3.1 9.6 3.1 13.8 0" />
+        <path d="M14.2 22.8c5.4.6 10 2.5 13.9 5.6" />
+        <path d="M49.8 22.8c-5.4.6-10 2.5-13.9 5.6" />
+      </svg>
+    );
+  }
+
+  if (key.includes("kick")) {
+    return (
+      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+        <path d="M18.5 9.5c5.7 2.6 9.9 6.7 12.4 12.2l5.8 12.6c1.1 2.5 3.3 4.2 6 4.7l6.7 1.1c4.7.8 7.5 3.4 8.1 7.8.3 2.4-.7 4.7-2.9 6.7-2 1.8-4.6 2.7-7.8 2.7H32.6c-3.4 0-6.2-2.1-7.4-5.3l-3.7-10.5c-1.5-4.4-4.5-7.9-8.7-10.5L7.2 27.7 12 17l6.5-7.5Z" />
+        <path d="M19.5 10.7 12.1 27" />
+        <path d="M27.4 44.2h28.4" />
+        <path d="M40.7 39.2c-2 2.6-3.1 5.5-3.3 8.6" />
+        <path d="M49 40.5c-1.1 2.2-1.6 4.8-1.5 7.6" />
+      </svg>
+    );
+  }
+
+  if (key.includes("bare")) {
+    return (
+      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+        <path d="M16.5 27.2v-7.1c0-3.2 2.4-5.8 5.5-5.8 1.7 0 3.2.8 4.2 2.1.9-2.1 2.9-3.5 5.3-3.5 2.5 0 4.6 1.5 5.5 3.7 1-1.4 2.6-2.3 4.5-2.3 3.1 0 5.5 2.6 5.5 5.8v11.5h1.2c4.2 0 7.3 3.4 7.3 7.7v2.5c0 8.1-6.2 14.3-14.3 14.3H27.6c-8 0-14.5-6.5-14.5-14.5v-7.2c0-3.2 1.2-5.6 3.4-7.2Z" />
+        <path d="M26.2 18.6v12" />
+        <path d="M37 18.1v12.5" />
+        <path d="M16.5 27.2c2.7-.2 5.3.6 7.7 2.4" />
+        <path d="M25.8 42.1c4.4 2.2 9.1 2.2 14.2 0" />
+      </svg>
+    );
+  }
+
+  if (key.includes("mma")) {
+    return (
+      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+        <path d="M16.3 29.5v-8.6c0-3.5 2.6-6.2 6-6.2 1.8 0 3.4.8 4.5 2.1 1-2.3 3.2-3.9 5.9-3.9s4.9 1.7 5.9 4.1c1.1-1.4 2.8-2.3 4.8-2.3 3.4 0 6 2.7 6 6.2v15.7c3.5.8 5.8 3.9 5.8 7.8 0 7.1-5.6 12.7-12.7 12.7H28.6c-8.6 0-15.6-7-15.6-15.6v-4.9c0-3 1.2-5.5 3.3-7.1Z" />
+        <path d="M26.8 18.9v17.5" />
+        <path d="M38.6 19.1v17.1" />
+        <path d="M18.1 30.2c4.6.5 8.1 2.5 10.6 6" />
+        <path d="M26.5 45.3h20.1" />
+        <path d="M22.8 10.1 19 5.5" />
+        <path d="M41.2 10.1 45 5.5" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+      <path d="M15.7 23.3c0-8.1 6-14.3 14.2-14.3h6.3c7.2 0 12.9 5.6 12.9 12.9v7.7c4.2 1.3 7.2 5.1 7.2 9.9 0 6.1-4.8 10.9-10.9 10.9h-6.7c-3.2 3.6-7.8 5.7-13.1 5.7-9.9 0-17.8-7.8-17.8-17.5 0-5.9 2.9-11.4 7.9-14.8Z" />
+      <path d="M15.9 23.5c5.5-.1 10 1.8 13.4 5.8" />
+      <path d="M29.7 9.1v16.1" />
+      <path d="M39.5 10.8v16.8" />
+      <path d="M40.1 34.4h15.4" />
+      <path d="M18.8 43.3c4.8 2.6 9.7 2.6 14.8 0" />
+    </svg>
+  );
+};
 
 const SCORING_ROWS = [
   ["Correct Winner", "100"],
@@ -942,7 +1015,7 @@ const MobilePhoneHome = ({
             </span>
           </h1>
           <p className="fmm-mobile-intro-copy">
-            Create a free account, enter a fight card, and make your picks before it locks.
+            Create a free account, enter an open fight card, and lock picks fast.
           </p>
           <div className="fmm-mobile-intro-actions">
             <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-signup-btn">
@@ -1055,7 +1128,9 @@ const MobilePhoneHome = ({
             }`}
             onClick={() => setActiveFightSport(section.key)}
           >
-            <img src={section.image} alt="" loading="lazy" />
+            <span className="fmm-mobile-category-icon" aria-hidden="true">
+              <FightCategoryIcon type={section.key} />
+            </span>
             <strong>{section.label}</strong>
             <span>{section.count.toLocaleString()} fights</span>
           </button>
@@ -1183,7 +1258,7 @@ const MobilePhoneHome = ({
         </div>
         <div className="fmm-mobile-wrestling-visual" aria-hidden="true">
           <Image
-            src={HOME_WRESTLING_IMAGE}
+            src={MOBILE_HOME_WRESTLING_IMAGE}
             alt=""
             fill
             sizes="(max-width: 767px) 62vw"
@@ -2022,7 +2097,7 @@ const HomeAnother = () => {
                   onClick={(event) => handleHomeSportJump(section.key, event)}
                 >
                   <span className="fmm-home-tab-art" aria-hidden="true">
-                    <img src={section.image} alt="" loading="lazy" />
+                    <FightCategoryIcon type={section.key} />
                   </span>
                   <span className="fmm-home-tab-copy">
                     <span>{section.label}</span>

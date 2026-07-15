@@ -8574,3 +8574,605 @@
     min-width: 36px !important;
   }
 }
+
+/* Client mobile homepage alignment polish: closer to supplied premium phone reference. */
+.fmm-fight-category-svg {
+  display: block;
+  height: 1em;
+  overflow: visible;
+  width: 1em;
+}
+
+.fmm-fight-category-svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.7;
+}
+
+.fmm-fight-category-svg path:first-child {
+  fill: currentColor;
+  fill-opacity: 0.13;
+}
+
+.fmm-home-tab-art .fmm-fight-category-svg {
+  font-size: 42px;
+  filter: drop-shadow(0 0 18px currentColor);
+}
+
+.fmm-home-fight-tab-card.is-boxing .fmm-home-tab-art,
+.fmm-home-fight-tab-card.is-boxing .fmm-fight-category-svg {
+  color: #ff2639;
+}
+
+.fmm-home-fight-tab-card.is-mma .fmm-home-tab-art,
+.fmm-home-fight-tab-card.is-mma .fmm-fight-category-svg,
+.fmm-home-fight-tab-card.is-bareknuckle .fmm-home-tab-art,
+.fmm-home-fight-tab-card.is-bareknuckle .fmm-fight-category-svg {
+  color: #9a55ff;
+}
+
+.fmm-home-fight-tab-card.is-kickboxing .fmm-home-tab-art,
+.fmm-home-fight-tab-card.is-kickboxing .fmm-fight-category-svg {
+  color: #ffc333;
+}
+
+.fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art,
+.fmm-home-fight-tab-card.is-pro-wrestling .fmm-fight-category-svg {
+  color: #2f88ff;
+}
+
+@media (max-width: 767px) {
+  .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    padding-inline: 12px !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    background:
+      radial-gradient(circle at 60% 11%, rgba(255, 255, 255, 0.13), transparent 20%),
+      linear-gradient(90deg, rgba(3, 5, 10, 0.94) 0%, rgba(3, 5, 10, 0.72) 44%, rgba(4, 7, 14, 0.64) 100%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 22px !important;
+    display: grid !important;
+    gap: 10px !important;
+    grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.08fr) !important;
+    height: 410px !important;
+    min-height: 410px !important;
+    padding: 17px 13px 18px !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before {
+    background:
+      radial-gradient(circle at 16% 24%, rgba(238, 20, 38, 0.58), transparent 34%),
+      radial-gradient(circle at 85% 22%, rgba(25, 132, 255, 0.48), transparent 37%),
+      linear-gradient(90deg, rgba(238, 22, 40, 0.18), transparent 45%, rgba(0, 125, 255, 0.18)),
+      linear-gradient(rgba(255, 255, 255, 0.034) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 44px 44px, 44px 44px !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    justify-content: center !important;
+    padding: 2px 0 12px !important;
+  }
+
+  .fmm-mobile-greeting {
+    font-size: clamp(9.5px, 2.9vw, 12px) !important;
+    margin-bottom: 7px !important;
+    white-space: nowrap !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(28px, 8.15vw, 39px) !important;
+    line-height: 0.94 !important;
+    margin-bottom: 11px !important;
+    max-width: 178px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: clamp(10px, 2.85vw, 12px) !important;
+    line-height: 1.34 !important;
+    margin-bottom: 15px !important;
+    max-width: 176px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    gap: 9px !important;
+    max-width: 176px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    border-radius: 7px !important;
+    font-size: 10.5px !important;
+    min-height: 40px !important;
+    padding: 10px 12px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    align-self: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    justify-content: center !important;
+    min-height: 334px !important;
+    overflow: visible !important;
+    padding: 110px 2px 4px !important;
+    position: relative !important;
+  }
+
+  .fmm-mobile-hero-event-card::before {
+    display: none !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    gap: 8px !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 22px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    flex-basis: clamp(68px, 21vw, 94px) !important;
+    height: clamp(68px, 21vw, 94px) !important;
+    width: clamp(68px, 21vw, 94px) !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    font-size: clamp(18px, 5.6vw, 27px) !important;
+    transform: translateY(2px) !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    border-radius: 7px !important;
+    font-size: 7px !important;
+    left: 4px !important;
+    padding: 6px 7px 5px !important;
+    top: 0 !important;
+    transform: translateY(-2px) !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    border-radius: 10px !important;
+    height: 62px !important;
+    right: 1px !important;
+    top: 0 !important;
+    width: 48px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip strong {
+    font-size: 24px !important;
+  }
+
+  .fmm-mobile-event-copy {
+    margin-top: 0 !important;
+    text-align: left !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: clamp(16px, 4.7vw, 21px) !important;
+    gap: 3px !important;
+    line-height: 1.01 !important;
+    margin: 0 0 8px !important;
+    max-width: calc(100% - 4px) !important;
+  }
+
+  .fmm-mobile-event-copy h2 em {
+    font-size: 11px !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    font-size: clamp(8px, 2.42vw, 10px) !important;
+    gap: 4px !important;
+    line-height: 1.18 !important;
+    margin-bottom: 9px !important;
+    max-width: 100% !important;
+  }
+
+  .fmm-mobile-countdown {
+    gap: 4px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-countdown span {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.14), transparent 62%),
+      linear-gradient(180deg, rgba(69, 22, 31, 0.86), rgba(7, 9, 14, 0.96)) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    border-radius: 9px !important;
+    min-height: 46px !important;
+    padding: 5px 2px !important;
+  }
+
+  .fmm-mobile-countdown strong {
+    font-size: clamp(15px, 4.8vw, 22px) !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-dots {
+    bottom: 9px !important;
+  }
+
+  .fmm-mobile-category-row {
+    display: grid !important;
+    gap: 7px !important;
+    grid-auto-columns: unset !important;
+    grid-auto-flow: unset !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    margin: 0 0 20px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    align-content: center !important;
+    border-radius: 13px !important;
+    gap: 5px !important;
+    height: 92px !important;
+    min-width: 0 !important;
+    padding: 9px 3px 8px !important;
+    scroll-snap-align: none !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    align-items: center !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    height: 37px !important;
+    justify-content: center !important;
+    position: relative !important;
+    width: 37px !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-category-row .fmm-fight-category-svg {
+    font-size: 35px !important;
+    filter: drop-shadow(0 0 14px currentColor) !important;
+  }
+
+  .fmm-mobile-category-row .is-boxing .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .is-boxing .fmm-fight-category-svg {
+    color: #ff2638 !important;
+  }
+
+  .fmm-mobile-category-row .is-mma .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .is-mma .fmm-fight-category-svg,
+  .fmm-mobile-category-row .is-bareknuckle .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .is-bareknuckle .fmm-fight-category-svg {
+    color: #9d55ff !important;
+  }
+
+  .fmm-mobile-category-row .is-kickboxing .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .is-kickboxing .fmm-fight-category-svg {
+    color: #ffc22f !important;
+  }
+
+  .fmm-mobile-category-row .is-pro-wrestling .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .is-pro-wrestling .fmm-fight-category-svg {
+    color: #2f8cff !important;
+  }
+
+  .fmm-mobile-category-row button.is-boxing::before {
+    background: radial-gradient(circle at 50% 12%, rgba(255, 35, 50, 0.54), transparent 45%), linear-gradient(145deg, rgba(245, 18, 37, 0.25), rgba(245, 18, 37, 0.03) 72%) !important;
+  }
+
+  .fmm-mobile-category-row button.is-mma::before,
+  .fmm-mobile-category-row button.is-bareknuckle::before {
+    background: radial-gradient(circle at 50% 13%, rgba(147, 57, 255, 0.58), transparent 46%), linear-gradient(145deg, rgba(123, 48, 255, 0.24), rgba(123, 48, 255, 0.03) 72%) !important;
+  }
+
+  .fmm-mobile-category-row button.is-kickboxing::before {
+    background: radial-gradient(circle at 50% 14%, rgba(255, 194, 47, 0.58), transparent 45%), linear-gradient(145deg, rgba(255, 178, 35, 0.24), rgba(255, 178, 35, 0.03) 72%) !important;
+  }
+
+  .fmm-mobile-category-row button.is-pro-wrestling::before {
+    background: radial-gradient(circle at 50% 13%, rgba(47, 140, 255, 0.56), transparent 46%), linear-gradient(145deg, rgba(47, 140, 255, 0.24), rgba(47, 140, 255, 0.03) 72%) !important;
+  }
+
+  .fmm-mobile-category-row img {
+    display: none !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    font-size: clamp(6.8px, 2.15vw, 9px) !important;
+    letter-spacing: 0.035em !important;
+    line-height: 1.04 !important;
+    max-width: 100% !important;
+    min-height: 18px !important;
+    overflow-wrap: anywhere !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-category-row span:not(.fmm-mobile-category-icon) {
+    font-size: clamp(6px, 1.85vw, 8px) !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    background:
+      linear-gradient(90deg, rgba(3, 5, 9, 0.95) 0%, rgba(3, 5, 9, 0.84) 34%, rgba(3, 5, 9, 0.16) 64%, rgba(3, 5, 9, 0.08) 100%),
+      radial-gradient(circle at 9% 44%, rgba(239, 22, 41, 0.40), transparent 36%),
+      radial-gradient(circle at 82% 34%, rgba(24, 130, 255, 0.36), transparent 42%) !important;
+    border-color: rgba(239, 28, 47, 0.52) !important;
+    border-radius: 16px !important;
+    min-height: 214px !important;
+    padding: 21px 17px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 50%, rgba(0, 0, 0, 0.10)),
+      linear-gradient(90deg, rgba(238, 21, 38, 0.16), transparent 42%, rgba(29, 139, 255, 0.06)) !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    max-width: 215px !important;
+    width: 58% !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: clamp(23px, 7.45vw, 32px) !important;
+    line-height: 1.01 !important;
+    max-width: 205px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    font-size: 11.6px !important;
+    line-height: 1.34 !important;
+    max-width: 182px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight a {
+    border-radius: 8px !important;
+    font-size: 10px !important;
+    min-height: 40px !important;
+    padding: 10px 13px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual {
+    bottom: 0 !important;
+    display: block !important;
+    left: 0 !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual::after {
+    background:
+      linear-gradient(90deg, rgba(3, 5, 9, 0.96) 0%, rgba(3, 5, 9, 0.72) 36%, rgba(3, 5, 9, 0.12) 66%, rgba(3, 5, 9, 0.04) 100%),
+      linear-gradient(180deg, rgba(3, 5, 9, 0.00), rgba(3, 5, 9, 0.12) 100%) !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-visual img {
+    filter: saturate(1.28) contrast(1.16) brightness(1.16) !important;
+    object-fit: cover !important;
+    object-position: 58% 50% !important;
+  }
+
+  .fmm-mobile-metrics {
+    align-items: stretch !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.08), transparent 30%),
+      radial-gradient(circle at 88% 0%, rgba(40, 135, 255, 0.12), transparent 34%),
+      linear-gradient(180deg, rgba(13, 19, 28, 0.98), rgba(4, 7, 12, 0.98)) !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+    border-radius: 15px !important;
+    display: grid !important;
+    gap: 0 !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    margin-top: 18px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .fmm-mobile-metrics div {
+    align-content: center !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+    justify-items: center !important;
+    min-height: 86px !important;
+    padding: 9px 4px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-metrics div + div {
+    border-left: 1px solid rgba(255, 255, 255, 0.09) !important;
+  }
+
+  .fmm-mobile-metrics svg {
+    color: rgba(255, 255, 255, 0.92) !important;
+    font-size: 19px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .fmm-mobile-metrics strong {
+    font-size: clamp(14px, 4vw, 20px) !important;
+    line-height: 1 !important;
+  }
+
+  .fmm-mobile-metrics span {
+    font-size: clamp(6.2px, 1.8vw, 8px) !important;
+    line-height: 1.1 !important;
+    max-width: 72px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.08fr) !important;
+    height: 400px !important;
+    min-height: 400px !important;
+    padding: 16px 11px 18px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(25px, 7.9vw, 33px) !important;
+    max-width: 150px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 9.6px !important;
+    max-width: 148px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    max-width: 146px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn {
+    font-size: 9px !important;
+    min-height: 37px !important;
+    padding-inline: 9px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 318px !important;
+    padding-top: 103px !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    top: 25px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    flex-basis: 69px !important;
+    height: 69px !important;
+    width: 69px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    font-size: 6.2px !important;
+    padding: 5px 6px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    height: 56px !important;
+    width: 43px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip strong {
+    font-size: 22px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: clamp(14px, 4.25vw, 18px) !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    font-size: 7.5px !important;
+  }
+
+  .fmm-mobile-countdown span {
+    min-height: 41px !important;
+  }
+
+  .fmm-mobile-category-row {
+    gap: 6px !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    height: 84px !important;
+    padding: 8px 2px 7px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    height: 32px !important;
+    width: 32px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-fight-category-svg {
+    font-size: 31px !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    font-size: 6.8px !important;
+    min-height: 16px !important;
+  }
+
+  .fmm-mobile-category-row span:not(.fmm-mobile-category-icon) {
+    font-size: 5.8px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight {
+    min-height: 206px !important;
+    padding: 20px 16px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight .fmm-mobile-wrestling-copy {
+    width: 59% !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight h2 {
+    font-size: clamp(20px, 6.9vw, 29px) !important;
+    max-width: 188px !important;
+  }
+
+  .fmm-mobile-wrestling-spotlight p {
+    font-size: 10.6px !important;
+    max-width: 166px !important;
+  }
+
+  .fmm-mobile-metrics div {
+    min-height: 78px !important;
+  }
+}
+
+@media (max-width: 374px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    height: 388px !important;
+    min-height: 388px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: 24px !important;
+    max-width: 138px !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 8.8px !important;
+    max-width: 136px !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    min-height: 310px !important;
+    padding-top: 98px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    flex-basis: 61px !important;
+    height: 61px !important;
+    width: 61px !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    font-size: 17px !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: 12.8px !important;
+  }
+
+  .fmm-mobile-countdown small {
+    font-size: 5.8px !important;
+  }
+}
