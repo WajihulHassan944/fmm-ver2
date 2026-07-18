@@ -72,6 +72,7 @@ import "@/styles/home-mobile-design-phone.css";
 import "@/styles/user-dashboard-mobile-phone.css";
 import "@/styles/phone-app-theme-all-pages.css";
 import "@/styles/featured-fight-stage-final.css";
+import "@/styles/home-design-reference-lock.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

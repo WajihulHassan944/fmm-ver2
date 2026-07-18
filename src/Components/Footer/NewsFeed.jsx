@@ -7,8 +7,9 @@ import {
   FaSearch,
   FaShieldAlt,
 } from 'react-icons/fa';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
-const NEWS_API = 'https://fantasymmadness-game-server-three.vercel.app/news';
+const NEWS_API = buildPublicApiUrl('/news');
 
 const NewsFeed = () => {
   const [news, setNews] = useState([]);

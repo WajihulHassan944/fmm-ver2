@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
   FaBars,
+  FaBell,
   FaBullseye,
   FaCalendarAlt,
   FaChartLine,
@@ -148,6 +149,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const pathname = router?.pathname || '';
   const asPath = router?.asPath || pathname;
+  const isHomeRoute = pathname === '/' || pathname === '/home';
   const auth = useSelector((state) => state.auth);
   const affiliateAuth = useSelector((state) => state.affiliateAuth);
   const affiliate = affiliateAuth?.userAffiliate;
@@ -200,9 +202,12 @@ const Header = () => {
     return '/CreateAccount';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
-  const mobileAccountLabel = isAuthenticated || isAuthenticatedAffiliate || authStatusSponsor
-    ? 'Open account'
-    : 'Create account';
+  const mobileHomeNotificationHref = '/fights-news';
+  const mobileAccountLabel = isHomeRoute
+    ? 'Open alerts'
+    : isAuthenticated || isAuthenticatedAffiliate || authStatusSponsor
+      ? 'Open account'
+      : 'Create account';
 
   const handleLogout = () => {
     dispatch(logout());
@@ -334,8 +339,19 @@ const Header = () => {
       </nav>
 
       <div className="theme-header-actions">
-        <Link href={mobileAccountHref} className="theme-mobile-signup-icon" aria-label={mobileAccountLabel}>
-          <FaUserCircle aria-hidden="true" />
+        <Link
+          href={isHomeRoute ? mobileHomeNotificationHref : mobileAccountHref}
+          className={`theme-mobile-signup-icon${isHomeRoute ? ' theme-mobile-notification-icon' : ''}`}
+          aria-label={mobileAccountLabel}
+        >
+          {isHomeRoute ? (
+            <>
+              <FaBell aria-hidden="true" />
+              <span className="theme-mobile-notification-badge">3</span>
+            </>
+          ) : (
+            <FaUserCircle aria-hidden="true" />
+          )}
         </Link>
         {renderAuthActions()}
         <button

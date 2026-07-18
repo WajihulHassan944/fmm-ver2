@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { stopMusic, playMusic } from "../../Redux/musicSlice";
 import Link from "next/link";
 import Head from "next/head";
@@ -86,26 +86,31 @@ const MOBILE_HOME_SPORT_TABS = [
     key: "boxing",
     label: "Boxing",
     image: "/images/mobile-home/categories/boxing.png",
+    fallbackCount: 128,
   },
   {
     key: "mma",
     label: "MMA",
     image: "/images/mobile-home/categories/mma.png",
+    fallbackCount: 214,
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
     image: "/images/mobile-home/categories/bare-knuckle.png",
+    fallbackCount: 36,
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
     image: "/images/mobile-home/categories/kickboxing.png",
+    fallbackCount: 58,
   },
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
     image: "/images/pro-wrestling/wrestling-live-premium.webp",
+    fallbackCount: 42,
   },
 ];
 
@@ -772,30 +777,79 @@ const getLeaderboardName = (player) =>
   player?.email?.split?.("@")?.[0] ||
   "Player";
 
+const MOBILE_FALLBACK_MATCHUPS = [
+  {
+    eventLabel: "UFC 319",
+    matchFighterA: "Conor McGregor",
+    matchFighterB: "Max Holloway",
+    matchDate: "2099-07-11",
+    matchTime: "21:00",
+    pot: 25000,
+    players: 1245,
+  },
+  {
+    eventLabel: "UFC 319",
+    matchFighterA: "Usman",
+    matchFighterB: "Diaz",
+    matchDate: "2099-07-15",
+    matchTime: "22:00",
+    pot: 10000,
+    players: 598,
+  },
+  {
+    eventLabel: "UFC 319",
+    matchFighterA: "Volkanovski",
+    matchFighterB: "Topuria",
+    matchDate: "2099-07-16",
+    matchTime: "20:00",
+    pot: 5000,
+    players: 321,
+  },
+];
+
 const getMobileFallbackFight = (sportKey = "mma", index = 0) => {
   const label = MOBILE_FALLBACK_SPORT_LABELS[sportKey] || "Combat";
-  const times = ["20:00", "21:30", "22:00"];
-  const dates = ["2099-07-14", "2099-07-15", "2099-07-16"];
+  const matchup = MOBILE_FALLBACK_MATCHUPS[index % MOBILE_FALLBACK_MATCHUPS.length];
+  const pot = matchup.pot;
+
   return {
     _id: `mobile-${sportKey}-preview-${index}`,
-    matchName: `${label} Fight Card`,
-    matchFighterA: `${label} Red`,
-    matchFighterB: `${label} Blue`,
+    eventLabel: matchup.eventLabel,
+    matchName: `${matchup.matchFighterA} vs ${matchup.matchFighterB}`,
+    matchFighterA: matchup.matchFighterA,
+    matchFighterB: matchup.matchFighterB,
     fighterAImage: MOBILE_FALLBACK_FIGHT_IMAGES[index % MOBILE_FALLBACK_FIGHT_IMAGES.length],
     fighterBImage: MOBILE_FALLBACK_FIGHT_IMAGES[(index + 1) % MOBILE_FALLBACK_FIGHT_IMAGES.length],
     matchCategory: label,
     matchCategoryTwo: label,
     matchStatus: "Open",
-    matchDate: dates[index % dates.length],
-    matchTime: times[index % times.length],
-    pot: [25000, 10000, 5000][index % 3],
-    currentPot: [25000, 10000, 5000][index % 3],
+    matchDate: matchup.matchDate,
+    matchTime: matchup.matchTime,
+    pot,
+    currentPot: pot,
     entryFee: [10, 5, 5][index % 3],
-    userPredictions: Array.from({ length: [1245, 598, 321][index % 3] }),
+    userPredictions: Array.from({ length: matchup.players }),
   };
 };
 
 
+
+const getMobileEventLabel = (match = {}) => {
+  const eventPattern = /\b(?:UFC|BKFC|PFL|BELLATOR|GLORY|ONE|WWE|AEW|NXT)\s*\d+\b/i;
+  const eventNameMatch = String(match?.eventName || match?.matchName || "").match(eventPattern)?.[0];
+  const rawLabel = pickHomeValue(
+    match?.eventCode,
+    match?.eventLabel,
+    match?.promotionEventCode,
+    eventNameMatch,
+    match?.leagueName,
+    match?.promotionName,
+    match?.organization,
+    getFightSportLabel(match),
+  );
+
+  return rawLabel ? rawLabel.toUpperCase() : getFightSportLabel(match).toUpperCase();
+};
 
 const getMobileShortDate = (match) => {
   const date = parseMatchDate(match);
@@ -948,6 +1002,7 @@ const useHorizontalDragScroll = () => {
 };
 
 const MobilePhoneHome = ({
+  greetingName,
   activeFightSport,
   setActiveFightSport,
   activeHeroFight,
@@ -965,7 +1020,7 @@ const MobilePhoneHome = ({
         const existing = homeFightSections.find((section) => section.key === tab.key);
         return {
           ...tab,
-          count: existing?.count || 3,
+          count: existing?.count || tab.fallbackCount || 0,
           fights: existing?.fights || [],
         };
       }),
@@ -1007,7 +1062,7 @@ const MobilePhoneHome = ({
         <div className="fmm-mobile-featured-bg" aria-hidden="true" />
 
         <div className="fmm-mobile-hero-intro">
-          <p className="fmm-mobile-greeting">Good Evening, Fighter 👋</p>
+          <p className="fmm-mobile-greeting">Good Evening, {greetingName || "Fighter"} 👋</p>
           <h1>
             Sign Up Free.
             <span>
@@ -1015,7 +1070,7 @@ const MobilePhoneHome = ({
             </span>
           </h1>
           <p className="fmm-mobile-intro-copy">
-            Create a free account, enter an open fight card, and lock picks fast.
+            Create a free account, enter an open fight card, and make your picks before the card locks. The homepage now keeps every category easy to browse without hiding the section path.
           </p>
           <div className="fmm-mobile-intro-actions">
             <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-signup-btn">
@@ -1157,7 +1212,7 @@ const MobilePhoneHome = ({
               key={getFightId(match) || `${activeSection?.key}-${index}`}
             >
               <div className="fmm-mobile-upcoming-top">
-                <span>{getFightSportLabel(match)}</span>
+                <span>{getMobileEventLabel(match)}</span>
                 <small>{getMobileShortDate(match)}</small>
               </div>
               <div className="fmm-mobile-card-fighters">
@@ -1202,6 +1257,7 @@ const MobilePhoneHome = ({
             <article className={`fmm-mobile-contest-row ${getCategoryClass(match)}`} key={getFightId(match) || `mobile-contest-${index}`}>
               <Link href={getFightDetailHref(match)} className="fmm-mobile-contest-visual">
                 <span>{["Live", "Featured", "Top Prize"][index % 3]}</span>
+                <small className="fmm-mobile-contest-event-label">{getMobileEventLabel(match)}</small>
                 <div>
                   <figure className="mobile-fighter-avatar">
                     <FightImage
@@ -1229,10 +1285,6 @@ const MobilePhoneHome = ({
                   <span>
                     <small>Prize Pool</small>
                     <strong>{getPrizePool(match)}</strong>
-                  </span>
-                  <span>
-                    <small>Entry Fee</small>
-                    <strong>{getMobileEntryFee(match)}</strong>
                   </span>
                   <span>
                     <small>Players</small>
@@ -1294,6 +1346,7 @@ const MobilePhoneHome = ({
 
 const HomeAnother = () => {
   const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.auth?.user || state.user);
   const howlerRef = useRef(null);
   const homeSportSectionRefs = useRef({});
   const homeFightRailDragRef = useRef({
@@ -1481,6 +1534,18 @@ const HomeAnother = () => {
     ? heroSlides[activeHeroIndex % heroSlides.length]
     : primaryFight;
   const primaryCountdown = getCountdownParts(activeHeroFight, now);
+  const mobileGreetingName = useMemo(
+    () =>
+      pickHomeValue(
+        currentUser?.firstName,
+        currentUser?.username,
+        currentUser?.name,
+        currentUser?.email?.split?.("@")[0],
+        "Fighter",
+      ),
+    [currentUser?.email, currentUser?.firstName, currentUser?.name, currentUser?.username],
+  );
+
 
   useEffect(() => {
     setActiveHeroIndex(0);
@@ -1798,6 +1863,7 @@ const HomeAnother = () => {
 
       <div className="theme-home fmm-home page-shell">
         <MobilePhoneHome
+          greetingName={mobileGreetingName}
           activeFightSport={activeFightSport}
           setActiveFightSport={setActiveFightSport}
           activeHeroFight={activeHeroFight}
