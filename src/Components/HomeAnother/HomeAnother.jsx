@@ -1883,16 +1883,16 @@ const HomeAnother = () => {
           <div className="theme-container fmm-hero-grid">
             <div className="fmm-hero-copy">
               <div className="fmm-premium-eyebrow">
-                <FaBolt aria-hidden="true" /> Fight card command center
+                <FaBolt aria-hidden="true" /> Fantasy fight card
               </div>
               <h1>
-                Pick The Card.
+                Sign Up Free.
                 <span>
-                  Beat The <em>Crowd.</em>
+                  Pick A Fight. <em>Win.</em>
                 </span>
               </h1>
               <p className="fmm-hero-subtitle">
-                Browse promoted combat cards, inspect the matchup, and lock your prediction before the bell.
+                Create a free account, enter an open fight card, and make your picks before the card locks. Browse every fight category without losing the featured event.
               </p>
 
               <div className="fmm-hero-actions">
@@ -1910,7 +1910,7 @@ const HomeAnother = () => {
                   }
                   className="theme-btn theme-btn-secondary"
                 >
-                  Open Featured Fight <FaPlay aria-hidden="true" />
+                  Enter Featured Event <FaPlay aria-hidden="true" />
                 </Link>
                 <Link href="/mock-game" className="theme-btn theme-btn-secondary fmm-mock-game-link">
                   Mock Game <FaBolt aria-hidden="true" />
