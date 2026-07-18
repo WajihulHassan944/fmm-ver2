@@ -47,6 +47,8 @@ const pickCalendarText = (...values) => {
 const NEWS_EVENT_DATE_FIELDS = [
   'eventDate',
   'event_date',
+  'calendarDate',
+  'calendar_date',
   'fightDate',
   'fight_date',
   'matchDate',
@@ -215,6 +217,31 @@ const getNewsEventTime = (article = {}) => {
   return `${timeMatch[1]}:${timeMatch[2] || '00'} ${timeMatch[3].toUpperCase()}`;
 };
 
+const NEWS_EVENT_INTENT_PATTERN = /\b(?:ufc\s*\d+|ufc\s+fight\s+night|fight\s+night|noche\s+ufc|fight\s+card|main\s+event|co-main|title\s+fight|championship|\bvs\.?\b|set\s+for|scheduled\s+for|booked\s+for|targeted\s+for|announced?|returns?\s+to|headed\s+to)\b/i;
+const NEWS_NON_CALENDAR_PATTERN = /\b(?:results?|recap|post[-\s]?fight|rankings?|opinion|mailbag|podcast|odds|betting|picks?|prediction(?:s)?|injur(?:y|ies|ed)|released?|signs?\s+with)\b/i;
+
+const hasExplicitNewsEventDate = (article = {}) => NEWS_EVENT_DATE_FIELDS.some((field) => isUsableCalendarText(article?.[field]));
+
+const isUpcomingNewsDateKey = (dateKey) => {
+  if (!dateKey) return false;
+  const eventDate = new Date(`${dateKey}T23:59:59`);
+  if (Number.isNaN(eventDate.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return eventDate >= today;
+};
+
+const hasCalendarNewsIntent = (article = {}) => {
+  if (article?.calendarEligible === true || article?.isCalendarEvent === true || article?.eventDiscovered === true) return true;
+  if (hasExplicitNewsEventDate(article)) return true;
+  const text = [article?.eventName, article?.matchName, article?.title, article?.headline, article?.description, article?.summary, article?.content]
+    .filter(isUsableCalendarText)
+    .join(' · ');
+  if (!text) return false;
+  if (NEWS_NON_CALENDAR_PATTERN.test(text) && !NEWS_EVENT_INTENT_PATTERN.test(text)) return false;
+  return NEWS_EVENT_INTENT_PATTERN.test(text);
+};
+
 const isCalendarNewsEvent = (item = {}) => item?.__calendarType === 'news';
 
 const getCalendarTitle = (item = {}) =>
@@ -224,9 +251,9 @@ const getCalendarTitle = (item = {}) =>
 
 const normalizeNewsIntoCalendarEvent = (article = {}, index = 0) => {
   const eventDateKey = getNewsEventDateKey(article);
-  if (!eventDateKey) return null;
+  if (!eventDateKey || !isUpcomingNewsDateKey(eventDateKey) || !hasCalendarNewsIntent(article)) return null;
 
-  const title = pickCalendarText(article?.title, article?.headline, 'Fight news event');
+  const title = pickCalendarText(article?.eventName, article?.matchName, article?.title, article?.headline, 'Fight news event');
   const description = pickCalendarText(
     article?.description,
     article?.summary,
@@ -243,27 +270,60 @@ const normalizeNewsIntoCalendarEvent = (article = {}, index = 0) => {
     description,
     matchDate: eventDateKey,
     matchTime: getNewsEventTime(article),
-    venue: pickCalendarText(article?.venue, article?.location, article?.eventLocation, 'News update'),
-    source: pickCalendarText(article?.source, article?.publisher, 'Fight news'),
-    link: pickCalendarText(article?.link, article?.url, article?.sourceUrl),
+    venue: pickCalendarText(article?.venue, article?.location, article?.eventLocation, article?.city, 'News update'),
+    source: pickCalendarText(article?.articleSource, article?.sourceName, article?.source, article?.publisher, 'Fight news'),
+    link: pickCalendarText(article?.link, article?.url, article?.sourceUrl, article?.articleUrl),
+    matchFighterA: pickCalendarText(article?.matchFighterA, article?.fighterA),
+    matchFighterB: pickCalendarText(article?.matchFighterB, article?.fighterB),
     rawArticle: article,
   };
 };
 
 const normalizeNewsPayloadRows = (payload) => {
+  if (Array.isArray(payload?.events)) return payload.events;
+  if (Array.isArray(payload?.calendarEvents)) return payload.calendarEvents;
   if (Array.isArray(payload?.data)) return payload.data;
   if (Array.isArray(payload?.news)) return payload.news;
   if (Array.isArray(payload?.items)) return payload.items;
   return Array.isArray(payload) ? payload : [];
 };
 
-const fetchCalendarNewsEvents = async () => {
-  const response = await fetch(buildPublicApiUrl('/news'), { headers: { Accept: 'application/json' } });
+const requestCalendarNewsRows = async (path, query = {}) => {
+  const response = await fetch(buildPublicApiUrl(path, query), { headers: { Accept: 'application/json' } });
   if (!response.ok) throw new Error(`News request failed with status ${response.status}`);
-  const payload = await response.json();
-  return normalizeNewsPayloadRows(payload)
+  return normalizeNewsPayloadRows(await response.json());
+};
+
+const fetchCalendarNewsEvents = async () => {
+  const rows = [];
+  const failures = [];
+
+  try {
+    rows.push(...await requestCalendarNewsRows('/api/public/fight-news-calendar', { upcomingOnly: true, limit: 100 }));
+  } catch (error) {
+    failures.push(error);
+    console.info('Dedicated news calendar feed unavailable:', error.message);
+  }
+
+  try {
+    rows.push(...await requestCalendarNewsRows('/news'));
+  } catch (error) {
+    failures.push(error);
+    console.info('General news feed unavailable for calendar mapping:', error.message);
+  }
+
+  if (!rows.length && failures.length) throw failures[0];
+
+  const seen = new Set();
+  return rows
     .map(normalizeNewsIntoCalendarEvent)
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((event) => {
+      const key = `${event.matchDate}:${event.title}`.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 };
 
 const CalenderOfMatches = () => {

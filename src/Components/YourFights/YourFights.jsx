@@ -26,7 +26,13 @@ import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { formatWrestlingDate, getWrestlerImage as getPWImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const safePredictions = (match) => (Array.isArray(match?.userPredictions) ? match.userPredictions : []);
-const sameId = (left, right) => String(left || '') === String(right || '');
+const sameId = (left, right) => String(left?._id || left || '') === String(right?._id || right || '');
+const isPredictionStatusSubmitted = (value) => ['submitted', 'complete', 'completed', 'locked', 'scored', 'settled'].includes(String(value || '').toLowerCase());
+const hasEmbeddedSubmittedPrediction = (match, userId) => Boolean(
+  userId && safePredictions(match).some((prediction) => (
+    sameId(prediction?.userId, userId) && isPredictionStatusSubmitted(prediction?.predictionStatus)
+  )),
+);
 const isSubmittedByUser = (match, userId) => {
   const status = String(match?.userPredictionStatus || match?.predictionStatus || '').toLowerCase();
   const bucket = String(match?.userFightBucket || '').toLowerCase();
@@ -34,9 +40,47 @@ const isSubmittedByUser = (match, userId) => {
     match?.predictionSubmitted === true ||
     match?.userPredictionSubmitted === true ||
     bucket === 'completed' ||
-    ['submitted', 'complete', 'completed'].includes(status) ||
-    safePredictions(match).some((prediction) => sameId(prediction.userId, userId) && prediction.predictionStatus === 'submitted')
+    isPredictionStatusSubmitted(status) ||
+    hasEmbeddedSubmittedPrediction(match, userId)
   );
+};
+
+const mergeFightRowsForUser = (rows = [], userId) => {
+  const byId = new Map();
+
+  (Array.isArray(rows) ? rows : []).filter(Boolean).forEach((match) => {
+    const id = getFightId(match);
+    if (!id) return;
+
+    const existing = byId.get(id);
+    if (!existing) {
+      byId.set(id, match);
+      return;
+    }
+
+    const existingSubmitted = isSubmittedByUser(existing, userId);
+    const nextSubmitted = isSubmittedByUser(match, userId);
+    const submitted = existingSubmitted || nextSubmitted;
+    const existingPredictions = safePredictions(existing);
+    const nextPredictions = safePredictions(match);
+    const userPredictions = nextPredictions.length >= existingPredictions.length ? nextPredictions : existingPredictions;
+    const preferred = nextSubmitted || (!existingSubmitted && nextPredictions.length > existingPredictions.length) ? match : existing;
+    const secondary = preferred === match ? existing : match;
+
+    byId.set(id, {
+      ...secondary,
+      ...preferred,
+      userPredictions,
+      predictionSubmitted: submitted,
+      userPredictionSubmitted: submitted,
+      userPredictionStatus: submitted ? 'submitted' : (preferred.userPredictionStatus || secondary.userPredictionStatus || 'not_submitted'),
+      userFightBucket: submitted ? 'completed' : (preferred.userFightBucket || secondary.userFightBucket || ''),
+      fightStatusBucket: preferred.fightStatusBucket || secondary.fightStatusBucket,
+      canSubmitPrediction: submitted ? false : (preferred.canSubmitPrediction ?? secondary.canSubmitPrediction),
+    });
+  });
+
+  return orderFightsForDisplay([...byId.values()]);
 };
 
 const YourFights = () => {
@@ -112,15 +156,10 @@ const YourFights = () => {
   }, [matches, playableMatches]);
 
 
-  const allFightRows = useMemo(() => {
-    const seen = new Set();
-    return orderFightsForDisplay([...(Array.isArray(matches) ? matches : []), ...(Array.isArray(playableMatches) ? playableMatches : [])]).filter((match) => {
-      const id = getFightId(match);
-      if (!id || seen.has(id)) return false;
-      seen.add(id);
-      return true;
-    });
-  }, [matches, playableMatches]);
+  const allFightRows = useMemo(() => mergeFightRowsForUser([
+    ...(Array.isArray(matches) ? matches : []),
+    ...(Array.isArray(playableMatches) ? playableMatches : []),
+  ], user?._id), [matches, playableMatches, user?._id]);
 
   const completedMatches = useMemo(() => allFightRows.filter((match) => (
     isSubmittedByUser(match, user?._id)

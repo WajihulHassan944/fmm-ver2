@@ -161,7 +161,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     setButtonText('Saving!');
 
     try {
-      await fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores', {
+      const scoreResponse = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -172,7 +172,12 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         }),
       });
 
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/matches/${matchId}/updatePredictionStatus`, {
+      if (!scoreResponse.ok) {
+        const errorText = await scoreResponse.text().catch(() => '');
+        throw new Error(errorText || `Score request failed with status ${scoreResponse.status}`);
+      }
+
+      const statusResponse = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/matches/${matchId}/updatePredictionStatus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,6 +185,10 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           predictionStatus: 'submitted',
         }),
       });
+
+      if (!statusResponse.ok) {
+        console.warn('Prediction status sync failed after score save:', statusResponse.status);
+      }
 
       onSubmitted?.();
       window.location.reload();
