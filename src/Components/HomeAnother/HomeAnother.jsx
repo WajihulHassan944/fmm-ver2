@@ -57,22 +57,22 @@ const HOME_FIGHT_SPORT_TABS = [
   {
     key: "boxing",
     label: "Boxing",
-    image: "/images/mobile-home/categories/boxing.png",
+    image: "/images/fmm-experience/fighter-duel-arena.webp",
   },
   {
     key: "mma",
     label: "MMA",
-    image: "/images/mobile-home/categories/mma.png",
+    image: "/images/fmm-pages/premium-duel-banner.webp",
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
-    image: "/images/mobile-home/categories/bare-knuckle.png",
+    image: "/images/fmm-pages/rewards-fighter-panel.webp",
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
-    image: "/images/mobile-home/categories/kickboxing.png",
+    image: "/images/fmm-pages/premium-affiliate-banner.webp",
   },
   {
     key: "pro-wrestling",
@@ -85,25 +85,25 @@ const MOBILE_HOME_SPORT_TABS = [
   {
     key: "boxing",
     label: "Boxing",
-    image: "/images/mobile-home/categories/boxing.png",
+    image: "/images/fmm-experience/fighter-duel-arena.webp",
     fallbackCount: 128,
   },
   {
     key: "mma",
     label: "MMA",
-    image: "/images/mobile-home/categories/mma.png",
+    image: "/images/fmm-pages/premium-duel-banner.webp",
     fallbackCount: 214,
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
-    image: "/images/mobile-home/categories/bare-knuckle.png",
+    image: "/images/fmm-pages/rewards-fighter-panel.webp",
     fallbackCount: 36,
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
-    image: "/images/mobile-home/categories/kickboxing.png",
+    image: "/images/fmm-pages/premium-affiliate-banner.webp",
     fallbackCount: 58,
   },
   {
@@ -1082,6 +1082,9 @@ const MobilePhoneHome = ({
             <Link href={getFightDetailHref(mobileHeroFight)} className="fmm-mobile-event-btn">
               Enter Featured Event
             </Link>
+            <Link href="/mock-game" className="fmm-mobile-mock-game-btn">
+              Enter Mock Game <FaBolt aria-hidden="true" />
+            </Link>
           </div>
         </div>
 
@@ -1399,6 +1402,34 @@ const MobilePhoneHome = ({
           </button>
         </form>
       </section>
+
+      <footer className="fmm-mobile-footer" aria-label="Fantasy MMAdness mobile footer">
+        <div className="fmm-mobile-footer-brand">
+          <Image
+            src="/images/fmm-experience/fantasy-mmadness-logo.webp"
+            alt="Fantasy MMAdness"
+            width={132}
+            height={60}
+            sizes="132px"
+          />
+          <p>Pick winners. Score big. Climb the leaderboard.</p>
+        </div>
+        <div className="fmm-mobile-footer-links">
+          <div>
+            <strong>Company</strong>
+            <Link href="/about">About</Link>
+            <Link href="/guides">How to Play</Link>
+            <Link href="/affiliate-create-account">Affiliates</Link>
+          </div>
+          <div>
+            <strong>Support</strong>
+            <Link href="/contact">Contact</Link>
+            <Link href="/faqs">FAQs</Link>
+            <Link href="/privacy-policy">Privacy</Link>
+          </div>
+        </div>
+        <small>© 2024 Fantasy MMAdness. All rights reserved.</small>
+      </footer>
     </div>
   );
 };
@@ -2135,6 +2166,33 @@ const HomeAnother = () => {
                         sizes="(max-width: 760px) 42vw, 30vw"
                       />
                     </div>
+                  </div>
+
+                  <div className="fmm-featured-thumb-rail" aria-label="Featured fight visual previews">
+                    {[
+                      "/images/fmm-experience/fighter-duel-arena.webp",
+                      "/images/fmm-pages/premium-duel-banner.webp",
+                      "/images/fmm-pages/rewards-fighter-panel.webp",
+                      "/images/pro-wrestling/hero.webp",
+                    ].map((imageSrc, imageIndex) => (
+                      <button
+                        key={imageSrc}
+                        type="button"
+                        className={imageIndex === activeHeroIndex % 4 ? "is-active" : ""}
+                        onClick={() => {
+                          if (heroSlides.length > 1) setActiveHeroIndex(imageIndex % heroSlides.length);
+                        }}
+                        aria-label={`Preview featured fight visual ${imageIndex + 1}`}
+                      >
+                        <Image
+                          src={imageSrc}
+                          alt=""
+                          width={148}
+                          height={74}
+                          sizes="148px"
+                        />
+                      </button>
+                    ))}
                   </div>
 
                   <div className="fmm-featured-status-panel">

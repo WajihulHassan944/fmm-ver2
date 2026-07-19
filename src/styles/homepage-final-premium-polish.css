@@ -1,0 +1,871 @@
+/* Homepage final premium polish: desktop hero, compact sport cards, mobile mock game CTA, mobile footer. */
+
+@media (min-width: 768px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero {
+    min-height: calc(100vh - 88px) !important;
+    padding: clamp(88px, 7.2vw, 128px) 0 clamp(34px, 4vw, 58px) !important;
+    background:
+      radial-gradient(circle at 9% 12%, rgba(255, 27, 45, 0.42), transparent 30rem),
+      radial-gradient(circle at 88% 13%, rgba(47, 124, 255, 0.30), transparent 34rem),
+      radial-gradient(circle at 52% 7%, rgba(255, 255, 255, 0.10), transparent 17rem),
+      linear-gradient(180deg, #020307 0%, #060811 52%, #020305 100%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::before {
+    background:
+      linear-gradient(90deg, rgba(1, 2, 6, 0.94) 0%, rgba(1, 2, 6, 0.58) 28%, rgba(1, 2, 6, 0.18) 54%, rgba(1, 2, 6, 0.70) 78%, rgba(1, 2, 6, 0.96) 100%),
+      linear-gradient(180deg, rgba(1, 2, 7, 0.08) 0%, rgba(1, 2, 7, 0.22) 54%, #020305 100%),
+      url('/images/home-premium/arena-faceoff.webp') center / cover no-repeat !important;
+    opacity: 1 !important;
+    filter: saturate(1.36) contrast(1.18) brightness(0.96) !important;
+    transform: scale(1.02) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::after {
+    background:
+      radial-gradient(circle at 16% 20%, rgba(255, 38, 57, 0.26), transparent 16rem),
+      radial-gradient(circle at 84% 21%, rgba(85, 154, 255, 0.18), transparent 15rem),
+      linear-gradient(110deg, rgba(255, 22, 40, 0.14), transparent 38%, transparent 62%, rgba(30, 123, 255, 0.16)),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 84px) !important;
+    opacity: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-grid {
+    grid-template-columns: minmax(390px, 0.74fr) minmax(660px, 1.26fr) !important;
+    gap: clamp(30px, 3.6vw, 58px) !important;
+    align-items: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-copy {
+    transform: translateY(-4px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-premium-eyebrow {
+    border-color: rgba(255, 255, 255, 0.17) !important;
+    background: linear-gradient(90deg, rgba(10, 13, 21, 0.92), rgba(39, 7, 14, 0.74)) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-copy h1 {
+    max-width: 690px !important;
+    font-size: clamp(64px, 6.4vw, 116px) !important;
+    letter-spacing: -0.052em !important;
+    text-shadow: 0 20px 44px rgba(0, 0, 0, 0.88), 0 0 28px rgba(255, 255, 255, 0.10) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-copy h1 em {
+    background: linear-gradient(180deg, #ff4a55 0%, #e30613 66%, #8e0009 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 0 0 42px rgba(255, 27, 45, 0.45) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-subtitle {
+    max-width: 620px !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    font-size: clamp(17px, 1.15vw, 21px) !important;
+    line-height: 1.48 !important;
+    text-shadow: 0 12px 32px rgba(0, 0, 0, 0.82) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner {
+    min-height: clamp(520px, 40vw, 650px) !important;
+    transform: perspective(1100px) rotateY(-2deg) translateZ(0) !important;
+    transform-origin: center !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 34px !important;
+    background:
+      linear-gradient(90deg, rgba(2, 3, 8, 0.78) 0%, rgba(74, 6, 17, 0.22) 29%, rgba(2, 5, 13, 0.18) 52%, rgba(3, 6, 15, 0.74) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.34) 62%, rgba(0, 0, 0, 0.82) 100%),
+      radial-gradient(circle at 25% 42%, rgba(255, 38, 57, 0.40), transparent 18rem),
+      radial-gradient(circle at 77% 36%, rgba(62, 139, 255, 0.33), transparent 18rem),
+      url('/images/fmm-experience/fighter-duel-arena.webp') center / cover no-repeat !important;
+    box-shadow:
+      0 40px 118px rgba(0, 0, 0, 0.72),
+      0 0 0 1px rgba(255, 46, 65, 0.14),
+      0 0 72px rgba(255, 31, 51, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      inset 0 -120px 170px rgba(0, 0, 0, 0.68) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner::before {
+    display: block !important;
+    background:
+      linear-gradient(90deg, rgba(255, 35, 55, 0.30), transparent 31%, transparent 65%, rgba(49, 133, 255, 0.28)),
+      radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.16), transparent 12rem),
+      repeating-linear-gradient(-18deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 70px) !important;
+    mix-blend-mode: screen !important;
+    opacity: 0.92 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner::after {
+    display: block !important;
+    background:
+      radial-gradient(circle at 50% 58%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.44) 56%, rgba(0, 0, 0, 0.82) 100%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 28%, rgba(0, 0, 0, 0.72) 100%) !important;
+    opacity: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-badge {
+    top: 28px !important;
+    left: 34px !important;
+    border-radius: 16px 4px 16px 4px !important;
+    background: linear-gradient(135deg, #ff3143, #d60713 64%, #730009) !important;
+    box-shadow: 0 18px 54px rgba(229, 9, 20, 0.50), 0 0 32px rgba(255, 255, 255, 0.10) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-duel-stage {
+    top: 76px !important;
+    bottom: 122px !important;
+    left: clamp(30px, 3vw, 54px) !important;
+    right: clamp(30px, 3vw, 54px) !important;
+    grid-template-columns: minmax(160px, 0.58fr) minmax(430px, 1fr) minmax(160px, 0.58fr) !important;
+    gap: clamp(12px, 2vw, 28px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fighter {
+    width: min(20vw, 280px) !important;
+    min-width: 170px !important;
+    height: min(20vw, 280px) !important;
+    max-width: 280px !important;
+    border-radius: 999px !important;
+    opacity: 0.86 !important;
+    background:
+      radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.18), transparent 42%),
+      rgba(0, 0, 0, 0.34) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.64), 0 0 48px rgba(255, 39, 63, 0.18) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fighter img {
+    filter: saturate(1.18) contrast(1.12) brightness(1.02) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center {
+    max-width: 520px !important;
+    padding: 42px 0 98px !important;
+    border-radius: 28px !important;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.36), transparent 70%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center > p {
+    color: #ff3144 !important;
+    letter-spacing: 0.42em !important;
+    text-shadow: 0 0 26px rgba(255, 47, 68, 0.62) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center h2 {
+    font-size: clamp(40px, 4vw, 66px) !important;
+    letter-spacing: -0.028em !important;
+    line-height: 0.92 !important;
+    text-shadow: 0 18px 48px rgba(0, 0, 0, 0.92), 0 0 28px rgba(255, 255, 255, 0.18) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-event-meta {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(5, 7, 14, 0.86) !important;
+    box-shadow: 0 20px 52px rgba(0, 0, 0, 0.54), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+    backdrop-filter: blur(18px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-details-grid {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-countdown-box {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-actions {
+    margin-top: 22px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-thumb-rail {
+    position: absolute !important;
+    z-index: 11 !important;
+    left: 50% !important;
+    bottom: 28px !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(96px, 1fr)) !important;
+    gap: 12px !important;
+    width: min(630px, calc(100% - 160px)) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-thumb-rail button {
+    position: relative !important;
+    display: block !important;
+    height: 66px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    background: rgba(2, 3, 8, 0.72) !important;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.50) !important;
+    cursor: pointer !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-thumb-rail button::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.58)) !important;
+    pointer-events: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-thumb-rail button.is-active {
+    border-color: rgba(255, 37, 56, 0.82) !important;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.58), 0 0 28px rgba(255, 30, 50, 0.28) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-thumb-rail img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.22) contrast(1.12) brightness(0.92) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-status-panel {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner > .fmm-promoted-dots {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-main {
+    padding-top: clamp(18px, 2.3vw, 34px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-section-title-row {
+    margin-bottom: 16px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tabs {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card {
+    display: grid !important;
+    grid-template-columns: minmax(92px, 35%) minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    min-height: 94px !important;
+    height: 98px !important;
+    padding: 8px 12px !important;
+    gap: 12px !important;
+    border-radius: 18px !important;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.075), transparent 36%),
+      radial-gradient(circle at 10% 20%, rgba(255, 32, 50, 0.18), transparent 6rem),
+      linear-gradient(180deg, rgba(13, 17, 26, 0.97), rgba(4, 6, 12, 0.98)) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card:hover,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-active {
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 43, 62, 0.55) !important;
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.44), 0 0 30px rgba(255, 32, 50, 0.16) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art {
+    width: 100% !important;
+    min-width: 84px !important;
+    height: 72px !important;
+    margin: 0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy {
+    display: grid !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy > span {
+    display: block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    color: #fff !important;
+    font-family: var(--fmm-condensed-font, Impact, 'Arial Narrow', sans-serif) !important;
+    font-size: clamp(16px, 1.1vw, 22px) !important;
+    letter-spacing: 0.02em !important;
+    line-height: 0.96 !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: normal !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy small {
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card > strong {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    overflow: hidden !important;
+    text-align: center !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-grid {
+    grid-template-columns: minmax(320px, 0.8fr) minmax(520px, 1.2fr) !important;
+    gap: 28px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-thumb-rail {
+    width: min(540px, calc(100% - 104px)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card {
+    grid-template-columns: minmax(78px, 33%) minmax(0, 1fr) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card > strong {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header {
+    height: calc(74px + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(74px + env(safe-area-inset-top, 0px)) !important;
+    padding: env(safe-area-inset-top, 0px) 16px 0 !important;
+    background: linear-gradient(180deg, rgba(2, 3, 8, 0.86), rgba(2, 3, 8, 0.12)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand {
+    position: fixed !important;
+    top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+    left: 14px !important;
+    right: auto !important;
+    width: 124px !important;
+    height: 56px !important;
+    transform: none !important;
+    justify-content: flex-start !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand img,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand span:not(.theme-mobile-wordmark) img {
+    width: 124px !important;
+    max-width: 124px !important;
+    max-height: 56px !important;
+    object-fit: contain !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-toggle {
+    position: fixed !important;
+    top: calc(20px + env(safe-area-inset-top, 0px)) !important;
+    right: 15px !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    background: rgba(4, 6, 13, 0.56) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-toggle svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-signup-icon,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-notification-icon,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-notification-badge {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-mobile-menu {
+    inset: calc(74px + env(safe-area-inset-top, 0px)) 14px auto !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    max-width: 460px !important;
+    padding: calc(78px + env(safe-area-inset-top, 0px)) 14px 30px !important;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(255, 34, 52, 0.22), transparent 13rem),
+      radial-gradient(circle at 92% 9%, rgba(56, 136, 255, 0.18), transparent 14rem),
+      linear-gradient(180deg, #03050b 0%, #05060a 48%, #020306 100%) !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 132px 14px 16px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 26px !important;
+    background:
+      linear-gradient(180deg, rgba(3, 5, 11, 0.24) 0%, rgba(3, 5, 11, 0.82) 45%, rgba(3, 5, 11, 0.98) 100%),
+      radial-gradient(circle at 50% 28%, rgba(255, 35, 52, 0.28), transparent 12rem),
+      url('/images/home-premium/fight-action-clash.webp') center top / cover no-repeat !important;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.62), 0 0 42px rgba(255, 24, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before,
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::after,
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    display: block !important;
+    content: "" !important;
+    position: absolute !important;
+    pointer-events: none !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before {
+    inset: 0 !important;
+    z-index: 1 !important;
+    background:
+      linear-gradient(90deg, rgba(255, 21, 42, 0.18), transparent 44%, rgba(52, 133, 255, 0.16)),
+      radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.11), transparent 8rem) !important;
+    mix-blend-mode: screen !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::after {
+    inset: auto 16px 0 !important;
+    z-index: 1 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 30, 50, 0.9), transparent) !important;
+    opacity: 0.9 !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    inset: 0 !important;
+    z-index: 0 !important;
+    background:
+      radial-gradient(circle at 20% 24%, rgba(255, 42, 58, 0.34), transparent 8rem),
+      radial-gradient(circle at 78% 24%, rgba(42, 126, 255, 0.22), transparent 8rem) !important;
+    opacity: 1 !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    position: relative !important;
+    z-index: 5 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    gap: 10px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-greeting {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    margin: 0 auto 2px !important;
+    padding: 7px 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 999px !important;
+    background: rgba(2, 3, 8, 0.56) !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
+    font-size: clamp(40px, 12vw, 58px) !important;
+    line-height: 0.88 !important;
+    letter-spacing: -0.055em !important;
+    text-align: center !important;
+    text-shadow: 0 16px 34px rgba(0, 0, 0, 0.92), 0 0 22px rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .fmm-mobile-hero-intro h1 span {
+    display: block !important;
+  }
+
+  .fmm-mobile-hero-intro h1 em {
+    display: inline-block !important;
+    color: #ff192b !important;
+    text-shadow: 0 0 34px rgba(255, 25, 43, 0.58) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    max-width: 330px !important;
+    margin: 0 auto !important;
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: 13px !important;
+    line-height: 1.48 !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+    width: 100% !important;
+    max-width: 338px !important;
+    margin: 5px auto 0 !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-mock-game-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 46px !important;
+    border-radius: 13px !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-signup-btn {
+    background: linear-gradient(180deg, #ff2a3b, #d90613) !important;
+    box-shadow: 0 18px 42px rgba(255, 28, 48, 0.34) !important;
+  }
+
+  .fmm-mobile-event-btn {
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: rgba(2, 3, 8, 0.62) !important;
+  }
+
+  .fmm-mobile-mock-game-btn {
+    grid-column: 1 / -1 !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 47, 68, 0.42) !important;
+    background:
+      linear-gradient(90deg, rgba(97, 5, 16, 0.88), rgba(8, 13, 26, 0.82)),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.16), transparent 70%) !important;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.38), 0 0 26px rgba(255, 29, 48, 0.16) !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    position: relative !important;
+    z-index: 6 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 16px 0 0 !important;
+    padding: 96px 12px 14px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 20px !important;
+    background:
+      linear-gradient(180deg, rgba(7, 10, 17, 0.76), rgba(2, 3, 8, 0.94)),
+      radial-gradient(circle at 25% 0%, rgba(255, 38, 57, 0.18), transparent 10rem),
+      radial-gradient(circle at 82% 0%, rgba(53, 137, 255, 0.18), transparent 10rem) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 20px 54px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    top: 12px !important;
+    left: 10px !important;
+    right: 10px !important;
+    height: 86px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: 92px !important;
+    height: 92px !important;
+    flex-basis: 92px !important;
+    border-radius: 18px !important;
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.38) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(180deg, #ff2639, #99000a) !important;
+    box-shadow: 0 0 32px rgba(255, 30, 48, 0.42) !important;
+    color: #fff !important;
+    font-size: 22px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    position: static !important;
+    display: inline-flex !important;
+    margin: 0 auto 8px !important;
+    font-size: 9px !important;
+    padding: 7px 10px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    display: none !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: clamp(21px, 6.4vw, 30px) !important;
+    line-height: 0.98 !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 10px !important;
+  }
+
+  .fmm-mobile-countdown {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    margin-top: 12px !important;
+  }
+
+  .fmm-mobile-countdown span {
+    min-height: 54px !important;
+    border-radius: 13px !important;
+  }
+
+  .fmm-mobile-signup-hero > .fmm-mobile-dots {
+    display: flex !important;
+    position: relative !important;
+    z-index: 7 !important;
+    justify-content: center !important;
+    margin-top: 13px !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  .fmm-mobile-category-row {
+    display: flex !important;
+    gap: 10px !important;
+    margin: 16px -14px 0 !important;
+    padding: 2px 14px 8px !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+  }
+
+  .fmm-mobile-category-row::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    flex: 0 0 122px !important;
+    width: 122px !important;
+    height: 132px !important;
+    min-height: 132px !important;
+    padding: 8px !important;
+    border-radius: 17px !important;
+    scroll-snap-align: start !important;
+    background:
+      linear-gradient(180deg, rgba(14, 18, 29, 0.96), rgba(3, 5, 10, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile::before {
+    border-radius: 17px !important;
+    opacity: 0.72 !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    width: 100% !important;
+    height: 70px !important;
+    margin: 0 0 8px !important;
+    border-radius: 13px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.22) contrast(1.12) brightness(0.92) !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    width: 100% !important;
+    color: #fff !important;
+    font-family: var(--fmm-condensed-font, Impact, 'Arial Narrow', sans-serif) !important;
+    font-size: 16px !important;
+    line-height: 0.98 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-category-row span:not(.fmm-mobile-category-icon) {
+    color: #ff2639 !important;
+    font-size: 10px !important;
+    letter-spacing: 0.08em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-contact-card {
+    margin-top: 18px !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 35, 52, 0.18), transparent 9rem),
+      linear-gradient(180deg, rgba(13, 17, 26, 0.98), rgba(4, 6, 12, 0.98)) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  .fmm-mobile-footer {
+    display: grid !important;
+    gap: 18px !important;
+    margin: 20px 0 0 !important;
+    padding: 22px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(255, 36, 55, 0.16), transparent 11rem),
+      radial-gradient(circle at 100% 0%, rgba(49, 131, 255, 0.11), transparent 11rem),
+      linear-gradient(180deg, rgba(9, 12, 19, 0.98), rgba(2, 3, 8, 0.98)) !important;
+    color: #fff !important;
+    box-shadow: 0 22px 62px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-mobile-footer-brand {
+    display: grid !important;
+    justify-items: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-footer-brand img {
+    width: 132px !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  .fmm-mobile-footer-brand p {
+    max-width: 260px !important;
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  .fmm-mobile-footer-links {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .fmm-mobile-footer-links > div {
+    display: grid !important;
+    gap: 8px !important;
+    padding: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.035) !important;
+  }
+
+  .fmm-mobile-footer-links strong {
+    color: #fff !important;
+    font-size: 12px !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-footer-links a {
+    color: rgba(255, 255, 255, 0.70) !important;
+    font-size: 12px !important;
+    text-decoration: none !important;
+  }
+
+  .fmm-mobile-footer > small {
+    color: rgba(255, 255, 255, 0.48) !important;
+    font-size: 11px !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    padding: 120px 12px 14px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(36px, 11.2vw, 50px) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 12px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    gap: 8px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-mock-game-btn {
+    min-height: 43px !important;
+    font-size: 10px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: 82px !important;
+    height: 82px !important;
+    flex-basis: 82px !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    flex-basis: 112px !important;
+    width: 112px !important;
+    height: 124px !important;
+    min-height: 124px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    height: 64px !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    font-size: 14px !important;
+  }
+}
