@@ -1082,6 +1082,9 @@ const MobilePhoneHome = ({
             <Link href={getFightDetailHref(mobileHeroFight)} className="fmm-mobile-event-btn">
               Enter Featured Event
             </Link>
+            <Link href="/mock-game" className="fmm-mobile-mock-game-btn">
+              Enter Mock Game <FaBolt aria-hidden="true" />
+            </Link>
           </div>
         </div>
 
@@ -1399,6 +1402,34 @@ const MobilePhoneHome = ({
           </button>
         </form>
       </section>
+
+      <footer className="fmm-mobile-footer" aria-label="Fantasy MMAdness mobile footer">
+        <div className="fmm-mobile-footer-brand">
+          <Image
+            src="/images/fmm-experience/fantasy-mmadness-logo.webp"
+            alt="Fantasy MMAdness"
+            width={132}
+            height={60}
+            sizes="132px"
+          />
+          <p>Pick winners. Score big. Climb the leaderboard.</p>
+        </div>
+        <div className="fmm-mobile-footer-links">
+          <div>
+            <strong>Company</strong>
+            <Link href="/about">About</Link>
+            <Link href="/guides">How to Play</Link>
+            <Link href="/affiliate-create-account">Affiliates</Link>
+          </div>
+          <div>
+            <strong>Support</strong>
+            <Link href="/contact">Contact</Link>
+            <Link href="/faqs">FAQs</Link>
+            <Link href="/privacy-policy">Privacy</Link>
+          </div>
+        </div>
+        <small>© 2024 Fantasy MMAdness. All rights reserved.</small>
+      </footer>
     </div>
   );
 };

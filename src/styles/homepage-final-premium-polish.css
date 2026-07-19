@@ -1,0 +1,655 @@
+/* Homepage final polish: preserves the earlier approved desktop hero/banner, restores real category artwork, and keeps phone mock-game/footer upgrades. */
+
+@media (min-width: 768px) {
+  /* Keep the approved hero composition. Only add subtle atmospheric gradients, not layout changes. */
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero {
+    background:
+      radial-gradient(circle at 13% 18%, rgba(255, 27, 45, 0.24), transparent 28rem),
+      radial-gradient(circle at 88% 16%, rgba(47, 124, 255, 0.20), transparent 31rem),
+      linear-gradient(180deg, #03060d 0%, #05060b 48%, #020308 100%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::after {
+    background:
+      radial-gradient(circle at 16% 20%, rgba(255, 38, 57, 0.15), transparent 15rem),
+      radial-gradient(circle at 82% 18%, rgba(82, 154, 255, 0.12), transparent 16rem),
+      linear-gradient(110deg, rgba(255, 22, 40, 0.07), transparent 38%, transparent 65%, rgba(30, 123, 255, 0.08)) !important;
+    opacity: 0.88 !important;
+  }
+
+  /* Restore the approved featured banner proportions; prevent the last update from forcing the poster/card treatment. */
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner {
+    transform: none !important;
+    transform-origin: center !important;
+    border-radius: 28px !important;
+    background:
+      linear-gradient(90deg, rgba(5, 7, 12, 0.92) 0%, rgba(5, 7, 12, 0.50) 48%, rgba(5, 7, 12, 0.86) 100%),
+      radial-gradient(circle at 50% 34%, rgba(219, 23, 31, 0.28), transparent 29%),
+      radial-gradient(circle at 83% 21%, rgba(42, 102, 255, 0.24), transparent 30%),
+      url('/images/fmm-pages/premium-arena-banner.webp') center / cover no-repeat !important;
+  }
+
+  /* Category row: use the previous real category images, but with a more tolerable compact height and premium gradients. */
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card {
+    min-height: 148px !important;
+    height: 148px !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+    border-radius: 20px !important;
+    background:
+      radial-gradient(circle at 24% 14%, rgba(255, 255, 255, 0.11), transparent 4.5rem),
+      linear-gradient(180deg, rgba(16, 21, 33, 0.96), rgba(4, 7, 14, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-boxing,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-bareknuckle {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 44, 57, 0.28), transparent 7rem),
+      linear-gradient(180deg, rgba(36, 7, 12, 0.96), rgba(5, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-mma,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-kickboxing {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(47, 127, 255, 0.24), transparent 7rem),
+      linear-gradient(180deg, rgba(7, 19, 38, 0.96), rgba(4, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-pro-wrestling {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 206, 65, 0.24), transparent 7rem),
+      linear-gradient(180deg, rgba(42, 24, 7, 0.96), rgba(5, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art {
+    display: block !important;
+    width: 100% !important;
+    height: 78px !important;
+    margin: 0 0 10px !important;
+    overflow: hidden !important;
+    border-radius: 15px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: inset 0 -28px 36px rgba(0, 0, 0, 0.52) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art span > img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.15) contrast(1.08) brightness(0.92) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy {
+    min-width: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy > span {
+    display: block !important;
+    overflow: hidden !important;
+    color: #fff !important;
+    font-family: var(--fmm-condensed-font, Impact, 'Arial Narrow', sans-serif) !important;
+    font-size: clamp(17px, 1.25vw, 23px) !important;
+    letter-spacing: 0.02em !important;
+    line-height: 0.98 !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy small {
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card {
+    min-height: 136px !important;
+    height: 136px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art {
+    height: 70px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-copy > span {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header {
+    height: calc(74px + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(74px + env(safe-area-inset-top, 0px)) !important;
+    padding: env(safe-area-inset-top, 0px) 16px 0 !important;
+    background: linear-gradient(180deg, rgba(2, 3, 8, 0.86), rgba(2, 3, 8, 0.12)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand {
+    position: fixed !important;
+    top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+    left: 14px !important;
+    right: auto !important;
+    width: 124px !important;
+    height: 56px !important;
+    transform: none !important;
+    justify-content: flex-start !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand img,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand span:not(.theme-mobile-wordmark) img {
+    width: 124px !important;
+    max-width: 124px !important;
+    max-height: 56px !important;
+    object-fit: contain !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-toggle {
+    position: fixed !important;
+    top: calc(20px + env(safe-area-inset-top, 0px)) !important;
+    right: 15px !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    background: rgba(4, 6, 13, 0.56) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-toggle svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-signup-icon,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-notification-icon,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-notification-badge {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-mobile-menu {
+    inset: calc(74px + env(safe-area-inset-top, 0px)) 14px auto !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    max-width: 460px !important;
+    padding: calc(78px + env(safe-area-inset-top, 0px)) 14px 30px !important;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(255, 34, 52, 0.22), transparent 13rem),
+      radial-gradient(circle at 92% 9%, rgba(56, 136, 255, 0.18), transparent 14rem),
+      linear-gradient(180deg, #03050b 0%, #05060a 48%, #020306 100%) !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 132px 14px 16px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 26px !important;
+    background:
+      linear-gradient(180deg, rgba(3, 5, 11, 0.24) 0%, rgba(3, 5, 11, 0.82) 45%, rgba(3, 5, 11, 0.98) 100%),
+      radial-gradient(circle at 50% 28%, rgba(255, 35, 52, 0.28), transparent 12rem),
+      url('/images/home-premium/fight-action-clash.webp') center top / cover no-repeat !important;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.62), 0 0 42px rgba(255, 24, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before,
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::after,
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    display: block !important;
+    content: "" !important;
+    position: absolute !important;
+    pointer-events: none !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::before {
+    inset: 0 !important;
+    z-index: 1 !important;
+    background:
+      linear-gradient(90deg, rgba(255, 21, 42, 0.18), transparent 44%, rgba(52, 133, 255, 0.16)),
+      radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.11), transparent 8rem) !important;
+    mix-blend-mode: screen !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero::after {
+    inset: auto 16px 0 !important;
+    z-index: 1 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 30, 50, 0.9), transparent) !important;
+    opacity: 0.9 !important;
+  }
+
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    inset: 0 !important;
+    z-index: 0 !important;
+    background:
+      radial-gradient(circle at 20% 24%, rgba(255, 42, 58, 0.34), transparent 8rem),
+      radial-gradient(circle at 78% 24%, rgba(42, 126, 255, 0.22), transparent 8rem) !important;
+    opacity: 1 !important;
+  }
+
+  .fmm-mobile-hero-intro {
+    position: relative !important;
+    z-index: 5 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    gap: 10px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-greeting {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    margin: 0 auto 2px !important;
+    padding: 7px 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 999px !important;
+    background: rgba(2, 3, 8, 0.56) !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
+    font-size: clamp(40px, 12vw, 58px) !important;
+    line-height: 0.88 !important;
+    letter-spacing: -0.055em !important;
+    text-align: center !important;
+    text-shadow: 0 16px 34px rgba(0, 0, 0, 0.92), 0 0 22px rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .fmm-mobile-hero-intro h1 span {
+    display: block !important;
+  }
+
+  .fmm-mobile-hero-intro h1 em {
+    display: inline-block !important;
+    color: #ff192b !important;
+    text-shadow: 0 0 34px rgba(255, 25, 43, 0.58) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    max-width: 330px !important;
+    margin: 0 auto !important;
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: 13px !important;
+    line-height: 1.48 !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+    width: 100% !important;
+    max-width: 338px !important;
+    margin: 5px auto 0 !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-mock-game-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 46px !important;
+    border-radius: 13px !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-signup-btn {
+    background: linear-gradient(180deg, #ff2a3b, #d90613) !important;
+    box-shadow: 0 18px 42px rgba(255, 28, 48, 0.34) !important;
+  }
+
+  .fmm-mobile-event-btn {
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: rgba(2, 3, 8, 0.62) !important;
+  }
+
+  .fmm-mobile-mock-game-btn {
+    grid-column: 1 / -1 !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 47, 68, 0.42) !important;
+    background:
+      linear-gradient(90deg, rgba(97, 5, 16, 0.88), rgba(8, 13, 26, 0.82)),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.16), transparent 70%) !important;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.38), 0 0 26px rgba(255, 29, 48, 0.16) !important;
+  }
+
+  .fmm-mobile-hero-event-card {
+    position: relative !important;
+    z-index: 6 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 16px 0 0 !important;
+    padding: 96px 12px 14px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 20px !important;
+    background:
+      linear-gradient(180deg, rgba(7, 10, 17, 0.76), rgba(2, 3, 8, 0.94)),
+      radial-gradient(circle at 25% 0%, rgba(255, 38, 57, 0.18), transparent 10rem),
+      radial-gradient(circle at 82% 0%, rgba(53, 137, 255, 0.18), transparent 10rem) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 20px 54px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  .fmm-mobile-hero-faceoff {
+    top: 12px !important;
+    left: 10px !important;
+    right: 10px !important;
+    height: 86px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: 92px !important;
+    height: 92px !important;
+    flex-basis: 92px !important;
+    border-radius: 18px !important;
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.38) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(180deg, #ff2639, #99000a) !important;
+    box-shadow: 0 0 32px rgba(255, 30, 48, 0.42) !important;
+    color: #fff !important;
+    font-size: 22px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-featured-label {
+    position: static !important;
+    display: inline-flex !important;
+    margin: 0 auto 8px !important;
+    font-size: 9px !important;
+    padding: 7px 10px !important;
+  }
+
+  .fmm-mobile-signup-hero .fmm-mobile-date-chip {
+    display: none !important;
+  }
+
+  .fmm-mobile-event-copy h2 {
+    font-size: clamp(21px, 6.4vw, 30px) !important;
+    line-height: 0.98 !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-event-copy p {
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 10px !important;
+  }
+
+  .fmm-mobile-countdown {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    margin-top: 12px !important;
+  }
+
+  .fmm-mobile-countdown span {
+    min-height: 54px !important;
+    border-radius: 13px !important;
+  }
+
+  .fmm-mobile-signup-hero > .fmm-mobile-dots {
+    display: flex !important;
+    position: relative !important;
+    z-index: 7 !important;
+    justify-content: center !important;
+    margin-top: 13px !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  .fmm-mobile-category-row {
+    display: flex !important;
+    gap: 10px !important;
+    margin: 16px -14px 0 !important;
+    padding: 2px 14px 8px !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+  }
+
+  .fmm-mobile-category-row::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    flex: 0 0 122px !important;
+    width: 122px !important;
+    height: 132px !important;
+    min-height: 132px !important;
+    padding: 8px !important;
+    border-radius: 17px !important;
+    scroll-snap-align: start !important;
+    background:
+      linear-gradient(180deg, rgba(14, 18, 29, 0.96), rgba(3, 5, 10, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile::before {
+    border-radius: 17px !important;
+    opacity: 0.72 !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    width: 100% !important;
+    height: 70px !important;
+    margin: 0 0 8px !important;
+    border-radius: 13px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.22) contrast(1.12) brightness(0.92) !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    width: 100% !important;
+    color: #fff !important;
+    font-family: var(--fmm-condensed-font, Impact, 'Arial Narrow', sans-serif) !important;
+    font-size: 16px !important;
+    line-height: 0.98 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-category-row span:not(.fmm-mobile-category-icon) {
+    color: #ff2639 !important;
+    font-size: 10px !important;
+    letter-spacing: 0.08em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-contact-card {
+    margin-top: 18px !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 35, 52, 0.18), transparent 9rem),
+      linear-gradient(180deg, rgba(13, 17, 26, 0.98), rgba(4, 6, 12, 0.98)) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  .fmm-mobile-footer {
+    display: grid !important;
+    gap: 18px !important;
+    margin: 20px 0 0 !important;
+    padding: 22px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(255, 36, 55, 0.16), transparent 11rem),
+      radial-gradient(circle at 100% 0%, rgba(49, 131, 255, 0.11), transparent 11rem),
+      linear-gradient(180deg, rgba(9, 12, 19, 0.98), rgba(2, 3, 8, 0.98)) !important;
+    color: #fff !important;
+    box-shadow: 0 22px 62px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .fmm-mobile-footer-brand {
+    display: grid !important;
+    justify-items: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+  }
+
+  .fmm-mobile-footer-brand img {
+    width: 132px !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  .fmm-mobile-footer-brand p {
+    max-width: 260px !important;
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  .fmm-mobile-footer-links {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .fmm-mobile-footer-links > div {
+    display: grid !important;
+    gap: 8px !important;
+    padding: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.035) !important;
+  }
+
+  .fmm-mobile-footer-links strong {
+    color: #fff !important;
+    font-size: 12px !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-footer-links a {
+    color: rgba(255, 255, 255, 0.70) !important;
+    font-size: 12px !important;
+    text-decoration: none !important;
+  }
+
+  .fmm-mobile-footer > small {
+    color: rgba(255, 255, 255, 0.48) !important;
+    font-size: 11px !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    padding: 120px 12px 14px !important;
+  }
+
+  .fmm-mobile-hero-intro h1 {
+    font-size: clamp(36px, 11.2vw, 50px) !important;
+  }
+
+  .fmm-mobile-intro-copy {
+    font-size: 12px !important;
+  }
+
+  .fmm-mobile-intro-actions {
+    gap: 8px !important;
+  }
+
+  .fmm-mobile-signup-btn,
+  .fmm-mobile-event-btn,
+  .fmm-mobile-mock-game-btn {
+    min-height: 43px !important;
+    font-size: 10px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: 82px !important;
+    height: 82px !important;
+    flex-basis: 82px !important;
+  }
+
+  .fmm-mobile-hero-faceoff > span {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    flex-basis: 112px !important;
+    width: 112px !important;
+    height: 124px !important;
+    min-height: 124px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    height: 64px !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    font-size: 14px !important;
+  }
+}
