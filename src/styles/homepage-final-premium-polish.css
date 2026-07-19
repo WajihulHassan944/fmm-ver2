@@ -1099,3 +1099,162 @@
     font-size: 11px !important;
   }
 }
+
+/* Final client follow-up: restore the original category artwork and bring back the visible premium fight-stage background. */
+@media (min-width: 768px) {
+  .fmm-home .fmm-home-hero,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-hero,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero {
+    position: relative !important;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(255, 31, 54, 0.30), transparent 28rem),
+      radial-gradient(circle at 89% 9%, rgba(49, 136, 255, 0.25), transparent 30rem),
+      linear-gradient(180deg, #020306 0%, #05070c 58%, #020306 100%) !important;
+  }
+
+  .fmm-home .fmm-home-hero::before,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-hero::before,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    background:
+      linear-gradient(90deg, rgba(2, 3, 8, 0.72) 0%, rgba(2, 3, 8, 0.38) 34%, rgba(2, 3, 8, 0.24) 55%, rgba(2, 3, 8, 0.70) 100%),
+      linear-gradient(180deg, rgba(2, 3, 8, 0.02) 0%, rgba(2, 3, 8, 0.16) 58%, rgba(2, 3, 8, 0.90) 100%),
+      url('/images/home-premium/arena-faceoff.webp') center / cover no-repeat !important;
+    opacity: 1 !important;
+    filter: saturate(1.18) contrast(1.06) brightness(1.02) !important;
+    pointer-events: none !important;
+  }
+
+  .fmm-home .fmm-home-hero::after,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-hero::after,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    background:
+      radial-gradient(circle at 16% 14%, rgba(255, 35, 55, 0.22), transparent 13rem),
+      radial-gradient(circle at 84% 13%, rgba(67, 150, 255, 0.20), transparent 14rem),
+      linear-gradient(110deg, rgba(255, 22, 40, 0.10), transparent 36%, transparent 64%, rgba(30, 123, 255, 0.10)) !important;
+    opacity: 0.96 !important;
+    pointer-events: none !important;
+  }
+
+  .fmm-home .fmm-hero-grid,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-hero-grid,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-hero-grid {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-home .fmm-featured-fight-banner,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-featured-fight-banner,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner {
+    background:
+      radial-gradient(circle at 22% 47%, rgba(255, 27, 48, 0.24), transparent 23rem),
+      radial-gradient(circle at 79% 47%, rgba(38, 126, 255, 0.22), transparent 23rem),
+      linear-gradient(90deg, rgba(3, 4, 9, 0.58) 0%, rgba(3, 5, 10, 0.24) 28%, rgba(3, 4, 9, 0.10) 50%, rgba(3, 7, 14, 0.24) 72%, rgba(2, 3, 8, 0.62) 100%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.02) 44%, rgba(0, 0, 0, 0.72) 100%),
+      url('/images/fmm-pages/featured-fight-stage-desktop-home-bg.webp') center / cover no-repeat !important;
+    background-color: #05070d !important;
+  }
+
+  .fmm-home .fmm-featured-fight-banner::before,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-featured-fight-banner::before,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner::before {
+    background:
+      radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.16), transparent 12rem),
+      radial-gradient(circle at 24% 52%, rgba(255, 23, 61, 0.30), transparent 21rem),
+      radial-gradient(circle at 76% 52%, rgba(29, 155, 240, 0.30), transparent 22rem),
+      radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.15), transparent 16rem),
+      linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.06) 40%, transparent 58%),
+      linear-gradient(rgba(255, 255, 255, 0.030) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.030) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 88px 88px, 88px 88px !important;
+    opacity: 0.94 !important;
+  }
+
+  .fmm-home .fmm-home-fight-tab-card .fmm-home-tab-art,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-fight-tab-card .fmm-home-tab-art,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card .fmm-home-tab-art {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background:
+      radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.12), transparent 64%),
+      linear-gradient(180deg, rgba(8, 10, 17, 0.92), rgba(2, 3, 8, 0.96)) !important;
+    box-shadow: inset 0 0 28px rgba(255, 255, 255, 0.035), 0 10px 24px rgba(0, 0, 0, 0.30) !important;
+  }
+
+  .fmm-home .fmm-home-fight-tab-card .fmm-home-tab-art img,
+  .fmm-home .fmm-home-fight-tab-card .fmm-home-tab-art span > img,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-fight-tab-card .fmm-home-tab-art img,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-fight-tab-card .fmm-home-tab-art span > img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card .fmm-home-tab-art img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card .fmm-home-tab-art span > img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 6px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.10)) saturate(1.22) contrast(1.08) brightness(1.03) !important;
+  }
+
+  .fmm-home .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art img,
+  .fmm-home .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art span > img,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art img,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art span > img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art span > img {
+    padding: 0 !important;
+    object-fit: cover !important;
+    filter: saturate(1.16) contrast(1.06) brightness(0.98) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row .fmm-mobile-category-icon,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row .fmm-mobile-category-image,
+  .fmm-mobile-category-row .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .fmm-mobile-category-image {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.12), transparent 66%),
+      linear-gradient(180deg, rgba(8, 10, 17, 0.92), rgba(2, 3, 8, 0.96)) !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row .fmm-mobile-category-icon img,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row .fmm-mobile-category-image img,
+  .fmm-mobile-category-row .fmm-mobile-category-icon img,
+  .fmm-mobile-category-row .fmm-mobile-category-image img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    padding: 6px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.10)) saturate(1.22) contrast(1.08) brightness(1.04) !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row .is-pro-wrestling .fmm-mobile-category-icon img,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row .is-pro-wrestling .fmm-mobile-category-image img,
+  .fmm-mobile-category-row .is-pro-wrestling .fmm-mobile-category-icon img,
+  .fmm-mobile-category-row .is-pro-wrestling .fmm-mobile-category-image img {
+    padding: 0 !important;
+    object-fit: cover !important;
+    filter: saturate(1.16) contrast(1.06) brightness(0.98) !important;
+  }
+}

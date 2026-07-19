@@ -57,27 +57,27 @@ const HOME_FIGHT_SPORT_TABS = [
   {
     key: "boxing",
     label: "Boxing",
-    image: "/images/fmm-experience/fighter-duel-arena.webp",
+    image: "/images/mobile-home/categories/boxing.png",
   },
   {
     key: "mma",
     label: "MMA",
-    image: "/images/fmm-pages/premium-duel-banner.webp",
+    image: "/images/mobile-home/categories/mma.png",
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
-    image: "/images/fmm-pages/rewards-fighter-panel.webp",
+    image: "/images/mobile-home/categories/bare-knuckle.png",
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
-    image: "/images/fmm-pages/premium-affiliate-banner.webp",
+    image: "/images/mobile-home/categories/kickboxing.png",
   },
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
-    image: "/images/pro-wrestling/hero.webp",
+    image: "/images/mobile-home/categories/pro-wrestling.png",
   },
 ];
 
@@ -85,31 +85,31 @@ const MOBILE_HOME_SPORT_TABS = [
   {
     key: "boxing",
     label: "Boxing",
-    image: "/images/fmm-experience/fighter-duel-arena.webp",
+    image: "/images/mobile-home/categories/boxing.png",
     fallbackCount: 128,
   },
   {
     key: "mma",
     label: "MMA",
-    image: "/images/fmm-pages/premium-duel-banner.webp",
+    image: "/images/mobile-home/categories/mma.png",
     fallbackCount: 214,
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
-    image: "/images/fmm-pages/rewards-fighter-panel.webp",
+    image: "/images/mobile-home/categories/bare-knuckle.png",
     fallbackCount: 36,
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
-    image: "/images/fmm-pages/premium-affiliate-banner.webp",
+    image: "/images/mobile-home/categories/kickboxing.png",
     fallbackCount: 58,
   },
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
-    image: "/images/pro-wrestling/hero.webp",
+    image: "/images/mobile-home/categories/pro-wrestling.png",
     fallbackCount: 42,
   },
 ];
