@@ -10,12 +10,12 @@ import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 const getPlayerName = (player) => player?.playerName || player?.username || [player?.firstName, player?.lastName].filter(Boolean).join(' ') || player?.email?.split?.('@')?.[0] || 'Player';
 const getPlayerId = (player) => player?._id || player?.id || player?.email || getPlayerName(player);
 const FALLBACK_AVATARS = [
-  `${FMM_ASSET_BASE}/fighter-jadden-addison.png`,
-  `${FMM_ASSET_BASE}/fighter-zaveer-davis.png`,
-  `${FMM_ASSET_BASE}/fighter-conor-benn.png`,
-  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.png`,
-  `${FMM_ASSET_BASE}/fighter-anthony-yarde.png`,
-  `${FMM_ASSET_BASE}/fighter-david-benavidez.png`,
+  `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`,
+  `${FMM_ASSET_BASE}/fighter-zaveer-davis.webp`,
+  `${FMM_ASSET_BASE}/fighter-conor-benn.webp`,
+  `${FMM_ASSET_BASE}/fighter-chris-eubank-jr.webp`,
+  `${FMM_ASSET_BASE}/fighter-anthony-yarde.webp`,
+  `${FMM_ASSET_BASE}/fighter-david-benavidez.webp`,
 ];
 
 const GlobalLeaderboard = () => {
@@ -55,7 +55,7 @@ const GlobalLeaderboard = () => {
           title="The table never lies."
           accent="Earn your place."
           description="Every scored round changes the order. Follow the community’s sharpest combat-sports predictors and turn accurate picks into a permanent place on the board."
-          backgroundImage={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`}
+          backgroundImage={`${FMM_ASSET_BASE}/fighter-action-blue.webp`}
           actions={[
             { href: '/upcomingfights', label: 'Enter an active fight' },
             { href: '/guides', label: 'Review scoring', variant: 'secondary' },
@@ -136,7 +136,7 @@ const GlobalLeaderboard = () => {
             </section>
 
             <section className="xp-rank-cta">
-              <div className="xp-rank-cta-art"><img src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fantasy combat arena" /></div>
+              <div className="xp-rank-cta-art"><img src={`${FMM_ASSET_BASE}/fighter-duel-panel.webp`} alt="Fantasy combat arena" /></div>
               <div>
                 <p className="xp-eyebrow">Your next score starts now</p>
                 <h2>Great picks are remembered. Perfect rounds are ranked.</h2>

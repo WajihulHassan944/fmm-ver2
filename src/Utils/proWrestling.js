@@ -116,7 +116,7 @@ export const timeUntil = (value, now = new Date()) => {
 export const formatWrestlingCountdown = (value, now = new Date()) => timeUntil(value, now).label;
 
 export const getWrestlingImage = (competitor, fallbackSide = 'A') => (
-  competitor?.image || competitor?.profileImage || `/images/pro-wrestling/wrestler-${String(fallbackSide).toLowerCase()}.jpg`
+  competitor?.image || competitor?.profileImage || "/images/pro-wrestling/wrestler-placeholder-a.webp"
 );
 export const getWrestlerImage = getWrestlingImage;
 export const getWrestlingMatchHref = (match) => `/pro-wrestling/matches/${match?._id || match?.slug || ''}`;

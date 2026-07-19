@@ -39,8 +39,8 @@ const fightCards = [
     date: 'Saturday · 10:00 PM',
     venue: 'Fight-night arena',
     crowd: '1,248 mock entries',
-    fighterOne: { name: 'Michael Venom Page', shortName: 'M. Page', image: `${FMM_ASSET_BASE}/fighter-action-blue.jpg`, record: '22-2-0' },
-    fighterTwo: { name: 'Mike Perry', shortName: 'M. Perry', image: `${FMM_ASSET_BASE}/fighter-action-red.jpg`, record: '14-8-0' },
+    fighterOne: { name: 'Michael Venom Page', shortName: 'M. Page', image: `${FMM_ASSET_BASE}/fighter-action-blue.webp`, record: '22-2-0' },
+    fighterTwo: { name: 'Mike Perry', shortName: 'M. Perry', image: `${FMM_ASSET_BASE}/fighter-action-red.webp`, record: '14-8-0' },
   },
   {
     id: 'fmm-cage-series',

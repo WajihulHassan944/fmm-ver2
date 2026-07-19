@@ -120,7 +120,7 @@ const Fighters = ({ fighters = [] }) => {
                 <Link href="/fighter-performance-tracker" className="theme-btn theme-btn-primary">Explore performance tracker</Link>
               </div>
               <div className="xp-fighter-editorial-art">
-                <OptimizedImage src={`${FMM_ASSET_BASE}/fighter-action-blue.jpg`} alt="Combat athlete in arena" width={620} height={420} sizes="(max-width: 768px) 100vw, 42vw" />
+                <OptimizedImage src={`${FMM_ASSET_BASE}/fighter-action-blue.webp`} alt="Combat athlete in arena" width={620} height={420} sizes="(max-width: 768px) 100vw, 42vw" />
               </div>
             </section>
           </div>

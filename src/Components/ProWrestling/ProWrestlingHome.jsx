@@ -152,7 +152,7 @@ const ProWrestlingHome = () => {
               <div className="pw-wrestler-preview-grid">
                 {wrestlers.map((wrestler, index) => (
                   <Link href={`/pro-wrestling/wrestlers/${wrestler.slug || wrestler._id}`} key={wrestler._id}>
-                    <img src={wrestler.profileImage || `/images/pro-wrestling/wrestler-placeholder-${index % 2 ? 'b' : 'a'}.jpg`} alt={wrestler.displayName} />
+                    <img src={wrestler.profileImage || "/images/pro-wrestling/wrestler-placeholder-a.webp"} alt={wrestler.displayName} />
                     <span><small>{wrestler.promotion || 'Pro Wrestling'}</small><strong>{wrestler.displayName}</strong><em>{wrestler.wrestlingStyle || 'All-around competitor'}</em></span>
                     <FaArrowRight />
                   </Link>

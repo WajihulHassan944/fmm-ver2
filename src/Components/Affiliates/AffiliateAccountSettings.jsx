@@ -132,7 +132,7 @@ const AffiliateAccountSettings = () => {
           title="Payment and payout."
           accent="Separated from your profile."
           description="Keep your public creator identity focused while managing private payout details in a dedicated, protected workspace."
-          backgroundImage={`${FMM_ASSET_BASE}/fighter-duel-arena.jpg`}
+          backgroundImage={`${FMM_ASSET_BASE}/fighter-duel-arena.webp`}
           actions={[
             { href: '/AffiliateProfile', label: 'Creator profile' },
             { href: '/AffiliateDashboard', label: 'Affiliate dashboard', variant: 'secondary' },

@@ -50,7 +50,7 @@ const buildMember = (entry, directory, index) => {
     plan: String(user?.currentPlan || (user?.isSubscribed ? 'Subscribed' : 'Member')),
     verified: Boolean(user?.verified),
     subscribed: Boolean(user?.isSubscribed),
-    avatar: user?.profileUrl || `${FMM_ASSET_BASE}/fighter-jadden-addison.png`,
+    avatar: user?.profileUrl || `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`,
     joinedAt: entry?.joinedAt || user?.joinedAt || user?.createdAt || null,
   };
 };
@@ -212,7 +212,7 @@ const AffiliateLeague = () => {
           <div className="theme-container xp-affiliate-league-shell">
             <section className="affiliate-league-invite-card affiliate-league-invite-final">
               <div className="affiliate-league-owner">
-                <img src={affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.png`} alt={affiliateName} />
+                <img src={affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`} alt={affiliateName} />
                 <span>
                   <small>League owner</small>
                   <strong>{affiliateName}</strong>

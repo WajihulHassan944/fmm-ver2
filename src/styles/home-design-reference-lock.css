@@ -4089,3 +4089,1059 @@
     background-image: linear-gradient(180deg, rgba(10, 14, 23, 0.96), rgba(4, 7, 13, 0.98)) !important;
   }
 }
+
+/* Client final homepage premium pass: stronger fight-site imagery, mobile-first hierarchy, and visible phone footer/contact. */
+@media (min-width: 768px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero {
+    background:
+      radial-gradient(circle at 16% 16%, rgba(255, 26, 43, 0.34), transparent 34rem),
+      radial-gradient(circle at 86% 10%, rgba(57, 133, 255, 0.25), transparent 34rem),
+      linear-gradient(180deg, #010207 0%, #050711 48%, #020306 100%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::before {
+    background:
+      linear-gradient(90deg, rgba(1, 2, 7, 0.95) 0%, rgba(1, 2, 7, 0.72) 24%, rgba(1, 2, 7, 0.22) 50%, rgba(1, 2, 7, 0.60) 76%, rgba(1, 2, 7, 0.94) 100%),
+      linear-gradient(180deg, rgba(1, 2, 7, 0.08) 0%, rgba(1, 2, 7, 0.26) 58%, #020306 100%),
+      url('/images/home-premium/arena-faceoff.webp') center / cover no-repeat !important;
+    opacity: 1 !important;
+    filter: saturate(1.2) contrast(1.1) brightness(0.92) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-hero::after {
+    background:
+      radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.08), transparent 8rem),
+      radial-gradient(circle at 83% 16%, rgba(255, 255, 255, 0.10), transparent 9rem),
+      linear-gradient(100deg, rgba(255, 18, 36, 0.18), transparent 37%, transparent 63%, rgba(56, 129, 255, 0.16)) !important;
+    opacity: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner {
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 32px !important;
+    background:
+      linear-gradient(90deg, rgba(3, 4, 10, 0.88) 0%, rgba(55, 7, 14, 0.36) 33%, rgba(4, 8, 18, 0.38) 58%, rgba(3, 7, 16, 0.86) 100%),
+      radial-gradient(circle at 28% 42%, rgba(255, 35, 52, 0.34), transparent 19rem),
+      radial-gradient(circle at 76% 35%, rgba(59, 131, 255, 0.30), transparent 21rem),
+      url('/images/home-premium/fight-action-clash.webp') center / cover no-repeat !important;
+    box-shadow:
+      0 34px 96px rgba(0, 0, 0, 0.68),
+      0 0 0 1px rgba(255, 34, 52, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -80px 120px rgba(0, 0, 0, 0.58) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner::before {
+    background:
+      linear-gradient(90deg, rgba(222, 13, 28, 0.26), transparent 33%, transparent 66%, rgba(42, 120, 255, 0.23)),
+      radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.10), transparent 17rem) !important;
+    mix-blend-mode: screen !important;
+    opacity: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner::after {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.08), transparent 42%, rgba(0, 0, 0, 0.62) 100%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.45), transparent 36%, transparent 64%, rgba(0, 0, 0, 0.45)) !important;
+    opacity: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center {
+    align-items: center !important;
+    justify-content: center !important;
+    justify-items: center !important;
+    max-width: 430px !important;
+    margin-inline: auto !important;
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center > p,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center h2,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center h2 span,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center h2 small,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center .fmm-hero-event-meta {
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-center .fmm-hero-event-meta {
+    justify-content: center !important;
+    margin-inline: auto !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-details-grid {
+    margin-inline: auto !important;
+    justify-content: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-actions {
+    justify-content: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner > .fmm-promoted-calendar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-status-panel {
+    right: 50% !important;
+    bottom: 24px !important;
+    width: min(520px, calc(100% - 180px)) !important;
+    max-width: 520px !important;
+    transform: translateX(50%) !important;
+    background:
+      linear-gradient(135deg, rgba(93, 8, 18, 0.90), rgba(8, 15, 30, 0.90)),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.12), transparent 70%) !important;
+    border-color: rgba(255, 55, 69, 0.48) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner > .fmm-promoted-dots {
+    bottom: 16px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card {
+    min-height: 190px !important;
+    padding: 14px !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 24% 14%, rgba(255, 255, 255, 0.12), transparent 4rem),
+      linear-gradient(180deg, rgba(16, 21, 33, 0.96), rgba(4, 7, 14, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-boxing,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-bareknuckle {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 44, 57, 0.28), transparent 7rem),
+      linear-gradient(180deg, rgba(36, 7, 12, 0.96), rgba(5, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-mma,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-kickboxing {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(47, 127, 255, 0.24), transparent 7rem),
+      linear-gradient(180deg, rgba(7, 19, 38, 0.96), rgba(4, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-fight-tab-card.is-pro-wrestling {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 206, 65, 0.24), transparent 7rem),
+      linear-gradient(180deg, rgba(42, 24, 7, 0.96), rgba(5, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art {
+    display: block !important;
+    width: 100% !important;
+    height: 106px !important;
+    margin: 0 0 12px !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: inset 0 -34px 44px rgba(0, 0, 0, 0.54) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-home-tab-art span > img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.15) contrast(1.08) brightness(0.92) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-status-panel {
+    width: min(520px, calc(100% - 72px)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header {
+    position: fixed !important;
+    inset: 0 0 auto 0 !important;
+    height: calc(72px + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(72px + env(safe-area-inset-top, 0px)) !important;
+    padding: env(safe-area-inset-top, 0px) 14px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: linear-gradient(180deg, rgba(1, 2, 7, 0.98), rgba(1, 3, 8, 0.88)) !important;
+    border-bottom: 1px solid rgba(255, 38, 54, 0.22) !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48) !important;
+    backdrop-filter: blur(14px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand {
+    position: absolute !important;
+    top: calc(50% + env(safe-area-inset-top, 0px) / 2) !important;
+    left: 14px !important;
+    right: auto !important;
+    width: 112px !important;
+    height: 54px !important;
+    transform: translateY(-50%) !important;
+    justify-content: flex-start !important;
+    z-index: 1512 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand img,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-brand span:not(.theme-mobile-wordmark) img {
+    display: block !important;
+    width: 108px !important;
+    max-width: 108px !important;
+    height: auto !important;
+    max-height: 54px !important;
+    object-fit: contain !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-wordmark,
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-signup-icon,
+  body:has(.site-experience-main.is-home-experience-main) .theme-mobile-notification-icon,
+  body:has(.site-experience-main.is-home-experience-main) .theme-mobile-notification-badge {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .header.theme-header .theme-mobile-toggle {
+    position: absolute !important;
+    top: calc(50% + env(safe-area-inset-top, 0px) / 2) !important;
+    right: 14px !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    transform: translateY(-50%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 14px !important;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.13), transparent 68%),
+      linear-gradient(180deg, rgba(27, 34, 48, 0.74), rgba(5, 8, 14, 0.92)) !important;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.42), 0 0 18px rgba(255, 25, 43, 0.14) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-mobile-menu {
+    inset: calc(76px + env(safe-area-inset-top, 0px)) 10px auto !important;
+    border-color: rgba(255, 42, 58, 0.26) !important;
+    background:
+      linear-gradient(180deg, rgba(7, 10, 17, 0.98), rgba(3, 4, 8, 0.98)),
+      radial-gradient(circle at 15% 0%, rgba(255, 31, 48, 0.18), transparent 9rem) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main),
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main,
+  body:has(.site-experience-main.is-home-experience-main) .theme-home.fmm-home.page-shell {
+    background:
+      radial-gradient(circle at 16% 8%, rgba(255, 37, 53, 0.25), transparent 13rem),
+      radial-gradient(circle at 84% 10%, rgba(52, 126, 255, 0.20), transparent 13rem),
+      linear-gradient(180deg, #010207 0%, #050711 52%, #020306 100%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .theme-home.fmm-home.page-shell,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    overflow-x: hidden !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-home {
+    display: block !important;
+    width: 100% !important;
+    max-width: 450px !important;
+    margin: 0 auto !important;
+    padding: calc(88px + env(safe-area-inset-top, 0px)) 12px 30px !important;
+    color: #fff !important;
+    background:
+      radial-gradient(circle at 12% 9%, rgba(242, 20, 37, 0.22), transparent 13rem),
+      radial-gradient(circle at 90% 20%, rgba(37, 112, 255, 0.18), transparent 14rem),
+      linear-gradient(180deg, rgba(4, 7, 14, 0.72), rgba(2, 3, 7, 0.98) 55%, #020306 100%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    width: 100% !important;
+    min-height: 648px !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 22px 15px 18px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 45, 62, 0.34) !important;
+    border-radius: 26px !important;
+    isolation: isolate !important;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(1, 2, 7, 0.54) 32%, rgba(1, 2, 7, 0.84) 72%, #020306 100%),
+      radial-gradient(circle at 18% 20%, rgba(255, 37, 54, 0.34), transparent 10rem),
+      radial-gradient(circle at 88% 16%, rgba(54, 133, 255, 0.24), transparent 11rem),
+      url('/images/home-premium/red-corner-fighter.webp') 58% top / cover no-repeat !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.66), inset 0 0 60px rgba(235, 24, 38, 0.14) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero::before,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero::after,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    display: block !important;
+    content: "" !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero::before {
+    z-index: 0 !important;
+    background:
+      linear-gradient(90deg, rgba(255, 24, 42, 0.22), transparent 42%, rgba(43, 120, 255, 0.18)),
+      radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.10), transparent 9rem) !important;
+    mix-blend-mode: screen !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero::after {
+    z-index: 1 !important;
+    border-radius: inherit !important;
+    background: linear-gradient(180deg, rgba(2, 3, 7, 0.12), transparent 34%, rgba(2, 3, 7, 0.78) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero .fmm-mobile-featured-bg {
+    z-index: 0 !important;
+    background:
+      linear-gradient(150deg, rgba(255, 31, 48, 0.22), transparent 38%),
+      linear-gradient(35deg, rgba(43, 115, 255, 0.16), transparent 38%) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-intro {
+    position: relative !important;
+    z-index: 4 !important;
+    display: grid !important;
+    justify-items: center !important;
+    gap: 11px !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 4px 2px 0 !important;
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-greeting {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 30px !important;
+    padding: 0 13px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-intro h1 {
+    max-width: 380px !important;
+    margin: 0 !important;
+    font-family: var(--fmm-home-heading-font, Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif) !important;
+    font-size: clamp(39px, 11.4vw, 56px) !important;
+    font-weight: 900 !important;
+    line-height: 0.88 !important;
+    letter-spacing: 0.005em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.82), 0 0 28px rgba(238, 27, 43, 0.36) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-intro h1 span {
+    display: block !important;
+    margin-top: 4px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-intro h1 em {
+    color: #ff2638 !important;
+    font-style: italic !important;
+    text-shadow: 0 0 24px rgba(255, 38, 56, 0.68) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-intro-copy {
+    display: block !important;
+    max-width: 340px !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+    -webkit-line-clamp: unset !important;
+    color: rgba(255, 255, 255, 0.84) !important;
+    font-family: var(--fmm-font-body, Inter, Roboto, Arial, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.48 !important;
+    letter-spacing: 0 !important;
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-intro-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: min(100%, 324px) !important;
+    max-width: 324px !important;
+    margin: 2px auto 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-signup-btn,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-btn {
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    border-radius: 12px !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.055em !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-signup-btn {
+    background: linear-gradient(180deg, #ff3445, #b80412) !important;
+    box-shadow: 0 16px 34px rgba(224, 16, 31, 0.42) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-btn {
+    background: linear-gradient(180deg, rgba(25, 33, 47, 0.88), rgba(6, 10, 17, 0.94)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-event-card {
+    position: relative !important;
+    z-index: 4 !important;
+    min-height: 326px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 176px 12px 14px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 22px !important;
+    background:
+      linear-gradient(180deg, rgba(6, 9, 17, 0.28), rgba(3, 6, 12, 0.94) 64%, rgba(2, 3, 7, 0.98) 100%),
+      radial-gradient(circle at 22% 20%, rgba(255, 43, 59, 0.22), transparent 7rem),
+      radial-gradient(circle at 83% 17%, rgba(55, 129, 255, 0.20), transparent 7rem) !important;
+    box-shadow: inset 0 0 44px rgba(255, 34, 52, 0.10) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-label {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    z-index: 6 !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(180deg, #ff3342, #a80410) !important;
+    font-size: 9px !important;
+    font-weight: 900 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-date-chip {
+    top: 12px !important;
+    right: 12px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 62px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(180deg, rgba(25, 31, 43, 0.94), rgba(5, 8, 14, 0.96)) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff {
+    position: absolute !important;
+    top: 18px !important;
+    left: -12px !important;
+    right: -12px !important;
+    height: 166px !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: end !important;
+    justify-items: center !important;
+    z-index: 3 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: clamp(128px, 36vw, 152px) !important;
+    height: clamp(156px, 42vw, 184px) !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left {
+    transform: translateX(4px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    transform: translateX(-4px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff > span {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: radial-gradient(circle, rgba(255, 35, 52, 0.98), rgba(105, 4, 14, 0.92)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #fff !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 19px !important;
+    font-style: italic !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 24px rgba(255, 30, 48, 0.52) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-copy {
+    position: relative !important;
+    z-index: 5 !important;
+    display: grid !important;
+    justify-items: center !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-copy h2 {
+    max-width: 100% !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: clamp(20px, 6.5vw, 30px) !important;
+    line-height: 0.96 !important;
+    letter-spacing: 0.015em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-copy h2 span,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-copy h2 em {
+    display: block !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-copy h2 em {
+    margin: 4px 0 !important;
+    color: #ff2b3b !important;
+    font-size: 0.72em !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-event-copy p {
+    max-width: 100% !important;
+    margin: 10px auto 0 !important;
+    justify-content: center !important;
+    color: rgba(255, 255, 255, 0.78) !important;
+    font-family: var(--fmm-font-body, Inter, Roboto, Arial, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.02em !important;
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-countdown {
+    position: relative !important;
+    z-index: 5 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 13px auto 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-countdown span {
+    display: grid !important;
+    min-height: 58px !important;
+    padding: 9px 4px 8px !important;
+    align-content: center !important;
+    justify-items: center !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 13px !important;
+    background: linear-gradient(180deg, rgba(22, 27, 38, 0.88), rgba(6, 9, 15, 0.94)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-countdown strong {
+    color: #ff3344 !important;
+    font-size: 23px !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-weight: 900 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-countdown small {
+    color: rgba(255, 255, 255, 0.68) !important;
+    font-size: 8px !important;
+    font-family: var(--fmm-font-body, Inter, sans-serif) !important;
+    font-weight: 900 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-dots {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 5 !important;
+    margin: 0 auto !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-row {
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 118px !important;
+    gap: 11px !important;
+    margin: 16px -12px 0 !important;
+    padding: 0 12px 8px !important;
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain !important;
+    scrollbar-width: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-row::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile {
+    height: 138px !important;
+    min-height: 138px !important;
+    padding: 9px !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.13), transparent 5.4rem),
+      linear-gradient(180deg, rgba(16, 22, 35, 0.96), rgba(4, 7, 14, 0.98)) !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile.is-active {
+    border-color: rgba(255, 42, 58, 0.92) !important;
+    box-shadow: 0 0 0 1px rgba(255, 42, 58, 0.25), 0 18px 38px rgba(223, 14, 30, 0.30) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile.is-boxing,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile.is-bareknuckle {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 46, 62, 0.30), transparent 6rem),
+      linear-gradient(180deg, rgba(36, 7, 13, 0.97), rgba(4, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile.is-mma,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile.is-kickboxing {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(45, 125, 255, 0.26), transparent 6rem),
+      linear-gradient(180deg, rgba(7, 20, 40, 0.97), rgba(4, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-tile.is-pro-wrestling {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 203, 55, 0.25), transparent 6rem),
+      linear-gradient(180deg, rgba(46, 25, 6, 0.97), rgba(4, 7, 13, 0.98)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-icon.fmm-mobile-category-image {
+    display: block !important;
+    width: 100% !important;
+    height: 76px !important;
+    margin: 0 !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-icon.fmm-mobile-category-image img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-icon.fmm-mobile-category-image span > img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.18) contrast(1.08) brightness(0.92) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-row strong {
+    color: #fff !important;
+    font-size: 12px !important;
+    line-height: 1.04 !important;
+    letter-spacing: 0.03em !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-row span:not(.fmm-mobile-category-icon) {
+    color: rgba(255, 255, 255, 0.66) !important;
+    font-size: 8px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-section {
+    margin-top: 22px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-section-heading {
+    margin-bottom: 12px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-section-heading h2,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-premium-flow h2,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card h2,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight h2 {
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: clamp(22px, 6.2vw, 29px) !important;
+    font-weight: 900 !important;
+    line-height: 0.98 !important;
+    letter-spacing: 0.015em !important;
+    text-transform: uppercase !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-rail {
+    grid-auto-columns: 214px !important;
+    gap: 12px !important;
+    margin: 0 -12px !important;
+    padding: 0 12px 5px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-upcoming-card {
+    height: 160px !important;
+    padding: 12px !important;
+    border-radius: 18px !important;
+    background:
+      linear-gradient(180deg, rgba(8, 13, 22, 0.52), rgba(2, 4, 9, 0.96) 78%),
+      url('/images/home-premium/fight-action-clash.webp') center / cover no-repeat !important;
+    box-shadow: inset 0 0 42px rgba(255, 32, 49, 0.13), 0 18px 36px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-card-fighters .mobile-fighter-avatar {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-card-names strong {
+    font-size: 12px !important;
+    line-height: 1.05 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-open-contests,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-leaderboard,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-premium-flow,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card {
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 22px !important;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 35, 52, 0.18), transparent 8rem),
+      linear-gradient(180deg, rgba(12, 18, 30, 0.96), rgba(4, 7, 13, 0.99)) !important;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-open-contests,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-leaderboard,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-premium-flow,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card {
+    padding: 15px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contest-row {
+    grid-template-columns: 100px minmax(0, 1fr) !important;
+    min-height: 132px !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+    background:
+      linear-gradient(180deg, rgba(13, 19, 29, 0.96), rgba(4, 7, 12, 0.99)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contest-visual {
+    height: 82px !important;
+    border-radius: 13px !important;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.62)),
+      url('/images/home-premium/arena-faceoff.webp') center / cover no-repeat !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contest-info h3 {
+    white-space: normal !important;
+    font-size: 13px !important;
+    line-height: 1.18 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contest-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-join {
+    grid-column: 1 / -1 !important;
+    min-height: 42px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    margin-top: 22px !important;
+    overflow: hidden !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics div {
+    min-height: 98px !important;
+    padding: 14px 10px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics div:nth-child(odd) {
+    border-left: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics div:nth-child(n + 3) {
+    border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics strong {
+    font-size: 20px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-metrics span {
+    font-size: 10px !important;
+    line-height: 1.32 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-premium-flow {
+    margin-top: 22px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-flow-grid {
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-flow-grid article {
+    display: grid !important;
+    grid-template-columns: 50px minmax(0, 1fr) !important;
+    gap: 4px 12px !important;
+    align-items: center !important;
+    padding: 13px !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 16px !important;
+    background:
+      linear-gradient(135deg, rgba(255, 35, 52, 0.16), rgba(21, 31, 52, 0.38)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-flow-grid article > span {
+    grid-row: 1 / span 2 !important;
+    width: 46px !important;
+    height: 46px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    border-radius: 50% !important;
+    background: linear-gradient(180deg, #ff3345, #9b0310) !important;
+    color: #fff !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 22px rgba(255, 37, 54, 0.36) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-flow-grid article strong {
+    color: #fff !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-flow-grid article p {
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight {
+    position: relative !important;
+    min-height: 246px !important;
+    margin-top: 22px !important;
+    padding: 18px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 24px !important;
+    background: #05070d !important;
+    box-shadow: 0 22px 52px rgba(0, 0, 0, 0.46), inset 0 0 52px rgba(255, 35, 52, 0.13) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.76) 76%, rgba(0, 0, 0, 0.94)),
+      radial-gradient(circle at 16% 26%, rgba(255, 34, 52, 0.26), transparent 9rem) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight img,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight span > img {
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.15) contrast(1.08) brightness(0.88) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight > div {
+    position: relative !important;
+    z-index: 2 !important;
+    display: grid !important;
+    gap: 10px !important;
+    align-content: end !important;
+    min-height: 210px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight span {
+    color: #ff3345 !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-fight-art-spotlight a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: fit-content !important;
+    min-height: 42px !important;
+    padding: 0 16px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(180deg, #ff3345, #b80512) !important;
+    color: #fff !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card {
+    margin-top: 22px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card > p {
+    margin: 0 0 13px !important;
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card form {
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card input,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card textarea {
+    width: 100% !important;
+    min-height: 48px !important;
+    padding: 0 13px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+    outline: 0 !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    color: #fff !important;
+    font: 700 13px/1.3 var(--fmm-font-body, Inter, Arial, sans-serif) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card textarea {
+    min-height: 112px !important;
+    padding-top: 13px !important;
+    resize: vertical !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card input::placeholder,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card textarea::placeholder {
+    color: rgba(255, 255, 255, 0.46) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-contact-card button {
+    min-height: 50px !important;
+    border: 0 !important;
+    border-radius: 13px !important;
+    background: linear-gradient(180deg, #ff3445, #ad0612) !important;
+    color: #fff !important;
+    font-family: var(--fmm-home-heading-font, Impact, sans-serif) !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 16px 34px rgba(224, 16, 31, 0.36) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) footer.theme-footer.footerDistributed,
+  body:has(.site-experience-main.is-home-experience-main) .theme-footer.footerDistributed,
+  body:has(.site-experience-main.is-home-experience-main) .footerDistributed {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-footer.footerDistributed {
+    padding: 28px 12px 34px !important;
+    overflow: hidden !important;
+    background:
+      linear-gradient(180deg, rgba(2, 3, 7, 0.98), rgba(5, 7, 12, 0.96)),
+      radial-gradient(circle at 15% 0%, rgba(255, 31, 48, 0.18), transparent 11rem) !important;
+    border-top: 1px solid rgba(255, 42, 58, 0.24) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-footer.footerDistributed .fmm-footer-shell {
+    width: 100% !important;
+    max-width: 450px !important;
+    margin: 0 auto !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-footer.footerDistributed .fmm-footer-feature-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .theme-footer.footerDistributed .fmm-footer-card-art {
+    opacity: 0.42 !important;
+    filter: saturate(1.12) contrast(1.08) !important;
+  }
+}
+
+@media (max-width: 389px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    min-height: 628px !important;
+    padding: 19px 12px 16px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-intro h1 {
+    font-size: clamp(34px, 10.8vw, 44px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-intro-copy {
+    font-size: 11px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: 122px !important;
+    height: 152px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-hero-event-card {
+    min-height: 318px !important;
+    padding-top: 168px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-mobile-category-row {
+    grid-auto-columns: 108px !important;
+  }
+}

@@ -42,7 +42,7 @@ const Sponsors = ({ sponsors = [] }) => {
           ]}
         >
           <div className="xp-sponsor-hero-card">
-            <div className="xp-sponsor-hero-art"><OptimizedImage src={`${FMM_ASSET_BASE}/fighter-duel-panel.jpg`} alt="Fight night partnership" width={520} height={420} sizes="(max-width: 768px) 100vw, 40vw" /></div>
+            <div className="xp-sponsor-hero-art"><OptimizedImage src={`${FMM_ASSET_BASE}/fighter-duel-panel.webp`} alt="Fight night partnership" width={520} height={420} sizes="(max-width: 768px) 100vw, 40vw" /></div>
             <div className="xp-sponsor-hero-copy">
               <span>Fight-night visibility</span>
               <h2>Own a moment before, during, and after the bell.</h2>

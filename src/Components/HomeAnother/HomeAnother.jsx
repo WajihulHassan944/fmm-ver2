@@ -47,8 +47,8 @@ import {
 } from "react-icons/fa";
 
 const FALLBACK_FIGHT_IMAGE = "/images/hero-fight.webp";
-const HOME_HERO_IMAGE = "/images/fmm-pages/premium-arena-banner.webp";
-const HOME_FIGHT_ART_IMAGE = "/images/hero-fight.webp";
+const HOME_HERO_IMAGE = "/images/home-premium/arena-faceoff.webp";
+const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
 const MOBILE_HOME_WRESTLING_IMAGE = "/images/pro-wrestling/hero.webp";
@@ -77,7 +77,7 @@ const HOME_FIGHT_SPORT_TABS = [
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
-    image: "/images/pro-wrestling/wrestling-live-premium.webp",
+    image: "/images/pro-wrestling/hero.webp",
   },
 ];
 
@@ -109,7 +109,7 @@ const MOBILE_HOME_SPORT_TABS = [
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
-    image: "/images/pro-wrestling/wrestling-live-premium.webp",
+    image: "/images/pro-wrestling/hero.webp",
     fallbackCount: 42,
   },
 ];
@@ -1013,6 +1013,9 @@ const MobilePhoneHome = ({
   matchError,
   matchStatus,
   now,
+  handleSubmit,
+  isSubmitting,
+  buttonText,
 }) => {
   const mobileSections = useMemo(
     () =>
@@ -1070,7 +1073,7 @@ const MobilePhoneHome = ({
             </span>
           </h1>
           <p className="fmm-mobile-intro-copy">
-            Create a free account, enter an open fight card, and make your picks before the card locks. The homepage now keeps every category easy to browse without hiding the section path.
+            A fight-night fantasy arena built for fast picks. Join free, pick winners across every combat category, and chase live leaderboard prizes before the card locks.
           </p>
           <div className="fmm-mobile-intro-actions">
             <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-signup-btn">
@@ -1183,8 +1186,14 @@ const MobilePhoneHome = ({
             }`}
             onClick={() => setActiveFightSport(section.key)}
           >
-            <span className="fmm-mobile-category-icon" aria-hidden="true">
-              <FightCategoryIcon type={section.key} />
+            <span className="fmm-mobile-category-icon fmm-mobile-category-image" aria-hidden="true">
+              <Image
+                src={section.image}
+                alt=""
+                width={86}
+                height={72}
+                sizes="72px"
+              />
             </span>
             <strong>{section.label}</strong>
             <span>{section.count.toLocaleString()} fights</span>
@@ -1339,6 +1348,56 @@ const MobilePhoneHome = ({
           <strong>100%</strong>
           <span>Fair play and secure gaming</span>
         </div>
+      </section>
+
+      <section className="fmm-mobile-premium-flow" aria-label="How Fantasy MMAdness works">
+        <div className="fmm-mobile-section-heading">
+          <h2>How To Win</h2>
+          <Link href="/guides">Rules <FaArrowRight aria-hidden="true" /></Link>
+        </div>
+        <div className="fmm-mobile-flow-grid">
+          {[
+            ["01", "Pick", "Choose the winner, method and round before lock."],
+            ["02", "Score", "Earn points as every punch, takedown and finish lands."],
+            ["03", "Climb", "Move up the leaderboard and chase premium prizes."],
+          ].map(([step, title, copy]) => (
+            <article key={title}>
+              <span>{step}</span>
+              <strong>{title}</strong>
+              <p>{copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="fmm-mobile-fight-art-spotlight" aria-label="Fight night experience">
+        <Image
+          src={HOME_FIGHT_ART_IMAGE}
+          alt="Fantasy MMAdness fight night action"
+          fill
+          sizes="(max-width: 767px) 100vw"
+        />
+        <div>
+          <span>Live Fight Night</span>
+          <h2>Premium cards. Fast picks. Real leaderboard heat.</h2>
+          <Link href="/upcomingfights">Explore Fights <FaArrowRight aria-hidden="true" /></Link>
+        </div>
+      </section>
+
+      <section className="fmm-mobile-contact-card" aria-labelledby="mobile-contact-title">
+        <div className="fmm-mobile-section-heading">
+          <h2 id="mobile-contact-title">Contact Us</h2>
+        </div>
+        <p>Questions about contests, sponsors or fight cards? Send a message and the team will follow up.</p>
+        <form onSubmit={handleSubmit}>
+          <input type="text" name="fullName" placeholder="Full name" required />
+          <input type="email" name="email" placeholder="Email address" required />
+          <input type="text" name="subject" placeholder="Subject" required />
+          <textarea name="message" placeholder="Message" required />
+          <button type="submit" disabled={isSubmitting}>
+            {buttonText || "Send Message"}
+          </button>
+        </form>
       </section>
     </div>
   );
@@ -1874,6 +1933,9 @@ const HomeAnother = () => {
           matchError={matchError}
           matchStatus={matchStatus}
           now={now}
+          handleSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          buttonText={buttonText}
         />
         <div className="fmm-desktop-home-shell">
           <section
@@ -1892,7 +1954,7 @@ const HomeAnother = () => {
                 </span>
               </h1>
               <p className="fmm-hero-subtitle">
-                Create a free account, enter an open fight card, and make your picks before the card locks. Browse every fight category without losing the featured event.
+                Step into a premium fight-night arena. Join free, pick winners across Boxing, MMA, Bare-knuckle, Kickboxing and Pro Wrestling, then climb live leaderboards before the card locks.
               </p>
 
               <div className="fmm-hero-actions">
@@ -2026,7 +2088,6 @@ const HomeAnother = () => {
                         <span>{getHomeFighterName(activeHeroFight, "B")}</span>
                       </h2>
                       <div className="fmm-hero-event-meta">
-                        <FaCalendarAlt aria-hidden="true" />
                         <span>{getFeaturedDateLabel(activeHeroFight)}</span>
                         <span className="fmm-featured-date-divider" aria-hidden="true" />
                         <FaClock aria-hidden="true" />
@@ -2086,8 +2147,6 @@ const HomeAnother = () => {
                       Play Now <FaArrowRight aria-hidden="true" />
                     </Link>
                   </div>
-
-                  <MiniFightCalendar match={activeHeroFight} />
 
                   {heroSlides.length > 1 && (
                     <div className="fmm-promoted-dots" aria-label="Promoted fight slides">
@@ -2163,7 +2222,13 @@ const HomeAnother = () => {
                   onClick={(event) => handleHomeSportJump(section.key, event)}
                 >
                   <span className="fmm-home-tab-art" aria-hidden="true">
-                    <FightCategoryIcon type={section.key} />
+                    <Image
+                      src={section.image}
+                      alt=""
+                      width={120}
+                      height={88}
+                      sizes="120px"
+                    />
                   </span>
                   <span className="fmm-home-tab-copy">
                     <span>{section.label}</span>

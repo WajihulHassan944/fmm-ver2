@@ -379,7 +379,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
           <aside className="xp-auth-art">
             <div className="xp-auth-art-grid" />
             <div className="xp-auth-art-copy">
-              <Link href="/" className="xp-auth-logo"><img src={`${FMM_ASSET_BASE}/fantasy-mmadness-logo.png`} alt="Fantasy MMAdness" /></Link>
+              <Link href="/" className="xp-auth-logo"><img src={`${FMM_ASSET_BASE}/fantasy-mmadness-logo.webp`} alt="Fantasy MMAdness" /></Link>
               <p className="xp-eyebrow">One account portal</p>
               <h1>Step inside the <span>fight room.</span></h1>
               <p>Players predict. Affiliates build leagues. Sponsors own meaningful fight-night moments. Choose your role and continue in one consistent experience.</p>

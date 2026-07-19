@@ -124,7 +124,7 @@ const HowItWorks = () => {
                 </ul>
               </div>
               <div className="affiliate-how-rules-art" aria-hidden="true">
-                <img src={`${FMM_ASSET_BASE}/fighter-action-red.jpg`} alt="" />
+                <img src={`${FMM_ASSET_BASE}/fighter-action-red.webp`} alt="" />
                 <div><FaComments /><strong>Community first</strong><span>Promote, engage, and keep the crowd informed.</span></div>
               </div>
             </section>
