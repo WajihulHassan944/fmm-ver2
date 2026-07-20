@@ -1456,3 +1456,141 @@
     max-width: 148px !important;
   }
 }
+
+/* Client feedback pass: poster-first Featured Fight, 4 mobile categories, and Pro Wrestling inside Featured Contests. */
+.fmm-featured-fight-banner.has-fight-poster {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.fmm-featured-fight-banner.has-fight-poster .fmm-featured-poster-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  overflow: hidden !important;
+  border-radius: inherit !important;
+  background: #02030a !important;
+}
+
+.fmm-featured-fight-banner.has-fight-poster .fmm-featured-poster-backdrop::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.24) 42%, rgba(0, 0, 0, 0.88) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.20) 42%, rgba(0, 0, 0, 0.72)) !important;
+  z-index: 1 !important;
+}
+
+.fmm-featured-fight-banner.has-fight-poster .fmm-featured-poster-backdrop img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: saturate(1.18) contrast(1.08) brightness(0.92) !important;
+  transform: scale(1.012) !important;
+}
+
+.fmm-featured-fight-banner.has-fight-poster .fmm-featured-badge,
+.fmm-featured-fight-banner.has-fight-poster .fmm-featured-arrow,
+.fmm-featured-fight-banner.has-fight-poster .fmm-promoted-dots,
+.fmm-featured-fight-banner.has-fight-poster .fmm-featured-status-panel {
+  z-index: 8 !important;
+}
+
+@media (min-width: 768px) {
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner.has-fight-poster .fmm-featured-duel-stage {
+    position: relative !important;
+    z-index: 3 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: end !important;
+    justify-items: center !important;
+    padding: clamp(118px, 8vw, 150px) clamp(26px, 4vw, 58px) clamp(124px, 8.8vw, 160px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner.has-fight-poster .fmm-featured-fighter {
+    display: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner.has-fight-poster .fmm-featured-center {
+    max-width: 560px !important;
+    padding: 24px 26px 22px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 24px !important;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 37, 58, 0.24), transparent 72%),
+      linear-gradient(180deg, rgba(4, 6, 13, 0.72), rgba(2, 3, 8, 0.86)) !important;
+    box-shadow: 0 28px 76px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main) .site-experience-main.is-home-experience-main .fmm-featured-fight-banner.has-fight-poster .fmm-featured-center > p::before {
+    content: "PICK · PLAY · WIN BIG" !important;
+    display: block !important;
+    margin-bottom: 7px !important;
+    color: #fff !important;
+    font-size: 10px !important;
+    letter-spacing: 0.24em !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster {
+    padding-top: 176px !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-hero-poster {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    right: 10px !important;
+    height: 154px !important;
+    z-index: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 17px !important;
+    background: #05060c !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-hero-poster::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(180deg, transparent 18%, rgba(0, 0, 0, 0.12) 46%, rgba(0, 0, 0, 0.74) 100%) !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-hero-poster img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.16) contrast(1.08) brightness(0.94) !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-hero-faceoff {
+    display: none !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-featured-label,
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-event-copy,
+  .fmm-mobile-home .fmm-mobile-hero-event-card.has-fight-poster .fmm-mobile-countdown {
+    position: relative !important;
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-section-heading h2#mobile-upcoming-title,
+  .fmm-mobile-home .fmm-mobile-section-heading h2#mobile-open-contests-title {
+    letter-spacing: -0.015em !important;
+  }
+
+  .fmm-mobile-home .fmm-mobile-open-contests .fmm-mobile-contest-row.is-pro-wrestling {
+    border-color: rgba(255, 46, 69, 0.32) !important;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(255, 42, 64, 0.18), transparent 9rem),
+      linear-gradient(180deg, rgba(18, 19, 30, 0.98), rgba(5, 7, 14, 0.98)) !important;
+  }
+}
