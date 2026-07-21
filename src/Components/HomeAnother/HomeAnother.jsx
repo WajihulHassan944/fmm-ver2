@@ -32,7 +32,6 @@ import {
   FaBolt,
   FaBullseye,
   FaCalendarAlt,
-  FaClock,
   FaCoins,
   FaChevronRight,
   FaCrown,
@@ -104,7 +103,8 @@ const MOBILE_FALLBACK_SPORT_LABELS = {
 };
 
 const getMobileUpcomingHeading = (section = {}) => {
-  const label = section?.label || MOBILE_FALLBACK_SPORT_LABELS[section?.key] || "Combat";
+  const label =
+    section?.label || MOBILE_FALLBACK_SPORT_LABELS[section?.key] || "Combat";
   return `Upcoming ${label} Fights`;
 };
 
@@ -132,7 +132,12 @@ const FightCategoryIcon = ({ type }) => {
 
   if (key.includes("pro") || key.includes("wrestling")) {
     return (
-      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+      <svg
+        className="fmm-fight-category-svg"
+        viewBox="0 0 64 64"
+        role="img"
+        aria-hidden="true"
+      >
         <path d="M18 10c3.8-2.4 8.2-3.6 14-3.6S42.2 7.6 46 10c5 3.1 7.5 8.8 7.5 17 0 15.5-8.9 28.1-21.5 30.6C19.4 55.1 10.5 42.5 10.5 27c0-8.2 2.5-13.9 7.5-17Z" />
         <path d="M19.3 17.2c2.9 3.9 7.1 6.2 12.7 6.2s9.8-2.3 12.7-6.2" />
         <path d="M20.3 30.4c2.9-3.6 8.4-4 11.7-.6-3.4 3.8-8.7 4-11.7.6Z" />
@@ -146,7 +151,12 @@ const FightCategoryIcon = ({ type }) => {
 
   if (key.includes("kick")) {
     return (
-      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+      <svg
+        className="fmm-fight-category-svg"
+        viewBox="0 0 64 64"
+        role="img"
+        aria-hidden="true"
+      >
         <path d="M18.5 9.5c5.7 2.6 9.9 6.7 12.4 12.2l5.8 12.6c1.1 2.5 3.3 4.2 6 4.7l6.7 1.1c4.7.8 7.5 3.4 8.1 7.8.3 2.4-.7 4.7-2.9 6.7-2 1.8-4.6 2.7-7.8 2.7H32.6c-3.4 0-6.2-2.1-7.4-5.3l-3.7-10.5c-1.5-4.4-4.5-7.9-8.7-10.5L7.2 27.7 12 17l6.5-7.5Z" />
         <path d="M19.5 10.7 12.1 27" />
         <path d="M27.4 44.2h28.4" />
@@ -158,7 +168,12 @@ const FightCategoryIcon = ({ type }) => {
 
   if (key.includes("bare")) {
     return (
-      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+      <svg
+        className="fmm-fight-category-svg"
+        viewBox="0 0 64 64"
+        role="img"
+        aria-hidden="true"
+      >
         <path d="M16.5 27.2v-7.1c0-3.2 2.4-5.8 5.5-5.8 1.7 0 3.2.8 4.2 2.1.9-2.1 2.9-3.5 5.3-3.5 2.5 0 4.6 1.5 5.5 3.7 1-1.4 2.6-2.3 4.5-2.3 3.1 0 5.5 2.6 5.5 5.8v11.5h1.2c4.2 0 7.3 3.4 7.3 7.7v2.5c0 8.1-6.2 14.3-14.3 14.3H27.6c-8 0-14.5-6.5-14.5-14.5v-7.2c0-3.2 1.2-5.6 3.4-7.2Z" />
         <path d="M26.2 18.6v12" />
         <path d="M37 18.1v12.5" />
@@ -170,7 +185,12 @@ const FightCategoryIcon = ({ type }) => {
 
   if (key.includes("mma")) {
     return (
-      <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+      <svg
+        className="fmm-fight-category-svg"
+        viewBox="0 0 64 64"
+        role="img"
+        aria-hidden="true"
+      >
         <path d="M16.3 29.5v-8.6c0-3.5 2.6-6.2 6-6.2 1.8 0 3.4.8 4.5 2.1 1-2.3 3.2-3.9 5.9-3.9s4.9 1.7 5.9 4.1c1.1-1.4 2.8-2.3 4.8-2.3 3.4 0 6 2.7 6 6.2v15.7c3.5.8 5.8 3.9 5.8 7.8 0 7.1-5.6 12.7-12.7 12.7H28.6c-8.6 0-15.6-7-15.6-15.6v-4.9c0-3 1.2-5.5 3.3-7.1Z" />
         <path d="M26.8 18.9v17.5" />
         <path d="M38.6 19.1v17.1" />
@@ -183,7 +203,12 @@ const FightCategoryIcon = ({ type }) => {
   }
 
   return (
-    <svg className="fmm-fight-category-svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+    <svg
+      className="fmm-fight-category-svg"
+      viewBox="0 0 64 64"
+      role="img"
+      aria-hidden="true"
+    >
       <path d="M15.7 23.3c0-8.1 6-14.3 14.2-14.3h6.3c7.2 0 12.9 5.6 12.9 12.9v7.7c4.2 1.3 7.2 5.1 7.2 9.9 0 6.1-4.8 10.9-10.9 10.9h-6.7c-3.2 3.6-7.8 5.7-13.1 5.7-9.9 0-17.8-7.8-17.8-17.5 0-5.9 2.9-11.4 7.9-14.8Z" />
       <path d="M15.9 23.5c5.5-.1 10 1.8 13.4 5.8" />
       <path d="M29.7 9.1v16.1" />
@@ -603,7 +628,9 @@ const MiniFightCalendar = ({ match }) => {
         <div className="fmm-mini-calendar-title" aria-hidden="true">
           <span>‹</span>
           <i>✦</i>
-          <strong>{monthLong} {date.getFullYear()}</strong>
+          <strong>
+            {monthLong} {date.getFullYear()}
+          </strong>
           <i>↯</i>
           <span>›</span>
         </div>
@@ -667,7 +694,9 @@ const getFightTitle = (match) => {
 };
 
 const getPrizePool = (match) => {
-  const amount = Number(match?.pot || match?.currentPot || match?.prizePool || 0);
+  const amount = Number(
+    match?.pot || match?.currentPot || match?.prizePool || 0,
+  );
   if (!amount) return "Prize TBA";
   return `$${amount.toLocaleString()}`;
 };
@@ -685,7 +714,9 @@ const getPotTokenLabel = (match) => {
 };
 
 const getRoundLabel = (match) => {
-  const rounds = Number(match?.maxRounds || match?.rounds || match?.scheduledRounds || 0);
+  const rounds = Number(
+    match?.maxRounds || match?.rounds || match?.scheduledRounds || 0,
+  );
   return rounds > 0 ? `${rounds} rounds` : "Rounds TBA";
 };
 
@@ -769,9 +800,21 @@ const normalizeWrestlingFightForHome = (match = {}) => ({
   matchTime: match.matchTime || match.time,
   pot: match.currentPot || match.pot || 0,
   prizePool: match.prizePool || match.currentPot || match.pot || 0,
-  promotionBackground: pickHomeValue(match.bannerImage, match.promotionBackground, HOME_WRESTLING_IMAGE),
-  fightPosterImage: pickHomeValue(match.bannerImage, match.fightPosterImage, HOME_WRESTLING_IMAGE),
-  eventLabel: pickHomeValue(match.promotionName, match.eventName, "Pro Wrestling"),
+  promotionBackground: pickHomeValue(
+    match.bannerImage,
+    match.promotionBackground,
+    HOME_WRESTLING_IMAGE,
+  ),
+  fightPosterImage: pickHomeValue(
+    match.bannerImage,
+    match.fightPosterImage,
+    HOME_WRESTLING_IMAGE,
+  ),
+  eventLabel: pickHomeValue(
+    match.promotionName,
+    match.eventName,
+    "Pro Wrestling",
+  ),
 });
 
 const getLeaderboardName = (player) =>
@@ -811,7 +854,8 @@ const MOBILE_FALLBACK_MATCHUPS = {
 
 const getMobileFallbackFight = (sportKey = "mma", index = 0) => {
   const label = MOBILE_FALLBACK_SPORT_LABELS[sportKey] || "Combat";
-  const matchups = MOBILE_FALLBACK_MATCHUPS[sportKey] || MOBILE_FALLBACK_MATCHUPS.mma;
+  const matchups =
+    MOBILE_FALLBACK_MATCHUPS[sportKey] || MOBILE_FALLBACK_MATCHUPS.mma;
   const [eventLabel, matchFighterA, matchFighterB, pot, players] =
     matchups[index % matchups.length];
   const matchDate = ["2099-07-11", "2099-07-15", "2099-07-16"][index % 3];
@@ -825,8 +869,12 @@ const getMobileFallbackFight = (sportKey = "mma", index = 0) => {
     matchName: `${matchFighterA} vs ${matchFighterB}`,
     matchFighterA,
     matchFighterB,
-    fighterAImage: MOBILE_FALLBACK_FIGHT_IMAGES[index % MOBILE_FALLBACK_FIGHT_IMAGES.length],
-    fighterBImage: MOBILE_FALLBACK_FIGHT_IMAGES[(index + 1) % MOBILE_FALLBACK_FIGHT_IMAGES.length],
+    fighterAImage:
+      MOBILE_FALLBACK_FIGHT_IMAGES[index % MOBILE_FALLBACK_FIGHT_IMAGES.length],
+    fighterBImage:
+      MOBILE_FALLBACK_FIGHT_IMAGES[
+        (index + 1) % MOBILE_FALLBACK_FIGHT_IMAGES.length
+      ],
     matchCategory: label,
     matchCategoryTwo: label,
     matchStatus: "Open",
@@ -839,11 +887,12 @@ const getMobileFallbackFight = (sportKey = "mma", index = 0) => {
   };
 };
 
-
-
 const getMobileEventLabel = (match = {}) => {
-  const eventPattern = /\b(?:UFC|BKFC|PFL|BELLATOR|GLORY|ONE|WWE|AEW|NXT)\s*\d+\b/i;
-  const eventNameMatch = String(match?.eventName || match?.matchName || "").match(eventPattern)?.[0];
+  const eventPattern =
+    /\b(?:UFC|BKFC|PFL|BELLATOR|GLORY|ONE|WWE|AEW|NXT)\s*\d+\b/i;
+  const eventNameMatch = String(
+    match?.eventName || match?.matchName || "",
+  ).match(eventPattern)?.[0];
   const rawLabel = pickHomeValue(
     match?.eventCode,
     match?.eventLabel,
@@ -855,7 +904,9 @@ const getMobileEventLabel = (match = {}) => {
     getFightSportLabel(match),
   );
 
-  return rawLabel ? rawLabel.toUpperCase() : getFightSportLabel(match).toUpperCase();
+  return rawLabel
+    ? rawLabel.toUpperCase()
+    : getFightSportLabel(match).toUpperCase();
 };
 
 const getMobileShortDate = (match) => {
@@ -877,7 +928,9 @@ const getMobileDateChip = (match) => {
   return {
     month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
     day: String(date.getDate()).padStart(2, "0"),
-    weekday: date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
+    weekday: date
+      .toLocaleDateString("en-US", { weekday: "short" })
+      .toUpperCase(),
   };
 };
 
@@ -891,7 +944,9 @@ const getMobileCountdownDisplay = (match, now) => {
 };
 
 const getMobileDisplayFights = (fights = [], sportKey = "mma", limit = 3) => {
-  const visible = Array.isArray(fights) ? fights.filter(Boolean).slice(0, limit) : [];
+  const visible = Array.isArray(fights)
+    ? fights.filter(Boolean).slice(0, limit)
+    : [];
   if (visible.length) return visible;
   return Array.from({ length: limit }, (_, index) =>
     getMobileFallbackFight(sportKey, index),
@@ -902,7 +957,6 @@ const getMobileEntryFee = (match = {}) => {
   const amount = Number(match?.entryFee || match?.fee || match?.cost || 0);
   return amount > 0 ? `$${amount.toLocaleString()}` : "$5";
 };
-
 
 const getHomeSportViewAllHref = (sportKey) =>
   sportKey === "pro-wrestling"
@@ -1026,7 +1080,9 @@ const MobilePhoneHome = ({
   const mobileSections = useMemo(
     () =>
       MOBILE_HOME_SPORT_TABS.map((tab) => {
-        const existing = homeFightSections.find((section) => section.key === tab.key);
+        const existing = homeFightSections.find(
+          (section) => section.key === tab.key,
+        );
         return {
           ...tab,
           count: existing?.count || tab.fallbackCount || 0,
@@ -1044,6 +1100,14 @@ const MobilePhoneHome = ({
     activeSection?.key,
     5,
   );
+  const mobileWrestlingSection = mobileSections.find(
+    (section) => section.key === "pro-wrestling",
+  );
+  const mobileWrestlingFights = getMobileDisplayFights(
+    mobileWrestlingSection?.fights,
+    "pro-wrestling",
+    4,
+  );
   const mobileHeroSlides = Array.isArray(heroSlides) ? heroSlides : [];
   const heroSlideCount = mobileHeroSlides.length || 1;
   const safeMobileHeroIndex = activeHeroIndex % heroSlideCount;
@@ -1052,24 +1116,28 @@ const MobilePhoneHome = ({
     mobileHeroSlides[safeMobileHeroIndex] ||
     getMobileFallbackFight(activeSection?.key || "mma", 0);
   const dateChip = getMobileDateChip(mobileHeroFight);
-  const mobileOpenContests = selectedUpcomingFights.slice(0, 3);
   const mobileHeroPoster = getHomeFightPosterImage(mobileHeroFight);
   const visibleHeroDots = mobileHeroSlides.slice(0, 4);
-  const mobileCountdownParts = getMobileCountdownDisplay(
-    mobileHeroFight,
-    now,
-  );
+  const mobileCountdownParts = getMobileCountdownDisplay(mobileHeroFight, now);
   const mobileFightRailRef = useHorizontalDragScroll();
   const mobileContestRailRef = useHorizontalDragScroll();
   const wrestlingHref = "/pro-wrestling";
 
   return (
-    <div className="fmm-mobile-home" aria-label="Fantasy MMAdness mobile homepage">
-      <section className="fmm-mobile-featured-card fmm-mobile-signup-hero" aria-label="Featured fight">
+    <div
+      className="fmm-mobile-home"
+      aria-label="Fantasy MMAdness mobile homepage"
+    >
+      <section
+        className="fmm-mobile-featured-card fmm-mobile-signup-hero"
+        aria-label="Featured fight"
+      >
         <div className="fmm-mobile-featured-bg" aria-hidden="true" />
 
         <div className="fmm-mobile-hero-intro">
-          <p className="fmm-mobile-greeting">Good Evening, {greetingName || "Fighter"} 👋</p>
+          <p className="fmm-mobile-greeting">
+            Good Evening, {greetingName || "Fighter"} 👋
+          </p>
           <h1>
             Pick. Play.
             <span>
@@ -1077,13 +1145,18 @@ const MobilePhoneHome = ({
             </span>
           </h1>
           <p className="fmm-mobile-intro-copy">
-            A fight-night fantasy arena built for fast picks. Join free, pick winners across every combat category, and chase cash-prize leaderboard action before the card locks.
+            A fight-night fantasy arena built for fast picks. Join free, pick
+            winners across every combat category, and chase cash-prize
+            leaderboard action before the card locks.
           </p>
           <div className="fmm-mobile-intro-actions">
             <Link href={PLAYER_SIGNUP_HREF} className="fmm-mobile-signup-btn">
               Sign Up Free <FaArrowRight aria-hidden="true" />
             </Link>
-            <Link href={getFightDetailHref(mobileHeroFight)} className="fmm-mobile-event-btn">
+            <Link
+              href={getFightDetailHref(mobileHeroFight)}
+              className="fmm-mobile-event-btn"
+            >
               Enter To Win
             </Link>
             <Link href="/mock-game" className="fmm-mobile-mock-game-btn">
@@ -1132,8 +1205,13 @@ const MobilePhoneHome = ({
             </figure>
           </div>
 
-          <span className="fmm-mobile-featured-label"><FaDollarSign aria-hidden="true" /> Win Big Featured Fight</span>
-          <div className="fmm-mobile-date-chip" aria-label="Featured fight date">
+          <span className="fmm-mobile-featured-label">
+            <FaDollarSign aria-hidden="true" /> Win Big Featured Fight
+          </span>
+          <div
+            className="fmm-mobile-date-chip"
+            aria-label="Featured fight date"
+          >
             <span>{dateChip.month}</span>
             <strong>{dateChip.day}</strong>
             <small>{dateChip.weekday}</small>
@@ -1151,7 +1229,10 @@ const MobilePhoneHome = ({
             </p>
           </div>
 
-          <div className="fmm-mobile-countdown" aria-label="Featured fight countdown">
+          <div
+            className="fmm-mobile-countdown"
+            aria-label="Featured fight countdown"
+          >
             {mobileCountdownParts.length > 0 ? (
               mobileCountdownParts.map((part) => (
                 <span key={part.label}>
@@ -1162,7 +1243,11 @@ const MobilePhoneHome = ({
             ) : (
               <>
                 <span>
-                  <strong>{getFightSportLabel(mobileHeroFight).slice(0, 3).toUpperCase()}</strong>
+                  <strong>
+                    {getFightSportLabel(mobileHeroFight)
+                      .slice(0, 3)
+                      .toUpperCase()}
+                  </strong>
                   <small>Sport</small>
                 </span>
                 <span>
@@ -1170,7 +1255,9 @@ const MobilePhoneHome = ({
                   <small>Status</small>
                 </span>
                 <span>
-                  <strong>{getPlayerCount(mobileHeroFight).toLocaleString()}</strong>
+                  <strong>
+                    {getPlayerCount(mobileHeroFight).toLocaleString()}
+                  </strong>
                   <small>Players</small>
                 </span>
               </>
@@ -1192,13 +1279,20 @@ const MobilePhoneHome = ({
       </section>
 
       {matchStatus === "loading" && (
-        <div className="fmm-mobile-loading-line" role="status" aria-live="polite">
+        <div
+          className="fmm-mobile-loading-line"
+          role="status"
+          aria-live="polite"
+        >
           <span />
           Syncing premium fight cards...
         </div>
       )}
 
-      <section className="fmm-mobile-category-row" aria-label="Fight categories">
+      <section
+        className="fmm-mobile-category-row"
+        aria-label="Fight categories"
+      >
         {mobileSections.map((section) => (
           <button
             type="button"
@@ -1208,7 +1302,10 @@ const MobilePhoneHome = ({
             }`}
             onClick={() => setActiveFightSport(section.key)}
           >
-            <span className="fmm-mobile-category-icon fmm-mobile-category-image" aria-hidden="true">
+            <span
+              className="fmm-mobile-category-icon fmm-mobile-category-image"
+              aria-hidden="true"
+            >
               <Image
                 src={section.image}
                 alt=""
@@ -1223,9 +1320,14 @@ const MobilePhoneHome = ({
         ))}
       </section>
 
-      <section className="fmm-mobile-section fmm-mobile-upcoming" aria-labelledby="mobile-upcoming-title">
+      <section
+        className="fmm-mobile-section fmm-mobile-upcoming"
+        aria-labelledby="mobile-upcoming-title"
+      >
         <div className="fmm-mobile-section-heading">
-          <h2 id="mobile-upcoming-title">{getMobileUpcomingHeading(activeSection)}</h2>
+          <h2 id="mobile-upcoming-title">
+            {getMobileUpcomingHeading(activeSection)}
+          </h2>
           <Link href={getHomeSportViewAllHref(activeSection?.key)}>
             View All <FaArrowRight aria-hidden="true" />
           </Link>
@@ -1276,19 +1378,32 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
-      <section className="fmm-mobile-section fmm-mobile-open-contests" aria-labelledby="mobile-open-contests-title">
+      <section
+        className="fmm-mobile-section fmm-mobile-open-contests fmm-mobile-pro-wrestling-fights"
+        aria-labelledby="mobile-open-contests-title"
+      >
         <div className="fmm-mobile-section-heading">
-          <h2 id="mobile-open-contests-title">Top {activeSection?.label} Contests</h2>
-          <Link href={getHomeSportViewAllHref(activeSection?.key)}>
+          <h2 id="mobile-open-contests-title">Pro Wrestling Fights</h2>
+          <Link href="/pro-wrestling">
             View All <FaArrowRight aria-hidden="true" />
           </Link>
         </div>
         <div className="fmm-mobile-contest-list" ref={mobileContestRailRef}>
-          {mobileOpenContests.map((match, index) => (
-            <article className={`fmm-mobile-contest-row ${getCategoryClass(match)}`} key={getFightId(match) || `mobile-contest-${index}`}>
-              <Link href={getFightDetailHref(match)} className="fmm-mobile-contest-visual">
-                <span>{["Open", "Top Prize", "Live"][index % 3]}</span>
-                <small className="fmm-mobile-contest-event-label">{getMobileEventLabel(match)}</small>
+          {mobileWrestlingFights.map((match, index) => (
+            <article
+              className={`fmm-mobile-contest-row ${getCategoryClass(match)} is-pro-wrestling-feature`}
+              key={getFightId(match) || `mobile-wrestling-${index}`}
+            >
+              <Link
+                href={getFightDetailHref(match)}
+                className="fmm-mobile-contest-visual"
+              >
+                <span>
+                  {["Open", "Top Prize", "Featured", "Live"][index % 4]}
+                </span>
+                <small className="fmm-mobile-contest-event-label">
+                  {getMobileEventLabel(match)}
+                </small>
                 <div>
                   <figure className="mobile-fighter-avatar">
                     <FightImage
@@ -1311,11 +1426,16 @@ const MobilePhoneHome = ({
                 </div>
               </Link>
               <div className="fmm-mobile-contest-info">
-                <h3>{match.matchTitle || match.eventName || match.matchName || getFightTitle(match)}</h3>
+                <h3>
+                  {match.matchTitle ||
+                    match.eventName ||
+                    match.matchName ||
+                    getFightTitle(match)}
+                </h3>
                 <div className="fmm-mobile-contest-meta">
                   <span>
-                    <small>Prize Pool</small>
-                    <strong>{getPrizePool(match)}</strong>
+                    <small>Token Pot</small>
+                    <strong>{getPotTokenLabel(match)}</strong>
                   </span>
                   <span>
                     <small>Players</small>
@@ -1323,18 +1443,26 @@ const MobilePhoneHome = ({
                   </span>
                 </div>
               </div>
-              <Link href={getFightDetailHref(match)} className="fmm-mobile-join">
-                Enter To Win <FaArrowRight aria-hidden="true" />
+              <Link
+                href={getFightDetailHref(match)}
+                className="fmm-mobile-join"
+              >
+                Open Fight <FaArrowRight aria-hidden="true" />
               </Link>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="fmm-mobile-wrestling-spotlight" aria-label="Pro wrestling spotlight">
+      <section
+        className="fmm-mobile-wrestling-spotlight"
+        aria-label="Pro wrestling spotlight"
+      >
         <div className="fmm-mobile-wrestling-copy">
           <h2>Pro Wrestling is now part of Fantasy MMAdness.</h2>
-          <p>Predict huge punches, body slams, kicks, power moves and win big!</p>
+          <p>
+            Predict huge punches, body slams, kicks, power moves and win big!
+          </p>
           <Link href={wrestlingHref}>
             Explore Wrestling <FaArrowRight aria-hidden="true" />
           </Link>
@@ -1372,16 +1500,29 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
-      <section className="fmm-mobile-premium-flow" aria-label="How Fantasy MMAdness works">
+      <section
+        className="fmm-mobile-premium-flow"
+        aria-label="How Fantasy MMAdness works"
+      >
         <div className="fmm-mobile-section-heading">
           <h2>How To Win</h2>
-          <Link href="/guides">Rules <FaArrowRight aria-hidden="true" /></Link>
+          <Link href="/guides">
+            Rules <FaArrowRight aria-hidden="true" />
+          </Link>
         </div>
         <div className="fmm-mobile-flow-grid">
           {[
             ["01", "Pick", "Choose the winner, method and round before lock."],
-            ["02", "Score", "Earn points as every punch, takedown and finish lands."],
-            ["03", "Climb", "Move up the leaderboard and chase premium prizes."],
+            [
+              "02",
+              "Score",
+              "Earn points as every punch, takedown and finish lands.",
+            ],
+            [
+              "03",
+              "Climb",
+              "Move up the leaderboard and chase premium prizes.",
+            ],
           ].map(([step, title, copy]) => (
             <article key={title}>
               <span>{step}</span>
@@ -1392,7 +1533,10 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
-      <section className="fmm-mobile-fight-art-spotlight" aria-label="Fight night experience">
+      <section
+        className="fmm-mobile-fight-art-spotlight"
+        aria-label="Fight night experience"
+      >
         <Image
           src={HOME_FIGHT_ART_IMAGE}
           alt="Fantasy MMAdness fight night action"
@@ -1402,18 +1546,31 @@ const MobilePhoneHome = ({
         <div>
           <span>Live Fight Night</span>
           <h2>Premium cards. Fast picks. Real leaderboard heat.</h2>
-          <Link href="/upcomingfights">Explore Fights <FaArrowRight aria-hidden="true" /></Link>
+          <Link href="/upcomingfights">
+            Explore Fights <FaArrowRight aria-hidden="true" />
+          </Link>
         </div>
       </section>
 
-      <section className="fmm-mobile-contact-card" aria-labelledby="mobile-contact-title">
+      <section
+        className="fmm-mobile-contact-card"
+        aria-labelledby="mobile-contact-title"
+      >
         <div className="fmm-mobile-section-heading">
           <h2 id="mobile-contact-title">Contact Us</h2>
         </div>
-        <p>Questions about contests, sponsors or fight cards? Send a message and the team will follow up.</p>
+        <p>
+          Questions about contests, sponsors or fight cards? Send a message and
+          the team will follow up.
+        </p>
         <form onSubmit={handleSubmit}>
           <input type="text" name="fullName" placeholder="Full name" required />
-          <input type="email" name="email" placeholder="Email address" required />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email address"
+            required
+          />
           <input type="text" name="subject" placeholder="Subject" required />
           <textarea name="message" placeholder="Message" required />
           <button type="submit" disabled={isSubmitting}>
@@ -1422,7 +1579,10 @@ const MobilePhoneHome = ({
         </form>
       </section>
 
-      <footer className="fmm-mobile-footer" aria-label="Fantasy MMAdness mobile footer">
+      <footer
+        className="fmm-mobile-footer"
+        aria-label="Fantasy MMAdness mobile footer"
+      >
         <div className="fmm-mobile-footer-brand">
           <Image
             src="/images/fmm-experience/fantasy-mmadness-logo.webp"
@@ -1469,6 +1629,7 @@ const HomeAnother = () => {
   const [homepageMatches, setHomepageMatches] = useState([]);
   const [promotedHeroFights, setPromotedHeroFights] = useState([]);
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+  const [selectedFeaturedFight, setSelectedFeaturedFight] = useState(null);
   const [homepageLeaderboard, setHomepageLeaderboard] = useState([]);
   const [matchStatus, setMatchStatus] = useState("loading");
   const [matchError, setMatchError] = useState(null);
@@ -1500,7 +1661,7 @@ const HomeAnother = () => {
               leaderboardLimit: 5,
             }),
             fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
-            fetchPromotedHomeFights({ limit: 24 }),
+            fetchPromotedHomeFights({ limit: 45 }),
           ]);
         const summary =
           summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
@@ -1592,14 +1753,18 @@ const HomeAnother = () => {
     () => wrestlingMatches.map(normalizeWrestlingFightForHome),
     [wrestlingMatches],
   );
-  const featuredPosterFightPool = useMemo(
-    () =>
-      orderFightsForDisplay(
-        dedupeHomepageFights(promotedHeroFights.map(hydrateHomeFightVisuals))
-          .filter((fight) => Boolean(getHomeFightPosterImage(fight))),
+  const featuredPosterFightPool = useMemo(() => {
+    const promoted = promotedHeroFights.map(hydrateHomeFightVisuals);
+    const posterBackups = homepageFightPool.filter((fight) =>
+      Boolean(getHomeFightPosterImage(fight)),
+    );
+
+    return orderFightsForDisplay(
+      dedupeHomepageFights([...promoted, ...posterBackups]).filter((fight) =>
+        Boolean(getHomeFightPosterImage(fight)),
       ),
-    [promotedHeroFights],
-  );
+    ).slice(0, 45);
+  }, [homepageFightPool, promotedHeroFights]);
 
   const homeFightSections = useMemo(
     () =>
@@ -1647,8 +1812,13 @@ const HomeAnother = () => {
   const activeHeroFight = heroSlides.length
     ? heroSlides[activeHeroIndex % heroSlides.length]
     : primaryFight;
-  const primaryCountdown = getCountdownParts(activeHeroFight, now);
   const activeHeroPoster = getHomeFightPosterImage(activeHeroFight);
+  const activeHeroSlideIndex = heroSlides.length
+    ? activeHeroIndex % heroSlides.length
+    : 0;
+  const activeHeroPosition = heroSlides.length ? activeHeroSlideIndex + 1 : 0;
+  const featuredThumbSlides = heroSlides.slice(0, 45);
+  const selectedFeaturedPoster = getHomeFightPosterImage(selectedFeaturedFight);
   const mobileGreetingName = useMemo(
     () =>
       pickHomeValue(
@@ -1658,13 +1828,17 @@ const HomeAnother = () => {
         currentUser?.email?.split?.("@")[0],
         "Fighter",
       ),
-    [currentUser?.email, currentUser?.firstName, currentUser?.name, currentUser?.username],
+    [
+      currentUser?.email,
+      currentUser?.firstName,
+      currentUser?.name,
+      currentUser?.username,
+    ],
   );
-
 
   useEffect(() => {
     setActiveHeroIndex(0);
-  }, [promotedHeroFights.length]);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     if (heroSlides.length <= 1) return undefined;
@@ -1673,6 +1847,27 @@ const HomeAnother = () => {
     }, 6500);
     return () => window.clearInterval(timer);
   }, [heroSlides.length]);
+
+  useEffect(() => {
+    if (!selectedFeaturedFight || typeof window === "undefined") {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setSelectedFeaturedFight(null);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedFeaturedFight]);
 
   const liveLeaderboardRows = useMemo(() => {
     if (!Array.isArray(homepageLeaderboard) || homepageLeaderboard.length === 0)
@@ -1868,8 +2063,8 @@ const HomeAnother = () => {
           )}
         </div>
 
-        <div className="fmm-contest-fighters">
-          <figure>
+        <div className="fmm-contest-fighters fmm-upcoming-fighter-stage">
+          <figure className="is-red-corner">
             <FightImage
               src={getHomeFighterImage(match, "A", index)}
               alt={getHomeFighterName(match, "A")}
@@ -1879,8 +2074,8 @@ const HomeAnother = () => {
             />
             <figcaption>{getHomeFighterName(match, "A")}</figcaption>
           </figure>
-          <span>VS</span>
-          <figure>
+          <span className="fmm-card-vs-pill">VS</span>
+          <figure className="is-blue-corner">
             <FightImage
               src={getHomeFighterImage(match, "B", index)}
               alt={getHomeFighterName(match, "B")}
@@ -1927,7 +2122,6 @@ const HomeAnother = () => {
       </article>
     );
   };
-
 
   return (
     <>
@@ -1999,714 +2193,822 @@ const HomeAnother = () => {
             className="fmm-home-hero"
             aria-label="Fantasy combat sports hero"
           >
-          <div className="theme-container fmm-hero-grid">
-            <div className="fmm-hero-copy">
-              <div className="fmm-premium-eyebrow">
-                <FaBolt aria-hidden="true" /> Win money fight card
-              </div>
-              <h1>
-                Pick. Play.
-                <span>
-                  <em>Win Big.</em>
-                </span>
-              </h1>
-              <p className="fmm-hero-subtitle">
-                Step into a premium fight-night arena. Join free, pick winners across Boxing, MMA, Bare-knuckle and Kickboxing, then climb cash-prize leaderboards before the card locks.
-              </p>
+            <div className="theme-container fmm-hero-grid">
+              <div className="fmm-hero-copy">
+                <div className="fmm-premium-eyebrow">
+                  <FaBolt aria-hidden="true" /> Win money fight card
+                </div>
+                <h1>
+                  Pick. Play.
+                  <span>
+                    <em>Win Big.</em>
+                  </span>
+                </h1>
+                <p className="fmm-hero-subtitle">
+                  Step into a premium fight-night arena. Join free, pick winners
+                  across Boxing, MMA, Bare-knuckle and Kickboxing, then climb
+                  cash-prize leaderboards before the card locks.
+                </p>
 
-              <div className="fmm-hero-actions">
-                <Link
-                  href={PLAYER_SIGNUP_HREF}
-                  className="theme-btn theme-btn-primary"
+                <div className="fmm-hero-actions">
+                  <Link
+                    href={PLAYER_SIGNUP_HREF}
+                    className="theme-btn theme-btn-primary"
+                  >
+                    Sign Up Free <FaArrowRight aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href={
+                      activeHeroFight
+                        ? getFightDetailHref(activeHeroFight)
+                        : "/upcomingfights"
+                    }
+                    className="theme-btn theme-btn-secondary"
+                  >
+                    Enter To Win <FaPlay aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href="/mock-game"
+                    className="theme-btn theme-btn-secondary fmm-mock-game-link"
+                  >
+                    Mock Game <FaBolt aria-hidden="true" />
+                  </Link>
+                </div>
+
+                <div
+                  className="fmm-premium-hero-stats"
+                  aria-label="Fantasy MMAdness live experience stats"
                 >
-                  Sign Up Free <FaArrowRight aria-hidden="true" />
-                </Link>
-                <Link
-                  href={
-                    activeHeroFight
-                      ? getFightDetailHref(activeHeroFight)
-                      : "/upcomingfights"
-                  }
-                  className="theme-btn theme-btn-secondary"
+                  <div>
+                    <strong>
+                      {totalHomeFightCount || contestMatches.length || 0}
+                    </strong>
+                    <span>Ready fights</span>
+                  </div>
+                  <div>
+                    <strong>
+                      {activeHeroFight
+                        ? getLockLabel(activeHeroFight, now)
+                        : "OPEN"}
+                    </strong>
+                    <span>Next lock</span>
+                  </div>
+                  <div>
+                    <strong>5</strong>
+                    <span>Fight categories</span>
+                  </div>
+                </div>
+
+                {activeHeroFight && (
+                  <div className="fmm-tonight-callout">
+                    <span>Win Big Featured Entry</span>
+                    <strong>
+                      {activeHeroFight.matchName ||
+                        getFightTitle(activeHeroFight)}
+                    </strong>
+                    <Link href={getFightDetailHref(activeHeroFight)}>
+                      Enter this fight <FaArrowRight aria-hidden="true" />
+                    </Link>
+                  </div>
+                )}
+
+                <div className="fmm-proof-strip">
+                  <div>
+                    <FaGift aria-hidden="true" />
+                    <strong>Cash Prizes</strong>
+                    <span>Ready</span>
+                  </div>
+                  <div>
+                    <FaTrophy aria-hidden="true" />
+                    <strong>Leaderboard</strong>
+                    <span>Live</span>
+                  </div>
+                  <div>
+                    <FaCoins aria-hidden="true" />
+                    <strong>Predictions</strong>
+                    <span>Open</span>
+                  </div>
+                  <div>
+                    <FaShieldAlt aria-hidden="true" />
+                    <strong>Secure</strong>
+                    <span>Platform</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="fmm-hero-fight-area">
+                {activeHeroFight ? (
+                  <aside
+                    key={getFightId(activeHeroFight) || activeHeroIndex}
+                    className={`fmm-hero-event-card fmm-promoted-slide-card fmm-featured-fight-banner fmm-featured-poster-carousel ${activeHeroPoster ? "has-fight-poster" : ""}`}
+                  >
+                    <div className="fmm-featured-carousel-head">
+                      <span>
+                        <FaDollarSign aria-hidden="true" /> Featured fight
+                        posters
+                      </span>
+                      <strong>
+                        {activeHeroPosition} / {heroSlides.length}
+                      </strong>
+                    </div>
+
+                    {heroSlides.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          className="fmm-featured-arrow is-left"
+                          aria-label="Previous featured fight poster"
+                          onClick={() =>
+                            setActiveHeroIndex(
+                              (current) =>
+                                (current - 1 + heroSlides.length) %
+                                heroSlides.length,
+                            )
+                          }
+                        >
+                          ‹
+                        </button>
+                        <button
+                          type="button"
+                          className="fmm-featured-arrow is-right"
+                          aria-label="Next featured fight poster"
+                          onClick={() =>
+                            setActiveHeroIndex(
+                              (current) => (current + 1) % heroSlides.length,
+                            )
+                          }
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      className="fmm-featured-poster-shell"
+                      onClick={() => setSelectedFeaturedFight(activeHeroFight)}
+                      aria-label={`Open premium details for ${getFightTitle(activeHeroFight)}`}
+                    >
+                      <span className="fmm-featured-poster-frame">
+                        <FightImage
+                          src={activeHeroPoster}
+                          alt={`${getFightTitle(activeHeroFight)} featured fight poster`}
+                          width={1080}
+                          height={1440}
+                          priority
+                          sizes="(max-width: 1180px) 90vw, 46vw"
+                        />
+                      </span>
+                    </button>
+
+                    <div className="fmm-featured-carousel-foot">
+                      <span>Click the poster for full fight details</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedFeaturedFight(activeHeroFight)
+                        }
+                      >
+                        Open details <FaArrowRight aria-hidden="true" />
+                      </button>
+                    </div>
+
+                    {featuredThumbSlides.length > 1 && (
+                      <div
+                        className="fmm-featured-poster-thumbs"
+                        aria-label="Featured fight poster thumbnails"
+                      >
+                        {featuredThumbSlides.map((fight, index) => (
+                          <button
+                            key={getFightId(fight) || `featured-thumb-${index}`}
+                            type="button"
+                            className={
+                              index === activeHeroSlideIndex ? "is-active" : ""
+                            }
+                            onClick={() => setActiveHeroIndex(index)}
+                            aria-label={`Show featured poster ${index + 1}`}
+                          >
+                            <FightImage
+                              src={getHomeFightPosterImage(fight)}
+                              alt=""
+                              width={96}
+                              height={128}
+                              sizes="64px"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </aside>
+                ) : (
+                  <aside
+                    className="fmm-hero-event-card fmm-promoted-slide-card fmm-featured-fight-banner fmm-featured-poster-carousel fmm-hero-loading-card"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <div
+                      className="fmm-premium-loader-orbit"
+                      aria-hidden="true"
+                    >
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                    <div className="fmm-premium-loader-copy">
+                      <span>Syncing live cards</span>
+                      <strong>
+                        Building the featured fight poster rail...
+                      </strong>
+                      <p>
+                        Pulling up to 45 promoted posters for the homepage
+                        banner.
+                      </p>
+                    </div>
+                    <div className="fmm-premium-loader-bars" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </aside>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {selectedFeaturedFight && (
+            <div
+              className="fmm-featured-modal-backdrop"
+              role="presentation"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                  setSelectedFeaturedFight(null);
+                }
+              }}
+            >
+              <section
+                className="fmm-featured-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="featured-fight-modal-title"
+              >
+                <button
+                  type="button"
+                  className="fmm-featured-modal-close"
+                  aria-label="Close featured fight details"
+                  onClick={() => setSelectedFeaturedFight(null)}
                 >
-                  Enter To Win <FaPlay aria-hidden="true" />
-                </Link>
-                <Link href="/mock-game" className="theme-btn theme-btn-secondary fmm-mock-game-link">
-                  Mock Game <FaBolt aria-hidden="true" />
-                </Link>
+                  ×
+                </button>
+
+                <div
+                  className="fmm-featured-modal-poster"
+                  aria-hidden={!selectedFeaturedPoster}
+                >
+                  {selectedFeaturedPoster ? (
+                    <FightImage
+                      src={selectedFeaturedPoster}
+                      alt={`${getFightTitle(selectedFeaturedFight)} fight poster`}
+                      width={900}
+                      height={1200}
+                      sizes="(max-width: 760px) 86vw, 36vw"
+                    />
+                  ) : (
+                    <FightImage
+                      src={getHomeFighterImage(selectedFeaturedFight, "A", 0)}
+                      alt={getHomeFighterName(selectedFeaturedFight, "A")}
+                      width={900}
+                      height={1200}
+                      sizes="(max-width: 760px) 86vw, 36vw"
+                    />
+                  )}
+                </div>
+
+                <div className="fmm-featured-modal-copy">
+                  <span className="fmm-featured-modal-kicker">
+                    <FaDollarSign aria-hidden="true" /> Win money featured fight
+                  </span>
+                  <h2 id="featured-fight-modal-title">
+                    {selectedFeaturedFight.matchName ||
+                      getFightTitle(selectedFeaturedFight)}
+                  </h2>
+                  <p>
+                    {getHomeFighterName(selectedFeaturedFight, "A")} vs{" "}
+                    {getHomeFighterName(selectedFeaturedFight, "B")}
+                  </p>
+
+                  <div className="fmm-featured-modal-meta">
+                    <span>
+                      <FaCalendarAlt aria-hidden="true" />{" "}
+                      {formatDateTime(selectedFeaturedFight)}
+                    </span>
+                    <span>
+                      <FaBullseye aria-hidden="true" />{" "}
+                      {getFightSportLabel(selectedFeaturedFight)}
+                    </span>
+                    <span>
+                      <FaUsers aria-hidden="true" />{" "}
+                      {getPlayerCount(selectedFeaturedFight).toLocaleString()}{" "}
+                      players
+                    </span>
+                    <span>
+                      <FaCoins aria-hidden="true" />{" "}
+                      {getPotTokenLabel(selectedFeaturedFight)}
+                    </span>
+                    <span>
+                      <FaTrophy aria-hidden="true" />{" "}
+                      {getPrizePool(selectedFeaturedFight)}
+                    </span>
+                    <span>
+                      <FaShieldAlt aria-hidden="true" />{" "}
+                      {selectedFeaturedFight.matchStatus ||
+                        selectedFeaturedFight.matchShadowOpenStatus ||
+                        "Open"}
+                    </span>
+                  </div>
+
+                  <div className="fmm-featured-modal-actions">
+                    <Link
+                      href={PLAYER_SIGNUP_HREF}
+                      className="theme-btn theme-btn-primary"
+                      onClick={() => setSelectedFeaturedFight(null)}
+                    >
+                      Enter To Win <FaArrowRight aria-hidden="true" />
+                    </Link>
+                    <Link
+                      href={getFightDetailHref(selectedFeaturedFight)}
+                      className="theme-btn theme-btn-secondary"
+                      onClick={() => setSelectedFeaturedFight(null)}
+                    >
+                      View Full Fight <FaPlay aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
+          <main className="theme-container fmm-home-main">
+            <section
+              className="fmm-active-section"
+              aria-labelledby="active-contests-title"
+            >
+              <div className="fmm-section-title-row">
+                <div>
+                  <span className="fmm-section-kicker">
+                    <FaFire aria-hidden="true" /> Browse fight categories
+                  </span>
+                  <h2 id="active-contests-title">Browse Fight Categories</h2>
+                </div>
+                <div className="fmm-section-actions">
+                  <span className="fmm-swipe-hint">
+                    Tap a category and jump straight to that section
+                  </span>
+                  <Link href="/upcomingfights?status=all">
+                    All fight cards <FaArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
               </div>
 
               <div
-                className="fmm-premium-hero-stats"
-                aria-label="Fantasy MMAdness live experience stats"
+                className="fmm-home-fight-tabs fmm-home-section-nav"
+                role="tablist"
+                aria-label="Jump to homepage fight sections"
               >
-                <div>
-                  <strong>
-                    {totalHomeFightCount || contestMatches.length || 0}
-                  </strong>
-                  <span>Ready fights</span>
-                </div>
-                <div>
-                  <strong>
-                    {activeHeroFight
-                      ? getLockLabel(activeHeroFight, now)
-                      : "OPEN"}
-                  </strong>
-                  <span>Next lock</span>
-                </div>
-                <div>
-                  <strong>5</strong>
-                  <span>Fight categories</span>
-                </div>
-              </div>
-
-              {activeHeroFight && (
-                <div className="fmm-tonight-callout">
-                  <span>Win Big Featured Entry</span>
-                  <strong>
-                    {activeHeroFight.matchName ||
-                      getFightTitle(activeHeroFight)}
-                  </strong>
-                  <Link href={getFightDetailHref(activeHeroFight)}>
-                    Enter this fight <FaArrowRight aria-hidden="true" />
-                  </Link>
-                </div>
-              )}
-
-              <div className="fmm-proof-strip">
-                <div>
-                  <FaGift aria-hidden="true" />
-                  <strong>Cash Prizes</strong>
-                  <span>Ready</span>
-                </div>
-                <div>
-                  <FaTrophy aria-hidden="true" />
-                  <strong>Leaderboard</strong>
-                  <span>Live</span>
-                </div>
-                <div>
-                  <FaCoins aria-hidden="true" />
-                  <strong>Predictions</strong>
-                  <span>Open</span>
-                </div>
-                <div>
-                  <FaShieldAlt aria-hidden="true" />
-                  <strong>Secure</strong>
-                  <span>Platform</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="fmm-hero-fight-area">
-              {activeHeroFight ? (
-                <aside
-                  key={getFightId(activeHeroFight) || activeHeroIndex}
-                  className={`fmm-hero-event-card fmm-promoted-slide-card fmm-featured-fight-banner ${activeHeroPoster ? "has-fight-poster" : ""}`}
-                >
-                  {activeHeroPoster && (
-                    <div className="fmm-featured-poster-backdrop" aria-hidden="true">
-                      <FightImage
-                        src={activeHeroPoster}
-                        alt="Featured fight poster"
-                        width={1280}
-                        height={720}
-                        priority
-                        sizes="(max-width: 1180px) 90vw, 48vw"
-                      />
-                    </div>
-                  )}
-                  <div className="fmm-featured-badge">
-                    <FaDollarSign aria-hidden="true" /> Win Big Featured Fight
-                  </div>
-                  {heroSlides.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        className="fmm-featured-arrow is-left"
-                        aria-label="Previous promoted fight"
-                        onClick={() => setActiveHeroIndex((current) => (current - 1 + heroSlides.length) % heroSlides.length)}
-                      >
-                        ‹
-                      </button>
-                      <button
-                        type="button"
-                        className="fmm-featured-arrow is-right"
-                        aria-label="Next promoted fight"
-                        onClick={() => setActiveHeroIndex((current) => (current + 1) % heroSlides.length)}
-                      >
-                        ›
-                      </button>
-                    </>
-                  )}
-                  <div className="fmm-featured-duel-stage">
-                    <div className="fmm-featured-fighter is-left">
-                      <FightImage
-                        src={getHomeFighterImage(activeHeroFight, "A", 0)}
-                        alt={getHomeFighterName(activeHeroFight, "A")}
-                        width={420}
-                        height={560}
-                        priority
-                        sizes="(max-width: 760px) 42vw, 30vw"
-                      />
-                    </div>
-                    <div className="fmm-featured-center">
-                      <p>{activeHeroFight.matchName || getFightSportLabel(activeHeroFight)}</p>
-                      <h2>
-                        <span>{getHomeFighterName(activeHeroFight, "A")}</span>
-                        <small>vs</small>
-                        <span>{getHomeFighterName(activeHeroFight, "B")}</span>
-                      </h2>
-                      <div className="fmm-hero-event-meta">
-                        <span>{getFeaturedDateLabel(activeHeroFight)}</span>
-                        <span className="fmm-featured-date-divider" aria-hidden="true" />
-                        <FaClock aria-hidden="true" />
-                        <span>{getFeaturedTimeLabel(activeHeroFight)}</span>
-                      </div>
-                      <div className="fmm-promoted-details fmm-featured-details-grid">
-                        <span><FaBullseye aria-hidden="true" /> {getFightSportLabel(activeHeroFight)}</span>
-                        <span><FaClock aria-hidden="true" /> {activeHeroFight.matchStatus || "Open"}</span>
-                        <span><FaUsers aria-hidden="true" /> {getPlayerCount(activeHeroFight).toLocaleString()} players</span>
-                        <span><FaCoins aria-hidden="true" /> {getPotTokenLabel(activeHeroFight)}</span>
-                        <span><FaTrophy aria-hidden="true" /> {getPrizePool(activeHeroFight)}</span>
-                        <span><FaShieldAlt aria-hidden="true" /> {getRoundLabel(activeHeroFight)}</span>
-                      </div>
-                      <div className="fmm-countdown-box" aria-label="Fight countdown">
-                        {primaryCountdown ? (
-                          primaryCountdown.slice(-3).map(({ label, value }) => (
-                            <div key={label}>
-                              <strong>{value}</strong>
-                              <span>{label}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="fmm-countdown-state">
-                            <strong>{activeHeroFight.matchStatus || "Open"}</strong>
-                            <span>{activeHeroFight.matchName || "Contest"}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="fmm-featured-actions">
-                        <Link href={PLAYER_SIGNUP_HREF} className="fmm-featured-primary-cta theme-btn theme-btn-primary">
-                          Enter To Win <FaArrowRight aria-hidden="true" />
-                        </Link>
-                        <Link href={getFightDetailHref(activeHeroFight)} className="fmm-featured-secondary-cta theme-btn theme-btn-secondary">
-                          View details <FaPlay aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="fmm-featured-fighter is-right">
-                      <FightImage
-                        src={getHomeFighterImage(activeHeroFight, "B", 1)}
-                        alt={getHomeFighterName(activeHeroFight, "B")}
-                        width={420}
-                        height={560}
-                        priority
-                        sizes="(max-width: 760px) 42vw, 30vw"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="fmm-featured-status-panel">
-                    <div className="fmm-featured-status-copy">
-                      <span>{activeHeroFight.matchStatus || activeHeroFight.matchShadowOpenStatus || "Ongoing"}</span>
-                      <strong>{activeHeroFight.matchName || getFightTitle(activeHeroFight)}</strong>
-                      <small>Sign up free, make your picks and chase the prize leaderboard.</small>
-                    </div>
-                    <Link href={PLAYER_SIGNUP_HREF} className="fmm-featured-status-cta fmm-featured-panel-cta">
-                      Enter To Win <FaArrowRight aria-hidden="true" />
-                    </Link>
-                  </div>
-
-                  {heroSlides.length > 1 && (
-                    <div className="fmm-promoted-dots" aria-label="Promoted fight slides">
-                      {heroSlides.map((fight, index) => (
-                        <button
-                          key={getFightId(fight) || index}
-                          type="button"
-                          className={index === activeHeroIndex % heroSlides.length ? "is-active" : ""}
-                          onClick={() => setActiveHeroIndex(index)}
-                          aria-label={`Show promoted fight ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </aside>
-              ) : (
-                <aside className="fmm-hero-event-card fmm-promoted-slide-card fmm-featured-fight-banner fmm-hero-loading-card" role="status" aria-live="polite">
-                  <div className="fmm-premium-loader-orbit" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                  <div className="fmm-premium-loader-copy">
-                    <span>Syncing live cards</span>
-                    <strong>Building the featured fight stage...</strong>
-                    <p>Pulling promoted matchups, fighter images, dates and contest state.</p>
-                  </div>
-                  <div className="fmm-premium-loader-bars" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                </aside>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <main className="theme-container fmm-home-main">
-          <section
-            className="fmm-active-section"
-            aria-labelledby="active-contests-title"
-          >
-            <div className="fmm-section-title-row">
-              <div>
-                <span className="fmm-section-kicker">
-                  <FaFire aria-hidden="true" /> Browse fight categories
-                </span>
-                <h2 id="active-contests-title">Browse Fight Categories</h2>
-              </div>
-              <div className="fmm-section-actions">
-                <span className="fmm-swipe-hint">
-                  Tap a category and jump straight to that section
-                </span>
-                <Link href="/upcomingfights?status=all">
-                  All fight cards <FaArrowRight aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-
-            <div
-              className="fmm-home-fight-tabs fmm-home-section-nav"
-              role="tablist"
-              aria-label="Jump to homepage fight sections"
-            >
-              {homeFightSections.map((section) => (
-                <button
-                  type="button"
-                  key={section.key}
-                  className={`fmm-home-fight-tab-card is-${section.key} ${
-                    activeFightSport === section.key ? "is-active" : ""
-                  }`}
-                  onClick={(event) => handleHomeSportJump(section.key, event)}
-                >
-                  <span className="fmm-home-tab-art" aria-hidden="true">
-                    <Image
-                      src={section.image}
-                      alt=""
-                      width={120}
-                      height={88}
-                      sizes="120px"
-                    />
-                  </span>
-                  <span className="fmm-home-tab-copy">
-                    <span>{section.label}</span>
-                    <small>{section.count.toLocaleString()} fights</small>
-                  </span>
-                  <strong>{section.count.toLocaleString()}</strong>
-                </button>
-              ))}
-            </div>
-
-            <div className="fmm-home-category-stack">
-              {matchStatus === "loading" && (
-                <div className="fmm-empty-card">Loading active contests...</div>
-              )}
-              {matchStatus === "failed" && (
-                <div className="fmm-empty-card">
-                  Unable to load fights: {matchError}
-                </div>
-              )}
-
-              {matchStatus !== "loading" &&
-                matchStatus !== "failed" &&
-                homeFightSections.map((section) => {
-                  const isExpanded = Boolean(expandedHomeSports?.[section.key]);
-                  const visibleFights = isExpanded
-                    ? section.fights
-                    : section.fights.slice(0, HOME_CATEGORY_PREVIEW_LIMIT);
-                  const hasMore =
-                    section.fights.length > HOME_CATEGORY_PREVIEW_LIMIT;
-
-                  return (
-                    <section
-                      className={`fmm-home-sport-section ${getCategoryClass(section.key)} ${
-                        isExpanded ? "is-expanded" : ""
-                      }`}
-                      id={`home-${section.key}-fights`}
-                      key={section.key}
-                      ref={(node) => {
-                        homeSportSectionRefs.current[section.key] = node;
-                      }}
-                    >
-                      <header className="fmm-home-sport-section-head">
-                        <div>
-                          <span className="fmm-section-kicker">
-                            <FaBullseye aria-hidden="true" /> {section.count}{" "}
-                            contest{section.count === 1 ? "" : "s"}
-                          </span>
-                          <h3>{section.label} section</h3>
-                          <p>
-                            Newest uploaded fights appear first. Cards without
-                            fighter images stay off the front page.
-                          </p>
-                        </div>
-                        <div className="fmm-home-sport-section-actions">
-                          {hasMore && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                toggleHomeSportSection(section.key)
-                              }
-                            >
-                              {isExpanded
-                                ? "Show less"
-                                : `Show ${section.label}`}
-                            </button>
-                          )}
-                          <Link href={getHomeSportViewAllHref(section.key)}>
-                            Browse all {section.label} fights{" "}
-                            <FaArrowRight aria-hidden="true" />
-                          </Link>
-                        </div>
-                      </header>
-
-                      <div
-                        className="fmm-contest-grid fmm-category-contest-grid"
-                        onPointerDown={handleFightRailPointerDown}
-                        onPointerMove={handleFightRailPointerMove}
-                        onPointerUp={handleFightRailPointerUp}
-                        onPointerCancel={handleFightRailPointerUp}
-                        onPointerLeave={handleFightRailPointerUp}
-                        onClickCapture={handleFightRailClickCapture}
-                      >
-                        {visibleFights.length === 0 ? (
-                          <div className="fmm-empty-card">
-                            No {section.label.toLowerCase()} contests are
-                            currently available.
-                          </div>
-                        ) : (
-                          visibleFights.map((match, index) =>
-                            renderHomeFightCard(match, index, section.key),
-                          )
-                        )}
-                      </div>
-                    </section>
-                  );
-                })}
-            </div>
-          </section>
-
-          <section className="fmm-home-wrestling-feature">
-            <div className="fmm-home-wrestling-copy">
-              <p>
-                <FaCrown /> New game mode
-              </p>
-              <h2>Pro Wrestling is now part of Fantasy MMADNESS.</h2>
-              <span>
-                Pro Wrestling remains inside the premium category tabs and appears in its own fight section below.
-              </span>
-              <div>
-                <Link
-                  href="/pro-wrestling"
-                  className="theme-btn theme-btn-primary"
-                >
-                  Explore pro wrestling <FaArrowRight />
-                </Link>
-                <Link
-                  href="/pro-wrestling/how-to-play"
-                  className="theme-btn theme-btn-secondary"
-                >
-                  How wrestling scores
-                </Link>
-              </div>
-            </div>
-            <div className="fmm-home-wrestling-visual">
-              <Image
-                src={HOME_WRESTLING_IMAGE}
-                alt="Fantasy MMADNESS Pro Wrestling"
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1180px) 90vw, 50vw"
-              />
-              {wrestlingMatches[0] ? (
-                <article>
-                  <header>
-                    <small>{wrestlingMatches[0].status}</small>
-                    <strong>{wrestlingMatches[0].eventName}</strong>
-                  </header>
-                  <div>
-                    <figure>
-                      <FightImage
-                        src={getPWImage(wrestlingMatches[0].competitorA, "A")}
-                        alt="Pro wrestling competitor"
-                        width={80}
-                        height={90}
-                        sizes="55px"
-                      />
-                      <figcaption>
-                        {wrestlingMatches[0].competitorA?.displayName}
-                      </figcaption>
-                    </figure>
-                    <b>VS</b>
-                    <figure>
-                      <FightImage
-                        src={getPWImage(wrestlingMatches[0].competitorB, "B")}
-                        alt="Pro wrestling competitor"
-                        width={80}
-                        height={90}
-                        sizes="55px"
-                      />
-                      <figcaption>
-                        {wrestlingMatches[0].competitorB?.displayName}
-                      </figcaption>
-                    </figure>
-                  </div>
-                  <p>
-                    {formatWrestlingDate(wrestlingMatches[0].matchDate)} ·{" "}
-                    {wrestlingMatches[0].currentPot || 0} token pot
-                  </p>
-                  <Link
-                    href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}
+                {homeFightSections.map((section) => (
+                  <button
+                    type="button"
+                    key={section.key}
+                    className={`fmm-home-fight-tab-card is-${section.key} ${
+                      activeFightSport === section.key ? "is-active" : ""
+                    }`}
+                    onClick={(event) => handleHomeSportJump(section.key, event)}
                   >
-                    Open featured card <FaArrowRight />
-                  </Link>
-                </article>
-              ) : (
-                <article className="is-empty">
-                  <FaCrown />
-                  <strong>Wrestling contest cards will appear here.</strong>
-                  <Link href="/pro-wrestling">Explore the new game mode</Link>
-                </article>
-              )}
-            </div>
-          </section>
-
-          <section
-            className="fmm-dashboard-grid"
-            aria-label="Gameplay summary and leaderboard"
-          >
-            <div className="fmm-panel fmm-how-score-panel">
-              <div className="fmm-how-block">
-                <h2>How It Works</h2>
-                {[
-                  [
-                    "Predict",
-                    "Pick the winner, method, round and score for each fight.",
-                  ],
-                  [
-                    "Score Points",
-                    "Earn points based on accuracy and depth of your predictions.",
-                  ],
-                  [
-                    "Climb & Win",
-                    "Compete on leaderboards and win real prizes.",
-                  ],
-                ].map(([title, copy], index) => (
-                  <div className="fmm-step-row" key={title}>
-                    <span>{index + 1}</span>
-                    <div>
-                      <strong>{title}</strong>
-                      <p>{copy}</p>
-                    </div>
-                  </div>
+                    <span className="fmm-home-tab-art" aria-hidden="true">
+                      <Image
+                        src={section.image}
+                        alt=""
+                        width={120}
+                        height={88}
+                        sizes="120px"
+                      />
+                    </span>
+                    <span className="fmm-home-tab-copy">
+                      <span>{section.label}</span>
+                      <small>{section.count.toLocaleString()} fights</small>
+                    </span>
+                    <strong>{section.count.toLocaleString()}</strong>
+                  </button>
                 ))}
               </div>
 
-              <div className="fmm-score-block">
-                <h2>Scoring Preview</h2>
-                <div className="fmm-score-table">
-                  <div>
-                    <strong>Prediction</strong>
-                    <strong>Points</strong>
+              <div className="fmm-home-category-stack">
+                {matchStatus === "loading" && (
+                  <div className="fmm-empty-card">
+                    Loading active contests...
                   </div>
-                  {SCORING_ROWS.map(([label, points]) => (
-                    <div
-                      key={label}
-                      className={label === "Perfect Fight" ? "is-perfect" : ""}
+                )}
+                {matchStatus === "failed" && (
+                  <div className="fmm-empty-card">
+                    Unable to load fights: {matchError}
+                  </div>
+                )}
+
+                {matchStatus !== "loading" &&
+                  matchStatus !== "failed" &&
+                  homeFightSections.map((section) => {
+                    const isExpanded = Boolean(
+                      expandedHomeSports?.[section.key],
+                    );
+                    const visibleFights = isExpanded
+                      ? section.fights
+                      : section.fights.slice(0, HOME_CATEGORY_PREVIEW_LIMIT);
+                    const hasMore =
+                      section.fights.length > HOME_CATEGORY_PREVIEW_LIMIT;
+
+                    return (
+                      <section
+                        className={`fmm-home-sport-section ${getCategoryClass(section.key)} ${
+                          isExpanded ? "is-expanded" : ""
+                        }`}
+                        id={`home-${section.key}-fights`}
+                        key={section.key}
+                        ref={(node) => {
+                          homeSportSectionRefs.current[section.key] = node;
+                        }}
+                      >
+                        <header className="fmm-home-sport-section-head">
+                          <div>
+                            <span className="fmm-section-kicker">
+                              <FaBullseye aria-hidden="true" /> {section.count}{" "}
+                              contest{section.count === 1 ? "" : "s"}
+                            </span>
+                            <h3>{section.label} section</h3>
+                            <p>
+                              Newest uploaded fights appear first. Cards without
+                              fighter images stay off the front page.
+                            </p>
+                          </div>
+                          <div className="fmm-home-sport-section-actions">
+                            {hasMore && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  toggleHomeSportSection(section.key)
+                                }
+                              >
+                                {isExpanded
+                                  ? "Show less"
+                                  : `Show ${section.label}`}
+                              </button>
+                            )}
+                            <Link href={getHomeSportViewAllHref(section.key)}>
+                              Browse all {section.label} fights{" "}
+                              <FaArrowRight aria-hidden="true" />
+                            </Link>
+                          </div>
+                        </header>
+
+                        <div
+                          className="fmm-contest-grid fmm-category-contest-grid"
+                          onPointerDown={handleFightRailPointerDown}
+                          onPointerMove={handleFightRailPointerMove}
+                          onPointerUp={handleFightRailPointerUp}
+                          onPointerCancel={handleFightRailPointerUp}
+                          onPointerLeave={handleFightRailPointerUp}
+                          onClickCapture={handleFightRailClickCapture}
+                        >
+                          {visibleFights.length === 0 ? (
+                            <div className="fmm-empty-card">
+                              No {section.label.toLowerCase()} contests are
+                              currently available.
+                            </div>
+                          ) : (
+                            visibleFights.map((match, index) =>
+                              renderHomeFightCard(match, index, section.key),
+                            )
+                          )}
+                        </div>
+                      </section>
+                    );
+                  })}
+              </div>
+            </section>
+
+            <section className="fmm-home-wrestling-feature">
+              <div className="fmm-home-wrestling-copy">
+                <p>
+                  <FaCrown /> New game mode
+                </p>
+                <h2>Pro Wrestling is now part of Fantasy MMADNESS.</h2>
+                <span>
+                  Pro Wrestling remains inside the premium category tabs and
+                  appears in its own fight section below.
+                </span>
+                <div>
+                  <Link
+                    href="/pro-wrestling"
+                    className="theme-btn theme-btn-primary"
+                  >
+                    Explore pro wrestling <FaArrowRight />
+                  </Link>
+                  <Link
+                    href="/pro-wrestling/how-to-play"
+                    className="theme-btn theme-btn-secondary"
+                  >
+                    How wrestling scores
+                  </Link>
+                </div>
+              </div>
+              <div className="fmm-home-wrestling-visual">
+                <Image
+                  src={HOME_WRESTLING_IMAGE}
+                  alt="Fantasy MMADNESS Pro Wrestling"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1180px) 90vw, 50vw"
+                />
+                {wrestlingMatches[0] ? (
+                  <article>
+                    <header>
+                      <small>{wrestlingMatches[0].status}</small>
+                      <strong>{wrestlingMatches[0].eventName}</strong>
+                    </header>
+                    <div>
+                      <figure>
+                        <FightImage
+                          src={getPWImage(wrestlingMatches[0].competitorA, "A")}
+                          alt="Pro wrestling competitor"
+                          width={80}
+                          height={90}
+                          sizes="55px"
+                        />
+                        <figcaption>
+                          {wrestlingMatches[0].competitorA?.displayName}
+                        </figcaption>
+                      </figure>
+                      <b>VS</b>
+                      <figure>
+                        <FightImage
+                          src={getPWImage(wrestlingMatches[0].competitorB, "B")}
+                          alt="Pro wrestling competitor"
+                          width={80}
+                          height={90}
+                          sizes="55px"
+                        />
+                        <figcaption>
+                          {wrestlingMatches[0].competitorB?.displayName}
+                        </figcaption>
+                      </figure>
+                    </div>
+                    <p>
+                      {formatWrestlingDate(wrestlingMatches[0].matchDate)} ·{" "}
+                      {wrestlingMatches[0].currentPot || 0} token pot
+                    </p>
+                    <Link
+                      href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}
                     >
-                      <span>{label}</span>
-                      <strong>{points}</strong>
+                      Open featured card <FaArrowRight />
+                    </Link>
+                  </article>
+                ) : (
+                  <article className="is-empty">
+                    <FaCrown />
+                    <strong>Wrestling contest cards will appear here.</strong>
+                    <Link href="/pro-wrestling">Explore the new game mode</Link>
+                  </article>
+                )}
+              </div>
+            </section>
+
+            <section
+              className="fmm-dashboard-grid"
+              aria-label="Gameplay summary and leaderboard"
+            >
+              <div className="fmm-panel fmm-how-score-panel">
+                <div className="fmm-how-block">
+                  <h2>How It Works</h2>
+                  {[
+                    [
+                      "Predict",
+                      "Pick the winner, method, round and score for each fight.",
+                    ],
+                    [
+                      "Score Points",
+                      "Earn points based on accuracy and depth of your predictions.",
+                    ],
+                    [
+                      "Climb & Win",
+                      "Compete on leaderboards and win real prizes.",
+                    ],
+                  ].map(([title, copy], index) => (
+                    <div className="fmm-step-row" key={title}>
+                      <span>{index + 1}</span>
+                      <div>
+                        <strong>{title}</strong>
+                        <p>{copy}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <Link href="/guides">
-                  Full rules &amp; scoring breakdown in How To Play
-                </Link>
-              </div>
-            </div>
 
-            <div className="fmm-panel fmm-winners-panel">
-              <div className="fmm-panel-title-row">
-                <h2>Recent Winners</h2>
-                <Link href="/global-leaderboard">
-                  View All Winners <FaArrowRight aria-hidden="true" />
-                </Link>
-              </div>
-              {STATIC_WINNERS.map((winner) => (
-                <div className="fmm-winner-row" key={winner.name}>
-                  <span className="fmm-winner-medal">{winner.icon}</span>
-                  <div>
-                    <strong>{winner.name}</strong>
-                    <p>{winner.contest}</p>
+                <div className="fmm-score-block">
+                  <h2>Scoring Preview</h2>
+                  <div className="fmm-score-table">
+                    <div>
+                      <strong>Prediction</strong>
+                      <strong>Points</strong>
+                    </div>
+                    {SCORING_ROWS.map(([label, points]) => (
+                      <div
+                        key={label}
+                        className={
+                          label === "Perfect Fight" ? "is-perfect" : ""
+                        }
+                      >
+                        <span>{label}</span>
+                        <strong>{points}</strong>
+                      </div>
+                    ))}
                   </div>
-                  <strong>{winner.amount}</strong>
+                  <Link href="/guides">
+                    Full rules &amp; scoring breakdown in How To Play
+                  </Link>
                 </div>
-              ))}
-              <p className="fmm-panel-note">
-                <FaCrown aria-hidden="true" /> Become the next champion.
-              </p>
-            </div>
+              </div>
 
-            <div className="fmm-panel fmm-leaderboard-panel">
-              <div className="fmm-panel-title-row">
-                <h2>Live Leaderboard</h2>
-                <Link href="/leaderboard">
-                  View Full Leaderboard <FaArrowRight aria-hidden="true" />
+              <div className="fmm-panel fmm-winners-panel">
+                <div className="fmm-panel-title-row">
+                  <h2>Recent Winners</h2>
+                  <Link href="/global-leaderboard">
+                    View All Winners <FaArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
+                {STATIC_WINNERS.map((winner) => (
+                  <div className="fmm-winner-row" key={winner.name}>
+                    <span className="fmm-winner-medal">{winner.icon}</span>
+                    <div>
+                      <strong>{winner.name}</strong>
+                      <p>{winner.contest}</p>
+                    </div>
+                    <strong>{winner.amount}</strong>
+                  </div>
+                ))}
+                <p className="fmm-panel-note">
+                  <FaCrown aria-hidden="true" /> Become the next champion.
+                </p>
+              </div>
+
+              <div className="fmm-panel fmm-leaderboard-panel">
+                <div className="fmm-panel-title-row">
+                  <h2>Live Leaderboard</h2>
+                  <Link href="/leaderboard">
+                    View Full Leaderboard <FaArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="fmm-leaderboard-head">
+                  <span>Rank</span>
+                  <span>Player</span>
+                  <span>Points</span>
+                </div>
+                {liveLeaderboardRows.map((player, index) => (
+                  <div
+                    className={`fmm-leaderboard-row ${index === 3 ? "is-highlighted" : ""}`}
+                    key={`${player.name}-${index}`}
+                  >
+                    <span>{index + 1}</span>
+                    <div>
+                      {player.avatar ? (
+                        <FightImage
+                          src={player.avatar}
+                          alt={player.name}
+                          width={48}
+                          height={48}
+                          sizes="40px"
+                        />
+                      ) : (
+                        <span>{player.name.charAt(0).toUpperCase()}</span>
+                      )}
+                      <strong>{player.name}</strong>
+                    </div>
+                    <strong>
+                      {Number(player.points || 0).toLocaleString()}
+                    </strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section
+              className="fmm-metrics-partners"
+              aria-label="Platform metrics and partners"
+            >
+              <div className="fmm-metrics-grid">
+                <div>
+                  <FaUsers aria-hidden="true" />
+                  <strong>128,547+</strong>
+                  <span>Players</span>
+                  <p>Worldwide community</p>
+                </div>
+                <div>
+                  <FaBullseye aria-hidden="true" />
+                  <strong>4.2M+</strong>
+                  <span>Predictions Submitted</span>
+                  <p>Across all time</p>
+                </div>
+                <div>
+                  <FaTrophy aria-hidden="true" />
+                  <strong>$1.7M+</strong>
+                  <span>Tokens Awarded</span>
+                  <p>To our champions</p>
+                </div>
+                <div>
+                  <FaShieldAlt aria-hidden="true" />
+                  <strong>100%</strong>
+                  <span>Secure &amp; Fair</span>
+                  <p>Provably fair contests</p>
+                </div>
+              </div>
+              <div className="fmm-partners-card">
+                <p>Trusted by fans. Backed by partners.</p>
+                <div>
+                  <span>UFC</span>
+                  <span>BKFC</span>
+                  <span>GLORY</span>
+                  <span>ESPN</span>
+                  <span>DAZN</span>
+                </div>
+              </div>
+            </section>
+
+            <section
+              className="fmm-fight-art-section"
+              aria-label="Fight night experience"
+            >
+              <div className="fmm-fight-art-copy">
+                <p>Fight Night Experience</p>
+                <h2>Built for every punch, round and prediction.</h2>
+                <span>
+                  Premium fight cards, live leaderboards and clean prediction
+                  flows stay focused on the contest, not hidden stat tables.
+                </span>
+                <Link href="/upcomingfights" className="fmm-art-link">
+                  Explore contests <FaArrowRight aria-hidden="true" />
                 </Link>
               </div>
-              <div className="fmm-leaderboard-head">
-                <span>Rank</span>
-                <span>Player</span>
-                <span>Points</span>
+              <div className="fmm-fight-art-media">
+                <Image
+                  src={HOME_FIGHT_ART_IMAGE}
+                  alt="Combat sports fight night"
+                  width={1280}
+                  height={720}
+                  sizes="(max-width: 760px) 100vw, 58vw"
+                />
               </div>
-              {liveLeaderboardRows.map((player, index) => (
-                <div
-                  className={`fmm-leaderboard-row ${index === 3 ? "is-highlighted" : ""}`}
-                  key={`${player.name}-${index}`}
+            </section>
+
+            <section
+              className="fmm-contact-panel"
+              aria-labelledby="contact-home-title"
+            >
+              <div>
+                <p>Contact Fantasy MMAdness</p>
+                <h2 id="contact-home-title">
+                  Questions about leagues, sponsors, or fight cards?
+                </h2>
+                <span>
+                  Send a message and the team will follow up. The existing
+                  production contact endpoint is unchanged.
+                </span>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Full name"
+                  required
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email address"
+                  required
+                />
+                <input
+                  type="text"
+                  name="subject"
+                  placeholder="Subject"
+                  required
+                />
+                <textarea name="message" placeholder="Message" required />
+                <button
+                  type="submit"
+                  className="theme-btn theme-btn-primary"
+                  disabled={isSubmitting}
                 >
-                  <span>{index + 1}</span>
-                  <div>
-                    {player.avatar ? (
-                      <FightImage
-                        src={player.avatar}
-                        alt={player.name}
-                        width={48}
-                        height={48}
-                        sizes="40px"
-                      />
-                    ) : (
-                      <span>{player.name.charAt(0).toUpperCase()}</span>
-                    )}
-                    <strong>{player.name}</strong>
-                  </div>
-                  <strong>{Number(player.points || 0).toLocaleString()}</strong>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section
-            className="fmm-metrics-partners"
-            aria-label="Platform metrics and partners"
-          >
-            <div className="fmm-metrics-grid">
-              <div>
-                <FaUsers aria-hidden="true" />
-                <strong>128,547+</strong>
-                <span>Players</span>
-                <p>Worldwide community</p>
-              </div>
-              <div>
-                <FaBullseye aria-hidden="true" />
-                <strong>4.2M+</strong>
-                <span>Predictions Submitted</span>
-                <p>Across all time</p>
-              </div>
-              <div>
-                <FaTrophy aria-hidden="true" />
-                <strong>$1.7M+</strong>
-                <span>Tokens Awarded</span>
-                <p>To our champions</p>
-              </div>
-              <div>
-                <FaShieldAlt aria-hidden="true" />
-                <strong>100%</strong>
-                <span>Secure &amp; Fair</span>
-                <p>Provably fair contests</p>
-              </div>
-            </div>
-            <div className="fmm-partners-card">
-              <p>Trusted by fans. Backed by partners.</p>
-              <div>
-                <span>UFC</span>
-                <span>BKFC</span>
-                <span>GLORY</span>
-                <span>ESPN</span>
-                <span>DAZN</span>
-              </div>
-            </div>
-          </section>
-
-          <section
-            className="fmm-fight-art-section"
-            aria-label="Fight night experience"
-          >
-            <div className="fmm-fight-art-copy">
-              <p>Fight Night Experience</p>
-              <h2>Built for every punch, round and prediction.</h2>
-              <span>
-                Premium fight cards, live leaderboards and clean prediction
-                flows stay focused on the contest, not hidden stat tables.
-              </span>
-              <Link href="/upcomingfights" className="fmm-art-link">
-                Explore contests <FaArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="fmm-fight-art-media">
-              <Image
-                src={HOME_FIGHT_ART_IMAGE}
-                alt="Combat sports fight night"
-                width={1280}
-                height={720}
-                sizes="(max-width: 760px) 100vw, 58vw"
-              />
-            </div>
-          </section>
-
-          <section
-            className="fmm-contact-panel"
-            aria-labelledby="contact-home-title"
-          >
-            <div>
-              <p>Contact Fantasy MMAdness</p>
-              <h2 id="contact-home-title">
-                Questions about leagues, sponsors, or fight cards?
-              </h2>
-              <span>
-                Send a message and the team will follow up. The existing
-                production contact endpoint is unchanged.
-              </span>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="fullName"
-                placeholder="Full name"
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email address"
-                required
-              />
-              <input
-                type="text"
-                name="subject"
-                placeholder="Subject"
-                required
-              />
-              <textarea name="message" placeholder="Message" required />
-              <button
-                type="submit"
-                className="theme-btn theme-btn-primary"
-                disabled={isSubmitting}
-              >
-                {buttonText}
-              </button>
-            </form>
-          </section>
-        </main>
+                  {buttonText}
+                </button>
+              </form>
+            </section>
+          </main>
         </div>
       </div>
     </>
