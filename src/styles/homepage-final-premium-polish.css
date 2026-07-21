@@ -9151,3 +9151,390 @@ body:has(.site-experience-main.is-home-experience-main)
         54% top / auto 100% no-repeat !important;
   }
 }
+
+/* === 2026-07-21 FOLLOW-UP QA: VISIBLE WIN-MONEY HERO + MOBILE CATEGORY/VS FIX === */
+:root,
+.theme-home.fmm-home.page-shell,
+.site-experience-main.is-home-experience-main .theme-home.fmm-home.page-shell {
+  --fmm-home-prize-bg: url("/images/home-premium/fantasy-mmadness-fighters-coins-win-arena-bg-v2.webp") !important;
+}
+
+@media (min-width: 768px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-hero,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-hero,
+  .fmm-home .fmm-home-hero {
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(2, 4, 10, 0.64) 0%,
+        rgba(2, 4, 10, 0.48) 30%,
+        rgba(2, 4, 10, 0.12) 52%,
+        rgba(2, 4, 10, 0.24) 77%,
+        rgba(2, 4, 10, 0.56) 100%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(2, 4, 10, 0.02) 0%,
+        rgba(2, 4, 10, 0.08) 54%,
+        rgba(2, 4, 10, 0.79) 100%
+      ),
+      var(--fmm-home-prize-bg) !important;
+    background-position: center, center, center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-hero::before,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-hero::before,
+  .fmm-home .fmm-home-hero::before {
+    background:
+      radial-gradient(circle at 17% 35%, rgba(255, 29, 48, 0.18), transparent 25rem),
+      radial-gradient(circle at 52% 24%, rgba(255, 202, 95, 0.12), transparent 19rem),
+      radial-gradient(circle at 87% 32%, rgba(47, 123, 255, 0.17), transparent 25rem) !important;
+    opacity: 0.64 !important;
+    filter: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-hero::after,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-hero::after,
+  .fmm-home .fmm-home-hero::after {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(180deg, transparent 0%, rgba(2, 3, 8, 0.44) 100%) !important;
+    background-size: 104px 104px, 104px 104px, auto !important;
+    opacity: 0.22 !important;
+  }
+
+  /* The category accent is now communicated by the border/glow only. */
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card::after,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card::after,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card::after,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card.is-active::after {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-featured-card.fmm-mobile-signup-hero,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-featured-card.fmm-mobile-signup-hero,
+  .fmm-mobile-featured-card.fmm-mobile-signup-hero {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(3, 4, 8, 0.18) 0%,
+        rgba(3, 4, 8, 0.55) 48%,
+        rgba(3, 4, 8, 0.96) 100%
+      ),
+      var(--fmm-home-prize-bg) 50% top / auto 100% no-repeat !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row,
+  .fmm-mobile-category-row {
+    grid-auto-columns: 96px !important;
+    gap: 8px !important;
+    padding: 2px 14px 11px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    display: grid !important;
+    grid-template-rows: 48px minmax(20px, auto) 11px !important;
+    align-content: start !important;
+    justify-items: center !important;
+    width: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+    height: 98px !important;
+    min-height: 98px !important;
+    max-height: 98px !important;
+    padding: 7px 6px 6px !important;
+    gap: 3px !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile::after,
+  .fmm-mobile-category-row .fmm-mobile-category-tile::after,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-active::after {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    .fmm-mobile-category-icon,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    .fmm-mobile-category-image,
+  .fmm-mobile-category-row .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .fmm-mobile-category-image,
+  .fmm-mobile-category-icon.fmm-mobile-category-image {
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    .fmm-mobile-category-icon
+    img,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    .fmm-mobile-category-image
+    img,
+  .fmm-mobile-category-row .fmm-mobile-category-icon img,
+  .fmm-mobile-category-row .fmm-mobile-category-image img,
+  .fmm-mobile-category-icon.fmm-mobile-category-image img {
+    width: 58px !important;
+    max-width: 58px !important;
+    height: 46px !important;
+    max-height: 46px !important;
+    object-fit: contain !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > strong,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > strong,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile > strong {
+    display: -webkit-box !important;
+    width: 100% !important;
+    min-height: 20px !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    color: #fff !important;
+    font-size: 9.4px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.025em !important;
+    line-height: 1.02 !important;
+    text-align: center !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image),
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image),
+  .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image) {
+    display: block !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    color: rgba(255, 255, 255, 0.68) !important;
+    font-size: 6.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.035em !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Reserve a real center lane for VS and move both fighters away from it. */
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-hero-faceoff,
+  .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff,
+  .fmm-mobile-hero-faceoff {
+    left: 0 !important;
+    right: 0 !important;
+    grid-template-columns: minmax(0, 1fr) 46px minmax(0, 1fr) !important;
+    column-gap: 10px !important;
+    justify-items: center !important;
+    overflow: visible !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-hero-faceoff
+    .mobile-fighter-avatar,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-hero-faceoff
+    .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    position: relative !important;
+    inset: auto !important;
+    width: clamp(94px, 29vw, 116px) !important;
+    min-width: 0 !important;
+    max-width: 116px !important;
+    height: clamp(122px, 36vw, 148px) !important;
+    max-height: 148px !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left {
+    transform: translateX(-8px) !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    transform: translateX(8px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-hero-faceoff
+    > span,
+  .site-experience-main.is-home-experience-main .fmm-mobile-hero-faceoff > span,
+  .fmm-mobile-hero-faceoff > span {
+    position: relative !important;
+    z-index: 20 !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    isolation: isolate !important;
+    box-shadow: 0 0 0 5px rgba(3, 5, 10, 0.72), 0 0 24px rgba(255, 30, 48, 0.46) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-card-fighters,
+  .site-experience-main.is-home-experience-main .fmm-mobile-card-fighters,
+  .fmm-mobile-card-fighters {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) !important;
+    column-gap: 6px !important;
+    align-items: end !important;
+    justify-items: center !important;
+    overflow: hidden !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-card-fighters
+    .mobile-fighter-avatar,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-card-fighters
+    .mobile-fighter-avatar,
+  .fmm-mobile-card-fighters .mobile-fighter-avatar {
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 64px !important;
+    max-height: 64px !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar:first-child {
+    transform: translateX(-4px) !important;
+  }
+
+  .fmm-mobile-card-fighters .mobile-fighter-avatar:last-child {
+    transform: translateX(4px) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-card-fighters
+    b,
+  .site-experience-main.is-home-experience-main .fmm-mobile-card-fighters b,
+  .fmm-mobile-card-fighters b {
+    position: relative !important;
+    z-index: 12 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    border-radius: 999px !important;
+    background: radial-gradient(circle, #ff3143, #8e0712) !important;
+    box-shadow: 0 0 0 4px rgba(3, 5, 10, 0.66), 0 0 18px rgba(255, 33, 50, 0.42) !important;
+  }
+}
+
+@media (max-width: 389px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row,
+  .fmm-mobile-category-row {
+    grid-auto-columns: 90px !important;
+    gap: 7px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+  }
+
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-left,
+  .fmm-mobile-hero-faceoff .mobile-fighter-avatar.is-right {
+    width: 92px !important;
+    max-width: 92px !important;
+    height: 122px !important;
+    max-height: 122px !important;
+  }
+}
