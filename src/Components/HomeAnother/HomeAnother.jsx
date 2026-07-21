@@ -105,7 +105,7 @@ const MOBILE_FALLBACK_SPORT_LABELS = {
 
 const getMobileUpcomingHeading = (section = {}) => {
   const label = section?.label || MOBILE_FALLBACK_SPORT_LABELS[section?.key] || "Combat";
-  return `Featured ${label} Fights`;
+  return `Upcoming ${label} Fights`;
 };
 
 const getHomeFightPosterImage = (fight = {}) =>
@@ -898,12 +898,6 @@ const getMobileDisplayFights = (fights = [], sportKey = "mma", limit = 3) => {
   );
 };
 
-const getPosterOnlyFights = (fights = [], limit = 5) =>
-  (Array.isArray(fights) ? fights : [])
-    .filter((fight) => Boolean(getHomeFightPosterImage(fight)))
-    .slice(0, limit);
-
-
 const getMobileEntryFee = (match = {}) => {
   const amount = Number(match?.entryFee || match?.fee || match?.cost || 0);
   return amount > 0 ? `$${amount.toLocaleString()}` : "$5";
@@ -1022,7 +1016,6 @@ const MobilePhoneHome = ({
   setActiveHeroIndex,
   heroSlides,
   homeFightSections,
-  wrestlingFights = [],
   matchError,
   matchStatus,
   now,
@@ -1038,7 +1031,6 @@ const MobilePhoneHome = ({
           ...tab,
           count: existing?.count || tab.fallbackCount || 0,
           fights: existing?.fights || [],
-          featuredFights: existing?.featuredFights || [],
         };
       }),
     [homeFightSections],
@@ -1047,14 +1039,12 @@ const MobilePhoneHome = ({
   const activeSection =
     mobileSections.find((section) => section.key === activeFightSport) ||
     mobileSections[0];
-  const selectedFeaturedPosterFights = getPosterOnlyFights(
-    activeSection?.featuredFights,
+  const selectedUpcomingFights = getMobileDisplayFights(
+    activeSection?.fights,
+    activeSection?.key,
     5,
   );
-  const mobileHeroSlides =
-    Array.isArray(heroSlides) && heroSlides.length
-      ? heroSlides
-      : selectedFeaturedPosterFights;
+  const mobileHeroSlides = Array.isArray(heroSlides) ? heroSlides : [];
   const heroSlideCount = mobileHeroSlides.length || 1;
   const safeMobileHeroIndex = activeHeroIndex % heroSlideCount;
   const mobileHeroFight =
@@ -1062,11 +1052,7 @@ const MobilePhoneHome = ({
     mobileHeroSlides[safeMobileHeroIndex] ||
     getMobileFallbackFight(activeSection?.key || "mma", 0);
   const dateChip = getMobileDateChip(mobileHeroFight);
-  const mobileOpenContests = getMobileDisplayFights(
-    wrestlingFights,
-    "pro-wrestling",
-    3,
-  );
+  const mobileOpenContests = selectedUpcomingFights.slice(0, 3);
   const mobileHeroPoster = getHomeFightPosterImage(mobileHeroFight);
   const visibleHeroDots = mobileHeroSlides.slice(0, 4);
   const mobileCountdownParts = getMobileCountdownDisplay(
@@ -1249,48 +1235,51 @@ const MobilePhoneHome = ({
           <div className="fmm-mobile-inline-alert">{matchError}</div>
         )}
 
-        <div className="fmm-mobile-fight-rail fmm-mobile-featured-poster-rail" ref={mobileFightRailRef}>
-          {selectedFeaturedPosterFights.length === 0 ? (
-            <div className="fmm-mobile-featured-empty">
-              <FaStar aria-hidden="true" />
-              <strong>No featured {activeSection?.label?.toLowerCase()} fight posters yet.</strong>
-              <span>Only fights promoted as Featured with an uploaded fight poster appear here.</span>
-            </div>
-          ) : (
-            selectedFeaturedPosterFights.map((match, index) => {
-              const posterImage = getHomeFightPosterImage(match);
-              return (
-                <Link
-                  href={getFightDetailHref(match)}
-                  className={`fmm-mobile-upcoming-card fmm-mobile-poster-fight-card ${getCategoryClass(match)}`}
-                  key={getFightId(match) || `${activeSection?.key}-featured-${index}`}
-                >
-                  <div className="fmm-mobile-poster-card-image">
-                    <FightImage
-                      src={posterImage}
-                      alt={`${match.matchName || getFightTitle(match)} fight poster`}
-                      width={420}
-                      height={560}
-                      sizes="72vw"
-                    />
-                  </div>
-                  <div className="fmm-mobile-poster-card-copy">
-                    <span><FaStar aria-hidden="true" /> Featured Fight Poster</span>
-                    <h3>{match.homepagePromotion?.title || match.matchName || getFightTitle(match)}</h3>
-                    <p><FaCalendarAlt aria-hidden="true" /> {formatDateTime(match)}</p>
-                    <small>{getPrizePool(match)} · {getPlayerCount(match).toLocaleString()} players</small>
-                  </div>
-                </Link>
-              );
-            })
-          )}
+        <div className="fmm-mobile-fight-rail" ref={mobileFightRailRef}>
+          {selectedUpcomingFights.map((match, index) => (
+            <Link
+              href={getFightDetailHref(match)}
+              className={`fmm-mobile-upcoming-card ${getCategoryClass(match)}`}
+              key={getFightId(match) || `${activeSection?.key}-${index}`}
+            >
+              <div className="fmm-mobile-upcoming-top">
+                <span>{getMobileEventLabel(match)}</span>
+                <small>{getMobileShortDate(match)}</small>
+              </div>
+              <div className="fmm-mobile-card-fighters">
+                <figure className="mobile-fighter-avatar">
+                  <FightImage
+                    src={getHomeFighterImage(match, "A", index)}
+                    alt={getHomeFighterName(match, "A")}
+                    width={96}
+                    height={96}
+                    sizes="72px"
+                  />
+                </figure>
+                <b>VS</b>
+                <figure className="mobile-fighter-avatar">
+                  <FightImage
+                    src={getHomeFighterImage(match, "B", index)}
+                    alt={getHomeFighterName(match, "B")}
+                    width={96}
+                    height={96}
+                    sizes="72px"
+                  />
+                </figure>
+              </div>
+              <div className="fmm-mobile-card-names">
+                <strong>{getHomeFighterName(match, "A")}</strong>
+                <strong>{getHomeFighterName(match, "B")}</strong>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
       <section className="fmm-mobile-section fmm-mobile-open-contests" aria-labelledby="mobile-open-contests-title">
         <div className="fmm-mobile-section-heading">
-          <h2 id="mobile-open-contests-title">Featured Pro Wrestling Contests</h2>
-          <Link href="/pro-wrestling">
+          <h2 id="mobile-open-contests-title">Top {activeSection?.label} Contests</h2>
+          <Link href={getHomeSportViewAllHref(activeSection?.key)}>
             View All <FaArrowRight aria-hidden="true" />
           </Link>
         </div>
@@ -1298,7 +1287,7 @@ const MobilePhoneHome = ({
           {mobileOpenContests.map((match, index) => (
             <article className={`fmm-mobile-contest-row ${getCategoryClass(match)}`} key={getFightId(match) || `mobile-contest-${index}`}>
               <Link href={getFightDetailHref(match)} className="fmm-mobile-contest-visual">
-                <span>{["Win Big", "Featured", "Top Prize"][index % 3]}</span>
+                <span>{["Open", "Top Prize", "Live"][index % 3]}</span>
                 <small className="fmm-mobile-contest-event-label">{getMobileEventLabel(match)}</small>
                 <div>
                   <figure className="mobile-fighter-avatar">
@@ -1621,23 +1610,14 @@ const HomeAnother = () => {
             : homepageFightPool.filter(
                 (fight) => getFightSportKey(fight) === tab.key,
               );
-        const featuredFights =
-          tab.key === "pro-wrestling"
-            ? normalizedWrestlingFights.filter((fight) =>
-                Boolean(getHomeFightPosterImage(fight)),
-              )
-            : featuredPosterFightPool.filter(
-                (fight) => getFightSportKey(fight) === tab.key,
-              );
 
         return {
           ...tab,
-          count: fights.length || featuredFights.length || tab.fallbackCount || 0,
+          count: fights.length || tab.fallbackCount || 0,
           fights,
-          featuredFights,
         };
       }),
-    [featuredPosterFightPool, homepageFightPool, normalizedWrestlingFights],
+    [homepageFightPool, normalizedWrestlingFights],
   );
 
   const sportCounts = useMemo(
@@ -1662,14 +1642,8 @@ const HomeAnother = () => {
     return activeSection?.fights?.slice(0, HOME_CATEGORY_PREVIEW_LIMIT) || [];
   }, [activeFightSport, homeFightSections]);
 
-  const primaryFight = featuredPosterFightPool[0] || homepageFightPool[0] || null;
-  const heroSlides = featuredPosterFightPool.length
-    ? featuredPosterFightPool
-    : promotedHeroFights.length
-      ? promotedHeroFights
-      : primaryFight
-        ? [primaryFight]
-        : [];
+  const primaryFight = featuredPosterFightPool[0] || null;
+  const heroSlides = featuredPosterFightPool;
   const activeHeroFight = heroSlides.length
     ? heroSlides[activeHeroIndex % heroSlides.length]
     : primaryFight;
@@ -1954,44 +1928,6 @@ const HomeAnother = () => {
     );
   };
 
-  const renderHomePosterFightCard = (match, index, sectionKey) => {
-    const posterImage = getHomeFightPosterImage(match);
-    if (!posterImage) return null;
-
-    const category = getCategory(match);
-    const categoryClass = getCategoryClass(match);
-    const title = match.homepagePromotion?.title || match.matchName || getFightTitle(match);
-
-    return (
-      <article
-        className={`fmm-featured-poster-contest-card ${categoryClass}`}
-        key={`${sectionKey}-featured-poster-${match._id || getFightTitle(match) || index}`}
-      >
-        <Link href={getFightDetailHref(match)} className="fmm-featured-poster-contest-media" aria-label={`Open ${title}`}>
-          <FightImage
-            src={posterImage}
-            alt={`${title} fight poster`}
-            width={520}
-            height={680}
-            sizes="(max-width: 760px) 74vw, 260px"
-          />
-          <span><FaStar aria-hidden="true" /> Featured Fight</span>
-        </Link>
-        <div className="fmm-featured-poster-contest-copy">
-          <small>{category}</small>
-          <h3>{title}</h3>
-          <p>{match.homepagePromotion?.subtitle || `${getHomeFighterName(match, "A")} vs ${getHomeFighterName(match, "B")}`}</p>
-          <div>
-            <span><FaCalendarAlt aria-hidden="true" /> {formatDateTime(match)}</span>
-            <span><FaTrophy aria-hidden="true" /> {getPrizePool(match)}</span>
-          </div>
-          <Link href={getFightDetailHref(match)} className="fmm-featured-poster-contest-action">
-            Enter To Win <FaChevronRight aria-hidden="true" />
-          </Link>
-        </div>
-      </article>
-    );
-  };
 
   return (
     <>
@@ -2051,7 +1987,6 @@ const HomeAnother = () => {
           setActiveHeroIndex={setActiveHeroIndex}
           heroSlides={heroSlides}
           homeFightSections={homeFightSections}
-          wrestlingFights={normalizedWrestlingFights}
           matchError={matchError}
           matchStatus={matchStatus}
           now={now}
@@ -2387,12 +2322,11 @@ const HomeAnother = () => {
                 matchStatus !== "failed" &&
                 homeFightSections.map((section) => {
                   const isExpanded = Boolean(expandedHomeSports?.[section.key]);
-                  const posterFights = section.featuredFights || [];
                   const visibleFights = isExpanded
-                    ? posterFights
-                    : posterFights.slice(0, HOME_CATEGORY_PREVIEW_LIMIT);
+                    ? section.fights
+                    : section.fights.slice(0, HOME_CATEGORY_PREVIEW_LIMIT);
                   const hasMore =
-                    posterFights.length > HOME_CATEGORY_PREVIEW_LIMIT;
+                    section.fights.length > HOME_CATEGORY_PREVIEW_LIMIT;
 
                   return (
                     <section
@@ -2411,9 +2345,10 @@ const HomeAnother = () => {
                             <FaBullseye aria-hidden="true" /> {section.count}{" "}
                             contest{section.count === 1 ? "" : "s"}
                           </span>
-                          <h3>Featured {section.label} Fights</h3>
+                          <h3>{section.label} section</h3>
                           <p>
-                            Only fights promoted as Featured with an uploaded fight poster appear in this section.
+                            Newest uploaded fights appear first. Cards without
+                            fighter images stay off the front page.
                           </p>
                         </div>
                         <div className="fmm-home-sport-section-actions">
@@ -2447,11 +2382,12 @@ const HomeAnother = () => {
                       >
                         {visibleFights.length === 0 ? (
                           <div className="fmm-empty-card">
-                            No featured {section.label.toLowerCase()} fight posters are currently published.
+                            No {section.label.toLowerCase()} contests are
+                            currently available.
                           </div>
                         ) : (
                           visibleFights.map((match, index) =>
-                            renderHomePosterFightCard(match, index, section.key),
+                            renderHomeFightCard(match, index, section.key),
                           )
                         )}
                       </div>
@@ -2468,7 +2404,7 @@ const HomeAnother = () => {
               </p>
               <h2>Pro Wrestling is now part of Fantasy MMADNESS.</h2>
               <span>
-                Pro Wrestling remains inside the premium category tabs and also has its own featured contest spotlight.
+                Pro Wrestling remains inside the premium category tabs and appears in its own fight section below.
               </span>
               <div>
                 <Link
