@@ -9176,3 +9176,139 @@
     font-size: 5.8px !important;
   }
 }
+
+/* Client follow-up: cleaner full-width category borders and slightly shorter cards. */
+@media (min-width: 768px) {
+  .fmm-home .fmm-home-section-nav,
+  .fmm-home-fight-tabs {
+    gap: clamp(10px, 1.1vw, 16px) !important;
+    margin: 16px 0 24px !important;
+  }
+
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card {
+    align-items: center !important;
+    background:
+      radial-gradient(circle at 0% 50%, var(--tab-soft), transparent 28%),
+      radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.06), transparent 32%),
+      linear-gradient(180deg, rgba(12, 17, 27, 0.97), rgba(5, 8, 14, 0.99)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 18px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 14px 34px rgba(0, 0, 0, 0.30) !important;
+    gap: 10px !important;
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    min-height: 84px !important;
+    padding: 11px 14px !important;
+  }
+
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card::before,
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card::after {
+    display: none !important;
+  }
+
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card:hover,
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card.is-active {
+    box-shadow:
+      inset 0 0 0 1px var(--tab-border),
+      0 18px 42px rgba(0, 0, 0, 0.36),
+      0 0 24px var(--tab-glow) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .fmm-home-tab-art {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    overflow: visible !important;
+    width: 40px !important;
+  }
+
+  .fmm-home-tab-art img {
+    height: 30px !important;
+    width: 30px !important;
+  }
+
+  .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art img {
+    height: 31px !important;
+    object-fit: contain !important;
+    opacity: 1 !important;
+    width: 31px !important;
+  }
+
+  .fmm-home-tab-copy {
+    gap: 4px !important;
+  }
+
+  .fmm-home-tab-copy > span {
+    font-size: clamp(12px, 0.92vw, 15px) !important;
+    line-height: 1.02 !important;
+  }
+
+  .fmm-home-tab-copy small {
+    font-size: 10px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card > strong {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card {
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    min-height: 78px !important;
+    padding: 10px 12px !important;
+  }
+
+  .fmm-home-tab-art {
+    height: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+
+  .fmm-home-tab-art img,
+  .fmm-home-fight-tab-card.is-pro-wrestling .fmm-home-tab-art img {
+    height: 28px !important;
+    width: 28px !important;
+  }
+
+  .fmm-home-tab-copy > span {
+    font-size: clamp(11px, 1.45vw, 13px) !important;
+  }
+
+  .fmm-home-tab-copy small {
+    font-size: 9px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-mobile-category-row {
+    margin: 0 0 18px !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    border-radius: 12px !important;
+    gap: 4px !important;
+    height: 86px !important;
+    padding: 8px 3px 7px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon {
+    height: 34px !important;
+    width: 34px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-fight-category-svg {
+    font-size: 32px !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    min-height: 16px !important;
+  }
+}

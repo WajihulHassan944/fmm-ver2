@@ -9538,3 +9538,411 @@ body:has(.site-experience-main.is-home-experience-main)
     max-height: 122px !important;
   }
 }
+
+/* === 2026-07-21 CATEGORY CARD BORDER + COMPACT HEIGHT FINAL FIX ===
+   Keep one continuous outer border, remove the partial inner accent frame,
+   reduce desktop card height, and preserve mobile content order:
+   image -> category label -> fight count.
+*/
+@media (min-width: 768px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    align-items: center !important;
+    justify-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: clamp(82px, 5.8vw, 92px) !important;
+    min-height: 82px !important;
+    max-height: 92px !important;
+    padding: 10px 12px !important;
+    gap: 9px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 16px !important;
+    background:
+      radial-gradient(
+        circle at 12% 50%,
+        rgba(var(--cat-accent-rgb), 0.24),
+        transparent 38%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(15, 18, 29, 0.98) 0%,
+        rgba(6, 8, 15, 0.995) 100%
+      ) !important;
+    background-clip: padding-box !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.055),
+      0 12px 28px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Fully remove the old half-width overlay / bottom accent rules. */
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card::before,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card::after,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card::before,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card::after,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card::before,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card::after,
+  .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card.is-active::before,
+  .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card.is-active::after {
+    content: none !important;
+    display: none !important;
+    inset: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card:hover,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card.is-active,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card:hover,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card.is-active,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card:hover,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card.is-active {
+    border-color: rgba(var(--cat-accent-rgb), 0.76) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 0 1px rgba(var(--cat-accent-rgb), 0.08),
+      0 0 22px rgba(var(--cat-accent-rgb), 0.15),
+      0 14px 30px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-tab-art,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-tab-art,
+  .fmm-home .fmm-home-tab-art {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    margin: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-tab-art
+    img,
+  .site-experience-main.is-home-experience-main .fmm-home .fmm-home-tab-art img,
+  .fmm-home .fmm-home-tab-art img,
+  .fmm-home
+    .fmm-home-fight-tab-card.is-pro-wrestling
+    .fmm-home-tab-art
+    img {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    object-fit: contain !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy {
+    align-items: flex-start !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy > span {
+    font-size: clamp(11px, 0.86vw, 14px) !important;
+    line-height: 1.05 !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy small {
+    font-size: clamp(8px, 0.62vw, 9.5px) !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card,
+  .site-experience-main.is-home-experience-main
+    .fmm-home
+    .fmm-home-fight-tabs
+    button.fmm-home-fight-tab-card,
+  .fmm-home .fmm-home-fight-tabs button.fmm-home-fight-tab-card {
+    grid-template-columns: 36px minmax(0, 1fr) !important;
+    justify-items: stretch !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    max-height: 78px !important;
+    padding: 8px 9px !important;
+    gap: 7px !important;
+    text-align: left !important;
+  }
+
+  .fmm-home .fmm-home-tab-art,
+  .fmm-home .fmm-home-tab-art img,
+  .fmm-home
+    .fmm-home-fight-tab-card.is-pro-wrestling
+    .fmm-home-tab-art
+    img {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy > span,
+  .fmm-home .fmm-home-tab-copy small {
+    text-align: left !important;
+    white-space: normal !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy > span {
+    font-size: 10px !important;
+  }
+
+  .fmm-home .fmm-home-tab-copy small {
+    font-size: 7.2px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row,
+  .fmm-mobile-category-row {
+    grid-auto-columns: 90px !important;
+    gap: 7px !important;
+    padding: 2px 14px 10px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+    height: 88px !important;
+    min-height: 88px !important;
+    max-height: 88px !important;
+    padding: 6px 5px 5px !important;
+    gap: 2px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 12px !important;
+    background:
+      radial-gradient(
+        circle at 50% 22%,
+        rgba(var(--cat-accent-rgb), 0.25),
+        transparent 48%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(15, 18, 29, 0.98),
+        rgba(6, 8, 15, 0.995)
+      ) !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile::before,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile::after,
+  .fmm-mobile-category-row
+    button.fmm-mobile-category-tile.is-active::before,
+  .fmm-mobile-category-row
+    button.fmm-mobile-category-tile.is-active::after {
+    content: none !important;
+    display: none !important;
+    inset: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+  }
+
+  .fmm-mobile-category-row button.fmm-mobile-category-tile.is-active {
+    border-color: rgba(var(--cat-accent-rgb), 0.82) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 18px rgba(var(--cat-accent-rgb), 0.14) !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    .fmm-mobile-category-icon,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    .fmm-mobile-category-image,
+  .fmm-mobile-category-row .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .fmm-mobile-category-image,
+  .fmm-mobile-category-icon.fmm-mobile-category-image {
+    order: 1 !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 39px !important;
+    min-height: 39px !important;
+    max-height: 39px !important;
+    margin: 0 auto 1px !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon img,
+  .fmm-mobile-category-row .fmm-mobile-category-image img,
+  .fmm-mobile-category-icon.fmm-mobile-category-image img {
+    width: 48px !important;
+    max-width: 48px !important;
+    height: 39px !important;
+    max-height: 39px !important;
+    object-fit: contain !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > strong,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > strong,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile > strong {
+    order: 2 !important;
+    display: -webkit-box !important;
+    width: 100% !important;
+    min-height: 18px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    color: #fff !important;
+    font-size: 8.4px !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.025em !important;
+    line-height: 1.03 !important;
+    text-align: center !important;
+    white-space: normal !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image),
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image),
+  .fmm-mobile-category-row
+    button.fmm-mobile-category-tile
+    > span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image) {
+    order: 3 !important;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: rgba(255, 255, 255, 0.66) !important;
+    font-size: 6.2px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 389px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row,
+  .site-experience-main.is-home-experience-main .fmm-mobile-category-row,
+  .fmm-mobile-category-row {
+    grid-auto-columns: 84px !important;
+    gap: 6px !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .site-experience-main.is-home-experience-main
+    .fmm-mobile-category-row
+    button.fmm-mobile-category-tile,
+  .fmm-mobile-category-row button.fmm-mobile-category-tile,
+  .fmm-mobile-category-tile {
+    width: 84px !important;
+    min-width: 84px !important;
+    max-width: 84px !important;
+    height: 86px !important;
+    min-height: 86px !important;
+    max-height: 86px !important;
+  }
+}
