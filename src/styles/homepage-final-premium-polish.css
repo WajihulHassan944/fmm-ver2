@@ -1594,3 +1594,574 @@
       linear-gradient(180deg, rgba(18, 19, 30, 0.98), rgba(5, 7, 14, 0.98)) !important;
   }
 }
+
+/* CLIENT FINAL CATEGORY + FEATURED-POSTER HOMEPAGE PASS
+   - Keep Pro Wrestling in tabs.
+   - Match attached premium five-card category design on desktop and phone.
+   - Future/upcoming fight areas show Featured fights with fight posters only. */
+.fmm-home-fight-tabs,
+.fmm-home-fight-tabs.fmm-home-section-nav {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(132px, 1fr)) !important;
+  gap: clamp(12px, 1.4vw, 18px) !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+  padding: 2px 0 4px !important;
+}
+
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card {
+  --cat-accent: #ff2636;
+  --cat-accent-rgb: 255, 38, 54;
+  position: relative !important;
+  isolation: isolate !important;
+  min-height: clamp(142px, 11.8vw, 178px) !important;
+  padding: clamp(17px, 1.7vw, 24px) 14px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  text-align: center !important;
+  border-radius: 17px !important;
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(var(--cat-accent-rgb), 0.22), transparent 38%),
+    linear-gradient(180deg, rgba(15, 16, 28, 0.94), rgba(5, 6, 13, 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 18px 42px rgba(0, 0, 0, 0.36) !important;
+  transform: translateZ(0) !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+}
+
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card::before,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -1px !important;
+  z-index: -1 !important;
+  border-radius: inherit !important;
+  border: 1px solid rgba(var(--cat-accent-rgb), 0.12) !important;
+  background:
+    linear-gradient(145deg, rgba(var(--cat-accent-rgb), 0.11), transparent 38%, rgba(255,255,255,0.025)) !important;
+  opacity: 0.86 !important;
+  transition: opacity 180ms ease, box-shadow 180ms ease !important;
+}
+
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card::after,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 18px !important;
+  right: 18px !important;
+  bottom: 0 !important;
+  height: 3px !important;
+  border-radius: 999px 999px 0 0 !important;
+  background: linear-gradient(90deg, transparent, rgba(var(--cat-accent-rgb), 0.96), transparent) !important;
+  opacity: 0 !important;
+  box-shadow: 0 0 16px rgba(var(--cat-accent-rgb), 0.76) !important;
+  transition: opacity 180ms ease !important;
+}
+
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card.is-active,
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card:hover,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card.is-active,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card:hover {
+  border-color: rgba(var(--cat-accent-rgb), 0.58) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(var(--cat-accent-rgb), 0.14),
+    0 18px 48px rgba(var(--cat-accent-rgb), 0.16),
+    0 22px 54px rgba(0, 0, 0, 0.44) !important;
+  transform: translateY(-2px) !important;
+}
+
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card.is-active::after,
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card:hover::after,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card.is-active::after,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card:hover::after {
+  opacity: 1 !important;
+}
+
+.fmm-home-fight-tab-card.is-boxing,
+.fmm-mobile-category-row .is-boxing {
+  --cat-accent: #ff2636 !important;
+  --cat-accent-rgb: 255, 38, 54 !important;
+}
+
+.fmm-home-fight-tab-card.is-mma,
+.fmm-home-fight-tab-card.is-bareknuckle,
+.fmm-mobile-category-row .is-mma,
+.fmm-mobile-category-row .is-bareknuckle {
+  --cat-accent: #a75cff !important;
+  --cat-accent-rgb: 167, 92, 255 !important;
+}
+
+.fmm-home-fight-tab-card.is-kickboxing,
+.fmm-mobile-category-row .is-kickboxing {
+  --cat-accent: #f2a743 !important;
+  --cat-accent-rgb: 242, 167, 67 !important;
+}
+
+.fmm-home-fight-tab-card.is-pro-wrestling,
+.fmm-mobile-category-row .is-pro-wrestling {
+  --cat-accent: #2e76ff !important;
+  --cat-accent-rgb: 46, 118, 255 !important;
+}
+
+.fmm-home-tab-art {
+  width: clamp(64px, 5.9vw, 88px) !important;
+  height: clamp(58px, 5.4vw, 78px) !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 auto 3px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.fmm-home-tab-art img,
+.fmm-home-fight-tab-card .fmm-home-tab-art img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: saturate(1.15) contrast(1.04) drop-shadow(0 0 18px rgba(var(--cat-accent-rgb), 0.48)) !important;
+  transform: none !important;
+}
+
+.fmm-home-tab-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  width: 100% !important;
+}
+
+.fmm-home-tab-copy > span {
+  color: #ffffff !important;
+  font-family: var(--font-heading, inherit) !important;
+  font-size: clamp(13px, 1.02vw, 16px) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0.035em !important;
+  text-transform: uppercase !important;
+  white-space: normal !important;
+}
+
+.fmm-home-tab-copy small {
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: clamp(11px, 0.84vw, 13px) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.045em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+.fmm-home-fight-tabs button.fmm-home-fight-tab-card > strong,
+.fmm-home-fight-tabs .fmm-home-fight-tab-card > strong {
+  display: none !important;
+}
+
+.fmm-category-contest-grid:has(.fmm-featured-poster-contest-card) {
+  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)) !important;
+  gap: clamp(16px, 1.4vw, 22px) !important;
+}
+
+.fmm-featured-poster-contest-card {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background:
+    radial-gradient(circle at 25% 0%, rgba(255, 37, 58, 0.16), transparent 14rem),
+    linear-gradient(180deg, rgba(15, 16, 27, 0.97), rgba(5, 6, 13, 0.98)) !important;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.fmm-featured-poster-contest-media {
+  position: relative !important;
+  display: block !important;
+  min-height: 320px !important;
+  overflow: hidden !important;
+  background: #05060c !important;
+  text-decoration: none !important;
+}
+
+.fmm-featured-poster-contest-media::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.04), transparent 36%, rgba(0,0,0,0.82)),
+    radial-gradient(circle at 50% 100%, rgba(255, 37, 58, 0.22), transparent 56%) !important;
+  pointer-events: none !important;
+}
+
+.fmm-featured-poster-contest-media img {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 320px !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: saturate(1.14) contrast(1.08) brightness(0.95) !important;
+  transition: transform 220ms ease !important;
+}
+
+.fmm-featured-poster-contest-card:hover .fmm-featured-poster-contest-media img {
+  transform: scale(1.035) !important;
+}
+
+.fmm-featured-poster-contest-media > span {
+  position: absolute !important;
+  top: 14px !important;
+  left: 14px !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.11em !important;
+  text-transform: uppercase !important;
+  background: rgba(255, 37, 58, 0.88) !important;
+  box-shadow: 0 12px 28px rgba(255, 37, 58, 0.28) !important;
+}
+
+.fmm-featured-poster-contest-copy {
+  padding: 17px 17px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+}
+
+.fmm-featured-poster-contest-copy > small {
+  color: #ff3345 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+}
+
+.fmm-featured-poster-contest-copy h3 {
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: clamp(18px, 1.4vw, 23px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.02em !important;
+  text-transform: uppercase !important;
+}
+
+.fmm-featured-poster-contest-copy p {
+  margin: 0 !important;
+  color: rgba(255, 255, 255, 0.74) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.fmm-featured-poster-contest-copy > div {
+  display: grid !important;
+  gap: 7px !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+.fmm-featured-poster-contest-copy > div span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+.fmm-featured-poster-contest-action {
+  margin-top: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-height: 42px !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  background: linear-gradient(135deg, #ff2439, #ff6b3d) !important;
+  box-shadow: 0 16px 34px rgba(255, 38, 54, 0.22) !important;
+}
+
+@media (max-width: 1180px) and (min-width: 768px) {
+  .fmm-home-fight-tabs,
+  .fmm-home-fight-tabs.fmm-home-section-nav {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    padding-bottom: 8px !important;
+  }
+
+  .fmm-home-fight-tabs button.fmm-home-fight-tab-card,
+  .fmm-home-fight-tabs .fmm-home-fight-tab-card {
+    flex: 0 0 166px !important;
+    scroll-snap-align: start !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-mobile-category-row {
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    padding: 2px 18px 11px !important;
+    margin: 2px -18px 12px !important;
+    scrollbar-width: none !important;
+  }
+
+  .fmm-mobile-category-row::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    --cat-accent: #ff2636;
+    --cat-accent-rgb: 255, 38, 54;
+    position: relative !important;
+    isolation: isolate !important;
+    flex: 0 0 145px !important;
+    width: 145px !important;
+    min-height: 154px !important;
+    padding: 18px 11px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+    scroll-snap-align: start !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    background:
+      radial-gradient(circle at 50% 13%, rgba(var(--cat-accent-rgb), 0.24), transparent 39%),
+      linear-gradient(180deg, rgba(15, 16, 29, 0.95), rgba(5, 6, 13, 0.99)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 14px 34px rgba(0, 0, 0, 0.36) !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-mobile-category-row button::before,
+  .fmm-mobile-category-row .fmm-mobile-category-tile::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -1px !important;
+    z-index: -1 !important;
+    border-radius: inherit !important;
+    border: 1px solid rgba(var(--cat-accent-rgb), 0.12) !important;
+    background: linear-gradient(145deg, rgba(var(--cat-accent-rgb), 0.11), transparent 44%) !important;
+  }
+
+  .fmm-mobile-category-row button::after,
+  .fmm-mobile-category-row .fmm-mobile-category-tile::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 17px !important;
+    right: 17px !important;
+    bottom: 0 !important;
+    height: 3px !important;
+    border-radius: 999px 999px 0 0 !important;
+    background: linear-gradient(90deg, transparent, rgba(var(--cat-accent-rgb), 0.98), transparent) !important;
+    box-shadow: 0 0 16px rgba(var(--cat-accent-rgb), 0.72) !important;
+    opacity: 0 !important;
+  }
+
+  .fmm-mobile-category-row button.is-active,
+  .fmm-mobile-category-row .fmm-mobile-category-tile.is-active {
+    border-color: rgba(var(--cat-accent-rgb), 0.62) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 1px rgba(var(--cat-accent-rgb), 0.14),
+      0 16px 36px rgba(var(--cat-accent-rgb), 0.18),
+      0 16px 38px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  .fmm-mobile-category-row button.is-active::after,
+  .fmm-mobile-category-row .fmm-mobile-category-tile.is-active::after {
+    opacity: 1 !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .fmm-mobile-category-image {
+    width: 75px !important;
+    height: 65px !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 auto 2px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .fmm-mobile-category-row img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    filter: saturate(1.16) contrast(1.04) drop-shadow(0 0 16px rgba(var(--cat-accent-rgb), 0.48)) !important;
+  }
+
+  .fmm-mobile-category-row strong {
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 950 !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0.035em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-category-row span:not(.fmm-mobile-category-icon):not(.fmm-mobile-category-image) {
+    color: rgba(255, 255, 255, 0.78) !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.045em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-featured-poster-rail {
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  .fmm-mobile-featured-poster-rail .fmm-mobile-poster-fight-card {
+    position: relative !important;
+    flex: 0 0 min(76vw, 292px) !important;
+    width: min(76vw, 292px) !important;
+    min-height: 392px !important;
+    padding: 0 !important;
+    border-radius: 22px !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    background: #05060c !important;
+    overflow: hidden !important;
+    box-shadow: 0 22px 50px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+    text-decoration: none !important;
+  }
+
+  .fmm-mobile-poster-card-image {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+  }
+
+  .fmm-mobile-poster-card-image::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.05), transparent 35%, rgba(0,0,0,0.86) 100%),
+      radial-gradient(circle at 50% 100%, rgba(255,37,58,0.24), transparent 56%) !important;
+  }
+
+  .fmm-mobile-poster-card-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: saturate(1.15) contrast(1.08) brightness(0.94) !important;
+  }
+
+  .fmm-mobile-poster-card-copy {
+    position: absolute !important;
+    left: 14px !important;
+    right: 14px !important;
+    bottom: 14px !important;
+    z-index: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+  }
+
+  .fmm-mobile-poster-card-copy span {
+    width: max-content !important;
+    max-width: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 9px !important;
+    border-radius: 999px !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    background: rgba(255, 37, 58, 0.9) !important;
+    box-shadow: 0 10px 24px rgba(255,37,58,0.28) !important;
+  }
+
+  .fmm-mobile-poster-card-copy h3 {
+    margin: 0 !important;
+    color: #fff !important;
+    font-size: 21px !important;
+    font-weight: 950 !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-mobile-poster-card-copy p,
+  .fmm-mobile-poster-card-copy small {
+    margin: 0 !important;
+    color: rgba(255,255,255,0.82) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.35 !important;
+  }
+
+  .fmm-mobile-featured-empty {
+    flex: 1 0 100% !important;
+    min-height: 142px !important;
+    padding: 18px !important;
+    display: grid !important;
+    align-content: center !important;
+    gap: 8px !important;
+    border-radius: 20px !important;
+    border: 1px dashed rgba(255, 255, 255, 0.16) !important;
+    background: linear-gradient(180deg, rgba(15, 16, 27, 0.96), rgba(5, 6, 13, 0.98)) !important;
+    color: rgba(255,255,255,0.72) !important;
+  }
+
+  .fmm-mobile-featured-empty svg {
+    color: #ff3345 !important;
+    font-size: 18px !important;
+  }
+
+  .fmm-mobile-featured-empty strong {
+    color: #fff !important;
+    font-size: 16px !important;
+    line-height: 1.15 !important;
+  }
+
+  .fmm-mobile-featured-empty span {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .fmm-mobile-category-row button,
+  .fmm-mobile-category-row .fmm-mobile-category-tile {
+    flex-basis: 132px !important;
+    width: 132px !important;
+    min-height: 146px !important;
+  }
+
+  .fmm-mobile-category-row .fmm-mobile-category-icon,
+  .fmm-mobile-category-row .fmm-mobile-category-image {
+    width: 66px !important;
+    height: 58px !important;
+  }
+}
