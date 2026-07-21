@@ -47,7 +47,7 @@ import {
 
 const FALLBACK_FIGHT_IMAGE = "/images/hero-fight.webp";
 const HOME_HERO_IMAGE =
-  "/images/home-premium/fantasy-mmadness-prize-pot-premium-bg.svg";
+  "/images/home-premium/fantasy-mmadness-prize-pot-visible-bg.svg";
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
@@ -58,34 +58,34 @@ const HOME_FIGHT_SPORT_TABS = [
     key: "boxing",
     label: "Boxing",
     image:
-      "/images/mobile-home/categories/fmm-category-boxing-reference-v2.png",
+      "/images/home-premium/category-icons/boxing.png",
     fallbackCount: 128,
   },
   {
     key: "mma",
     label: "MMA",
-    image: "/images/mobile-home/categories/fmm-category-mma-reference-v2.png",
+    image: "/images/home-premium/category-icons/mma.png",
     fallbackCount: 214,
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
     image:
-      "/images/mobile-home/categories/fmm-category-bare-knuckle-reference-v2.png",
+      "/images/home-premium/category-icons/bareknuckle.png",
     fallbackCount: 36,
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
     image:
-      "/images/mobile-home/categories/fmm-category-kickboxing-reference-v2.png",
+      "/images/home-premium/category-icons/kickboxing.png",
     fallbackCount: 58,
   },
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
     image:
-      "/images/mobile-home/categories/fmm-category-pro-wrestling-reference-v2.png",
+      "/images/home-premium/category-icons/pro-wrestling.png",
     fallbackCount: 42,
   },
 ];
