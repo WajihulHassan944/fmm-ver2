@@ -47,7 +47,7 @@ import {
 
 const FALLBACK_FIGHT_IMAGE = "/images/hero-fight.webp";
 const HOME_HERO_IMAGE =
-  "/images/home-premium/fantasy-mmadness-money-arena-bg-v2.svg";
+  "/images/home-premium/fantasy-mmadness-fighters-prize-arena-bg.webp";
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
@@ -57,35 +57,31 @@ const HOME_FIGHT_SPORT_TABS = [
   {
     key: "boxing",
     label: "Boxing",
-    image:
-      "/images/mobile-home/categories/fmm-category-boxing-reference-v2.png",
+    image: "/images/home-premium/category-icons/boxing.png",
     fallbackCount: 128,
   },
   {
     key: "mma",
     label: "MMA",
-    image: "/images/mobile-home/categories/fmm-category-mma-reference-v2.png",
+    image: "/images/home-premium/category-icons/mma.png",
     fallbackCount: 214,
   },
   {
     key: "bareknuckle",
     label: "Bare-knuckle",
-    image:
-      "/images/mobile-home/categories/fmm-category-bare-knuckle-reference-v2.png",
+    image: "/images/home-premium/category-icons/bareknuckle.png",
     fallbackCount: 36,
   },
   {
     key: "kickboxing",
     label: "Kickboxing",
-    image:
-      "/images/mobile-home/categories/fmm-category-kickboxing-reference-v2.png",
+    image: "/images/home-premium/category-icons/kickboxing.png",
     fallbackCount: 58,
   },
   {
     key: "pro-wrestling",
     label: "Pro Wrestling",
-    image:
-      "/images/mobile-home/categories/fmm-category-pro-wrestling-reference-v2.png",
+    image: "/images/home-premium/category-icons/pro-wrestling.png",
     fallbackCount: 42,
   },
 ];
@@ -1073,6 +1069,7 @@ const MobilePhoneHome = ({
   activeHeroFight,
   activeHeroIndex,
   setActiveHeroIndex,
+  setSelectedFeaturedFight,
   heroSlides,
   homeFightSections,
   matchError,
@@ -1116,6 +1113,9 @@ const MobilePhoneHome = ({
   const mobileHeroSlides = Array.isArray(heroSlides) ? heroSlides : [];
   const heroSlideCount = mobileHeroSlides.length || 1;
   const safeMobileHeroIndex = activeHeroIndex % heroSlideCount;
+  const mobileActiveHeroPosition = mobileHeroSlides.length
+    ? safeMobileHeroIndex + 1
+    : 1;
   const mobileHeroFight =
     activeHeroFight ||
     mobileHeroSlides[safeMobileHeroIndex] ||
@@ -1124,6 +1124,23 @@ const MobilePhoneHome = ({
   const mobileHeroPoster = getHomeFightPosterImage(mobileHeroFight);
   const visibleHeroDots = mobileHeroSlides.slice(0, 4);
   const mobileCountdownParts = getMobileCountdownDisplay(mobileHeroFight, now);
+  const showMobilePosterStage = Boolean(mobileHeroPoster);
+  const openMobileFeaturedDetails = () => {
+    if (typeof setSelectedFeaturedFight === "function" && mobileHeroFight) {
+      setSelectedFeaturedFight(mobileHeroFight);
+    }
+  };
+  const showPreviousMobilePoster = () => {
+    if (mobileHeroSlides.length <= 1) return;
+    setActiveHeroIndex(
+      (current) =>
+        (current - 1 + mobileHeroSlides.length) % mobileHeroSlides.length,
+    );
+  };
+  const showNextMobilePoster = () => {
+    if (mobileHeroSlides.length <= 1) return;
+    setActiveHeroIndex((current) => (current + 1) % mobileHeroSlides.length);
+  };
   const mobileFightRailRef = useHorizontalDragScroll();
   const mobileContestRailRef = useHorizontalDragScroll();
   const wrestlingHref = "/pro-wrestling";
@@ -1171,103 +1188,155 @@ const MobilePhoneHome = ({
         </div>
 
         <article
-          className={`fmm-mobile-hero-event-card ${mobileHeroPoster ? "has-fight-poster" : ""}`}
+          className={`fmm-mobile-hero-event-card fmm-mobile-featured-poster-carousel ${
+            showMobilePosterStage ? "has-fight-poster" : ""
+          }`}
           aria-label="Featured fight details"
         >
-          {mobileHeroPoster && (
-            <div className="fmm-mobile-hero-poster" aria-hidden="true">
-              <FightImage
-                src={mobileHeroPoster}
-                alt="Featured fight poster"
-                width={640}
-                height={360}
-                priority
-                sizes="92vw"
-              />
-            </div>
+          {showMobilePosterStage ? (
+            <>
+              <div className="fmm-mobile-featured-carousel-head">
+                <span>
+                  <FaDollarSign aria-hidden="true" /> Featured fight posters
+                </span>
+                <strong>
+                  {mobileActiveHeroPosition} / {heroSlideCount}
+                </strong>
+              </div>
+
+              {mobileHeroSlides.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    className="fmm-mobile-featured-arrow is-left"
+                    aria-label="Previous featured fight poster"
+                    onClick={showPreviousMobilePoster}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="fmm-mobile-featured-arrow is-right"
+                    aria-label="Next featured fight poster"
+                    onClick={showNextMobilePoster}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                className="fmm-mobile-featured-poster-shell"
+                onClick={openMobileFeaturedDetails}
+                aria-label={`Open premium details for ${getFightTitle(mobileHeroFight)}`}
+              >
+                <span className="fmm-mobile-featured-poster-frame">
+                  <FightImage
+                    src={mobileHeroPoster}
+                    alt={`${getFightTitle(mobileHeroFight)} featured fight poster`}
+                    width={720}
+                    height={960}
+                    priority
+                    sizes="92vw"
+                  />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className="fmm-mobile-featured-poster-caption"
+                onClick={openMobileFeaturedDetails}
+              >
+                Tap poster for fight details <FaArrowRight aria-hidden="true" />
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="fmm-mobile-hero-faceoff" aria-hidden="true">
+                <figure className="mobile-fighter-avatar is-left">
+                  <FightImage
+                    src={getHomeFighterImage(mobileHeroFight, "A", 0)}
+                    alt={getHomeFighterName(mobileHeroFight, "A")}
+                    width={240}
+                    height={260}
+                    priority
+                    sizes="46vw"
+                  />
+                </figure>
+                <span>VS</span>
+                <figure className="mobile-fighter-avatar is-right">
+                  <FightImage
+                    src={getHomeFighterImage(mobileHeroFight, "B", 1)}
+                    alt={getHomeFighterName(mobileHeroFight, "B")}
+                    width={240}
+                    height={260}
+                    priority
+                    sizes="46vw"
+                  />
+                </figure>
+              </div>
+
+              <span className="fmm-mobile-featured-label">
+                <FaDollarSign aria-hidden="true" /> Win Big Featured Fight
+              </span>
+              <div
+                className="fmm-mobile-date-chip"
+                aria-label="Featured fight date"
+              >
+                <span>{dateChip.month}</span>
+                <strong>{dateChip.day}</strong>
+                <small>{dateChip.weekday}</small>
+              </div>
+
+              <div className="fmm-mobile-event-copy">
+                <h2>
+                  <span>{getHomeFighterName(mobileHeroFight, "A")}</span>
+                  <em>vs</em>
+                  <span>{getHomeFighterName(mobileHeroFight, "B")}</span>
+                </h2>
+                <p>
+                  <FaCalendarAlt aria-hidden="true" />
+                  {formatDateTime(mobileHeroFight)}
+                </p>
+              </div>
+
+              <div
+                className="fmm-mobile-countdown"
+                aria-label="Featured fight countdown"
+              >
+                {mobileCountdownParts.length > 0 ? (
+                  mobileCountdownParts.map((part) => (
+                    <span key={part.label}>
+                      <strong>{part.value}</strong>
+                      <small>{part.label}</small>
+                    </span>
+                  ))
+                ) : (
+                  <>
+                    <span>
+                      <strong>
+                        {getFightSportLabel(mobileHeroFight)
+                          .slice(0, 3)
+                          .toUpperCase()}
+                      </strong>
+                      <small>Sport</small>
+                    </span>
+                    <span>
+                      <strong>{mobileHeroFight?.matchStatus || "Open"}</strong>
+                      <small>Status</small>
+                    </span>
+                    <span>
+                      <strong>
+                        {getPlayerCount(mobileHeroFight).toLocaleString()}
+                      </strong>
+                      <small>Players</small>
+                    </span>
+                  </>
+                )}
+              </div>
+            </>
           )}
-          <div className="fmm-mobile-hero-faceoff" aria-hidden="true">
-            <figure className="mobile-fighter-avatar is-left">
-              <FightImage
-                src={getHomeFighterImage(mobileHeroFight, "A", 0)}
-                alt={getHomeFighterName(mobileHeroFight, "A")}
-                width={240}
-                height={260}
-                priority
-                sizes="46vw"
-              />
-            </figure>
-            <span>VS</span>
-            <figure className="mobile-fighter-avatar is-right">
-              <FightImage
-                src={getHomeFighterImage(mobileHeroFight, "B", 1)}
-                alt={getHomeFighterName(mobileHeroFight, "B")}
-                width={240}
-                height={260}
-                priority
-                sizes="46vw"
-              />
-            </figure>
-          </div>
-
-          <span className="fmm-mobile-featured-label">
-            <FaDollarSign aria-hidden="true" /> Win Big Featured Fight
-          </span>
-          <div
-            className="fmm-mobile-date-chip"
-            aria-label="Featured fight date"
-          >
-            <span>{dateChip.month}</span>
-            <strong>{dateChip.day}</strong>
-            <small>{dateChip.weekday}</small>
-          </div>
-
-          <div className="fmm-mobile-event-copy">
-            <h2>
-              <span>{getHomeFighterName(mobileHeroFight, "A")}</span>
-              <em>vs</em>
-              <span>{getHomeFighterName(mobileHeroFight, "B")}</span>
-            </h2>
-            <p>
-              <FaCalendarAlt aria-hidden="true" />
-              {formatDateTime(mobileHeroFight)}
-            </p>
-          </div>
-
-          <div
-            className="fmm-mobile-countdown"
-            aria-label="Featured fight countdown"
-          >
-            {mobileCountdownParts.length > 0 ? (
-              mobileCountdownParts.map((part) => (
-                <span key={part.label}>
-                  <strong>{part.value}</strong>
-                  <small>{part.label}</small>
-                </span>
-              ))
-            ) : (
-              <>
-                <span>
-                  <strong>
-                    {getFightSportLabel(mobileHeroFight)
-                      .slice(0, 3)
-                      .toUpperCase()}
-                  </strong>
-                  <small>Sport</small>
-                </span>
-                <span>
-                  <strong>{mobileHeroFight?.matchStatus || "Open"}</strong>
-                  <small>Status</small>
-                </span>
-                <span>
-                  <strong>
-                    {getPlayerCount(mobileHeroFight).toLocaleString()}
-                  </strong>
-                  <small>Players</small>
-                </span>
-              </>
-            )}
-          </div>
         </article>
 
         <div className="fmm-mobile-dots" aria-label="Featured fight slides">
@@ -2184,6 +2253,7 @@ const HomeAnother = () => {
           activeHeroFight={activeHeroFight}
           activeHeroIndex={activeHeroIndex}
           setActiveHeroIndex={setActiveHeroIndex}
+          setSelectedFeaturedFight={setSelectedFeaturedFight}
           heroSlides={heroSlides}
           homeFightSections={homeFightSections}
           matchError={matchError}
@@ -3015,6 +3085,117 @@ const HomeAnother = () => {
             </section>
           </main>
         </div>
+        {selectedFeaturedFight && (
+          <div
+            className="fmm-featured-modal-backdrop fmm-mobile-featured-modal-portal"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setSelectedFeaturedFight(null);
+              }
+            }}
+          >
+            <section
+              className="fmm-featured-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="mobile-featured-fight-modal-title"
+            >
+              <button
+                type="button"
+                className="fmm-featured-modal-close"
+                aria-label="Close featured fight details"
+                onClick={() => setSelectedFeaturedFight(null)}
+              >
+                ×
+              </button>
+
+              <div
+                className="fmm-featured-modal-poster"
+                aria-hidden={!selectedFeaturedPoster}
+              >
+                {selectedFeaturedPoster ? (
+                  <FightImage
+                    src={selectedFeaturedPoster}
+                    alt={`${getFightTitle(selectedFeaturedFight)} fight poster`}
+                    width={900}
+                    height={1200}
+                    sizes="(max-width: 760px) 86vw, 36vw"
+                  />
+                ) : (
+                  <FightImage
+                    src={getHomeFighterImage(selectedFeaturedFight, "A", 0)}
+                    alt={getHomeFighterName(selectedFeaturedFight, "A")}
+                    width={900}
+                    height={1200}
+                    sizes="(max-width: 760px) 86vw, 36vw"
+                  />
+                )}
+              </div>
+
+              <div className="fmm-featured-modal-copy">
+                <span className="fmm-featured-modal-kicker">
+                  <FaDollarSign aria-hidden="true" /> Win money featured fight
+                </span>
+                <h2 id="mobile-featured-fight-modal-title">
+                  {selectedFeaturedFight.matchName ||
+                    getFightTitle(selectedFeaturedFight)}
+                </h2>
+                <p>
+                  {getHomeFighterName(selectedFeaturedFight, "A")} vs{" "}
+                  {getHomeFighterName(selectedFeaturedFight, "B")}
+                </p>
+
+                <div className="fmm-featured-modal-meta">
+                  <span>
+                    <FaCalendarAlt aria-hidden="true" />{" "}
+                    {formatDateTime(selectedFeaturedFight)}
+                  </span>
+                  <span>
+                    <FaBullseye aria-hidden="true" />{" "}
+                    {getFightSportLabel(selectedFeaturedFight)}
+                  </span>
+                  <span>
+                    <FaUsers aria-hidden="true" />{" "}
+                    {getPlayerCount(selectedFeaturedFight).toLocaleString()}{" "}
+                    players
+                  </span>
+                  <span>
+                    <FaCoins aria-hidden="true" />{" "}
+                    {getPotTokenLabel(selectedFeaturedFight)}
+                  </span>
+                  <span>
+                    <FaTrophy aria-hidden="true" />{" "}
+                    {getPrizePool(selectedFeaturedFight)}
+                  </span>
+                  <span>
+                    <FaShieldAlt aria-hidden="true" />{" "}
+                    {selectedFeaturedFight.matchStatus ||
+                      selectedFeaturedFight.matchShadowOpenStatus ||
+                      "Open"}
+                  </span>
+                </div>
+
+                <div className="fmm-featured-modal-actions">
+                  <Link
+                    href={PLAYER_SIGNUP_HREF}
+                    className="theme-btn theme-btn-primary"
+                    onClick={() => setSelectedFeaturedFight(null)}
+                  >
+                    Enter To Win <FaArrowRight aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href={getFightDetailHref(selectedFeaturedFight)}
+                    className="theme-btn theme-btn-secondary"
+                    onClick={() => setSelectedFeaturedFight(null)}
+                  >
+                    View Full Fight <FaPlay aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
     </>
   );
