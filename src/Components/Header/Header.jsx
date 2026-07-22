@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
   FaBars,
+  FaBell,
   FaBullseye,
   FaCalendarAlt,
   FaChartLine,
@@ -333,6 +334,41 @@ const Header = () => {
 
   return (
     <header className={`header theme-header ${isHomeRoute ? 'is-home-route' : ''}`}>
+      {isHomeRoute && (
+        <div className="theme-home-mobile-chrome">
+          <button
+            type="button"
+            className="theme-mobile-toggle theme-home-mobile-hamburger"
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((current) => !current)}
+          >
+            {mobileOpen ? <FaTimes aria-hidden="true" /> : <FaBars aria-hidden="true" />}
+          </button>
+
+          <Link
+            href="/fights-rewards"
+            className="theme-home-mobile-wallet"
+            aria-label={`Fantasy coin balance: ${homeMobileWalletTokens.toLocaleString()}`}
+          >
+            <span className="theme-home-mobile-coin">FM</span>
+            <strong>{homeMobileWalletTokens.toLocaleString()}</strong>
+            <span className="theme-home-mobile-wallet-plus" aria-hidden="true">
+              <FaPlus />
+            </span>
+          </Link>
+
+          <Link
+            href={mobileAccountHref}
+            className="theme-home-mobile-notifications"
+            aria-label={mobileAccountLabel}
+          >
+            <FaBell aria-hidden="true" />
+            <span className="theme-home-mobile-badge" aria-hidden="true">3</span>
+          </Link>
+        </div>
+      )}
+
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
         <OptimizedImage
           className="theme-brand-logo theme-brand-logo-default"
