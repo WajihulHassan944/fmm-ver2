@@ -1314,44 +1314,46 @@ const MobilePhoneHome = ({
           <i className="is-blue" />
         </div>
 
-        <div className="fmm-game-logo-stage">
-          <Image
-            src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
-            alt="Fantasy MMAdness"
-            width={1254}
-            height={1254}
-            sizes="(max-width: 767px) 86vw, 360px"
-            priority
-          />
-          <span className="fmm-game-logo-shine" aria-hidden="true" />
-        </div>
+        <div className="fmm-game-hero-content">
+          <div className="fmm-game-logo-stage">
+            <Image
+              src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
+              alt="Fantasy MMAdness"
+              width={1254}
+              height={1254}
+              sizes="(max-width: 767px) 94vw, 360px"
+              priority
+            />
+            <span className="fmm-game-logo-shine" aria-hidden="true" />
+          </div>
 
-        <p className="fmm-game-eyebrow">
-          The Ultimate Fantasy Combat Sports Experience
-        </p>
-        <h1 id="fmm-game-hero-title">WIN BIG.</h1>
-        <p className="fmm-game-hero-copy">Pick the winners. Be the champion.</p>
+          <p className="fmm-game-eyebrow">
+            The Ultimate Fantasy Combat Sports Experience
+          </p>
+          <h1 id="fmm-game-hero-title">WIN BIG.</h1>
+          <p className="fmm-game-hero-copy">Pick the winners. Be the champion.</p>
 
-        <Link href={primaryCtaHref} className="fmm-game-primary-cta">
-          {primaryCtaLabel} <FaArrowRight aria-hidden="true" />
-        </Link>
+          <Link href={primaryCtaHref} className="fmm-game-primary-cta">
+            {primaryCtaLabel} <FaArrowRight aria-hidden="true" />
+          </Link>
 
-        <div className="fmm-game-stats" aria-label="Platform highlights">
-          <article>
-            <FaTrophy aria-hidden="true" />
-            <strong>{getPrizePool(featuredContest)}</strong>
-            <small>Prize Pool</small>
-          </article>
-          <article>
-            <FaUsers aria-hidden="true" />
-            <strong>128,000+</strong>
-            <small>Players</small>
-          </article>
-          <article>
-            <FaChartLine aria-hidden="true" />
-            <strong>Live</strong>
-            <small>Leaderboards</small>
-          </article>
+          <div className="fmm-game-stats" aria-label="Platform highlights">
+            <article>
+              <FaTrophy aria-hidden="true" />
+              <strong>{getPrizePool(featuredContest)}</strong>
+              <small>Prize Pool</small>
+            </article>
+            <article>
+              <FaUsers aria-hidden="true" />
+              <strong>128,000+</strong>
+              <small>Players</small>
+            </article>
+            <article>
+              <FaChartLine aria-hidden="true" />
+              <strong>Live</strong>
+              <small>Leaderboards</small>
+            </article>
+          </div>
         </div>
       </section>
 

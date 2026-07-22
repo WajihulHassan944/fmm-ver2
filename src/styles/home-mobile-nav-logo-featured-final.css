@@ -292,3 +292,170 @@
     font-size: 50px !important;
   }
 }
+
+/* Final phone-banner polish: flush navbar transition, blended artwork, exact centering. */
+@media (max-width: 767px) {
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-home.page-shell,
+  body:has(.site-experience-main.is-home-experience-main)
+    .site-experience-main.is-home-experience-main
+    .fmm-mobile-home.fmm-game-home {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .fmm-mobile-home.fmm-game-home
+    .fmm-game-hero {
+    background:
+      radial-gradient(ellipse at 4% 12%, rgba(239, 35, 23, 0.3), transparent 46%),
+      radial-gradient(ellipse at 96% 12%, rgba(22, 135, 255, 0.27), transparent 46%),
+      radial-gradient(ellipse at 50% 34%, rgba(255, 196, 0, 0.055), transparent 43%),
+      linear-gradient(180deg, #08080c 0%, #13080b 18%, #07101b 57%, #050505 100%) !important;
+    border: 0 !important;
+    margin: -1px 0 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: 6px 10px 0 !important;
+    position: relative !important;
+    text-align: center !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .fmm-mobile-home.fmm-game-home
+    .fmm-game-hero::before {
+    background:
+      linear-gradient(180deg, rgba(4, 4, 7, 0.76), transparent 72%),
+      linear-gradient(90deg, rgba(239, 35, 23, 0.12), transparent 28%, transparent 72%, rgba(22, 135, 255, 0.12));
+    content: "" !important;
+    display: block !important;
+    height: 54px !important;
+    inset: 0 0 auto !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 1 !important;
+  }
+
+  body:has(.site-experience-main.is-home-experience-main)
+    .fmm-mobile-home.fmm-game-home
+    .fmm-game-hero::after {
+    background: linear-gradient(180deg, transparent, #050505 94%) !important;
+    height: 46px !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-hero-content {
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    margin: 0 auto !important;
+    max-width: 390px !important;
+    position: relative !important;
+    text-align: center !important;
+    width: 100% !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-logo-stage {
+    background: #07080c !important;
+    border: 1px solid rgba(255, 255, 255, 0.055) !important;
+    border-radius: 20px !important;
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.72),
+      -18px 0 42px rgba(239, 35, 23, 0.09),
+      18px 0 42px rgba(22, 135, 255, 0.09) !important;
+    isolation: isolate !important;
+    margin: 0 auto -9px !important;
+    max-width: 338px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    width: min(94vw, 338px) !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-logo-stage::before {
+    background:
+      linear-gradient(180deg, rgba(6, 7, 10, 0.52), transparent 7%),
+      linear-gradient(90deg, rgba(8, 8, 12, 0.5), transparent 7%, transparent 93%, rgba(8, 10, 15, 0.5));
+    content: "" !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-logo-stage img,
+  .fmm-mobile-home.fmm-game-home .fmm-game-logo-stage > span img {
+    display: block !important;
+    height: auto !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+    position: relative !important;
+    width: 100% !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-logo-shine {
+    z-index: 3 !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-eyebrow,
+  .fmm-mobile-home.fmm-game-home .fmm-game-hero h1,
+  .fmm-mobile-home.fmm-game-home .fmm-game-hero-copy {
+    align-self: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 360px !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-eyebrow {
+    margin-bottom: 3px !important;
+    margin-top: 0 !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-hero h1 {
+    line-height: 0.92 !important;
+    margin-bottom: 0 !important;
+    margin-top: 1px !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-hero-copy {
+    margin-bottom: 12px !important;
+    margin-top: 8px !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-primary-cta,
+  .fmm-mobile-home.fmm-game-home .fmm-game-stats {
+    align-self: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 350px !important;
+    width: 100% !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-stats {
+    margin-top: 13px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .fmm-mobile-home.fmm-game-home .fmm-game-hero {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-logo-stage {
+    border-radius: 17px !important;
+    max-width: 326px !important;
+    width: min(95vw, 326px) !important;
+  }
+
+  .fmm-mobile-home.fmm-game-home .fmm-game-primary-cta,
+  .fmm-mobile-home.fmm-game-home .fmm-game-stats {
+    max-width: 330px !important;
+  }
+}
