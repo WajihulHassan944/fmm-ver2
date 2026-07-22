@@ -340,21 +340,9 @@ const Header = () => {
           alt="Fantasy MMAdness"
           width={188}
           height={84}
-          sizes="188px"
+          sizes="(max-width: 767px) 54px, 188px"
           priority
         />
-        {isHomeRoute && (
-          <OptimizedImage
-            className="theme-brand-logo theme-brand-logo-home-mobile"
-            src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
-            alt=""
-            width={1254}
-            height={1254}
-            sizes="54px"
-            priority
-            aria-hidden="true"
-          />
-        )}
         <span className="theme-mobile-wordmark" aria-hidden="true">
           <b>Fantasy</b>
           <strong>MMAdness</strong>

@@ -93,7 +93,33 @@ const HOME_FIGHT_SPORT_TABS = [
   },
 ];
 
-const MOBILE_HOME_SPORT_TABS = HOME_FIGHT_SPORT_TABS;
+const MOBILE_HOME_SPORT_TABS = [
+  {
+    ...HOME_FIGHT_SPORT_TABS[0],
+    label: "Boxing",
+    symbol: "🥊",
+  },
+  {
+    ...HOME_FIGHT_SPORT_TABS[1],
+    label: "UFC / MMA",
+    symbol: "🥋",
+  },
+  {
+    ...HOME_FIGHT_SPORT_TABS[2],
+    label: "Bare Knuckle",
+    symbol: "👊",
+  },
+  {
+    ...HOME_FIGHT_SPORT_TABS[3],
+    label: "Kickboxing",
+    symbol: "🦵",
+  },
+  {
+    ...HOME_FIGHT_SPORT_TABS[4],
+    label: "Pro Wrestling",
+    symbol: "🤼",
+  },
+];
 
 const MOBILE_FALLBACK_FIGHT_IMAGES = [
   "/images/fmm-experience/fighter-chris-eubank-jr.webp",
@@ -1191,6 +1217,88 @@ const MobilePhoneHome = ({
     });
   };
 
+  const mobilePosterCarousel = (
+    <div className="fmm-game-poster-stage">
+      {mobileHeroPoster && mobileHeroFight ? (
+        <div
+          className="fmm-game-poster-slide"
+          key={getFightId(mobileHeroFight) || `mobile-hero-${activeHeroIndex}`}
+        >
+          <div className="fmm-game-poster-meta">
+            <span>Featured Fight</span>
+            <strong>
+              {mobileHeroPosition} / {Math.max(mobileHeroSlides.length, 1)}
+            </strong>
+          </div>
+    
+          {mobileHeroSlides.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="fmm-game-poster-arrow is-left"
+                aria-label="Previous featured fight poster"
+                onClick={() => moveMobileHeroPoster(-1)}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="fmm-game-poster-arrow is-right"
+                aria-label="Next featured fight poster"
+                onClick={() => moveMobileHeroPoster(1)}
+              >
+                ›
+              </button>
+            </>
+          )}
+    
+          <button
+            type="button"
+            className="fmm-game-poster-button"
+            onClick={() => setSelectedFeaturedFight?.(mobileHeroFight)}
+            aria-label={`Open premium details for ${getFightTitle(mobileHeroFight)}`}
+          >
+            <FightImage
+              src={mobileHeroPoster}
+              alt={`${getFightTitle(mobileHeroFight)} featured fight poster`}
+              width={1080}
+              height={1440}
+              priority
+              sizes="(max-width: 767px) 64vw, 300px"
+            />
+          </button>
+    
+          {mobileHeroSlides.length > 1 && (
+            <div className="fmm-game-poster-dots" aria-hidden="true">
+              {mobileHeroSlides.slice(0, 7).map((fight, index) => (
+                <span
+                  className={
+                    index ===
+                    activeHeroIndex % Math.min(mobileHeroSlides.length, 7)
+                      ? "is-active"
+                      : ""
+                  }
+                  key={getFightId(fight) || `mobile-hero-dot-${index}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="fmm-game-poster-fallback" aria-hidden="true">
+          <Image
+            src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
+            alt=""
+            width={1254}
+            height={1254}
+            sizes="(max-width: 767px) 64vw, 300px"
+            priority
+          />
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div
       className="fmm-mobile-home fmm-game-home"
@@ -1206,84 +1314,16 @@ const MobilePhoneHome = ({
           <i className="is-blue" />
         </div>
 
-        <div className="fmm-game-poster-stage">
-          {mobileHeroPoster && mobileHeroFight ? (
-            <div
-              className="fmm-game-poster-slide"
-              key={getFightId(mobileHeroFight) || `mobile-hero-${activeHeroIndex}`}
-            >
-              <div className="fmm-game-poster-meta">
-                <span>Featured Fight</span>
-                <strong>
-                  {mobileHeroPosition} / {Math.max(mobileHeroSlides.length, 1)}
-                </strong>
-              </div>
-
-              {mobileHeroSlides.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    className="fmm-game-poster-arrow is-left"
-                    aria-label="Previous featured fight poster"
-                    onClick={() => moveMobileHeroPoster(-1)}
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    className="fmm-game-poster-arrow is-right"
-                    aria-label="Next featured fight poster"
-                    onClick={() => moveMobileHeroPoster(1)}
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-
-              <button
-                type="button"
-                className="fmm-game-poster-button"
-                onClick={() => setSelectedFeaturedFight?.(mobileHeroFight)}
-                aria-label={`Open premium details for ${getFightTitle(mobileHeroFight)}`}
-              >
-                <FightImage
-                  src={mobileHeroPoster}
-                  alt={`${getFightTitle(mobileHeroFight)} featured fight poster`}
-                  width={1080}
-                  height={1440}
-                  priority
-                  sizes="(max-width: 767px) 64vw, 300px"
-                />
-              </button>
-
-              {mobileHeroSlides.length > 1 && (
-                <div className="fmm-game-poster-dots" aria-hidden="true">
-                  {mobileHeroSlides.slice(0, 7).map((fight, index) => (
-                    <span
-                      className={
-                        index ===
-                        activeHeroIndex % Math.min(mobileHeroSlides.length, 7)
-                          ? "is-active"
-                          : ""
-                      }
-                      key={getFightId(fight) || `mobile-hero-dot-${index}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="fmm-game-poster-fallback" aria-hidden="true">
-              <Image
-                src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
-                alt=""
-                width={1254}
-                height={1254}
-                sizes="(max-width: 767px) 64vw, 300px"
-                priority
-              />
-            </div>
-          )}
+        <div className="fmm-game-logo-stage">
+          <Image
+            src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
+            alt="Fantasy MMAdness"
+            width={1254}
+            height={1254}
+            sizes="(max-width: 767px) 86vw, 360px"
+            priority
+          />
+          <span className="fmm-game-logo-shine" aria-hidden="true" />
         </div>
 
         <p className="fmm-game-eyebrow">
@@ -1315,6 +1355,19 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
+      <section
+        className="fmm-game-section fmm-game-featured-posters"
+        aria-labelledby="fmm-game-featured-posters-title"
+      >
+        <div className="fmm-game-section-heading">
+          <h2 id="fmm-game-featured-posters-title">Featured Fights</h2>
+          <Link href="/upcomingfights?status=all">
+            View All <FaArrowRight aria-hidden="true" />
+          </Link>
+        </div>
+        {mobilePosterCarousel}
+      </section>
+
       {matchStatus === "loading" && (
         <div className="fmm-game-loading" role="status" aria-live="polite">
           Loading live contests...
@@ -1341,13 +1394,7 @@ const MobilePhoneHome = ({
               aria-pressed={activeSection?.key === section.key}
             >
               <span className="fmm-game-sport-art" aria-hidden="true">
-                <Image
-                  src={section.image}
-                  alt=""
-                  width={150}
-                  height={126}
-                  sizes="86px"
-                />
+                <span className="fmm-game-sport-symbol">{section.symbol}</span>
               </span>
               <strong>{section.label}</strong>
               <small>{section.count.toLocaleString()} fights</small>
