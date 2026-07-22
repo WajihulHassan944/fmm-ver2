@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
   FaBars,
+  FaBell,
   FaBullseye,
   FaCalendarAlt,
   FaChartLine,
@@ -24,6 +25,7 @@ import {
   FaMedal,
   FaNewspaper,
   FaQuestionCircle,
+  FaPlus,
   FaSignOutAlt,
   FaTimes,
   FaTrophy,
@@ -33,7 +35,6 @@ import {
 } from 'react-icons/fa';
 
 const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
-const HOME_MOBILE_LOGO_URL = '/images/mobile-home/game/fantasy-mmadness-updated-logo.png';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
@@ -181,6 +182,28 @@ const Header = () => {
     return displayName.charAt(0).toUpperCase();
   }, [affiliate?.firstName, affiliate?.username, user?.firstName, user?.name, user?.username]);
 
+  const homeMobileWalletTokens = useMemo(() => {
+    const values = [user?.tokens, user?.walletTokens, user?.wallet?.balance];
+    for (const value of values) {
+      const normalized = typeof value === 'string' ? value.replaceAll(',', '').trim() : value;
+      const parsed = Number(normalized);
+      if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
+    }
+    return 0;
+  }, [user?.tokens, user?.walletTokens, user?.wallet?.balance]);
+
+  const homeMobileUnreadNotifications = useMemo(() => {
+    const explicitValues = [user?.unreadNotifications, user?.notificationCount];
+    for (const value of explicitValues) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
+    }
+
+    return Array.isArray(user?.notifications)
+      ? user.notifications.filter((notification) => !notification?.read).length
+      : 0;
+  }, [user?.notificationCount, user?.notifications, user?.unreadNotifications]);
+
   const currentNav = useMemo(() => {
     if (isAuthenticatedAffiliate) return affiliateNav;
     if (authStatusSponsor) return sponsorNav;
@@ -322,7 +345,7 @@ const Header = () => {
   const mobileLinks = flattenNav(currentNav);
 
   return (
-    <header className="header theme-header">
+    <header className={`header theme-header ${isHomeRoute ? 'is-home-route' : ''}`}>
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
         <OptimizedImage
           className="theme-brand-logo theme-brand-logo-default"
@@ -333,28 +356,43 @@ const Header = () => {
           sizes="188px"
           priority
         />
-        {isHomeRoute && (
-          <OptimizedImage
-            className="theme-brand-logo theme-brand-logo-home-mobile"
-            src={HOME_MOBILE_LOGO_URL}
-            alt="Fantasy MMAdness"
-            width={88}
-            height={88}
-            sizes="64px"
-            priority
-          />
-        )}
         <span className="theme-mobile-wordmark" aria-hidden="true">
           <b>Fantasy</b>
           <strong>MMAdness</strong>
         </span>
       </Link>
 
+      {isHomeRoute && (
+        <Link
+          href="/fights-rewards"
+          className="theme-home-mobile-wallet"
+          aria-label={`Fantasy coin balance: ${homeMobileWalletTokens.toLocaleString()}`}
+        >
+          <span className="theme-home-mobile-coin">FM</span>
+          <strong>{homeMobileWalletTokens.toLocaleString()}</strong>
+          <span className="theme-home-mobile-wallet-plus" aria-hidden="true">
+            <FaPlus />
+          </span>
+        </Link>
+      )}
+
       <nav className="theme-nav" aria-label="Primary navigation">
         {currentNav.map(renderNavItem)}
       </nav>
 
       <div className="theme-header-actions">
+        {isHomeRoute && (
+          <Link
+            href={isAuthenticated ? "/UserDashboard" : "/login"}
+            className="theme-home-mobile-notifications"
+            aria-label="Open notifications"
+          >
+            <FaBell aria-hidden="true" />
+            {homeMobileUnreadNotifications > 0 && (
+              <span>{Math.min(homeMobileUnreadNotifications, 99)}</span>
+            )}
+          </Link>
+        )}
         <Link
           href={mobileAccountHref}
           className="theme-mobile-signup-icon"
