@@ -1342,16 +1342,10 @@ const MobilePhoneHome = ({
             />
           </figure>
 
-          <div className="fmm-game-logo-stage">
-            <Image
-              src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
-              alt="Fantasy MMAdness"
-              width={766}
-              height={768}
-              sizes="(max-width: 480px) 64vw, 292px"
-              priority
-            />
-            <span className="fmm-game-logo-shine" aria-hidden="true" />
+          <div className="fmm-game-versus-lockup" aria-label={`${heroFighterA} versus ${heroFighterB}`}>
+            <span>Featured Fight</span>
+            <strong>VS</strong>
+            <small>Tap arrows to switch</small>
           </div>
 
           {mobileHeroSlides.length > 1 && (

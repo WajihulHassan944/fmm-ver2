@@ -75,6 +75,7 @@ import "@/styles/featured-fight-stage-final.css";
 import "@/styles/home-design-reference-lock.css";
 import "@/styles/homepage-final-premium-polish.css";
 import "@/styles/home-mobile-game-concept.css";
+import "@/styles/home-mobile-banner-menu-followup.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

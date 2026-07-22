@@ -33,6 +33,7 @@ import {
 } from 'react-icons/fa';
 
 const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
+const HOME_MOBILE_LOGO_URL = '/images/mobile-home/game/fantasy-mmadness-updated-logo.png';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
@@ -323,7 +324,26 @@ const Header = () => {
   return (
     <header className="header theme-header">
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
-        <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={188} height={84} sizes="188px" priority />
+        <OptimizedImage
+          className="theme-brand-logo theme-brand-logo-default"
+          src={LOGO_URL}
+          alt="Fantasy MMAdness"
+          width={188}
+          height={84}
+          sizes="188px"
+          priority
+        />
+        {isHomeRoute && (
+          <OptimizedImage
+            className="theme-brand-logo theme-brand-logo-home-mobile"
+            src={HOME_MOBILE_LOGO_URL}
+            alt="Fantasy MMAdness"
+            width={88}
+            height={88}
+            sizes="64px"
+            priority
+          />
+        )}
         <span className="theme-mobile-wordmark" aria-hidden="true">
           <b>Fantasy</b>
           <strong>MMAdness</strong>
@@ -335,15 +355,13 @@ const Header = () => {
       </nav>
 
       <div className="theme-header-actions">
-        {!isHomeRoute && (
-          <Link
-            href={mobileAccountHref}
-            className="theme-mobile-signup-icon"
-            aria-label={mobileAccountLabel}
-          >
-            <FaUserCircle aria-hidden="true" />
-          </Link>
-        )}
+        <Link
+          href={mobileAccountHref}
+          className="theme-mobile-signup-icon"
+          aria-label={mobileAccountLabel}
+        >
+          <FaUserCircle aria-hidden="true" />
+        </Link>
         {renderAuthActions()}
         <button
           type="button"
