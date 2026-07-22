@@ -955,10 +955,15 @@ const getMobileDisplayFights = (fights = [], sportKey = "mma", limit = 3) => {
   const visible = Array.isArray(fights)
     ? fights.filter(Boolean).slice(0, limit)
     : [];
-  if (visible.length) return visible;
-  return Array.from({ length: limit }, (_, index) =>
-    getMobileFallbackFight(sportKey, index),
+
+  if (visible.length >= limit) return visible;
+
+  const fallbackFights = Array.from(
+    { length: limit - visible.length },
+    (_, index) => getMobileFallbackFight(sportKey, visible.length + index),
   );
+
+  return [...visible, ...fallbackFights];
 };
 
 const getMobileEntryFee = (match = {}) => {
@@ -1091,6 +1096,10 @@ const MobilePhoneHome = ({
   activeFightSport,
   setActiveFightSport,
   activeHeroFight,
+  activeHeroIndex = 0,
+  setActiveHeroIndex = () => {},
+  setSelectedFeaturedFight,
+  heroSlides = [],
   homeFightSections,
   matchError,
   matchStatus,
@@ -1121,13 +1130,29 @@ const MobilePhoneHome = ({
     5,
   );
   const featuredContest =
-    activeHeroFight ||
     selectedUpcomingFights[0] ||
     getMobileFallbackFight(activeSection?.key || "mma", 0);
-  const secondaryContests = dedupeHomepageFights([
-    ...selectedUpcomingFights.slice(1),
-    ...mobileSections.flatMap((section) => section.fights || []),
-  ]).slice(0, 2);
+  const secondaryContests = selectedUpcomingFights.slice(1, 3);
+  const mobileHeroSlides = Array.isArray(heroSlides) ? heroSlides : [];
+  const mobileHeroFight =
+    mobileHeroSlides.length > 0
+      ? mobileHeroSlides[activeHeroIndex % mobileHeroSlides.length]
+      : activeHeroFight;
+  const mobileHeroPoster = getHomeFightPosterImage(mobileHeroFight);
+  const mobileHeroPosition = mobileHeroSlides.length
+    ? (activeHeroIndex % mobileHeroSlides.length) + 1
+    : mobileHeroFight
+      ? 1
+      : 0;
+
+  const moveMobileHeroPoster = (direction) => {
+    if (mobileHeroSlides.length <= 1) return;
+    setActiveHeroIndex(
+      (current) =>
+        (current + direction + mobileHeroSlides.length) %
+        mobileHeroSlides.length,
+    );
+  };
   const isLoggedIn = Boolean(
     currentUser?._id || currentUser?.email || currentUser?.username,
   );
@@ -1181,16 +1206,84 @@ const MobilePhoneHome = ({
           <i className="is-blue" />
         </div>
 
-        <div className="fmm-game-logo-stage">
-          <Image
-            src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
-            alt="Fantasy MMAdness"
-            width={1254}
-            height={1254}
-            sizes="(max-width: 767px) 88vw, 520px"
-            priority
-          />
-          <span className="fmm-game-logo-shine" aria-hidden="true" />
+        <div className="fmm-game-poster-stage">
+          {mobileHeroPoster && mobileHeroFight ? (
+            <div
+              className="fmm-game-poster-slide"
+              key={getFightId(mobileHeroFight) || `mobile-hero-${activeHeroIndex}`}
+            >
+              <div className="fmm-game-poster-meta">
+                <span>Featured Fight</span>
+                <strong>
+                  {mobileHeroPosition} / {Math.max(mobileHeroSlides.length, 1)}
+                </strong>
+              </div>
+
+              {mobileHeroSlides.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    className="fmm-game-poster-arrow is-left"
+                    aria-label="Previous featured fight poster"
+                    onClick={() => moveMobileHeroPoster(-1)}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="fmm-game-poster-arrow is-right"
+                    aria-label="Next featured fight poster"
+                    onClick={() => moveMobileHeroPoster(1)}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                className="fmm-game-poster-button"
+                onClick={() => setSelectedFeaturedFight?.(mobileHeroFight)}
+                aria-label={`Open premium details for ${getFightTitle(mobileHeroFight)}`}
+              >
+                <FightImage
+                  src={mobileHeroPoster}
+                  alt={`${getFightTitle(mobileHeroFight)} featured fight poster`}
+                  width={1080}
+                  height={1440}
+                  priority
+                  sizes="(max-width: 767px) 64vw, 300px"
+                />
+              </button>
+
+              {mobileHeroSlides.length > 1 && (
+                <div className="fmm-game-poster-dots" aria-hidden="true">
+                  {mobileHeroSlides.slice(0, 7).map((fight, index) => (
+                    <span
+                      className={
+                        index ===
+                        activeHeroIndex % Math.min(mobileHeroSlides.length, 7)
+                          ? "is-active"
+                          : ""
+                      }
+                      key={getFightId(fight) || `mobile-hero-dot-${index}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="fmm-game-poster-fallback" aria-hidden="true">
+              <Image
+                src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
+                alt=""
+                width={1254}
+                height={1254}
+                sizes="(max-width: 767px) 64vw, 300px"
+                priority
+              />
+            </div>
+          )}
         </div>
 
         <p className="fmm-game-eyebrow">
@@ -1258,7 +1351,10 @@ const MobilePhoneHome = ({
               </span>
               <strong>{section.label}</strong>
               <small>{section.count.toLocaleString()} fights</small>
-              <span className="fmm-game-sport-action">Play Now</span>
+              <span className="fmm-game-sport-action">
+                <span>Play Now</span>
+                <FaArrowRight aria-hidden="true" />
+              </span>
             </button>
           ))}
         </div>

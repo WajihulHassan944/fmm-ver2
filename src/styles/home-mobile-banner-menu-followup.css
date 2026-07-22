@@ -310,3 +310,396 @@
     width: 44px !important;
   }
 }
+
+/* Mobile homepage refinement: branded flex navbar, animated poster hero, premium sport actions. */
+.theme-brand-logo-home-mobile {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .header.theme-header.is-home-route {
+    align-items: center !important;
+    display: grid !important;
+    gap: 10px !important;
+    grid-template-columns: 54px minmax(112px, 1fr) 38px !important;
+    justify-content: stretch !important;
+    padding: env(safe-area-inset-top) 12px 0 !important;
+  }
+
+  .header.theme-header.is-home-route .theme-brand {
+    align-items: center !important;
+    align-self: center !important;
+    display: flex !important;
+    height: 52px !important;
+    justify-content: flex-start !important;
+    left: auto !important;
+    margin: 0 !important;
+    max-width: 52px !important;
+    min-width: 0 !important;
+    order: 1 !important;
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 52px !important;
+  }
+
+  .header.theme-header.is-home-route .theme-brand-logo-default,
+  .header.theme-header.is-home-route .theme-mobile-wordmark {
+    display: none !important;
+  }
+
+  .header.theme-header.is-home-route .theme-brand-logo-home-mobile,
+  .header.theme-header.is-home-route .theme-brand-logo-home-mobile img,
+  .header.theme-header.is-home-route .theme-brand-logo-home-mobile > span img {
+    display: block !important;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8)) !important;
+    height: 50px !important;
+    max-height: 50px !important;
+    max-width: 50px !important;
+    object-fit: contain !important;
+    width: 50px !important;
+  }
+
+  .header.theme-header.is-home-route .theme-home-mobile-wallet {
+    align-self: center !important;
+    justify-self: center !important;
+    left: auto !important;
+    margin: 0 !important;
+    max-width: 154px !important;
+    min-width: 116px !important;
+    order: 2 !important;
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: fit-content !important;
+  }
+
+  .header.theme-header.is-home-route .theme-header-actions {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    justify-self: end !important;
+    margin: 0 !important;
+    order: 3 !important;
+    position: static !important;
+    width: 38px !important;
+  }
+
+  .header.theme-header.is-home-route .theme-home-mobile-notifications {
+    display: none !important;
+  }
+
+  .header.theme-header.is-home-route .theme-mobile-toggle {
+    align-items: center !important;
+    display: inline-flex !important;
+    flex: 0 0 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+    left: auto !important;
+    margin: 0 !important;
+    min-height: 36px !important;
+    min-width: 36px !important;
+    order: 1 !important;
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 36px !important;
+  }
+
+  #mobile-game-live-contests {
+    scroll-margin-top: calc(72px + env(safe-area-inset-top)) !important;
+  }
+
+  .fmm-game-poster-stage {
+    margin: 10px auto 5px !important;
+    min-height: 314px !important;
+    position: relative !important;
+    width: min(76vw, 300px) !important;
+    z-index: 2 !important;
+  }
+
+  .fmm-game-poster-slide {
+    animation: fmmMobilePosterEntrance 620ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+    margin: 0 auto !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  .fmm-game-poster-meta {
+    align-items: center !important;
+    display: flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    justify-content: space-between !important;
+    margin: 0 auto 7px !important;
+    max-width: 230px !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-game-poster-meta span {
+    color: var(--fmm-game-gold, #ffc400) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .fmm-game-poster-meta strong {
+    background: rgba(0, 0, 0, 0.58) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 999px !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    letter-spacing: 0.06em !important;
+    padding: 4px 8px !important;
+  }
+
+  .fmm-game-poster-button {
+    appearance: none !important;
+    aspect-ratio: 3 / 4 !important;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255, 196, 0, 0.1), transparent 45%),
+      #060606 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 14px !important;
+    box-shadow:
+      0 20px 38px rgba(0, 0, 0, 0.82),
+      0 0 26px rgba(239, 35, 23, 0.16),
+      inset 0 0 0 1px rgba(255, 196, 0, 0.05) !important;
+    cursor: pointer !important;
+    display: block !important;
+    margin: 0 auto !important;
+    max-height: 284px !important;
+    overflow: hidden !important;
+    padding: 5px !important;
+    position: relative !important;
+    width: min(58vw, 214px) !important;
+  }
+
+  .fmm-game-poster-button::after {
+    background: linear-gradient(115deg, transparent 28%, rgba(255, 255, 255, 0.24) 48%, transparent 68%) !important;
+    content: "" !important;
+    inset: -25% -65% !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    transform: translateX(-72%) !important;
+    animation: fmmMobilePosterShine 4.8s ease-in-out infinite !important;
+  }
+
+  .fmm-game-poster-button img,
+  .fmm-game-poster-button > span img {
+    border-radius: 9px !important;
+    display: block !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+  }
+
+  .fmm-game-poster-arrow {
+    align-items: center !important;
+    background: rgba(7, 8, 12, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55) !important;
+    color: #fff !important;
+    display: flex !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 29px !important;
+    height: 38px !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    padding: 0 0 3px !important;
+    position: absolute !important;
+    top: 49% !important;
+    transform: translateY(-50%) !important;
+    width: 38px !important;
+    z-index: 5 !important;
+  }
+
+  .fmm-game-poster-arrow.is-left {
+    left: 0 !important;
+  }
+
+  .fmm-game-poster-arrow.is-right {
+    right: 0 !important;
+  }
+
+  .fmm-game-poster-dots {
+    align-items: center !important;
+    display: flex !important;
+    gap: 5px !important;
+    justify-content: center !important;
+    margin-top: 8px !important;
+  }
+
+  .fmm-game-poster-dots span {
+    background: rgba(255, 255, 255, 0.24) !important;
+    border-radius: 999px !important;
+    height: 3px !important;
+    transition: width 180ms ease, background-color 180ms ease !important;
+    width: 12px !important;
+  }
+
+  .fmm-game-poster-dots span.is-active {
+    background: var(--fmm-game-gold, #ffc400) !important;
+    box-shadow: 0 0 9px rgba(255, 196, 0, 0.72) !important;
+    width: 25px !important;
+  }
+
+  .fmm-game-poster-fallback {
+    align-items: center !important;
+    display: flex !important;
+    height: 300px !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+    width: 230px !important;
+  }
+
+  .fmm-game-poster-fallback img,
+  .fmm-game-poster-fallback > span img {
+    display: block !important;
+    height: auto !important;
+    object-fit: contain !important;
+    width: 100% !important;
+  }
+
+  .fmm-game-stats strong,
+  .fmm-game-stats small {
+    font-family: var(--fmm-font-display, "Arial Narrow", Impact, sans-serif) !important;
+  }
+
+  .fmm-game-stats strong {
+    font-size: clamp(13px, 3.9vw, 17px) !important;
+    letter-spacing: 0.015em !important;
+  }
+
+  .fmm-game-stats small {
+    font-size: clamp(8px, 2.25vw, 10px) !important;
+    letter-spacing: 0.045em !important;
+    line-height: 0.95 !important;
+  }
+
+  .fmm-game-sport-card {
+    --sport-accent: #ef2317;
+    --sport-accent-bright: #ff5b50;
+    --sport-accent-dark: #9f0804;
+  }
+
+  .fmm-game-sport-card.is-mma {
+    --sport-accent: #1687ff;
+    --sport-accent-bright: #64b3ff;
+    --sport-accent-dark: #0755a8;
+  }
+
+  .fmm-game-sport-card.is-bareknuckle {
+    --sport-accent: #ffc400;
+    --sport-accent-bright: #ffe375;
+    --sport-accent-dark: #b16a00;
+  }
+
+  .fmm-game-sport-card.is-kickboxing {
+    --sport-accent: #3ed13b;
+    --sport-accent-bright: #8bf08a;
+    --sport-accent-dark: #18711c;
+  }
+
+  .fmm-game-sport-card.is-pro-wrestling {
+    --sport-accent: #bf4bff;
+    --sport-accent-bright: #e29cff;
+    --sport-accent-dark: #7420a8;
+  }
+
+  .fmm-game-sport-action {
+    align-items: center !important;
+    background: linear-gradient(180deg, var(--sport-accent-bright), var(--sport-accent) 48%, var(--sport-accent-dark)) !important;
+    border: 1px solid color-mix(in srgb, var(--sport-accent-bright) 76%, white) !important;
+    border-radius: 8px !important;
+    box-shadow:
+      0 7px 16px color-mix(in srgb, var(--sport-accent) 30%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.28) !important;
+    color: #fff !important;
+    display: flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 10px !important;
+    gap: 7px !important;
+    justify-content: center !important;
+    letter-spacing: 0.045em !important;
+    min-height: 29px !important;
+    overflow: hidden !important;
+    padding: 6px 7px !important;
+    position: relative !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .fmm-game-sport-action::before {
+    background: linear-gradient(105deg, transparent 24%, rgba(255, 255, 255, 0.5) 48%, transparent 72%) !important;
+    content: "" !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    transform: translateX(-120%) !important;
+    transition: transform 320ms ease !important;
+  }
+
+  .fmm-game-sport-card:is(:hover, :focus-visible) .fmm-game-sport-action::before,
+  .fmm-game-sport-card.is-active .fmm-game-sport-action::before {
+    transform: translateX(120%) !important;
+  }
+
+  .fmm-game-sport-action > span,
+  .fmm-game-sport-action > svg {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .fmm-game-sport-action > svg {
+    background: rgba(0, 0, 0, 0.18) !important;
+    border-radius: 999px !important;
+    height: 18px !important;
+    padding: 5px !important;
+    width: 18px !important;
+  }
+
+  @keyframes fmmMobilePosterEntrance {
+    from {
+      opacity: 0;
+      transform: translate3d(24px, 0, 0) scale(0.965);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  @keyframes fmmMobilePosterShine {
+    0%, 58% {
+      opacity: 0;
+      transform: translateX(-72%);
+    }
+    68% {
+      opacity: 0.72;
+    }
+    84%, 100% {
+      opacity: 0;
+      transform: translateX(72%);
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .fmm-game-poster-stage {
+    min-height: 292px !important;
+    width: min(78vw, 278px) !important;
+  }
+
+  .fmm-game-poster-button {
+    max-height: 260px !important;
+    width: min(57vw, 195px) !important;
+  }
+
+  .fmm-game-poster-arrow {
+    height: 34px !important;
+    width: 34px !important;
+  }
+}

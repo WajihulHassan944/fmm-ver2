@@ -8,7 +8,6 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
   FaBars,
-  FaBell,
   FaBullseye,
   FaCalendarAlt,
   FaChartLine,
@@ -192,18 +191,6 @@ const Header = () => {
     return 0;
   }, [user?.tokens, user?.walletTokens, user?.wallet?.balance]);
 
-  const homeMobileUnreadNotifications = useMemo(() => {
-    const explicitValues = [user?.unreadNotifications, user?.notificationCount];
-    for (const value of explicitValues) {
-      const parsed = Number(value);
-      if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
-    }
-
-    return Array.isArray(user?.notifications)
-      ? user.notifications.filter((notification) => !notification?.read).length
-      : 0;
-  }, [user?.notificationCount, user?.notifications, user?.unreadNotifications]);
-
   const currentNav = useMemo(() => {
     if (isAuthenticatedAffiliate) return affiliateNav;
     if (authStatusSponsor) return sponsorNav;
@@ -356,6 +343,18 @@ const Header = () => {
           sizes="188px"
           priority
         />
+        {isHomeRoute && (
+          <OptimizedImage
+            className="theme-brand-logo theme-brand-logo-home-mobile"
+            src="/images/mobile-home/game/fantasy-mmadness-updated-logo.png"
+            alt=""
+            width={1254}
+            height={1254}
+            sizes="54px"
+            priority
+            aria-hidden="true"
+          />
+        )}
         <span className="theme-mobile-wordmark" aria-hidden="true">
           <b>Fantasy</b>
           <strong>MMAdness</strong>
@@ -381,18 +380,6 @@ const Header = () => {
       </nav>
 
       <div className="theme-header-actions">
-        {isHomeRoute && (
-          <Link
-            href={isAuthenticated ? "/UserDashboard" : "/login"}
-            className="theme-home-mobile-notifications"
-            aria-label="Open notifications"
-          >
-            <FaBell aria-hidden="true" />
-            {homeMobileUnreadNotifications > 0 && (
-              <span>{Math.min(homeMobileUnreadNotifications, 99)}</span>
-            )}
-          </Link>
-        )}
         <Link
           href={mobileAccountHref}
           className="theme-mobile-signup-icon"
