@@ -877,3 +877,215 @@
     }
   }
 }
+
+/* === V6: remove legacy mobile header spacer, single hero controls, and crisp semantic nav === */
+@media (max-width: 767px) {
+  html,
+  body,
+  #__next,
+  main.site-experience-main.is-home-experience-main,
+  .site-experience-main.is-home-experience-main,
+  .site-experience-main.is-home-experience-main > .fmm-home,
+  .site-experience-main.is-home-experience-main .fmm-home.page-shell,
+  .site-experience-main.is-home-experience-main .theme-home,
+  .site-experience-main.is-home-experience-main .page-shell,
+  .site-experience-main.is-home-experience-main .fmm-static-client-home {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: auto !important;
+    transform: none !important;
+  }
+
+  .header.theme-header.is-home-route {
+    display: none !important;
+    position: fixed !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-static-client-home {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 12px calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-x: hidden !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-static-hero {
+    margin: 0 -12px 8px !important;
+    padding: 0 !important;
+  }
+
+  .fmm-static-hero-menu-button,
+  .fmm-static-hero-user-button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    opacity: 1 !important;
+  }
+
+  .fmm-static-control-hit-label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .fmm-static-bottom-nav {
+    position: fixed !important;
+    left: 6px !important;
+    right: 6px !important;
+    bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 220 !important;
+    width: auto !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 1px !important;
+    padding: 7px 5px 6px !important;
+    overflow: visible !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background:
+      radial-gradient(circle at 52% 0%, rgba(255, 198, 39, 0.12), transparent 30%),
+      linear-gradient(180deg, rgba(13, 16, 24, 0.99), rgba(5, 7, 12, 0.995)) !important;
+    box-shadow:
+      0 20px 48px rgba(0, 0, 0, 0.68),
+      inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(18px);
+  }
+
+  .fmm-static-bottom-nav > a {
+    position: relative;
+    min-width: 0;
+    min-height: 62px;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    padding: 7px 1px 5px;
+    border-radius: 17px;
+    color: rgba(230, 233, 240, 0.58) !important;
+    font: 700 clamp(0.42rem, 1.72vw, 0.58rem)/1 var(--fmm-static-heading) !important;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.015em;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fmm-static-bottom-nav > a > svg {
+    width: clamp(17px, 5.2vw, 23px);
+    height: clamp(17px, 5.2vw, 23px);
+    flex: 0 0 auto;
+    filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.45));
+  }
+
+  .fmm-static-bottom-nav > a > span:last-child {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .fmm-static-bottom-nav > a.is-active {
+    color: #ff4a34 !important;
+    background:
+      radial-gradient(circle at 50% 28%, rgba(255, 70, 48, 0.28), transparent 58%),
+      linear-gradient(180deg, rgba(123, 12, 9, 0.72), rgba(38, 5, 5, 0.76));
+    border: 1px solid rgba(255, 59, 43, 0.48);
+    box-shadow:
+      0 0 20px rgba(255, 42, 30, 0.27),
+      inset 0 0 14px rgba(255, 47, 35, 0.12);
+  }
+
+  .fmm-static-bottom-nav > a.is-primary {
+    overflow: visible;
+    color: #ffd449 !important;
+    padding-top: 27px;
+  }
+
+  .fmm-static-bottom-nav-orb {
+    position: absolute !important;
+    top: -23px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: clamp(53px, 16vw, 64px) !important;
+    height: clamp(53px, 16vw, 64px) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    color: #2b1a00 !important;
+    background: radial-gradient(circle at 35% 28%, #fff3a4 0%, #ffd94d 34%, #d58d09 100%) !important;
+    border: 4px solid #080a10 !important;
+    box-shadow:
+      0 14px 26px rgba(255, 190, 28, 0.36),
+      0 0 0 1px rgba(255, 222, 104, 0.48) !important;
+  }
+
+  .fmm-static-bottom-nav-orb svg {
+    width: 45% !important;
+    height: 45% !important;
+  }
+
+  .fmm-static-bottom-nav > a:active {
+    transform: translateY(1px);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  @media (max-width: 375px) {
+    .fmm-static-bottom-nav {
+      left: 3px !important;
+      right: 3px !important;
+      height: 74px !important;
+      min-height: 74px !important;
+      padding-inline: 3px !important;
+    }
+
+    .fmm-static-bottom-nav > a {
+      min-height: 59px;
+      font-size: 0.43rem !important;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-static-bottom-nav > a.is-primary > span:last-child {
+    max-width: 56px;
+    overflow: visible;
+    white-space: normal;
+    line-height: 0.94;
+  }
+
+  .fmm-static-bottom-nav > a:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: -1px;
+    width: 1px;
+    height: 43px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.08), transparent);
+    pointer-events: none;
+  }
+
+  .fmm-static-bottom-nav > a.is-primary::after,
+  .fmm-static-bottom-nav > a.is-active::after {
+    display: none;
+  }
+}

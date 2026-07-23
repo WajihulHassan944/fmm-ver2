@@ -29,7 +29,6 @@ import {
 } from "@/Utils/fightExperience";
 import {
   FaArrowRight,
-  FaBars,
   FaBolt,
   FaBullseye,
   FaCalendarAlt,
@@ -51,7 +50,6 @@ import {
   FaTimes,
   FaTrophy,
   FaUserAlt,
-  FaUserCircle,
   FaUsers,
 } from "react-icons/fa";
 
@@ -1219,7 +1217,7 @@ const MobilePhoneHome = ({
   ];
 
   return (
-    <div className="fmm-mobile-home fmm-static-client-home" aria-label="Fantasy MMAdness mobile homepage">
+    <div className="fmm-static-client-home" aria-label="Fantasy MMAdness mobile homepage">
       <section className="fmm-static-hero" aria-label="Fantasy MMAdness hero banner">
         <div className="fmm-static-hero-controls" aria-label="Homepage controls">
           <button
@@ -1230,7 +1228,7 @@ const MobilePhoneHome = ({
             aria-controls="fmm-static-hero-menu"
             onClick={() => setIsHeroMenuOpen((current) => !current)}
           >
-            {isHeroMenuOpen ? <FaTimes aria-hidden="true" /> : <FaBars aria-hidden="true" />}
+            <span className="fmm-static-control-hit-label">Menu</span>
           </button>
 
           <Link
@@ -1238,7 +1236,7 @@ const MobilePhoneHome = ({
             className="fmm-static-hero-user-button"
             aria-label="Create your Fantasy MMAdness account"
           >
-            <FaUserCircle aria-hidden="true" />
+            <span className="fmm-static-control-hit-label">Create account</span>
           </Link>
         </div>
 
@@ -1281,7 +1279,7 @@ const MobilePhoneHome = ({
         )}
 
         <Image
-          src="/images/mobile-home/client-v4/hero-static.jpg"
+          src="/images/mobile-home/client-v4/hero-static-user.jpg"
           alt="Fantasy MMAdness combat prediction game"
           width={1024}
           height={563}
@@ -1494,23 +1492,36 @@ const MobilePhoneHome = ({
       </section>
 
       <nav className="fmm-static-bottom-nav" aria-label="Mobile homepage navigation">
-        <Image
-          src="/images/mobile-home/client-v4/bottom-nav-static.jpg"
-          alt=""
-          width={1002}
-          height={98}
-          sizes="100vw"
-          aria-hidden="true"
-        />
-        <div className="fmm-static-bottom-nav-links">
-          <Link href="/" aria-label="Home" />
-          <Link href="/upcomingfights" aria-label="Contests" />
-          <Link href="/mock-game" aria-label="Make" />
-          <Link href={primaryCtaHref} aria-label="Make predictions" />
-          <Link href={isLoggedIn ? "/YourFights" : "/login"} aria-label="My picks" />
-          <Link href="/leaderboard" aria-label="Leaderboard" />
-          <Link href={profileHref} aria-label="Profile" />
-        </div>
+        <Link href="/" className="is-active" aria-label="Home">
+          <FaHome aria-hidden="true" />
+          <span>Home</span>
+        </Link>
+        <Link href="/upcomingfights" aria-label="Contests">
+          <FaTrophy aria-hidden="true" />
+          <span>Contests</span>
+        </Link>
+        <Link href="/mock-game" aria-label="Make">
+          <FaFistRaised aria-hidden="true" />
+          <span>Make</span>
+        </Link>
+        <Link href={primaryCtaHref} className="is-primary" aria-label="Make predictions">
+          <span className="fmm-static-bottom-nav-orb">
+            <FaBullseye aria-hidden="true" />
+          </span>
+          <span>Make Predictions</span>
+        </Link>
+        <Link href={isLoggedIn ? "/YourFights" : "/login"} aria-label="My picks">
+          <FaCheck aria-hidden="true" />
+          <span>My Picks</span>
+        </Link>
+        <Link href="/leaderboard" aria-label="Leaderboard">
+          <FaCrown aria-hidden="true" />
+          <span>Leaderboard</span>
+        </Link>
+        <Link href={profileHref} aria-label="Profile">
+          <FaUserAlt aria-hidden="true" />
+          <span>Profile</span>
+        </Link>
       </nav>
     </div>
   );
