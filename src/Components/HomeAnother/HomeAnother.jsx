@@ -29,7 +29,7 @@ import {
 } from "@/Utils/fightExperience";
 import {
   FaArrowRight,
-  FaBell,
+  FaBars,
   FaBolt,
   FaBullseye,
   FaCalendarAlt,
@@ -48,8 +48,10 @@ import {
   FaShieldAlt,
   FaSignal,
   FaStar,
+  FaTimes,
   FaTrophy,
   FaUserAlt,
+  FaUserCircle,
   FaUsers,
 } from "react-icons/fa";
 
@@ -1126,6 +1128,8 @@ const MobilePhoneHome = ({
   matchStatus,
   now,
 }) => {
+  const [isHeroMenuOpen, setIsHeroMenuOpen] = useState(false);
+
   const staticSportCards = [
     {
       key: "boxing",
@@ -1204,9 +1208,78 @@ const MobilePhoneHome = ({
     });
   };
 
+  const heroMenuLinks = [
+    { href: "/", label: "Home", icon: FaHome },
+    { href: "/upcomingfights", label: "Live Contests", icon: FaTrophy },
+    { href: "/pro-wrestling", label: "Pro Wrestling", icon: FaCrown },
+    { href: "/leaderboard", label: "Leaderboard", icon: FaChartLine },
+    { href: "/fights-rewards", label: "Rewards & Tokens", icon: FaGift },
+    { href: "/guides", label: "How To Play", icon: FaBullseye },
+    { href: "/affiliate-create-account", label: "Affiliates", icon: FaUsers },
+  ];
+
   return (
     <div className="fmm-mobile-home fmm-static-client-home" aria-label="Fantasy MMAdness mobile homepage">
       <section className="fmm-static-hero" aria-label="Fantasy MMAdness hero banner">
+        <div className="fmm-static-hero-controls" aria-label="Homepage controls">
+          <button
+            type="button"
+            className="fmm-static-hero-menu-button"
+            aria-label={isHeroMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isHeroMenuOpen}
+            aria-controls="fmm-static-hero-menu"
+            onClick={() => setIsHeroMenuOpen((current) => !current)}
+          >
+            {isHeroMenuOpen ? <FaTimes aria-hidden="true" /> : <FaBars aria-hidden="true" />}
+          </button>
+
+          <Link
+            href={PLAYER_SIGNUP_HREF}
+            className="fmm-static-hero-user-button"
+            aria-label="Create your Fantasy MMAdness account"
+          >
+            <FaUserCircle aria-hidden="true" />
+          </Link>
+        </div>
+
+        {isHeroMenuOpen && (
+          <>
+            <button
+              type="button"
+              className="fmm-static-hero-menu-backdrop"
+              aria-label="Close navigation menu"
+              onClick={() => setIsHeroMenuOpen(false)}
+            />
+            <aside id="fmm-static-hero-menu" className="fmm-static-hero-menu-panel" aria-label="Mobile navigation">
+              <div className="fmm-static-hero-menu-head">
+                <strong>Fantasy MMAdness</strong>
+                <button type="button" onClick={() => setIsHeroMenuOpen(false)} aria-label="Close navigation menu">
+                  <FaTimes aria-hidden="true" />
+                </button>
+              </div>
+              <nav>
+                {heroMenuLinks.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link key={item.href} href={item.href} onClick={() => setIsHeroMenuOpen(false)}>
+                      <Icon aria-hidden="true" />
+                      <span>{item.label}</span>
+                      <FaChevronRight aria-hidden="true" />
+                    </Link>
+                  );
+                })}
+              </nav>
+              <Link
+                href={PLAYER_SIGNUP_HREF}
+                className="fmm-static-hero-menu-signup"
+                onClick={() => setIsHeroMenuOpen(false)}
+              >
+                Create Account <FaArrowRight aria-hidden="true" />
+              </Link>
+            </aside>
+          </>
+        )}
+
         <Image
           src="/images/mobile-home/client-v4/hero-static.jpg"
           alt="Fantasy MMAdness combat prediction game"
