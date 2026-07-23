@@ -80,6 +80,7 @@ import "@/styles/home-mobile-nav-logo-featured-final.css";
 import "@/styles/home-mobile-client-redesign-v3.css";
 import "@/styles/home-mobile-client-static-v4.css";
 import "@/styles/home-mobile-roadmap-v7.css";
+import "@/styles/home-mobile-roadmap-v8-stability.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

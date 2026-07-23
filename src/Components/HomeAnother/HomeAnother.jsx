@@ -40,15 +40,15 @@ import {
   FaDollarSign,
   FaFire,
   FaHandshake,
+  FaNewspaper,
+  FaTshirt,
   FaFistRaised,
   FaGift,
   FaHome,
-  FaNewspaper,
   FaPlus,
   FaPlay,
   FaShieldAlt,
   FaSignal,
-  FaTshirt,
   FaStar,
   FaTimes,
   FaTrophy,
@@ -1570,6 +1570,28 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
+      <section className="fmm-roadmap-coins" aria-label="Fight coins and rewards">
+        <Link href="/fights-rewards" className="fmm-roadmap-coins-balance">
+          <span className="fmm-roadmap-coins-icon"><FaCoins aria-hidden="true" /></span>
+          <div>
+            <small>Fight Coins</small>
+            <strong>{tokenBalance.toLocaleString()}</strong>
+            <em>Available balance</em>
+          </div>
+          <span className="fmm-roadmap-coins-add"><FaPlus aria-hidden="true" /> Add Coins</span>
+        </Link>
+        <Link href="/fights-rewards" className="fmm-roadmap-coins-shortcut is-rewards">
+          <FaGift aria-hidden="true" />
+          <span><strong>Daily Rewards</strong><small>Claim coins & prizes</small></span>
+          <FaChevronRight aria-hidden="true" />
+        </Link>
+        <Link href="/leaderboard" className="fmm-roadmap-coins-shortcut is-leaderboard">
+          <FaCrown aria-hidden="true" />
+          <span><strong>Crown & Cash</strong><small>Ranks, points and prize pools</small></span>
+          <FaChevronRight aria-hidden="true" />
+        </Link>
+      </section>
+
       <section className="fmm-roadmap-journey" aria-label="Your journey and Fight IQ">
         <Link href={profileHref} className="fmm-roadmap-journey-track">
           <div className="fmm-roadmap-journey-head">
@@ -1951,10 +1973,9 @@ const HomeAnother = () => {
 
   useEffect(() => {
     let active = true;
-    let hasLoadedOnce = false;
 
     const loadHomepageFights = async () => {
-      if (!hasLoadedOnce) setMatchStatus("loading");
+      setMatchStatus("loading");
       setMatchError(null);
 
       try {
@@ -1997,26 +2018,19 @@ const HomeAnother = () => {
           Array.isArray(summary.leaderboard) ? summary.leaderboard : [],
         );
         setMatchStatus("succeeded");
-        hasLoadedOnce = true;
       } catch (error) {
         if (!active) return;
-        if (!hasLoadedOnce) {
-          setHomepageMatches([]);
-          setPromotedHeroFights([]);
-          setMatchStatus("failed");
-        } else {
-          setMatchStatus("succeeded");
-        }
-        setMatchError(error.message || "Unable to refresh fights");
+        setHomepageMatches([]);
+        setPromotedHeroFights([]);
+        setMatchStatus("failed");
+        setMatchError(error.message || "Unable to load fights");
       }
     };
 
     loadHomepageFights();
-    const refreshTimer = window.setInterval(loadHomepageFights, 60000);
 
     return () => {
       active = false;
-      window.clearInterval(refreshTimer);
     };
   }, []);
 
@@ -2028,7 +2042,7 @@ const HomeAnother = () => {
 
   useEffect(() => {
     let active = true;
-    const loadWrestling = () => {
+    const timer = window.setTimeout(() => {
       wrestlingRequest(
         "/api/wrestling/matches?limit=8&status=OPEN,LIVE,SCORING",
       )
@@ -2041,14 +2055,11 @@ const HomeAnother = () => {
             requestError.message,
           ),
         );
-    };
-    const initialTimer = window.setTimeout(loadWrestling, 1800);
-    const refreshTimer = window.setInterval(loadWrestling, 60000);
+    }, 1800);
 
     return () => {
       active = false;
-      window.clearTimeout(initialTimer);
-      window.clearInterval(refreshTimer);
+      window.clearTimeout(timer);
     };
   }, []);
 
