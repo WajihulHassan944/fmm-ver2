@@ -17,6 +17,8 @@ import {
 import { WrestlingModeNav, WrestlingStatusBadge } from './WrestlingPrimitives';
 import {
   WRESTLING_STATS,
+  formatWrestlingElapsed,
+  getWrestlingTimeRangeLabel,
   formatWrestlingDate,
   getPlayerToken,
   getWrestlerImage,
@@ -32,6 +34,7 @@ const WrestlingLivePage = () => {
   const [live, setLive] = useState(null);
   const [myEntry, setMyEntry] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardMeta, setLeaderboardMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -51,6 +54,11 @@ const WrestlingLivePage = () => {
       ]);
       setLive(livePayload);
       setLeaderboard(Array.isArray(leaderboardPayload?.data) ? leaderboardPayload.data : []);
+      setLeaderboardMeta({
+        standingsLabel: leaderboardPayload?.standingsLabel,
+        liveClock: leaderboardPayload?.liveClock,
+        activeMatchTimeRange: leaderboardPayload?.activeMatchTimeRange,
+      });
       setMyEntry(entryPayload);
       setError('');
       setLastUpdated(new Date());
@@ -65,7 +73,7 @@ const WrestlingLivePage = () => {
   useEffect(() => {
     if (!router.isReady || !matchId) return undefined;
     load();
-    const timer = window.setInterval(() => load(true), 15000);
+    const timer = window.setInterval(() => load(true), 5000);
     return () => window.clearInterval(timer);
   }, [matchId, router.isReady]);
 
@@ -81,6 +89,11 @@ const WrestlingLivePage = () => {
   const entryPrediction = myEntry?.prediction || null;
   const personalPosition = live.myPosition || leaderboardPosition || (entryPrediction?.score !== undefined ? entryPrediction : null);
   const topThree = leaderboard.slice(0, 3);
+  const liveClock = leaderboardMeta?.liveClock || live?.liveClock || match?.liveClock || {};
+  const activeRange = leaderboardMeta?.activeMatchTimeRange || liveClock?.activeRange || null;
+  const activeRangeLabel = activeRange?.label || getWrestlingTimeRangeLabel(activeRange?.key || activeRange);
+  const standingsLabel = leaderboardMeta?.standingsLabel || live?.standingsLabel || liveClock?.standingsLabel || 'LIVE / PROVISIONAL STANDINGS';
+  const elapsedLabel = liveClock?.elapsedLabel || formatWrestlingElapsed(liveClock?.elapsedSeconds || 0);
 
   return (
     <>
@@ -102,6 +115,12 @@ const WrestlingLivePage = () => {
         <main className="theme-container pw-main pw-live-main">
           {error && <div className="pw-live-warning"><FaClock /> {error}</div>}
 
+          <section className="pw-live-timer-strip" aria-label="Live match timer and provisional scoring range">
+            <div><FaClock /><span><small>Current match time</small><strong>{elapsedLabel}</strong></span></div>
+            <div><FaBolt /><span><small>Active range</small><strong>{activeRangeLabel || 'Waiting for start'}</strong></span></div>
+            <div><FaChartLine /><span><small>Leaderboard mode</small><strong>{standingsLabel}</strong></span></div>
+          </section>
+
           <section className="pw-live-scoreboard">
             <header><div><p className="pw-eyebrow"><FaChartLine /> Official action feed</p><h2>Every move changes the table.</h2></div>{match.officialWinner && <span><FaTrophy /> Official result: {winnerLabel(match.officialWinner, match)}</span>}</header>
             <div className="pw-live-stat-head"><span>{match.competitorA.displayName}</span><strong>Official totals</strong><span>{match.competitorB.displayName}</span></div>
@@ -114,7 +133,7 @@ const WrestlingLivePage = () => {
             <article className="pw-my-live-position">
               <p className="pw-eyebrow"><FaBolt /> Your provisional result</p>
               {personalPosition ? (
-                <><div><span><small>Current rank</small><strong>#{personalPosition.rank || '—'}</strong></span><span><small>Current score</small><strong>{Number(personalPosition.score || 0).toLocaleString()}</strong></span><span><small>Rank movement</small><strong>{personalPosition.previousRank && personalPosition.rank ? `${personalPosition.previousRank - personalPosition.rank > 0 ? '+' : ''}${personalPosition.previousRank - personalPosition.rank}` : '—'}</strong></span></div><p>Scores are provisional until the official result is finalized.</p></>
+                <><div><span><small>Current rank</small><strong>#{personalPosition.rank || '—'}</strong></span><span><small>Current score</small><strong>{Number(personalPosition.score || 0).toLocaleString()}</strong></span><span><small>Time-range points</small><strong>{Number(personalPosition.provisionalTimeRangePoints || 0) > 0 ? `+${Number(personalPosition.provisionalTimeRangePoints).toLocaleString()}` : '0'}</strong></span><span><small>Rank movement</small><strong>{personalPosition.previousRank && personalPosition.rank ? `${personalPosition.previousRank - personalPosition.rank > 0 ? '+' : ''}${personalPosition.previousRank - personalPosition.rank}` : '—'}</strong></span></div><p>{standingsLabel}. Time-range points can move while the live clock crosses into a new bracket.</p></>
               ) : <div className="pw-live-no-entry"><FaMedal /><h3>{hasPlayerSession ? 'Your score is waiting for calculation.' : 'No personal score is available.'}</h3><p>{hasPlayerSession ? (myEntry?.prediction ? 'Your submitted prediction is attached to this contest. The score appears after official statistics are recalculated.' : myEntry?.entry ? 'Your contest entry is confirmed, but this account has no submitted prediction for this card.' : 'This signed-in account does not have an entry in this contest.') : 'Sign in and submit a prediction before lock time to appear here.'}</p></div>}
             </article>
 
@@ -125,8 +144,8 @@ const WrestlingLivePage = () => {
           </section>
 
           <section className="pw-live-table-panel">
-            <header><div><p>Provisional standings</p><h2>Live wrestling leaderboard</h2></div><Link href={`/pro-wrestling/leaderboard/${match._id}`}>Open full leaderboard <FaArrowRight /></Link></header>
-            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Score</th></tr></thead><tbody>{leaderboard.length ? leaderboard.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{displayPlayerName(row).charAt(0) || 'P'}</span>}<b>{displayPlayerName(row)}</b></div></td><td className={row.rankMovement > 0 ? 'is-up' : row.rankMovement < 0 ? 'is-down' : ''}>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td></tr>) : <tr><td colSpan="5">No provisional scores have been calculated yet.</td></tr>}</tbody></table></div>
+            <header><div><p>{standingsLabel}</p><h2>Live wrestling leaderboard</h2><span>Current range: {activeRangeLabel || 'Waiting for start'} · {elapsedLabel}</span></div><Link href={`/pro-wrestling/leaderboard/${match._id}`}>Open full leaderboard <FaArrowRight /></Link></header>
+            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Time range</th><th>Score</th></tr></thead><tbody>{leaderboard.length ? leaderboard.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{displayPlayerName(row).charAt(0) || 'P'}</span>}<b>{displayPlayerName(row)}</b></div></td><td className={row.rankMovement > 0 ? 'is-up' : row.rankMovement < 0 ? 'is-down' : ''}>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.provisionalTimeRangePoints || 0) > 0 ? `+${Number(row.provisionalTimeRangePoints).toLocaleString()}` : '—'}</td><td>{Number(row.score || 0).toLocaleString()}</td></tr>) : <tr><td colSpan="6">No provisional scores have been calculated yet.</td></tr>}</tbody></table></div>
           </section>
         </main>
       </div>

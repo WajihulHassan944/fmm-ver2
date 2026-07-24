@@ -25,6 +25,9 @@ import { WrestlingStatusBadge } from './WrestlingPrimitives';
 import {
   EMPTY_WRESTLING_STATS,
   WRESTLING_STATS,
+  WRESTLING_FINISH_TYPES,
+  WRESTLING_TIME_RANGES,
+  formatWrestlingElapsed,
   formatTokenAmount,
   formatWrestlingDate,
   getWrestlerImage,
@@ -46,6 +49,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
   const [statsB, setStatsB] = useState({ ...EMPTY_WRESTLING_STATS });
   const [winner, setWinner] = useState('');
   const [finishType, setFinishType] = useState('OTHER');
+  const [officialMatchTime, setOfficialMatchTime] = useState('');
   const [entries, setEntries] = useState([]);
   const [predictions, setPredictions] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -74,6 +78,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
       setStatsB(normalizeWrestlingStats(matchRecord?.officialStats?.competitorB));
       setWinner(matchRecord?.officialWinner && matchRecord.officialWinner !== 'NO_CONTEST' ? matchRecord.officialWinner : '');
       setFinishType(matchRecord?.finishType || 'OTHER');
+      setOfficialMatchTime(matchRecord?.officialMatchDurationSeconds !== null && matchRecord?.officialMatchDurationSeconds !== undefined ? formatWrestlingElapsed(matchRecord.officialMatchDurationSeconds) : '');
       setEntries(safeWrestlingArray(entryPayload?.data));
       setPredictions(safeWrestlingArray(predictionPayload?.data));
       setLeaderboard(safeWrestlingArray(boardPayload?.data));
@@ -125,16 +130,26 @@ const WrestlingAdminScoring = ({ matchId }) => {
       toast.error('Select the official winner or draw.');
       return;
     }
+    if (!officialMatchTime.trim()) {
+      toast.error('Enter the official match duration in MM:SS format.');
+      return;
+    }
     run(
       'result',
       () => wrestlingRequest(`/api/admin/wrestling/matches/${matchId}/result`, {
         admin: true,
         method: 'PUT',
-        body: { competitorA: statsA, competitorB: statsB, officialWinner: winner, finishType, reason },
+        body: { competitorA: statsA, competitorB: statsB, officialWinner: winner, finishType, officialMatchTime, reason },
       }),
       'Official wrestling result saved.',
     );
   };
+
+  const startMatch = () => run(
+    'start-match',
+    () => wrestlingRequest(`/api/admin/wrestling/matches/${matchId}/start`, { admin: true, method: 'POST', body: { reason } }),
+    'Match started. Predictions are locked and the live elapsed timer is running.',
+  );
 
   const transition = (status) => run(
     `status-${status}`,
@@ -188,6 +203,8 @@ const WrestlingAdminScoring = ({ matchId }) => {
       competitorA: normalizeWrestlingStats(prediction.competitorA),
       competitorB: normalizeWrestlingStats(prediction.competitorB),
       winnerPrediction: prediction.winnerPrediction || '',
+      finishTypePrediction: prediction.finishTypePrediction || '',
+      matchTimeRangePrediction: prediction.matchTimeRangePrediction || '',
     });
     setCorrectionReason('Administrator correction from wrestling score center.');
   };
@@ -206,6 +223,14 @@ const WrestlingAdminScoring = ({ matchId }) => {
       toast.error('Select a winner prediction before saving the correction.');
       return;
     }
+    if (!correction.finishTypePrediction) {
+      toast.error('Select a finish type prediction before saving the correction.');
+      return;
+    }
+    if (!correction.matchTimeRangePrediction) {
+      toast.error('Select a match time range before saving the correction.');
+      return;
+    }
     if (!correctionReason.trim()) {
       toast.error('An audit reason is required.');
       return;
@@ -219,6 +244,8 @@ const WrestlingAdminScoring = ({ matchId }) => {
           competitorA: correction.competitorA,
           competitorB: correction.competitorB,
           winnerPrediction: correction.winnerPrediction,
+          finishTypePrediction: correction.finishTypePrediction,
+          matchTimeRangePrediction: correction.matchTimeRangePrediction,
           reason: correctionReason.trim(),
         },
       });
@@ -282,7 +309,8 @@ const WrestlingAdminScoring = ({ matchId }) => {
             ))}
             <div className="pw-admin-result-fields">
               <label><span>Official winner</span><select value={winner} disabled={terminal} onChange={(event) => setWinner(event.target.value)}><option value="">Winner not set</option><option value="A">{match.competitorA.displayName}</option><option value="B">{match.competitorB.displayName}</option><option value="DRAW">Draw</option></select></label>
-              <label><span>Finish type</span><select value={finishType} disabled={terminal} onChange={(event) => setFinishType(event.target.value)}>{['PINFALL', 'SUBMISSION', 'DQ', 'COUNT_OUT', 'DRAW', 'OTHER'].map((value) => <option key={value}>{value}</option>)}</select></label>
+              <label><span>Finish type</span><select value={finishType} disabled={terminal} onChange={(event) => setFinishType(event.target.value)}>{WRESTLING_FINISH_TYPES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+              <label><span>Official match duration</span><input value={officialMatchTime} disabled={terminal} onChange={(event) => setOfficialMatchTime(event.target.value)} placeholder="MM:SS, e.g. 14:37" /></label>
               <label className="is-wide"><span>Admin reason / audit note</span><input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Optional reason recorded in the audit trail" /></label>
             </div>
             <div className="pw-admin-score-primary-actions">
@@ -293,7 +321,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
           </div>
 
           <aside className="pw-admin-control-rail">
-            <section><p>Match lifecycle</p><h3>Operational controls</h3><button type="button" disabled={match.status !== 'DRAFT' || Boolean(working)} onClick={() => transition('OPEN')}><FaBolt /> Publish and open</button><button type="button" disabled={match.status !== 'OPEN' || Boolean(working)} onClick={() => transition('LOCKED')}><FaLock /> Lock predictions</button><button type="button" disabled={!['LOCKED', 'OPEN'].includes(match.status) || Boolean(working)} onClick={() => transition('LIVE')}><FaBolt /> Mark match live</button><button type="button" disabled={!['LIVE', 'LOCKED'].includes(match.status) || Boolean(working)} onClick={() => transition('SCORING')}><FaCalculator /> Move to scoring</button></section>
+            <section><p>Match lifecycle</p><h3>Operational controls</h3><button type="button" disabled={match.status !== 'DRAFT' || Boolean(working)} onClick={() => transition('OPEN')}><FaBolt /> Publish and open</button><button type="button" disabled={match.status !== 'OPEN' || Boolean(working)} onClick={() => transition('LOCKED')}><FaLock /> Lock predictions</button><button type="button" disabled={!['LOCKED', 'OPEN'].includes(match.status) || Boolean(working)} onClick={startMatch}><FaBolt /> {working === 'start-match' ? 'Starting…' : 'Match Started'}</button><button type="button" disabled={!['LIVE', 'LOCKED'].includes(match.status) || Boolean(working)} onClick={() => transition('SCORING')}><FaCalculator /> Move to scoring</button></section>
             <section className="is-settlement"><p>Settlement</p><h3>Finalize the pot</h3><span>Requires an official result and submitted predictions.</span><button type="button" disabled={terminal || Boolean(working)} onClick={finalize}><FaTrophy /> {working === 'finalize' ? 'Finalizing…' : 'Finalize and pay'}</button></section>
             <section className="pw-admin-notify-card"><p>Player communication</p><h3>Send contest update</h3><input value={notificationTitle} onChange={(event) => setNotificationTitle(event.target.value)} placeholder="Notification title" /><textarea rows="3" value={notificationMessage} onChange={(event) => setNotificationMessage(event.target.value)} placeholder="Notification message" /><button type="button" disabled={Boolean(working)} onClick={sendNotification}><FaBell /> {working === 'notify' ? 'Sending…' : 'Notify eligible players'}</button></section>
             <section className="is-danger"><p>Exception workflow</p><h3>Cancel or no contest</h3><button type="button" disabled={terminal || Boolean(working)} onClick={() => cancel('CANCELLED')}><FaTimesCircle /> Cancel and refund</button><button type="button" disabled={terminal || Boolean(working)} onClick={() => cancel('NO_CONTEST')}><FaExclamationTriangle /> No contest and refund</button></section>
@@ -320,7 +348,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
           )}
 
           {activeTable === 'predictions' && (
-            <div className="pw-admin-table-wrap pw-admin-predictions-table-wrap"><table className="pw-admin-table pw-admin-predictions-table"><thead><tr><th>Player</th><th>Status</th><th>Winner</th>{WRESTLING_STATS.map((stat) => <th key={`a-${stat.key}`}>A {stat.short}</th>)}{WRESTLING_STATS.map((stat) => <th key={`b-${stat.key}`}>B {stat.short}</th>)}<th>Score</th><th>Action</th></tr></thead><tbody>{predictions.length ? predictions.map((prediction) => <tr key={prediction._id}><td><div className="pw-admin-player-cell">{prediction.user?.profileUrl ? <img src={prediction.user.profileUrl} alt="" /> : <i><FaUser /></i>}<span><strong>{getPlayerName(prediction)}</strong><small>{prediction.user?.email || prediction.userId}</small></span></div></td><td>{prediction.predictionStatus}</td><td>{prediction.winnerPrediction || '—'}</td>{WRESTLING_STATS.map((stat) => <td key={`a-${stat.key}`}>{prediction.competitorA?.[stat.key] ?? 0}</td>)}{WRESTLING_STATS.map((stat) => <td key={`b-${stat.key}`}>{prediction.competitorB?.[stat.key] ?? 0}</td>)}<td>{Number(prediction.score || 0).toLocaleString()}</td><td><button type="button" className="pw-admin-table-edit" disabled={terminal} onClick={() => openCorrection(prediction)}><FaEdit /> Correct</button></td></tr>) : <tr><td colSpan="15">No wrestling predictions have been submitted.</td></tr>}</tbody></table></div>
+            <div className="pw-admin-table-wrap pw-admin-predictions-table-wrap"><table className="pw-admin-table pw-admin-predictions-table"><thead><tr><th>Player</th><th>Status</th><th>Winner</th><th>Finish</th><th>Time range</th>{WRESTLING_STATS.map((stat) => <th key={`a-${stat.key}`}>A {stat.short}</th>)}{WRESTLING_STATS.map((stat) => <th key={`b-${stat.key}`}>B {stat.short}</th>)}<th>Score</th><th>Action</th></tr></thead><tbody>{predictions.length ? predictions.map((prediction) => <tr key={prediction._id}><td><div className="pw-admin-player-cell">{prediction.user?.profileUrl ? <img src={prediction.user.profileUrl} alt="" /> : <i><FaUser /></i>}<span><strong>{getPlayerName(prediction)}</strong><small>{prediction.user?.email || prediction.userId}</small></span></div></td><td>{prediction.predictionStatus}</td><td>{prediction.winnerPrediction || '—'}</td><td>{prediction.finishTypePrediction || '—'}</td><td>{WRESTLING_TIME_RANGES.find((option) => option.value === prediction.matchTimeRangePrediction)?.label || '—'}</td>{WRESTLING_STATS.map((stat) => <td key={`a-${stat.key}`}>{prediction.competitorA?.[stat.key] ?? 0}</td>)}{WRESTLING_STATS.map((stat) => <td key={`b-${stat.key}`}>{prediction.competitorB?.[stat.key] ?? 0}</td>)}<td>{Number(prediction.score || 0).toLocaleString()}</td><td><button type="button" className="pw-admin-table-edit" disabled={terminal} onClick={() => openCorrection(prediction)}><FaEdit /> Correct</button></td></tr>) : <tr><td colSpan="17">No wrestling predictions have been submitted.</td></tr>}</tbody></table></div>
           )}
         </section>
       </div>
@@ -332,6 +360,8 @@ const WrestlingAdminScoring = ({ matchId }) => {
             <div className="pw-admin-correction-head"><span>{match.competitorA.displayName}</span><strong>Category</strong><span>{match.competitorB.displayName}</span></div>
             {WRESTLING_STATS.map((stat) => <div className="pw-admin-correction-row" key={stat.key}><input type="number" min="0" value={correction.competitorA[stat.key]} onChange={(event) => updateCorrection('competitorA', stat.key, event.target.value)} /><span><b>{stat.short}</b><small>{stat.label}</small></span><input type="number" min="0" value={correction.competitorB[stat.key]} onChange={(event) => updateCorrection('competitorB', stat.key, event.target.value)} /></div>)}
             <label><span>Winner prediction</span><select value={correction.winnerPrediction} onChange={(event) => setCorrection((current) => ({ ...current, winnerPrediction: event.target.value }))}><option value="">Select predicted winner</option><option value="A">{match.competitorA.displayName}</option><option value="B">{match.competitorB.displayName}</option><option value="DRAW">Draw</option></select></label>
+            <label><span>Finish type prediction</span><select value={correction.finishTypePrediction || ''} onChange={(event) => setCorrection((current) => ({ ...current, finishTypePrediction: event.target.value }))}><option value="">Select finish type</option>{WRESTLING_FINISH_TYPES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+            <label><span>Match time range prediction</span><select value={correction.matchTimeRangePrediction || ''} onChange={(event) => setCorrection((current) => ({ ...current, matchTimeRangePrediction: event.target.value }))}><option value="">Select time range</option>{WRESTLING_TIME_RANGES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
             <label><span>Required audit reason</span><textarea rows="3" value={correctionReason} onChange={(event) => setCorrectionReason(event.target.value)} /></label>
             <footer><button type="button" className="pw-admin-secondary" onClick={() => setCorrection(null)}>Cancel</button><button type="button" className="pw-admin-primary" disabled={working === 'correction'} onClick={saveCorrection}><FaSave /> {working === 'correction' ? 'Saving correction…' : 'Save audited correction'}</button></footer>
           </section>

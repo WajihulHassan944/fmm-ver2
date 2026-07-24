@@ -13,7 +13,7 @@ const DynamicPromoImage = () => {
     usersInLeague: 500,
     fighterAImage: "https://i.ibb.co/mb8ZH7L/f2b08a202923.jpg",
     fighterBImage: "https://i.ibb.co/6D7QNHw/758447972263.jpg",
-    logoImage: "https://fantasymmadness.com/static/media/logo.c2aa609dbe0ed6c1af42.png"
+    logoImage: "/images/fmm-experience/fantasy-mmadness-logo.png"
   };
 
   useEffect(() => {

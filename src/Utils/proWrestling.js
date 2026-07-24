@@ -9,6 +9,34 @@ export const WRESTLING_STATS = [
 ];
 
 export const EMPTY_WRESTLING_STATS = Object.freeze({ HP: 0, BP: 0, K: 0, PM: 0, FM: 0 });
+export const WRESTLING_FINISH_TYPES = [
+  { value: 'PINFALL', label: 'Pinfall' },
+  { value: 'SUBMISSION', label: 'Submission' },
+  { value: 'DQ', label: 'Disqualification' },
+  { value: 'COUNT_OUT', label: 'Count out' },
+  { value: 'DRAW', label: 'Draw' },
+  { value: 'OTHER', label: 'Other' },
+];
+export const WRESTLING_TIME_RANGES = [
+  { value: 'UNDER_5', label: 'Under 5 minutes', minSeconds: 0, maxSeconds: 299 },
+  { value: '5_TO_9_59', label: '5:00–9:59', minSeconds: 300, maxSeconds: 599 },
+  { value: '10_TO_14_59', label: '10:00–14:59', minSeconds: 600, maxSeconds: 899 },
+  { value: '15_TO_19_59', label: '15:00–19:59', minSeconds: 900, maxSeconds: 1199 },
+  { value: '20_TO_29_59', label: '20:00–29:59', minSeconds: 1200, maxSeconds: 1799 },
+  { value: '30_PLUS', label: '30 minutes or more', minSeconds: 1800, maxSeconds: null },
+];
+export const getWrestlingTimeRangeLabel = (value) => (
+  WRESTLING_TIME_RANGES.find((range) => range.value === String(value || '').toUpperCase())?.label || 'Not selected'
+);
+export const formatWrestlingElapsed = (seconds) => {
+  const safe = Math.max(0, Math.floor(safeNumber(seconds, 0)));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const remainingSeconds = safe % 60;
+  return hours > 0
+    ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
+    : `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+};
 export const WRESTLING_STATUS_ORDER = ['DRAFT', 'OPEN', 'LOCKED', 'LIVE', 'SCORING', 'FINALIZED', 'CANCELLED', 'NO_CONTEST'];
 export const WRESTLING_STATUS_COPY = {
   DRAFT: 'Draft', OPEN: 'Open for entry', LOCKED: 'Predictions locked', LIVE: 'Live',
@@ -143,7 +171,7 @@ export const normalizePredictionStats = (value = {}) => WRESTLING_STATS.reduce((
   return result;
 }, {});
 export const normalizeWrestlingStats = normalizePredictionStats;
-export const emptyPrediction = () => ({ competitorA: normalizePredictionStats(), competitorB: normalizePredictionStats(), winnerPrediction: '' });
+export const emptyPrediction = () => ({ competitorA: normalizePredictionStats(), competitorB: normalizePredictionStats(), winnerPrediction: '', finishTypePrediction: '', matchTimeRangePrediction: '' });
 
 export const buildWrestlingFormData = (values, fileFields = []) => {
   const form = new FormData();

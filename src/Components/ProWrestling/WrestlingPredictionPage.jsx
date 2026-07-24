@@ -20,6 +20,8 @@ import { WrestlingModeNav, WrestlingStatusBadge } from './WrestlingPrimitives';
 import {
   EMPTY_WRESTLING_STATS,
   WRESTLING_STATS,
+  WRESTLING_FINISH_TYPES,
+  WRESTLING_TIME_RANGES,
   canEditWrestlingPrediction,
   formatWrestlingCountdown,
   formatWrestlingDate,
@@ -41,6 +43,8 @@ const WrestlingPredictionPage = () => {
   const [competitorA, setCompetitorA] = useState(cloneStats());
   const [competitorB, setCompetitorB] = useState(cloneStats());
   const [winnerPrediction, setWinnerPrediction] = useState('');
+  const [finishTypePrediction, setFinishTypePrediction] = useState('');
+  const [matchTimeRangePrediction, setMatchTimeRangePrediction] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState('');
   const [error, setError] = useState('');
@@ -69,6 +73,8 @@ const WrestlingPredictionPage = () => {
           setCompetitorA(cloneStats(prediction.competitorA));
           setCompetitorB(cloneStats(prediction.competitorB));
           setWinnerPrediction(prediction.winnerPrediction || '');
+          setFinishTypePrediction(prediction.finishTypePrediction || '');
+          setMatchTimeRangePrediction(prediction.matchTimeRangePrediction || '');
         }
       } catch (requestError) {
         console.error(requestError);
@@ -92,12 +98,20 @@ const WrestlingPredictionPage = () => {
       toast.error('Select a predicted match winner before saving the scorecard.');
       return;
     }
+    if (predictionStatus !== 'DRAFT' && !finishTypePrediction) {
+      toast.error('Select how you expect the match to finish.');
+      return;
+    }
+    if (predictionStatus !== 'DRAFT' && !matchTimeRangePrediction) {
+      toast.error('Select a non-overlapping match time range.');
+      return;
+    }
     setSaving(predictionStatus);
     try {
       const payload = await wrestlingRequest(`/api/wrestling/matches/${matchId}/prediction`, {
         auth: true,
         method: existingPrediction ? 'PUT' : 'POST',
-        body: { competitorA, competitorB, winnerPrediction, predictionStatus },
+        body: { competitorA, competitorB, winnerPrediction, finishTypePrediction, matchTimeRangePrediction, predictionStatus },
       });
       setExistingPrediction(payload?.prediction || existingPrediction);
       toast.success(predictionStatus === 'DRAFT' ? 'Wrestling prediction draft saved.' : 'Wrestling prediction submitted.');
@@ -177,6 +191,29 @@ const WrestlingPredictionPage = () => {
                     {image ? <img src={image} alt="" /> : <FaTrophy />}<span><small>{value === 'DRAW' ? 'Draw pick' : `Wrestler ${value}`}</small><strong>{label}</strong></span>{winnerPrediction === value && <FaCheck />}
                   </button>
                 ))}
+              </div>
+            </section>
+
+            <section className="pw-outcome-picks">
+              <div className="pw-outcome-pick-card">
+                <div><p className="pw-eyebrow"><FaBolt /> Finish prediction</p><h2>How will the match end?</h2><span>Choose one official finish type. This pick is locked when the match starts.</span></div>
+                <div className="pw-outcome-options">
+                  {WRESTLING_FINISH_TYPES.map((option) => (
+                    <button type="button" key={option.value} className={finishTypePrediction === option.value ? 'is-selected' : ''} disabled={!editable} onClick={() => setFinishTypePrediction(option.value)}>
+                      <span><small>Finish type</small><strong>{option.label}</strong></span>{finishTypePrediction === option.value && <FaCheck />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="pw-outcome-pick-card">
+                <div><p className="pw-eyebrow"><FaBolt /> Match time range</p><h2>When will the match finish?</h2><span>Ranges never overlap, so the official duration always maps to exactly one selection.</span></div>
+                <div className="pw-time-range-options">
+                  {WRESTLING_TIME_RANGES.map((option) => (
+                    <button type="button" key={option.value} className={matchTimeRangePrediction === option.value ? 'is-selected' : ''} disabled={!editable} onClick={() => setMatchTimeRangePrediction(option.value)}>
+                      <small>Match duration</small><strong>{option.label}</strong>{matchTimeRangePrediction === option.value && <FaCheck />}
+                    </button>
+                  ))}
+                </div>
               </div>
             </section>
 

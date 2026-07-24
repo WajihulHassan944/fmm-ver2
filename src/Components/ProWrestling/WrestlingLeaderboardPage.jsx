@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { FaArrowLeft, FaArrowRight, FaCoins, FaCrown, FaMedal, FaTrophy } from 'react-icons/fa';
 import { WrestlingModeNav, WrestlingStatusBadge } from './WrestlingPrimitives';
-import { formatTokenAmount, getWrestlerImage, winnerLabel, wrestlingRequest } from '@/Utils/proWrestling';
+import { formatTokenAmount, formatWrestlingElapsed, getWrestlerImage, getWrestlingTimeRangeLabel, winnerLabel, wrestlingRequest } from '@/Utils/proWrestling';
 
 const WrestlingLeaderboardPage = () => {
   const router = useRouter();
@@ -14,6 +14,7 @@ const WrestlingLeaderboardPage = () => {
   const [match, setMatch] = useState(null);
   const [rows, setRows] = useState([]);
   const [myResult, setMyResult] = useState(null);
+  const [boardMeta, setBoardMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -30,6 +31,11 @@ const WrestlingLeaderboardPage = () => {
         if (!active) return;
         setMatch(matchPayload);
         setRows(Array.isArray(boardPayload?.data) ? boardPayload.data : []);
+        setBoardMeta({
+          standingsLabel: boardPayload?.standingsLabel,
+          liveClock: boardPayload?.liveClock,
+          activeMatchTimeRange: boardPayload?.activeMatchTimeRange,
+        });
         if (['SCORING', 'FINALIZED'].includes(matchPayload.status)) {
           try {
             const resultPayload = await wrestlingRequest(`/api/wrestling/matches/${matchId}/results`, { auth: true });
@@ -45,7 +51,10 @@ const WrestlingLeaderboardPage = () => {
       }
     };
     load();
-    return () => { active = false; };
+    const timer = window.setInterval(() => {
+      if (active) load();
+    }, 5000);
+    return () => { active = false; window.clearInterval(timer); };
   }, [matchId, router.isReady]);
 
   if (loading) return <div className="pw-page pw-state-page"><div className="pw-state-card"><FaTrophy /><h1>Loading wrestling leaderboard…</h1></div></div>;
@@ -55,6 +64,11 @@ const WrestlingLeaderboardPage = () => {
   const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.playerName || '';
   const displayPlayerName = (row) => (userId && String(row?.playerId || '') === userId && userDisplayName ? userDisplayName : row?.playerName || 'Player');
   const podium = rows.slice(0, 3);
+  const liveClock = boardMeta?.liveClock || match?.liveClock || {};
+  const activeRange = boardMeta?.activeMatchTimeRange || liveClock?.activeRange || null;
+  const activeRangeLabel = activeRange?.label || getWrestlingTimeRangeLabel(activeRange?.key || activeRange);
+  const standingsLabel = boardMeta?.standingsLabel || liveClock?.standingsLabel || (match.status === 'FINALIZED' ? 'OFFICIAL STANDINGS' : 'LIVE / PROVISIONAL STANDINGS');
+  const elapsedLabel = liveClock?.elapsedLabel || formatWrestlingElapsed(liveClock?.elapsedSeconds || 0);
   return (
     <>
       <Head><title>Wrestling Leaderboard | {match.matchTitle}</title></Head>
@@ -75,8 +89,8 @@ const WrestlingLeaderboardPage = () => {
           {myResult && <section className="pw-my-final-result"><FaMedal /><div><small>Your finalized performance</small><h2>Rank #{myResult.rank || '—'} · {Number(myResult.score || 0).toLocaleString()} points</h2><p>{myResult.exactPredictionCount || 0} exact category predictions · {formatTokenAmount(myResult.payoutAmount)} payout tokens</p></div><Link href="/pro-wrestling/history">Open wrestling history <FaArrowRight /></Link></section>}
 
           <section className="pw-live-table-panel is-final">
-            <header><div><p>{match.status === 'FINALIZED' ? 'Official final standings' : 'Provisional standings'}</p><h2>{match.matchTitle}</h2></div><span>{rows.length} ranked players</span></header>
-            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Score</th><th>Payout</th></tr></thead><tbody>{rows.length ? rows.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{displayPlayerName(row).charAt(0) || 'P'}</span>}<b>{displayPlayerName(row)}</b></div></td><td>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td><td>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens` : 'Pending'}</td></tr>) : <tr><td colSpan="6">No ranked predictions are available.</td></tr>}</tbody></table></div>
+            <header><div><p>{standingsLabel}</p><h2>{match.matchTitle}</h2><span>{match.status === 'LIVE' ? `Current match time ${elapsedLabel} · Active range ${activeRangeLabel || 'Waiting for start'}` : 'Confirmed scoring from the official result'}</span></div><span>{rows.length} ranked players</span></header>
+            <div className="pw-table-scroll"><table><thead><tr><th>Rank</th><th>Player</th><th>Movement</th><th>Exact picks</th><th>Time range</th><th>Score</th><th>Payout</th></tr></thead><tbody>{rows.length ? rows.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td><div className="pw-player-cell">{row.profileUrl ? <img src={row.profileUrl} alt="" /> : <span>{displayPlayerName(row).charAt(0) || 'P'}</span>}<b>{displayPlayerName(row)}</b></div></td><td>{row.rankMovement ? `${row.rankMovement > 0 ? '▲' : '▼'} ${Math.abs(row.rankMovement)}` : '—'}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.provisionalTimeRangePoints || 0) > 0 ? `+${Number(row.provisionalTimeRangePoints).toLocaleString()}` : '—'}</td><td>{Number(row.score || 0).toLocaleString()}</td><td>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens` : 'Pending'}</td></tr>) : <tr><td colSpan="7">No ranked predictions are available.</td></tr>}</tbody></table></div>
           </section>
         </main>
       </div>
