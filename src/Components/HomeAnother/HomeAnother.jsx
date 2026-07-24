@@ -14,7 +14,6 @@ import {
   buildPublicApiUrl,
   fetchPromotedHomeFights,
   fetchPublicHomeSummary,
-  fetchPublicBlogs,
   fetchPublicPredictionFights,
 } from "@/Utils/publicApi";
 import {
@@ -99,54 +98,12 @@ const HOME_FIGHT_SPORT_TABS = [
   },
 ];
 
-const MOBILE_HOME_SPORT_TABS = [
-  {
-    ...HOME_FIGHT_SPORT_TABS[0],
-    label: "Boxing",
-    symbol: "🥊",
-  },
-  {
-    ...HOME_FIGHT_SPORT_TABS[1],
-    label: "UFC / MMA",
-    symbol: "🥋",
-  },
-  {
-    ...HOME_FIGHT_SPORT_TABS[2],
-    label: "Bare Knuckle",
-    symbol: "👊",
-  },
-  {
-    ...HOME_FIGHT_SPORT_TABS[3],
-    label: "Kickboxing",
-    symbol: "🦵",
-  },
-  {
-    ...HOME_FIGHT_SPORT_TABS[4],
-    label: "Pro Wrestling",
-    symbol: "🤼",
-  },
-];
-
 const MOBILE_FALLBACK_FIGHT_IMAGES = [
   "/images/fmm-experience/fighter-chris-eubank-jr.webp",
   "/images/fmm-experience/fighter-conor-benn.webp",
   "/images/fmm-experience/fighter-anthony-yarde.webp",
   "/images/fmm-experience/fighter-david-benavidez.webp",
 ];
-
-const MOBILE_FALLBACK_SPORT_LABELS = {
-  boxing: "Boxing",
-  mma: "MMA",
-  bareknuckle: "Bare-knuckle",
-  kickboxing: "Kickboxing",
-  "pro-wrestling": "Pro Wrestling",
-};
-
-const getMobileUpcomingHeading = (section = {}) => {
-  const label =
-    section?.label || MOBILE_FALLBACK_SPORT_LABELS[section?.key] || "Combat";
-  return `Upcoming ${label} Fights`;
-};
 
 const getHomeFightPosterImage = (fight = {}) =>
   pickHomeValue(
@@ -927,82 +884,6 @@ const getMobileFallbackFight = (sportKey = "mma", index = 0) => {
   };
 };
 
-const getMobileEventLabel = (match = {}) => {
-  const eventPattern =
-    /\b(?:UFC|BKFC|PFL|BELLATOR|GLORY|ONE|WWE|AEW|NXT)\s*\d+\b/i;
-  const eventNameMatch = String(
-    match?.eventName || match?.matchName || "",
-  ).match(eventPattern)?.[0];
-  const rawLabel = pickHomeValue(
-    match?.eventCode,
-    match?.eventLabel,
-    match?.promotionEventCode,
-    eventNameMatch,
-    match?.leagueName,
-    match?.promotionName,
-    match?.organization,
-    getFightSportLabel(match),
-  );
-
-  return rawLabel
-    ? rawLabel.toUpperCase()
-    : getFightSportLabel(match).toUpperCase();
-};
-
-const getMobileShortDate = (match) => {
-  const date = parseMatchDate(match);
-  if (!date) return "TBA";
-  const datePart = date
-    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    .replace(",", "");
-  const timePart = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  return `${datePart} • ${timePart} EST`.toUpperCase();
-};
-
-const getMobileDateChip = (match) => {
-  const date = parseMatchDate(match);
-  if (!date) return { month: "TBA", day: "--", weekday: "" };
-  return {
-    month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
-    day: String(date.getDate()).padStart(2, "0"),
-    weekday: date
-      .toLocaleDateString("en-US", { weekday: "short" })
-      .toUpperCase(),
-  };
-};
-
-const getMobileCountdownDisplay = (match, now) => {
-  const parts = getCountdownParts(match, now);
-  if (!parts) return [];
-
-  const [days, hours, minutes, seconds] = parts;
-  if (Number(days.value) > 0) return [days, hours, minutes];
-  return [hours, minutes, seconds];
-};
-
-const getMobileDisplayFights = (fights = [], sportKey = "mma", limit = 3) => {
-  const visible = Array.isArray(fights)
-    ? fights.filter(Boolean).slice(0, limit)
-    : [];
-
-  if (visible.length >= limit) return visible;
-
-  const fallbackFights = Array.from(
-    { length: limit - visible.length },
-    (_, index) => getMobileFallbackFight(sportKey, visible.length + index),
-  );
-
-  return [...visible, ...fallbackFights];
-};
-
-const getMobileEntryFee = (match = {}) => {
-  const amount = Number(match?.entryFee || match?.fee || match?.cost || 0);
-  return amount > 0 ? `$${amount.toLocaleString()}` : "$5";
-};
-
 const getHomeSportViewAllHref = (sportKey) =>
   sportKey === "pro-wrestling"
     ? "/pro-wrestling"
@@ -1124,187 +1005,24 @@ const formatMobileMetric = (value) =>
 
 const MobilePhoneHome = ({
   currentUser,
-  leaderboardRows = [],
-  homepageStats = {},
-  activeFightSport,
-  setActiveFightSport,
-  setSelectedFeaturedFight,
   heroSlides = [],
   homeFightSections = [],
-  matchError,
-  matchStatus,
-  now,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [rewardBurst, setRewardBurst] = useState(false);
-  const [blogs, setBlogs] = useState([]);
-  const [animatedStats, setAnimatedStats] = useState({
-    predictors: 0,
-    prizePools: 0,
-    liveEvents: 0,
-    leaderboardPlayers: 0,
-    realFights: 0,
-  });
   const audioContextRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("fmm-mobile-sound-enabled");
+    const stored = window.localStorage.getItem("fmm-one-screen-sound");
     if (stored !== null) setSoundEnabled(stored === "true");
   }, []);
-
-  useEffect(() => {
-    let active = true;
-    fetchPublicBlogs({ limit: 3 })
-      .then((payload) => {
-        if (!active) return;
-        const rows = Array.isArray(payload?.rows)
-          ? payload.rows
-          : Array.isArray(payload?.data)
-            ? payload.data
-            : Array.isArray(payload)
-              ? payload
-              : [];
-        setBlogs(rows.slice(0, 3));
-      })
-      .catch(() => {
-        if (active) setBlogs([]);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const playFx = (type = "click") => {
-    if (!soundEnabled || typeof window === "undefined") return;
-    try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      const context = audioContextRef.current || new AudioContextClass();
-      audioContextRef.current = context;
-      if (context.state === "suspended") context.resume();
-
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      const nowTime = context.currentTime;
-      const presets = {
-        click: [420, 610, 0.07, 0.055],
-        whoosh: [180, 820, 0.18, 0.08],
-        coin: [740, 1180, 0.16, 0.09],
-        boom: [110, 58, 0.22, 0.11],
-        tick: [760, 820, 0.045, 0.035],
-        reward: [520, 1320, 0.28, 0.12],
-      };
-      const [startFrequency, endFrequency, duration, volume] =
-        presets[type] || presets.click;
-      oscillator.type = type === "boom" ? "sine" : "triangle";
-      oscillator.frequency.setValueAtTime(startFrequency, nowTime);
-      oscillator.frequency.exponentialRampToValueAtTime(
-        Math.max(25, endFrequency),
-        nowTime + duration,
-      );
-      gain.gain.setValueAtTime(0.0001, nowTime);
-      gain.gain.exponentialRampToValueAtTime(volume, nowTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, nowTime + duration);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(nowTime);
-      oscillator.stop(nowTime + duration + 0.02);
-    } catch (error) {
-      // Sound is an enhancement only; gameplay must never depend on it.
-    }
-  };
-
-  const toggleSound = () => {
-    setSoundEnabled((current) => {
-      const next = !current;
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("fmm-mobile-sound-enabled", String(next));
-      }
-      return next;
-    });
-  };
-
-  const mobileSections = useMemo(
-    () =>
-      HOME_FIGHT_SPORT_TABS.map((tab) => {
-        const existing = homeFightSections.find(
-          (section) => section.key === tab.key,
-        );
-        const artMap = {
-          boxing: "/images/mobile-home/client-v7/category-boxing-art.jpg",
-          mma: "/images/mobile-home/client-v7/category-mma-art.jpg",
-          bareknuckle:
-            "/images/mobile-home/client-v7/category-bare-knuckle-art.jpg",
-          kickboxing:
-            "/images/mobile-home/client-v7/category-kickboxing-art.jpg",
-          "pro-wrestling":
-            "/images/mobile-home/client-v7/category-pro-wrestling-art.jpg",
-        };
-        const labels = {
-          boxing: "Boxing",
-          mma: "UFC / MMA",
-          bareknuckle: "Bare Knuckle",
-          kickboxing: "Kickboxing",
-          "pro-wrestling": "Pro Wrestling",
-        };
-        const fights = existing?.fights || [];
-        const livePlayerCount = fights.reduce(
-          (total, fight) => total + getPlayerCount(fight),
-          0,
-        );
-        return {
-          ...tab,
-          label: labels[tab.key] || tab.label,
-          image: artMap[tab.key] || tab.image,
-          count: livePlayerCount || existing?.count || 0,
-          fights,
-        };
-      }),
-    [homeFightSections],
-  );
-
-  const activeSection =
-    mobileSections.find((section) => section.key === activeFightSport) ||
-    mobileSections[0];
-
-  const uniqueAllFights = useMemo(() => {
-    const source = [
-      ...(Array.isArray(heroSlides) ? heroSlides : []),
-      ...mobileSections.flatMap((section) => section.fights || []),
-    ];
-    const seen = new Set();
-    const real = source.filter((fight) => {
-      const key = getFightId(fight) || getFightTitle(fight);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    if (real.length) return real;
-    return mobileSections.map((section, index) =>
-      getMobileFallbackFight(section.key, index),
-    );
-  }, [heroSlides, mobileSections]);
-
-  const featuredFight = uniqueAllFights[0];
-  const upcomingFights = uniqueAllFights.slice(0, 10);
-  const selectedSportFights = getMobileDisplayFights(
-    activeSection?.fights,
-    activeSection?.key,
-    6,
-  );
 
   const isLoggedIn = Boolean(
     currentUser?._id || currentUser?.email || currentUser?.username,
   );
   const profileHref = isLoggedIn ? "/profile" : PLAYER_SIGNUP_HREF;
-  const primaryCtaHref = isLoggedIn
-    ? featuredFight
-      ? getFightDetailHref(featuredFight)
-      : "/upcomingfights"
-    : PLAYER_SIGNUP_HREF;
-
+  const picksHref = isLoggedIn ? "/YourFights" : "/login";
   const tokenBalance = getSafeMetricNumber(
     currentUser?.tokens,
     currentUser?.walletTokens,
@@ -1319,652 +1037,294 @@ const MobilePhoneHome = ({
       1,
     ),
   );
-  const xpValue = Math.max(
-    0,
-    getSafeMetricNumber(currentUser?.xp, currentUser?.totalXp),
-  );
-  const xpTarget = Math.max(3000, Math.ceil(Math.max(xpValue, 1) / 1000) * 1000);
-  const xpPercent = Math.min(100, Math.round((xpValue / xpTarget) * 100));
 
-  const parseMetricValue = (...values) => {
-    for (const value of values) {
-      if (value === null || value === undefined || value === "") continue;
-      const normalized =
-        typeof value === "string"
-          ? value.replace(/[^0-9.-]+/g, "")
-          : value;
-      const parsed = Number(normalized);
-      if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
+  const allFights = useMemo(() => {
+    const candidates = [
+      ...(Array.isArray(heroSlides) ? heroSlides : []),
+      ...homeFightSections.flatMap((section) => section?.fights || []),
+    ];
+    const seen = new Set();
+    const unique = candidates.filter((fight) => {
+      if (!fight) return false;
+      const key = getFightId(fight) || getFightTitle(fight);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return unique.length
+      ? unique
+      : HOME_FIGHT_SPORT_TABS.map((section, index) =>
+          getMobileFallbackFight(section.key, index),
+        );
+  }, [heroSlides, homeFightSections]);
+
+  const featuredFight = allFights[0];
+  const upcomingFights = Array.from({ length: 5 }, (_, index) =>
+    allFights[index] || getMobileFallbackFight("mma", index),
+  );
+  const featuredHref = featuredFight
+    ? getFightDetailHref(featuredFight)
+    : "/upcomingfights";
+  const joinHref = isLoggedIn ? featuredHref : PLAYER_SIGNUP_HREF;
+
+  const playFx = (type = "click") => {
+    if (!soundEnabled || typeof window === "undefined") return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const context = audioContextRef.current || new AudioContextClass();
+      audioContextRef.current = context;
+      if (context.state === "suspended") context.resume();
+
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const startedAt = context.currentTime;
+      const presets = {
+        click: [460, 620, 0.075, 0.05],
+        whoosh: [190, 960, 0.22, 0.085],
+        boom: [120, 62, 0.24, 0.11],
+        tick: [780, 900, 0.055, 0.04],
+        coin: [720, 1320, 0.2, 0.09],
+        reward: [460, 1480, 0.3, 0.12],
+      };
+      const [from, to, duration, volume] = presets[type] || presets.click;
+      oscillator.type = type === "boom" ? "sine" : "triangle";
+      oscillator.frequency.setValueAtTime(from, startedAt);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        Math.max(30, to),
+        startedAt + duration,
+      );
+      gain.gain.setValueAtTime(0.0001, startedAt);
+      gain.gain.exponentialRampToValueAtTime(volume, startedAt + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startedAt + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(startedAt);
+      oscillator.stop(startedAt + duration + 0.02);
+    } catch {
+      // Audio feedback must never block navigation.
     }
-    return 0;
   };
 
-  const fightPrizeNumber = (fight = {}) =>
-    parseMetricValue(
-      fight?.pot,
-      fight?.prizePool,
-      fight?.prize,
-      fight?.winningAmount,
-      fight?.cashPrize,
-    );
+  const activate = (type = "click", vibrate = 0) => {
+    playFx(type);
+    if (vibrate && typeof navigator !== "undefined") {
+      navigator.vibrate?.(vibrate);
+    }
+  };
 
-  const fightPlayerNumber = (fight = {}) =>
-    parseMetricValue(
-      fight?.playerCount,
-      fight?.players,
-      Array.isArray(fight?.userPredictions) ? fight.userPredictions.length : 0,
-    );
-
-  const totalPrize = uniqueAllFights.reduce(
-    (sum, fight) => sum + fightPrizeNumber(fight),
-    0,
-  );
-  const liveEvents = Math.max(
-    parseMetricValue(homepageStats?.activeFights),
-    uniqueAllFights.length,
-  );
-  const predictors = Math.max(
-    parseMetricValue(homepageStats?.players),
-    parseMetricValue(homepageStats?.registeredUsers),
-  );
-  const leaderboardPlayers = Math.max(
-    parseMetricValue(homepageStats?.leaderboardPlayers),
-    leaderboardRows.length,
-  );
-
-  const statTargets = useMemo(
-    () => ({
-      predictors,
-      prizePools: totalPrize,
-      liveEvents,
-      leaderboardPlayers,
-      realFights: uniqueAllFights.length,
-    }),
-    [predictors, totalPrize, liveEvents, leaderboardPlayers, uniqueAllFights.length],
-  );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-    const start = performance.now();
-    const duration = 1250;
-    let frameId;
-    const animate = (timestamp) => {
-      const progress = Math.min(1, (timestamp - start) / duration);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimatedStats(
-        Object.fromEntries(
-          Object.entries(statTargets).map(([key, value]) => [
-            key,
-            Math.round((Number(value) || 0) * eased),
-          ]),
-        ),
-      );
-      if (progress < 1) frameId = window.requestAnimationFrame(animate);
-    };
-    frameId = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [statTargets]);
-
-  const fighterA = getHomeFighterName(featuredFight, "A");
-  const fighterB = getHomeFighterName(featuredFight, "B");
-
-  const predictionSummary = useMemo(() => {
-    const predictions = Array.isArray(featuredFight?.userPredictions)
-      ? featuredFight.userPredictions
-      : [];
-    const fighterAId = String(
-      featuredFight?.fighterAId?._id ||
-        featuredFight?.fighterAId ||
-        featuredFight?.fighterA?._id ||
-        "",
-    ).toLowerCase();
-    const fighterBId = String(
-      featuredFight?.fighterBId?._id ||
-        featuredFight?.fighterBId ||
-        featuredFight?.fighterB?._id ||
-        "",
-    ).toLowerCase();
-    const fighterAName = String(fighterA || "").toLowerCase();
-    const fighterBName = String(fighterB || "").toLowerCase();
-    const winnerCounts = { A: 0, B: 0 };
-    const methodCounts = { "KO / TKO": 0, Submission: 0, Decision: 0 };
-    const roundCounts = [0, 0, 0, 0, 0];
-
-    const resolveSide = (value) => {
-      const normalized = String(
-        value?._id || value?.id || value?.name || value || "",
-      )
-        .trim()
-        .toLowerCase();
-      if (!normalized) return "";
-      if (["a", "1", "fightera", "fighter a", "corner a", "red"].includes(normalized)) return "A";
-      if (["b", "2", "fighterb", "fighter b", "corner b", "blue"].includes(normalized)) return "B";
-      if (fighterAId && normalized === fighterAId) return "A";
-      if (fighterBId && normalized === fighterBId) return "B";
-      if (fighterAName && normalized.includes(fighterAName)) return "A";
-      if (fighterBName && normalized.includes(fighterBName)) return "B";
-      return "";
-    };
-
-    predictions.forEach((prediction) => {
-      const rows = Array.isArray(prediction?.predictions)
-        ? prediction.predictions
-        : Array.isArray(prediction?.rounds)
-          ? prediction.rounds
-          : [];
-      const winner = [
-        prediction?.predictedWinner,
-        prediction?.winner,
-        prediction?.winnerSide,
-        prediction?.selectedWinner,
-        prediction?.winnerPrediction,
-        prediction?.fighterId,
-      ]
-        .map(resolveSide)
-        .find(Boolean);
-      if (winner) winnerCounts[winner] += 1;
-
-      const text = JSON.stringify(prediction || {}).toLowerCase();
-      if (/submission|\bsub\b/.test(text)) methodCounts.Submission += 1;
-      else if (/knockout|\bko\b|tko/.test(text)) methodCounts["KO / TKO"] += 1;
-      else methodCounts.Decision += 1;
-
-      const predictedRound = getSafeMetricNumber(
-        prediction?.predictedRound,
-        prediction?.finishRound,
-        prediction?.round,
-      );
-      if (predictedRound >= 1 && predictedRound <= 5) {
-        roundCounts[predictedRound - 1] += 1;
-      } else if (rows.length) {
-        const finishIndex = rows.findIndex((row) =>
-          Object.entries(row || {}).some(
-            ([key, value]) => /ko|submission|finish/i.test(key) && Number(value) > 0,
-          ),
-        );
-        if (finishIndex >= 0 && finishIndex < 5) roundCounts[finishIndex] += 1;
+  const toggleSound = () => {
+    setSoundEnabled((current) => {
+      const next = !current;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("fmm-one-screen-sound", String(next));
       }
+      return next;
     });
+  };
 
-    const total = predictions.length;
-    const percent = (count) =>
-      total > 0 ? Math.round((count / total) * 100) : 0;
-    return {
-      total,
-      winnerA: percent(winnerCounts.A),
-      winnerB: percent(winnerCounts.B),
-      methods: Object.entries(methodCounts).map(([label, count]) => ({
-        label,
-        value: percent(count),
-      })),
-      rounds: roundCounts.map((count, index) => ({
-        label: index + 1,
-        value: percent(count),
-      })),
-    };
-  }, [featuredFight, fighterA, fighterB]);
+  const categoryLinks = [
+    ["boxing", "Boxing"],
+    ["mma", "UFC / MMA"],
+    ["bareknuckle", "Bare Knuckle"],
+    ["kickboxing", "Kickboxing"],
+    ["pro-wrestling", "Pro Wrestling"],
+  ];
 
-  const liveLeaderboard = useMemo(
-    () =>
-      (Array.isArray(leaderboardRows) && leaderboardRows.length
-        ? leaderboardRows
-        : FALLBACK_LEADERBOARD
-      )
-        .slice(0, 5)
-        .map((player, index) => ({
-          rank: index + 1,
-          name: player?.name || getLeaderboardName(player),
-          points: getSafeMetricNumber(player?.points, player?.totalPoints),
-          avatar: player?.avatar || player?.profileUrl,
-        })),
-    [leaderboardRows],
-  );
-
-  const currentUserName = pickHomeValue(
-    currentUser?.playerName,
-    currentUser?.username,
-    currentUser?.firstName,
-    "You",
-  );
-
-  const menuLinks = [
-    ["/", "Home", FaHome],
-    ["/upcomingfights", "Contests", FaTrophy],
-    ["/YourFights", "My Picks", FaCheck],
+  const drawerLinks = [
+    ["/upcomingfights", "Open Fights", FaFire],
     ["/leaderboard", "Leaderboard", FaCrown],
-    ["/fights-rewards", "Coins & Rewards", FaCoins],
+    ["/fights-rewards", "Rewards", FaGift],
     ["/blogs", "Latest Blogs", FaNewspaper],
     ["/apparel", "Apparel", FaTshirt],
     ["/affiliate-create-account", "Affiliates", FaHandshake],
+    ["/guides", "How To Play", FaBullseye],
+    [profileHref, isLoggedIn ? "Profile" : "Create Account", FaUserAlt],
   ];
 
-  const categoryHref = (key) => getHomeSportViewAllHref(key);
-
-  const onPremiumTap = (type = "click") => {
-    playFx(type);
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate(type === "whoosh" ? 22 : 10);
-    }
-  };
-
-  const claimReward = () => {
-    onPremiumTap("reward");
-    setRewardBurst(true);
-    window.setTimeout(() => {
-      if (typeof window !== "undefined") window.location.assign("/fights-rewards");
-    }, 520);
-  };
-
-  const blogFallbacks = [
-    {
-      _id: "blog-1",
-      title: "Breakdown: This Week's Main Event",
-      image: "/images/home-premium/fight-action-clash.webp",
-    },
-    {
-      _id: "blog-2",
-      title: "Five Keys to Better Fight Predictions",
-      image: "/images/home-premium/arena-faceoff.webp",
-    },
-    {
-      _id: "blog-3",
-      title: "Fight IQ Strategy: Think Like a Fighter",
-      image: "/images/fmm-pages/our-fighters-featured-sharp.webp",
-    },
-  ];
-  const blogRows = blogs.length ? blogs : blogFallbacks;
+  const HotspotLink = ({ href, label, className = "", fx = "click", vibrate = 0, children }) => (
+    <Link
+      href={href}
+      className={`fmm-one-screen-hotspot ${className}`}
+      aria-label={label}
+      onClick={() => activate(fx, vibrate)}
+    >
+      {children || <span className="sr-only">{label}</span>}
+    </Link>
+  );
 
   return (
-    <div className="fmm-premium-mobile-home" aria-label="Fantasy MMAdness mobile homepage">
-      <section className="fmm-premium-hero" aria-label="Fantasy MMAdness arena hero">
+    <section className="fmm-one-screen-home" aria-label="Fantasy MMAdness mobile game homepage">
+      <div className="fmm-one-screen-stage">
         <Image
-          src="/images/mobile-home/premium-v9/hero-reference.webp"
-          alt="Fantasy MMAdness combat prediction game"
-          width={700}
-          height={330}
-          sizes="100vw"
+          className="fmm-one-screen-art"
+          src="/images/mobile-home/premium-v11/single-screen-home.webp"
+          alt="Fantasy MMAdness premium combat prediction game homepage"
+          width={670}
+          height={1595}
           priority
+          sizes="100vw"
         />
-        <span className="fmm-premium-hero-light is-red" aria-hidden="true" />
-        <span className="fmm-premium-hero-light is-blue" aria-hidden="true" />
-        <span className="fmm-premium-crown-glow" aria-hidden="true" />
+
+        <div className="fmm-one-screen-ambient" aria-hidden="true">
+          <i className="is-beam-one" />
+          <i className="is-beam-two" />
+          <i className="is-crown-glow" />
+          <i className="is-spark-one" />
+          <i className="is-spark-two" />
+          <i className="is-spark-three" />
+        </div>
 
         <button
           type="button"
-          className="fmm-premium-hero-menu"
-          aria-label={isMenuOpen ? "Close homepage menu" : "Open homepage menu"}
+          className="fmm-one-screen-hotspot fmm-one-screen-menu-trigger"
+          aria-label="Open navigation menu"
           aria-expanded={isMenuOpen}
           onClick={() => {
-            onPremiumTap();
-            setIsMenuOpen((value) => !value);
+            activate("click", 8);
+            setIsMenuOpen(true);
           }}
         >
-          <span className="fmm-premium-menu-hit-label">Menu</span>
+          <span className="sr-only">Open navigation menu</span>
         </button>
 
-        <Link
-          href="/fights-rewards"
-          className="fmm-premium-wallet-chip"
-          onClick={() => onPremiumTap("coin")}
-          aria-label={`Fight wallet: ${tokenBalance.toLocaleString()} coins`}
-        >
-          <span className="fmm-premium-wallet-coin">FM</span>
+        <HotspotLink href="/checkout" label="Open Fight Coins wallet" className="is-wallet" fx="coin">
           <strong>{tokenBalance.toLocaleString()}</strong>
-          <b><FaPlus aria-hidden="true" /></b>
-        </Link>
+        </HotspotLink>
+        <HotspotLink href={profileHref} label={isLoggedIn ? "Open profile" : "Create account"} className="is-profile">
+          <small>Lv. {playerLevel}</small>
+        </HotspotLink>
 
-        <Link
-          href={profileHref}
-          className="fmm-premium-profile-chip"
-          onClick={() => onPremiumTap()}
-          aria-label={isLoggedIn ? "Open profile" : "Create account"}
-        >
-          {currentUser?.profileUrl ? (
-            <img src={currentUser.profileUrl} alt="" />
-          ) : (
-            <FaUserAlt aria-hidden="true" />
-          )}
-          <span>Lv. {playerLevel}</span>
-        </Link>
+        <HotspotLink href={joinHref} label="Join Fantasy MMAdness free" className="is-join" fx="whoosh" vibrate={18}>
+          <span className="fmm-one-screen-join-shine" aria-hidden="true" />
+        </HotspotLink>
 
-        <Link
-          href={primaryCtaHref}
-          className="fmm-premium-join-hitarea"
-          onClick={() => onPremiumTap("whoosh")}
-          aria-label={isLoggedIn ? "Make predictions" : "Join free"}
-        >
-          <span className="fmm-premium-button-shine" aria-hidden="true" />
-        </Link>
-      </section>
+        <div className="fmm-one-screen-stats-links" aria-label="Platform statistics shortcuts">
+          <HotspotLink href="/leaderboard" label="View predictors" className="is-stat-one" fx="tick" />
+          <HotspotLink href="/fights-rewards" label="View prize pools" className="is-stat-two" fx="coin" />
+          <HotspotLink href="/upcomingfights" label="View live events" className="is-stat-three" fx="tick" />
+          <HotspotLink href="/leaderboard" label="View live leaderboards" className="is-stat-four" fx="tick" />
+          <HotspotLink href="/upcomingfights" label="View real fights" className="is-stat-five" fx="boom" />
+        </div>
 
-      {isMenuOpen && (
-        <>
+        <div className="fmm-one-screen-category-links" aria-label="Combat sport categories">
+          {categoryLinks.map(([key, label], index) => (
+            <HotspotLink
+              key={key}
+              href={getHomeSportViewAllHref(key)}
+              label={`Open ${label} fights`}
+              className={`is-category is-category-${index + 1}`}
+              fx="boom"
+              vibrate={10}
+            >
+              <span className="fmm-one-screen-live-pulse" aria-hidden="true" />
+            </HotspotLink>
+          ))}
+        </div>
+
+        <HotspotLink href={featuredHref} label="Open featured fight" className="is-featured" fx="boom" vibrate={14} />
+        <HotspotLink href={featuredHref} label="Make predictions on the featured fight" className="is-featured-cta" fx="whoosh" vibrate={16}>
+          <span className="fmm-one-screen-featured-shine" aria-hidden="true" />
+        </HotspotLink>
+
+        <div className="fmm-one-screen-upcoming-links" aria-label="Upcoming fights">
+          {upcomingFights.map((fight, index) => (
+            <HotspotLink
+              key={getFightId(fight) || `single-screen-upcoming-${index}`}
+              href={getFightDetailHref(fight)}
+              label={`Open ${getFightTitle(fight)}`}
+              className={`is-upcoming is-upcoming-${index + 1}`}
+              fx="tick"
+            />
+          ))}
+        </div>
+
+        <HotspotLink href={featuredHref} label="Open fight command center" className="is-command" fx="boom" />
+        <HotspotLink href="/leaderboard" label="Open community predictions and standings" className="is-community" fx="tick" />
+        <HotspotLink href="/fights-rewards" label="Claim daily reward" className="is-daily-reward" fx="reward" vibrate={18} />
+        <HotspotLink href="/checkout" label="Add Fight Coins" className="is-coins" fx="coin" vibrate={10} />
+        <HotspotLink href="/leaderboard" label="Open leaderboard" className="is-leaderboard" fx="tick" />
+        <HotspotLink href="/fights-rewards" label="Open streak rewards" className="is-streak" fx="reward" />
+        <HotspotLink href="/blogs" label="Open latest blogs" className="is-blogs" />
+        <HotspotLink href="/apparel" label="Open Fantasy MMAdness apparel" className="is-apparel" />
+        <HotspotLink href="/affiliate-create-account" label="Open affiliate program" className="is-affiliates" />
+
+        <nav className="fmm-one-screen-bottom-links" aria-label="Mobile game navigation">
+          <HotspotLink href="/" label="Home" className="is-bottom is-home" />
+          <HotspotLink href="/upcomingfights" label="Contests" className="is-bottom is-contests" />
+          <HotspotLink href={picksHref} label="My picks" className="is-bottom is-picks" />
+          <HotspotLink href={featuredHref} label="Make predictions" className="is-bottom is-predict" fx="whoosh" vibrate={12} />
+          <HotspotLink href="/leaderboard" label="Leaderboard" className="is-bottom is-leaders" />
+          <HotspotLink href={profileHref} label="Profile" className="is-bottom is-bottom-profile" />
           <button
             type="button"
-            className="fmm-premium-menu-backdrop"
-            aria-label="Close homepage menu"
-            onClick={() => setIsMenuOpen(false)}
-          />
-          <aside className="fmm-premium-menu-drawer" aria-label="Homepage navigation">
-            <header>
-              <Image
-                src="/images/mobile-home/premium-v9/fantasy-mmadness-clean-logo-tight.png"
-                alt="Fantasy MMAdness"
-                width={303}
-                height={170}
-              />
-              <button type="button" onClick={() => setIsMenuOpen(false)} aria-label="Close menu">
-                <FaTimes aria-hidden="true" />
+            className={`fmm-one-screen-hotspot fmm-one-screen-sound ${soundEnabled ? "is-on" : "is-off"}`}
+            aria-label={`Turn sound ${soundEnabled ? "off" : "on"}`}
+            aria-pressed={soundEnabled}
+            onClick={() => {
+              if (!soundEnabled) {
+                setSoundEnabled(true);
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem("fmm-one-screen-sound", "true");
+                }
+                window.setTimeout(() => playFx("click"), 0);
+                return;
+              }
+              playFx("click");
+              toggleSound();
+            }}
+          >
+            {soundEnabled ? <FaVolumeUp aria-hidden="true" /> : <FaVolumeMute aria-hidden="true" />}
+          </button>
+        </nav>
+
+        {isMenuOpen && (
+          <div className="fmm-one-screen-drawer-layer" role="dialog" aria-modal="true" aria-label="Mobile navigation menu">
+            <button
+              type="button"
+              className="fmm-one-screen-drawer-backdrop"
+              aria-label="Close navigation menu"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <aside className="fmm-one-screen-drawer">
+              <header>
+                <span><FaCrown aria-hidden="true" /> Fantasy MMAdness</span>
+                <button type="button" aria-label="Close menu" onClick={() => setIsMenuOpen(false)}>
+                  <FaTimes aria-hidden="true" />
+                </button>
+              </header>
+              <nav>
+                {drawerLinks.map(([href, label, Icon]) => (
+                  <Link
+                    key={`${href}-${label}`}
+                    href={href}
+                    onClick={() => {
+                      activate("click");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <Icon aria-hidden="true" />
+                    <span>{label}</span>
+                    <FaChevronRight aria-hidden="true" />
+                  </Link>
+                ))}
+              </nav>
+              <button
+                type="button"
+                className="fmm-one-screen-drawer-sound"
+                onClick={toggleSound}
+              >
+                {soundEnabled ? <FaVolumeUp aria-hidden="true" /> : <FaVolumeMute aria-hidden="true" />}
+                Sound {soundEnabled ? "On" : "Off"}
               </button>
-            </header>
-            <nav>
-              {menuLinks.map(([href, label, Icon]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => {
-                    onPremiumTap();
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <Icon aria-hidden="true" />
-                  <span>{label}</span>
-                  <FaChevronRight aria-hidden="true" />
-                </Link>
-              ))}
-            </nav>
-          </aside>
-        </>
-      )}
-
-      <section className="fmm-premium-stats" aria-label="Live platform statistics">
-        {[
-          [FaUsers, animatedStats.predictors, "Predictors", "is-purple"],
-          [FaTrophy, animatedStats.prizePools, "Prize Pools", "is-gold", "$"],
-          [FaSignal, animatedStats.liveEvents, "Live Events", "is-blue"],
-          [FaChartLine, animatedStats.leaderboardPlayers, "Leaderboards", "is-green"],
-          [FaShieldAlt, animatedStats.realFights, "Real Fights", "is-orange"],
-        ].map(([Icon, value, label, tone, prefix]) => (
-          <Link
-            href={label === "Prize Pools" ? "/fights-rewards" : label === "Leaderboards" ? "/leaderboard" : "/upcomingfights"}
-            className={`fmm-premium-stat ${tone}`}
-            key={label}
-            onClick={() => onPremiumTap("tick")}
-          >
-            <Icon aria-hidden="true" />
-            <div>
-              <strong>{prefix || ""}{Number(value || 0).toLocaleString()}</strong>
-              <span>{label}</span>
-            </div>
-          </Link>
-        ))}
-      </section>
-
-      <section className="fmm-premium-categories" aria-labelledby="fmm-premium-categories-title">
-        <div className="fmm-premium-heading">
-          <div>
-            <span>Combat Sports</span>
-            <h2 id="fmm-premium-categories-title">Choose Your Arena</h2>
+            </aside>
           </div>
-          <Link href="/upcomingfights">View All <FaChevronRight aria-hidden="true" /></Link>
-        </div>
-        <div className="fmm-premium-category-grid">
-          {mobileSections.map((section) => (
-            <Link
-              href={categoryHref(section.key)}
-              key={section.key}
-              className={`fmm-premium-category-card is-${section.key}`}
-              onClick={() => {
-                setActiveFightSport(section.key);
-                onPremiumTap("boom");
-              }}
-              aria-label={`Open ${section.label} fights`}
-            >
-              <Image src={section.image} alt="" width={133} height={140} sizes="20vw" />
-              <span className="fmm-premium-live-badge">Live</span>
-              <strong>{section.label}</strong>
-              <small><FaUsers aria-hidden="true" /> {section.count.toLocaleString()}</small>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="fmm-premium-featured-event" aria-labelledby="fmm-premium-featured-event-title">
-        <div className="fmm-premium-event-backdrop" aria-hidden="true" />
-        <span className="fmm-premium-event-kicker"><FaFire aria-hidden="true" /> Featured This Week</span>
-        <div className="fmm-premium-event-fighter is-left">
-          <FightImage
-            src={getHomeFighterImage(featuredFight, "A", 0)}
-            alt={fighterA}
-            width={360}
-            height={460}
-            priority
-            sizes="42vw"
-          />
-        </div>
-        <div className="fmm-premium-event-copy">
-          <small>{getMobileEventLabel(featuredFight)}</small>
-          <h2 id="fmm-premium-featured-event-title">
-            {fighterA}<em>vs</em>{fighterB}
-          </h2>
-          <strong>{getPrizePool(featuredFight)} <span>Prize Pool</span></strong>
-          <p>{getLockLabel(featuredFight, now)}</p>
-          <Link
-            href={getFightDetailHref(featuredFight)}
-            onClick={() => onPremiumTap("boom")}
-          >
-            Make Predictions <FaArrowRight aria-hidden="true" />
-          </Link>
-        </div>
-        <div className="fmm-premium-event-fighter is-right">
-          <FightImage
-            src={getHomeFighterImage(featuredFight, "B", 1)}
-            alt={fighterB}
-            width={360}
-            height={460}
-            priority
-            sizes="42vw"
-          />
-        </div>
-      </section>
-
-      <section className="fmm-premium-upcoming" aria-labelledby="fmm-premium-upcoming-title">
-        <div className="fmm-premium-heading">
-          <div><span>Fight Calendar</span><h2 id="fmm-premium-upcoming-title">Upcoming Events</h2></div>
-          <Link href="/upcomingfights">View All <FaChevronRight aria-hidden="true" /></Link>
-        </div>
-        <div className="fmm-premium-upcoming-rail">
-          {upcomingFights.map((fight, index) => (
-            <Link
-              href={getFightDetailHref(fight)}
-              className={`fmm-premium-upcoming-card ${getCategoryClass(fight)}`}
-              key={getFightId(fight) || `upcoming-${index}`}
-              onClick={() => onPremiumTap("tick")}
-            >
-              <span>{getMobileEventLabel(fight)}</span>
-              <div>
-                <FightImage
-                  src={getHomeFighterImage(fight, "A", index)}
-                  alt={getHomeFighterName(fight, "A")}
-                  width={160}
-                  height={210}
-                  sizes="26vw"
-                />
-                <b>VS</b>
-                <FightImage
-                  src={getHomeFighterImage(fight, "B", index + 1)}
-                  alt={getHomeFighterName(fight, "B")}
-                  width={160}
-                  height={210}
-                  sizes="26vw"
-                />
-              </div>
-              <h3>{getHomeFighterName(fight, "A")} <em>vs</em> {getHomeFighterName(fight, "B")}</h3>
-              <time>{getLockLabel(fight, now)}</time>
-              <strong>{getPrizePool(fight)}</strong>
-              <small>Enter Now</small>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="fmm-premium-command-grid" aria-label="Fight command center">
-        <article className="fmm-premium-command-card">
-          <header><span>Featured Fight</span><strong>{getMobileEventLabel(featuredFight)}</strong></header>
-          <div className="fmm-premium-command-stage">
-            <FightImage src={getHomeFighterImage(featuredFight, "A", 0)} alt={fighterA} width={250} height={300} sizes="28vw" />
-            <div><h2>{fighterA}<em>vs</em>{fighterB}</h2><p>{getLockLabel(featuredFight, now)}</p></div>
-            <FightImage src={getHomeFighterImage(featuredFight, "B", 1)} alt={fighterB} width={250} height={300} sizes="28vw" />
-          </div>
-          <div className="fmm-premium-command-metrics">
-            <span><small>Prize Pool</small><strong>{getPrizePool(featuredFight)}</strong></span>
-            <span><small>Entry Fee</small><strong>{getSafeMetricNumber(featuredFight?.entryFee, featuredFight?.matchTokens)} tokens</strong></span>
-            <span><small>Entries</small><strong>{fightPlayerNumber(featuredFight).toLocaleString()}</strong></span>
-          </div>
-          <Link href={getFightDetailHref(featuredFight)} onClick={() => onPremiumTap("boom")}>Make Predictions</Link>
-        </article>
-
-        <article className="fmm-premium-community-card">
-          <header><span>Community Predictions</span><small>{predictionSummary.total.toLocaleString()} picks</small></header>
-          <div className="fmm-premium-community-content">
-            <div className="fmm-premium-winner-chart">
-              <span>Who Will Win?</span>
-              <strong>{fighterA} <b>{predictionSummary.winnerA}%</b></strong>
-              <i
-                style={{
-                  background: `conic-gradient(#f33 ${predictionSummary.winnerA}%, #1777ff 0)`,
-                }}
-                aria-label={`${predictionSummary.winnerA}% ${fighterA}, ${predictionSummary.winnerB}% ${fighterB}`}
-              />
-              <small>{fighterB} <b>{predictionSummary.winnerB}%</b></small>
-            </div>
-            <div className="fmm-premium-method-chart">
-              <span>How Will It End?</span>
-              {predictionSummary.methods.map((row, index) => (
-                <div key={row.label}>
-                  <label>{row.label}</label>
-                  <i><b style={{ width: `${row.value}%` }} /></i>
-                  <strong>{row.value}%</strong>
-                </div>
-              ))}
-            </div>
-            <div className="fmm-premium-round-chart">
-              <span>In Which Round?</span>
-              {predictionSummary.rounds.map((row) => (
-                <div key={row.label}>
-                  <label>R{row.label}</label>
-                  <i><b style={{ width: `${row.value}%` }} /></i>
-                  <strong>{row.value}%</strong>
-                </div>
-              ))}
-            </div>
-          </div>
-          <Link href="/leaderboard" onClick={() => onPremiumTap()}>Live / Provisional Standings <FaChevronRight aria-hidden="true" /></Link>
-        </article>
-
-        <article className="fmm-premium-progress-card">
-          <div className="fmm-premium-progress-badge">{playerLevel}</div>
-          <div>
-            <span>Your Progression</span>
-            <strong>Fight IQ {xpValue.toLocaleString()} XP</strong>
-            <i><b style={{ width: `${xpPercent}%` }} /></i>
-            <small>Next level: {xpTarget.toLocaleString()} XP</small>
-          </div>
-          <FaCrown aria-hidden="true" />
-        </article>
-      </section>
-
-      <section className="fmm-premium-reward-grid" aria-label="Rewards, coins, leaderboard, and streak">
-        <button
-          type="button"
-          className={`fmm-premium-reward-card is-daily ${rewardBurst ? "is-claiming" : ""}`}
-          onClick={claimReward}
-          aria-label="Claim daily reward"
-        >
-          <Image src="/images/mobile-home/premium-v9/daily-reward.webp" alt="Daily reward chest" width={160} height={180} sizes="46vw" />
-          {rewardBurst && <i className="fmm-premium-coin-burst" aria-hidden="true"><b /><b /><b /><b /><b /></i>}
-        </button>
-        <Link
-          href="/fights-rewards"
-          className="fmm-premium-reward-card is-coins"
-          onClick={() => onPremiumTap("coin")}
-          aria-label={`Open fight coin wallet with ${tokenBalance.toLocaleString()} coins`}
-        >
-          <Image src="/images/mobile-home/premium-v9/coins-wallet.webp" alt="" width={165} height={180} sizes="46vw" aria-hidden="true" />
-          <span className="fmm-premium-coins-copy">
-            <span>Coins Wallet</span>
-            <strong>{tokenBalance.toLocaleString()}</strong>
-            <small>Coins</small>
-            <b>Add Coins <FaPlus aria-hidden="true" /></b>
-          </span>
-        </Link>
-        <Link href="/leaderboard" className="fmm-premium-leaderboard-card" onClick={() => onPremiumTap()}>
-          <header><span>Leaderboard</span><small>View All <FaChevronRight aria-hidden="true" /></small></header>
-          <ol>
-            {liveLeaderboard.slice(0, 4).map((row) => (
-              <li className={row.name === currentUserName ? "is-me" : ""} key={`${row.rank}-${row.name}`}>
-                <b>{row.rank}</b><span>{row.name}</span><strong>{row.points.toLocaleString()} pts</strong>
-              </li>
-            ))}
-            <li className="is-me"><b>{playerLevel}</b><span>{currentUserName}</span><strong>{xpValue.toLocaleString()} pts</strong></li>
-          </ol>
-        </Link>
-        <Link href="/fights-rewards" className="fmm-premium-streak-card" onClick={() => onPremiumTap("reward")}>
-          <FaFire aria-hidden="true" /><span>Streak Bonus</span><strong>7 Day Streak</strong><div>{[1,2,3,4,5,6,7].map((day) => <i key={day}>✓</i>)}</div><small>+250 FM</small>
-        </Link>
-      </section>
-
-      <section className="fmm-premium-discovery-grid" aria-label="Latest blogs, apparel, and affiliates">
-        <article className="fmm-premium-blogs-card">
-          <header><span>Latest Blogs</span><Link href="/blogs">View All <FaChevronRight aria-hidden="true" /></Link></header>
-          <div>
-            {blogRows.slice(0, 3).map((blog, index) => {
-              const id = blog?._id || blog?.id || blog?.slug || index;
-              const href = blog?._id || blog?.id ? `/blog-details/${blog?._id || blog?.id}` : "/blogs";
-              const image = pickHomeValue(blog?.thumbnail, blog?.imageUrl, blog?.image, blog?.coverImage, blog?.featuredImage) || blogFallbacks[index]?.image;
-              return (
-                <Link href={href} key={id} onClick={() => onPremiumTap()}>
-                  <img src={image} alt="" />
-                  <span>{blog?.title || blog?.blogTitle || blogFallbacks[index]?.title}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </article>
-
-        <Link href="/apparel" className="fmm-premium-apparel-card" onClick={() => onPremiumTap()}>
-          <header><span>Apparel</span><small>View All <FaChevronRight aria-hidden="true" /></small></header>
-          <Image src="/images/mobile-home/premium-v9/apparel.webp" alt="Fantasy MMAdness apparel" width={240} height={153} sizes="45vw" />
-          <strong>Shirts · Hats · Hoodies · Tanks</strong>
-        </Link>
-
-        <Link href="/affiliate-create-account" className="fmm-premium-affiliate-card" onClick={() => onPremiumTap()}>
-          <Image src="/images/mobile-home/premium-v9/affiliates.webp" alt="Fantasy MMAdness affiliates" width={235} height={153} sizes="45vw" />
-          <span>Affiliates</span><strong>Earn Rewards</strong><small>Invite. Earn. Win.</small>
-        </Link>
-      </section>
-
-      <nav className="fmm-premium-bottom-nav" aria-label="Mobile homepage navigation">
-        {[
-          ["/", "Home", FaHome, "is-active"],
-          ["/upcomingfights", "Contests", FaTrophy, ""],
-          [isLoggedIn ? "/YourFights" : "/login", "My Picks", FaCheck, ""],
-          [primaryCtaHref, "Make Predictions", FaBullseye, "is-center"],
-          ["/leaderboard", "Leaderboard", FaCrown, ""],
-          [profileHref, "Profile", FaUserAlt, ""],
-        ].map(([href, label, Icon, className]) => (
-          <Link href={href} key={label} className={className} onClick={() => onPremiumTap(className === "is-center" ? "whoosh" : "click")}>
-            <Icon aria-hidden="true" /><span>{label}</span>
-          </Link>
-        ))}
-        <button type="button" className="fmm-premium-sound-toggle" onClick={toggleSound} aria-label={`Turn sound ${soundEnabled ? "off" : "on"}`}>
-          {soundEnabled ? <FaVolumeUp aria-hidden="true" /> : <FaVolumeMute aria-hidden="true" />}
-          <span>Sound</span><i className={soundEnabled ? "is-on" : ""}><b /></i>
-        </button>
-      </nav>
-    </div>
+        )}
+      </div>
+    </section>
   );
 };
+
 
 
 const HomeAnother = () => {

@@ -82,6 +82,7 @@ import "@/styles/home-mobile-client-static-v4.css";
 import "@/styles/home-mobile-roadmap-v7.css";
 import "@/styles/home-mobile-roadmap-v8-stability.css";
 import "@/styles/home-mobile-premium-v9.css";
+import "@/styles/home-mobile-one-screen-v11.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
