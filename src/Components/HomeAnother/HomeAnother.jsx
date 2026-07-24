@@ -105,6 +105,14 @@ const MOBILE_FALLBACK_FIGHT_IMAGES = [
   "/images/fmm-experience/fighter-david-benavidez.webp",
 ];
 
+const MOBILE_FALLBACK_SPORT_LABELS = {
+  boxing: "Boxing",
+  mma: "MMA",
+  bareknuckle: "Bare-knuckle",
+  kickboxing: "Kickboxing",
+  "pro-wrestling": "Pro Wrestling",
+};
+
 const getHomeFightPosterImage = (fight = {}) =>
   pickHomeValue(
     fight?.fightPosterMobileImage,
