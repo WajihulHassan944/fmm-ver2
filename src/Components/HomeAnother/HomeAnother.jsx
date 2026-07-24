@@ -1233,14 +1233,14 @@ const MobilePhoneHome = ({
           (section) => section.key === tab.key,
         );
         const artMap = {
-          boxing: "/images/mobile-home/premium-v9/category-boxing.webp",
-          mma: "/images/mobile-home/premium-v9/category-mma.webp",
+          boxing: "/images/mobile-home/client-v7/category-boxing-art.jpg",
+          mma: "/images/mobile-home/client-v7/category-mma-art.jpg",
           bareknuckle:
-            "/images/mobile-home/premium-v9/category-bareknuckle.webp",
+            "/images/mobile-home/client-v7/category-bare-knuckle-art.jpg",
           kickboxing:
-            "/images/mobile-home/premium-v9/category-kickboxing.webp",
+            "/images/mobile-home/client-v7/category-kickboxing-art.jpg",
           "pro-wrestling":
-            "/images/mobile-home/premium-v9/category-pro-wrestling.webp",
+            "/images/mobile-home/client-v7/category-pro-wrestling-art.jpg",
         };
         const labels = {
           boxing: "Boxing",
@@ -1599,7 +1599,7 @@ const MobilePhoneHome = ({
             setIsMenuOpen((value) => !value);
           }}
         >
-          <span /><span /><span />
+          <span className="fmm-premium-menu-hit-label">Menu</span>
         </button>
 
         <Link
@@ -1875,14 +1875,28 @@ const MobilePhoneHome = ({
       </section>
 
       <section className="fmm-premium-reward-grid" aria-label="Rewards, coins, leaderboard, and streak">
-        <button type="button" className={`fmm-premium-reward-card is-daily ${rewardBurst ? "is-claiming" : ""}`} onClick={claimReward}>
+        <button
+          type="button"
+          className={`fmm-premium-reward-card is-daily ${rewardBurst ? "is-claiming" : ""}`}
+          onClick={claimReward}
+          aria-label="Claim daily reward"
+        >
           <Image src="/images/mobile-home/premium-v9/daily-reward.webp" alt="Daily reward chest" width={160} height={180} sizes="46vw" />
-          <span>Daily Reward</span><strong>Claim Reward</strong>
           {rewardBurst && <i className="fmm-premium-coin-burst" aria-hidden="true"><b /><b /><b /><b /><b /></i>}
         </button>
-        <Link href="/fights-rewards" className="fmm-premium-reward-card is-coins" onClick={() => onPremiumTap("coin")}>
-          <Image src="/images/mobile-home/premium-v9/coins-wallet.webp" alt="Fight coins" width={165} height={180} sizes="46vw" />
-          <span>Coins Wallet</span><strong>{tokenBalance.toLocaleString()} Coins</strong><small>Add Coins +</small>
+        <Link
+          href="/fights-rewards"
+          className="fmm-premium-reward-card is-coins"
+          onClick={() => onPremiumTap("coin")}
+          aria-label={`Open fight coin wallet with ${tokenBalance.toLocaleString()} coins`}
+        >
+          <Image src="/images/mobile-home/premium-v9/coins-wallet.webp" alt="" width={165} height={180} sizes="46vw" aria-hidden="true" />
+          <span className="fmm-premium-coins-copy">
+            <span>Coins Wallet</span>
+            <strong>{tokenBalance.toLocaleString()}</strong>
+            <small>Coins</small>
+            <b>Add Coins <FaPlus aria-hidden="true" /></b>
+          </span>
         </Link>
         <Link href="/leaderboard" className="fmm-premium-leaderboard-card" onClick={() => onPremiumTap()}>
           <header><span>Leaderboard</span><small>View All <FaChevronRight aria-hidden="true" /></small></header>

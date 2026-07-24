@@ -404,3 +404,302 @@
     .fmm-premium-sound-toggle { position: fixed; right: 10px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); width: 66px; height: 34px; min-height: 34px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.13); background: rgba(8,11,17,0.95); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
   }
 }
+
+/* Final phone-only visual stability pass (v10). */
+@media (max-width: 767px) {
+  /* Avoid relying on :has() for critical home-only chrome removal. */
+  .header.theme-header.is-home-route,
+  .site-experience-main.is-home-experience-main + footer.theme-footer,
+  .site-experience-main.is-home-experience-main + .theme-footer,
+  .site-experience-main.is-home-experience-main ~ footer.theme-footer {
+    display: none !important;
+  }
+
+  .site-experience-main.is-home-experience-main,
+  .site-experience-main.is-home-experience-main .theme-home.fmm-home.page-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Crop the baked static stats row from the artwork; live stats render below it. */
+  .fmm-premium-hero {
+    aspect-ratio: 700 / 308;
+    min-height: 0;
+  }
+
+  .fmm-premium-hero > img,
+  .fmm-premium-hero > span > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* The artwork already contains one hamburger. Keep only one visible icon and
+     use this transparent button as its accessible, functional tap target. */
+  .fmm-premium-hero-menu {
+    top: 5.2%;
+    left: 3.5%;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    box-shadow: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fmm-premium-hero-menu:focus-visible {
+    outline: 2px solid rgba(255, 213, 76, 0.92);
+    outline-offset: 2px;
+  }
+
+  .fmm-premium-menu-hit-label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* Match the baked top-right control proportions so the live controls cover
+     the placeholder artwork without dominating the logo. */
+  .fmm-premium-wallet-chip {
+    top: 4.5%;
+    right: 13.6%;
+    min-width: 94px;
+    width: 25%;
+    max-width: 110px;
+    height: 36px;
+    padding: 4px 4px 4px 6px;
+    gap: 5px;
+    border-radius: 12px;
+  }
+
+  .fmm-premium-wallet-chip strong {
+    font-size: clamp(0.66rem, 2.7vw, 0.82rem);
+  }
+
+  .fmm-premium-wallet-chip b,
+  .fmm-premium-wallet-coin {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+  }
+
+  .fmm-premium-profile-chip {
+    top: 4.2%;
+    right: 2.1%;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .fmm-premium-profile-chip img {
+    width: 29px;
+    height: 29px;
+  }
+
+  .fmm-premium-profile-chip span {
+    top: -6px;
+    right: -5px;
+    min-width: 27px;
+    font-size: 0.46rem;
+  }
+
+  /* Art-only category images + one dynamic label/count layer. */
+  .fmm-premium-category-card img {
+    object-position: center top;
+  }
+
+  .fmm-premium-category-card strong {
+    bottom: 23px;
+    padding-inline: 1px;
+    text-shadow: 0 2px 7px rgba(0, 0, 0, 0.95);
+  }
+
+  .fmm-premium-category-card small {
+    bottom: 7px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+  }
+
+  /* Static daily-reward asset already contains its own title/button. */
+  .fmm-premium-reward-card.is-daily > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Keep the coin artwork, mask baked values, and render the actual wallet
+     balance once in a predictable layer. */
+  .fmm-premium-reward-card.is-coins {
+    isolation: isolate;
+  }
+
+  .fmm-premium-reward-card.is-coins > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.58) saturate(0.88);
+  }
+
+  .fmm-premium-reward-card.is-coins::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(4, 6, 10, 0.2) 0 42%, rgba(4, 6, 10, 0.9) 58% 100%),
+      linear-gradient(180deg, rgba(4, 6, 10, 0.28) 0 18%, transparent 42% 64%, rgba(4, 6, 10, 0.92) 70% 100%);
+  }
+
+  .fmm-premium-coins-copy {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
+    padding: 10px;
+    font-family: var(--fmm9-title);
+    text-transform: uppercase;
+  }
+
+  .fmm-premium-coins-copy > span {
+    grid-column: 1 / -1;
+    color: var(--fmm9-gold);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+  }
+
+  .fmm-premium-coins-copy > strong {
+    grid-column: 2;
+    align-self: center;
+    color: #fff;
+    font-size: clamp(1.2rem, 5.5vw, 1.65rem);
+    line-height: 1;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.85);
+  }
+
+  .fmm-premium-coins-copy > small {
+    grid-column: 2;
+    align-self: center;
+    margin-top: 28px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.58rem;
+  }
+
+  .fmm-premium-coins-copy > b {
+    grid-column: 1 / -1;
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 7px;
+    color: #241500;
+    background: linear-gradient(180deg, #ffe16c, #e8a311);
+    border: 1px solid rgba(255, 226, 112, 0.72);
+    box-shadow: 0 7px 16px rgba(238, 169, 19, 0.22);
+    font-size: 0.65rem;
+  }
+
+  /* Prevent the fixed bar from masking the final discovery content. */
+  .fmm-premium-mobile-home {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .fmm-premium-discovery-grid {
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 390px) {
+    .fmm-premium-wallet-chip {
+      right: 14%;
+      min-width: 88px;
+      height: 34px;
+    }
+
+    .fmm-premium-profile-chip {
+      width: 38px;
+      height: 38px;
+    }
+  }
+}
+
+/* Full-page PDF/print captures should not repeat the fixed phone navbar on every page. */
+@media print {
+  .fmm-premium-bottom-nav {
+    display: none !important;
+  }
+
+  .fmm-premium-mobile-home {
+    padding-bottom: 18px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-premium-reward-card > .fmm-premium-coins-copy {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    left: 0;
+    top: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
+    padding: 10px;
+    color: #fff;
+    font-family: var(--fmm9-title);
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-premium-reward-card > .fmm-premium-coins-copy {
+    display: block;
+    padding: 0;
+  }
+
+  .fmm-premium-coins-copy > span,
+  .fmm-premium-coins-copy > strong,
+  .fmm-premium-coins-copy > small,
+  .fmm-premium-coins-copy > b {
+    position: absolute;
+  }
+
+  .fmm-premium-coins-copy > span {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+  }
+
+  .fmm-premium-coins-copy > strong {
+    top: 48px;
+    right: 12px;
+  }
+
+  .fmm-premium-coins-copy > small {
+    top: 78px;
+    right: 13px;
+    margin: 0;
+  }
+
+  .fmm-premium-coins-copy > b {
+    left: 10px;
+    right: 10px;
+    bottom: 9px;
+  }
+}
