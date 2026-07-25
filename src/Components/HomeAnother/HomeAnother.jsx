@@ -59,8 +59,6 @@ import {
 } from "react-icons/fa";
 
 const FALLBACK_FIGHT_IMAGE = "/images/hero-fight.webp";
-const HOME_HERO_IMAGE =
-  "/images/home-premium/fantasy-mmadness-fighters-prize-arena-bg.webp";
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
@@ -678,6 +676,26 @@ const getLockLabel = (match, now) => {
 };
 
 const getCategory = (match) => getFightSportLabel(match);
+
+const getMobileEventLabel = (fight = {}) => {
+  const sportKey = getFightSportKey(fight);
+
+  return pickHomeValue(
+    fight?.eventLabel,
+    fight?.promotionName,
+    fight?.eventName,
+    fight?.eventTitle,
+    fight?.organizationName,
+    fight?.organization,
+    fight?.leagueName,
+    fight?.league,
+    fight?.matchCategoryTwo,
+    fight?.matchCategory,
+    MOBILE_FALLBACK_SPORT_LABELS[sportKey],
+    getFightSportLabel(fight),
+    "Featured Fight",
+  );
+};
 
 const getCategoryClass = (matchOrCategory) => {
   const key =
@@ -2126,12 +2144,6 @@ const HomeAnother = () => {
         <meta
           name="keywords"
           content="Fantasy MMA, Fantasy UFC, Fantasy BKFC, Fantasy Boxing, Fantasy Kickboxing, Fantasy Bare Knuckle, Fantasy Combat, Fantasy Fighting, Fantasy Fighter Rankings"
-        />
-        <link
-          rel="preload"
-          as="image"
-          href={HOME_HERO_IMAGE}
-          fetchPriority="high"
         />
         <script
           type="application/ld+json"

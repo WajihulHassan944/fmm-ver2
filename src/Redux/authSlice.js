@@ -3,6 +3,56 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { setUser } from '../Redux/userSlice'; // Import setUser action
 
+const profileRequestsByToken = new Map();
+
+const parseJsonResponse = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+};
+
+const fetchProfileWithToken = (token) => {
+  const normalizedToken = typeof token === 'string' ? token.trim() : '';
+  if (!normalizedToken) {
+    return Promise.reject(Object.assign(new Error('Missing authentication token'), { status: 401 }));
+  }
+
+  const existingRequest = profileRequestsByToken.get(normalizedToken);
+  if (existingRequest) return existingRequest;
+
+  const request = fetch(buildPublicApiUrl('/profile'), {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${normalizedToken}`,
+    },
+  })
+    .then(async (response) => {
+      const data = await parseJsonResponse(response);
+      if (!response.ok) {
+        const error = new Error(data.message || 'Failed to fetch user data');
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    })
+    .finally(() => {
+      profileRequestsByToken.delete(normalizedToken);
+    });
+
+  profileRequestsByToken.set(normalizedToken, request);
+  return request;
+};
+
+const clearInvalidStoredToken = (status) => {
+  if (![401, 403].includes(Number(status))) return;
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem('authToken');
+  }
+};
+
 // Async thunk for logging in
 export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, password }, { dispatch, rejectWithValue }) => {
   try {
@@ -20,20 +70,9 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
       throw new Error(data.message || 'Login failed');
     }
 
-    // Fetch user data with token
+    // Fetch user data with token. Duplicate requests for the same token are shared.
     const token = data.token;
-    const userResponse = await fetch(buildPublicApiUrl('/profile'), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const userData = await userResponse.json();
-    if (!userResponse.ok) {
-      throw new Error(userData.message || 'Failed to fetch user data');
-    }
+    const userData = await fetchProfileWithToken(token);
 
     // Dispatch setUser action with user data
     dispatch(setUser(userData.user));
@@ -51,26 +90,18 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
 // Async thunk for fetching user data based on token
 export const fetchUser = createAsyncThunk('auth/fetchUser', async (token, { dispatch, rejectWithValue }) => {
   try {
-    const response = await fetch(buildPublicApiUrl('/profile'), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch user data');
-    }
+    const data = await fetchProfileWithToken(token);
 
     // Dispatch setUser action with user data
     dispatch(setUser(data.user));
 
     return data.user; // Returning user data
   } catch (error) {
-    return rejectWithValue(error.message);
+    clearInvalidStoredToken(error?.status);
+    return rejectWithValue({
+      message: error?.message || 'Failed to fetch user data',
+      status: Number(error?.status) || 0,
+    });
   }
 });
 
@@ -120,7 +151,7 @@ const authSlice = createSlice({
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload?.message || action.error?.message || 'Failed to fetch user data';
         state.isAuthenticated = false;
         state.user = null;
       });
