@@ -1013,8 +1013,12 @@ const formatMobileMetric = (value) =>
 
 const MobilePhoneHome = ({
   currentUser,
+  leaderboardRows = [],
+  homepageStats = {},
   heroSlides = [],
   homeFightSections = [],
+  matchStatus = "idle",
+  now,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -1052,28 +1056,154 @@ const MobilePhoneHome = ({
       ...homeFightSections.flatMap((section) => section?.fights || []),
     ];
     const seen = new Set();
-    const unique = candidates.filter((fight) => {
+    return candidates.filter((fight) => {
       if (!fight) return false;
       const key = getFightId(fight) || getFightTitle(fight);
       if (!key || seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-    return unique.length
-      ? unique
-      : HOME_FIGHT_SPORT_TABS.map((section, index) =>
-          getMobileFallbackFight(section.key, index),
-        );
   }, [heroSlides, homeFightSections]);
 
-  const featuredFight = allFights[0];
-  const upcomingFights = Array.from({ length: 5 }, (_, index) =>
-    allFights[index] || getMobileFallbackFight("mma", index),
-  );
+  const featuredFight = allFights[0] || null;
+  const upcomingFights = allFights.slice(0, 5);
   const featuredHref = featuredFight
     ? getFightDetailHref(featuredFight)
     : "/upcomingfights";
   const joinHref = isLoggedIn ? featuredHref : PLAYER_SIGNUP_HREF;
+
+  const actualSportSections = useMemo(
+    () =>
+      HOME_FIGHT_SPORT_TABS.map((tab) => {
+        const existing = homeFightSections.find((section) => section.key === tab.key);
+        const fights = Array.isArray(existing?.fights) ? existing.fights : [];
+        return { ...tab, count: fights.length, fights };
+      }),
+    [homeFightSections],
+  );
+
+  const actualFightCount = actualSportSections.reduce(
+    (total, section) => total + section.count,
+    0,
+  );
+  const parsePrizeAmount = (fight) => {
+    const parsed = Number(String(getPrizePool(fight) || "").replace(/[^0-9.]/g, ""));
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const calculatedPrizePool = allFights.reduce(
+    (total, fight) => total + parsePrizeAmount(fight),
+    0,
+  );
+  const statPredictors = getSafeMetricNumber(
+    homepageStats?.predictors,
+    homepageStats?.totalPredictors,
+    homepageStats?.totalPlayers,
+    homepageStats?.registeredUsers,
+  );
+  const statPrizePool = getSafeMetricNumber(
+    homepageStats?.totalPrizePool,
+    homepageStats?.prizePool,
+    homepageStats?.totalPrizes,
+    calculatedPrizePool,
+  );
+  const statLiveEvents = getSafeMetricNumber(
+    homepageStats?.liveEvents,
+    homepageStats?.activeFights,
+    homepageStats?.openFights,
+    allFights.length,
+  );
+  const statLeaderboards = getSafeMetricNumber(
+    homepageStats?.liveLeaderboards,
+    homepageStats?.leaderboards,
+    Array.isArray(leaderboardRows) ? leaderboardRows.length : 0,
+  );
+  const statRealFights = getSafeMetricNumber(
+    homepageStats?.realFights,
+    homepageStats?.totalFights,
+    actualFightCount,
+  );
+
+  const formatUsdMetric = (value) =>
+    value > 0
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          notation: value >= 100000 ? "compact" : "standard",
+          maximumFractionDigits: 0,
+        }).format(value)
+      : "$0";
+
+  const featuredFighterA = featuredFight
+    ? getHomeFighterName(featuredFight, "A")
+    : "Upcoming";
+  const featuredFighterB = featuredFight
+    ? getHomeFighterName(featuredFight, "B")
+    : "Fight";
+  const featuredEntries = featuredFight ? getPlayerCount(featuredFight) : 0;
+  const featuredEntryFee = featuredFight
+    ? getSafeMetricNumber(
+        featuredFight?.entryFee,
+        featuredFight?.tokenEntry,
+        featuredFight?.tokenCost,
+        featuredFight?.buyIn,
+      )
+    : 0;
+
+  const predictionRows = Array.isArray(featuredFight?.userPredictions)
+    ? featuredFight.userPredictions
+    : [];
+  const normalizeWinnerPick = (prediction) =>
+    String(
+      prediction?.winnerPrediction ||
+        prediction?.predictedWinner ||
+        prediction?.selectedWinner ||
+        prediction?.winner ||
+        "",
+    )
+      .trim()
+      .toLowerCase();
+  const fighterAKey = featuredFighterA.toLowerCase();
+  const fighterBKey = featuredFighterB.toLowerCase();
+  const fighterAPicks = predictionRows.filter((prediction) => {
+    const value = normalizeWinnerPick(prediction);
+    return value === "a" || value === "fightera" || value === fighterAKey;
+  }).length;
+  const fighterBPicks = predictionRows.filter((prediction) => {
+    const value = normalizeWinnerPick(prediction);
+    return value === "b" || value === "fighterb" || value === fighterBKey;
+  }).length;
+  const resolvedWinnerPicks = fighterAPicks + fighterBPicks;
+  const fighterAPercentage = resolvedWinnerPicks
+    ? Math.round((fighterAPicks / resolvedWinnerPicks) * 100)
+    : 0;
+  const fighterBPercentage = resolvedWinnerPicks
+    ? 100 - fighterAPercentage
+    : 0;
+  const methodCounts = predictionRows.reduce(
+    (acc, prediction) => {
+      const method = String(
+        prediction?.methodPrediction ||
+          prediction?.predictedMethod ||
+          prediction?.finishTypePrediction ||
+          prediction?.method ||
+          "",
+      ).toLowerCase();
+      if (method.includes("sub")) acc.submission += 1;
+      else if (method.includes("decision")) acc.decision += 1;
+      else if (method) acc.ko += 1;
+      return acc;
+    },
+    { ko: 0, submission: 0, decision: 0 },
+  );
+  const methodTotal = methodCounts.ko + methodCounts.submission + methodCounts.decision;
+  const methodPercent = (value) => (methodTotal ? Math.round((value / methodTotal) * 100) : 0);
+  const topLeaderboardRows = (Array.isArray(leaderboardRows) ? leaderboardRows : [])
+    .slice(0, 4)
+    .map((player, index) => ({
+      rank: index + 1,
+      name: player?.name || getLeaderboardName(player),
+      points: getSafeMetricNumber(player?.points, player?.totalPoints),
+    }));
 
   const playFx = (type = "click") => {
     if (!soundEnabled || typeof window === "undefined") return;
@@ -1181,6 +1311,146 @@ const MobilePhoneHome = ({
           <i className="is-spark-one" />
           <i className="is-spark-two" />
           <i className="is-spark-three" />
+        </div>
+
+        <div className="fmm-live-stats-overlay" aria-label="Live platform statistics">
+          <article><FaUsers aria-hidden="true" /><strong>{formatMobileMetric(statPredictors)}</strong><small>Predictors</small></article>
+          <article><FaTrophy aria-hidden="true" /><strong>{formatUsdMetric(statPrizePool)}</strong><small>Prize Pools</small></article>
+          <article><FaSignal aria-hidden="true" /><strong>{formatMobileMetric(statLiveEvents)}</strong><small>Live Events</small></article>
+          <article><FaChartLine aria-hidden="true" /><strong>{formatMobileMetric(statLeaderboards)}</strong><small>Leaderboards</small></article>
+          <article><FaShieldAlt aria-hidden="true" /><strong>{formatMobileMetric(statRealFights)}</strong><small>Real Fights</small></article>
+        </div>
+
+        <div className="fmm-live-category-counts" aria-label="Live category fight counts">
+          {actualSportSections.map((section, index) => (
+            <span key={section.key} className={`is-count-${index + 1}`}>
+              <FaUsers aria-hidden="true" /> {section.count.toLocaleString()}
+            </span>
+          ))}
+        </div>
+
+        <div className="fmm-live-featured-overlay" aria-live="polite">
+          {featuredFight ? (
+            <>
+              <div className="fmm-live-featured-fighter is-left">
+                <FightImage
+                  src={getHomeFighterImage(featuredFight, "A", 0)}
+                  alt={featuredFighterA}
+                  width={240}
+                  height={300}
+                  priority
+                  sizes="27vw"
+                />
+              </div>
+              <div className="fmm-live-featured-copy">
+                <small>{getMobileEventLabel(featuredFight)}</small>
+                <h2>{featuredFighterA}<em>VS</em>{featuredFighterB}</h2>
+                <strong>{getPrizePool(featuredFight)} <span>Prize Pool</span></strong>
+                <p>{getLockLabel(featuredFight, now)}</p>
+              </div>
+              <div className="fmm-live-featured-fighter is-right">
+                <FightImage
+                  src={getHomeFighterImage(featuredFight, "B", 1)}
+                  alt={featuredFighterB}
+                  width={240}
+                  height={300}
+                  priority
+                  sizes="27vw"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="fmm-live-empty-state">
+              <FaFire aria-hidden="true" />
+              <strong>{matchStatus === "loading" ? "Loading featured fight…" : "Upcoming fights will appear here"}</strong>
+            </div>
+          )}
+        </div>
+
+        <div className="fmm-live-upcoming-overlay" aria-label="Real upcoming fights">
+          <header><strong>Upcoming Events</strong><span>{upcomingFights.length} Open</span></header>
+          <div className="fmm-live-upcoming-grid">
+            {upcomingFights.length ? upcomingFights.map((fight, index) => {
+              const poster = getHomeFightPosterImage(fight);
+              return (
+                <article key={getFightId(fight) || `live-upcoming-${index}`}>
+                  <div className="fmm-live-upcoming-art">
+                    {poster ? (
+                      <FightImage src={poster} alt="" width={180} height={240} sizes="18vw" />
+                    ) : (
+                      <>
+                        <FightImage src={getHomeFighterImage(fight, "A", index)} alt="" width={110} height={150} sizes="9vw" />
+                        <FightImage src={getHomeFighterImage(fight, "B", index + 1)} alt="" width={110} height={150} sizes="9vw" />
+                      </>
+                    )}
+                  </div>
+                  <h3>{getHomeFighterName(fight, "A")}<em>vs</em>{getHomeFighterName(fight, "B")}</h3>
+                  <p>{getLockLabel(fight, now)}</p>
+                  <strong>{getPrizePool(fight)}</strong>
+                </article>
+              );
+            }) : (
+              <div className="fmm-live-empty-state is-upcoming">
+                <strong>{matchStatus === "loading" ? "Loading events…" : "No open fights yet"}</strong>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="fmm-live-command-overlay">
+          {featuredFight ? (
+            <>
+              <header><strong>Featured Fight</strong><span>{getMobileEventLabel(featuredFight)}</span></header>
+              <div className="fmm-live-command-main">
+                <FightImage src={getHomeFighterImage(featuredFight, "A", 0)} alt={featuredFighterA} width={170} height={220} sizes="16vw" />
+                <h3>{featuredFighterA}<em>VS</em>{featuredFighterB}</h3>
+                <FightImage src={getHomeFighterImage(featuredFight, "B", 1)} alt={featuredFighterB} width={170} height={220} sizes="16vw" />
+              </div>
+              <footer>
+                <span><small>Prize</small><strong>{getPrizePool(featuredFight)}</strong></span>
+                <span><small>Entry</small><strong>{featuredEntryFee ? `${featuredEntryFee} Tokens` : "Free"}</strong></span>
+                <span><small>Entries</small><strong>{featuredEntries.toLocaleString()}</strong></span>
+              </footer>
+            </>
+          ) : (
+            <div className="fmm-live-empty-state"><strong>No featured fight available</strong></div>
+          )}
+        </div>
+
+        <div className="fmm-live-community-overlay">
+          <header><strong>Community Predictions</strong><span>{predictionRows.length} Picks</span></header>
+          <div className="fmm-live-community-grid">
+            <div className="fmm-live-winner-split">
+              <small>Winner</small>
+              <strong>{fighterAPercentage}%</strong>
+              <div className="fmm-live-donut" style={{ "--winner-a": `${fighterAPercentage}%` }} />
+              <span>{fighterBPercentage}%</span>
+            </div>
+            <div className="fmm-live-method-bars">
+              <small>Method</small>
+              {[
+                ["KO / TKO", methodPercent(methodCounts.ko)],
+                ["Submission", methodPercent(methodCounts.submission)],
+                ["Decision", methodPercent(methodCounts.decision)],
+              ].map(([label, value]) => (
+                <div key={label}><label>{label}</label><i><b style={{ width: `${value}%` }} /></i><span>{value}%</span></div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="fmm-live-wallet-overlay">
+          <FaCoins aria-hidden="true" />
+          <div><small>Coins Wallet</small><strong>{tokenBalance.toLocaleString()}</strong><span>Fight Coins</span></div>
+        </div>
+
+        <div className="fmm-live-leaderboard-overlay">
+          <header><strong>Leaderboard</strong><span>Live</span></header>
+          <ol>
+            {topLeaderboardRows.length ? topLeaderboardRows.map((player) => (
+              <li key={`${player.rank}-${player.name}`}><b>{player.rank}</b><span>{player.name}</span><strong>{player.points.toLocaleString()}</strong></li>
+            )) : <li className="is-empty"><span>Leaderboard loading…</span></li>}
+          </ol>
         </div>
 
         <button
