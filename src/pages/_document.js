@@ -1,7 +1,7 @@
 import { Html, Head, Main, NextScript } from "next/document";
 
 const GOOGLE_FONTS_STYLESHEET =
-  "https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Baloo+Tamma+2:wght@600&family=Bebas+Neue&family=Bungee&family=Caveat+Brush&family=Fira+Sans:wght@400;500;700&family=Gidugu&family=Holtwood+One+SC&family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;700;900&family=League+Spartan:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&family=Oswald:wght@500;700&family=Roboto:wght@300;400;500;600;700;800;900&family=Saira+Stencil+One&family=Source+Sans+Pro:wght@300;400;600;700;900&family=VT323&display=swap";
+  "https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Baloo+Tamma+2:wght@600&family=Bebas+Neue&family=Bungee&family=Caveat+Brush&family=Fira+Sans:wght@400;500;700&family=Gidugu&family=Holtwood+One+SC&family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;700;900&family=League+Spartan:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&family=Oswald:wght@500;700&family=Rajdhani:wght@500;600;700&family=Roboto:wght@300;400;500;600;700;800;900&family=Saira+Stencil+One&family=Source+Sans+Pro:wght@300;400;600;700;900&family=VT323&display=swap";
 
 export default function Document() {
   return (
