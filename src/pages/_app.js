@@ -85,6 +85,8 @@ import "@/styles/home-mobile-premium-v9.css";
 import "@/styles/home-mobile-one-screen-v11.css";
 import "@/styles/home-mobile-one-screen-realtime-v12.css";
 import "@/styles/home-mobile-app-clean-v15.css";
+import "@/styles/home-mobile-app-complete-v16.css";
+import "@/styles/home-mobile-design-handoff-v17.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
