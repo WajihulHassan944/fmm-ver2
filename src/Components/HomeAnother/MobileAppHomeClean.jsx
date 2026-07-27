@@ -382,6 +382,12 @@ const MobileAppHomeClean = ({
   }, []);
 
   useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    document.body.classList.add("fmm-v18-app-active");
+    return () => document.body.classList.remove("fmm-v18-app-active");
+  }, []);
+
+  useEffect(() => {
     if (!toast) return undefined;
     const timer = window.setTimeout(() => setToast(""), 2600);
     return () => window.clearTimeout(timer);
@@ -724,216 +730,137 @@ const MobileAppHomeClean = ({
   };
 
   const renderHome = () => {
-    const visibleUpcoming = (upcomingFights.length
-      ? upcomingFights
-      : allFights.filter((fight) => fight !== featuredFight))
-      .slice(0, 5);
-    const homeLeaderboard = leaderboard.length
-      ? leaderboard.slice(0, 4)
-      : [
-          { rank: 1, name: "FightIQ_King", points: 4850 },
-          { rank: 2, name: "KO_Beast", points: 4320 },
-          { rank: 3, name: "Prediction_Prof", points: 3915 },
-          { rank: 4, name: "You", points: userXp },
-        ];
-    const featuredPrize = getPrize(featuredFight || {});
-    const featuredEntry = getEntryFee(featuredFight || {});
-    const featuredEntries = getPlayers(featuredFight || {});
+    const hotspot = (key, label, className, onClick) => (
+      <button
+        type="button"
+        key={key}
+        className={`fmm-v18-hotspot ${className}`}
+        aria-label={label}
+        onClick={onClick}
+      >
+        <span>{label}</span>
+      </button>
+    );
+
+    const categoryActions = sections.map((section, index) =>
+      hotspot(
+        `sport-${section.key}`,
+        `Open ${section.label} fights`,
+        `is-sport is-sport-${index + 1}`,
+        () => goToScreen("contests", { sport: section.key, sound: "boom" }),
+      ),
+    );
+
+    const upcomingActions = [0, 1, 2, 3, 4].map((index) => {
+      const fight = upcomingFights[index] || allFights[index] || featuredFight;
+      return hotspot(
+        `upcoming-${index}`,
+        fight ? `Open ${getFightTitle(fight)}` : "Open upcoming fights",
+        `is-upcoming is-upcoming-${index + 1}`,
+        () =>
+          fight
+            ? goToScreen("predict", { fight, sound: "click" })
+            : goToScreen("contests"),
+      );
+    });
 
     return (
-      <div className="fmm-v17-home">
-        <section className="fmm-v17-hero" aria-label="Fantasy MMAdness combat prediction game">
-          <img
-            className="fmm-v17-hero-image"
-            src={`${HANDOFF_ASSET_BASE}/hero-banner-crop.png`}
-            alt="Fantasy MMAdness combat prediction game"
-          />
-          <button
-            type="button"
-            className="fmm-v17-hero-cta-hotspot"
-            aria-label={userLoggedIn ? "Make predictions" : "Join free"}
-            onClick={() => goToScreen(userLoggedIn ? "predict" : "demo", { sound: "whoosh", fight: featuredFight })}
-          />
-          <span className="fmm-v17-hero-glow" aria-hidden="true" />
-        </section>
+      <div className="fmm-v18-home" aria-label="Fantasy MMAdness mobile homepage">
+        <img
+          className="fmm-v18-home-art"
+          src="/images/mobile-app-v18/home-reference.png"
+          alt="Fantasy MMAdness premium mobile combat prediction homepage"
+          draggable="false"
+        />
 
-        <section className="fmm-v17-stats" aria-label="Live platform statistics">
-          {stats.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <button type="button" key={item.label} onClick={() => goToScreen(item.screen)}>
-                <Icon />
-                <span><strong>{item.value || "0"}</strong><small>{item.label}</small></span>
-                {index < 2 && <em>{index === 0 ? "+842 today" : "+$12,450 today"}</em>}
-              </button>
-            );
-          })}
-        </section>
+        <div className="fmm-v18-wallet-live" aria-label={`Wallet balance ${Math.floor(tokenBalance).toLocaleString("en-US")} FM`}>
+          <span>FM</span>
+          <strong>{Math.floor(tokenBalance).toLocaleString("en-US")}</strong>
+          <i><FaPlus /></i>
+        </div>
 
-        <section className="fmm-v17-sports" aria-labelledby="fmm-v17-sports-title">
-          <div className="fmm-v17-section-line">
-            <span>››</span><h2 id="fmm-v17-sports-title">Choose Your Combat Sport</h2><span>‹‹</span>
-          </div>
-          <div className="fmm-v17-sports-grid">
-            {sections.map((section) => (
-              <button
-                type="button"
-                key={section.key}
-                className={`is-${section.key}`}
-                onClick={() => goToScreen("contests", { sport: section.key, sound: "boom" })}
-              >
-                <SafeImage src={section.image} alt="" />
-                <strong>{section.label}</strong>
-                <small><FaUsers /> {section.count.toLocaleString("en-US")}</small>
-                <i><b /> Live</i>
-              </button>
-            ))}
-          </div>
-        </section>
+        {hotspot("menu", "Open app menu", "is-menu", () => {
+          interact();
+          setMenuOpen(true);
+        })}
+        {hotspot("wallet", "Open Fight Coins wallet", "is-wallet", () => {
+          interact("coin");
+          if (typeof window !== "undefined") window.location.href = "/checkout";
+        })}
+        {hotspot("notifications", "Open notifications", "is-notifications", () =>
+          showToast("No new fight alerts right now."),
+        )}
+        {hotspot(
+          "join",
+          userLoggedIn ? "Make predictions" : "Join Fantasy MMAdness free",
+          "is-join",
+          () =>
+            userLoggedIn
+              ? goToScreen("predict", { fight: featuredFight, sound: "whoosh" })
+              : (typeof window !== "undefined" && (window.location.href = SIGN_UP_HREF)),
+        )}
 
-        <section className="fmm-v17-featured-week">
-          <button
-            type="button"
-            className="fmm-v17-featured-week-card"
-            onClick={() => goToScreen("predict", { fight: featuredFight, sound: "boom" })}
-          >
-            <header><span><FaStar /> Featured This Week</span><em><FaClock /> {featuredFight ? formatCountdown(featuredFight, now) : "Open Soon"}</em></header>
-            <div className="fmm-v17-featured-week-body">
-              <SafeImage
-                src={featuredFight ? getFighterImage(featuredFight, "A", 0) : `${HANDOFF_ASSET_BASE}/transparent-featured-left.png`}
-                alt={fighterAName}
-                className="is-left"
-              />
-              <div>
-                <small>{featuredFight ? getEventLabel(featuredFight) : "Featured Event"}</small>
-                <h3>{fighterAName}<b>vs</b>{fighterBName}</h3>
-                <strong>{featuredPrize}<span>Prize Pool</span></strong>
-                <em>Make Predictions <FaChevronRight /></em>
-              </div>
-              <SafeImage
-                src={featuredFight ? getFighterImage(featuredFight, "B", 1) : `${HANDOFF_ASSET_BASE}/transparent-featured-right.png`}
-                alt={fighterBName}
-                className="is-right"
-              />
-            </div>
-          </button>
-        </section>
+        {hotspot("stat-predictors", "Open profile statistics", "is-stat is-stat-1", () => goToScreen("profile"))}
+        {hotspot("stat-prizes", "Open rewards and prize pools", "is-stat is-stat-2", () => {
+          interact("coin");
+          if (typeof window !== "undefined") window.location.href = "/fights-rewards";
+        })}
+        {hotspot("stat-live", "Open live events", "is-stat is-stat-3", () => goToScreen("contests"))}
+        {hotspot("stat-leaderboard", "Open live leaderboard", "is-stat is-stat-4", () => goToScreen("leaderboard"))}
+        {hotspot("stat-fights", "Open real fights", "is-stat is-stat-5", () => goToScreen("contests"))}
 
-        <section className="fmm-v17-upcoming">
-          <div className="fmm-v17-mini-heading"><h2>Upcoming Events</h2><button type="button" onClick={() => goToScreen("contests")}>View All <FaChevronRight /></button></div>
-          <div className="fmm-v17-upcoming-rail">
-            {visibleUpcoming.map((fight, index) => (
-              <button
-                type="button"
-                key={getFightId(fight) || `${getFightTitle(fight)}-${index}`}
-                className={`is-${getSportKey(fight)}`}
-                onClick={() => goToScreen("predict", { fight, sound: "click" })}
-              >
-                <div className="fmm-v17-upcoming-art">{renderFightArt(fight, index)}</div>
-                <small>{getEventLabel(fight)}</small>
-                <h3>{getFighterName(fight, "A")}<b>vs</b>{getFighterName(fight, "B")}</h3>
-                <p>{formatCountdown(fight, now)}</p>
-                <strong>{getPrize(fight)}</strong>
-                <span>Enter Now</span>
-              </button>
-            ))}
-          </div>
-        </section>
+        {categoryActions}
 
-        <section className="fmm-v17-command-row">
-          <article className="fmm-v17-fight-command">
-            <header><span>Featured Fight</span><em>{featuredFight ? getEventLabel(featuredFight) : "Open Fight"}</em></header>
-            <button type="button" className="fmm-v17-command-faceoff" onClick={() => goToScreen("predict", { fight: featuredFight, sound: "whoosh" })}>
-              <SafeImage src={featuredFight ? getFighterImage(featuredFight, "A", 0) : `${HANDOFF_ASSET_BASE}/transparent-fd-jones.png`} alt={fighterAName} />
-              <h3>{fighterAName}<b>vs</b>{fighterBName}</h3>
-              <SafeImage src={featuredFight ? getFighterImage(featuredFight, "B", 1) : `${HANDOFF_ASSET_BASE}/transparent-fd-aspinall.png`} alt={fighterBName} />
-            </button>
-            <div className="fmm-v17-command-meta">
-              <span><small>Prize Pool</small><strong>{featuredPrize}</strong></span>
-              <span><small>Entry Fee</small><strong>{featuredEntry}</strong></span>
-              <span><small>Entries</small><strong>{featuredEntries.toLocaleString("en-US")}</strong></span>
-            </div>
-            <button type="button" className="fmm-v17-command-cta" onClick={() => goToScreen("predict", { fight: featuredFight, sound: "whoosh" })}>Make Predictions</button>
-          </article>
+        {hotspot("featured-week", "Open featured fight predictions", "is-featured-week", () =>
+          goToScreen("predict", { fight: featuredFight, sound: "boom" }),
+        )}
 
-          <article className="fmm-v17-community">
-            <h2>Community Predictions</h2>
-            <div className="fmm-v17-community-body">
-              <div className="fmm-v17-community-winner">
-                <small>Who will win?</small>
-                <strong>{fighterAName}<b>{aPercent}%</b></strong>
-                <div className="fmm-v17-community-donut" style={{ "--a-percent": `${aPercent}%` }} />
-                <em>{fighterBName}<b>{bPercent}%</b></em>
-              </div>
-              <div className="fmm-v17-community-methods">
-                <small>How will it end?</small>
-                {[
-                  ["KO / TKO", methodPercentage(methodCounts.ko)],
-                  ["Submission", methodPercentage(methodCounts.submission)],
-                  ["Decision", methodPercentage(methodCounts.decision)],
-                ].map(([label, value]) => (
-                  <div key={label}><span>{label}</span><i><b style={{ width: `${value}%` }} /></i><em>{value}%</em></div>
-                ))}
-              </div>
-            </div>
-          </article>
+        {upcomingActions}
+        {hotspot("view-all-events", "View all upcoming events", "is-view-all-events", () => goToScreen("contests"))}
 
-          <article className="fmm-v17-progression">
-            <h2>Your Progression</h2>
-            <div><FaCrown /><span><small>Fight IQ</small><strong>{userXp.toLocaleString("en-US")} XP</strong></span></div>
-            <i><b style={{ width: `${xpPercent}%` }} /></i>
-            <p>Next level: {nextXp.toLocaleString("en-US")} XP</p>
-            <strong><FaMedal /> Legend <em>Level {userLevel}</em></strong>
-          </article>
-        </section>
+        {hotspot("featured-fight", "Open featured fight command center", "is-featured-fight", () =>
+          goToScreen("predict", { fight: featuredFight, sound: "whoosh" }),
+        )}
+        {hotspot("community", "Open community predictions", "is-community", () => goToScreen("contests"))}
+        {hotspot("progression", "Open Fight IQ progression", "is-progression", () => goToScreen("profile"))}
 
-        <section className="fmm-v17-rewards-row">
-          <button
-            type="button"
-            className={rewardClaimed ? "is-claimed" : ""}
-            onClick={() => {
-              if (!rewardClaimed) {
-                setRewardClaimed(true);
-                showToast("Daily reward claimed: +250 FM", "reward");
-              }
-            }}
-          >
-            <h3>Daily Reward</h3>
-            <img src={`${HANDOFF_ASSET_BASE}/chest-transparent.png`} alt="Daily reward chest" />
-            <span>{rewardClaimed ? "Claimed" : "Claim Reward"}</span>
-          </button>
-          <Link href="/checkout" onClick={() => interact("coin")}>
-            <h3>Coins Wallet</h3>
-            <FaCoins />
-            <strong>{Math.floor(tokenBalance).toLocaleString("en-US")}</strong>
-            <span>Add Coins <FaPlus /></span>
-          </Link>
-          <button type="button" onClick={() => goToScreen("leaderboard")}>
-            <div className="fmm-v17-card-heading"><h3>Leaderboard</h3><em>View All <FaChevronRight /></em></div>
-            <ol>{homeLeaderboard.map((player) => <li key={`${player.rank}-${player.name}`} className={player.name.toLowerCase().includes("you") ? "is-you" : ""}><b>{player.rank}</b><span>{player.name}</span><strong>{player.points.toLocaleString("en-US")} pts</strong></li>)}</ol>
-          </button>
-          <Link href="/fights-rewards" className="fmm-v17-streak" onClick={() => interact("reward")}>
-            <h3>Streak Bonus</h3><strong><FaFire /> 7 Day Streak</strong><div>{[1,2,3,4,5,6,7].map((day) => <i key={day}><FaCheck /></i>)}</div><span>+250 FM</span>
-          </Link>
-        </section>
+        {hotspot("daily-reward", "Claim daily reward", "is-reward is-reward-1", () => {
+          if (!rewardClaimed) {
+            setRewardClaimed(true);
+            showToast("Daily reward claimed: +250 FM", "reward");
+          } else {
+            showToast("Daily reward already claimed.");
+          }
+        })}
+        {hotspot("coins", "Add Fight Coins", "is-reward is-reward-2", () => {
+          interact("coin");
+          if (typeof window !== "undefined") window.location.href = "/checkout";
+        })}
+        {hotspot("leaderboard-card", "Open leaderboard", "is-reward is-reward-3", () => goToScreen("leaderboard"))}
+        {hotspot("streak", "Open streak rewards", "is-reward is-reward-4", () => {
+          interact("reward");
+          if (typeof window !== "undefined") window.location.href = "/fights-rewards";
+        })}
 
-        <section className="fmm-v17-bottom-content-row">
-          <Link href="/apparel" className="fmm-v17-apparel-card" onClick={() => interact()}>
-            <div className="fmm-v17-card-heading"><h3>Apparel</h3><em>View All <FaChevronRight /></em></div>
-            <div><img src={`${HANDOFF_ASSET_BASE}/apparel-shirt.jpg`} alt="Fantasy MMAdness shirt" /><img src={`${HANDOFF_ASSET_BASE}/apparel-hoodie.jpg`} alt="Fantasy MMAdness hoodie" /><img src={`${HANDOFF_ASSET_BASE}/apparel-cap.jpg`} alt="Fantasy MMAdness cap" /></div>
-          </Link>
-          <button type="button" className="fmm-v17-blogs-card" onClick={() => goToScreen("blogs")}>
-            <div className="fmm-v17-card-heading"><h3>Latest Blogs</h3><em>View All <FaChevronRight /></em></div>
-            <div><img src={`${HANDOFF_ASSET_BASE}/blog-1.jpg`} alt="" /><span>Featured fight preview</span></div>
-            <div><img src={`${HANDOFF_ASSET_BASE}/blog-2.jpg`} alt="" /><span>5 keys to better picks</span></div>
-            <div><img src={`${HANDOFF_ASSET_BASE}/blog-3.jpg`} alt="" /><span>Fight IQ strategy</span></div>
-          </button>
-          <Link href="/affiliate-create-account" className="fmm-v17-affiliate-card" onClick={() => interact()}>
-            <div className="fmm-v17-card-heading"><h3>Affiliates</h3><em>View All <FaChevronRight /></em></div>
-            <img src={`${HANDOFF_ASSET_BASE}/handshake-transparent.png`} alt="Affiliate partnership" />
-            <strong>Earn Rewards</strong><span>Invite. Earn. Win.</span><em>Learn More</em>
-          </Link>
-        </section>
+        {hotspot("apparel", "Open Fantasy MMAdness apparel", "is-content is-content-1", () => {
+          interact();
+          if (typeof window !== "undefined") window.location.href = "/apparel";
+        })}
+        {hotspot("blogs", "Open latest fight blogs", "is-content is-content-2", () => goToScreen("blogs"))}
+        {hotspot("affiliates", "Open affiliate programme", "is-content is-content-3", () => {
+          interact();
+          if (typeof window !== "undefined") window.location.href = "/affiliate-create-account";
+        })}
+
+        {hotspot("nav-home", "Home", "is-bottom-nav is-bottom-1", () => goToScreen("home"))}
+        {hotspot("nav-contests", "Contests", "is-bottom-nav is-bottom-2", () => goToScreen("contests"))}
+        {hotspot("nav-predict", "Make predictions", "is-bottom-nav is-bottom-3", () => goToScreen("predict", { fight: featuredFight, sound: "whoosh" }))}
+        {hotspot("nav-leaderboard", "Leaderboard", "is-bottom-nav is-bottom-4", () => goToScreen("leaderboard"))}
+        {hotspot("nav-profile", "Profile", "is-bottom-nav is-bottom-5", () => goToScreen("profile"))}
+
+        <span className="fmm-v18-ambient is-one" aria-hidden="true" />
+        <span className="fmm-v18-ambient is-two" aria-hidden="true" />
+        <span className="fmm-v18-ambient is-three" aria-hidden="true" />
       </div>
     );
   };
@@ -1252,10 +1179,10 @@ const MobileAppHomeClean = ({
   ];
 
   return (
-    <div className="fmm-app-v16">
-      {renderTopbar()}
+    <div className="fmm-app-v16 fmm-app-v18">
+      {activeScreen !== "home" && renderTopbar()}
       <main className={`fmm-v16-main is-${activeScreen}`}>{renderScreen()}</main>
-      {renderBottomNav()}
+      {activeScreen !== "home" && renderBottomNav()}
 
       <div className={`fmm-v16-drawer-backdrop ${menuOpen ? "is-open" : ""}`} onClick={() => setMenuOpen(false)} />
       <aside className={`fmm-v16-drawer ${menuOpen ? "is-open" : ""}`} aria-hidden={!menuOpen}>

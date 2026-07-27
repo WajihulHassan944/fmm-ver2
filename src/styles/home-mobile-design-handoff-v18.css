@@ -1,0 +1,319 @@
+/*
+ * Fantasy MMAdness mobile design handoff v18
+ * Phone-only visual isolation layer. Desktop remains controlled by existing styles.
+ */
+@media (max-width: 767px) {
+  html,
+  body.fmm-v18-app-active {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+  }
+
+  body.fmm-v18-app-active .header.theme-header,
+  body.fmm-v18-app-active footer,
+  body.fmm-v18-app-active .site-footer,
+  body.fmm-v18-app-active .theme-footer,
+  body.fmm-v18-app-active .chatbase-widget,
+  body.fmm-v18-app-active [class*="Chatbase"] {
+    display: none !important;
+  }
+
+  body.fmm-v18-app-active .site-experience-main,
+  body.fmm-v18-app-active .site-experience-main.is-home-experience-main,
+  body.fmm-v18-app-active .theme-home,
+  body.fmm-v18-app-active .fmm-home,
+  body.fmm-v18-app-active .page-shell,
+  body.fmm-v18-app-active #__next {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #000 !important;
+    overflow: hidden !important;
+  }
+
+  body.fmm-v18-app-active .fmm-desktop-home-shell {
+    display: none !important;
+  }
+
+  .fmm-app-v18 {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147482000 !important;
+    display: block !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+    color: #fff;
+  }
+
+  .fmm-app-v18 > .fmm-v16-main.is-home {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+  }
+
+  .fmm-v18-home {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    isolation: isolate;
+    background: #000;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  .fmm-v18-home-art {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    object-fit: cover;
+    object-position: 50% 50%;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    filter: saturate(1.02) contrast(1.015);
+  }
+
+  .fmm-v18-home::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 12% 14%, rgba(239, 68, 68, 0.1), transparent 18%),
+      radial-gradient(circle at 88% 13%, rgba(77, 141, 255, 0.1), transparent 18%),
+      linear-gradient(110deg, transparent 22%, rgba(255, 229, 144, 0.07) 42%, transparent 57%);
+    background-size: auto, auto, 220% 100%;
+    animation: fmmV18ArenaSweep 8s linear infinite;
+    mix-blend-mode: screen;
+  }
+
+  .fmm-v18-home::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.48);
+  }
+
+  .fmm-v18-wallet-live {
+    position: absolute;
+    left: 68.2%;
+    top: 3.55%;
+    z-index: 8;
+    width: 21.8%;
+    height: 4.3%;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: clamp(3px, 1vw, 7px);
+    padding: 0 clamp(4px, 1.2vw, 9px);
+    border: 1px solid rgba(242, 181, 68, 0.55);
+    border-radius: 999px;
+    background: linear-gradient(145deg, rgba(20, 22, 30, 0.97), rgba(5, 7, 12, 0.98));
+    box-shadow:
+      0 0 14px rgba(242, 181, 68, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    font-family: "Rajdhani", "Arial Narrow", sans-serif;
+    pointer-events: none;
+  }
+
+  .fmm-v18-wallet-live > span,
+  .fmm-v18-wallet-live > i {
+    width: clamp(20px, 6.2vw, 30px);
+    aspect-ratio: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-style: normal;
+  }
+
+  .fmm-v18-wallet-live > span {
+    color: #392100;
+    background: radial-gradient(circle at 34% 28%, #fff6a4, #f2b544 56%, #9d6500 100%);
+    font-size: clamp(7px, 2.3vw, 11px);
+    font-weight: 900;
+  }
+
+  .fmm-v18-wallet-live > strong {
+    min-width: 0;
+    overflow: hidden;
+    color: #fff;
+    font-size: clamp(10px, 3.4vw, 17px);
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fmm-v18-wallet-live > i {
+    color: #2a1700;
+    background: linear-gradient(180deg, #ffd75c, #f0a80d);
+    font-size: clamp(7px, 2.4vw, 12px);
+    box-shadow: 0 0 10px rgba(242, 181, 68, 0.34);
+  }
+
+  .fmm-v18-hotspot {
+    position: absolute;
+    z-index: 12;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    outline: 0;
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .fmm-v18-hotspot > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .fmm-v18-hotspot:focus-visible {
+    outline: 2px solid #f2b544;
+    outline-offset: 2px;
+    background: rgba(242, 181, 68, 0.08);
+  }
+
+  .fmm-v18-hotspot:active {
+    transform: scale(0.965);
+    background: radial-gradient(circle, rgba(255, 223, 118, 0.2), transparent 70%);
+  }
+
+  .fmm-v18-hotspot.is-menu { left: 2.8%; top: 3.45%; width: 8.4%; height: 5.2%; border-radius: 14px; }
+  .fmm-v18-hotspot.is-wallet { left: 67.6%; top: 3.1%; width: 23.4%; height: 5.2%; border-radius: 999px; }
+  .fmm-v18-hotspot.is-notifications { left: 91.1%; top: 3.35%; width: 7.2%; height: 5.15%; border-radius: 13px; }
+  .fmm-v18-hotspot.is-join { left: 29.2%; top: 18.65%; width: 41.4%; height: 3.65%; border-radius: 999px; }
+
+  .fmm-v18-hotspot.is-stat { top: 22.25%; height: 4.75%; border-radius: 0; }
+  .fmm-v18-hotspot.is-stat-1 { left: 2.5%; width: 18.6%; }
+  .fmm-v18-hotspot.is-stat-2 { left: 21.1%; width: 19.4%; }
+  .fmm-v18-hotspot.is-stat-3 { left: 40.5%; width: 18.8%; }
+  .fmm-v18-hotspot.is-stat-4 { left: 59.3%; width: 19.8%; }
+  .fmm-v18-hotspot.is-stat-5 { left: 79.1%; width: 18.4%; }
+
+  .fmm-v18-hotspot.is-sport { top: 28.05%; height: 8.85%; border-radius: 12px; }
+  .fmm-v18-hotspot.is-sport-1 { left: 2.5%; width: 17.2%; }
+  .fmm-v18-hotspot.is-sport-2 { left: 20.9%; width: 17.2%; }
+  .fmm-v18-hotspot.is-sport-3 { left: 39.3%; width: 17.2%; }
+  .fmm-v18-hotspot.is-sport-4 { left: 57.7%; width: 17.2%; }
+  .fmm-v18-hotspot.is-sport-5 { left: 76.1%; width: 21.3%; }
+
+  .fmm-v18-hotspot.is-featured-week { left: 2.5%; top: 37.25%; width: 95%; height: 12.25%; border-radius: 12px; }
+  .fmm-v18-hotspot.is-view-all-events { left: 84%; top: 50.15%; width: 13.5%; height: 2.3%; }
+
+  .fmm-v18-hotspot.is-upcoming { top: 52.05%; height: 10.45%; border-radius: 10px; }
+  .fmm-v18-hotspot.is-upcoming-1 { left: 3.0%; width: 17.8%; }
+  .fmm-v18-hotspot.is-upcoming-2 { left: 21.7%; width: 17.8%; }
+  .fmm-v18-hotspot.is-upcoming-3 { left: 40.4%; width: 17.8%; }
+  .fmm-v18-hotspot.is-upcoming-4 { left: 59.1%; width: 17.8%; }
+  .fmm-v18-hotspot.is-upcoming-5 { left: 77.8%; width: 19.2%; }
+
+  .fmm-v18-hotspot.is-featured-fight { left: 2.5%; top: 63.0%; width: 42.1%; height: 13.25%; border-radius: 11px; }
+  .fmm-v18-hotspot.is-community { left: 45.7%; top: 63.0%; width: 25.0%; height: 13.25%; border-radius: 11px; }
+  .fmm-v18-hotspot.is-progression { left: 71.7%; top: 63.0%; width: 25.8%; height: 13.25%; border-radius: 11px; }
+
+  .fmm-v18-hotspot.is-reward { top: 77.2%; height: 8.75%; border-radius: 10px; }
+  .fmm-v18-hotspot.is-reward-1 { left: 2.6%; width: 21.7%; }
+  .fmm-v18-hotspot.is-reward-2 { left: 25.2%; width: 21.7%; }
+  .fmm-v18-hotspot.is-reward-3 { left: 47.8%; width: 25.5%; }
+  .fmm-v18-hotspot.is-reward-4 { left: 74.2%; width: 23.2%; }
+
+  .fmm-v18-hotspot.is-content { top: 86.75%; height: 8.25%; border-radius: 10px; }
+  .fmm-v18-hotspot.is-content-1 { left: 2.5%; width: 31.8%; }
+  .fmm-v18-hotspot.is-content-2 { left: 35.3%; width: 30.8%; }
+  .fmm-v18-hotspot.is-content-3 { left: 67.1%; width: 30.4%; }
+
+  .fmm-v18-hotspot.is-bottom-nav { top: 95.45%; height: 4.35%; border-radius: 16px; }
+  .fmm-v18-hotspot.is-bottom-1 { left: 1.3%; width: 18.5%; }
+  .fmm-v18-hotspot.is-bottom-2 { left: 20.2%; width: 18.5%; }
+  .fmm-v18-hotspot.is-bottom-3 { left: 39.2%; width: 21.6%; }
+  .fmm-v18-hotspot.is-bottom-4 { left: 61.2%; width: 18.5%; }
+  .fmm-v18-hotspot.is-bottom-5 { left: 80.1%; width: 18.5%; }
+
+  .fmm-v18-ambient {
+    position: absolute;
+    z-index: 5;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: fmmV18Spark 5.4s ease-in-out infinite;
+  }
+
+  .fmm-v18-ambient.is-one { left: 13%; top: 12%; background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+  .fmm-v18-ambient.is-two { left: 84%; top: 17%; background: #4d8dff; box-shadow: 0 0 10px #4d8dff; animation-delay: 1.7s; }
+  .fmm-v18-ambient.is-three { left: 49%; top: 7%; background: #f2b544; box-shadow: 0 0 12px #f2b544; animation-delay: 3.2s; }
+
+  .fmm-app-v18 .fmm-v16-drawer-backdrop,
+  .fmm-app-v18 .fmm-v16-drawer,
+  .fmm-app-v18 .fmm-v16-toast {
+    z-index: 2147483000 !important;
+  }
+
+  @keyframes fmmV18ArenaSweep {
+    0% { background-position: 0 0, 0 0, 120% 0; }
+    100% { background-position: 0 0, 0 0, -120% 0; }
+  }
+
+  @keyframes fmmV18Spark {
+    0%, 88%, 100% { opacity: 0; transform: scale(0.4) translateY(8px); }
+    92% { opacity: 1; transform: scale(1.2) translateY(0); }
+    96% { opacity: 0.45; transform: scale(0.8) translateY(-8px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fmm-v18-home::before,
+    .fmm-v18-ambient {
+      animation: none !important;
+    }
+  }
+}
+
+@media print {
+  .fmm-v18-hotspot,
+  .fmm-v18-wallet-live,
+  .fmm-v18-ambient {
+    display: none !important;
+  }
+}
