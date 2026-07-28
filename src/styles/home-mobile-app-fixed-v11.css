@@ -1691,3 +1691,225 @@
     display: none !important;
   }
 }
+
+
+/* V12 phone-home hotfixes: vertical scroll, softer typography, visible hero CTA. */
+@media (max-width: 767px) {
+  html:has(.fmm-app-fixed-home),
+  body:has(.fmm-app-fixed-home) {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body:has(.fmm-app-fixed-home) #__next,
+  body:has(.fmm-app-fixed-home) main,
+  body:has(.fmm-app-fixed-home) .site-experience-main.is-home-experience-main,
+  body:has(.fmm-app-fixed-home) .theme-home.fmm-home.page-shell,
+  body:has(.fmm-app-fixed-home) .theme-home,
+  body:has(.fmm-app-fixed-home) .page-shell {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .fmm-app-fixed-home {
+    --app-heading-font: "Rajdhani", "Arial Narrow", "Inter Tight", system-ui, sans-serif;
+    min-height: 100svh !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    letter-spacing: 0.01em;
+    padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .fmm-app-hero,
+  .fmm-app-menu-drawer,
+  .fmm-app-featured-week,
+  .fmm-app-featured-fights,
+  .fmm-app-affiliate a:first-child,
+  .fmm-app-chest {
+    overflow: hidden !important;
+  }
+
+  .fmm-app-join-hit {
+    bottom: 22px;
+    width: min(224px, 62vw);
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    border-radius: 999px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 34%),
+      linear-gradient(135deg, #ffe47a 0%, #f4b52e 48%, #9b5d00 100%);
+    border: 1px solid rgba(255, 236, 160, 0.8);
+    box-shadow:
+      0 12px 30px rgba(242, 181, 68, 0.34),
+      0 0 26px rgba(242, 181, 68, 0.28),
+      inset 0 -2px 0 rgba(82, 42, 0, 0.42);
+  }
+
+  .fmm-app-join-hit::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -44%;
+    width: 34%;
+    transform: skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+    animation: fmmAppButtonShine 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .fmm-app-join-hit span {
+    position: relative;
+    z-index: 1;
+    color: #180d00;
+    font-family: var(--app-ui-font);
+    font-size: clamp(14px, 4.4vw, 18px);
+    font-weight: 850;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+  }
+
+  .fmm-app-wallet b,
+  .fmm-app-wallet strong,
+  .fmm-app-notify em,
+  .fmm-app-ticker span,
+  .fmm-app-stats a span,
+  .fmm-app-stats a small,
+  .fmm-app-sports small,
+  .fmm-app-featured-head span,
+  .fmm-app-featured-fights-inner > span,
+  .fmm-app-featured-head b,
+  .fmm-app-featured-main small,
+  .fmm-app-featured-main div strong,
+  .fmm-app-section-head a,
+  .fmm-app-upcoming figcaption,
+  .fmm-app-upcoming time,
+  .fmm-app-upcoming article > a:first-child strong,
+  .fmm-app-quick-picks a,
+  .fmm-app-enter-now,
+  .fmm-app-mini-fight-list span,
+  .fmm-app-mini-fight-list small,
+  .fmm-app-watch-leagues span,
+  .fmm-app-community span,
+  .fmm-app-rewards span,
+  .fmm-app-leader-streak span,
+  .fmm-app-apparel span,
+  .fmm-app-affiliate span,
+  .fmm-app-bottom-nav a {
+    font-weight: 750;
+  }
+
+  .fmm-app-stats a strong {
+    font-family: var(--app-ui-font);
+    font-size: clamp(11px, 2.75vw, 14px);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: 0.015em;
+  }
+
+  .fmm-app-stats a span {
+    font-size: 7px;
+    line-height: 1.08;
+    letter-spacing: 0.065em;
+  }
+
+  .fmm-app-stats a small {
+    font-size: 7px;
+    letter-spacing: 0.02em;
+  }
+
+  .fmm-app-ticker span {
+    font-size: 11px;
+    letter-spacing: 0.055em;
+  }
+
+  .fmm-app-sports strong {
+    font-family: var(--app-ui-font);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.015em;
+  }
+
+  .fmm-app-sports small {
+    font-size: 8px;
+    letter-spacing: 0.075em;
+  }
+
+  .fmm-app-featured-main h2,
+  .fmm-app-main-fight-row h2,
+  .fmm-app-section-head h2,
+  .fmm-app-watch-leagues strong,
+  .fmm-app-rewards strong,
+  .fmm-app-leader-streak strong,
+  .fmm-app-affiliate strong,
+  .fmm-app-socials span {
+    font-family: var(--app-heading-font);
+    font-weight: 800;
+    letter-spacing: 0.025em;
+  }
+
+  .fmm-app-featured-main h2 {
+    font-size: clamp(22px, 7.2vw, 32px);
+    line-height: 0.96;
+  }
+
+  .fmm-app-section-head h2 {
+    font-size: 21px;
+  }
+
+  .fmm-app-upcoming h3 {
+    font-family: var(--app-heading-font);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+  }
+
+  .fmm-app-featured-meta span strong,
+  .fmm-app-mini-fight-list strong,
+  .fmm-app-community strong,
+  .fmm-app-apparel strong,
+  .fmm-app-leader-streak p,
+  .fmm-app-leader-streak p strong {
+    font-weight: 800;
+    letter-spacing: 0.035em;
+  }
+
+  .fmm-app-bottom-nav a {
+    font-size: 7px;
+    letter-spacing: 0.045em;
+  }
+
+  .fmm-app-bottom-nav a.is-center {
+    font-weight: 800;
+  }
+
+  @media (max-width: 390px) {
+    .fmm-app-join-hit {
+      bottom: 19px;
+      width: min(208px, 60vw);
+      height: 46px;
+    }
+
+    .fmm-app-join-hit span {
+      font-size: 14px;
+    }
+
+    .fmm-app-stats a strong {
+      font-size: 11px;
+    }
+  }
+}

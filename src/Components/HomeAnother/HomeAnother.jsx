@@ -1688,7 +1688,14 @@ const MobilePhoneHome = ({
         <span className="fmm-app-crown-sparkles" aria-hidden="true">
           {["✦", "✦", "✦", "✦", "✦", "✦"].map((spark, index) => <i key={index}>{spark}</i>)}
         </span>
-        <Link href={primaryCtaHref} className="fmm-app-join-hit" aria-label={isLoggedIn ? "Make predictions" : "Join free"} onClick={() => onPremiumTap("whoosh")} />
+        <Link
+          href={primaryCtaHref}
+          className="fmm-app-join-hit"
+          aria-label={isLoggedIn ? "Make predictions" : "Join free"}
+          onClick={() => onPremiumTap("whoosh")}
+        >
+          <span>{isLoggedIn ? "MAKE PREDICTIONS" : "JOIN FREE"}</span>
+        </Link>
       </section>
 
       <section className="fmm-app-ticker" aria-label="Live activity ticker">
