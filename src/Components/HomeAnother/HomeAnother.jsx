@@ -65,6 +65,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v11";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -1574,7 +1575,7 @@ const MobilePhoneHome = ({
   ];
   const blogRows = blogs.length ? blogs : blogFallbacks;
 
-  const appAssetBase = "/images/mobile-home/app-fixed-v11";
+  const appAssetBase = APP_FIXED_ASSET_BASE;
   const appStaticStats = [
     { Icon: FaUsers, big: "128,000+", small: "PREDICTORS", sub: "+842 today", tone: "purple", href: "/leaderboard" },
     { Icon: FaTrophy, big: "$250,000+", small: "IN PRIZES", sub: "$12,450 today", tone: "gold", href: "/fights-rewards" },
@@ -2496,18 +2497,30 @@ const HomeAnother = () => {
             <div className="theme-container fmm-hero-grid">
               <div className="fmm-hero-copy">
                 <div className="fmm-premium-eyebrow">
-                  <FaBolt aria-hidden="true" /> Win money fight card
+                  <FaBolt aria-hidden="true" /> Combat prediction game
                 </div>
-                <h1>
-                  Pick. Play.
+                <div className="fmm-desktop-brand-lockup" aria-label="Fantasy MMAdness brand lockup">
+                  <img
+                    src={`${APP_FIXED_ASSET_BASE}/hero-banner-crop.png`}
+                    alt="Fantasy MMAdness"
+                    loading="eager"
+                    decoding="async"
+                  />
+                  <div>
+                    <span>Same Fantasy MMAdness arena</span>
+                    <strong>Matched website + mobile experience</strong>
+                  </div>
+                </div>
+                <h1 className="fmm-home-title-no-overlap">
+                  Fantasy
                   <span>
-                    <em>Win Big.</em>
+                    <em>MMAdness</em>
                   </span>
                 </h1>
                 <p className="fmm-hero-subtitle">
-                  Step into a premium fight-night arena. Join free, pick winners
-                  across Boxing, MMA, Bare-knuckle and Kickboxing, then climb
-                  cash-prize leaderboards before the card locks.
+                  Predict every fight. Prove your fight IQ. Climb the
+                  leaderboard across MMA, Boxing, Bare-knuckle, Kickboxing,
+                  and Pro Wrestling.
                 </p>
 
                 <div className="fmm-hero-actions">
