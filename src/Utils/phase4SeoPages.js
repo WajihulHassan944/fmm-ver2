@@ -112,7 +112,37 @@ export const getMatchTitle = (match = {}) => match.matchName || match.title || `
 
 export const getMatchSport = (match = {}) => match.matchCategoryTwo || match.effectiveCategory || match.displayCategory || match.categoryLabel || match.matchCategory || match.sport || match.category || 'Combat Sports';
 
-export const getMatchImage = (match = {}) => match.fightImage || match.matchImage || match.heroImage || match.fighterAImage || match.fighterBImage || match.fighterAId?.primaryImage || match.fighterBId?.primaryImage || match.fighterA?.primaryImage || match.fighterB?.primaryImage || '/images/fmm-pages/premium-duel-banner.webp';
+const isUsableImage = (value) => {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return Boolean(text && !['null', 'undefined', 'none', 'n/a'].includes(text.toLowerCase()));
+};
+
+const firstImage = (...values) => {
+  for (const value of values) {
+    if (isUsableImage(value)) return value.trim();
+  }
+  return '';
+};
+
+export const getMatchImage = (match = {}) => firstImage(
+  match.fightPosterImage,
+  match.posterImage,
+  match.homepagePromotion?.posterImage,
+  match.homepagePromotion?.image,
+  match.bannerImage,
+  match.promotionPoster,
+  match.promotionBackground,
+  match.eventPoster,
+  match.fightImage,
+  match.matchImage,
+  match.heroImage,
+  match.fighterAId?.primaryImage,
+  match.fighterBId?.primaryImage,
+  match.fighterA?.primaryImage,
+  match.fighterB?.primaryImage,
+  match.fighterAImage,
+  match.fighterBImage,
+) || '/images/fmm-pages/premium-duel-banner.webp';
 
 export const getMatchDateLabel = (match = {}) => {
   const raw = match.matchDate || match.date || match.scheduledAt || match.createdAt;

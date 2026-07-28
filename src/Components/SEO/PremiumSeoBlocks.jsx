@@ -29,6 +29,7 @@ import {
   getMatchImage,
   getMatchSport,
   getMatchTitle,
+  normalizeSlug,
 } from '@/Utils/phase4SeoPages';
 import { SITE_URL } from '@/Utils/seoConfig';
 
@@ -75,8 +76,41 @@ const EmptyCard = ({ title, copy, href = '/upcomingfights', linkLabel = 'View fi
   </div>
 );
 
+const getSportFilterKey = (config = {}) => {
+  const slug = normalizeSlug(config.slug || config.sport);
+  if (slug.includes('bare-knuckle') || slug.includes('bareknuckle')) return 'bareknuckle';
+  if (slug.includes('kickboxing')) return 'kickboxing';
+  if (slug.includes('boxing')) return 'boxing';
+  if (slug.includes('pro-wrestling') || slug.includes('wrestling')) return 'pro-wrestling';
+  return 'mma';
+};
+
+const getSportActiveHref = (config = {}) => {
+  const key = getSportFilterKey(config);
+  if (key === 'pro-wrestling') return '/pro-wrestling';
+  return `/upcomingfights?status=all&category=${encodeURIComponent(key)}`;
+};
+
+const getSportGuideHref = (config = {}) => {
+  const key = getSportFilterKey(config);
+  if (key === 'boxing') return '/guides/how-to-play-fantasy-boxing';
+  if (key === 'mma') return '/guides/how-to-play-fantasy-mma';
+  if (key === 'pro-wrestling') return '/pro-wrestling/how-to-play';
+  return '/guides';
+};
+
+const getSportFightHref = (fight = {}, config = {}) => {
+  const id = fight._id || fight.id || fight.matchId;
+  if (!id) return getSportActiveHref(config);
+  return getSportFilterKey(config) === 'pro-wrestling'
+    ? `/pro-wrestling/matches/${id}`
+    : `/fight/${id}`;
+};
+
 export const PremiumSportLanding = ({ config, fights = [], blogs = [] }) => {
   const visibleFights = safeArray(fights).slice(0, 12);
+  const activeFightsHref = getSportActiveHref(config);
+  const guideHref = getSportGuideHref(config);
   const visibleBlogs = safeArray(blogs).slice(0, 3);
   const schema = {
     '@context': 'https://schema.org',
@@ -93,8 +127,8 @@ export const PremiumSportLanding = ({ config, fights = [], blogs = [] }) => {
 
       <PremiumHero eyebrow={config.eyebrow} title={config.title} description={config.description} image={config.heroImage}>
         <div className="phase4-hero-actions">
-          <Link href="/upcomingfights">Find active fights <FaArrowRight /></Link>
-          <Link href="/guides/how-to-play-fantasy-mma" className="phase4-secondary-link">How it works</Link>
+          <Link href={activeFightsHref}>Find active {config.sport} fights <FaArrowRight /></Link>
+          <Link href={guideHref} className="phase4-secondary-link">How it works</Link>
         </div>
       </PremiumHero>
 
@@ -128,10 +162,10 @@ export const PremiumSportLanding = ({ config, fights = [], blogs = [] }) => {
               <span>{getMatchSport(fight)}</span>
               <h3>{getMatchTitle(fight)}</h3>
               <p><FaClock /> {getMatchDateLabel(fight)}</p>
-              <Link href={`/fight/${fight._id || fight.id || fight.matchId}`}>Open fight <FaArrowRight /></Link>
+              <Link href={getSportFightHref(fight, config)}>Open fight <FaArrowRight /></Link>
             </div>
           </article>
-        )) : <EmptyCard title={`No live ${config.sport} fights found yet`} copy="This page is ready and will populate as matching fight cards are added from admin." />}
+        )) : <EmptyCard title={`No live ${config.sport} fights found yet`} copy="This page is ready and will populate as matching fight cards are added from admin." href={activeFightsHref} linkLabel={`Browse ${config.sport} fights`} />}
       </section>
 
       <section className="phase4-section-head">
