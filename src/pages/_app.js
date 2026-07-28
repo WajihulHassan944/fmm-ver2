@@ -84,6 +84,7 @@ import "@/styles/home-mobile-roadmap-v8-stability.css";
 import "@/styles/home-mobile-premium-v9.css";
 import "@/styles/home-mobile-app-fixed-v11.css";
 import "@/styles/fmm-responsive-brand-alignment-v13.css";
+import "@/styles/fmm-home-identical-desktop-v14.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
