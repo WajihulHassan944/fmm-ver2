@@ -39,7 +39,7 @@ export default function BlogDetailsPage({ blog }) {
               publisher: {
                 '@type': 'Organization',
                 name: 'Fantasy MMAdness',
-                logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/fmm-experience/fantasy-mmadness-logo.webp` },
+                logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/brand/fantasy-mmadness-sticker-logo.png` },
               },
             }),
           }}

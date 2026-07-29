@@ -479,18 +479,20 @@ export const fetchPublicPredictionFights = async (query = {}) => {
 };
 
 
-export const FALLBACK_PUBLIC_LEADERBOARD = [
-  { _id: "fallback-ko-beast", playerName: "KO_Beast", username: "KO_Beast", totalPoints: 9850 },
-  { _id: "fallback-fight-wizard", playerName: "FightWizard", username: "FightWizard", totalPoints: 8420 },
-  { _id: "fallback-champ-mind", playerName: "ChampMind", username: "ChampMind", totalPoints: 7910 },
-  { _id: "fallback-kelly-d", playerName: "KellyD", username: "KellyD", totalPoints: 2450 },
-  { _id: "fallback-the-ghost", playerName: "TheGhost", username: "TheGhost", totalPoints: 1347 },
-];
-
-const withLeaderboardFallback = (rows = [], limit = 10) => {
+const normalizeLeaderboardRows = (rows = [], limit = 10) => {
   const normalized = Array.isArray(rows) ? rows.filter(Boolean) : [];
-  if (normalized.length) return normalized;
-  return FALLBACK_PUBLIC_LEADERBOARD.slice(0, Number(limit) || 10);
+  return normalized
+    .filter((row) => {
+      const marker = String(row?._id || row?.id || row?.source || '').toLowerCase();
+      return !marker.startsWith('fallback-') && !marker.includes('mock-leaderboard');
+    })
+    .map((row) => ({
+      ...row,
+      totalPoints: Number(row?.totalPoints || row?.points || row?.totalScore || row?.score || row?.classicPoints || row?.proWrestlingPoints || 0),
+    }))
+    .filter((row) => Number.isFinite(row.totalPoints))
+    .sort((a, b) => Number(b.totalPoints || 0) - Number(a.totalPoints || 0))
+    .slice(0, Number(limit) || 10);
 };
 
 export const fetchPublicLeaderboard = async (query = {}) => {
@@ -499,19 +501,20 @@ export const fetchPublicLeaderboard = async (query = {}) => {
   try {
     const payload = await safeFetchJson(
       "/api/public/leaderboard",
-      { limit: 10, ...query },
+      { limit, fresh: Date.now(), ...query },
       { timeoutMs: 8000 },
     );
-    const leaderboard = withLeaderboardFallback(payload?.leaderboard, limit);
+    const leaderboard = normalizeLeaderboardRows(payload?.leaderboard, limit);
     return {
       leaderboard,
       playerCount: Number(payload?.playerCount || leaderboard.length || 0),
       generatedAt: payload?.generatedAt,
+      source: payload?.source || 'backend',
+      diagnostics: payload?.diagnostics || null,
     };
   } catch (error) {
     console.warn("Public leaderboard API unavailable:", error.message);
-    const leaderboard = withLeaderboardFallback([], limit);
-    return { leaderboard, playerCount: leaderboard.length, generatedAt: null };
+    return { leaderboard: [], playerCount: 0, generatedAt: null, source: 'unavailable', diagnostics: null };
   }
 };
 

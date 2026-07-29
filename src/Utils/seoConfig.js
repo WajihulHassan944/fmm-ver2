@@ -301,7 +301,7 @@ export const buildOrganizationSchema = () => ({
   '@type': 'SportsOrganization',
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/images/fmm-experience/fantasy-mmadness-logo.webp`,
+  logo: `${SITE_URL}/images/brand/fantasy-mmadness-sticker-logo.png`,
   sameAs: [
     'https://www.instagram.com/fantasymmadness',
     'https://x.com/FMmadness2024',

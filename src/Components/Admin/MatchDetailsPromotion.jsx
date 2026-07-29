@@ -19,7 +19,7 @@ const MatchDetailsPromotion = ({ matchId, fight: initialFight = null }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
    
     const imageData = {
-      logoImage: "/images/fmm-experience/fantasy-mmadness-logo.png"
+      logoImage: "/images/brand/fantasy-mmadness-sticker-logo.png"
     };
     const [backgroundImgVar, setBackgroundImgVar] = useState("https://i.ibb.co/sWZ5QFh/imgone.png");
     

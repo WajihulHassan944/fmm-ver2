@@ -34,7 +34,7 @@ import {
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 
-const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
+const LOGO_URL = '/images/brand/fantasy-mmadness-sticker-logo.png';
 
 const navigationGroups = [
   {

@@ -21,17 +21,22 @@ const FALLBACK_AVATARS = [
 const GlobalLeaderboard = () => {
   const matches = useSelector((state) => state.matches.data);
   const currentUser = useSelector((state) => state.user);
-  const { leaderboard, playerCount } = useLeaderboardData(matches);
+  const { leaderboard, playerCount, status, source, diagnostics } = useLeaderboardData(matches, { limit: 100 });
   const [search, setSearch] = useState('');
 
 
-  const rows = useMemo(() => (Array.isArray(leaderboard) ? leaderboard : []).map((player, index) => ({
-    ...player,
-    rank: index + 1,
-    displayName: getPlayerName(player),
-    avatar: player?.profileUrl || FALLBACK_AVATARS[index % FALLBACK_AVATARS.length],
-    points: Number(player?.totalPoints || 0),
-  })), [leaderboard]);
+  const rows = useMemo(() => (Array.isArray(leaderboard) ? leaderboard : [])
+    .filter((player) => {
+      const marker = String(player?._id || player?.id || player?.source || '').toLowerCase();
+      return !marker.startsWith('fallback-') && !marker.includes('mock-leaderboard');
+    })
+    .map((player, index) => ({
+      ...player,
+      rank: index + 1,
+      displayName: getPlayerName(player),
+      avatar: player?.profileUrl || FALLBACK_AVATARS[index % FALLBACK_AVATARS.length],
+      points: Number(player?.totalPoints || player?.points || player?.totalScore || player?.score || player?.classicPoints || player?.proWrestlingPoints || 0),
+    })), [leaderboard]);
 
   const filteredRows = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -98,7 +103,7 @@ const GlobalLeaderboard = () => {
 
               <div className="xp-leaderboard-shell">
                 <div className="xp-leaderboard-toolbar">
-                  <div className="xp-leaderboard-context"><FaBolt /><span><strong>All-time standings</strong><small>Scored fights only</small></span></div>
+                  <div className="xp-leaderboard-context"><FaBolt /><span><strong>All-time standings</strong><small>{status === 'loading' ? 'Loading real backend standings…' : source === 'real-user-scores' ? `${Number(diagnostics?.scoreRows || 0).toLocaleString()} score rows · ${Number(diagnostics?.embeddedPredictionRows || 0).toLocaleString()} submitted fight entries · ${Number(diagnostics?.wrestlingRows || 0).toLocaleString()} wrestling picks` : 'Connected to live backend only'}</small></span></div>
                   <label className="xp-search-field">
                     <FaSearch aria-hidden="true" />
                     <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search player..." />
@@ -129,7 +134,7 @@ const GlobalLeaderboard = () => {
                 {filteredRows.length === 0 && (
                   <ExperienceEmptyState
                     title={rows.length ? 'No player matches that search' : 'Standings are being calculated'}
-                    description={rows.length ? 'Try another player name.' : 'The table will populate after completed fights have verified scores.'}
+                    description={rows.length ? 'Try another player name.' : source === 'unavailable' ? 'The leaderboard API is unavailable right now. No mock standings are being shown.' : 'No real scored users were returned by the backend yet. Mock/fallback players are disabled on this page.'}
                   />
                 )}
               </div>
