@@ -10,12 +10,40 @@ const storyTitle = (blog) => blog?.metaTitle || blog?.header || blog?.title || '
 const storyDescription = (blog) => cleanText(blog?.metaDescription || blog?.description || blog?.sections?.[0]?.content || '').slice(0, 250);
 const storyDate = (blog) => blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Latest publication';
 const storyImage = (blog) => blog?.blogHeaderImage || blog?.image || '/images/fmm-pages/editorial-arena-hd.webp';
+const storyHref = (blog) => blog?.href || `/blog-details/${blog?._id || blog?.id}`;
+
+const FALLBACK_BLOGS = [
+  {
+    _id: 'fallback-main-event-preview',
+    title: 'Fight IQ Preview: Reading the Main Event',
+    metaDescription: 'A practical Fantasy MMAdness preview explaining how to compare styles, timing, activity, and finishing risk before submitting predictions.',
+    image: '/images/home-premium/fight-action-clash.webp',
+    createdAt: '2026-07-28T00:00:00.000Z',
+    href: '/upcomingfights',
+  },
+  {
+    _id: 'fallback-scoring-guide',
+    title: 'Fantasy MMAdness Scoring: KO, Round Win, Survival, and Round Loss',
+    metaDescription: 'A concise guide to the unified combat scoring rules used across the player guide, FAQ, and homepage scoring preview.',
+    image: '/images/fmm-pages/premium-arena-banner.webp',
+    createdAt: '2026-07-28T00:00:00.000Z',
+    href: '/guides',
+  },
+  {
+    _id: 'fallback-leagues',
+    title: 'How Fantasy Leagues Build Fight-Night Communities',
+    metaDescription: 'How creator-led leagues, leaderboards, and head-to-head prediction rooms help players compete together across combat sports.',
+    image: '/images/fmm-pages/league-arena-hd.webp',
+    createdAt: '2026-07-28T00:00:00.000Z',
+    href: '/FantasyLeagues',
+  },
+];
 
 export default function BlogsPage({ blogs = [], pagination = {} }) {
   const [query, setQuery] = useState('');
   const visible = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    const rows = Array.isArray(blogs) ? blogs : [];
+    const rows = Array.isArray(blogs) && blogs.length ? blogs : FALLBACK_BLOGS;
     if (!normalized) return rows;
     return rows.filter((blog) => `${storyTitle(blog)} ${storyDescription(blog)}`.toLowerCase().includes(normalized));
   }, [blogs, query]);
@@ -39,7 +67,7 @@ export default function BlogsPage({ blogs = [], pagination = {} }) {
       </section>
 
       {!visible.length ? (
-        <div className="xp-editorial-empty"><FaSearch /><h3>No stories match this search</h3><p>Clear the search or return when the next editorial piece is published.</p></div>
+        <div className="xp-editorial-empty"><FaSearch /><h3>No stories match this search</h3><p>Clear the search to return to the latest Fantasy MMAdness stories.</p></div>
       ) : (
         <>
           {featured && (
@@ -50,7 +78,7 @@ export default function BlogsPage({ blogs = [], pagination = {} }) {
                 <h2>{storyTitle(featured)}</h2>
                 <p>{storyDescription(featured) || 'Open the full story for fight analysis and platform perspective.'}</p>
                 <small><FaCalendarAlt /> {storyDate(featured)}</small>
-                <Link href={`/blog-details/${featured._id || featured.id}`}>Read full story <FaArrowRight /></Link>
+                <Link href={storyHref(featured)}>Read full story <FaArrowRight /></Link>
               </div>
             </article>
           )}
@@ -62,7 +90,7 @@ export default function BlogsPage({ blogs = [], pagination = {} }) {
                 <span>{storyDate(blog)}</span>
                 <h3>{storyTitle(blog)}</h3>
                 <p>{storyDescription(blog).slice(0, 150) || 'Read the full Fantasy MMAdness story.'}</p>
-                <Link href={`/blog-details/${blog._id || blog.id}`}>Read story <FaArrowRight /></Link>
+                <Link href={storyHref(blog)}>Read story <FaArrowRight /></Link>
               </article>
             ))}
           </section>

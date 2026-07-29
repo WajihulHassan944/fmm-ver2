@@ -4,13 +4,15 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 import { FaChevronDown, FaQuestionCircle, FaSearch, FaShieldAlt, FaTrophy } from 'react-icons/fa';
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
+import { SCORE_POINTS } from '@/Utils/scoringRules';
 
 const fallbackFaqs = [
-  { title: 'What is Fantasy MMAdness?', description: 'Fantasy MMAdness is a combat-sports prediction platform for boxing, MMA, kickboxing, and bare-knuckle events. Players predict round and fight outcomes, compete on leaderboards, and earn platform rewards.' },
-  { title: 'How do live fight predictions work?', description: 'Members predict live fight metrics such as round winners, methods of victory, punch counts, and other configured fight statistics before the contest starts.' },
-  { title: 'Can I play for free?', description: 'Yes. Fantasy MMAdness includes free-to-play experiences so players can learn the prediction flow before entering paid token contests.' },
+  { title: 'What is Fantasy MMAdness?', description: 'Fantasy MMAdness is a combat-sports prediction platform for boxing, MMA, kickboxing, bare-knuckle, and pro-wrestling experiences. Players predict fight outcomes, compete on leaderboards, and earn platform rewards.' },
+  { title: 'How do live fight predictions work?', description: 'Members submit predictions before the lock time on each fight card. The fight page shows the current schedule, prize pool, entry status, and leaderboard access.' },
+  { title: 'How does Fantasy MMAdness scoring work?', description: `The unified public scoring model is KO/finish bonus ${SCORE_POINTS.KO} points, round win ${SCORE_POINTS.RW} points, survival ${SCORE_POINTS.SP} points, and round-loss participation ${SCORE_POINTS.RL} points.` },
+  { title: 'Can I play for free?', description: 'Yes. Fantasy MMAdness includes free-to-play and demo experiences so players can learn the prediction flow before entering paid token contests.' },
   { title: 'What are tokens?', description: 'Tokens are the platform currency used for paid fight entries. Existing backend wallet and refund behavior remains unchanged.' },
-  { title: 'What rewards can I earn?', description: 'Players can win cash prizes, tokens, leaderboard recognition, and public profile achievements by performing well in prediction contests.' },
+  { title: 'What rewards can I earn?', description: 'Eligible fight cards display their prize pool and entry terms before submission. Players can also earn leaderboard recognition and public profile achievements.' },
 ];
 
 const normalizeFaq = (item, index) => {
@@ -44,9 +46,9 @@ export default function FAQsPage({ faqs = [] }) {
   return (
     <>
       <Head>
-        <title>FAQs – Fantasy Boxing Game & League | Fantasy-MMadness</title>
+        <title>FAQs – Fantasy Boxing Game & League | Fantasy MMAdness</title>
         <meta name="description" content="Answers about Fantasy MMAdness accounts, scoring, fight predictions, tokens, rewards, leagues, and support." />
-        <meta name="keywords" content="fantasy boxing, fantasy boxing game, fantasy boxing league, fantasy sports FAQ, Fantasy-MMadness questions" />
+        <meta name="keywords" content="fantasy boxing, fantasy boxing game, fantasy boxing league, fantasy sports FAQ, Fantasy MMAdness questions" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       </Head>
 
@@ -96,7 +98,7 @@ export default function FAQsPage({ faqs = [] }) {
                 <aside className="xp-faq-aside">
                   <FaQuestionCircle aria-hidden="true" />
                   <strong>Quick guidance</strong>
-                  <p>Scoring and contest results are calculated by the backend. This page changes the visual presentation only.</p>
+                  <p>Scoring and contest results are calculated by the backend. The same unified scoring copy is used across Home, Guides, FAQs, and fight pages.</p>
                   <Link href="/guides">Open player guide</Link>
                   <Link href="/upcomingfights">Explore fight cards</Link>
                 </aside>

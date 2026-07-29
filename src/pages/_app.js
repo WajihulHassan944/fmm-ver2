@@ -87,6 +87,8 @@ import "@/styles/fmm-responsive-brand-alignment-v13.css";
 import "@/styles/fmm-home-identical-desktop-v14.css";
 import "@/styles/fmm-client-feedback-quality-buttons-v15.css";
 import "@/styles/fmm-home-desktop-cleanup-v16.css";
+import "@/styles/fmm-desktop-home-polish-v17.css";
+import "@/styles/fmm-client-feedback-final-v18.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

@@ -137,5 +137,5 @@ export const WrestlingSectionHeading = ({ eyebrow, title, description, action })
 );
 
 export const WrestlingChampionMark = () => (
-  <div className="pw-champion-mark"><FaCrown /><span>Fantasy MMADNESS</span><strong>Pro Wrestling</strong></div>
+  <div className="pw-champion-mark"><FaCrown /><span>Fantasy MMAdness</span><strong>Pro Wrestling</strong></div>
 );
