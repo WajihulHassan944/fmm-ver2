@@ -13,6 +13,7 @@ import {
   FaQuestionCircle,
   FaRobot,
   FaShieldAlt,
+  FaShoppingBag,
   FaTrophy,
   FaUserFriends,
   FaUsers,
@@ -35,6 +36,7 @@ const Admin = () => {
     shadowTemplatesCount: 0,
     totalClicks: 0,
     unreadNotificationsCount: 0,
+    apparelOrdersCount: 0,
   });
 
   useEffect(() => {
@@ -77,6 +79,7 @@ const Admin = () => {
     { label: 'Registered users', value: dashboardCounts.usersCount, icon: FaUsers, href: '/administration/RegisteredUsers' },
     { label: 'Affiliates', value: dashboardCounts.affiliatesCount, icon: FaUserFriends, href: '/administration/AffiliateUsers' },
     { label: 'Notifications', value: dashboardCounts.unreadNotificationsCount, icon: FaBell, href: '/administration/notifications' },
+    { label: 'Apparel orders', value: dashboardCounts.apparelOrdersCount, icon: FaShoppingBag, href: '/administration/apparel-orders' },
     { label: 'Tracked visitors', value: dashboardCounts.totalClicks, icon: FaEye, onClick: () => setShowAnalytics(true) },
   ], [dashboardCounts]);
 
@@ -84,6 +87,7 @@ const Admin = () => {
     { area: 'Fight operations', metric: `${dashboardCounts.matchesCount || 0} matches`, status: 'Active', statusClass: 'is-success', href: '/administration/upcomingFights', action: 'Open score center' },
     { area: 'Player accounts', metric: `${dashboardCounts.usersCount || 0} registered`, status: 'Monitored', statusClass: 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
     { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
+    { area: 'Apparel orders', metric: `${dashboardCounts.apparelOrdersCount || 0} orders`, status: dashboardCounts.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
     { area: 'Community alerts', metric: `${dashboardCounts.unreadNotificationsCount || 0} unread`, status: dashboardCounts.unreadNotificationsCount ? 'Attention' : 'Clear', statusClass: dashboardCounts.unreadNotificationsCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'View notifications' },
     { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Gateway', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
     { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Ready', statusClass: 'is-success', href: '/administration/seo-growth', action: 'Open SEO center' },
@@ -93,6 +97,7 @@ const Admin = () => {
     { title: 'Create a match', copy: 'Build a new fight card and prediction setup.', href: '/administration/AddNewMatch', icon: FaPlus },
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },
     { title: 'Review payouts', copy: 'Process affiliate payout requests.', href: '/administration/payouts', icon: FaShieldAlt },
+    { title: 'Apparel orders', copy: 'View guest orders, shipping details, and fulfilment status.', href: '/administration/apparel-orders', icon: FaShoppingBag },
     { title: 'Publish content', copy: 'Create editorial and platform news.', href: '/administration/blogs/add-new-blog', icon: FaBolt },
     { title: 'Swarm automation', copy: 'Generate blogs, SEO drafts, social drafts, and review jobs.', href: '/administration/swarm', icon: FaRobot },
     { title: 'SEO growth center', copy: 'Review SEO reports, metadata, links, and growth tasks.', href: '/administration/seo-growth', icon: FaChartLine },

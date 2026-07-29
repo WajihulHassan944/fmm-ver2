@@ -5,11 +5,8 @@ import { useSelector } from "react-redux";
 import {
   FaArrowLeft,
   FaCheckCircle,
-  FaMinus,
-  FaPlus,
   FaShoppingBag,
   FaTshirt,
-  FaTrash,
 } from "react-icons/fa";
 import { buildPublicApiUrl } from "@/Utils/publicApi";
 
@@ -249,11 +246,32 @@ const ApparelPage = () => {
                     <div>
                       <strong>{item.name}</strong>
                       <span>Size {item.size} · {money(item.price)}</span>
-                      <div>
-                        <button type="button" onClick={() => updateQuantity(item, -1)}><FaMinus /></button>
-                        <b>{item.quantity}</b>
-                        <button type="button" onClick={() => updateQuantity(item, 1)}><FaPlus /></button>
-                        <button type="button" onClick={() => removeItem(item)}><FaTrash /></button>
+                      <div className="fmm-apparel-qty-controls-v20" aria-label={`${item.name} quantity controls`}>
+                        <button
+                          type="button"
+                          className="fmm-apparel-qty-btn-v20"
+                          onClick={() => updateQuantity(item, -1)}
+                          aria-label={`Decrease ${item.name} quantity`}
+                        >
+                          −
+                        </button>
+                        <b aria-label={`Quantity ${item.quantity}`}>{item.quantity}</b>
+                        <button
+                          type="button"
+                          className="fmm-apparel-qty-btn-v20"
+                          onClick={() => updateQuantity(item, 1)}
+                          aria-label={`Increase ${item.name} quantity`}
+                        >
+                          +
+                        </button>
+                        <button
+                          type="button"
+                          className="fmm-apparel-remove-btn-v20"
+                          onClick={() => removeItem(item)}
+                          aria-label={`Remove ${item.name} from order`}
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
                     <em>{money(item.price * item.quantity)}</em>
@@ -474,8 +492,55 @@ const ApparelPage = () => {
           .fmm-apparel-cart-list-v19 img { width: 78px; height: 70px; object-fit: cover; border-radius: 14px; }
           .fmm-apparel-cart-list-v19 strong { display: block; }
           .fmm-apparel-cart-list-v19 span { color: rgba(255,255,255,.65); font-size: .84rem; }
-          .fmm-apparel-cart-list-v19 article div div { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
-          .fmm-apparel-cart-list-v19 article div div button { width: 30px; height: 30px; min-height: 30px; padding: 0; border-radius: 10px; }
+          .fmm-apparel-qty-controls-v20 { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+          .fmm-apparel-qty-controls-v20 b {
+            min-width: 30px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: #fff;
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .12);
+            font-size: .95rem;
+          }
+          .fmm-apparel-cart-list-v19 .fmm-apparel-qty-btn-v20,
+          .fmm-apparel-cart-list-v19 .fmm-apparel-remove-btn-v20 {
+            height: 32px;
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .10);
+            color: #fff !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: 0;
+          }
+          .fmm-apparel-cart-list-v19 .fmm-apparel-qty-btn-v20 {
+            width: 34px;
+            padding: 0;
+            border-radius: 11px;
+            font-size: 1.25rem;
+            font-weight: 900;
+          }
+          .fmm-apparel-cart-list-v19 .fmm-apparel-remove-btn-v20 {
+            width: auto;
+            padding: 0 11px;
+            border-radius: 11px;
+            color: #ffb4b4 !important;
+            font-size: .72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+          }
+          .fmm-apparel-cart-list-v19 .fmm-apparel-qty-btn-v20:hover,
+          .fmm-apparel-cart-list-v19 .fmm-apparel-remove-btn-v20:hover {
+            border-color: rgba(255, 207, 69, .45);
+            background: rgba(255, 255, 255, .16);
+          }
           .fmm-apparel-cart-list-v19 em { color: #ffcf45; font-style: normal; font-weight: 900; }
           .fmm-apparel-subtotal-v19 { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 2px; font-size: 1.1rem; }
           .fmm-apparel-subtotal-v19 strong { color: #ffcf45; }
