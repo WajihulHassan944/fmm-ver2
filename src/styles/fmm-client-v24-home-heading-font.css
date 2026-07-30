@@ -1,0 +1,78 @@
+/* v24: align homepage heading typography with the restored fight-night section heading. */
+body:has(.fmm-app-fixed-home) .fmm-app-fixed-home,
+.theme-home .fmm-app-fixed-home {
+  --app-heading-font: var(--fmm-font-display, 'FMMUFCCondensedBold', 'Arial Narrow', Impact, sans-serif) !important;
+}
+
+/* Phone/app-style homepage headings */
+body:has(.fmm-app-fixed-home) .fmm-app-fixed-home h1,
+body:has(.fmm-app-fixed-home) .fmm-app-fixed-home h2,
+body:has(.fmm-app-fixed-home) .fmm-app-fixed-home h3,
+body:has(.fmm-app-fixed-home) .fmm-app-fixed-home h4,
+body:has(.fmm-app-fixed-home) .fmm-app-section-head h2,
+body:has(.fmm-app-fixed-home) .fmm-app-featured-main h2,
+body:has(.fmm-app-fixed-home) .fmm-app-featured-fights-inner h2,
+body:has(.fmm-app-fixed-home) .fmm-app-upcoming h3,
+body:has(.fmm-app-fixed-home) .fmm-app-sports strong,
+body:has(.fmm-app-fixed-home) .fmm-app-watch-leagues strong,
+body:has(.fmm-app-fixed-home) .fmm-app-affiliate strong,
+body:has(.fmm-app-fixed-home) .fmm-app-coin-funnel h2,
+body:has(.fmm-app-fixed-home) .fmm-app-coin-confirm h2,
+.theme-home .fmm-app-fixed-home h1,
+.theme-home .fmm-app-fixed-home h2,
+.theme-home .fmm-app-fixed-home h3,
+.theme-home .fmm-app-fixed-home h4,
+.theme-home .fmm-app-section-head h2,
+.theme-home .fmm-app-featured-main h2,
+.theme-home .fmm-app-featured-fights-inner h2,
+.theme-home .fmm-app-upcoming h3,
+.theme-home .fmm-app-sports strong,
+.theme-home .fmm-app-watch-leagues strong,
+.theme-home .fmm-app-affiliate strong,
+.theme-home .fmm-app-coin-funnel h2,
+.theme-home .fmm-app-coin-confirm h2 {
+  font-family: var(--fmm-font-display, 'FMMUFCCondensedBold', 'Arial Narrow', Impact, sans-serif) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+/* Restored desktop homepage sections */
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 h1,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 h2,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 h3,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 .fmm-panel-title-row h2,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 .fmm-home-wrestling-copy h2,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 .fmm-fight-art-copy h2,
+.theme-home .fmm-desktop-restored-static-v19 h1,
+.theme-home .fmm-desktop-restored-static-v19 h2,
+.theme-home .fmm-desktop-restored-static-v19 h3,
+.theme-home .fmm-desktop-restored-static-v19 .fmm-panel-title-row h2,
+.theme-home .fmm-desktop-restored-static-v19 .fmm-home-wrestling-copy h2,
+.theme-home .fmm-desktop-restored-static-v19 .fmm-fight-art-copy h2 {
+  font-family: var(--fmm-font-display, 'FMMUFCCondensedBold', 'Arial Narrow', Impact, sans-serif) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+/* Keep compact labels readable while matching the same condensed family. */
+body:has(.fmm-app-fixed-home) .fmm-app-featured-head span,
+body:has(.fmm-app-fixed-home) .fmm-app-featured-fights-inner > span,
+body:has(.fmm-app-fixed-home) .fmm-app-upcoming figcaption,
+body:has(.fmm-app-fixed-home) .fmm-app-leader-streak header span,
+body:has(.fmm-app-fixed-home) .fmm-app-leader-streak > a > span,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 .fmm-home-wrestling-copy p,
+body:has(.fmm-app-fixed-home) .fmm-desktop-restored-static-v19 .fmm-fight-art-copy p,
+.theme-home .fmm-app-featured-head span,
+.theme-home .fmm-app-featured-fights-inner > span,
+.theme-home .fmm-app-upcoming figcaption,
+.theme-home .fmm-app-leader-streak header span,
+.theme-home .fmm-app-leader-streak > a > span,
+.theme-home .fmm-desktop-restored-static-v19 .fmm-home-wrestling-copy p,
+.theme-home .fmm-desktop-restored-static-v19 .fmm-fight-art-copy p {
+  font-family: var(--fmm-font-display, 'FMMUFCCondensedBold', 'Arial Narrow', Impact, sans-serif) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
