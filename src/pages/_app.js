@@ -95,6 +95,7 @@ import "@/styles/fmm-client-v21-desktop-apparel-centering.css";
 import "@/styles/fmm-client-v22-phone-live-fixes.css";
 import "@/styles/fmm-client-v23-phone-logo-coins.css";
 import "@/styles/fmm-client-v24-home-heading-font.css";
+import "@/styles/fmm-client-v25-phone-reference-lock.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
