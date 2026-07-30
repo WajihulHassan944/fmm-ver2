@@ -1696,8 +1696,8 @@ const MobilePhoneHome = ({
   const posterForFight = (fight, index = 0) =>
     getHomeFightPosterImage(fight) || appEventFallbacks[index % appEventFallbacks.length];
   const quickPickLabel = (name = "Fighter") => String(name).trim().split(/\s+/)[0] || "Fighter";
-  const communityWinnerA = predictionInsight.total ? predictionInsight.winnerA : 76;
-  const communityWinnerB = predictionInsight.total ? predictionInsight.winnerB : 24;
+  const communityWinnerA = predictionSummary.total ? predictionSummary.winnerA : 76;
+  const communityWinnerB = predictionSummary.total ? predictionSummary.winnerB : 24;
   const communityDash = `${communityWinnerA} ${100 - communityWinnerA}`;
 
 
