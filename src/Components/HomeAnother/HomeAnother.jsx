@@ -988,6 +988,14 @@ const getMobileDateChip = (match) => {
   };
 };
 
+const getMobileDateChipLabel = (match) => {
+  const chip = getMobileDateChip(match);
+  if (!chip || typeof chip !== "object") return "TBA";
+  const month = String(chip.month || "TBA").trim();
+  const day = String(chip.day || "").trim();
+  return [month, day].filter(Boolean).join(" ").trim() || "TBA";
+};
+
 const getMobileCountdownDisplay = (match, now) => {
   const parts = getCountdownParts(match, now);
   if (!parts) return [];
@@ -1877,7 +1885,7 @@ const MobilePhoneHome = ({
             <span>FEATURED FIGHT</span>
             <small>{featuredLabel} · {getRoundLabel(featuredFight)}</small>
             <h3>{fighterA} <em>VS</em> {fighterB}</h3>
-            <p><b>📅 {getMobileDateChip(featuredFight)}</b><b>⏱ {getLockLabel(featuredFight, now)}</b></p>
+            <p><b>📅 {getMobileDateChipLabel(featuredFight)}</b><b>⏱ {getLockLabel(featuredFight, now)}</b></p>
             <ul>
               <li><small>PRIZE POOL</small><strong>{featuredPrize}</strong></li>
               <li><small>ENTRY FEE</small><strong>{featuredEntryFee}</strong></li>
