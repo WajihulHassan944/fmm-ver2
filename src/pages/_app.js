@@ -92,6 +92,7 @@ import "@/styles/fmm-client-feedback-final-v18.css";
 import "@/styles/fmm-client-final-v19.css";
 import "@/styles/fmm-client-v20-apparel-admin-logo.css";
 import "@/styles/fmm-client-v21-desktop-apparel-centering.css";
+import "@/styles/fmm-client-v22-phone-live-fixes.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

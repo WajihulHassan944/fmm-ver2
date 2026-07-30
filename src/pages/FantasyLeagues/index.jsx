@@ -60,13 +60,13 @@ const FALLBACK_LEAGUES = [
 ];
 
 const FantasyLeagues = () => {
-  const [affiliates, setAffiliates] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [affiliates, setAffiliates] = useState(FALLBACK_LEAGUES);
+  const [users, setUsers] = useState(FALLBACK_USERS);
   const [openCardIds, setOpenCardIds] = useState({});
   const [redirectToLogin, setRedirectToLogin] = useState(false);
   const [pendingAffiliateJoin, setPendingAffiliateJoin] = useState(null);
   const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [joiningId, setJoiningId] = useState(null);
 
@@ -245,7 +245,7 @@ const FantasyLeagues = () => {
                 <article><strong>{totalMembers}</strong><span>League members</span></article>
                 <article><strong>{rewardLeagues}</strong><span>Reward leagues</span></article>
               </div>
-              <p><FaShieldAlt /> Joining still uses the existing account and affiliate league APIs.</p>
+              <p><FaShieldAlt /> Join league rooms, track members, and compete from one Fantasy MMAdness account.</p>
             </aside>
           </div>
         </section>

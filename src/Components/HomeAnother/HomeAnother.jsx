@@ -1930,7 +1930,14 @@ const MobilePhoneHome = ({
           <span>🪙</span><span>💰</span><span>🪙</span>
         </Link>
         <div className="fmm-app-socials" aria-label="Social channels">
-          {["X", "Instagram", "Facebook", "TikTok"].map((label) => <span key={label}>{label}</span>)}
+          {[
+            ["https://x.com/FMmadness2024", "X"],
+            ["https://www.instagram.com/fantasymmadness", "Instagram"],
+            ["https://www.facebook.com/fantasymmadness", "Facebook"],
+            ["https://www.tiktok.com/@fantasymmadness", "TikTok"],
+          ].map(([href, label]) => (
+            <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={`Open ${label}`}>{label}</a>
+          ))}
         </div>
       </section>
 
@@ -1998,7 +2005,7 @@ const HomeAnother = () => {
               fightLimit: HOME_FIGHT_FEED_LIMIT,
               leaderboardLimit: 5,
             }),
-            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
+            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT, status: "upcoming" }),
             fetchPromotedHomeFights({ limit: 45 }),
           ]);
         const summary =
@@ -2463,13 +2470,14 @@ const HomeAnother = () => {
         />
         <meta
           property="og:title"
-          content="Fantasy MMAdness - Predict Combat Sports"
+          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
         />
         <meta
           property="og:description"
           content="Join Fantasy MMAdness and compete in premium MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests."
         />
         <meta property="og:url" content="https://www.fantasymmadness.com/" />
+        <link rel="canonical" href="https://www.fantasymmadness.com/" />
         <meta
           name="keywords"
           content="Fantasy MMA, Fantasy UFC, Fantasy BKFC, Fantasy Boxing, Fantasy Kickboxing, Fantasy Bare Knuckle, Fantasy Combat, Fantasy Fighting, Fantasy Fighter Rankings"
@@ -3591,8 +3599,8 @@ const HomeAnother = () => {
                   Questions about leagues, sponsors, or fight cards?
                 </h2>
                 <span>
-                  Send a message and the team will follow up. The existing
-                  production contact endpoint is unchanged.
+                  Send a message and the team will follow up about leagues, sponsors,
+                  accounts, fight cards, or apparel orders.
                 </span>
               </div>
               <form onSubmit={handleSubmit}>

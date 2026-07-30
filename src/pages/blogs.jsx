@@ -4,13 +4,55 @@ import Link from 'next/link';
 import { FaArrowRight, FaCalendarAlt, FaNewspaper, FaSearch } from 'react-icons/fa';
 
 import { fetchPublicBlogs } from '@/Utils/publicApi';
-const cleanText = (value = '') => String(value).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
-const storyTitle = (blog) => blog?.metaTitle || blog?.header || blog?.title || 'Fight story';
+const stripUnsafeBlogText = (value = '') => String(value || '')
+  .replace(/data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g, ' ')
+  .replace(/\b[A-Za-z0-9+/]{180,}={0,2}\b/g, ' ')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/Fantasy\s*MMADNESS/g, 'Fantasy MMAdness')
+  .replace(/Fantasy\s*MMadness/g, 'Fantasy MMAdness')
+  .replace(/FantasyMMAdness/g, 'Fantasy MMAdness')
+  .replace(/Fantasy-MMadness/g, 'Fantasy MMAdness')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const isSafeBlogImage = (value) => {
+  const src = String(value || '').trim();
+  if (!src || src.length > 500) return false;
+  if (/^data:/i.test(src) || /base64/i.test(src)) return false;
+  return /^https?:\/\//i.test(src) || src.startsWith('/');
+};
+
+const sanitizeBlogRow = (blog = {}, index = 0) => ({
+  ...blog,
+  _id: blog?._id || blog?.id || `story-${index}`,
+  title: stripUnsafeBlogText(blog?.title || blog?.header || blog?.metaTitle || blog?.name).slice(0, 140),
+  header: stripUnsafeBlogText(blog?.header || blog?.title || blog?.metaTitle || blog?.name).slice(0, 140),
+  description: stripUnsafeBlogText(blog?.description || blog?.excerpt || blog?.metaDescription || blog?.sections?.[0]?.content || blog?.content || blog?.body).slice(0, 260),
+  metaDescription: stripUnsafeBlogText(blog?.metaDescription || blog?.description || blog?.excerpt || blog?.sections?.[0]?.content).slice(0, 260),
+  blogHeaderImage: isSafeBlogImage(blog?.blogHeaderImage) ? blog.blogHeaderImage : undefined,
+  image: isSafeBlogImage(blog?.image) ? blog.image : undefined,
+  imageUrl: isSafeBlogImage(blog?.imageUrl) ? blog.imageUrl : undefined,
+  featuredImage: isSafeBlogImage(blog?.featuredImage) ? blog.featuredImage : undefined,
+  href: blog?.href,
+  createdAt: blog?.createdAt,
+});
+
+const cleanText = (value = '') => stripUnsafeBlogText(value);
+const storyTitle = (blog) => stripUnsafeBlogText(blog?.metaTitle || blog?.header || blog?.title || 'Fight story') || 'Fight story';
 const storyDescription = (blog) => cleanText(blog?.metaDescription || blog?.description || blog?.sections?.[0]?.content || '').slice(0, 250);
 const storyDate = (blog) => blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Latest publication';
-const storyImage = (blog) => blog?.blogHeaderImage || blog?.image || '/images/fmm-pages/editorial-arena-hd.webp';
-const storyHref = (blog) => blog?.href || `/blog-details/${blog?._id || blog?.id}`;
+const storyImage = (blog) => {
+  const candidates = [blog?.blogHeaderImage, blog?.image, blog?.imageUrl, blog?.featuredImage];
+  return candidates.find(isSafeBlogImage) || '/images/fmm-pages/premium-duel-banner.webp';
+};
+
+const storyHref = (blog) => {
+  if (blog?.href) return blog.href;
+  const id = String(blog?._id || blog?.id || '').trim();
+  if (!id || id.startsWith('fallback-')) return '/blogs';
+  return `/blog-details/${id}`;
+};
 
 const FALLBACK_BLOGS = [
   {
@@ -110,7 +152,7 @@ export async function getServerSideProps({ query, res }) {
     res?.setHeader?.('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     const page = Number(query?.page || 1);
     const { rows: blogs, pagination } = await fetchPublicBlogs({ page, limit: 24 });
-    return { props: { blogs: JSON.parse(JSON.stringify(blogs)), pagination: JSON.parse(JSON.stringify(pagination || {})) } };
+    return { props: { blogs: JSON.parse(JSON.stringify((Array.isArray(blogs) ? blogs : []).map((blog, index) => sanitizeBlogRow(blog, index)))), pagination: JSON.parse(JSON.stringify(pagination || {})) } };
   } catch (error) {
     console.error('Error fetching blogs:', error);
     return { props: { blogs: [], pagination: {} } };

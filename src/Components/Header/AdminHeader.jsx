@@ -33,7 +33,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
-const LOGO_URL = '/images/brand/fantasy-mmadness-sticker-logo.png?v=20';
+const LOGO_URL = '/images/brand/fantasy-mmadness-sticker-logo.png';
 
 const navigationGroups = [
   {

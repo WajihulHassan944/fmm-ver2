@@ -21,11 +21,13 @@ const normalizeLeaderboardRows = (rows = []) =>
 const useLeaderboardData = (_matches, options = {}) => {
   const limit = Number(options.limit || DEFAULT_LIMIT);
   const enabled = options.enabled !== false;
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [playerCount, setPlayerCount] = useState(0);
-  const [status, setStatus] = useState("idle");
-  const [source, setSource] = useState(null);
-  const [diagnostics, setDiagnostics] = useState(null);
+  const initialPayload = options.initialData || null;
+  const initialRows = normalizeLeaderboardRows(initialPayload?.leaderboard);
+  const [leaderboard, setLeaderboard] = useState(initialRows);
+  const [playerCount, setPlayerCount] = useState(Number(initialPayload?.playerCount || initialRows.length || 0));
+  const [status, setStatus] = useState(initialRows.length ? "succeeded" : "idle");
+  const [source, setSource] = useState(initialPayload?.source || null);
+  const [diagnostics, setDiagnostics] = useState(initialPayload?.diagnostics || null);
 
   useEffect(() => {
     if (!enabled) {

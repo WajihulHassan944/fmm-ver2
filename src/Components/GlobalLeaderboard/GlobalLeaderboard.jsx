@@ -18,10 +18,10 @@ const FALLBACK_AVATARS = [
   `${FMM_ASSET_BASE}/fighter-david-benavidez.webp`,
 ];
 
-const GlobalLeaderboard = () => {
+const GlobalLeaderboard = ({ initialLeaderboardData = null }) => {
   const matches = useSelector((state) => state.matches.data);
   const currentUser = useSelector((state) => state.user);
-  const { leaderboard, playerCount, status, source, diagnostics } = useLeaderboardData(matches, { limit: 100 });
+  const { leaderboard, playerCount, status, source, diagnostics } = useLeaderboardData(matches, { limit: 100, initialData: initialLeaderboardData });
   const [search, setSearch] = useState('');
 
 

@@ -6,6 +6,19 @@ import { FaChevronDown, FaQuestionCircle, FaSearch, FaShieldAlt, FaTrophy } from
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 
+
+const sanitizeFaqCopy = (value = '') => String(value || '')
+  .replace(/Fantasy\s*MMADNESS/g, 'Fantasy MMAdness')
+  .replace(/Fantasy\s*MMadness/g, 'Fantasy MMAdness')
+  .replace(/FantasyMMAdness/g, 'Fantasy MMAdness')
+  .replace(/Fantasy-MMadness/g, 'Fantasy MMAdness')
+  .replace(/Doesthe/g, 'Does the')
+  .replace(/FAQ feed still uses the existing production endpoint\.?/gi, '')
+  .replace(/Scoring and contest results are calculated by the backend\.\s*/gi, '')
+  .replace(/This page changes the visual presentation only\.?/gi, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+
 const fallbackFaqs = [
   { title: 'What is Fantasy MMAdness?', description: 'Fantasy MMAdness is a combat-sports prediction platform for boxing, MMA, kickboxing, bare-knuckle, and pro-wrestling experiences. Players predict fight outcomes, compete on leaderboards, and earn platform rewards.' },
   { title: 'How do live fight predictions work?', description: 'Members submit predictions before the lock time on each fight card. The fight page shows the current schedule, prize pool, entry status, and leaderboard access.' },
@@ -17,8 +30,8 @@ const fallbackFaqs = [
 
 const normalizeFaq = (item, index) => {
   const fallback = fallbackFaqs[index % fallbackFaqs.length];
-  const title = item?.title || item?.question || item?.name || fallback?.title;
-  const description = item?.description || item?.answer || item?.content || item?.acceptedAnswer?.text || fallback?.description;
+  const title = sanitizeFaqCopy(item?.title || item?.question || item?.name || fallback?.title);
+  const description = sanitizeFaqCopy(item?.description || item?.answer || item?.content || item?.acceptedAnswer?.text || fallback?.description);
   return { ...item, title, description };
 };
 
@@ -57,7 +70,7 @@ export default function FAQsPage({ faqs = [] }) {
           eyebrow="Support center"
           title="Answers before"
           accent="the bell."
-          description="A premium support library for account access, prediction scoring, wallet tokens, league activity, fight entries, and platform rules. The FAQ feed still uses the existing production endpoint."
+          description="A premium support library for account access, prediction scoring, wallet tokens, league activity, fight entries, and platform rules."
           backgroundImage="/images/fmm-pages/premium-arena-banner.webp"
           className="premium-faq-phase-two-hero"
           actions={[
@@ -98,7 +111,7 @@ export default function FAQsPage({ faqs = [] }) {
                 <aside className="xp-faq-aside">
                   <FaQuestionCircle aria-hidden="true" />
                   <strong>Quick guidance</strong>
-                  <p>Scoring and contest results are calculated by the backend. The same unified scoring copy is used across Home, Guides, FAQs, and fight pages.</p>
+                  <p>Use this guide to understand accounts, predictions, tokens, rewards, leagues, and official scoring before you enter a fight card.</p>
                   <Link href="/guides">Open player guide</Link>
                   <Link href="/upcomingfights">Explore fight cards</Link>
                 </aside>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaPaperPlane, FaShieldAlt } from 'react-icons/fa';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const Contact = () => {
   const [buttonText, setButtonText] = useState('Send Message');
@@ -21,7 +22,7 @@ const Contact = () => {
     };
 
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/contact-us-fantasymmadness', {
+      const response = await fetch(buildPublicApiUrl('/contact-us-fantasymmadness'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -48,7 +49,7 @@ const Contact = () => {
         <div>
           <p><FaEnvelope /> Contact Fantasy MMAdness</p>
           <h1>Questions about leagues, sponsors, or fight cards?</h1>
-          <span>Send a clear message and the production contact endpoint will receive the same full name, email, subject, and message fields.</span>
+          <span>Send us your details and the Fantasy MMAdness team will follow up with the right next step.</span>
         </div>
         <aside><FaShieldAlt /><strong>Player support</strong><small>Account, fight-card, affiliate, sponsor, and platform questions.</small></aside>
       </section>
