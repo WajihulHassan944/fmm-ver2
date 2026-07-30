@@ -17,7 +17,7 @@ import {
   FaYoutube,
 } from 'react-icons/fa';
 
-const LOGO_URL = '/images/brand/fantasy-mmadness-sticker-logo.png';
+const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
 
 const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/fantasymmadness', icon: FaInstagram },

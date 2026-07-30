@@ -192,6 +192,6 @@ export const buildArticleSchema = (blog = {}, path = '/') => ({
   publisher: {
     '@type': 'Organization',
     name: 'Fantasy MMAdness',
-    logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/brand/fantasy-mmadness-sticker-logo.png` },
+    logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/brand/fantasy-mmadness-main-logo-v23.jpg` },
   },
 });
