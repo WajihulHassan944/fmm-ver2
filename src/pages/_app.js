@@ -100,6 +100,7 @@ import "@/styles/fmm-client-v28-phone-reference-sync.css";
 import "@/styles/fmm-client-v29-home-design-complete.css";
 import "@/styles/fmm-client-v30-reference-code-sync.css";
 import "@/styles/fmm-client-v31-home-reference-cleanup.css";
+import "@/styles/fmm-client-v32-reference-exact-home.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

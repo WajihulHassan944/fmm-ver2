@@ -537,7 +537,7 @@ body:has(.fmm-app-fixed-home) .fmm-app-mini-coins svg { display:block !important
 .fmm-app-fixed-home .fmm-app-mini-coins > b,
 body:has(.fmm-app-fixed-home) .fmm-app-mini-coins > b { display:block !important; color:#fff !important; font-family:var(--app-heading-font) !important; font-size:28px !important; line-height:.95 !important; text-shadow:0 0 10px rgba(255,255,255,.3) !important; }
 .fmm-app-fixed-home .fmm-app-mini-leader,
-body:has(.fmm-app-fixed-home) .fmm-app-mini-leader { text-align:left !important; background:linear-gradient(160deg,rgba(24,10,4,.70),rgba(5,7,11,.88)), url('/images/mobile-home/app-fixed-v31/pasted-1785012542538-0.png') center/cover !important; border-color:rgba(242,181,68,.75) !important; }
+body:has(.fmm-app-fixed-home) .fmm-app-mini-leader { text-align:left !important; background:linear-gradient(160deg,rgba(24,10,4,.70),rgba(5,7,11,.88)), url('/images/mobile-home/app-fixed-v32/pasted-1785012542538-0.png') center/cover !important; border-color:rgba(242,181,68,.75) !important; }
 .fmm-app-fixed-home .fmm-app-mini-leader header,
 body:has(.fmm-app-fixed-home) .fmm-app-mini-leader header { display:flex !important; justify-content:space-between !important; align-items:center !important; gap:8px !important; margin-bottom:7px !important; }
 .fmm-app-fixed-home .fmm-app-mini-leader header small,
@@ -551,7 +551,7 @@ body:has(.fmm-app-fixed-home) .fmm-app-mini-leader p strong { color:#ffce54 !imp
 .fmm-app-fixed-home .fmm-app-mini-leader p.is-you,
 body:has(.fmm-app-fixed-home) .fmm-app-mini-leader p.is-you { color:#22c55e !important; }
 .fmm-app-fixed-home .fmm-app-mini-streak,
-body:has(.fmm-app-fixed-home) .fmm-app-mini-streak { text-align:left !important; background:linear-gradient(160deg,rgba(4,6,10,.70),rgba(9,4,4,.88)), url('/images/mobile-home/app-fixed-v31/pasted-1785014166827-0.png') center/cover !important; border-color:rgba(239,68,68,.68) !important; }
+body:has(.fmm-app-fixed-home) .fmm-app-mini-streak { text-align:left !important; background:linear-gradient(160deg,rgba(4,6,10,.70),rgba(9,4,4,.88)), url('/images/mobile-home/app-fixed-v32/pasted-1785014166827-0.png') center/cover !important; border-color:rgba(239,68,68,.68) !important; }
 .fmm-app-fixed-home .fmm-app-mini-streak h3,
 body:has(.fmm-app-fixed-home) .fmm-app-mini-streak h3 { margin:9px 0 6px !important; font-family:var(--app-heading-font) !important; font-size:18px !important; line-height:1 !important; color:#fff !important; }
 .fmm-app-fixed-home .fmm-app-mini-streak div,
