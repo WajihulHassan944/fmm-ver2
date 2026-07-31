@@ -63,14 +63,14 @@ const ProWrestlingHome = () => {
   return (
     <>
       <Head>
-        <title>Pro Wrestling Predictions | Fantasy MMADNESS</title>
-        <meta name="description" content="Predict every punch, kick, power move, finisher, and winner in Fantasy MMADNESS Pro Wrestling contests." />
+        <title>Pro Wrestling Predictions | Fantasy MMAdness</title>
+        <meta name="description" content="Predict every punch, kick, power move, finisher, and winner in Fantasy MMAdness Pro Wrestling contests." />
       </Head>
       <div className="pw-page pw-home-page">
         <WrestlingHero
           title="Predict the action."
           accent="Win the wrestling pot."
-          description="A full-match prediction game built directly into Fantasy MMADNESS. Enter a real contest, forecast both wrestlers' offense, follow live scoring, and climb a dedicated Pro Wrestling leaderboard."
+          description="A full-match prediction game built directly into Fantasy MMAdness. Enter a real contest, forecast both wrestlers' offense, follow live scoring, and climb a dedicated Pro Wrestling leaderboard."
           actions={[
             { href: featured ? `/pro-wrestling/matches/${featured._id}` : '#pw-contests', label: featured ? 'Enter featured contest' : 'Explore contests', icon: FaFistRaised },
             { href: '/pro-wrestling/how-to-play', label: 'View scoring rules', secondary: true, icon: FaShieldAlt },
@@ -83,7 +83,7 @@ const ProWrestlingHome = () => {
         >
           <div className="pw-featured-poster">
             <div className="pw-featured-poster-label"><FaCrown /> New game mode</div>
-            <img src="/images/pro-wrestling/wrestling-match-premium.webp" alt="Fantasy MMADNESS Pro Wrestling arena" />
+            <img src="/images/pro-wrestling/wrestling-match-premium.webp" alt="Fantasy MMAdness Pro Wrestling arena" />
             <div><small>Full-match scorecard</small><strong>HP · BP · K · PM · FM</strong><span>Predict both wrestlers plus the official winner.</span></div>
           </div>
         </WrestlingHero>
@@ -93,7 +93,7 @@ const ProWrestlingHome = () => {
         <main className="theme-container pw-main" id="pw-contests">
           <section className="pw-game-mode-strip">
             <div><FaFistRaised /><span><small>Game mode</small><strong>Pro Wrestling</strong></span></div>
-            <p>Same Fantasy MMADNESS account, wallet, community, and competitive DNA—now with a scoring system designed for wrestling action.</p>
+            <p>Same Fantasy MMAdness account, wallet, community, and competitive DNA—now with a scoring system designed for wrestling action.</p>
             <Link href="/pro-wrestling/history">My wrestling entries <FaArrowRight /></Link>
           </section>
 
@@ -133,7 +133,7 @@ const ProWrestlingHome = () => {
             <div className="pw-flow-copy">
               <p className="pw-eyebrow"><FaLock /> Contest lifecycle</p>
               <h2>Join. Predict. Lock. Watch. Rank. Win.</h2>
-              <p>Every stage is connected to the existing Fantasy MMADNESS user account and fight wallet. Entries are protected by backend lock times and settlement rules.</p>
+              <p>Every stage is connected to the existing Fantasy MMAdness user account and fight wallet. Entries are protected by backend lock times and settlement rules.</p>
               <div className="pw-flow-steps">
                 {[
                   ['01', 'Join the contest', 'Pay the listed token entry fee from the existing fight wallet.'],
@@ -162,7 +162,7 @@ const ProWrestlingHome = () => {
           </section>
 
           <section className="pw-final-cta">
-            <div><p>Fantasy MMADNESS Pro Wrestling</p><h2>Every move can change the leaderboard.</h2><span>Enter the next card and prove that you can read the full match—not just the finish.</span></div>
+            <div><p>Fantasy MMAdness Pro Wrestling</p><h2>Every move can change the leaderboard.</h2><span>Enter the next card and prove that you can read the full match—not just the finish.</span></div>
             <div><Link href={featured ? `/pro-wrestling/matches/${featured._id}` : '/pro-wrestling'} className="pw-btn pw-btn-primary">Enter the arena <FaArrowRight /></Link><Link href="/pro-wrestling/leaderboard" className="pw-btn pw-btn-secondary">Wrestling leaderboards</Link></div>
           </section>
         </main>

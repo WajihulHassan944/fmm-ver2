@@ -15,6 +15,7 @@ export const DEFAULT_COMBAT_SCORING = Object.freeze({
 });
 
 export const SCORE_POINTS = DEFAULT_COMBAT_SCORING.points;
+export const SCORE_LABELS = DEFAULT_COMBAT_SCORING.labels;
 
 export const getRoundOutcomeValues = (winnerSide) => {
   if (winnerSide === 'A') return { fighterA: SCORE_POINTS.RW, fighterB: SCORE_POINTS.RL, fighterAText: 'RW', fighterBText: 'RL' };

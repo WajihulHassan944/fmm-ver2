@@ -28,7 +28,7 @@ const WrestlingWrestlersPage = () => {
 
   return (
     <>
-      <Head><title>Pro Wrestling Roster | Fantasy MMADNESS</title></Head>
+      <Head><title>Pro Wrestling Roster | Fantasy MMAdness</title></Head>
       <div className="pw-page pw-wrestlers-page">
         <WrestlingHero compact eyebrow="Wrestler intelligence" title="Study the roster." accent="Predict with context." description="Explore wrestling styles, career records, signature moves, finishers, and historical action totals before building a scorecard." actions={[{ href: '/pro-wrestling', label: 'Open contests', icon: FaFistRaised }, { href: '/pro-wrestling/how-to-play', label: 'Scoring guide', secondary: true, icon: FaShieldAlt }]} stats={[{ value: wrestlers.length, label: 'Active profiles', icon: FaTrophy }]} background="/images/pro-wrestling/wrestling-roster-premium.webp" />
         <WrestlingModeNav active="wrestlers" />

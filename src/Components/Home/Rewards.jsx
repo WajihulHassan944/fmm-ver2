@@ -12,25 +12,25 @@ import {
 const REWARDS = [
   {
     icon: FaCrown,
-    eyebrow: 'Winner award',
-    value: 'Up to $10,000',
-    copy: 'Fight-card prize awards are distributed as specified for eligible competitions.',
+    eyebrow: 'Fight-card prize pools',
+    value: 'Shown before entry',
+    copy: 'Each eligible fight card displays its current prize pool and entry details before a player submits predictions.',
     image: 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743522314/home/nrarejwnri8cdalxtlgo.png',
     accent: 'gold',
   },
   {
     icon: FaTrophy,
-    eyebrow: 'Admin award',
-    value: 'Up to $200',
-    copy: 'Special platform awards can be attached to selected events and community challenges.',
+    eyebrow: 'Bonus challenges',
+    value: 'Event-based rewards',
+    copy: 'Selected events can include bonus token or prize challenges configured by the platform team.',
     image: 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743522401/home/t5vvnlqqu57vgpeumtj2.png',
     accent: 'red',
   },
   {
     icon: FaCoins,
-    eyebrow: 'Free tokens',
-    value: '$20 account credit',
-    copy: 'New-account token benefits are made available according to the existing platform offer.',
+    eyebrow: 'Free and demo entries',
+    value: 'Marked on card',
+    copy: 'Free-play and demo fight cards are labelled clearly before entry so users know when no coins are needed.',
     image: 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743522571/home/hbkim5wxsjmhryavrat0.png',
     accent: 'blue',
   },
@@ -73,7 +73,7 @@ const Rewards = () => (
             <div className="user-reward-card-copy">
               <p>{eyebrow}</p>
               <h3>{value}</h3>
-              <span>As specified</span>
+              <span>Live terms on each card</span>
               <small>{copy}</small>
             </div>
           </article>

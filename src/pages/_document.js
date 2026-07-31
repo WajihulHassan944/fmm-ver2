@@ -72,7 +72,7 @@ export default function Document() {
         />
         <meta
           property="og:title"
-          content="Fantasy MMAdness | Fantasy Combat Sports"
+          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
         />
         <meta
           property="og:description"
@@ -89,7 +89,7 @@ export default function Document() {
         <meta name="twitter:site" content="@FMmadness2024" />
         <meta
           name="twitter:title"
-          content="Fantasy MMAdness | Fantasy Combat Sports"
+          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
         />
         <meta
           name="twitter:description"
@@ -108,7 +108,7 @@ export default function Document() {
               "@type": "SportsOrganization",
               name: "Fantasy MMAdness",
               url: "https://www.fantasymmadness.com",
-              logo: "https://www.fantasymmadness.com/images/fmm-experience/fantasy-mmadness-logo.webp",
+              logo: "https://www.fantasymmadness.com/images/brand/fantasy-mmadness-sticker-logo.png",
               sameAs: [
                 "https://www.facebook.com/fantasymmadness",
                 "https://www.instagram.com/fantasymmadness",

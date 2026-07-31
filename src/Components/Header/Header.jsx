@@ -34,7 +34,7 @@ import {
   FaVideo,
 } from 'react-icons/fa';
 
-const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
+const LOGO_URL = '/images/brand/fantasy-mmadness-sticker-logo.png';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
@@ -370,14 +370,18 @@ const Header = () => {
       )}
 
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
-        <OptimizedImage
+        <img
           className="theme-brand-logo theme-brand-logo-default"
           src={LOGO_URL}
           alt="Fantasy MMAdness"
-          width={188}
-          height={84}
-          sizes="(max-width: 767px) 54px, 188px"
-          priority
+          width="188"
+          height="188"
+          loading="eager"
+          decoding="async"
+          onError={(event) => {
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = '/images/fmm-experience/fantasy-mmadness-logo.png';
+          }}
         />
         <span className="theme-mobile-wordmark" aria-hidden="true">
           <b>Fantasy</b>

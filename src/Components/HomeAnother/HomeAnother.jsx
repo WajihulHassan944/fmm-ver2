@@ -28,6 +28,7 @@ import {
   getPublicFightDuplicateKey,
   getFighterName as getResolvedFighterName,
 } from "@/Utils/fightExperience";
+import { SCORE_POINTS, SCORE_LABELS } from "@/Utils/scoringRules";
 import {
   FaArrowRight,
   FaBolt,
@@ -261,11 +262,10 @@ const FightCategoryIcon = ({ type }) => {
 };
 
 const SCORING_ROWS = [
-  ["Correct Winner", "100"],
-  ["Correct Method", "75"],
-  ["Correct Round", "50"],
-  ["Exact Score", "25"],
-  ["Perfect Fight", "250"],
+  [SCORE_LABELS.KO || "Knockout / Finish", String(SCORE_POINTS.KO)],
+  [SCORE_LABELS.RW || "Round Win", String(SCORE_POINTS.RW)],
+  [SCORE_LABELS.SP || "Survival", String(SCORE_POINTS.SP)],
+  [SCORE_LABELS.RL || "Round Loss", String(SCORE_POINTS.RL)],
 ];
 
 const STATIC_WINNERS = [
@@ -287,14 +287,6 @@ const STATIC_WINNERS = [
     amount: "$750",
     icon: "🥉",
   },
-];
-
-const FALLBACK_LEADERBOARD = [
-  { name: "Kelly", points: 2986 },
-  { name: "Tasha", points: 2261 },
-  { name: "Shane O.", points: 1878 },
-  { name: "Wajih ul Hassan", points: 1566 },
-  { name: "TheGhost", points: 1347 },
 ];
 
 const getMatchTimestamp = (match) => {
@@ -570,9 +562,30 @@ const parseMatchDate = (match) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const HOME_PAST_STATUS_PATTERN = /(finished|complete|completed|closed|cancelled|canceled|past|result|final)/i;
+const HOME_LIVE_STATUS_PATTERN = /(live|ongoing|scoring)/i;
+
+const isPastHomeFight = (match = {}, now = new Date()) => {
+  const statusText = [
+    match?.matchStatus,
+    match?.matchShadowOpenStatus,
+    match?.matchShadowStatus,
+    match?.status,
+    match?.timelineBucket,
+    match?.resultStatus,
+  ].filter(Boolean).join(" ");
+
+  if (HOME_PAST_STATUS_PATTERN.test(statusText)) return true;
+
+  const date = parseMatchDate(match);
+  if (date && date.getTime() < now.getTime()) return true;
+  if (HOME_LIVE_STATUS_PATTERN.test(statusText)) return false;
+  return false;
+};
+
 const formatDateTime = (match) => {
   const date = parseMatchDate(match);
-  if (!date) return "Schedule pending";
+  if (!date) return "Date & time TBA";
 
   const datePart = date.toLocaleDateString("en-US", {
     weekday: "short",
@@ -589,7 +602,7 @@ const formatDateTime = (match) => {
 
 const getFeaturedDateLabel = (match) => {
   const date = parseMatchDate(match);
-  if (!date) return "Schedule pending";
+  if (!date) return "Date TBA";
 
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -738,7 +751,7 @@ const getPrizePool = (match) => {
   const amount = Number(
     match?.pot || match?.currentPot || match?.prizePool || 0,
   );
-  if (!amount) return "Prize TBA";
+  if (!amount) return "Open prize pool";
   return `$${amount.toLocaleString()}`;
 };
 
@@ -751,14 +764,14 @@ const getPotTokenLabel = (match) => {
       match?.prizePool ||
       0,
   );
-  return amount > 0 ? `${amount.toLocaleString()} POT` : "POT TBA";
+  return amount > 0 ? `${amount.toLocaleString()} POT` : "OPEN POT";
 };
 
 const getRoundLabel = (match) => {
   const rounds = Number(
     match?.maxRounds || match?.rounds || match?.scheduledRounds || 0,
   );
-  return rounds > 0 ? `${rounds} rounds` : "Rounds TBA";
+  return rounds > 0 ? `${rounds} rounds` : "Prediction card";
 };
 
 const getFighterImage = (imageUrl) => imageUrl || FALLBACK_FIGHT_IMAGE;
@@ -867,8 +880,8 @@ const getLeaderboardName = (player) =>
 
 const MOBILE_FALLBACK_MATCHUPS = {
   boxing: [
-    ["Boxing Showdown", "Chris Eubank Jr", "Conor Benn", 25000, 1245],
-    ["Title Eliminator", "Anthony Yarde", "David Benavidez", 10000, 598],
+    ["Boxing Showdown", "Abel Ramos", "Adam Azim", 25000, 1245],
+    ["Title Eliminator", "Xander Zayas", "Jaron Boots Ennis", 10000, 598],
     ["Prize Fight", "Zaveer Davis", "Jadden Addison", 5000, 321],
   ],
   mma: [
@@ -1299,12 +1312,11 @@ const MobilePhoneHome = ({
   const isLoggedIn = Boolean(
     currentUser?._id || currentUser?.email || currentUser?.username,
   );
-  const profileHref = isLoggedIn ? "/profile" : PLAYER_SIGNUP_HREF;
-  const primaryCtaHref = isLoggedIn
-    ? featuredFight
-      ? getFightDetailHref(featuredFight)
-      : "/upcomingfights"
-    : PLAYER_SIGNUP_HREF;
+  const profileHref = isLoggedIn ? "/profile" : "/login?next=/profile";
+  const primaryCtaHref = featuredFight
+    ? getFightDetailHref(featuredFight)
+    : "/upcomingfights";
+  const heroJoinHref = isLoggedIn ? primaryCtaHref : PLAYER_SIGNUP_HREF;
 
   const tokenBalance = getSafeMetricNumber(
     currentUser?.tokens,
@@ -1507,10 +1519,11 @@ const MobilePhoneHome = ({
 
   const liveLeaderboard = useMemo(
     () =>
-      (Array.isArray(leaderboardRows) && leaderboardRows.length
-        ? leaderboardRows
-        : FALLBACK_LEADERBOARD
-      )
+      (Array.isArray(leaderboardRows) ? leaderboardRows : [])
+        .filter((player) => {
+          const marker = String(player?._id || player?.id || '').toLowerCase();
+          return player && !marker.startsWith('fallback-') && !marker.includes('fallback');
+        })
         .slice(0, 5)
         .map((player, index) => ({
           rank: index + 1,
@@ -1690,7 +1703,7 @@ const MobilePhoneHome = ({
           {["✦", "✦", "✦", "✦", "✦", "✦"].map((spark, index) => <i key={index}>{spark}</i>)}
         </span>
         <Link
-          href={primaryCtaHref}
+          href={heroJoinHref}
           className="fmm-app-join-hit"
           aria-label={isLoggedIn ? "Make predictions" : "Join free"}
           onClick={() => onPremiumTap("whoosh")}
@@ -1876,10 +1889,16 @@ const MobilePhoneHome = ({
         <Link href="/leaderboard" onClick={() => onPremiumTap()}>
           <img src="/images/fmm-pages/league-arena-hd.webp" alt="" loading="lazy" decoding="async" />
           <header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>
-          <p><b>1. KO_Beast</b><strong>9,850</strong></p>
-          <p><b>2. FightWizard</b><strong>8,420</strong></p>
-          <p><b>3. ChampMind</b><strong>7,910</strong></p>
-          <p className="is-me"><b>18. KellyD (You)</b><strong>2,450 ↑</strong></p>
+          {liveLeaderboard.length ? (
+            liveLeaderboard.slice(0, 4).map((player) => (
+              <p key={`${player.rank}-${player.name}`}>
+                <b>{player.rank}. {player.name}</b>
+                <strong>{Number(player.points || 0).toLocaleString()}</strong>
+              </p>
+            ))
+          ) : (
+            <p className="is-empty"><b>Real standings are syncing</b><strong>—</strong></p>
+          )}
         </Link>
         <Link href="/fights-rewards" onClick={() => onPremiumTap("reward")}>
           <img src="/images/fmm-pages/rewards-arena-hd.webp" alt="" loading="lazy" decoding="async" />
@@ -1911,7 +1930,14 @@ const MobilePhoneHome = ({
           <span>🪙</span><span>💰</span><span>🪙</span>
         </Link>
         <div className="fmm-app-socials" aria-label="Social channels">
-          {["X", "Instagram", "Facebook", "TikTok"].map((label) => <span key={label}>{label[0]}</span>)}
+          {[
+            ["https://x.com/FMmadness2024", "X"],
+            ["https://www.instagram.com/fantasymmadness", "Instagram"],
+            ["https://www.facebook.com/fantasymmadness", "Facebook"],
+            ["https://www.tiktok.com/@fantasymmadness", "TikTok"],
+          ].map(([href, label]) => (
+            <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={`Open ${label}`}>{label}</a>
+          ))}
         </div>
       </section>
 
@@ -1979,7 +2005,7 @@ const HomeAnother = () => {
               fightLimit: HOME_FIGHT_FEED_LIMIT,
               leaderboardLimit: 5,
             }),
-            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
+            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT, status: "upcoming" }),
             fetchPromotedHomeFights({ limit: 45 }),
           ]);
         const summary =
@@ -2004,9 +2030,9 @@ const HomeAnother = () => {
 
         if (!active) return;
 
-        setHomepageMatches(orderFightsForDisplay(fights || []));
+        setHomepageMatches(orderFightsForDisplay((fights || []).filter((fight) => !isPastHomeFight(fight))));
         setPromotedHeroFights(
-          orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals)),
+          orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals).filter((fight) => !isPastHomeFight(fight))),
         );
         setHomepageLeaderboard(
           Array.isArray(summary.leaderboard) ? summary.leaderboard : [],
@@ -2064,7 +2090,7 @@ const HomeAnother = () => {
   }, []);
 
   const orderedMatches = useMemo(
-    () => getOrderedMatches(homepageMatches),
+    () => getOrderedMatches(homepageMatches).filter((fight) => !isPastHomeFight(fight)),
     [homepageMatches],
   );
   const homepageFightPool = useMemo(() => {
@@ -2085,8 +2111,8 @@ const HomeAnother = () => {
     );
 
     return orderFightsForDisplay(
-      dedupeHomepageFights([...promoted, ...posterBackups]).filter((fight) =>
-        Boolean(getHomeFightPosterImage(fight)),
+      dedupeHomepageFights([...promoted, ...posterBackups]).filter(
+        (fight) => !isPastHomeFight(fight) && Boolean(getHomeFightPosterImage(fight)),
       ),
     ).slice(0, 45);
   }, [homepageFightPool, promotedHeroFights]);
@@ -2179,13 +2205,16 @@ const HomeAnother = () => {
 
   const liveLeaderboardRows = useMemo(() => {
     if (!Array.isArray(homepageLeaderboard) || homepageLeaderboard.length === 0)
-      return FALLBACK_LEADERBOARD;
+      return [];
 
-    return homepageLeaderboard.slice(0, 5).map((player) => ({
-      name: getLeaderboardName(player),
-      points: Number(player?.totalPoints || 0),
-      avatar: player?.profileUrl,
-    }));
+    return homepageLeaderboard
+      .filter((player) => !String(player?._id || '').startsWith('fallback-'))
+      .slice(0, 5)
+      .map((player) => ({
+        name: getLeaderboardName(player),
+        points: Number(player?.totalPoints || player?.points || 0),
+        avatar: player?.profileUrl,
+      }));
   }, [homepageLeaderboard]);
 
   const handleSubmit = async (e) => {
@@ -2441,13 +2470,14 @@ const HomeAnother = () => {
         />
         <meta
           property="og:title"
-          content="Fantasy MMAdness - Predict Combat Sports"
+          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
         />
         <meta
           property="og:description"
           content="Join Fantasy MMAdness and compete in premium MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests."
         />
         <meta property="og:url" content="https://www.fantasymmadness.com/" />
+        <link rel="canonical" href="https://www.fantasymmadness.com/" />
         <meta
           name="keywords"
           content="Fantasy MMA, Fantasy UFC, Fantasy BKFC, Fantasy Boxing, Fantasy Kickboxing, Fantasy Bare Knuckle, Fantasy Combat, Fantasy Fighting, Fantasy Fighter Rankings"
@@ -2493,7 +2523,284 @@ const HomeAnother = () => {
           matchStatus={matchStatus}
           now={now}
         />
-        <div className="fmm-desktop-home-shell">
+        <div className="fmm-desktop-restored-static-v19" aria-label="Desktop Fantasy MMAdness feature sections">
+          <main className="theme-container fmm-desktop-restored-main-v19">
+            <section className="fmm-home-wrestling-feature fmm-desktop-wrestling-restored-v19">
+              <div className="fmm-home-wrestling-copy">
+                <p>
+                  <FaCrown /> New game mode
+                </p>
+                <h2>Pro Wrestling is now part of Fantasy MMAdness.</h2>
+                <span>
+                  Pro Wrestling stays connected to the same account, wallet,
+                  leaderboards, and contest flow while keeping its own scoring
+                  rules and match cards.
+                </span>
+                <div>
+                  <Link
+                    href="/pro-wrestling"
+                    className="theme-btn theme-btn-primary"
+                  >
+                    Explore pro wrestling <FaArrowRight />
+                  </Link>
+                  <Link
+                    href="/pro-wrestling/how-to-play"
+                    className="theme-btn theme-btn-secondary"
+                  >
+                    How wrestling scores
+                  </Link>
+                </div>
+              </div>
+              <div className="fmm-home-wrestling-visual">
+                <Image
+                  src={HOME_WRESTLING_IMAGE}
+                  alt="Fantasy MMAdness Pro Wrestling"
+                  fill
+                  sizes="(max-width: 1180px) 90vw, 50vw"
+                />
+                {wrestlingMatches[0] ? (
+                  <article>
+                    <header>
+                      <small>{wrestlingMatches[0].status}</small>
+                      <strong>{wrestlingMatches[0].eventName}</strong>
+                    </header>
+                    <div>
+                      <figure>
+                        <FightImage
+                          src={getPWImage(wrestlingMatches[0].competitorA, "A")}
+                          alt="Pro wrestling competitor"
+                          width={80}
+                          height={90}
+                          sizes="55px"
+                        />
+                        <figcaption>
+                          {wrestlingMatches[0].competitorA?.displayName}
+                        </figcaption>
+                      </figure>
+                      <b>VS</b>
+                      <figure>
+                        <FightImage
+                          src={getPWImage(wrestlingMatches[0].competitorB, "B")}
+                          alt="Pro wrestling competitor"
+                          width={80}
+                          height={90}
+                          sizes="55px"
+                        />
+                        <figcaption>
+                          {wrestlingMatches[0].competitorB?.displayName}
+                        </figcaption>
+                      </figure>
+                    </div>
+                    <p>
+                      {formatWrestlingDate(wrestlingMatches[0].matchDate)} ·{" "}
+                      {wrestlingMatches[0].currentPot || 0} token pot
+                    </p>
+                    <Link
+                      href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}
+                    >
+                      Open featured card <FaArrowRight />
+                    </Link>
+                  </article>
+                ) : (
+                  <article className="is-empty">
+                    <FaCrown />
+                    <strong>Open Pro Wrestling cards will appear here as soon as they are published.</strong>
+                    <Link href="/pro-wrestling">Explore the game mode</Link>
+                  </article>
+                )}
+              </div>
+            </section>
+
+            <section
+              className="fmm-dashboard-grid fmm-desktop-gameplay-restored-v19"
+              aria-label="Gameplay summary and leaderboard"
+            >
+              <div className="fmm-panel fmm-how-score-panel">
+                <div className="fmm-how-block">
+                  <h2>How It Works</h2>
+                  {[
+                    [
+                      "Predict",
+                      "Pick the winner, method, round, and score before the card locks.",
+                    ],
+                    [
+                      "Score Points",
+                      "Earn leaderboard points from the official Fantasy MMAdness scoring model.",
+                    ],
+                    [
+                      "Climb & Win",
+                      "Compete across global standings, leagues, and fight-night cards.",
+                    ],
+                  ].map(([title, copy], index) => (
+                    <div className="fmm-step-row" key={title}>
+                      <span>{index + 1}</span>
+                      <div>
+                        <strong>{title}</strong>
+                        <p>{copy}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="fmm-score-block">
+                  <h2>Scoring Preview</h2>
+                  <div className="fmm-score-table">
+                    <div>
+                      <strong>Prediction</strong>
+                      <strong>Points</strong>
+                    </div>
+                    {SCORING_ROWS.map(([label, points]) => (
+                      <div key={label}>
+                        <span>{label}</span>
+                        <strong>{points}</strong>
+                      </div>
+                    ))}
+                  </div>
+                  <Link href="/guides">
+                    Full rules &amp; scoring breakdown in How To Play
+                  </Link>
+                </div>
+              </div>
+
+              <div className="fmm-panel fmm-winners-panel">
+                <div className="fmm-panel-title-row">
+                  <h2>Recent Winners</h2>
+                  <Link href="/global-leaderboard">
+                    View All Winners <FaArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
+                {STATIC_WINNERS.map((winner) => (
+                  <div className="fmm-winner-row" key={winner.name}>
+                    <span className="fmm-winner-medal">{winner.icon}</span>
+                    <div>
+                      <strong>{winner.name}</strong>
+                      <p>{winner.contest}</p>
+                    </div>
+                    <strong>{winner.amount}</strong>
+                  </div>
+                ))}
+                <p className="fmm-panel-note">
+                  <FaCrown aria-hidden="true" /> Become the next champion.
+                </p>
+              </div>
+
+              <div className="fmm-panel fmm-leaderboard-panel">
+                <div className="fmm-panel-title-row">
+                  <h2>Live Leaderboard</h2>
+                  <Link href="/leaderboard">
+                    View Full Leaderboard <FaArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="fmm-leaderboard-head">
+                  <span>Rank</span>
+                  <span>Player</span>
+                  <span>Points</span>
+                </div>
+                {liveLeaderboardRows.length ? (
+                  liveLeaderboardRows.map((player, index) => (
+                    <div
+                      className={`fmm-leaderboard-row ${index === 0 ? "is-highlighted" : ""}`}
+                      key={`${player.name}-${index}`}
+                    >
+                      <span>{index + 1}</span>
+                      <div>
+                        {player.avatar ? (
+                          <FightImage
+                            src={player.avatar}
+                            alt={player.name}
+                            width={48}
+                            height={48}
+                            sizes="40px"
+                          />
+                        ) : (
+                          <span>{player.name.charAt(0).toUpperCase()}</span>
+                        )}
+                        <strong>{player.name}</strong>
+                      </div>
+                      <strong>
+                        {Number(player.points || 0).toLocaleString()}
+                      </strong>
+                    </div>
+                  ))
+                ) : (
+                  <div className="fmm-empty-card fmm-leaderboard-real-empty-v19">
+                    Real leaderboard rows will appear here after the backend
+                    returns scored users.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section
+              className="fmm-metrics-partners fmm-desktop-metrics-restored-v19"
+              aria-label="Platform metrics and partners"
+            >
+              <div className="fmm-metrics-grid">
+                <div>
+                  <FaUsers aria-hidden="true" />
+                  <strong>128,547+</strong>
+                  <span>Players</span>
+                  <p>Worldwide community</p>
+                </div>
+                <div>
+                  <FaBullseye aria-hidden="true" />
+                  <strong>4.2M+</strong>
+                  <span>Predictions Submitted</span>
+                  <p>Across all time</p>
+                </div>
+                <div>
+                  <FaTrophy aria-hidden="true" />
+                  <strong>$1.7M+</strong>
+                  <span>Tokens Awarded</span>
+                  <p>To our champions</p>
+                </div>
+                <div>
+                  <FaShieldAlt aria-hidden="true" />
+                  <strong>100%</strong>
+                  <span>Secure &amp; Fair</span>
+                  <p>Provably fair contests</p>
+                </div>
+              </div>
+              <div className="fmm-partners-card">
+                <p>Trusted by fans. Backed by partners.</p>
+                <div>
+                  <span>UFC</span>
+                  <span>BKFC</span>
+                  <span>GLORY</span>
+                  <span>ESPN</span>
+                  <span>DAZN</span>
+                </div>
+              </div>
+            </section>
+
+            <section
+              className="fmm-fight-art-section fmm-desktop-fight-art-restored-v19"
+              aria-label="Fight night experience"
+            >
+              <div className="fmm-fight-art-copy">
+                <p>Fight Night Experience</p>
+                <h2>Built for every punch, round and prediction.</h2>
+                <span>
+                  Premium fight cards, live leaderboards and clean prediction
+                  flows stay focused on the contest, not hidden stat tables.
+                </span>
+                <Link href="/upcomingfights" className="fmm-art-link">
+                  Explore contests <FaArrowRight aria-hidden="true" />
+                </Link>
+              </div>
+              <div className="fmm-fight-art-media">
+                <Image
+                  src={HOME_FIGHT_ART_IMAGE}
+                  alt="Combat sports fight night"
+                  width={1280}
+                  height={720}
+                  sizes="(max-width: 1180px) 90vw, 58vw"
+                />
+              </div>
+            </section>
+          </main>
+        </div>
+        <div className="fmm-desktop-home-shell" hidden aria-hidden="true">
           <section
             className="fmm-home-hero"
             aria-label="Fantasy combat sports hero"
@@ -2732,7 +3039,7 @@ const HomeAnother = () => {
                       <span />
                     </div>
                     <div className="fmm-premium-loader-copy">
-                      <span>Syncing live cards</span>
+                      <span>Featured fight posters</span>
                       <strong>
                         Building the featured fight poster rail...
                       </strong>
@@ -2921,7 +3228,7 @@ const HomeAnother = () => {
               <div className="fmm-home-category-stack">
                 {matchStatus === "loading" && (
                   <div className="fmm-empty-card">
-                    Loading active contests...
+                    Refreshing active contests...
                   </div>
                 )}
                 {matchStatus === "failed" && (
@@ -3016,7 +3323,7 @@ const HomeAnother = () => {
                 <p>
                   <FaCrown /> New game mode
                 </p>
-                <h2>Pro Wrestling is now part of Fantasy MMADNESS.</h2>
+                <h2>Pro Wrestling is now part of Fantasy MMAdness.</h2>
                 <span>
                   Pro Wrestling remains inside the premium category tabs and
                   appears in its own fight section below.
@@ -3039,7 +3346,7 @@ const HomeAnother = () => {
               <div className="fmm-home-wrestling-visual">
                 <Image
                   src={HOME_WRESTLING_IMAGE}
-                  alt="Fantasy MMADNESS Pro Wrestling"
+                  alt="Fantasy MMAdness Pro Wrestling"
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1180px) 90vw, 50vw"
                 />
@@ -3089,7 +3396,7 @@ const HomeAnother = () => {
                 ) : (
                   <article className="is-empty">
                     <FaCrown />
-                    <strong>Wrestling contest cards will appear here.</strong>
+                    <strong>Open Pro Wrestling cards will appear here as soon as they are published.</strong>
                     <Link href="/pro-wrestling">Explore the new game mode</Link>
                   </article>
                 )}
@@ -3292,8 +3599,8 @@ const HomeAnother = () => {
                   Questions about leagues, sponsors, or fight cards?
                 </h2>
                 <span>
-                  Send a message and the team will follow up. The existing
-                  production contact endpoint is unchanged.
+                  Send a message and the team will follow up about leagues, sponsors,
+                  accounts, fight cards, or apparel orders.
                 </span>
               </div>
               <form onSubmit={handleSubmit}>

@@ -51,7 +51,7 @@ export const FeaturedFight = ({ match, index = 0, onAction, actionLabel }) => {
         </h2>
         <div className="xp-featured-meta">
           <span><FaCalendarAlt /> {formatFightDate(match)}</span>
-          <span><FaMapMarkerAlt /> {match.location || match.venue || 'Venue TBA'}</span>
+          <span><FaMapMarkerAlt /> {match.location || match.venue || 'Online fight card'}</span>
           <span><FaClock /> {getFightCategory(match)} · {getFightRounds(match)}</span>
         </div>
       </div>
@@ -66,6 +66,7 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
   if (!match) return null;
   const status = getFightStatus(match);
   const playerCount = getFightPlayerCount(match);
+  const playerLabel = playerCount > 0 ? `${playerCount} ${playerCount === 1 ? 'player' : 'players'}` : 'Open entries';
   const category = getFightCategory(match);
   const resultLabel = match?.winner || match?.winningFighter || match?.result || 'Result available';
   const actionLabel = suppliedActionLabel || (status === 'past' ? 'View result' : status === 'live' ? 'Follow live' : match?.matchTokens == null ? 'Enter free' : 'Enter fight');
@@ -85,7 +86,7 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
         <div className="xp-fight-card-details">
           <span><FaCalendarAlt /> {formatFightDate(match, { short: true })}</span>
           <span><FaClock /> {getFightRounds(match)}</span>
-          <span><FaUsers /> {playerCount} {playerCount === 1 ? 'player' : 'players'}</span>
+          <span><FaUsers /> {playerLabel}</span>
         </div>
         <div className="xp-fight-card-footer">
           <div>

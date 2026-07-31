@@ -123,20 +123,17 @@ export const getFightStatus = (match, now = new Date()) => {
   const date = parseFightDate(match);
   const isFuture = date && date.getTime() >= now.getTime();
 
-  if (source.includes('upcoming')) return 'upcoming';
   if (source.includes('past')) return 'past';
 
-  // Product rule: all LIVE fight records are upcoming cards. They move to
-  // Shadow/past after the scheduled date rollover handled by the backend.
-  if (type.includes('live') || source.includes('live fight')) return 'upcoming';
-
-  // Product rule: Shadow templates are past/template records unless an
-  // affiliate gives them a future promotion date, then they become upcoming.
+  // Shadow templates are past/template records unless an affiliate gives
+  // them a future promotion date, then they become upcoming.
   if (type.includes('shadow')) return isFuture ? 'upcoming' : 'past';
 
-  if (/(finished|completed|closed|past|result)/.test(source)) return 'past';
-  if (/live now|scoring/.test(source)) return 'live';
+  if (/(finished|completed|closed|past|result|final)/.test(source)) return 'past';
   if (date && date.getTime() < now.getTime()) return 'past';
+  if (source.includes('upcoming')) return 'upcoming';
+  if (/\blive now\b|\bscoring\b/.test(source)) return 'live';
+  if (type.includes('live') || source.includes('live fight')) return 'upcoming';
   return 'upcoming';
 };
 
@@ -149,7 +146,7 @@ export const getFightStatusLabel = (match) => {
 
 export const formatFightDate = (match, options = {}) => {
   const date = parseFightDate(match);
-  if (!date) return 'Schedule pending';
+  if (!date) return 'Date & time TBA';
   const base = options.short
     ? { month: 'short', day: 'numeric', year: 'numeric' }
     : { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
@@ -161,7 +158,7 @@ export const formatFightDate = (match, options = {}) => {
 
 export const getFightDayParts = (match) => {
   const date = parseFightDate(match);
-  if (!date) return { day: '--', month: 'TBA' };
+  if (!date) return { day: 'TBA', month: '' };
   return {
     day: date.toLocaleDateString('en-US', { day: '2-digit' }),
     month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
@@ -170,19 +167,22 @@ export const getFightDayParts = (match) => {
 
 export const getFightPlayerCount = (match) => {
   const predictions = safeArray(match?.userPredictions);
-  return Number(match?.playerCount || match?.players || predictions.length || 0);
+  const raw = match?.playerCount ?? match?.players ?? match?.entryCount ?? match?.entries ?? match?.participantCount ?? predictions.length ?? 0;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : 0;
 };
 
 export const getFightPrize = (match) => {
-  const raw = match?.pot ?? match?.prizePool ?? match?.prize ?? 0;
+  const raw = match?.pot ?? match?.currentPot ?? match?.prizePool ?? match?.prize ?? match?.rewardAmount ?? match?.entryPrize ?? 0;
+  if (typeof raw === 'string' && raw.trim() && !/^tba$/i.test(raw.trim())) return raw.trim();
   const amount = Number(raw);
-  if (!Number.isFinite(amount) || amount <= 0) return 'Prize TBA';
+  if (!Number.isFinite(amount) || amount <= 0) return 'Open prize pool';
   return `$${amount.toLocaleString()}`;
 };
 
 export const getFightRounds = (match) => {
   const rounds = match?.maxRounds || match?.rounds || match?.numberOfRounds;
-  return rounds ? `${rounds} rounds` : 'Rounds TBA';
+  return rounds ? `${rounds} rounds` : 'Prediction card';
 };
 
 export const getFightSearchText = (match) => [
