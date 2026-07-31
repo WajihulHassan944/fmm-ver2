@@ -34,7 +34,7 @@ import {
   FaVideo,
 } from 'react-icons/fa';
 
-const LOGO_URL = '/images/brand/fantasy-mmadness-sticker-logo.png';
+const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },

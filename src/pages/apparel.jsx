@@ -187,7 +187,7 @@ const ApparelPage = () => {
             </div>
           </div>
           <figure>
-            <img src="/images/brand/fantasy-mmadness-sticker-logo.png" alt="Fantasy MMAdness sticker logo" />
+            <img src="/images/brand/fantasy-mmadness-main-logo-v23.jpg" alt="Fantasy MMAdness sticker logo" />
           </figure>
         </section>
 

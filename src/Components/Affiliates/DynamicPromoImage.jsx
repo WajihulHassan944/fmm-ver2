@@ -13,7 +13,7 @@ const DynamicPromoImage = () => {
     usersInLeague: 500,
     fighterAImage: "https://i.ibb.co/mb8ZH7L/f2b08a202923.jpg",
     fighterBImage: "https://i.ibb.co/6D7QNHw/758447972263.jpg",
-    logoImage: "/images/brand/fantasy-mmadness-sticker-logo.png"
+    logoImage: "/images/brand/fantasy-mmadness-main-logo-v23.jpg"
   };
 
   useEffect(() => {

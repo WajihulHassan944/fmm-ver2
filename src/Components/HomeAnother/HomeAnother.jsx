@@ -66,7 +66,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
-const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v11";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v23";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -1152,6 +1152,10 @@ const MobilePhoneHome = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [rewardBurst, setRewardBurst] = useState(false);
+  const [coinFunnelOpen, setCoinFunnelOpen] = useState(false);
+  const [coinTopUpBonus, setCoinTopUpBonus] = useState(0);
+  const [selectedCoinPack, setSelectedCoinPack] = useState(null);
+  const [coinToast, setCoinToast] = useState("");
   const [blogs, setBlogs] = useState([]);
   const [animatedStats, setAnimatedStats] = useState({
     predictors: 0,
@@ -1541,6 +1545,35 @@ const MobilePhoneHome = ({
     "You",
   );
 
+  const displayCoinBalance = Math.max(0, (tokenBalance > 0 ? tokenBalance : 2450) + coinTopUpBonus);
+  const coinPackages = [
+    { amount: 1000, price: "$0.99", label: "Starter Pack" },
+    { amount: 5000, price: "$3.99", label: "Most Popular", popular: true },
+    { amount: 15000, price: "$9.99", label: "Power Pack" },
+  ];
+
+  const openCoinFunnel = () => {
+    onPremiumTap("coin");
+    setCoinToast("");
+    setSelectedCoinPack(null);
+    setCoinFunnelOpen(true);
+  };
+
+  const closeCoinFunnel = () => {
+    onPremiumTap("click");
+    setCoinFunnelOpen(false);
+  };
+
+  const handleCoinPackageSelect = (amount, price) => {
+    onPremiumTap("reward");
+    setSelectedCoinPack({ amount, price });
+    setCoinToast(`${amount.toLocaleString()} FM coins selected · ${price}`);
+    setRewardBurst(true);
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => setRewardBurst(false), 700);
+    }
+  };
+
   const menuLinks = [
     ["/", "Home", FaHome],
     ["/upcomingfights", "Contests", FaTrophy],
@@ -1564,9 +1597,11 @@ const MobilePhoneHome = ({
   const claimReward = () => {
     onPremiumTap("reward");
     setRewardBurst(true);
-    window.setTimeout(() => {
-      if (typeof window !== "undefined") window.location.assign("/fights-rewards");
-    }, 520);
+    setCoinTopUpBonus((current) => current + 250);
+    setCoinToast("Daily reward claimed · +250 FM");
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => setRewardBurst(false), 900);
+    }
   };
 
   const blogFallbacks = [
@@ -1666,9 +1701,9 @@ const MobilePhoneHome = ({
           <span /><span /><span />
         </button>
         <div className="fmm-app-top-actions">
-          <Link href="/fights-rewards" className="fmm-app-wallet" onClick={() => onPremiumTap("coin")}>
-            <b>FM</b><strong>2,450</strong><i><FaPlus aria-hidden="true" /></i>
-          </Link>
+          <button type="button" className="fmm-app-wallet" onClick={openCoinFunnel} aria-label={`Open FM coin wallet with ${displayCoinBalance.toLocaleString()} coins`}>
+            <b>FM</b><strong>{displayCoinBalance.toLocaleString()}</strong><i><FaPlus aria-hidden="true" /></i>
+          </button>
           <Link href={profileHref} className="fmm-app-notify" onClick={() => onPremiumTap()} aria-label="Open profile">
             <FaUserAlt aria-hidden="true" />
             <em>18</em>
@@ -1880,9 +1915,9 @@ const MobilePhoneHome = ({
         <button type="button" className={rewardBurst ? "is-claiming" : ""} onClick={claimReward}>
           <FaGift aria-hidden="true" /><span>COME BACK EVERY DAY & BUILD YOUR STREAK!</span><strong>CLAIM REWARD</strong>
         </button>
-        <Link href="/fights-rewards" onClick={() => onPremiumTap("coin")}>
-          <FaCoins aria-hidden="true" /><span>COINS WALLET</span><strong>2,450 COINS</strong><b>ADD COINS +</b>
-        </Link>
+        <button type="button" className="fmm-app-coin-wallet-card" onClick={openCoinFunnel}>
+          <FaCoins aria-hidden="true" /><span>COINS WALLET</span><strong>{displayCoinBalance.toLocaleString()} COINS</strong><b>ADD COINS +</b>
+        </button>
       </section>
 
       <section className="fmm-app-leader-streak" aria-label="Leaderboard and streak bonus">
@@ -1925,21 +1960,77 @@ const MobilePhoneHome = ({
           <small>Promote fights. Build a league. Get players moving.</small>
           <b>BECOME A PARTNER →</b>
         </Link>
-        <Link href="/fights-rewards" className="fmm-app-chest" onClick={() => onPremiumTap("coin")}>
+        <button type="button" className="fmm-app-chest fmm-app-coin-chest-trigger" onClick={openCoinFunnel} aria-label="Open FM coin funnel">
           <img src={`${appAssetBase}/chest-transparent.png`} alt="Treasure chest" />
           <span>🪙</span><span>💰</span><span>🪙</span>
-        </Link>
+        </button>
         <div className="fmm-app-socials" aria-label="Social channels">
           {[
-            ["https://x.com/FMmadness2024", "X"],
-            ["https://www.instagram.com/fantasymmadness", "Instagram"],
-            ["https://www.facebook.com/fantasymmadness", "Facebook"],
-            ["https://www.tiktok.com/@fantasymmadness", "TikTok"],
-          ].map(([href, label]) => (
-            <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={`Open ${label}`}>{label}</a>
+            ["https://x.com/FMmadness2024", "X", "X"],
+            ["https://www.instagram.com/fantasymmadness", "Instagram", "IG"],
+            ["https://www.facebook.com/fantasymmadness", "Facebook", "FB"],
+            ["https://www.tiktok.com/@fantasymmadness", "TikTok", "TT"],
+          ].map(([href, label, shortLabel]) => (
+            <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={`Open ${label}`}>
+              <span aria-hidden="true">{shortLabel}</span>
+              <strong>{label}</strong>
+            </a>
           ))}
         </div>
       </section>
+
+      {coinFunnelOpen && (
+        <div className="fmm-app-coin-funnel" role="dialog" aria-modal="true" aria-labelledby="fmm-app-coin-funnel-title">
+          <button type="button" className="fmm-app-coin-funnel-backdrop" aria-label="Close coin wallet" onClick={closeCoinFunnel} />
+          <section className="fmm-app-coin-funnel-card">
+            <button type="button" className="fmm-app-coin-funnel-close" onClick={closeCoinFunnel} aria-label="Close coin wallet">
+              <FaTimes aria-hidden="true" />
+            </button>
+            <div className="fmm-app-coin-funnel-hero">
+              <img src={`${appAssetBase}/chest-transparent.png`} alt="FM coin treasure chest" />
+              <div>
+                <span>FM COINS</span>
+                <h2 id="fmm-app-coin-funnel-title">Power your next picks</h2>
+                <strong>{displayCoinBalance.toLocaleString()} coins</strong>
+              </div>
+            </div>
+            <p>Choose a coin pack, enter paid cards faster, and keep the fight-night funnel inside the phone app flow.</p>
+            <div className="fmm-app-coin-packages">
+              {coinPackages.map((pack) => (
+                <button
+                  type="button"
+                  key={pack.amount}
+                  className={[pack.popular ? "is-popular" : "", selectedCoinPack?.amount === pack.amount ? "is-selected" : ""].filter(Boolean).join(" ")}
+                  onClick={() => handleCoinPackageSelect(pack.amount, pack.price)}
+                >
+                  {pack.popular ? <em>MOST POPULAR</em> : null}
+                  <span>{pack.label}</span>
+                  <strong>{pack.amount.toLocaleString()} FM</strong>
+                  <b>{pack.price}</b>
+                </button>
+              ))}
+            </div>
+            {coinToast ? <div className="fmm-app-coin-toast">{coinToast}</div> : null}
+            {selectedCoinPack ? (
+              <Link
+                href={isLoggedIn ? "/checkout" : "/CreateAccount"}
+                className="fmm-app-coin-signup"
+                onClick={() => onPremiumTap("whoosh")}
+              >
+                {isLoggedIn ? "Continue to secure checkout" : "Create account to continue"}
+              </Link>
+            ) : !isLoggedIn ? (
+              <Link href="/CreateAccount" className="fmm-app-coin-signup" onClick={() => onPremiumTap("whoosh")}>
+                🎁 Sign up and start with bonus FM coins
+              </Link>
+            ) : (
+              <Link href="/checkout" className="fmm-app-coin-signup" onClick={() => onPremiumTap("whoosh")}>
+                Select a pack to continue
+              </Link>
+            )}
+          </section>
+        </div>
+      )}
 
       <nav className="fmm-app-bottom-nav" aria-label="Mobile homepage navigation">
         {navItems.map(([href, label, Icon, id, className]) => (

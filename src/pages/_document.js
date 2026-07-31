@@ -108,7 +108,7 @@ export default function Document() {
               "@type": "SportsOrganization",
               name: "Fantasy MMAdness",
               url: "https://www.fantasymmadness.com",
-              logo: "https://www.fantasymmadness.com/images/brand/fantasy-mmadness-sticker-logo.png",
+              logo: "https://www.fantasymmadness.com/images/brand/fantasy-mmadness-main-logo-v23.jpg",
               sameAs: [
                 "https://www.facebook.com/fantasymmadness",
                 "https://www.instagram.com/fantasymmadness",
