@@ -199,7 +199,7 @@ body:has(.fmm-app-fixed-home) .fmm-app-mini-coins > b {
 }
 body:has(.fmm-app-fixed-home) .fmm-app-mini-leader {
   text-align:left !important;
-  background:linear-gradient(160deg,rgba(18,10,3,.92),rgba(3,5,10,.98)), url('/images/mobile-home/app-fixed-v30/pasted-1785012542538-0.png') center/cover !important;
+  background:linear-gradient(160deg,rgba(18,10,3,.92),rgba(3,5,10,.98)), url('/images/mobile-home/app-fixed-v31/pasted-1785012542538-0.png') center/cover !important;
 }
 body:has(.fmm-app-fixed-home) .fmm-app-mini-leader header {
   display:flex !important;
@@ -246,7 +246,7 @@ body:has(.fmm-app-fixed-home) .fmm-app-mini-leader p strong {
 }
 body:has(.fmm-app-fixed-home) .fmm-app-mini-leader p.is-you { color:#22c55e !important; }
 body:has(.fmm-app-fixed-home) .fmm-app-mini-streak {
-  background:linear-gradient(160deg,rgba(21,8,8,.88),rgba(3,5,10,.96)), url('/images/mobile-home/app-fixed-v30/pasted-1785014166827-0.png') center/cover !important;
+  background:linear-gradient(160deg,rgba(21,8,8,.88),rgba(3,5,10,.96)), url('/images/mobile-home/app-fixed-v31/pasted-1785014166827-0.png') center/cover !important;
   border-color:rgba(239,68,68,.55) !important;
 }
 body:has(.fmm-app-fixed-home) .fmm-app-mini-streak h3 {

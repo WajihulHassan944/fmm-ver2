@@ -67,7 +67,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
-const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v30";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v31";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -1675,11 +1675,11 @@ const MobilePhoneHome = ({
     "/images/pro-wrestling/pro-wrestling-hero.webp",
   ];
   const appApparel = [
-    { name: "MMADNESS HOODIE", price: "$49.99", image: "/images/mobile-home/app-fixed-v15/ap1-hq.webp" },
-    { name: "FIGHT TEE", price: "$29.99", image: "/images/mobile-home/app-fixed-v15/ap2-hq.webp" },
-    { name: "SNAPBACK CAP", price: "$24.99", image: "/images/mobile-home/app-fixed-v15/ap3-hq.webp" },
-    { name: "FIGHT SHORTS", price: "$39.99", image: "/images/mobile-home/app-fixed-v15/ap1-2-hq.webp" },
-    { name: "TRAINING GLOVES", price: "$34.99", image: "/images/mobile-home/app-fixed-v15/ap2-2-hq.webp" },
+    { name: "MMADNESS HOODIE", price: "$49.99", image: `${appAssetBase}/ap1-hq.webp` },
+    { name: "FIGHT TEE", price: "$29.99", image: `${appAssetBase}/ap2-hq.webp` },
+    { name: "SNAPBACK CAP", price: "$24.99", image: `${appAssetBase}/ap3-hq.webp` },
+    { name: "FIGHT SHORTS", price: "$39.99", image: `${appAssetBase}/ap1-2-hq.webp` },
+    { name: "TRAINING GLOVES", price: "$34.99", image: `${appAssetBase}/ap2-2-hq.webp` },
   ];
   const featuredFightList = (selectedSportFights.length ? selectedSportFights : uniqueAllFights.length ? uniqueAllFights : [featuredFight]).filter(Boolean).slice(0, 4);
   const featuredEntryFee = getMobileEntryFee(featuredFight);
