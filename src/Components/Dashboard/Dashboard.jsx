@@ -160,7 +160,7 @@ const getDashboardMobilePrize = (match = {}) => {
   const amount = Number(
     match?.pot ?? match?.currentPot ?? match?.prizePool ?? match?.prize ?? 0,
   );
-  return amount > 0 ? `$${amount.toLocaleString()}` : "Open prize pool";
+  return amount > 0 ? `$${amount.toLocaleString()}` : "Prize TBA";
 };
 
 const getDashboardMobileFightTitle = (match = {}) =>

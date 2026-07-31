@@ -478,43 +478,23 @@ export const fetchPublicPredictionFights = async (query = {}) => {
   return dedupePublicFights(await fetchPublicFights(requestQuery));
 };
 
-
-const normalizeLeaderboardRows = (rows = [], limit = 10) => {
-  const normalized = Array.isArray(rows) ? rows.filter(Boolean) : [];
-  return normalized
-    .filter((row) => {
-      const marker = String(row?._id || row?.id || row?.source || '').toLowerCase();
-      return !marker.startsWith('fallback-') && !marker.includes('mock-leaderboard');
-    })
-    .map((row) => ({
-      ...row,
-      totalPoints: Number(row?.totalPoints || row?.points || row?.totalScore || row?.score || row?.classicPoints || row?.proWrestlingPoints || 0),
-    }))
-    .filter((row) => Number.isFinite(row.totalPoints))
-    .sort((a, b) => Number(b.totalPoints || 0) - Number(a.totalPoints || 0))
-    .slice(0, Number(limit) || 10);
-};
-
 export const fetchPublicLeaderboard = async (query = {}) => {
-  const limit = Number(query?.limit || 10);
-
   try {
     const payload = await safeFetchJson(
       "/api/public/leaderboard",
-      { limit, fresh: Date.now(), ...query },
+      { limit: 10, ...query },
       { timeoutMs: 8000 },
     );
-    const leaderboard = normalizeLeaderboardRows(payload?.leaderboard, limit);
     return {
-      leaderboard,
-      playerCount: Number(payload?.playerCount || leaderboard.length || 0),
+      leaderboard: Array.isArray(payload?.leaderboard)
+        ? payload.leaderboard
+        : [],
+      playerCount: Number(payload?.playerCount || 0),
       generatedAt: payload?.generatedAt,
-      source: payload?.source || 'backend',
-      diagnostics: payload?.diagnostics || null,
     };
   } catch (error) {
     console.warn("Public leaderboard API unavailable:", error.message);
-    return { leaderboard: [], playerCount: 0, generatedAt: null, source: 'unavailable', diagnostics: null };
+    return { leaderboard: [], playerCount: 0, generatedAt: null };
   }
 };
 

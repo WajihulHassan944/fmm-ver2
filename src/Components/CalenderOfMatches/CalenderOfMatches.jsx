@@ -559,7 +559,7 @@ const CalenderOfMatches = () => {
                           </>
                         ) : (
                           <>
-                            <FaClock /> {formatTime(match?.matchTime)} · <FaMapMarkerAlt /> {match?.venue || 'Online fight card'}
+                            <FaClock /> {formatTime(match?.matchTime)} · <FaMapMarkerAlt /> {match?.venue || 'Venue TBA'}
                           </>
                         )}
                       </small>
@@ -602,7 +602,7 @@ const CalenderOfMatches = () => {
             <div className="premium-calendar-fight-meta">
               <span><FaCalendarAlt /> {formatDateKey(currentMatch.matchDate) || 'Date TBA'}</span>
               <span><FaClock /> {formatTime(currentMatch.matchTime)}</span>
-              <span><FaMapMarkerAlt /> {currentMatch.venue || 'Online fight card'}</span>
+              <span><FaMapMarkerAlt /> {currentMatch.venue || 'Venue TBA'}</span>
             </div>
           </div>
         </div>

@@ -89,7 +89,7 @@ export const QUICK_CAMPAIGN_PRESETS = [
     sport: 'combat',
     vertical: 'combat',
     includeAll: true,
-    title: 'Fantasy MMAdness July 10,000 Signup Growth System',
+    title: 'Fantasy MMadness July 10,000 Signup Growth System',
     copy: 'Run the safe daily growth pack for 30-60 approval-first content assets.',
   },
   {

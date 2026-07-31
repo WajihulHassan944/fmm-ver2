@@ -95,18 +95,18 @@ const PromoShadowPage = ({ affiliate, matchData }) => {
   return (
     <>
       <Head>
-        <title>{`${fighterAName} vs ${fighterBName} | Fantasy MMAdness ${categoryLabel}`}</title>
+        <title>{`${fighterAName} vs ${fighterBName} | Fantasy MMADNESS ${categoryLabel}`}</title>
         <meta
           name="description"
-          content={`Join ${affiliateName}'s Fantasy MMAdness promotion for ${fighterAName} vs ${fighterBName}. Make predictions, follow the card, and compete with the league.`}
+          content={`Join ${affiliateName}'s Fantasy MMADNESS promotion for ${fighterAName} vs ${fighterBName}. Make predictions, follow the card, and compete with the league.`}
         />
-        <meta property="og:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMAdness`} />
+        <meta property="og:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMADNESS`} />
         <meta property="og:description" content={matchData?.matchDescription || `Fantasy fight promotion by ${affiliateName}.`} />
         <meta property="og:url" content={promotionUrl} />
         <meta property="og:image" content={safeMetaImage} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMAdness`} />
+        <meta name="twitter:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMADNESS`} />
         <meta name="twitter:description" content={`Join the ${categoryLabel} fantasy promotion and make your fight picks.`} />
         <meta name="twitter:image" content={safeMetaImage} />
         <script
@@ -128,7 +128,7 @@ const PromoShadowPage = ({ affiliate, matchData }) => {
                 { '@type': 'Person', name: fighterAName, image: fighterAImage },
                 { '@type': 'Person', name: fighterBName, image: fighterBImage },
               ],
-              organizer: { '@type': 'Organization', name: 'Fantasy MMAdness', url: 'https://fantasymmadness.com' },
+              organizer: { '@type': 'Organization', name: 'Fantasy MMADNESS', url: 'https://fantasymmadness.com' },
             }),
           }}
         />

@@ -56,14 +56,14 @@ const WrestlingLeaderboardDirectory = () => {
 
   return (
     <>
-      <Head><title>Pro Wrestling Leaderboards | Fantasy MMAdness</title></Head>
+      <Head><title>Pro Wrestling Leaderboards | Fantasy MMADNESS</title></Head>
       <div className="pw-page pw-leaderboard-directory-page">
         <WrestlingHero
           compact
           eyebrow="Wrestling rankings archive"
           title="Every card."
           accent="Every leaderboard."
-          description="Open live standings or finalized results for every Pro Wrestling contest inside Fantasy MMAdness."
+          description="Open live standings or finalized results for every Pro Wrestling contest inside Fantasy MMADNESS."
           actions={[
             { href: '/pro-wrestling', label: 'Open contest lobby', icon: FaBolt },
             { href: '/pro-wrestling/history', label: 'My wrestling record', secondary: true, icon: FaChartLine },

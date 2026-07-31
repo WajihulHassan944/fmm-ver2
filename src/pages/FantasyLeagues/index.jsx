@@ -16,57 +16,18 @@ import {
 import styles from './FantasyLeagues.module.css';
 import { useSelector } from 'react-redux';
 import Login from '@/Components/Login/Login';
-import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 
-const FALLBACK_USERS = [
-  { _id: 'league-user-1', firstName: 'KO', lastName: 'Beast', playerName: 'KO_Beast', profileUrl: '/images/fmm-experience/fighter-jadden-addison.webp' },
-  { _id: 'league-user-2', firstName: 'Fight', lastName: 'Wizard', playerName: 'FightWizard', profileUrl: '/images/fmm-experience/fighter-zaveer-davis.webp' },
-  { _id: 'league-user-3', firstName: 'Champ', lastName: 'Mind', playerName: 'ChampMind', profileUrl: '/images/fmm-experience/fighter-conor-benn.webp' },
-  { _id: 'league-user-4', firstName: 'Kelly', lastName: 'D', playerName: 'KellyD', profileUrl: '/images/fmm-experience/fighter-chris-eubank-jr.webp' },
-  { _id: 'league-user-5', firstName: 'The', lastName: 'Ghost', playerName: 'TheGhost', profileUrl: '/images/fmm-experience/fighter-anthony-yarde.webp' },
-];
-
-const FALLBACK_LEAGUES = [
-  {
-    _id: 'league-boxing-main-event',
-    firstName: 'Main Event',
-    lastName: 'Boxing Room',
-    playerName: 'Main Event Boxing League',
-    profileUrl: '/images/mobile-home/categories/fmm-category-boxing-reference-v2.png',
-    rewardTitle: 'Weekly boxing leaderboard rewards',
-    usersJoined: FALLBACK_USERS.slice(0, 4).map((member) => ({ userId: member._id })),
-  },
-  {
-    _id: 'league-mma-sharp-picks',
-    firstName: 'MMA',
-    lastName: 'Sharp Picks',
-    playerName: 'MMA Sharp Picks League',
-    profileUrl: '/images/mobile-home/categories/fmm-category-mma-reference-v2.png',
-    rewardTitle: 'Top predictor badge',
-    usersJoined: FALLBACK_USERS.slice(1, 5).map((member) => ({ userId: member._id })),
-  },
-  {
-    _id: 'league-bare-knuckle',
-    firstName: 'Bare Knuckle',
-    lastName: 'Fight Room',
-    playerName: 'Bare Knuckle Fight Room',
-    profileUrl: '/images/mobile-home/categories/fmm-category-bare-knuckle-reference-v2.png',
-    rewardTitle: 'Creator challenge rewards',
-    usersJoined: FALLBACK_USERS.slice(0, 3).map((member) => ({ userId: member._id })),
-  },
-];
-
 const FantasyLeagues = () => {
-  const [affiliates, setAffiliates] = useState(FALLBACK_LEAGUES);
-  const [users, setUsers] = useState(FALLBACK_USERS);
+  const [affiliates, setAffiliates] = useState([]);
+  const [users, setUsers] = useState([]);
   const [openCardIds, setOpenCardIds] = useState({});
   const [redirectToLogin, setRedirectToLogin] = useState(false);
   const [pendingAffiliateJoin, setPendingAffiliateJoin] = useState(null);
   const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [joiningId, setJoiningId] = useState(null);
 
@@ -78,25 +39,25 @@ const FantasyLeagues = () => {
     setLoadError('');
 
     try {
-      const response = await fetch(buildPublicApiUrl('/api/public/leagues', { limit: 12 }));
-      if (!response.ok) throw new Error('League directory could not be loaded.');
+      const [affiliatesRes, usersRes] = await Promise.all([
+        fetch(`${API_BASE}/affiliates`),
+        fetch(`${API_BASE}/users`),
+      ]);
 
-      const payload = await response.json();
-      const leagueRows = safeArray(payload?.leagues || payload?.affiliates || payload?.data || payload);
-      const userRows = safeArray(payload?.users);
-
-      if (leagueRows.length) {
-        setAffiliates(leagueRows);
-        setUsers(userRows.length ? userRows : FALLBACK_USERS);
-      } else {
-        setAffiliates(FALLBACK_LEAGUES);
-        setUsers(FALLBACK_USERS);
+      if (!affiliatesRes.ok || !usersRes.ok) {
+        throw new Error('League directory could not be loaded.');
       }
+
+      const affiliatesData = await affiliatesRes.json();
+      const usersData = await usersRes.json();
+
+      setAffiliates(safeArray(affiliatesData));
+      setUsers(safeArray(usersData));
     } catch (error) {
-      console.error('Failed to fetch league data:', error);
-      setAffiliates(FALLBACK_LEAGUES);
-      setUsers(FALLBACK_USERS);
-      setLoadError('');
+      console.error('Failed to fetch data:', error);
+      setAffiliates([]);
+      setUsers([]);
+      setLoadError('The fantasy league directory is temporarily unavailable.');
     } finally {
       setIsLoading(false);
     }
@@ -245,7 +206,7 @@ const FantasyLeagues = () => {
                 <article><strong>{totalMembers}</strong><span>League members</span></article>
                 <article><strong>{rewardLeagues}</strong><span>Reward leagues</span></article>
               </div>
-              <p><FaShieldAlt /> Join league rooms, track members, and compete from one Fantasy MMAdness account.</p>
+              <p><FaShieldAlt /> Joining still uses the existing account and affiliate league APIs.</p>
             </aside>
           </div>
         </section>

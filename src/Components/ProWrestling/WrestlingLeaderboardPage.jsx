@@ -76,7 +76,7 @@ const WrestlingLeaderboardPage = () => {
         <section className="pw-leaderboard-hero">
           <div className="theme-container">
             <Link href={`/pro-wrestling/matches/${match._id}`} className="pw-inline-back"><FaArrowLeft /> Contest overview</Link>
-            <div className="pw-leaderboard-hero-copy"><p>Fantasy MMAdness Pro Wrestling</p><h1>The action decides. <span>The leaderboard remembers.</span></h1><div><WrestlingStatusBadge status={match.status} /><span><FaCrown /> Winner: {winnerLabel(match.officialWinner, match)}</span><span><FaCoins /> {formatTokenAmount(match.currentPot)} token pot</span></div></div>
+            <div className="pw-leaderboard-hero-copy"><p>Fantasy MMADNESS Pro Wrestling</p><h1>The action decides. <span>The leaderboard remembers.</span></h1><div><WrestlingStatusBadge status={match.status} /><span><FaCrown /> Winner: {winnerLabel(match.officialWinner, match)}</span><span><FaCoins /> {formatTokenAmount(match.currentPot)} token pot</span></div></div>
             <div className="pw-leaderboard-fighters"><img src={getWrestlerImage(match.competitorA, 'A')} alt={match.competitorA.displayName} /><strong>{match.competitorA.displayName} <em>VS</em> {match.competitorB.displayName}</strong><img src={getWrestlerImage(match.competitorB, 'B')} alt={match.competitorB.displayName} /></div>
           </div>
         </section>

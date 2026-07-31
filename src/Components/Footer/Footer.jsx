@@ -17,7 +17,7 @@ import {
   FaYoutube,
 } from 'react-icons/fa';
 
-const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
 
 const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/fantasymmadness', icon: FaInstagram },
@@ -134,18 +134,7 @@ const Footer = () => {
 
         <div className="fmm-footer-bottom">
           <Link href={dashboardHomeHref} className="fmm-footer-logo" aria-label="Fantasy MMAdness home">
-            <img
-              src={LOGO_URL}
-              alt="Fantasy MMAdness"
-              width="180"
-              height="180"
-              loading="lazy"
-              decoding="async"
-              onError={(event) => {
-                event.currentTarget.onerror = null;
-                event.currentTarget.src = '/images/fmm-experience/fantasy-mmadness-logo.png';
-              }}
-            />
+            <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={180} height={80} sizes="180px" />
           </Link>
           <nav aria-label="Footer navigation">
             {quickLinks.map(([label, href]) => (

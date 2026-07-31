@@ -119,7 +119,7 @@ function SwarmJobSummaryPage() {
   return (
     <AdminPrivateRoute>
       <Head>
-        <title>{mainTitle} | Fantasy MMAdness Admin</title>
+        <title>{mainTitle} | Fantasy MMADNESS Admin</title>
       </Head>
 
       <main className="admin-workspace admin-swarm-job-detail-page">

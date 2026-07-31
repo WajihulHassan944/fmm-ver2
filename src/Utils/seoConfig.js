@@ -1,8 +1,4 @@
-const configuredSiteUrl = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim();
-const safeSiteUrl = configuredSiteUrl && !/localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(configuredSiteUrl)
-  ? configuredSiteUrl
-  : 'https://www.fantasymmadness.com';
-export const SITE_URL = safeSiteUrl.replace(/\/$/, '');
+export const SITE_URL = String(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fantasymmadness.com').replace(/\/$/, '');
 export const SITE_NAME = 'Fantasy MMAdness';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/fmm-pages/premium-duel-banner.webp`;
 
@@ -10,7 +6,7 @@ const baseDescription = 'Play fantasy MMA, Boxing, Kickboxing, Bare-Knuckle, and
 
 export const SEO_ROUTE_MAP = {
   '/': {
-    title: 'Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing',
+    title: 'Fantasy MMAdness | Fantasy MMA, Boxing & Pro Wrestling Contests',
     description: baseDescription,
     keywords: 'fantasy MMA, fantasy boxing, fantasy combat sports, UFC predictions, boxing predictions, pro wrestling fantasy, fight contests',
     image: `${SITE_URL}/images/fmm-experience/homepage-fight-hero.webp`,
@@ -305,7 +301,7 @@ export const buildOrganizationSchema = () => ({
   '@type': 'SportsOrganization',
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/images/brand/fantasy-mmadness-main-logo-v23.jpg`,
+  logo: `${SITE_URL}/images/fmm-experience/fantasy-mmadness-logo.webp`,
   sameAs: [
     'https://www.instagram.com/fantasymmadness',
     'https://x.com/FMmadness2024',

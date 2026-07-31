@@ -489,7 +489,7 @@ const AffiliateDashboard = () => {
                   <p className="xp-eyebrow"><FaCrown /> Pro Wrestling game mode</p>
                   <h2>Bring your audience into the wrestling arena.</h2>
                   <p>
-                    Pro Wrestling contests use the same Fantasy MMAdness account, wallet, and affiliate attribution.
+                    Pro Wrestling contests use the same Fantasy MMADNESS account, wallet, and affiliate attribution.
                     Share an assigned card and monitor entries and earned commission from this creator workspace.
                   </p>
                   <div className="affiliate-wrestling-command-stats">

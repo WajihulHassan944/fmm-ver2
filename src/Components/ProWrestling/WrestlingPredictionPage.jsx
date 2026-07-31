@@ -130,7 +130,7 @@ const WrestlingPredictionPage = () => {
   if (!isAuthenticated) {
     return (
       <div className="pw-page pw-state-page">
-        <div className="pw-state-card"><FaShieldAlt /><h1>Player login required</h1><p>Sign in with your Fantasy MMAdness player account to enter and edit a Pro Wrestling scorecard.</p><Link href={`/auth?mode=login&role=player&next=${encodeURIComponent(router.asPath)}`} className="pw-btn pw-btn-primary">Player login <FaArrowRight /></Link></div>
+        <div className="pw-state-card"><FaShieldAlt /><h1>Player login required</h1><p>Sign in with your Fantasy MMADNESS player account to enter and edit a Pro Wrestling scorecard.</p><Link href={`/auth?mode=login&role=player&next=${encodeURIComponent(router.asPath)}`} className="pw-btn pw-btn-primary">Player login <FaArrowRight /></Link></div>
       </div>
     );
   }
@@ -227,7 +227,7 @@ const WrestlingPredictionPage = () => {
           </section>
 
           <section className="pw-prediction-help">
-            <img src="/images/pro-wrestling/prediction-mockup.webp" alt="Fantasy MMAdness wrestling scorecard visual" />
+            <img src="/images/pro-wrestling/prediction-mockup.webp" alt="Fantasy MMADNESS wrestling scorecard visual" />
             <div><p className="pw-eyebrow"><FaCoins /> Scoring mindset</p><h2>Accuracy beats volume.</h2><p>Do not simply enter the highest possible numbers. Exact values earn the strongest multiplier, with reduced credit as the prediction moves farther from the official total.</p><Link href="/pro-wrestling/how-to-play">Review category weights and tie-breaks <FaArrowRight /></Link></div>
           </section>
         </main>

@@ -19,7 +19,6 @@ import {
   FaFistRaised,
   FaLayerGroup,
   FaMoneyCheckAlt,
-  FaShoppingBag,
   FaNewspaper,
   FaPlus,
   FaRobot,
@@ -33,7 +32,9 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
-const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
+import OptimizedImage from '@/Components/Common/OptimizedImage';
+
+const LOGO_URL = '/images/fmm-experience/fantasy-mmadness-logo.webp';
 
 const navigationGroups = [
   {
@@ -74,7 +75,6 @@ const navigationGroups = [
       { label: 'Affiliate users', href: '/administration/AffiliateUsers', icon: FaUserFriends },
       { label: 'Guest & suspended', href: '/administration/non-registered-users', icon: FaShieldAlt, matchPrefixes: ['/administration/suspended-accounts'] },
       { label: 'Payouts', href: '/administration/payouts', icon: FaMoneyCheckAlt },
-      { label: 'Apparel orders', href: '/administration/apparel-orders', icon: FaShoppingBag },
       { label: 'Sponsors', href: '/administration/sponsors', icon: FaTrophy },
     ],
   },
@@ -171,18 +171,7 @@ const AdminHeader = () => {
       <aside className={`admin-command-nav ${menuOpen ? 'is-open' : ''} ${compact ? 'is-compact' : ''}`} aria-label="Administration navigation">
         <div className="admin-command-brand">
           <Link href="/administration" aria-label="Administration dashboard">
-            <img
-              src={LOGO_URL}
-              alt="Fantasy MMAdness"
-              width="168"
-              height="168"
-              loading="eager"
-              decoding="async"
-              onError={(event) => {
-                event.currentTarget.onerror = null;
-                event.currentTarget.src = '/images/fmm-experience/fantasy-mmadness-logo.png';
-              }}
-            />
+            <OptimizedImage src={LOGO_URL} alt="Fantasy MMAdness" width={168} height={76} sizes="168px" />
             <span><strong>FMM</strong><small>Command center</small></span>
           </Link>
           <button type="button" onClick={() => setCompact((current) => !current)} aria-label={compact ? 'Expand navigation' : 'Compact navigation'}>

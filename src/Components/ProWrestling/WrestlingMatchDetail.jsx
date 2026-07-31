@@ -135,14 +135,14 @@ const WrestlingMatchDetail = () => {
 
   return (
     <>
-      <Head><title>{match.matchTitle} | Pro Wrestling | Fantasy MMAdness</title></Head>
+      <Head><title>{match.matchTitle} | Pro Wrestling | Fantasy MMADNESS</title></Head>
       <div className="pw-page pw-match-detail-page">
         <section className="pw-detail-hero" style={{ '--pw-detail-bg': `url(${match.bannerImage || '/images/pro-wrestling/wrestling-match-premium.webp'})` }}>
           <div className="pw-detail-hero-grid" />
           <div className="theme-container pw-detail-hero-inner">
             <Link href="/pro-wrestling" className="pw-inline-back"><FaArrowLeft /> Wrestling lobby</Link>
             <div className="pw-detail-title-row">
-              <div><p>{match.promotionName || 'Fantasy MMAdness Wrestling'} · {match.eventName}</p><h1>{match.matchTitle}</h1><span>{match.description || 'Predict the full action across both competitors and lock in the official winner.'}</span></div>
+              <div><p>{match.promotionName || 'Fantasy MMADNESS Wrestling'} · {match.eventName}</p><h1>{match.matchTitle}</h1><span>{match.description || 'Predict the full action across both competitors and lock in the official winner.'}</span></div>
               <WrestlingStatusBadge status={match.status} />
             </div>
             <div className="pw-detail-fight-stage">

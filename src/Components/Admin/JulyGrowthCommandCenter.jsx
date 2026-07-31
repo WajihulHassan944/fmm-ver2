@@ -20,7 +20,7 @@ import {
 import { formatJobTypeLabel, formatSwarmDate, swarmApi } from '@/Utils/swarmApi';
 
 const DEFAULT_GROWTH_FORM = {
-  title: 'Fantasy MMAdness July 10,000 Signup Growth System',
+  title: 'Fantasy MMadness July 10,000 Signup Growth System',
   topic: 'Acquire quality users by turning every combat sports event into Content → Prediction → Signup → Return Visit. Create approval-first assets only.',
   sport: 'combat',
   signupGoal: 10000,
@@ -54,7 +54,7 @@ const JulyGrowthCommandCenter = ({ onSubmitted }) => {
   const latestJobs = safeArray(dashboardPayload?.latestJobs);
   const latestArtifacts = safeArray(dashboardPayload?.latestArtifacts);
 
-  const youtubeCta = config?.requiredYouTubeEndingLine || 'Make your picks on Fantasy MMAdness before the event starts.';
+  const youtubeCta = config?.requiredYouTubeEndingLine || 'Make your picks on Fantasy MMadness before the event starts.';
   const logoReady = Boolean(config?.brandLogo?.url);
 
   const loadGrowth = useCallback(async () => {

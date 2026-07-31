@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { SCORE_POINTS } from '@/Utils/scoringRules';
 import {
   FaBell,
   FaCoins,
@@ -31,7 +30,7 @@ const GUIDE_ITEMS = [
     label: 'Scoring',
     steps: [
       'Open the fight detail page and enter your prediction before the fight locks.',
-      'Check each scoring field carefully. The public model uses KO/finish, round win, survival, and round-loss participation points.',
+      'Check each scoring field carefully. Total Punches is its own score and should be treated separately.',
       'Submit once you are comfortable with your final picks.',
     ],
   },
@@ -82,10 +81,14 @@ const GUIDE_ITEMS = [
 ];
 
 const SCORING_ITEMS = [
-  ['KO', `Knockout / finish bonus · ${SCORE_POINTS.KO} pts`],
-  ['RW', `Round win · ${SCORE_POINTS.RW} pts`],
-  ['SP', `Survival when not knocked out · ${SCORE_POINTS.SP} pts`],
-  ['RL', `Round loss participation · ${SCORE_POINTS.RL} pts`],
+  ['HP', 'Head Punches'],
+  ['BP', 'Body Punches'],
+  ['TP', 'Total Punches'],
+  ['RW', 'Rounds Won'],
+  ['KO', 'Knockout/Stoppage'],
+  ['SP', 'Scoring Points'],
+  ['ST', 'Strikes'],
+  ['KI', 'Kicks'],
 ];
 
 const Guide = () => {
@@ -140,7 +143,8 @@ const Guide = () => {
             <p className="xp-guide-eyebrow"><FaMedal /> Scoring reminder</p>
             <h2>Know the fields before you submit.</h2>
             <p>
-              The unified public scoring model uses one source of truth across Home, Guides, FAQs, and fight pages: KO/finish, round win, survival, and round-loss participation points.
+              Different sports can use different scoring fields. When boxing fields are shown, Total Punches is handled
+              as its own value and should not be assumed to be Head Punches plus Body Punches.
             </p>
           </div>
           <div className="xp-guide-score-grid">

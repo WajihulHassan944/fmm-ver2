@@ -28,11 +28,9 @@ import {
   getPublicFightDuplicateKey,
   getFighterName as getResolvedFighterName,
 } from "@/Utils/fightExperience";
-import { SCORE_POINTS, SCORE_LABELS } from "@/Utils/scoringRules";
 import {
   FaArrowRight,
   FaBolt,
-  FaBell,
   FaBullseye,
   FaCalendarAlt,
   FaChartLine,
@@ -67,7 +65,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
-const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v32";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v11";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -263,10 +261,11 @@ const FightCategoryIcon = ({ type }) => {
 };
 
 const SCORING_ROWS = [
-  [SCORE_LABELS.KO || "Knockout / Finish", String(SCORE_POINTS.KO)],
-  [SCORE_LABELS.RW || "Round Win", String(SCORE_POINTS.RW)],
-  [SCORE_LABELS.SP || "Survival", String(SCORE_POINTS.SP)],
-  [SCORE_LABELS.RL || "Round Loss", String(SCORE_POINTS.RL)],
+  ["Correct Winner", "100"],
+  ["Correct Method", "75"],
+  ["Correct Round", "50"],
+  ["Exact Score", "25"],
+  ["Perfect Fight", "250"],
 ];
 
 const STATIC_WINNERS = [
@@ -288,6 +287,14 @@ const STATIC_WINNERS = [
     amount: "$750",
     icon: "🥉",
   },
+];
+
+const FALLBACK_LEADERBOARD = [
+  { name: "Kelly", points: 2986 },
+  { name: "Tasha", points: 2261 },
+  { name: "Shane O.", points: 1878 },
+  { name: "Wajih ul Hassan", points: 1566 },
+  { name: "TheGhost", points: 1347 },
 ];
 
 const getMatchTimestamp = (match) => {
@@ -563,30 +570,9 @@ const parseMatchDate = (match) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const HOME_PAST_STATUS_PATTERN = /(finished|complete|completed|closed|cancelled|canceled|past|result|final)/i;
-const HOME_LIVE_STATUS_PATTERN = /(live|ongoing|scoring)/i;
-
-const isPastHomeFight = (match = {}, now = new Date()) => {
-  const statusText = [
-    match?.matchStatus,
-    match?.matchShadowOpenStatus,
-    match?.matchShadowStatus,
-    match?.status,
-    match?.timelineBucket,
-    match?.resultStatus,
-  ].filter(Boolean).join(" ");
-
-  if (HOME_PAST_STATUS_PATTERN.test(statusText)) return true;
-
-  const date = parseMatchDate(match);
-  if (date && date.getTime() < now.getTime()) return true;
-  if (HOME_LIVE_STATUS_PATTERN.test(statusText)) return false;
-  return false;
-};
-
 const formatDateTime = (match) => {
   const date = parseMatchDate(match);
-  if (!date) return "Date & time TBA";
+  if (!date) return "Schedule pending";
 
   const datePart = date.toLocaleDateString("en-US", {
     weekday: "short",
@@ -603,7 +589,7 @@ const formatDateTime = (match) => {
 
 const getFeaturedDateLabel = (match) => {
   const date = parseMatchDate(match);
-  if (!date) return "Date TBA";
+  if (!date) return "Schedule pending";
 
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -752,7 +738,7 @@ const getPrizePool = (match) => {
   const amount = Number(
     match?.pot || match?.currentPot || match?.prizePool || 0,
   );
-  if (!amount) return "Open prize pool";
+  if (!amount) return "Prize TBA";
   return `$${amount.toLocaleString()}`;
 };
 
@@ -765,14 +751,14 @@ const getPotTokenLabel = (match) => {
       match?.prizePool ||
       0,
   );
-  return amount > 0 ? `${amount.toLocaleString()} POT` : "OPEN POT";
+  return amount > 0 ? `${amount.toLocaleString()} POT` : "POT TBA";
 };
 
 const getRoundLabel = (match) => {
   const rounds = Number(
     match?.maxRounds || match?.rounds || match?.scheduledRounds || 0,
   );
-  return rounds > 0 ? `${rounds} rounds` : "Prediction card";
+  return rounds > 0 ? `${rounds} rounds` : "Rounds TBA";
 };
 
 const getFighterImage = (imageUrl) => imageUrl || FALLBACK_FIGHT_IMAGE;
@@ -881,8 +867,8 @@ const getLeaderboardName = (player) =>
 
 const MOBILE_FALLBACK_MATCHUPS = {
   boxing: [
-    ["Boxing Showdown", "Abel Ramos", "Adam Azim", 25000, 1245],
-    ["Title Eliminator", "Xander Zayas", "Jaron Boots Ennis", 10000, 598],
+    ["Boxing Showdown", "Chris Eubank Jr", "Conor Benn", 25000, 1245],
+    ["Title Eliminator", "Anthony Yarde", "David Benavidez", 10000, 598],
     ["Prize Fight", "Zaveer Davis", "Jadden Addison", 5000, 321],
   ],
   mma: [
@@ -987,14 +973,6 @@ const getMobileDateChip = (match) => {
       .toLocaleDateString("en-US", { weekday: "short" })
       .toUpperCase(),
   };
-};
-
-const getMobileDateChipLabel = (match) => {
-  const chip = getMobileDateChip(match);
-  if (!chip || typeof chip !== "object") return "TBA";
-  const month = String(chip.month || "TBA").trim();
-  const day = String(chip.day || "").trim();
-  return [month, day].filter(Boolean).join(" ").trim() || "TBA";
 };
 
 const getMobileCountdownDisplay = (match, now) => {
@@ -1161,10 +1139,6 @@ const MobilePhoneHome = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [rewardBurst, setRewardBurst] = useState(false);
-  const [coinFunnelOpen, setCoinFunnelOpen] = useState(false);
-  const [coinTopUpBonus, setCoinTopUpBonus] = useState(0);
-  const [selectedCoinPack, setSelectedCoinPack] = useState(null);
-  const [coinToast, setCoinToast] = useState("");
   const [blogs, setBlogs] = useState([]);
   const [animatedStats, setAnimatedStats] = useState({
     predictors: 0,
@@ -1260,11 +1234,14 @@ const MobilePhoneHome = ({
           (section) => section.key === tab.key,
         );
         const artMap = {
-          boxing: `${APP_FIXED_ASSET_BASE}/sport-boxing-design.png`,
-          mma: `${APP_FIXED_ASSET_BASE}/sport-mma-design.png`,
-          bareknuckle: `${APP_FIXED_ASSET_BASE}/sport-bareknuckle-design.png`,
-          kickboxing: `${APP_FIXED_ASSET_BASE}/sport-kickboxing-design.png`,
-          "pro-wrestling": `${APP_FIXED_ASSET_BASE}/sport-wrestling-design.png`,
+          boxing: "/images/mobile-home/client-v7/category-boxing-art.jpg",
+          mma: "/images/mobile-home/client-v7/category-mma-art.jpg",
+          bareknuckle:
+            "/images/mobile-home/client-v7/category-bare-knuckle-art.jpg",
+          kickboxing:
+            "/images/mobile-home/client-v7/category-kickboxing-art.jpg",
+          "pro-wrestling":
+            "/images/mobile-home/client-v7/category-pro-wrestling-art.jpg",
         };
         const labels = {
           boxing: "Boxing",
@@ -1322,11 +1299,12 @@ const MobilePhoneHome = ({
   const isLoggedIn = Boolean(
     currentUser?._id || currentUser?.email || currentUser?.username,
   );
-  const profileHref = isLoggedIn ? "/profile" : "/login?next=/profile";
-  const primaryCtaHref = featuredFight
-    ? getFightDetailHref(featuredFight)
-    : "/upcomingfights";
-  const heroJoinHref = isLoggedIn ? primaryCtaHref : PLAYER_SIGNUP_HREF;
+  const profileHref = isLoggedIn ? "/profile" : PLAYER_SIGNUP_HREF;
+  const primaryCtaHref = isLoggedIn
+    ? featuredFight
+      ? getFightDetailHref(featuredFight)
+      : "/upcomingfights"
+    : PLAYER_SIGNUP_HREF;
 
   const tokenBalance = getSafeMetricNumber(
     currentUser?.tokens,
@@ -1529,11 +1507,10 @@ const MobilePhoneHome = ({
 
   const liveLeaderboard = useMemo(
     () =>
-      (Array.isArray(leaderboardRows) ? leaderboardRows : [])
-        .filter((player) => {
-          const marker = String(player?._id || player?.id || '').toLowerCase();
-          return player && !marker.startsWith('fallback-') && !marker.includes('fallback');
-        })
+      (Array.isArray(leaderboardRows) && leaderboardRows.length
+        ? leaderboardRows
+        : FALLBACK_LEADERBOARD
+      )
         .slice(0, 5)
         .map((player, index) => ({
           rank: index + 1,
@@ -1550,35 +1527,6 @@ const MobilePhoneHome = ({
     currentUser?.firstName,
     "You",
   );
-
-  const displayCoinBalance = Math.max(0, (tokenBalance > 0 ? tokenBalance : 2450) + coinTopUpBonus);
-  const coinPackages = [
-    { amount: 1000, price: "$0.99", label: "Starter Pack" },
-    { amount: 5000, price: "$3.99", label: "Most Popular", popular: true },
-    { amount: 15000, price: "$9.99", label: "Power Pack" },
-  ];
-
-  const openCoinFunnel = () => {
-    onPremiumTap("coin");
-    setCoinToast("");
-    setSelectedCoinPack(null);
-    setCoinFunnelOpen(true);
-  };
-
-  const closeCoinFunnel = () => {
-    onPremiumTap("click");
-    setCoinFunnelOpen(false);
-  };
-
-  const handleCoinPackageSelect = (amount, price) => {
-    onPremiumTap("reward");
-    setSelectedCoinPack({ amount, price });
-    setCoinToast(`${amount.toLocaleString()} FM coins selected · ${price}`);
-    setRewardBurst(true);
-    if (typeof window !== "undefined") {
-      window.setTimeout(() => setRewardBurst(false), 700);
-    }
-  };
 
   const menuLinks = [
     ["/", "Home", FaHome],
@@ -1603,24 +1551,10 @@ const MobilePhoneHome = ({
   const claimReward = () => {
     onPremiumTap("reward");
     setRewardBurst(true);
-    setCoinTopUpBonus((current) => current + 250);
-    setCoinToast("Daily reward claimed · +250 FM");
-    if (typeof window !== "undefined") {
-      window.setTimeout(() => setRewardBurst(false), 900);
-    }
+    window.setTimeout(() => {
+      if (typeof window !== "undefined") window.location.assign("/fights-rewards");
+    }, 520);
   };
-
-  const sanitizeImageUrl = (value) => {
-    const src = String(value || "").trim();
-    if (!src || src.startsWith("data:")) return "";
-    return src;
-  };
-
-  const stripUnsafeBlogText = (value) =>
-    String(value || "")
-      .replace(/data:image\/[^;]+;base64,[a-z0-9+/=]+/gi, "")
-      .replace(/\s+/g, " ")
-      .trim();
 
   const blogFallbacks = [
     {
@@ -1658,11 +1592,11 @@ const MobilePhoneHome = ({
     ["🎯", "76% picking Jones to win", "#a855f7"],
   ];
   const appSportCards = [
-    { key: "boxing", name: "BOXING", count: "38,245", color: "#ef4444", image: `${appAssetBase}/sport-boxing-design.png`, href: "/fantasy-boxing" },
-    { key: "mma", name: "UFC / MMA", count: "52,221", color: "#4d8dff", image: `${appAssetBase}/sport-mma-design.png`, href: "/fantasy-mma" },
-    { key: "bareknuckle", name: "BARE KNUCKLE", count: "12,582", color: "#f2b544", image: `${appAssetBase}/sport-bareknuckle-design.png`, href: "/fantasy-bare-knuckle" },
-    { key: "kickboxing", name: "KICKBOXING", count: "8,715", color: "#22c55e", image: `${appAssetBase}/sport-kickboxing-design.png`, href: "/fantasy-kickboxing" },
-    { key: "pro-wrestling", name: "PRO WRESTLING", count: "16,148", color: "#a855f7", image: `${appAssetBase}/sport-wrestling-design.png`, href: "/fantasy-pro-wrestling" },
+    { key: "boxing", name: "BOXING", count: "38,245", color: "#ef4444", image: "/images/mobile-home/categories/fmm-category-boxing-reference-v2.png", href: "/fantasy-boxing" },
+    { key: "mma", name: "UFC / MMA", count: "52,221", color: "#4d8dff", image: "/images/mobile-home/categories/fmm-category-mma-reference-v2.png", href: "/fantasy-mma" },
+    { key: "bareknuckle", name: "BARE KNUCKLE", count: "12,582", color: "#f2b544", image: "/images/mobile-home/categories/fmm-category-bare-knuckle-reference-v2.png", href: "/fantasy-bare-knuckle" },
+    { key: "kickboxing", name: "KICKBOXING", count: "8,715", color: "#22c55e", image: "/images/mobile-home/categories/fmm-category-kickboxing-reference-v2.png", href: "/fantasy-kickboxing" },
+    { key: "pro-wrestling", name: "PRO WRESTLING", count: "16,148", color: "#a855f7", image: "/images/mobile-home/categories/fmm-category-pro-wrestling-reference-v2.png", href: "/fantasy-pro-wrestling" },
   ];
   const appEventFallbacks = [
     "/images/fmm-pages/premium-duel-banner.webp",
@@ -1672,11 +1606,11 @@ const MobilePhoneHome = ({
     "/images/pro-wrestling/pro-wrestling-hero.webp",
   ];
   const appApparel = [
-    { name: "MMADNESS HOODIE", price: "$49.99", image: `${appAssetBase}/ap1-hq.webp` },
-    { name: "FIGHT TEE", price: "$29.99", image: `${appAssetBase}/ap2-hq.webp` },
-    { name: "SNAPBACK CAP", price: "$24.99", image: `${appAssetBase}/ap3-hq.webp` },
-    { name: "FIGHT SHORTS", price: "$39.99", image: `${appAssetBase}/ap1-2-hq.webp` },
-    { name: "TRAINING GLOVES", price: "$34.99", image: `${appAssetBase}/ap2-2-hq.webp` },
+    { name: "MMADNESS HOODIE", price: "$49.99", image: "/images/mobile-home/app-fixed-v15/ap1-hq.webp" },
+    { name: "FIGHT TEE", price: "$29.99", image: "/images/mobile-home/app-fixed-v15/ap2-hq.webp" },
+    { name: "SNAPBACK CAP", price: "$24.99", image: "/images/mobile-home/app-fixed-v15/ap3-hq.webp" },
+    { name: "FIGHT SHORTS", price: "$39.99", image: "/images/mobile-home/app-fixed-v15/ap1-2-hq.webp" },
+    { name: "TRAINING GLOVES", price: "$34.99", image: "/images/mobile-home/app-fixed-v15/ap2-2-hq.webp" },
   ];
   const featuredFightList = (selectedSportFights.length ? selectedSportFights : uniqueAllFights.length ? uniqueAllFights : [featuredFight]).filter(Boolean).slice(0, 4);
   const featuredEntryFee = getMobileEntryFee(featuredFight);
@@ -1702,10 +1636,6 @@ const MobilePhoneHome = ({
   const posterForFight = (fight, index = 0) =>
     getHomeFightPosterImage(fight) || appEventFallbacks[index % appEventFallbacks.length];
   const quickPickLabel = (name = "Fighter") => String(name).trim().split(/\s+/)[0] || "Fighter";
-  const communityWinnerA = predictionSummary.total ? predictionSummary.winnerA : 76;
-  const communityWinnerB = predictionSummary.total ? predictionSummary.winnerB : 24;
-  const communityDash = `${communityWinnerA} ${100 - communityWinnerA}`;
-
 
   return (
     <div className="fmm-app-fixed-home" aria-label="Fantasy MMAdness mobile app home screen">
@@ -1723,11 +1653,11 @@ const MobilePhoneHome = ({
           <span /><span /><span />
         </button>
         <div className="fmm-app-top-actions">
-          <button type="button" className="fmm-app-wallet" onClick={openCoinFunnel} aria-label={`Open FM coin wallet with ${displayCoinBalance.toLocaleString()} coins`}>
-            <b>FM</b><strong>{displayCoinBalance.toLocaleString()}</strong><i><FaPlus aria-hidden="true" /></i>
-          </button>
-          <Link href={profileHref} className="fmm-app-notify" onClick={() => onPremiumTap()} aria-label="Open profile notifications">
-            <FaBell aria-hidden="true" />
+          <Link href="/fights-rewards" className="fmm-app-wallet" onClick={() => onPremiumTap("coin")}>
+            <b>FM</b><strong>2,450</strong><i><FaPlus aria-hidden="true" /></i>
+          </Link>
+          <Link href={profileHref} className="fmm-app-notify" onClick={() => onPremiumTap()} aria-label="Open profile">
+            <FaUserAlt aria-hidden="true" />
             <em>18</em>
           </Link>
         </div>
@@ -1738,7 +1668,7 @@ const MobilePhoneHome = ({
           <button type="button" className="fmm-app-menu-backdrop" aria-label="Close menu" onClick={() => setIsMenuOpen(false)} />
           <aside className="fmm-app-menu-drawer" aria-label="Homepage navigation">
             <header>
-              <img src={`${appAssetBase}/hero-banner-crop.png`} alt="Fantasy MMAdness" />
+              <img src="/images/mobile-home/app-fixed-v15/hero-banner-crop-hq.webp" alt="Fantasy MMAdness" />
               <button type="button" onClick={() => setIsMenuOpen(false)} aria-label="Close menu"><FaTimes aria-hidden="true" /></button>
             </header>
             <nav>
@@ -1752,20 +1682,15 @@ const MobilePhoneHome = ({
         </>
       )}
 
-      <section className="fmm-app-layout-switch" aria-label="Homepage display style">
-        <button type="button" className="is-active" onClick={() => onPremiumTap("tick")}>CLASSIC</button>
-        <button type="button" onClick={() => onPremiumTap("whoosh")}>⚡ BOLD</button>
-      </section>
-
       <section className="fmm-app-hero" aria-label="Fantasy MMAdness hero">
-        <img src={`${appAssetBase}/hero-banner-crop.png`} alt="Fantasy MMAdness combat prediction game" />
+        <img src="/images/mobile-home/app-fixed-v15/hero-banner-crop-hq.webp" alt="Fantasy MMAdness combat prediction game" />
         <span className="fmm-app-hero-glow is-red" aria-hidden="true" />
         <span className="fmm-app-hero-glow is-blue" aria-hidden="true" />
         <span className="fmm-app-crown-sparkles" aria-hidden="true">
           {["✦", "✦", "✦", "✦", "✦", "✦"].map((spark, index) => <i key={index}>{spark}</i>)}
         </span>
         <Link
-          href={heroJoinHref}
+          href={primaryCtaHref}
           className="fmm-app-join-hit"
           aria-label={isLoggedIn ? "Make predictions" : "Join free"}
           onClick={() => onPremiumTap("whoosh")}
@@ -1789,12 +1714,6 @@ const MobilePhoneHome = ({
           </Link>
         ))}
       </section>
-
-      <div className="fmm-app-sport-title" aria-hidden="true">
-        <span>››</span>
-        <strong>CHOOSE YOUR COMBAT SPORT</strong>
-        <span>‹‹</span>
-      </div>
 
       <section className="fmm-app-sports" aria-label="Combat sports selector">
         {appSportCards.map((sport) => {
@@ -1881,43 +1800,39 @@ const MobilePhoneHome = ({
         </div>
       </section>
 
-      <section className="fmm-app-featured-detail" aria-labelledby="fmm-app-featured-detail-title">
-        <img className="fmm-app-detail-bg" src={`${appAssetBase}/pasted-1785011607947-0.png`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <span className="fmm-app-detail-flare is-red" aria-hidden="true" />
-        <span className="fmm-app-detail-flare is-blue" aria-hidden="true" />
-        <div className="fmm-app-detail-fighter is-left">
-          <FightImage src={getHomeFighterImage(featuredFight, "A", 0) || `${appAssetBase}/transparent-fd-jones.png`} alt={fighterA} width={180} height={220} sizes="38vw" />
-        </div>
-        <div className="fmm-app-detail-fighter is-right">
-          <FightImage src={getHomeFighterImage(featuredFight, "B", 1) || `${appAssetBase}/transparent-fd-aspinall.png`} alt={fighterB} width={180} height={220} sizes="38vw" />
-        </div>
-        <div className="fmm-app-detail-content">
-          <header>
-            <span>FEATURED FIGHT · {featuredLabel}</span>
-          </header>
-          <h2 id="fmm-app-featured-detail-title">{fighterA} <em>VS</em> {fighterB}</h2>
-          <div className="fmm-app-detail-info">
-            <span><small>{getMobileDateChipLabel(featuredFight)}</small><b>{getLockLabel(featuredFight, now)}</b></span>
-            <span><small>ENTRY FEE</small><b>{featuredEntryFee}</b></span>
-            <span><small>ENTRIES</small><b>{featuredEntries.toLocaleString()}</b></span>
+      <section className="fmm-app-featured-fights" aria-labelledby="fmm-app-featured-fights-title">
+        <img src="/images/home-premium/fight-action-clash.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <div className="fmm-app-featured-fights-inner">
+          <span>FEATURED FIGHTS · {getCategory(featuredFight).toUpperCase()}</span>
+          <div className="fmm-app-main-fight-row">
+            <figure><FightImage src={getHomeFighterImage(featuredFight, "A", 0)} alt={fighterA} width={200} height={200} sizes="26vw" /></figure>
+            <h2 id="fmm-app-featured-fights-title">{fighterA} <em>VS</em> {fighterB}</h2>
+            <figure><FightImage src={getHomeFighterImage(featuredFight, "B", 1)} alt={fighterB} width={200} height={200} sizes="26vw" /></figure>
           </div>
-          <strong className="fmm-app-detail-prize">{featuredPrize} POOL</strong>
+          <div className="fmm-app-featured-meta">
+            <span><small>PRIZE POOL</small><strong>{featuredPrize}</strong></span>
+            <span><small>ENTRY FEE</small><strong>{featuredEntryFee}</strong></span>
+            <span><small>ENTRIES</small><strong>{featuredEntries.toLocaleString()}</strong></span>
+          </div>
           <Link href={featuredHref} onClick={() => onPremiumTap("boom")}>MAKE PREDICTIONS</Link>
+          <div className="fmm-app-mini-fight-list">
+            {featuredFightList.slice(1).map((fight, index) => (
+              <Link href={getFightDetailHref(fight)} key={getFightId(fight) || `featured-list-${index}`} onClick={() => onPremiumTap("tick")}>
+                <span>{getMobileEventLabel(fight)}</span>
+                <strong>{getHomeFighterName(fight, "A")} <em>VS</em> {getHomeFighterName(fight, "B")}</strong>
+                <small>{getLockLabel(fight, now)}</small>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="fmm-app-watch-leagues" aria-label="Live watch party and leagues">
         <Link href="/pro-wrestling" onClick={() => onPremiumTap("whoosh")}>
-          <img src={`${appAssetBase}/pasted-1785015130714-0.png`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-          <span>🔴 LIVE NOW</span>
-          <strong>WATCH PARTY</strong>
-          <small>Live scoring · crowd reactions</small>
+          <span>🔴 LIVE WATCH PARTY</span><strong>Watch together, score together</strong><small>Live chat, round clock, crowd reactions</small>
         </Link>
         <Link href="/FantasyLeagues" onClick={() => onPremiumTap("whoosh")}>
-          <img src={`${appAssetBase}/pasted-1785012202182-0.png`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-          <span>⚔ COMPETE</span>
-          <strong>LEAGUES · H2H</strong>
-          <small>Private leagues & wagers</small>
+          <span>⚔ LEAGUES</span><strong>Season cards and head-to-heads</strong><small>Draft fighters across every combat style</small>
         </Link>
       </section>
 
@@ -1926,81 +1841,58 @@ const MobilePhoneHome = ({
         <span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span>
       </Link>
 
-      <section className="fmm-app-community fmm-app-dashboard-grid" aria-label="Community predictions and player progression">
-        <article className="fmm-app-community-card">
-          <img src={`${appAssetBase}/pasted-1785014371576-0.png`} alt="" loading="lazy" decoding="async" />
+      <section className="fmm-app-community" aria-label="Community predictions and player progression">
+        <article>
+          <img src="/images/fmm-pages/community-arena-hd.webp" alt="" loading="lazy" decoding="async" />
           <div>
             <span>COMMUNITY PREDICTIONS</span>
-            <small>{quickPickLabel(fighterA)} VS {quickPickLabel(fighterB)}</small>
-            <div className="fmm-app-community-donut">
-              <svg viewBox="0 0 44 44" aria-hidden="true">
-                <circle cx="22" cy="22" r="16" />
-                <circle cx="22" cy="22" r="16" style={{ strokeDasharray: communityDash }} />
-              </svg>
-            </div>
-            <p><b>{quickPickLabel(fighterA)}</b><strong>{communityWinnerA}%</strong></p>
-            <p><b>{quickPickLabel(fighterB)}</b><strong>{communityWinnerB}%</strong></p>
+            <strong>JONES <b>76%</b></strong>
+            <i><b style={{ width: "76%" }} /></i>
+            <strong>ASPINALL <b>24%</b></strong>
           </div>
         </article>
-        <article className="fmm-app-progress-card">
-          <img src={`${appAssetBase}/pasted-1785013690779-0.png`} alt="" loading="lazy" decoding="async" />
+        <article>
+          <img src="/images/fmm-pages/rewards-arena-hd.webp" alt="" loading="lazy" decoding="async" />
           <div>
             <span>YOUR PROGRESSION</span>
-            <div className="fmm-app-level-badge">{playerLevel}</div>
-            <small>FIGHT IQ</small>
-            <strong>{xpValue > 0 ? xpValue.toLocaleString() : "2,450"} XP</strong>
-            <i><b style={{ width: `${xpPercent || 82}%` }} /></i>
-            <em>NEXT LEVEL: {xpTarget.toLocaleString()} XP</em>
-            <div className="fmm-app-legend-badge">♛ LEGEND · LEVEL {Math.max(playerLevel, 18)}</div>
+            <strong>FIGHT IQ 2,450 XP</strong>
+            <i><b style={{ width: "82%" }} /></i>
+            <small>NEXT LEVEL: 3,000 XP</small>
+            <em>👑 LEGEND · LEVEL 18</em>
           </div>
         </article>
       </section>
 
-      <section className="fmm-app-reward-grid fmm-app-wallet-grid" aria-label="Daily reward, coin wallet, leaderboard and streak bonus">
-        <button type="button" className={rewardBurst ? "fmm-app-mini-panel is-claiming" : "fmm-app-mini-panel"} onClick={claimReward}>
-          <span>DAILY REWARD</span>
-          <img src={`${appAssetBase}/chest-transparent.png`} alt="" loading="lazy" decoding="async" />
-          <small>COME BACK EVERY DAY & BUILD YOUR STREAK!</small>
-          <strong>CLAIM REWARD</strong>
+      <section className="fmm-app-rewards" aria-label="Rewards and wallet">
+        <button type="button" className={rewardBurst ? "is-claiming" : ""} onClick={claimReward}>
+          <FaGift aria-hidden="true" /><span>COME BACK EVERY DAY & BUILD YOUR STREAK!</span><strong>CLAIM REWARD</strong>
         </button>
-        <button type="button" className="fmm-app-mini-panel fmm-app-mini-coins" onClick={openCoinFunnel}>
-          <span>COINS WALLET</span>
-          <FaCoins aria-hidden="true" />
-          <b>{displayCoinBalance.toLocaleString()}</b>
-          <small>COINS</small>
-          <strong>ADD COINS <FaPlus aria-hidden="true" /></strong>
-        </button>
-        <Link href="/leaderboard" className="fmm-app-dashboard-card fmm-app-dashboard-leader" onClick={() => onPremiumTap()}>
-          <img src={`${appAssetBase}/pasted-1785012542538-0.png`} alt="" loading="lazy" decoding="async" />
-          <header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>
-          <div>
-            {liveLeaderboard.length ? liveLeaderboard.slice(0, 4).map((player) => (
-              <p key={`${player.rank}-${player.name}`} className={player.name === currentUserName ? "is-you" : ""}>
-                <b>{player.rank}</b><span>{player.name}</span><strong>{Number(player.points || 0).toLocaleString()}</strong>
-              </p>
-            )) : (
-              <p className="is-empty"><b>—</b><span>Standings syncing</span><strong>LIVE</strong></p>
-            )}
-          </div>
+        <Link href="/fights-rewards" onClick={() => onPremiumTap("coin")}>
+          <FaCoins aria-hidden="true" /><span>COINS WALLET</span><strong>2,450 COINS</strong><b>ADD COINS +</b>
         </Link>
-        <button type="button" className="fmm-app-dashboard-card fmm-app-dashboard-streak" onClick={openCoinFunnel}>
-          <img src={`${appAssetBase}/pasted-1785014166827-0.png`} alt="" loading="lazy" decoding="async" />
-          <span>STREAK BONUS</span>
-          <h3>🔥 7 DAY STREAK</h3>
-          <div>{[1, 2, 3, 4, 5, 6, 7].map((day) => <i key={day}>✓</i>)}</div>
-          <strong>+250 <b>FM</b></strong>
-          <small>🏆 Streak expires in 5h 56m</small>
-        </button>
+      </section>
+
+      <section className="fmm-app-leader-streak" aria-label="Leaderboard and streak bonus">
+        <Link href="/leaderboard" onClick={() => onPremiumTap()}>
+          <img src="/images/fmm-pages/league-arena-hd.webp" alt="" loading="lazy" decoding="async" />
+          <header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>
+          <p><b>1. KO_Beast</b><strong>9,850</strong></p>
+          <p><b>2. FightWizard</b><strong>8,420</strong></p>
+          <p><b>3. ChampMind</b><strong>7,910</strong></p>
+          <p className="is-me"><b>18. KellyD (You)</b><strong>2,450 ↑</strong></p>
+        </Link>
+        <Link href="/fights-rewards" onClick={() => onPremiumTap("reward")}>
+          <img src="/images/fmm-pages/rewards-arena-hd.webp" alt="" loading="lazy" decoding="async" />
+          <span>STREAK BONUS</span><strong>🔥 7 DAY STREAK</strong><div>{[1, 2, 3, 4, 5, 6, 7].map((day) => <i key={day}>✓</i>)}</div><b>+250 FM</b><small>⏳ Streak expires in 23h 58m</small>
+        </Link>
       </section>
 
       <section className="fmm-app-apparel" aria-labelledby="fmm-app-apparel-title">
-        <div className="fmm-app-section-head"><h2 id="fmm-app-apparel-title">APPAREL</h2><Link href="/apparel" onClick={() => onPremiumTap()}>VIEW ALL ›</Link></div>
+        <div className="fmm-app-section-head"><h2 id="fmm-app-apparel-title">APPAREL</h2><Link href="/apparel">VIEW ALL ›</Link></div>
         <div>
           {appApparel.map((item) => (
             <Link href="/apparel" key={item.name} onClick={() => onPremiumTap()}>
-              <img src={item.image} alt="" loading="lazy" decoding="async" />
-              <span>{item.name}</span>
-              <strong>{item.price}</strong>
+              <img src={item.image} alt="" /><span>{item.name}</span><strong>{item.price}</strong>
             </Link>
           ))}
         </div>
@@ -2008,83 +1900,20 @@ const MobilePhoneHome = ({
 
       <section className="fmm-app-affiliate" aria-label="Affiliates and social">
         <Link href="/affiliate-create-account" onClick={() => onPremiumTap("whoosh")}>
-          <img src={`${appAssetBase}/handshake-transparent.png`} alt="" loading="lazy" decoding="async" />
+          <img src={`${appAssetBase}/handshake-transparent.png`} alt="" />
           <span>🤝 AFFILIATES & CREATORS</span>
           <strong>YOU'RE THE PROMOTER NOW</strong>
           <small>Promote fights. Build a league. Get players moving.</small>
           <b>BECOME A PARTNER →</b>
         </Link>
-        <button type="button" className="fmm-app-chest fmm-app-coin-chest-trigger" onClick={openCoinFunnel} aria-label="Open FM coin funnel">
-          <img src={`${appAssetBase}/chest-transparent.png`} alt="Treasure chest" loading="lazy" decoding="async" />
+        <Link href="/fights-rewards" className="fmm-app-chest" onClick={() => onPremiumTap("coin")}>
+          <img src={`${appAssetBase}/chest-transparent.png`} alt="Treasure chest" />
           <span>🪙</span><span>💰</span><span>🪙</span>
-        </button>
+        </Link>
         <div className="fmm-app-socials" aria-label="Social channels">
-          {[
-            ["https://x.com/FMmadness2024", "X", "X"],
-            ["https://www.instagram.com/fantasymmadness", "Instagram", "IG"],
-            ["https://www.facebook.com/fantasymmadness", "Facebook", "FB"],
-            ["https://www.tiktok.com/@fantasymmadness", "TikTok", "TT"],
-          ].map(([href, label, shortLabel]) => (
-            <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={`Open ${label}`}>
-              <span aria-hidden="true">{shortLabel}</span>
-              <strong>{label}</strong>
-            </a>
-          ))}
+          {["X", "Instagram", "Facebook", "TikTok"].map((label) => <span key={label}>{label[0]}</span>)}
         </div>
       </section>
-
-      {coinFunnelOpen && (
-        <div className="fmm-app-coin-funnel" role="dialog" aria-modal="true" aria-labelledby="fmm-app-coin-funnel-title">
-          <button type="button" className="fmm-app-coin-funnel-backdrop" aria-label="Close coin wallet" onClick={closeCoinFunnel} />
-          <section className="fmm-app-coin-funnel-card">
-            <button type="button" className="fmm-app-coin-funnel-close" onClick={closeCoinFunnel} aria-label="Close coin wallet">
-              <FaTimes aria-hidden="true" />
-            </button>
-            <div className="fmm-app-coin-funnel-hero">
-              <img src={`${appAssetBase}/chest-transparent.png`} alt="FM coin treasure chest" />
-              <div>
-                <span>FM COINS</span>
-                <h2 id="fmm-app-coin-funnel-title">Power your next picks</h2>
-                <strong>{displayCoinBalance.toLocaleString()} coins</strong>
-              </div>
-            </div>
-            <p>Choose a coin pack, enter paid cards faster, and keep the fight-night funnel inside the phone app flow.</p>
-            <div className="fmm-app-coin-packages">
-              {coinPackages.map((pack) => (
-                <button
-                  type="button"
-                  key={pack.amount}
-                  className={[pack.popular ? "is-popular" : "", selectedCoinPack?.amount === pack.amount ? "is-selected" : ""].filter(Boolean).join(" ")}
-                  onClick={() => handleCoinPackageSelect(pack.amount, pack.price)}
-                >
-                  {pack.popular ? <em>MOST POPULAR</em> : null}
-                  <span>{pack.label}</span>
-                  <strong>{pack.amount.toLocaleString()} FM</strong>
-                  <b>{pack.price}</b>
-                </button>
-              ))}
-            </div>
-            {coinToast ? <div className="fmm-app-coin-toast">{coinToast}</div> : null}
-            {selectedCoinPack ? (
-              <Link
-                href={isLoggedIn ? "/checkout" : "/CreateAccount"}
-                className="fmm-app-coin-signup"
-                onClick={() => onPremiumTap("whoosh")}
-              >
-                {isLoggedIn ? "Continue to secure checkout" : "Create account to continue"}
-              </Link>
-            ) : !isLoggedIn ? (
-              <Link href="/CreateAccount" className="fmm-app-coin-signup" onClick={() => onPremiumTap("whoosh")}>
-                🎁 Sign up and start with bonus FM coins
-              </Link>
-            ) : (
-              <Link href="/checkout" className="fmm-app-coin-signup" onClick={() => onPremiumTap("whoosh")}>
-                Select a pack to continue
-              </Link>
-            )}
-          </section>
-        </div>
-      )}
 
       <nav className="fmm-app-bottom-nav" aria-label="Mobile homepage navigation">
         {navItems.map(([href, label, Icon, id, className]) => (
@@ -2150,7 +1979,7 @@ const HomeAnother = () => {
               fightLimit: HOME_FIGHT_FEED_LIMIT,
               leaderboardLimit: 5,
             }),
-            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT, status: "upcoming" }),
+            fetchPublicPredictionFights({ limit: HOME_FIGHT_FEED_LIMIT }),
             fetchPromotedHomeFights({ limit: 45 }),
           ]);
         const summary =
@@ -2175,9 +2004,9 @@ const HomeAnother = () => {
 
         if (!active) return;
 
-        setHomepageMatches(orderFightsForDisplay((fights || []).filter((fight) => !isPastHomeFight(fight))));
+        setHomepageMatches(orderFightsForDisplay(fights || []));
         setPromotedHeroFights(
-          orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals).filter((fight) => !isPastHomeFight(fight))),
+          orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals)),
         );
         setHomepageLeaderboard(
           Array.isArray(summary.leaderboard) ? summary.leaderboard : [],
@@ -2235,7 +2064,7 @@ const HomeAnother = () => {
   }, []);
 
   const orderedMatches = useMemo(
-    () => getOrderedMatches(homepageMatches).filter((fight) => !isPastHomeFight(fight)),
+    () => getOrderedMatches(homepageMatches),
     [homepageMatches],
   );
   const homepageFightPool = useMemo(() => {
@@ -2256,8 +2085,8 @@ const HomeAnother = () => {
     );
 
     return orderFightsForDisplay(
-      dedupeHomepageFights([...promoted, ...posterBackups]).filter(
-        (fight) => !isPastHomeFight(fight) && Boolean(getHomeFightPosterImage(fight)),
+      dedupeHomepageFights([...promoted, ...posterBackups]).filter((fight) =>
+        Boolean(getHomeFightPosterImage(fight)),
       ),
     ).slice(0, 45);
   }, [homepageFightPool, promotedHeroFights]);
@@ -2350,16 +2179,13 @@ const HomeAnother = () => {
 
   const liveLeaderboardRows = useMemo(() => {
     if (!Array.isArray(homepageLeaderboard) || homepageLeaderboard.length === 0)
-      return [];
+      return FALLBACK_LEADERBOARD;
 
-    return homepageLeaderboard
-      .filter((player) => !String(player?._id || '').startsWith('fallback-'))
-      .slice(0, 5)
-      .map((player) => ({
-        name: getLeaderboardName(player),
-        points: Number(player?.totalPoints || player?.points || 0),
-        avatar: player?.profileUrl,
-      }));
+    return homepageLeaderboard.slice(0, 5).map((player) => ({
+      name: getLeaderboardName(player),
+      points: Number(player?.totalPoints || 0),
+      avatar: player?.profileUrl,
+    }));
   }, [homepageLeaderboard]);
 
   const handleSubmit = async (e) => {
@@ -2615,14 +2441,13 @@ const HomeAnother = () => {
         />
         <meta
           property="og:title"
-          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
+          content="Fantasy MMAdness - Predict Combat Sports"
         />
         <meta
           property="og:description"
           content="Join Fantasy MMAdness and compete in premium MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests."
         />
         <meta property="og:url" content="https://www.fantasymmadness.com/" />
-        <link rel="canonical" href="https://www.fantasymmadness.com/" />
         <meta
           name="keywords"
           content="Fantasy MMA, Fantasy UFC, Fantasy BKFC, Fantasy Boxing, Fantasy Kickboxing, Fantasy Bare Knuckle, Fantasy Combat, Fantasy Fighting, Fantasy Fighter Rankings"
@@ -2668,284 +2493,7 @@ const HomeAnother = () => {
           matchStatus={matchStatus}
           now={now}
         />
-        <div className="fmm-desktop-restored-static-v19" aria-label="Desktop Fantasy MMAdness feature sections">
-          <main className="theme-container fmm-desktop-restored-main-v19">
-            <section className="fmm-home-wrestling-feature fmm-desktop-wrestling-restored-v19">
-              <div className="fmm-home-wrestling-copy">
-                <p>
-                  <FaCrown /> New game mode
-                </p>
-                <h2>Pro Wrestling is now part of Fantasy MMAdness.</h2>
-                <span>
-                  Pro Wrestling stays connected to the same account, wallet,
-                  leaderboards, and contest flow while keeping its own scoring
-                  rules and match cards.
-                </span>
-                <div>
-                  <Link
-                    href="/pro-wrestling"
-                    className="theme-btn theme-btn-primary"
-                  >
-                    Explore pro wrestling <FaArrowRight />
-                  </Link>
-                  <Link
-                    href="/pro-wrestling/how-to-play"
-                    className="theme-btn theme-btn-secondary"
-                  >
-                    How wrestling scores
-                  </Link>
-                </div>
-              </div>
-              <div className="fmm-home-wrestling-visual">
-                <Image
-                  src={HOME_WRESTLING_IMAGE}
-                  alt="Fantasy MMAdness Pro Wrestling"
-                  fill
-                  sizes="(max-width: 1180px) 90vw, 50vw"
-                />
-                {wrestlingMatches[0] ? (
-                  <article>
-                    <header>
-                      <small>{wrestlingMatches[0].status}</small>
-                      <strong>{wrestlingMatches[0].eventName}</strong>
-                    </header>
-                    <div>
-                      <figure>
-                        <FightImage
-                          src={getPWImage(wrestlingMatches[0].competitorA, "A")}
-                          alt="Pro wrestling competitor"
-                          width={80}
-                          height={90}
-                          sizes="55px"
-                        />
-                        <figcaption>
-                          {wrestlingMatches[0].competitorA?.displayName}
-                        </figcaption>
-                      </figure>
-                      <b>VS</b>
-                      <figure>
-                        <FightImage
-                          src={getPWImage(wrestlingMatches[0].competitorB, "B")}
-                          alt="Pro wrestling competitor"
-                          width={80}
-                          height={90}
-                          sizes="55px"
-                        />
-                        <figcaption>
-                          {wrestlingMatches[0].competitorB?.displayName}
-                        </figcaption>
-                      </figure>
-                    </div>
-                    <p>
-                      {formatWrestlingDate(wrestlingMatches[0].matchDate)} ·{" "}
-                      {wrestlingMatches[0].currentPot || 0} token pot
-                    </p>
-                    <Link
-                      href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}
-                    >
-                      Open featured card <FaArrowRight />
-                    </Link>
-                  </article>
-                ) : (
-                  <article className="is-empty">
-                    <FaCrown />
-                    <strong>Open Pro Wrestling cards will appear here as soon as they are published.</strong>
-                    <Link href="/pro-wrestling">Explore the game mode</Link>
-                  </article>
-                )}
-              </div>
-            </section>
-
-            <section
-              className="fmm-dashboard-grid fmm-desktop-gameplay-restored-v19"
-              aria-label="Gameplay summary and leaderboard"
-            >
-              <div className="fmm-panel fmm-how-score-panel">
-                <div className="fmm-how-block">
-                  <h2>How It Works</h2>
-                  {[
-                    [
-                      "Predict",
-                      "Pick the winner, method, round, and score before the card locks.",
-                    ],
-                    [
-                      "Score Points",
-                      "Earn leaderboard points from the official Fantasy MMAdness scoring model.",
-                    ],
-                    [
-                      "Climb & Win",
-                      "Compete across global standings, leagues, and fight-night cards.",
-                    ],
-                  ].map(([title, copy], index) => (
-                    <div className="fmm-step-row" key={title}>
-                      <span>{index + 1}</span>
-                      <div>
-                        <strong>{title}</strong>
-                        <p>{copy}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="fmm-score-block">
-                  <h2>Scoring Preview</h2>
-                  <div className="fmm-score-table">
-                    <div>
-                      <strong>Prediction</strong>
-                      <strong>Points</strong>
-                    </div>
-                    {SCORING_ROWS.map(([label, points]) => (
-                      <div key={label}>
-                        <span>{label}</span>
-                        <strong>{points}</strong>
-                      </div>
-                    ))}
-                  </div>
-                  <Link href="/guides">
-                    Full rules &amp; scoring breakdown in How To Play
-                  </Link>
-                </div>
-              </div>
-
-              <div className="fmm-panel fmm-winners-panel">
-                <div className="fmm-panel-title-row">
-                  <h2>Recent Winners</h2>
-                  <Link href="/global-leaderboard">
-                    View All Winners <FaArrowRight aria-hidden="true" />
-                  </Link>
-                </div>
-                {STATIC_WINNERS.map((winner) => (
-                  <div className="fmm-winner-row" key={winner.name}>
-                    <span className="fmm-winner-medal">{winner.icon}</span>
-                    <div>
-                      <strong>{winner.name}</strong>
-                      <p>{winner.contest}</p>
-                    </div>
-                    <strong>{winner.amount}</strong>
-                  </div>
-                ))}
-                <p className="fmm-panel-note">
-                  <FaCrown aria-hidden="true" /> Become the next champion.
-                </p>
-              </div>
-
-              <div className="fmm-panel fmm-leaderboard-panel">
-                <div className="fmm-panel-title-row">
-                  <h2>Live Leaderboard</h2>
-                  <Link href="/leaderboard">
-                    View Full Leaderboard <FaArrowRight aria-hidden="true" />
-                  </Link>
-                </div>
-                <div className="fmm-leaderboard-head">
-                  <span>Rank</span>
-                  <span>Player</span>
-                  <span>Points</span>
-                </div>
-                {liveLeaderboardRows.length ? (
-                  liveLeaderboardRows.map((player, index) => (
-                    <div
-                      className={`fmm-leaderboard-row ${index === 0 ? "is-highlighted" : ""}`}
-                      key={`${player.name}-${index}`}
-                    >
-                      <span>{index + 1}</span>
-                      <div>
-                        {player.avatar ? (
-                          <FightImage
-                            src={player.avatar}
-                            alt={player.name}
-                            width={48}
-                            height={48}
-                            sizes="40px"
-                          />
-                        ) : (
-                          <span>{player.name.charAt(0).toUpperCase()}</span>
-                        )}
-                        <strong>{player.name}</strong>
-                      </div>
-                      <strong>
-                        {Number(player.points || 0).toLocaleString()}
-                      </strong>
-                    </div>
-                  ))
-                ) : (
-                  <div className="fmm-empty-card fmm-leaderboard-real-empty-v19">
-                    Real leaderboard rows will appear here after the backend
-                    returns scored users.
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section
-              className="fmm-metrics-partners fmm-desktop-metrics-restored-v19"
-              aria-label="Platform metrics and partners"
-            >
-              <div className="fmm-metrics-grid">
-                <div>
-                  <FaUsers aria-hidden="true" />
-                  <strong>128,547+</strong>
-                  <span>Players</span>
-                  <p>Worldwide community</p>
-                </div>
-                <div>
-                  <FaBullseye aria-hidden="true" />
-                  <strong>4.2M+</strong>
-                  <span>Predictions Submitted</span>
-                  <p>Across all time</p>
-                </div>
-                <div>
-                  <FaTrophy aria-hidden="true" />
-                  <strong>$1.7M+</strong>
-                  <span>Tokens Awarded</span>
-                  <p>To our champions</p>
-                </div>
-                <div>
-                  <FaShieldAlt aria-hidden="true" />
-                  <strong>100%</strong>
-                  <span>Secure &amp; Fair</span>
-                  <p>Provably fair contests</p>
-                </div>
-              </div>
-              <div className="fmm-partners-card">
-                <p>Trusted by fans. Backed by partners.</p>
-                <div>
-                  <span>UFC</span>
-                  <span>BKFC</span>
-                  <span>GLORY</span>
-                  <span>ESPN</span>
-                  <span>DAZN</span>
-                </div>
-              </div>
-            </section>
-
-            <section
-              className="fmm-fight-art-section fmm-desktop-fight-art-restored-v19"
-              aria-label="Fight night experience"
-            >
-              <div className="fmm-fight-art-copy">
-                <p>Fight Night Experience</p>
-                <h2>Built for every punch, round and prediction.</h2>
-                <span>
-                  Premium fight cards, live leaderboards and clean prediction
-                  flows stay focused on the contest, not hidden stat tables.
-                </span>
-                <Link href="/upcomingfights" className="fmm-art-link">
-                  Explore contests <FaArrowRight aria-hidden="true" />
-                </Link>
-              </div>
-              <div className="fmm-fight-art-media">
-                <Image
-                  src={HOME_FIGHT_ART_IMAGE}
-                  alt="Combat sports fight night"
-                  width={1280}
-                  height={720}
-                  sizes="(max-width: 1180px) 90vw, 58vw"
-                />
-              </div>
-            </section>
-          </main>
-        </div>
-        <div className="fmm-desktop-home-shell" hidden aria-hidden="true">
+        <div className="fmm-desktop-home-shell">
           <section
             className="fmm-home-hero"
             aria-label="Fantasy combat sports hero"
@@ -3184,7 +2732,7 @@ const HomeAnother = () => {
                       <span />
                     </div>
                     <div className="fmm-premium-loader-copy">
-                      <span>Featured fight posters</span>
+                      <span>Syncing live cards</span>
                       <strong>
                         Building the featured fight poster rail...
                       </strong>
@@ -3373,7 +2921,7 @@ const HomeAnother = () => {
               <div className="fmm-home-category-stack">
                 {matchStatus === "loading" && (
                   <div className="fmm-empty-card">
-                    Refreshing active contests...
+                    Loading active contests...
                   </div>
                 )}
                 {matchStatus === "failed" && (
@@ -3468,7 +3016,7 @@ const HomeAnother = () => {
                 <p>
                   <FaCrown /> New game mode
                 </p>
-                <h2>Pro Wrestling is now part of Fantasy MMAdness.</h2>
+                <h2>Pro Wrestling is now part of Fantasy MMADNESS.</h2>
                 <span>
                   Pro Wrestling remains inside the premium category tabs and
                   appears in its own fight section below.
@@ -3491,7 +3039,7 @@ const HomeAnother = () => {
               <div className="fmm-home-wrestling-visual">
                 <Image
                   src={HOME_WRESTLING_IMAGE}
-                  alt="Fantasy MMAdness Pro Wrestling"
+                  alt="Fantasy MMADNESS Pro Wrestling"
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1180px) 90vw, 50vw"
                 />
@@ -3541,7 +3089,7 @@ const HomeAnother = () => {
                 ) : (
                   <article className="is-empty">
                     <FaCrown />
-                    <strong>Open Pro Wrestling cards will appear here as soon as they are published.</strong>
+                    <strong>Wrestling contest cards will appear here.</strong>
                     <Link href="/pro-wrestling">Explore the new game mode</Link>
                   </article>
                 )}
@@ -3744,8 +3292,8 @@ const HomeAnother = () => {
                   Questions about leagues, sponsors, or fight cards?
                 </h2>
                 <span>
-                  Send a message and the team will follow up about leagues, sponsors,
-                  accounts, fight cards, or apparel orders.
+                  Send a message and the team will follow up. The existing
+                  production contact endpoint is unchanged.
                 </span>
               </div>
               <form onSubmit={handleSubmit}>

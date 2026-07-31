@@ -239,7 +239,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
             <div className="public-fight-detail-pills">
               <span><FaCalendarAlt /> {formatFightDate(resolvedFight)}</span>
               <span><FaClock /> {getFightRounds(resolvedFight)}</span>
-              <span><FaMapMarkerAlt /> {resolvedFight?.location || resolvedFight?.venue || 'Online fight card'}</span>
+              <span><FaMapMarkerAlt /> {resolvedFight?.location || resolvedFight?.venue || 'Venue TBA'}</span>
               <span><FaTrophy /> {getFightStatusLabel(resolvedFight)}</span>
             </div>
             <div className="public-fight-detail-actions">
@@ -268,7 +268,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
       </section>
 
       <section className="theme-container public-fight-data-strip" aria-label="Fight data">
-        <article><FaUsers /><span><strong>{playerCount > 0 ? playerCount : 'Open'}</strong><small>{playerCount > 0 ? 'Players' : 'Entries'}</small></span></article>
+        <article><FaUsers /><span><strong>{playerCount}</strong><small>Players</small></span></article>
         <article><FaCoins /><span><strong>{getFightPrize(resolvedFight)}</strong><small>Prize pool</small></span></article>
         <article><FaShieldAlt /><span><strong>{resolvedFight?.matchType || 'Public'}</strong><small>Fight type</small></span></article>
         <article><FaClock /><span><strong>{resolvedFight?.matchStatus || 'Open'}</strong><small>Status</small></span></article>
@@ -282,7 +282,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
             <li><strong>Category</strong><span>{category}</span></li>
             <li><strong>Schedule</strong><span>{formatFightDate(resolvedFight)}</span></li>
             <li><strong>Rounds</strong><span>{getFightRounds(resolvedFight)}</span></li>
-            <li><strong>Venue</strong><span>{resolvedFight?.location || resolvedFight?.venue || 'Online fight card'}</span></li>
+            <li><strong>Venue</strong><span>{resolvedFight?.location || resolvedFight?.venue || 'Venue TBA'}</span></li>
           </ul>
         </article>
 

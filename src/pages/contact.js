@@ -1,6 +1,15 @@
+import dynamic from 'next/dynamic';
 import React from 'react';
-import Contact from '@/Components/Footer/Contact';
 
-const ContactPage = () => <Contact />;
+const Contact = dynamic(
+  () => import('@/Components/Footer/Contact'),
+  {
+    loading: () => <p>Loading...</p>,
+  }
+);
+
+const ContactPage = () => {
+  return <Contact />;
+};
 
 export default ContactPage;

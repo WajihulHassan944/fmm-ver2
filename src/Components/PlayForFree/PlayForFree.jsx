@@ -12,10 +12,10 @@ const PlayForFree = () => {
   return (
     <>
       <Head>
-        <title>Play for Free | Fantasy Boxing Game & League – Fantasy MMAdness</title>
+        <title>Play for Free | Fantasy Boxing Game & League – Fantasy-MMadness</title>
         <meta
           name="description"
-          content="Play fantasy boxing for free with Fantasy MMAdness. No risk, just excitement. Join our fantasy boxing league, make predictions, and climb the leaderboard!"
+          content="Play fantasy boxing for free with Fantasy-MMadness. No risk, just excitement. Join our fantasy boxing league, make predictions, and climb the leaderboard!"
         />
         <meta
           name="keywords"
@@ -29,7 +29,7 @@ const PlayForFree = () => {
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Play for Free – Fantasy Boxing League & Game" />
-        <meta name="twitter:description" content="Join Fantasy MMAdness and enjoy our free fantasy boxing game. Compete, predict fights, and earn tokens – all without spending a dime." />
+        <meta name="twitter:description" content="Join Fantasy-MMadness and enjoy our free fantasy boxing game. Compete, predict fights, and earn tokens – all without spending a dime." />
         <meta name="twitter:image" content="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
 
         <link rel="icon" href="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
@@ -44,7 +44,7 @@ const PlayForFree = () => {
 
         <h1 data-aos="zoom-out" style={{marginTop:'60px'}}>Play Fantasy Boxing for Free</h1>
         <p>
-          Welcome to <strong>Fantasy MMAdness</strong> – the ultimate platform to experience the world of 
+          Welcome to <strong>Fantasy-MMadness</strong> – the ultimate platform to experience the world of 
           <strong> fantasy boxing</strong> without spending a single penny! Whether you’re a hardcore MMA fan or 
           completely new to fantasy sports, our <strong>free-to-play fantasy boxing game</strong> is built just for you.
         </p>
@@ -58,7 +58,7 @@ const PlayForFree = () => {
 
         <h2 data-aos="zoom-out">How It Works</h2>
         <ul>
-          <li><strong>Sign Up for Free:</strong> Get started by creating your free Fantasy MMAdness account.</li>
+          <li><strong>Sign Up for Free:</strong> Get started by creating your free Fantasy-MMadness account.</li>
           <li><strong>Make Predictions:</strong> Pick winners, rounds, and outcomes in real MMA fights to earn points in our <strong>fantasy boxing game</strong>.</li>
           <li><strong>Climb the Leaderboard:</strong> Your correct predictions boost your score and take you higher in our <strong>fantasy boxing league</strong> standings.</li>
         </ul>
