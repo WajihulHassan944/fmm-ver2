@@ -67,7 +67,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
-const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v28";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v29";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -1905,6 +1905,7 @@ const MobilePhoneHome = ({
             <span><small>ENTRIES</small><b>{featuredEntries.toLocaleString()}</b></span>
           </div>
           <strong className="fmm-app-detail-prize">{featuredPrize} POOL</strong>
+          <Link href={featuredHref} className="fmm-app-ai-scout" onClick={() => onPremiumTap("whoosh")}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</Link>
           <Link href={featuredHref} onClick={() => onPremiumTap("boom")}>MAKE PREDICTIONS</Link>
         </div>
       </section>
