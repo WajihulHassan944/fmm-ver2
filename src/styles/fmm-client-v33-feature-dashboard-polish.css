@@ -1,0 +1,210 @@
+/* v33: final targeted correction for the only deviated homepage sections: Featured This Week + dashboard cards. */
+
+.fmm-app-fixed-home .fmm-app-featured-week {
+  isolation:isolate !important;
+  background:
+    radial-gradient(circle at 23% 42%, rgba(239,31,45,.36), transparent 34%),
+    radial-gradient(circle at 76% 40%, rgba(77,141,255,.36), transparent 35%),
+    linear-gradient(180deg,#040509 0%,#020306 100%) !important;
+  border-color:rgba(242,181,68,.74) !important;
+  box-shadow:0 0 26px rgba(242,181,68,.28), inset 0 0 34px rgba(0,0,0,.84) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-bg {
+  opacity:1 !important;
+  object-position:center center !important;
+  filter:saturate(1.28) contrast(1.12) brightness(.78) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-week::before {
+  z-index:1 !important;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.08) 30%, rgba(0,0,0,.76) 100%),
+    radial-gradient(ellipse at 23% 49%, rgba(239,31,45,.34), transparent 40%),
+    radial-gradient(ellipse at 78% 46%, rgba(59,130,246,.34), transparent 40%) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-week::after {
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:2 !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.72) 0%, transparent 18%, transparent 82%, rgba(0,0,0,.72) 100%),
+    linear-gradient(180deg, rgba(255,255,255,.05) 0%, transparent 20%, transparent 72%, rgba(0,0,0,.48) 100%) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-content {
+  z-index:5 !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-head {
+  justify-content:space-between !important;
+  align-items:center !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-head b {
+  color:#ff3344 !important;
+  font-weight:900 !important;
+  letter-spacing:.08em !important;
+  text-shadow:0 0 10px rgba(239,31,45,.5), 0 2px 3px #000 !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-main h2 {
+  letter-spacing:.035em !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-main > div strong {
+  color:#fff !important;
+  background:rgba(0,0,0,.58) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.05), 0 8px 18px rgba(0,0,0,.35) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-content > a {
+  background:linear-gradient(180deg,#ffe78f 0%,#f4ba48 58%,#d69118 100%) !important;
+  border:1px solid rgba(255,255,255,.42) !important;
+  box-shadow:0 0 24px rgba(242,181,68,.68), inset 0 2px 0 rgba(255,255,255,.35) !important;
+}
+
+/* Use the same dashboard card treatment as the reference design: image-backed cards with readable overlays. */
+.fmm-app-fixed-home .fmm-app-community-card,
+.fmm-app-fixed-home .fmm-app-progress-card,
+.fmm-app-fixed-home .fmm-app-dashboard-leader,
+.fmm-app-fixed-home .fmm-app-dashboard-streak {
+  background:#05070c !important;
+  border-width:1.5px !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card > img,
+.fmm-app-fixed-home .fmm-app-progress-card > img,
+.fmm-app-fixed-home .fmm-app-dashboard-leader > img,
+.fmm-app-fixed-home .fmm-app-dashboard-streak > img {
+  opacity:.92 !important;
+  filter:saturate(1.18) contrast(1.1) brightness(.62) !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card > img { object-position:center center !important; }
+.fmm-app-fixed-home .fmm-app-progress-card > img { object-position:right center !important; }
+.fmm-app-fixed-home .fmm-app-dashboard-leader > img { object-position:center center !important; }
+.fmm-app-fixed-home .fmm-app-dashboard-streak > img { object-position:center center !important; }
+.fmm-app-fixed-home .fmm-app-community-card::after {
+  background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.52)), linear-gradient(90deg,rgba(0,0,0,.42),rgba(0,0,0,.1) 45%,rgba(0,0,0,.68)) !important;
+}
+.fmm-app-fixed-home .fmm-app-progress-card::after {
+  background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.5)), linear-gradient(90deg,rgba(9,7,28,.74),rgba(9,7,28,.2) 45%,rgba(0,0,0,.35)) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-leader::after {
+  background:linear-gradient(160deg,rgba(34,15,0,.62),rgba(0,0,0,.78)) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-streak::after {
+  background:linear-gradient(180deg,rgba(0,0,0,.14),rgba(0,0,0,.62)), linear-gradient(90deg,rgba(0,0,0,.6),rgba(0,0,0,.18) 55%,rgba(0,0,0,.5)) !important;
+}
+.fmm-app-fixed-home .fmm-app-progress-card .fmm-app-level-badge {
+  border-radius:50% !important;
+  background:radial-gradient(circle at 50% 38%,#d9a6ff 0%,#8b3dff 45%,#3c127d 100%) !important;
+  box-shadow:0 0 24px rgba(168,85,247,.92), inset 0 0 14px rgba(255,255,255,.18) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-streak i {
+  background:#16b957 !important;
+  border-color:#25d366 !important;
+  color:#fff !important;
+  box-shadow:0 0 10px rgba(34,197,94,.46) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-streak strong {
+  color:#ffce54 !important;
+  text-shadow:0 0 16px rgba(242,181,68,.82), 0 2px 4px #000 !important;
+}
+
+@media (max-width:767px) {
+  .fmm-app-fixed-home .fmm-app-featured-week {
+    height:257px !important;
+    margin:0 16px 18px !important;
+    border-radius:14px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-content {
+    padding:10px 12px 14px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-head span {
+    height:22px !important;
+    padding:0 12px !important;
+    font-size:8.5px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-head b {
+    font-size:9px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main {
+    width:100% !important;
+    margin-top:2px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main small {
+    font-size:10px !important;
+    margin-bottom:6px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main h2 {
+    max-width:62% !important;
+    font-size:31px !important;
+    line-height:.9 !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main > div {
+    width:74% !important;
+    margin:9px auto 0 !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main > div strong {
+    min-height:35px !important;
+    font-size:9.5px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-cutout {
+    width:31% !important;
+    height:142px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-content > a {
+    width:160px !important;
+    min-height:43px !important;
+    font-size:11.5px !important;
+  }
+
+  .fmm-app-fixed-home .fmm-app-community.fmm-app-dashboard-grid {
+    gap:8px !important;
+    margin:0 16px 16px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-community-card,
+  .fmm-app-fixed-home .fmm-app-progress-card,
+  .fmm-app-fixed-home .fmm-app-dashboard-card {
+    min-height:154px !important;
+    border-radius:13px !important;
+  }
+}
+
+@media (min-width:768px) {
+  .fmm-app-fixed-home .fmm-app-featured-week {
+    height:300px !important;
+    margin:0 0 30px !important;
+    border-radius:20px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-content {
+    padding:26px 34px 26px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-head span {
+    min-height:29px !important;
+    padding:0 24px !important;
+    font-size:12px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-head b {
+    font-size:14px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main h2 {
+    max-width:58% !important;
+    font-size:clamp(44px,4.5vw,64px) !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-main > div {
+    width:66% !important;
+    margin:15px auto 0 !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-cutout {
+    width:27% !important;
+    height:224px !important;
+  }
+
+  .fmm-app-fixed-home .fmm-app-community.fmm-app-dashboard-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:14px !important;
+    margin:0 0 24px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-community-card,
+  .fmm-app-fixed-home .fmm-app-progress-card,
+  .fmm-app-fixed-home .fmm-app-dashboard-card {
+    min-height:214px !important;
+    border-radius:18px !important;
+  }
+}

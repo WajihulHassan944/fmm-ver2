@@ -1672,11 +1672,11 @@ const MobilePhoneHome = ({
     "/images/pro-wrestling/pro-wrestling-hero.webp",
   ];
   const appApparel = [
-    { name: "MMADNESS HOODIE", price: "$49.99", image: `${appAssetBase}/ap1-hq.webp` },
-    { name: "FIGHT TEE", price: "$29.99", image: `${appAssetBase}/ap2-hq.webp` },
-    { name: "SNAPBACK CAP", price: "$24.99", image: `${appAssetBase}/ap3-hq.webp` },
-    { name: "FIGHT SHORTS", price: "$39.99", image: `${appAssetBase}/ap1-2-hq.webp` },
-    { name: "TRAINING GLOVES", price: "$34.99", image: `${appAssetBase}/ap2-2-hq.webp` },
+    { name: "MMADNESS HOODIE", price: "$49.99", image: "/images/mobile-home/app-fixed-v32/ap1-hq.webp" },
+    { name: "FIGHT TEE", price: "$29.99", image: "/images/mobile-home/app-fixed-v32/ap2-hq.webp" },
+    { name: "SNAPBACK CAP", price: "$24.99", image: "/images/mobile-home/app-fixed-v32/ap3-hq.webp" },
+    { name: "FIGHT SHORTS", price: "$39.99", image: "/images/mobile-home/app-fixed-v32/ap1-2-hq.webp" },
+    { name: "TRAINING GLOVES", price: "$34.99", image: "/images/mobile-home/app-fixed-v32/ap2-2-hq.webp" },
   ];
   const featuredFightList = (selectedSportFights.length ? selectedSportFights : uniqueAllFights.length ? uniqueAllFights : [featuredFight]).filter(Boolean).slice(0, 4);
   const featuredEntryFee = getMobileEntryFee(featuredFight);
@@ -1763,6 +1763,12 @@ const MobilePhoneHome = ({
         <span className="fmm-app-hero-glow is-blue" aria-hidden="true" />
         <span className="fmm-app-crown-sparkles" aria-hidden="true">
           {["✦", "✦", "✦", "✦", "✦", "✦"].map((spark, index) => <i key={index}>{spark}</i>)}
+        </span>
+        <span className="fmm-app-hero-particles" aria-hidden="true">
+          {Array.from({ length: 20 }).map((_, index) => <i key={index} />)}
+        </span>
+        <span className="fmm-app-hero-bulbs" aria-hidden="true">
+          {Array.from({ length: 16 }).map((_, index) => <i key={index} />)}
         </span>
         <Link
           href={heroJoinHref}
@@ -1926,7 +1932,7 @@ const MobilePhoneHome = ({
         <span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span>
       </Link>
 
-      <section className="fmm-app-community fmm-app-dashboard-grid" aria-label="Community predictions and player progression">
+      <section className="fmm-app-community fmm-app-dashboard-grid" aria-label="Community predictions, player progression, leaderboard and streak">
         <article className="fmm-app-community-card">
           <img src={`${appAssetBase}/pasted-1785014371576-0.png`} alt="" loading="lazy" decoding="async" />
           <div>
@@ -1954,22 +1960,6 @@ const MobilePhoneHome = ({
             <div className="fmm-app-legend-badge">♛ LEGEND · LEVEL {Math.max(playerLevel, 18)}</div>
           </div>
         </article>
-      </section>
-
-      <section className="fmm-app-reward-grid fmm-app-wallet-grid" aria-label="Daily reward, coin wallet, leaderboard and streak bonus">
-        <button type="button" className={rewardBurst ? "fmm-app-mini-panel is-claiming" : "fmm-app-mini-panel"} onClick={claimReward}>
-          <span>DAILY REWARD</span>
-          <img src={`${appAssetBase}/chest-transparent.png`} alt="" loading="lazy" decoding="async" />
-          <small>COME BACK EVERY DAY & BUILD YOUR STREAK!</small>
-          <strong>CLAIM REWARD</strong>
-        </button>
-        <button type="button" className="fmm-app-mini-panel fmm-app-mini-coins" onClick={openCoinFunnel}>
-          <span>COINS WALLET</span>
-          <FaCoins aria-hidden="true" />
-          <b>{displayCoinBalance.toLocaleString()}</b>
-          <small>COINS</small>
-          <strong>ADD COINS <FaPlus aria-hidden="true" /></strong>
-        </button>
         <Link href="/leaderboard" className="fmm-app-dashboard-card fmm-app-dashboard-leader" onClick={() => onPremiumTap()}>
           <img src={`${appAssetBase}/pasted-1785012542538-0.png`} alt="" loading="lazy" decoding="async" />
           <header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>
@@ -1990,6 +1980,22 @@ const MobilePhoneHome = ({
           <div>{[1, 2, 3, 4, 5, 6, 7].map((day) => <i key={day}>✓</i>)}</div>
           <strong>+250 <b>FM</b></strong>
           <small>🏆 Streak expires in 5h 56m</small>
+        </button>
+      </section>
+
+      <section className="fmm-app-reward-grid fmm-app-wallet-grid" aria-label="Daily reward and coin wallet">
+        <button type="button" className={rewardBurst ? "fmm-app-mini-panel is-claiming" : "fmm-app-mini-panel"} onClick={claimReward}>
+          <span>DAILY REWARD</span>
+          <img src={`${appAssetBase}/chest-transparent.png`} alt="" loading="lazy" decoding="async" />
+          <small>COME BACK EVERY DAY & BUILD YOUR STREAK!</small>
+          <strong>CLAIM REWARD</strong>
+        </button>
+        <button type="button" className="fmm-app-mini-panel fmm-app-mini-coins" onClick={openCoinFunnel}>
+          <span>COINS WALLET</span>
+          <FaCoins aria-hidden="true" />
+          <b>{displayCoinBalance.toLocaleString()}</b>
+          <small>COINS</small>
+          <strong>ADD COINS <FaPlus aria-hidden="true" /></strong>
         </button>
       </section>
 
@@ -2021,9 +2027,9 @@ const MobilePhoneHome = ({
         <div className="fmm-app-socials" aria-label="Social channels">
           {[
             ["https://x.com/FMmadness2024", "X", "X"],
-            ["https://www.instagram.com/fantasymmadness", "Instagram", "IG"],
-            ["https://www.facebook.com/fantasymmadness", "Facebook", "FB"],
-            ["https://www.tiktok.com/@fantasymmadness", "TikTok", "TT"],
+            ["https://www.instagram.com/fantasymmadness", "Instagram", "●"],
+            ["https://www.facebook.com/fantasymmadness", "Facebook", "F"],
+            ["https://www.tiktok.com/@fantasymmadness", "TikTok", "♪"],
           ].map(([href, label, shortLabel]) => (
             <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={`Open ${label}`}>
               <span aria-hidden="true">{shortLabel}</span>
