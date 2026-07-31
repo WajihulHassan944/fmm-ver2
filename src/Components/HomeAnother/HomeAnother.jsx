@@ -67,7 +67,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
-const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v29";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v30";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
