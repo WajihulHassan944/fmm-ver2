@@ -67,7 +67,7 @@ const HOME_HERO_IMAGE =
 const HOME_FIGHT_ART_IMAGE = "/images/home-premium/fight-action-clash.webp";
 const HOME_WRESTLING_IMAGE =
   "/images/pro-wrestling/wrestling-live-premium.webp";
-const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v32";
+const APP_FIXED_ASSET_BASE = "/images/mobile-home/app-fixed-v28";
 
 const HOME_FIGHT_SPORT_TABS = [
   {
@@ -1260,14 +1260,11 @@ const MobilePhoneHome = ({
           (section) => section.key === tab.key,
         );
         const artMap = {
-          boxing: "/images/mobile-home/client-v7/category-boxing-art.jpg",
-          mma: "/images/mobile-home/client-v7/category-mma-art.jpg",
-          bareknuckle:
-            "/images/mobile-home/client-v7/category-bare-knuckle-art.jpg",
-          kickboxing:
-            "/images/mobile-home/client-v7/category-kickboxing-art.jpg",
-          "pro-wrestling":
-            "/images/mobile-home/client-v7/category-pro-wrestling-art.jpg",
+          boxing: `${APP_FIXED_ASSET_BASE}/sport-boxing-design.png`,
+          mma: `${APP_FIXED_ASSET_BASE}/sport-mma-design.png`,
+          bareknuckle: `${APP_FIXED_ASSET_BASE}/sport-bareknuckle-design.png`,
+          kickboxing: `${APP_FIXED_ASSET_BASE}/sport-kickboxing-design.png`,
+          "pro-wrestling": `${APP_FIXED_ASSET_BASE}/sport-wrestling-design.png`,
         };
         const labels = {
           boxing: "Boxing",
@@ -1675,11 +1672,11 @@ const MobilePhoneHome = ({
     "/images/pro-wrestling/pro-wrestling-hero.webp",
   ];
   const appApparel = [
-    { name: "MMADNESS HOODIE", price: "$49.99", image: `${appAssetBase}/ap1-hq.webp` },
-    { name: "FIGHT TEE", price: "$29.99", image: `${appAssetBase}/ap2-hq.webp` },
-    { name: "SNAPBACK CAP", price: "$24.99", image: `${appAssetBase}/ap3-hq.webp` },
-    { name: "FIGHT SHORTS", price: "$39.99", image: `${appAssetBase}/ap1-2-hq.webp` },
-    { name: "TRAINING GLOVES", price: "$34.99", image: `${appAssetBase}/ap2-2-hq.webp` },
+    { name: "MMADNESS HOODIE", price: "$49.99", image: "/images/mobile-home/app-fixed-v15/ap1-hq.webp" },
+    { name: "FIGHT TEE", price: "$29.99", image: "/images/mobile-home/app-fixed-v15/ap2-hq.webp" },
+    { name: "SNAPBACK CAP", price: "$24.99", image: "/images/mobile-home/app-fixed-v15/ap3-hq.webp" },
+    { name: "FIGHT SHORTS", price: "$39.99", image: "/images/mobile-home/app-fixed-v15/ap1-2-hq.webp" },
+    { name: "TRAINING GLOVES", price: "$34.99", image: "/images/mobile-home/app-fixed-v15/ap2-2-hq.webp" },
   ];
   const featuredFightList = (selectedSportFights.length ? selectedSportFights : uniqueAllFights.length ? uniqueAllFights : [featuredFight]).filter(Boolean).slice(0, 4);
   const featuredEntryFee = getMobileEntryFee(featuredFight);
@@ -1905,7 +1902,6 @@ const MobilePhoneHome = ({
             <span><small>ENTRIES</small><b>{featuredEntries.toLocaleString()}</b></span>
           </div>
           <strong className="fmm-app-detail-prize">{featuredPrize} POOL</strong>
-          <Link href={featuredHref} className="fmm-app-ai-scout" onClick={() => onPremiumTap("whoosh")}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</Link>
           <Link href={featuredHref} onClick={() => onPremiumTap("boom")}>MAKE PREDICTIONS</Link>
         </div>
       </section>
@@ -1930,7 +1926,7 @@ const MobilePhoneHome = ({
         <span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span>
       </Link>
 
-      <section className="fmm-app-community" aria-label="Community predictions and player progression">
+      <section className="fmm-app-community fmm-app-dashboard-grid" aria-label="Community predictions, player progression, leaderboard and streak">
         <article className="fmm-app-community-card">
           <img src={`${appAssetBase}/pasted-1785012542538-0.png`} alt="" loading="lazy" decoding="async" />
           <div>
@@ -1958,9 +1954,30 @@ const MobilePhoneHome = ({
             <div className="fmm-app-legend-badge">♛ LEGEND · LEVEL {Math.max(playerLevel, 18)}</div>
           </div>
         </article>
+        <Link href="/leaderboard" className="fmm-app-dashboard-card fmm-app-dashboard-leader" onClick={() => onPremiumTap()}>
+          <img src={`${appAssetBase}/pasted-1785012542538-0.png`} alt="" loading="lazy" decoding="async" />
+          <header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>
+          <div>
+            {liveLeaderboard.length ? liveLeaderboard.slice(0, 4).map((player) => (
+              <p key={`${player.rank}-${player.name}`} className={player.name === currentUserName ? "is-you" : ""}>
+                <b>{player.rank}</b><span>{player.name}</span><strong>{Number(player.points || 0).toLocaleString()}</strong>
+              </p>
+            )) : (
+              <p className="is-empty"><b>—</b><span>Standings syncing</span><strong>LIVE</strong></p>
+            )}
+          </div>
+        </Link>
+        <button type="button" className="fmm-app-dashboard-card fmm-app-dashboard-streak" onClick={openCoinFunnel}>
+          <img src={`${appAssetBase}/pasted-1785014166827-0.png`} alt="" loading="lazy" decoding="async" />
+          <span>STREAK BONUS</span>
+          <h3>🔥 7 DAY STREAK</h3>
+          <div>{[1, 2, 3, 4, 5, 6, 7].map((day) => <i key={day}>✓</i>)}</div>
+          <strong>+250 <b>FM</b></strong>
+          <small>🏆 Streak expires in 5h 56m</small>
+        </button>
       </section>
 
-      <section className="fmm-app-reward-grid" aria-label="Rewards, coins and leaderboard">
+      <section className="fmm-app-reward-grid fmm-app-wallet-grid" aria-label="Daily reward and coin wallet">
         <button type="button" className={rewardBurst ? "fmm-app-mini-panel is-claiming" : "fmm-app-mini-panel"} onClick={claimReward}>
           <span>DAILY REWARD</span>
           <img src={`${appAssetBase}/chest-transparent.png`} alt="" loading="lazy" decoding="async" />
@@ -1973,23 +1990,6 @@ const MobilePhoneHome = ({
           <b>{displayCoinBalance.toLocaleString()}</b>
           <small>COINS</small>
           <strong>ADD COINS <FaPlus aria-hidden="true" /></strong>
-        </button>
-        <Link href="/leaderboard" className="fmm-app-mini-panel fmm-app-mini-leader" onClick={() => onPremiumTap()}>
-          <header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>
-          {liveLeaderboard.length ? liveLeaderboard.slice(0, 4).map((player) => (
-            <p key={`${player.rank}-${player.name}`} className={player.name === currentUserName ? "is-you" : ""}>
-              <b>{player.rank}</b><span>{player.name}</span><strong>{Number(player.points || 0).toLocaleString()} PTS</strong>
-            </p>
-          )) : (
-            <p className="is-empty"><b>—</b><span>Standings syncing</span><strong>LIVE</strong></p>
-          )}
-        </Link>
-        <button type="button" className="fmm-app-mini-panel fmm-app-mini-streak" onClick={openCoinFunnel}>
-          <span>STREAK BONUS</span>
-          <h3>🔥 7 DAY STREAK</h3>
-          <div>{[1, 2, 3, 4, 5, 6, 7].map((day) => <i key={day}>✓</i>)}</div>
-          <strong>+250 <b>FM</b></strong>
-          <img src={`${appAssetBase}/chest-transparent.png`} alt="" loading="lazy" decoding="async" />
         </button>
       </section>
 
