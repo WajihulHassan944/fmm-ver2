@@ -102,6 +102,7 @@ import "@/styles/fmm-client-v32-reference-code-home.css";
 import "@/styles/fmm-client-v33-featured-dashboard-sync.css";
 import "@/styles/fmm-client-v34-upcoming-event-repair.css";
 import "@/styles/fmm-client-v35-final-home-design.css";
+import "@/styles/fmm-client-v36-home-final-tuning.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

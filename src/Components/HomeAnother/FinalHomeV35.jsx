@@ -28,6 +28,7 @@ const sportAssets = {
     longLabel: "BOXING",
     color: "#ef4444",
     image: `${ASSET_BASE}/sport-boxing.webp`,
+    frames: [`${ASSET_BASE}/sport-boxing.webp`, `${ASSET_BASE}/sport-boxing-0.webp`, `${ASSET_BASE}/sport-boxing-1.webp`, `${ASSET_BASE}/sport-boxing-2.webp`],
     count: "38,245",
     href: "/upcomingfights?status=all&category=boxing",
   },
@@ -36,6 +37,7 @@ const sportAssets = {
     longLabel: "UFC / MMA",
     color: "#4d8dff",
     image: `${ASSET_BASE}/sport-mma.webp`,
+    frames: [`${ASSET_BASE}/sport-mma.webp`, `${ASSET_BASE}/sport-mma-2.webp`, `${ASSET_BASE}/sport-mma-3.webp`],
     count: "52,221",
     href: "/upcomingfights?status=all&category=mma",
   },
@@ -44,6 +46,7 @@ const sportAssets = {
     longLabel: "BARE KNUCKLE",
     color: "#f2b544",
     image: `${ASSET_BASE}/sport-bareknuckle.webp`,
+    frames: [`${ASSET_BASE}/sport-bareknuckle.webp`, `${ASSET_BASE}/sport-bareknuckle-0.webp`],
     count: "12,582",
     href: "/upcomingfights?status=all&category=bareknuckle",
   },
@@ -52,6 +55,7 @@ const sportAssets = {
     longLabel: "KICKBOXING",
     color: "#22c55e",
     image: `${ASSET_BASE}/sport-kickboxing.webp`,
+    frames: [`${ASSET_BASE}/sport-kickboxing.webp`, `${ASSET_BASE}/sport-kickboxing-0.webp`],
     count: "8,715",
     href: "/upcomingfights?status=all&category=kickboxing",
   },
@@ -60,6 +64,7 @@ const sportAssets = {
     longLabel: "PRO WRESTLING",
     color: "#a855f7",
     image: `${ASSET_BASE}/sport-wrestling.webp`,
+    frames: [`${ASSET_BASE}/sport-wrestling.webp`, `${ASSET_BASE}/sport-wrestling-4.webp`],
     count: "16,148",
     href: "/pro-wrestling",
   },
@@ -443,6 +448,11 @@ const FinalHomeV35 = ({
           <span className="fmm-v35-hero-sparks" aria-hidden="true">
             {Array.from({ length: 20 }).map((_, index) => <i key={index} />)}
           </span>
+          <span className="fmm-v36-hero-rays" aria-hidden="true" />
+          <span className="fmm-v36-hero-scan" aria-hidden="true" />
+          <span className="fmm-v36-hero-burst" aria-hidden="true">
+            {Array.from({ length: 16 }).map((_, index) => <i key={index} />)}
+          </span>
           <Link href={isLoggedIn ? featuredHref : SIGNUP_HREF} className="fmm-v35-hero-hit" aria-label={isLoggedIn ? "Make predictions" : "Join free"} />
         </section>
 
@@ -482,7 +492,11 @@ const FinalHomeV35 = ({
               style={{ "--sport-color": sport.color }}
               onClick={() => setActiveFightSport(sport.key)}
             >
-              <img src={sport.image} alt="" />
+              <span className="fmm-v36-sport-frames" aria-hidden="true">
+                {(sport.frames?.length ? sport.frames : [sport.image]).map((src, frameIndex) => (
+                  <img src={src} alt="" key={`${sport.key}-${frameIndex}`} />
+                ))}
+              </span>
               <strong>{sport.label}</strong>
               <span><FaUsers /> {sport.count}</span>
               <small><i />{activeSport === sport.key ? "SELECTED" : "LIVE"}</small>
