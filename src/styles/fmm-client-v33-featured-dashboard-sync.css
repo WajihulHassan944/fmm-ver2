@@ -1,0 +1,219 @@
+/* v33: final correction for the only deviated home sections: Featured This Week + dashboard cards. */
+
+.fmm-app-fixed-home .fmm-app-featured-week {
+  isolation:isolate !important;
+  background:#020409 !important;
+  border:1.5px solid rgba(242,181,68,.72) !important;
+  box-shadow:
+    0 0 22px rgba(242,181,68,.24),
+    inset 0 0 32px rgba(0,0,0,.74) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-bg {
+  opacity:.94 !important;
+  filter:saturate(1.18) contrast(1.1) brightness(.66) !important;
+  object-position:center center !important;
+  z-index:0 !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-week::before {
+  background:
+    radial-gradient(circle at 18% 43%,rgba(239,68,68,.36),transparent 35%),
+    radial-gradient(circle at 80% 40%,rgba(77,141,255,.35),transparent 35%),
+    linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.42) 58%,rgba(0,0,0,.82)) !important;
+  z-index:1 !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-week::after {
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:2 !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.7),transparent 23%,transparent 77%,rgba(0,0,0,.7)),
+    radial-gradient(ellipse at center,transparent 38%,rgba(0,0,0,.28) 74%,rgba(0,0,0,.76)) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-cutout,
+.fmm-app-fixed-home .fmm-app-featured-content {
+  z-index:4 !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-cutout {
+  background:transparent !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-cutout img,
+.fmm-app-fixed-home .fmm-app-featured-cutout picture {
+  filter:drop-shadow(0 14px 14px rgba(0,0,0,.88)) saturate(1.08) contrast(1.04) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-head {
+  justify-content:space-between !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-head span {
+  background:linear-gradient(90deg,#fff9c8 0%,#f5cb56 52%,#e5a526 100%) !important;
+  color:#4b2a00 !important;
+  box-shadow:0 0 18px rgba(242,181,68,.55), inset 0 1px 0 rgba(255,255,255,.45) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-head b {
+  color:#ff3838 !important;
+  text-shadow:0 1px 5px rgba(0,0,0,.9),0 0 12px rgba(239,68,68,.45) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-main small {
+  color:#ff4050 !important;
+  text-shadow:0 0 10px rgba(239,68,68,.45),0 2px 4px #000 !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-main h2 {
+  text-shadow:0 2px 0 #000,0 0 18px rgba(255,255,255,.22),0 0 26px rgba(77,141,255,.14) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-main > div strong {
+  background:rgba(0,0,0,.64) !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  box-shadow:inset 0 0 14px rgba(255,255,255,.04),0 0 12px rgba(0,0,0,.58) !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-content > a {
+  background:linear-gradient(180deg,#ffe182 0%,#f4b93d 55%,#d98a14 100%) !important;
+  color:#241100 !important;
+  box-shadow:0 0 24px rgba(242,181,68,.72), inset 0 2px 0 rgba(255,255,255,.34) !important;
+}
+
+/* Reference-style prediction/progression/leaderboard/streak cards. */
+.fmm-app-fixed-home .fmm-app-community-card,
+.fmm-app-fixed-home .fmm-app-progress-card,
+.fmm-app-fixed-home .fmm-app-dashboard-card {
+  position:relative !important;
+  overflow:hidden !important;
+  background:#060910 !important;
+  border-width:1.5px !important;
+  box-shadow:0 0 18px rgba(0,0,0,.54), inset 0 0 24px rgba(0,0,0,.68) !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card { border-color:rgba(239,68,68,.86) !important; box-shadow:0 0 16px rgba(239,68,68,.26), inset 0 0 24px rgba(0,0,0,.72) !important; }
+.fmm-app-fixed-home .fmm-app-progress-card { border-color:rgba(168,85,247,.88) !important; box-shadow:0 0 16px rgba(168,85,247,.26), inset 0 0 24px rgba(0,0,0,.72) !important; }
+.fmm-app-fixed-home .fmm-app-dashboard-leader { border-color:rgba(242,181,68,.82) !important; box-shadow:0 0 16px rgba(242,181,68,.22), inset 0 0 24px rgba(0,0,0,.72) !important; }
+.fmm-app-fixed-home .fmm-app-dashboard-streak { border-color:rgba(239,68,68,.84) !important; box-shadow:0 0 16px rgba(239,68,68,.22), inset 0 0 24px rgba(0,0,0,.72) !important; }
+.fmm-app-fixed-home .fmm-app-community-card > img,
+.fmm-app-fixed-home .fmm-app-progress-card > img,
+.fmm-app-fixed-home .fmm-app-dashboard-card > img {
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  object-fit:cover !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  transform:none !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card > img { opacity:.76 !important; object-position:center center !important; filter:saturate(1.12) contrast(1.04) brightness(.8) !important; }
+.fmm-app-fixed-home .fmm-app-progress-card > img { opacity:.82 !important; object-position:center right !important; filter:saturate(1.12) contrast(1.05) brightness(.8) !important; }
+.fmm-app-fixed-home .fmm-app-dashboard-leader > img { opacity:.76 !important; object-position:center center !important; filter:saturate(1.12) contrast(1.05) brightness(.7) !important; }
+.fmm-app-fixed-home .fmm-app-dashboard-streak > img { opacity:.76 !important; object-position:center center !important; filter:saturate(1.12) contrast(1.06) brightness(.72) !important; }
+.fmm-app-fixed-home .fmm-app-community-card::before,
+.fmm-app-fixed-home .fmm-app-progress-card::before,
+.fmm-app-fixed-home .fmm-app-dashboard-card::before {
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:1 !important;
+  pointer-events:none !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card::before {
+  background:linear-gradient(180deg,rgba(0,0,0,.26),rgba(0,0,0,.44)),radial-gradient(circle at 22% 72%,rgba(239,68,68,.2),transparent 44%) !important;
+}
+.fmm-app-fixed-home .fmm-app-progress-card::before {
+  background:linear-gradient(90deg,rgba(10,7,20,.6),rgba(8,5,16,.3) 45%,rgba(6,4,13,.5)),radial-gradient(circle at 48% 48%,rgba(168,85,247,.24),transparent 42%) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-leader::before {
+  background:linear-gradient(160deg,rgba(29,13,2,.62),rgba(8,5,4,.76)),radial-gradient(circle at 88% 12%,rgba(242,181,68,.12),transparent 42%) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-streak::before {
+  background:linear-gradient(105deg,rgba(5,4,4,.68),rgba(20,5,5,.44),rgba(0,0,0,.58)),radial-gradient(circle at 84% 20%,rgba(242,181,68,.18),transparent 45%) !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card > div,
+.fmm-app-fixed-home .fmm-app-progress-card > div,
+.fmm-app-fixed-home .fmm-app-dashboard-card > :not(img) {
+  position:relative !important;
+  z-index:2 !important;
+}
+.fmm-app-fixed-home .fmm-app-community-card span,
+.fmm-app-fixed-home .fmm-app-progress-card span,
+.fmm-app-fixed-home .fmm-app-dashboard-card header span,
+.fmm-app-fixed-home .fmm-app-dashboard-streak > span {
+  color:#ffce54 !important;
+  text-shadow:0 2px 4px #000,0 0 10px rgba(242,181,68,.28) !important;
+}
+.fmm-app-fixed-home .fmm-app-progress-card .fmm-app-level-badge {
+  background:radial-gradient(circle,#a855f7 0%,#732ee5 54%,#25124f 100%) !important;
+  box-shadow:0 0 26px rgba(168,85,247,.78), inset 0 0 18px rgba(255,255,255,.16) !important;
+}
+.fmm-app-fixed-home .fmm-app-progress-card i b {
+  animation:fmmV32Progress 1.2s ease-out both !important;
+  background:linear-gradient(90deg,#a855f7 0%,#ec4899 72%,#ffd166 100%) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-streak i {
+  background:#22c55e !important;
+  border-color:#22c55e !important;
+  color:#fff !important;
+  box-shadow:0 0 10px rgba(34,197,94,.42) !important;
+}
+.fmm-app-fixed-home .fmm-app-dashboard-streak strong {
+  color:#ffcf4d !important;
+  text-shadow:0 0 18px rgba(242,181,68,.72),0 2px 4px #000 !important;
+}
+
+@media (max-width:767px) {
+  .fmm-app-fixed-home .fmm-app-featured-week {
+    height:205px !important;
+    margin:0 16px 18px !important;
+    border-radius:14px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-cutout { width:25% !important; height:112px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-content { padding:10px 12px 12px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-head span { height:21px !important; padding:0 10px !important; font-size:8.5px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-head b { font-size:9.5px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-main small { font-size:10px !important; margin-bottom:4px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-main h2 { max-width:61% !important; font-size:27px !important; line-height:.94 !important; }
+  .fmm-app-fixed-home .fmm-app-featured-main > div { width:76% !important; margin:7px auto 0 !important; gap:5px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-main > div strong { min-height:31px !important; font-size:8.5px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-content > a { width:154px !important; min-height:40px !important; font-size:11px !important; }
+
+  .fmm-app-fixed-home .fmm-app-community.fmm-app-dashboard-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+    margin:0 16px 16px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-community-card,
+  .fmm-app-fixed-home .fmm-app-progress-card,
+  .fmm-app-fixed-home .fmm-app-dashboard-card {
+    min-height:156px !important;
+    border-radius:13px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-community-card > div,
+  .fmm-app-fixed-home .fmm-app-progress-card > div { padding:10px !important; min-height:156px !important; }
+  .fmm-app-fixed-home .fmm-app-community-donut { width:58px !important; height:58px !important; left:11px !important; bottom:12px !important; }
+  .fmm-app-fixed-home .fmm-app-community-donut svg { width:58px !important; height:58px !important; }
+  .fmm-app-fixed-home .fmm-app-community-card p { margin-left:70px !important; font-size:11px !important; }
+  .fmm-app-fixed-home .fmm-app-dashboard-card { padding:9px !important; }
+  .fmm-app-fixed-home .fmm-app-dashboard-streak div { gap:3px !important; }
+}
+
+@media (min-width:768px) {
+  .fmm-app-fixed-home .fmm-app-featured-week {
+    height:268px !important;
+    margin:0 0 28px !important;
+    border-radius:20px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-featured-cutout { width:22% !important; height:178px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-content { padding:24px 34px 22px !important; }
+  .fmm-app-fixed-home .fmm-app-featured-main h2 { max-width:62% !important; font-size:clamp(42px,4.2vw,60px) !important; }
+  .fmm-app-fixed-home .fmm-app-featured-main > div { width:58% !important; margin:13px auto 0 !important; }
+
+  .fmm-app-fixed-home .fmm-app-community.fmm-app-dashboard-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:16px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-community-card,
+  .fmm-app-fixed-home .fmm-app-progress-card,
+  .fmm-app-fixed-home .fmm-app-dashboard-card {
+    min-height:196px !important;
+    border-radius:18px !important;
+  }
+  .fmm-app-fixed-home .fmm-app-community-card > div,
+  .fmm-app-fixed-home .fmm-app-progress-card > div { min-height:196px !important; }
+  .fmm-app-fixed-home .fmm-app-progress-card i { margin-left:38px !important; margin-right:38px !important; }
+}
