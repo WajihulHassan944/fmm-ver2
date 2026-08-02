@@ -145,10 +145,10 @@ const statCards = [
 ];
 
 const socialLinks = [
-  ["https://x.com/FMmadness2024", "X", "X"],
-  ["https://www.instagram.com/fantasymmadness", "Instagram", "●"],
-  ["https://www.facebook.com/fantasymmadness", "Facebook", "F"],
-  ["https://www.tiktok.com/@fantasymmadness", "TikTok", "♪"],
+  { href: "https://x.com/FMmadness2024", label: "X", short: "X", bg: "#030305", path: "M18.9 3H22l-7.5 8.6L23 21h-6.9l-5.4-6.4L4.4 21H1.3l8-9.2L1 3h7l4.9 5.8L18.9 3z" },
+  { href: "https://www.instagram.com/fantasymmadness", label: "Instagram", short: "IG", bg: "#dd2a7b", path: "M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 2A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5zM17.75 6a1 1 0 1 1-1 1 1 1 0 0 1 1-1z" },
+  { href: "https://www.facebook.com/fantasymmadness", label: "Facebook", short: "FB", bg: "#1877f2", path: "M13 22v-9h3l.5-4H13V6.5c0-1.15.3-1.9 2-1.9h2V1.1C16.6 1 15.4.9 14 .9c-2.9 0-4.9 1.8-4.9 5V9H6v4h3v9h4z" },
+  { href: "https://www.tiktok.com/@fantasymmadness", label: "TikTok", short: "TT", bg: "#25f4ee", path: "M16 2h3.2a5.6 5.6 0 0 0 4 3.9v3.3a8.9 8.9 0 0 1-4-1v6.9a6.9 6.9 0 1 1-6.9-6.9c.3 0 .6 0 .9.1v3.4a3.5 3.5 0 1 0 3.5 3.5V2z" },
 ];
 
 const pick = (...values) => values.find((value) => value !== undefined && value !== null && String(value).trim() !== "");
@@ -459,15 +459,19 @@ const FinalHomeV35 = ({
         <section className="fmm-v35-ticker" aria-label="Live ticker">
           <div>
             {[
-              ["#3", "Prediction_Prof climbed to #3", "#ef4444"],
+              ["🔥", "KO_Beast just won 1,200 FM on UFC 323", "#ff6b3b"],
+              ["🥊", "842 predictors joined today", "#f2b544"],
+              ["🏆", "Prediction_Prof climbed to #3", "#f2b544"],
               ["⚡", "BKFC 68 entries closing in 16 days", "#4d8dff"],
-              ["💰", "$12,450 paid out today", "#f2b544"],
-              ["🔥", "KO_Beast just won 1,200 FM", "#ef4444"],
+              ["💰", "$12,450 paid out today", "#22c55e"],
+              ["🎯", "76% picking Jones to win", "#a855f7"],
             ].concat([
-              ["#3", "Prediction_Prof climbed to #3", "#ef4444"],
+              ["🔥", "KO_Beast just won 1,200 FM on UFC 323", "#ff6b3b"],
+              ["🥊", "842 predictors joined today", "#f2b544"],
+              ["🏆", "Prediction_Prof climbed to #3", "#f2b544"],
               ["⚡", "BKFC 68 entries closing in 16 days", "#4d8dff"],
-              ["💰", "$12,450 paid out today", "#f2b544"],
-              ["🔥", "KO_Beast just won 1,200 FM", "#ef4444"],
+              ["💰", "$12,450 paid out today", "#22c55e"],
+              ["🎯", "76% picking Jones to win", "#a855f7"],
             ]).map(([icon, copy, color], index) => (
               <span key={`${copy}-${index}`} style={{ "--ticker-color": color }}><b>{icon}</b>{copy}</span>
             ))}
@@ -595,7 +599,7 @@ const FinalHomeV35 = ({
         <section className="fmm-v35-affiliate" aria-label="Affiliate promoter and socials">
           <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/handshake-transparent.png`} alt="" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
           <button type="button" className="fmm-v35-chest" onClick={() => setCoinModalOpen(true)} aria-label="Open coin funnel"><img src={`${ASSET_BASE}/chest-transparent.png`} alt="Treasure chest" /><i /><i /><i /></button>
-          <div className="fmm-v35-socials">{socialLinks.map(([href, label, short]) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label}><span>{short}</span><small>{label}</small></a>)}</div>
+          <div className="fmm-v35-socials">{socialLinks.map(({ href, label, short, bg, path }) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label} title={label} style={{ "--social-bg": bg }}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={path} /></svg><span>{short}</span><small>{label}</small></a>)}</div>
         </section>
       </main>
 
