@@ -180,8 +180,19 @@ const getFightId = (fight = {}) => fight?._id || fight?.id || fight?.matchId || 
 const getFightHref = (fight = {}) => {
   const id = getFightId(fight);
   if (!id || String(id).startsWith("fallback")) return "/upcomingfights";
-  if (fight?.__source === "pro-wrestling" || fight?.sport === "pro-wrestling") return `/pro-wrestling/matches/${id}`;
-  return `/upcomingfights/${id}`;
+  const rawSport = String(
+    pick(
+      fight?.__source,
+      fight?.sport,
+      fight?.category,
+      fight?.fightCategory,
+      fight?.matchCategory,
+      fight?.combatSport,
+      fight?.type,
+    ),
+  ).toLowerCase();
+  if (rawSport.includes("wrestl") || rawSport.includes("pro-wrestling")) return `/pro-wrestling/matches/${id}`;
+  return `/fight/${id}`;
 };
 
 const getSportKey = (fight = {}) => {
@@ -313,6 +324,7 @@ const FinalHomeV35 = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [coinModalOpen, setCoinModalOpen] = useState(false);
+  const [aiScoutOpen, setAiScoutOpen] = useState(false);
   const [layout, setLayout] = useState("classic");
 
   const isLoggedIn = Boolean(currentUser?._id || currentUser?.email || currentUser?.username);
@@ -555,7 +567,7 @@ const FinalHomeV35 = ({
             <h2 id="fmm-v35-detail-title">JONES <em>VS</em> ASPINALL</h2>
             <div className="fmm-v35-detail-meta"><b>JUL 12</b><b>10:00 PM ET</b><b>T-MOBILE ARENA</b></div>
             <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong>$100,000</strong></p><p><small>ENTRY FEE</small><strong>100 FM</strong></p><p><small>ENTRIES</small><strong>22,450</strong></p></div>
-            <Link href={featuredHref} className="fmm-v35-ai">🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</Link>
+            <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
             <Link href={featuredHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
           </div>
         </section>
@@ -612,6 +624,33 @@ const FinalHomeV35 = ({
           [isLoggedIn ? "/profile" : "/login?next=/profile", "PROFILE", FaUserAlt, "profile"],
         ].map(([href, label, Icon, key]) => <Link href={href} key={key} className={`is-${key}`}><Icon /><span>{label}</span></Link>)}
       </nav>
+
+
+      {aiScoutOpen && (
+        <div className="fmm-v39-ai-scout-modal" role="dialog" aria-modal="true" aria-labelledby="fmm-v39-ai-title">
+          <button type="button" className="fmm-v39-modal-backdrop" aria-label="Close AI scouting assistant" onClick={() => setAiScoutOpen(false)} />
+          <section className="fmm-v39-ai-card">
+            <button type="button" className="fmm-v39-ai-close" aria-label="Close AI scouting assistant" onClick={() => setAiScoutOpen(false)}><FaTimes /></button>
+            <header>
+              <span>🤖</span>
+              <div>
+                <h2 id="fmm-v39-ai-title">AI SCOUTING ASSISTANT</h2>
+                <p>JONES vs ASPINALL · UFC 323</p>
+              </div>
+            </header>
+            <blockquote>
+              “Aspinall’s takedown defense has improved 22% since his last title bout, but Jones lands 3.4 more significant strikes per round historically. Fights that go past round 2 favor the underdog here.”
+            </blockquote>
+            <div className="fmm-v39-ai-stats">
+              <article><strong>64%</strong><span>PICKED JONES</span></article>
+              <article><strong>36%</strong><span>PICKED ASPINALL</span></article>
+              <article><strong>+2X</strong><span>UNDERDOG BONUS</span></article>
+            </div>
+            <p className="fmm-v39-ai-note">💡 Users who followed this insight went 3-1 last event</p>
+            <Link href={featuredHref} className="fmm-v39-ai-cta" onClick={() => setAiScoutOpen(false)}>USE THIS INSIGHT — MAKE MY PICK</Link>
+          </section>
+        </div>
+      )}
 
       {coinModalOpen && (
         <div className="fmm-v35-coin-modal" role="dialog" aria-modal="true">
