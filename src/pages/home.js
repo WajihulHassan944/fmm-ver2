@@ -1,15 +1,6 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
+import React from "react";
+import HomeAnother from "@/Components/HomeAnother/HomeAnother";
 
-const HomeAnother = dynamic(
-  () => import('@/Components/HomeAnother/HomeAnother'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
+const HomePage = () => <HomeAnother />;
 
-const index = () => {
-  return <HomeAnother />
-}
-
-export default index
+export default HomePage;

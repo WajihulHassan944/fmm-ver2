@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   FaBell,
@@ -405,6 +405,12 @@ const FinalHomeV35 = ({
   const [aiScoutOpen, setAiScoutOpen] = useState(false);
   const [layout, setLayout] = useState("classic");
 
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    document.body.classList.add("fmm-final-home-route-v41");
+    return () => document.body.classList.remove("fmm-final-home-route-v41");
+  }, []);
+
   const isLoggedIn = Boolean(currentUser?._id || currentUser?.email || currentUser?.username);
   const tokenBalance = numberFrom(currentUser?.tokens, currentUser?.walletTokens, currentUser?.wallet?.balance) || 2450;
   const playerLevel = Math.max(1, numberFrom(currentUser?.fightIqLevel, currentUser?.level) || 18);
@@ -446,7 +452,7 @@ const FinalHomeV35 = ({
     f1: "XANDER ZAYAS",
     f2: "JARON BOOTS ENNIS",
     prize: "$100,000",
-    entryFee: "$5",
+    entryFee: 100,
   };
 
   const upcomingEvents = (realFights.length ? realFights : fallbackEvents)
@@ -475,12 +481,14 @@ const FinalHomeV35 = ({
   const featuredPrize = getPrize(featuredFight, "$100,000");
   const featuredEntry = getEntry(featuredFight);
   const featuredEntries = getEntries(featuredFight);
+  const predictionHref = featuredHref || "/upcomingfights";
+  const watchPartyHref = "/watch-party";
+  const leaguesHref = "/FantasyLeagues";
+  const demoHref = "/playforfree";
+  const coinCheckoutHref = isLoggedIn ? "/checkout?product=fm-coins" : SIGNUP_HREF;
 
-  const leaders = (Array.isArray(leaderboardRows) && leaderboardRows.length ? leaderboardRows : [
-    { rank: 1, name: "FightIQ_King", points: 4850 },
-    { rank: 2, name: "KO_Beast", points: 4320 },
-    { rank: 3, name: "Prediction_Prof", points: 3915 },
-  ]).slice(0, 4).map((row, index) => ({
+  const hasRealLeaders = Array.isArray(leaderboardRows) && leaderboardRows.length > 0;
+  const leaders = (hasRealLeaders ? leaderboardRows : []).slice(0, 4).map((row, index) => ({
     rank: row.rank || index + 1,
     name: cleanText(row.name || row.username || row.playerName || "Player"),
     points: numberFrom(row.points, row.totalPoints, row.score),
@@ -517,7 +525,7 @@ const FinalHomeV35 = ({
               {[
                 ["/", "Home"],
                 ["/upcomingfights", "Contests"],
-                [featuredHref, "Make Predictions"],
+                [predictionHref, "Make Predictions"],
                 ["/leaderboard", "Leaderboard"],
                 ["/FantasyLeagues", "Leagues"],
                 ["/apparel", "Apparel"],
@@ -547,7 +555,7 @@ const FinalHomeV35 = ({
           <span className="fmm-v36-hero-burst" aria-hidden="true">
             {Array.from({ length: 16 }).map((_, index) => <i key={index} />)}
           </span>
-          <Link href={isLoggedIn ? featuredHref : SIGNUP_HREF} className="fmm-v35-hero-hit" aria-label={isLoggedIn ? "Make predictions" : "Join free"} />
+          <Link href={isLoggedIn ? predictionHref : SIGNUP_HREF} className="fmm-v35-hero-hit" aria-label={isLoggedIn ? "Make predictions" : "Join free"} />
         </section>
 
         <section className="fmm-v35-ticker" aria-label="Live ticker">
@@ -615,7 +623,7 @@ const FinalHomeV35 = ({
               <strong>{featuredEntry}<small> ENTRY</small></strong>
               <strong>{featuredEntries.toLocaleString()}<small> ENTRIES</small></strong>
             </div>
-            <Link href={featuredHref}>MAKE PREDICTIONS</Link>
+            <Link href={predictionHref}>MAKE PREDICTIONS</Link>
           </div>
         </section>
 
@@ -648,18 +656,18 @@ const FinalHomeV35 = ({
             <span>FEATURED FIGHT · HEAVYWEIGHT BOUT</span>
             <h2 id="fmm-v35-detail-title">JONES <em>VS</em> ASPINALL</h2>
             <div className="fmm-v35-detail-meta"><b>JUL 12</b><b>10:00 PM ET</b><b>T-MOBILE ARENA</b></div>
-            <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong>$100,000</strong></p><p><small>ENTRY FEE</small><strong>100 FM</strong></p><p><small>ENTRIES</small><strong>22,450</strong></p></div>
+            <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong>$100,000</strong></p><p><small>ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>22,450</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
-            <Link href={featuredHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
+            <Link href={predictionHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
           </div>
         </section>
 
         <section className="fmm-v35-promos" aria-label="Watch party and leagues">
-          <Link href={featuredHref}><img src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" /><span>🔴 LIVE NOW</span><strong>WATCH PARTY</strong><small>Live scoring · crowd reactions</small></Link>
-          <Link href="/FantasyLeagues"><img src={`${ASSET_BASE}/pasted-1785012202182-0.png`} alt="" /><span>⚔ COMPETE</span><strong>LEAGUES · H2H</strong><small>Private leagues & wagers</small></Link>
+          <Link href={watchPartyHref}><img src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" /><span>🔴 LIVE NOW</span><strong>WATCH PARTY</strong><small>Live scoring · crowd reactions</small></Link>
+          <Link href={leaguesHref}><img src={`${ASSET_BASE}/pasted-1785012202182-0.png`} alt="" /><span>⚔ COMPETE</span><strong>LEAGUES · H2H</strong><small>Private leagues & wagers</small></Link>
         </section>
 
-        <Link href="/upcomingfights" className="fmm-v35-demo"><b>NEW HERE?</b><span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span></Link>
+        <Link href={demoHref} className="fmm-v35-demo"><b>NEW HERE?</b><span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span></Link>
 
         <section className="fmm-v35-dashboard" aria-label="Predictions and progression">
           <article className="fmm-v35-dash-card fmm-v35-community">
@@ -672,7 +680,7 @@ const FinalHomeV35 = ({
           </article>
           <Link href="/leaderboard" className="fmm-v35-dash-card fmm-v35-leader">
             <img src={`${ASSET_BASE}/pasted-1785012542538-0.png`} alt="" />
-            <div><header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>{leaders.slice(0, 3).map((row) => <p key={`${row.rank}-${row.name}`}><b>{row.rank}.</b><span>{row.name}</span><strong>{row.points.toLocaleString()}</strong></p>)}<p className="is-you"><b>18.</b><span>{cleanText(currentUser?.firstName || currentUser?.username || "KellyD")} (You)</span><strong>{tokenBalance.toLocaleString()} ↑</strong></p></div>
+            <div><header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>{leaders.length ? leaders.slice(0, 3).map((row) => <p key={`${row.rank}-${row.name}`}><b>{row.rank}.</b><span>{row.name}</span><strong>{row.points.toLocaleString()}</strong></p>) : <p className="fmm-v41-leader-empty"><span>Scores publish after official results.</span></p>}{isLoggedIn ? <p className="is-you"><b>18.</b><span>{cleanText(currentUser?.firstName || currentUser?.username || "You")} (You)</span><strong>{tokenBalance.toLocaleString()} ↑</strong></p> : null}</div>
           </Link>
           <button type="button" className="fmm-v35-dash-card fmm-v35-streak" onClick={() => setCoinModalOpen(true)}>
             <img src={`${ASSET_BASE}/pasted-1785014166827-0.png`} alt="" />
@@ -691,7 +699,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-affiliate" aria-label="Affiliate promoter and socials">
-          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/affiliate-modal-handshake.webp`} alt="Affiliate partnership handshake" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
+          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/handshake-transparent.png`} alt="Affiliate partnership handshake" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
           <button type="button" className="fmm-v35-chest" onClick={() => setCoinModalOpen(true)} aria-label="Open coin funnel"><img src={`${ASSET_BASE}/chest-transparent.png`} alt="Treasure chest" /><i /><i /><i /></button>
           <div className="fmm-v35-socials">{socialLinks.map(({ href, label, bg, path }) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label} title={label} style={{ "--social-bg": bg }}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={path} /></svg></a>)}</div>
         </section>
@@ -701,7 +709,7 @@ const FinalHomeV35 = ({
         {[
           ["/", "HOME", FaHome, "home"],
           ["/upcomingfights", "CONTESTS", FaTrophy, "contests"],
-          [featuredHref, "MAKE\nPREDICTIONS", FaBullseye, "predict"],
+          [predictionHref, "MAKE\nPREDICTIONS", FaBullseye, "predict"],
           ["/leaderboard", "LEADERBOARD", FaCrown, "leaderboard"],
           [isLoggedIn ? "/profile" : "/login?next=/profile", "PROFILE", FaUserAlt, "profile"],
         ].map(([href, label, Icon, key]) => <Link href={href} key={key} className={`is-${key}`}><Icon /><span>{label}</span></Link>)}
@@ -729,7 +737,7 @@ const FinalHomeV35 = ({
               <article><strong>+2X</strong><span>UNDERDOG BONUS</span></article>
             </div>
             <p className="fmm-v39-ai-note">💡 Users who followed this insight went 3-1 last event</p>
-            <Link href={featuredHref} className="fmm-v39-ai-cta" onClick={() => setAiScoutOpen(false)}>USE THIS INSIGHT — MAKE MY PICK</Link>
+            <Link href={predictionHref} className="fmm-v39-ai-cta" onClick={() => setAiScoutOpen(false)}>USE THIS INSIGHT — MAKE MY PICK</Link>
           </section>
         </div>
       )}
@@ -747,7 +755,7 @@ const FinalHomeV35 = ({
               ["1,000 FM", "$0.99", "Starter"],
               ["5,000 FM", "$3.99", "Most Popular"],
               ["15,000 FM", "$9.99", "Power Pack"],
-            ].map(([amount, price, label]) => <Link href={isLoggedIn ? "/checkout" : SIGNUP_HREF} key={amount}><small>{label}</small><strong>{amount}</strong><b>{price}</b></Link>)}</div>
+            ].map(([amount, price, label]) => <Link href={coinCheckoutHref} key={amount}><small>{label}</small><strong>{amount}</strong><b>{price}</b></Link>)}</div>
           </section>
         </div>
       )}

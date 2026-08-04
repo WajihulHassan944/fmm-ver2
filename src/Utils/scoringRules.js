@@ -1,5 +1,5 @@
 export const DEFAULT_COMBAT_SCORING = Object.freeze({
-  version: 'combat-round-outcome-v1',
+  version: 'official-full-distance-scorecard-v2',
   points: {
     KO: 500,
     SP: 25,
@@ -7,10 +7,10 @@ export const DEFAULT_COMBAT_SCORING = Object.freeze({
     RL: 25,
   },
   labels: {
-    KO: 'Knockout / finish bonus',
-    SP: 'Survival points when fighter was not knocked out in the round',
-    RW: 'Round win points',
-    RL: 'Round loss participation points',
+    KO: 'Official result adjustment, no separate public knockout bonus',
+    SP: 'Official result adjustment, no separate survival bonus',
+    RW: 'Official round winner points',
+    RL: 'Official round participation points',
   },
 });
 
@@ -24,7 +24,7 @@ export const getRoundOutcomeValues = (winnerSide) => {
 };
 
 export const getFinishOutcomeValues = (finishSide) => {
-  if (finishSide === 'A') return { fighterA: SCORE_POINTS.KO, fighterB: SCORE_POINTS.SP, fighterAText: 'KO', fighterBText: 'SP' };
-  if (finishSide === 'B') return { fighterA: SCORE_POINTS.SP, fighterB: SCORE_POINTS.KO, fighterAText: 'SP', fighterBText: 'KO' };
-  return { fighterA: 0, fighterB: 0, fighterAText: 'KO', fighterBText: 'KO' };
+  if (finishSide === 'A') return { fighterA: SCORE_POINTS.KO, fighterB: SCORE_POINTS.SP, fighterAText: 'OR', fighterBText: 'OR' };
+  if (finishSide === 'B') return { fighterA: SCORE_POINTS.SP, fighterB: SCORE_POINTS.KO, fighterAText: 'OR', fighterBText: 'OR' };
+  return { fighterA: 0, fighterB: 0, fighterAText: 'OR', fighterBText: 'OR' };
 };

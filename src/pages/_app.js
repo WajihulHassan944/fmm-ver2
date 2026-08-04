@@ -107,6 +107,7 @@ import "@/styles/fmm-client-v37-desktop-home-category-fix.css";
 import "@/styles/fmm-client-v38-final-touchups.css";
 import "@/styles/fmm-client-v39-clickthrough-fixes.css";
 import "@/styles/fmm-client-v40-clean-home-migration.css";
+import "@/styles/fmm-client-v41-home-functional-cleanup.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -238,6 +239,7 @@ function AppContent({ children }) {
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
   const hideLayout = isAdministrationRoute;
+  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute;
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
@@ -415,7 +417,7 @@ function AppContent({ children }) {
 
       {!hideLayout && <Header />}
       {showAdminChrome && <AdminHeader />}
-      {!hideLayout && <ChatbaseWidget />}
+      {!hideFooterChrome && <ChatbaseWidget />}
 
       <main className={mainClassName}>
         {useRouteExperienceFrame ? (
@@ -426,7 +428,7 @@ function AppContent({ children }) {
           children
         )}
       </main>
-      {!hideLayout && <Footer />}
+      {!hideFooterChrome && <Footer />}
     </>
   );
 }
