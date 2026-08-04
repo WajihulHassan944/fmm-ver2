@@ -106,6 +106,7 @@ import "@/styles/fmm-client-v36-home-final-tuning.css";
 import "@/styles/fmm-client-v37-desktop-home-category-fix.css";
 import "@/styles/fmm-client-v38-final-touchups.css";
 import "@/styles/fmm-client-v39-clickthrough-fixes.css";
+import "@/styles/fmm-client-v40-clean-home-migration.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

@@ -18,6 +18,11 @@ const ROUTE_COPY = {
     title: 'Submit & view scores',
     description: 'Manage upcoming cards, score submissions, and live fight administration using the original score workflows.',
   },
+  '/administration/homepage-content': {
+    eyebrow: 'Homepage funnel',
+    title: 'Homepage posters and fight promotion',
+    description: 'Upload fight artwork/video on the fight record, then promote up to the homepage banner and mobile poster rail from the same back-office workflow.',
+  },
   '/administration/RegisteredUsers': {
     eyebrow: 'People',
     title: 'Registered users',

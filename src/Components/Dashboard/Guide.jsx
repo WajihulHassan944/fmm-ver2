@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { SCORE_POINTS } from '@/Utils/scoringRules';
 import {
   FaBell,
   FaCoins,
@@ -31,7 +30,7 @@ const GUIDE_ITEMS = [
     label: 'Scoring',
     steps: [
       'Open the fight detail page and enter your prediction before the fight locks.',
-      'Check each scoring field carefully. The public model uses KO/finish, round win, survival, and round-loss participation points.',
+      'Check each scoring field carefully. The public model is reconciled against the official fight result and completed/officially judged rounds, with no separate public KO bonus advertised.',
       'Submit once you are comfortable with your final picks.',
     ],
   },
@@ -82,10 +81,10 @@ const GUIDE_ITEMS = [
 ];
 
 const SCORING_ITEMS = [
-  ['KO', `Knockout / finish bonus · ${SCORE_POINTS.KO} pts`],
-  ['RW', `Round win · ${SCORE_POINTS.RW} pts`],
-  ['SP', `Survival when not knocked out · ${SCORE_POINTS.SP} pts`],
-  ['RL', `Round loss participation · ${SCORE_POINTS.RL} pts`],
+  ['OFFICIAL RESULT', 'Scored from the official fight result source'],
+  ['ROUND-BY-ROUND', 'Completed and officially judged rounds are reconciled'],
+  ['EARLY FINISH', 'No separate public KO bonus is advertised'],
+  ['LEADERBOARD', 'Final rankings update after official scoring review'],
 ];
 
 const Guide = () => {
@@ -140,7 +139,7 @@ const Guide = () => {
             <p className="xp-guide-eyebrow"><FaMedal /> Scoring reminder</p>
             <h2>Know the fields before you submit.</h2>
             <p>
-              The unified public scoring model uses one source of truth across Home, Guides, FAQs, and fight pages: KO/finish, round win, survival, and round-loss participation points.
+              Fantasy MMAdness now uses one public scoring message across Home, Guides, FAQs, and fight pages: official results drive the final leaderboard, completed/officially judged rounds are reconciled, and no separate public KO bonus is advertised.
             </p>
           </div>
           <div className="xp-guide-score-grid">

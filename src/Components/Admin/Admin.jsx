@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import {
   FaArrowRight,
   FaBell,
+  FaBullhorn,
   FaBolt,
   FaChartLine,
   FaClone,
@@ -94,6 +95,7 @@ const Admin = () => {
   ];
 
   const quickActions = [
+    { title: 'Homepage posters', copy: 'Promote fight posters and shadow-fight videos to the homepage mobile funnel.', href: '/administration/homepage-content', icon: FaBullhorn },
     { title: 'Create a match', copy: 'Build a new fight card and prediction setup.', href: '/administration/AddNewMatch', icon: FaPlus },
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },
     { title: 'Review payouts', copy: 'Process affiliate payout requests.', href: '/administration/payouts', icon: FaShieldAlt },

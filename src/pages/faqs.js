@@ -4,7 +4,6 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 import { FaChevronDown, FaQuestionCircle, FaSearch, FaShieldAlt, FaTrophy } from 'react-icons/fa';
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
-import { SCORE_POINTS } from '@/Utils/scoringRules';
 
 
 const sanitizeFaqCopy = (value = '') => String(value || '')
@@ -22,7 +21,7 @@ const sanitizeFaqCopy = (value = '') => String(value || '')
 const fallbackFaqs = [
   { title: 'What is Fantasy MMAdness?', description: 'Fantasy MMAdness is a combat-sports prediction platform for boxing, MMA, kickboxing, bare-knuckle, and pro-wrestling experiences. Players predict fight outcomes, compete on leaderboards, and earn platform rewards.' },
   { title: 'How do live fight predictions work?', description: 'Members submit predictions before the lock time on each fight card. The fight page shows the current schedule, prize pool, entry status, and leaderboard access.' },
-  { title: 'How does Fantasy MMAdness scoring work?', description: `The unified public scoring model is KO/finish bonus ${SCORE_POINTS.KO} points, round win ${SCORE_POINTS.RW} points, survival ${SCORE_POINTS.SP} points, and round-loss participation ${SCORE_POINTS.RL} points.` },
+  { title: 'How does Fantasy MMAdness scoring work?', description: 'Fantasy MMAdness uses one official round-by-round scoring source. Early finishes are reconciled against the official fight result and completed/officially judged rounds; there is no separate public KO bonus advertised on the site.' },
   { title: 'Can I play for free?', description: 'Yes. Fantasy MMAdness includes free-to-play and demo experiences so players can learn the prediction flow before entering paid token contests.' },
   { title: 'What are tokens?', description: 'Tokens are the platform currency used for paid fight entries. Existing backend wallet and refund behavior remains unchanged.' },
   { title: 'What rewards can I earn?', description: 'Eligible fight cards display their prize pool and entry terms before submission. Players can also earn leaderboard recognition and public profile achievements.' },

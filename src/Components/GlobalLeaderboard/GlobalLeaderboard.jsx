@@ -133,8 +133,8 @@ const GlobalLeaderboard = ({ initialLeaderboardData = null }) => {
 
                 {filteredRows.length === 0 && (
                   <ExperienceEmptyState
-                    title={rows.length ? 'No player matches that search' : 'Standings are being calculated'}
-                    description={rows.length ? 'Try another player name.' : source === 'unavailable' ? 'The leaderboard API is unavailable right now. No mock standings are being shown.' : 'No real scored users were returned by the backend yet. Mock/fallback players are disabled on this page.'}
+                    title={rows.length ? 'No player matches that search' : 'No scored leaderboard rows yet'}
+                    description={rows.length ? 'Try another player name.' : source === 'unavailable' ? 'The leaderboard API is unavailable right now.' : 'The page is connected to the real leaderboard API and will show rows as soon as scored or submitted entries return.'}
                   />
                 )}
               </div>

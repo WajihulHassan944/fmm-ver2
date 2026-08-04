@@ -365,11 +365,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       <section className="admin-page-heading">
         <div>
           <span>Fight operations</span>
-          <h2>{mode === 'score' ? 'Score center and fight tables' : 'Unified fight registry'}</h2>
-          <p>Search by fight name, fighter, sport, description, or fight ID. Unique view hides duplicated LIVE/SHADOW copies while the all-records filter remains available.</p>
+          <h2>{mode === 'homepage' ? 'Homepage poster funnel' : mode === 'score' ? 'Score center and fight tables' : 'Unified fight registry'}</h2>
+          <p>{mode === 'homepage' ? 'Upload artwork/video on the fight record, then use the Homepage banner action to place upcoming fights into the homepage/mobile poster funnel. Use Edit fight for poster/video files and Homepage banner for visibility.' : 'Search by fight name, fighter, sport, description, or fight ID. Unique view hides duplicated LIVE/SHADOW copies while the all-records filter remains available.'}</p>
         </div>
         <div className="admin-heading-actions">
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
+          {mode === 'homepage' && <Link href="/administration/ShadowFightsLibrary" className="admin-action-secondary"><FaVideo /> Shadow fight videos</Link>}
           <button type="button" className="admin-action-secondary" onClick={() => setShowDataQuality(true)}><FaDatabase /> Data quality</button>
           <button type="button" className="admin-action-secondary" onClick={refreshFightRows}><FaSyncAlt className={matchStatus === 'loading' || matchRowsLoading ? 'xp-spin' : ''} /> Refresh</button>
         </div>

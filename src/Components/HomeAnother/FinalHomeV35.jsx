@@ -285,8 +285,10 @@ const getPrize = (fight = {}, fallback = "$100,000") => {
 };
 
 const getEntry = (fight = {}) => {
-  const numeric = numberFrom(fight?.entryFee, fight?.fee, fight?.entryCost, fight?.cost);
-  return numeric > 0 ? `${numeric}${numeric > 20 ? " FM" : ""}` : "$5";
+  const raw = pick(fight?.entryFee, fight?.fee, fight?.entryCost, fight?.cost, fight?.matchTokens, fight?.tokensRequired);
+  const numeric = numberFrom(raw);
+  if (numeric > 0) return `${numeric.toLocaleString()} FM`;
+  return "100 FM";
 };
 
 const getEntries = (fight = {}) => {
@@ -311,6 +313,82 @@ const getShortDate = (fight = {}) => {
   const label = getDateLabel(fight, "JUL 12");
   return label.split("·")[0].trim();
 };
+const parseFinalMonthDayTextDate = (text = "") => {
+  const match = String(text).match(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t)?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})\b/i);
+  if (!match) return null;
+  const date = new Date(`${match[1]} ${match[2]}, ${new Date().getFullYear()}`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseFinalFightDate = (fight = {}) => {
+  const raw = pick(
+    fight?.matchDate,
+    fight?.date,
+    fight?.fightDate,
+    fight?.scheduledAt,
+    fight?.startDate,
+    fight?.eventDate,
+    fight?.iso,
+    fight?.dateLabel,
+    fight?.scheduleLabel,
+    fight?.matchDateLabel,
+    fight?.homepagePromotionStartsAt,
+    fight?.homepagePromotion?.startsAt,
+    fight?.homepagePromotion?.subtitle,
+    fight?.homepagePromotionSubtitle,
+  );
+
+  const searchableText = [
+    raw,
+    fight?.matchName,
+    fight?.matchDescription,
+    fight?.homepagePromotion?.title,
+    fight?.homepagePromotion?.subtitle,
+  ].filter(Boolean).join(" ").trim();
+
+  if (!searchableText) return null;
+
+  const text = String(raw || searchableText).trim();
+  const timeText = String(fight?.matchTime || fight?.time || fight?.fightTime || "").trim();
+  const timeMatch = timeText.match(/^(\d{1,2}):(\d{2})/);
+  const isIsoLike = /^\d{4}-\d{2}-\d{2}/.test(text) || text.includes("T");
+  let date = null;
+
+  if (isIsoLike) {
+    const base = text.includes("T") ? text : `${text}T${String(timeMatch?.[1] || "23").padStart(2, "0")}:${String(timeMatch?.[2] || "59").padStart(2, "0")}:00`;
+    date = new Date(base);
+  }
+  if (!date || Number.isNaN(date.getTime())) date = new Date(text);
+  if (!date || Number.isNaN(date.getTime())) {
+    date = parseFinalMonthDayTextDate(text) || parseFinalMonthDayTextDate(searchableText);
+  }
+  if (!date || Number.isNaN(date.getTime())) return null;
+  if (timeMatch && !text.includes("T")) {
+    const hours = Number(timeMatch[1]);
+    const minutes = Number(timeMatch[2]);
+    if (Number.isFinite(hours) && Number.isFinite(minutes)) date.setHours(hours, minutes, 0, 0);
+  } else if (!text.includes("T")) {
+    date.setHours(23, 59, 59, 999);
+  }
+  return date;
+};
+
+const isPastFinalFight = (fight = {}, nowValue = new Date()) => {
+  const statusText = [
+    fight?.matchStatus,
+    fight?.matchShadowOpenStatus,
+    fight?.matchShadowStatus,
+    fight?.status,
+    fight?.timelineBucket,
+    fight?.publicTimelineBucket,
+    fight?.resultStatus,
+  ].filter(Boolean).join(" ");
+  if (/(finished|complete|completed|closed|cancelled|canceled|past|result|final)/i.test(statusText)) return true;
+  const date = parseFinalFightDate(fight);
+  const now = nowValue instanceof Date ? nowValue : new Date(nowValue || Date.now());
+  return Boolean(date && !Number.isNaN(now.getTime()) && date.getTime() < now.getTime());
+};
+
 
 const FinalHomeV35 = ({
   currentUser,
@@ -342,20 +420,24 @@ const FinalHomeV35 = ({
         key,
         ...sport,
         count: section?.count ? Number(section.count).toLocaleString() : sport.count,
-        fights: Array.isArray(section?.fights) ? section.fights : [],
+        fights: Array.isArray(section?.fights)
+          ? section.fights.filter((fight) => !isPastFinalFight(fight, now))
+          : [],
       };
     });
-  }, [homeFightSections]);
+  }, [homeFightSections, now]);
 
   const activeSport = sportAssets[activeFightSport] ? activeFightSport : "boxing";
   const activeSection = sports.find((sport) => sport.key === activeSport) || sports[0];
-  const realFights = Array.isArray(activeSection?.fights) ? activeSection.fights.filter(Boolean) : [];
+  const realFights = Array.isArray(activeSection?.fights)
+    ? activeSection.fights.filter((fight) => fight && !isPastFinalFight(fight, now))
+    : [];
   const allRealFights = useMemo(
     () => [
       ...(Array.isArray(heroSlides) ? heroSlides : []),
       ...sports.flatMap((sport) => sport.fights || []),
-    ].filter(Boolean),
-    [heroSlides, sports],
+    ].filter((fight) => fight && !isPastFinalFight(fight, now)),
+    [heroSlides, sports, now],
   );
 
   const featuredFight = realFights[0] || allRealFights[0] || {
@@ -573,7 +655,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-promos" aria-label="Watch party and leagues">
-          <Link href="/pro-wrestling"><img src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" /><span>🔴 LIVE NOW</span><strong>WATCH PARTY</strong><small>Live scoring · crowd reactions</small></Link>
+          <Link href={featuredHref}><img src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" /><span>🔴 LIVE NOW</span><strong>WATCH PARTY</strong><small>Live scoring · crowd reactions</small></Link>
           <Link href="/FantasyLeagues"><img src={`${ASSET_BASE}/pasted-1785012202182-0.png`} alt="" /><span>⚔ COMPETE</span><strong>LEAGUES · H2H</strong><small>Private leagues & wagers</small></Link>
         </section>
 
@@ -609,9 +691,9 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-affiliate" aria-label="Affiliate promoter and socials">
-          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/handshake-transparent.png`} alt="" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
+          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/affiliate-modal-handshake.webp`} alt="Affiliate partnership handshake" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
           <button type="button" className="fmm-v35-chest" onClick={() => setCoinModalOpen(true)} aria-label="Open coin funnel"><img src={`${ASSET_BASE}/chest-transparent.png`} alt="Treasure chest" /><i /><i /><i /></button>
-          <div className="fmm-v35-socials">{socialLinks.map(({ href, label, short, bg, path }) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label} title={label} style={{ "--social-bg": bg }}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={path} /></svg><span>{short}</span><small>{label}</small></a>)}</div>
+          <div className="fmm-v35-socials">{socialLinks.map(({ href, label, bg, path }) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label} title={label} style={{ "--social-bg": bg }}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={path} /></svg></a>)}</div>
         </section>
       </main>
 
