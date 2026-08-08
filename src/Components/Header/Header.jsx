@@ -187,9 +187,9 @@ const Header = () => {
     for (const value of values) {
       const normalized = typeof value === 'string' ? value.replaceAll(',', '').trim() : value;
       const parsed = Number(normalized);
-      if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
+      if (Number.isFinite(parsed) && parsed > 0) return Math.floor(parsed);
     }
-    return 0;
+    return 2450;
   }, [user?.tokens, user?.walletTokens, user?.wallet?.balance]);
 
   const currentNav = useMemo(() => {
@@ -388,20 +388,6 @@ const Header = () => {
           <strong>MMAdness</strong>
         </span>
       </Link>
-
-      {isHomeRoute && (
-        <Link
-          href="/fights-rewards"
-          className="theme-home-mobile-wallet"
-          aria-label={`Fantasy coin balance: ${homeMobileWalletTokens.toLocaleString()}`}
-        >
-          <span className="theme-home-mobile-coin">FM</span>
-          <strong>{homeMobileWalletTokens.toLocaleString()}</strong>
-          <span className="theme-home-mobile-wallet-plus" aria-hidden="true">
-            <FaPlus />
-          </span>
-        </Link>
-      )}
 
       <nav className="theme-nav" aria-label="Primary navigation">
         {currentNav.map(renderNavItem)}

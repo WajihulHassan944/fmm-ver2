@@ -30,7 +30,7 @@ const GUIDE_ITEMS = [
     label: 'Scoring',
     steps: [
       'Open the fight detail page and enter your prediction before the fight locks.',
-      'Check each scoring field carefully. The public model is reconciled against the official fight result and completed/officially judged rounds, with no separate public KO bonus advertised.',
+      'Check each scoring field carefully. The official model scores round-winner picks, paired round-loser credit, survival credit, and the finish-round bonus from the same scoring source of truth.',
       'Submit once you are comfortable with your final picks.',
     ],
   },
@@ -81,10 +81,10 @@ const GUIDE_ITEMS = [
 ];
 
 const SCORING_ITEMS = [
-  ['OFFICIAL RESULT', 'Scored from the official fight result source'],
-  ['ROUND-BY-ROUND', 'Completed and officially judged rounds are reconciled'],
-  ['EARLY FINISH', 'No separate public KO bonus is advertised'],
-  ['LEADERBOARD', 'Final rankings update after official scoring review'],
+  ['ROUND WINNER', 'Correct round-winner pick = 100 pts'],
+  ['PAIRED CREDIT', 'Same pick auto-pairs round-loser credit = +25 pts'],
+  ['FINISH ROUND', 'Correct actual KO/TKO/submission finish-round pick = +500 pts'],
+  ['SURVIVAL', 'Wrong pick on a non-finish round = 25 pts'],
 ];
 
 const Guide = () => {
@@ -139,7 +139,7 @@ const Guide = () => {
             <p className="xp-guide-eyebrow"><FaMedal /> Scoring reminder</p>
             <h2>Know the fields before you submit.</h2>
             <p>
-              Fantasy MMAdness now uses one public scoring message across Home, Guides, FAQs, and fight pages: official results drive the final leaderboard, completed/officially judged rounds are reconciled, and no separate public KO bonus is advertised.
+              Fantasy MMAdness uses one official scoring source across Home, Guides, FAQs, and fight pages: users predict each scheduled round, points stack cumulatively, and the official result determines round-winner, paired-credit, survival, and finish-round bonus scoring.
             </p>
           </div>
           <div className="xp-guide-score-grid">

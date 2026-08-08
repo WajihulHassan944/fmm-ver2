@@ -412,7 +412,11 @@ const FinalHomeV35 = ({
   }, []);
 
   const isLoggedIn = Boolean(currentUser?._id || currentUser?.email || currentUser?.username);
-  const tokenBalance = numberFrom(currentUser?.tokens, currentUser?.walletTokens, currentUser?.wallet?.balance) || 2450;
+  const resolvedTokenBalance = numberFrom(currentUser?.tokens, currentUser?.walletTokens, currentUser?.wallet?.balance);
+  // Match the standalone design wallet and use one balance value everywhere.
+  // A missing/zero anonymous balance falls back to the same demo value shown in the wallet section.
+  const tokenBalance = resolvedTokenBalance > 0 ? resolvedTokenBalance : 2450;
+  const notificationCount = isLoggedIn ? Math.max(1, numberFrom(currentUser?.notificationsUnread, currentUser?.unreadNotifications) || 3) : 3;
   const playerLevel = Math.max(1, numberFrom(currentUser?.fightIqLevel, currentUser?.level) || 18);
   const xpValue = numberFrom(currentUser?.xp, currentUser?.totalXp) || 2450;
   const xpTarget = Math.max(3000, Math.ceil(xpValue / 1000) * 1000);
@@ -508,8 +512,8 @@ const FinalHomeV35 = ({
         <button type="button" className="fmm-v35-wallet" onClick={() => setCoinModalOpen(true)} aria-label="Open FM coin wallet">
           <b>FM</b><strong>{tokenBalance.toLocaleString()}</strong><i><FaPlus /></i>
         </button>
-        <Link href={isLoggedIn ? "/profile" : "/login?next=/profile"} className="fmm-v35-notify" aria-label="Open profile">
-          <FaBell /><em>18</em>
+        <Link href={isLoggedIn ? "/profile" : "/login?next=/profile"} className="fmm-v35-notify" aria-label={`Notifications and profile: ${notificationCount} unread`}>
+          <FaBell /><span className="fmm-v42-sr-only">Notifications</span><em>{notificationCount}</em>
         </Link>
       </header>
 
@@ -619,8 +623,8 @@ const FinalHomeV35 = ({
             <small>{featuredSport.longLabel}</small>
             <h2 id="fmm-v35-featured-week-title">{fighterA} <em>VS</em> {fighterB}</h2>
             <div className="fmm-v35-fw-meta">
-              <strong>{featuredPrize}<small> POOL</small></strong>
-              <strong>{featuredEntry}<small> ENTRY</small></strong>
+              <strong>{featuredPrize}<small> CASH POOL</small></strong>
+              <strong>{featuredEntry}<small> ENTRY FEE</small></strong>
               <strong>{featuredEntries.toLocaleString()}<small> ENTRIES</small></strong>
             </div>
             <Link href={predictionHref}>MAKE PREDICTIONS</Link>
@@ -656,7 +660,7 @@ const FinalHomeV35 = ({
             <span>FEATURED FIGHT · HEAVYWEIGHT BOUT</span>
             <h2 id="fmm-v35-detail-title">JONES <em>VS</em> ASPINALL</h2>
             <div className="fmm-v35-detail-meta"><b>JUL 12</b><b>10:00 PM ET</b><b>T-MOBILE ARENA</b></div>
-            <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong>$100,000</strong></p><p><small>ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>22,450</strong></p></div>
+            <div className="fmm-v35-detail-money"><p><small>CASH PRIZE POOL</small><strong>$100,000</strong></p><p><small>FM ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>22,450</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
             <Link href={predictionHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
           </div>

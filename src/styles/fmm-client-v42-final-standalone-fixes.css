@@ -1,0 +1,96 @@
+/* v42: final standalone handoff fixes — no duplicate website chrome, no stray wallet/nav fragments. */
+body.fmm-final-home-route-v41 .header,
+body.fmm-final-home-route-v41 .theme-header,
+body.fmm-final-home-route-v41 .theme-home-mobile-chrome,
+body.fmm-final-home-route-v41 .theme-mobile-menu,
+body.fmm-final-home-route-v41 .theme-home-mobile-wallet,
+body.fmm-final-home-route-v41 .theme-home-mobile-notifications,
+body.fmm-final-home-route-v41 .theme-mobile-signup-icon,
+body.fmm-final-home-route-v41 .theme-header-actions,
+body.fmm-final-home-route-v41 footer,
+body.fmm-final-home-route-v41 .footer,
+body.fmm-final-home-route-v41 .theme-footer,
+body.fmm-final-home-route-v41 .chatbase-widget,
+body.fmm-final-home-route-v41 #chatbase-bubble,
+body.fmm-final-home-route-v41 [data-chatbase-widget] {
+  display: none !important;
+}
+
+body.fmm-final-home-route-v41 .site-experience-main.is-home-experience-main {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.fmm-home-single-final-v40,
+.fmm-home-single-final-v40 .fmm-home-v35-final {
+  min-height: 100vh !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-topbar {
+  contain: layout style !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-wallet strong,
+.fmm-home-single-final-v40 .fmm-v35-mini-card.is-coins b {
+  font-variant-numeric: tabular-nums !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-notify {
+  overflow: visible !important;
+}
+
+.fmm-v42-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-fw-meta strong,
+.fmm-home-single-final-v40 .fmm-v35-detail-money strong {
+  white-space: nowrap !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-fw-meta small,
+.fmm-home-single-final-v40 .fmm-v35-detail-money small {
+  letter-spacing: .08em !important;
+  opacity: .95 !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-fw-meta strong:first-child small,
+.fmm-home-single-final-v40 .fmm-v35-detail-money p:first-child small {
+  color: #f2c869 !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-fw-meta strong:nth-child(2) small,
+.fmm-home-single-final-v40 .fmm-v35-detail-money p:nth-child(2) small {
+  color: #f2b544 !important;
+}
+
+@media (min-width: 768px) {
+  body.fmm-final-home-route-v41 .site-experience-main.is-home-experience-main {
+    padding-top: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-home-single-final-v40 .fmm-v35-topbar {
+    display: flex !important;
+  }
+
+  .fmm-home-single-final-v40 .fmm-v35-wallet {
+    min-width: 112px !important;
+  }
+
+  .fmm-home-single-final-v40 .fmm-v35-notify em {
+    width: 19px !important;
+    height: 19px !important;
+    line-height: 19px !important;
+    font-size: 10px !important;
+  }
+}

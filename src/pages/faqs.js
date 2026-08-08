@@ -6,6 +6,9 @@ import { FaChevronDown, FaQuestionCircle, FaSearch, FaShieldAlt, FaTrophy } from
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
 
 
+const SCORING_SOURCE_TRUTH_COPY = 'Combat sports scoring uses one official round-by-round source: correct round-winner pick = 100 points, paired round-loser credit = +25, correct actual finish-round pick = +500 Finish Bonus, and a wrong pick on a non-finish round earns a 25-point Survival Bonus.';
+const LEGACY_NO_KO_COPY_RE = new RegExp(`(?:there is )?${'no separate public'}\\s+KO\\s+bonus(?:\\s+is)?\\s+advertised(?: on the site)?\\.?`, 'gi');
+
 const sanitizeFaqCopy = (value = '') => String(value || '')
   .replace(/Fantasy\s*MMADNESS/g, 'Fantasy MMAdness')
   .replace(/Fantasy\s*MMadness/g, 'Fantasy MMAdness')
@@ -15,13 +18,15 @@ const sanitizeFaqCopy = (value = '') => String(value || '')
   .replace(/FAQ feed still uses the existing production endpoint\.?/gi, '')
   .replace(/Scoring and contest results are calculated by the backend\.\s*/gi, '')
   .replace(/This page changes the visual presentation only\.?/gi, '')
+  .replace(LEGACY_NO_KO_COPY_RE, SCORING_SOURCE_TRUTH_COPY)
+  .replace(/Knockout\s*\/\s*finish bonus\s*(?:=|:)?\s*500\s*(?:pts?|points?)?/gi, '+500 Finish Bonus for a correct actual finish-round pick')
   .replace(/\s+/g, ' ')
   .trim();
 
 const fallbackFaqs = [
   { title: 'What is Fantasy MMAdness?', description: 'Fantasy MMAdness is a combat-sports prediction platform for boxing, MMA, kickboxing, bare-knuckle, and pro-wrestling experiences. Players predict fight outcomes, compete on leaderboards, and earn platform rewards.' },
   { title: 'How do live fight predictions work?', description: 'Members submit predictions before the lock time on each fight card. The fight page shows the current schedule, prize pool, entry status, and leaderboard access.' },
-  { title: 'How does Fantasy MMAdness scoring work?', description: 'Fantasy MMAdness uses one official round-by-round scoring source. Early finishes are reconciled against the official fight result and completed/officially judged rounds; there is no separate public KO bonus advertised on the site.' },
+  { title: 'How does Fantasy MMAdness scoring work?', description: SCORING_SOURCE_TRUTH_COPY },
   { title: 'Can I play for free?', description: 'Yes. Fantasy MMAdness includes free-to-play and demo experiences so players can learn the prediction flow before entering paid token contests.' },
   { title: 'What are tokens?', description: 'Tokens are the platform currency used for paid fight entries. Existing backend wallet and refund behavior remains unchanged.' },
   { title: 'What rewards can I earn?', description: 'Eligible fight cards display their prize pool and entry terms before submission. Players can also earn leaderboard recognition and public profile achievements.' },

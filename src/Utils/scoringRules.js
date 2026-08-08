@@ -1,5 +1,5 @@
 export const DEFAULT_COMBAT_SCORING = Object.freeze({
-  version: 'official-full-distance-scorecard-v2',
+  version: 'official-round-finish-scorecard-v3',
   points: {
     KO: 500,
     SP: 25,
@@ -7,10 +7,10 @@ export const DEFAULT_COMBAT_SCORING = Object.freeze({
     RL: 25,
   },
   labels: {
-    KO: 'Official result adjustment, no separate public knockout bonus',
-    SP: 'Official result adjustment, no separate survival bonus',
-    RW: 'Official round winner points',
-    RL: 'Official round participation points',
+    KO: 'Finish Bonus — correct actual finish-round pick',
+    SP: 'Survival Bonus — wrong pick when the round is not the finish round',
+    RW: 'Round Winner pick',
+    RL: 'Round Loser paired credit',
   },
 });
 

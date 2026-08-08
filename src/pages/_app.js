@@ -108,6 +108,7 @@ import "@/styles/fmm-client-v38-final-touchups.css";
 import "@/styles/fmm-client-v39-clickthrough-fixes.css";
 import "@/styles/fmm-client-v40-clean-home-migration.css";
 import "@/styles/fmm-client-v41-home-functional-cleanup.css";
+import "@/styles/fmm-client-v42-final-standalone-fixes.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -238,7 +239,10 @@ function AppContent({ children }) {
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
-  const hideLayout = isAdministrationRoute;
+  // Home uses the standalone Fantasy MMAdness app shell. Do not render the global
+  // website header here; it creates duplicate FM wallets and stray mobile nav
+  // fragments beside the design topbar.
+  const hideLayout = isAdministrationRoute || isHomeExperienceRoute;
   const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute;
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
