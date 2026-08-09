@@ -1,0 +1,221 @@
+/* v46: final homepage click/visual fixes requested from live mobile QA */
+
+/* Coin funnel: keep modal above the fixed mobile nav and browser bottom chrome. */
+.fmm-home-v35-final .fmm-v35-coin-modal,
+.fmm-home-v35-final .fmm-v39-ai-scout-modal {
+  z-index: 2147483000 !important;
+}
+
+.fmm-home-v35-final.is-coin-modal-open .fmm-v35-bottom-nav,
+.fmm-home-v35-final.is-ai-scout-open .fmm-v35-bottom-nav {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateX(-50%) translateY(115%) !important;
+}
+
+.fmm-home-v35-final .fmm-v35-coin-modal {
+  align-items: center !important;
+  padding: max(14px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom)) !important;
+}
+
+.fmm-home-v35-final .fmm-v35-coin-modal section {
+  max-height: calc(100dvh - 34px) !important;
+  overflow-y: auto !important;
+  margin: 0 !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fmm-home-v35-final .fmm-v35-coin-modal section > div {
+  position: relative;
+  z-index: 2;
+}
+
+.fmm-home-v35-final .fmm-v35-modal-close {
+  z-index: 5 !important;
+}
+
+@media (max-width: 767px) {
+  .fmm-home-v35-final .fmm-v35-coin-modal section {
+    width: min(94vw, 420px) !important;
+    padding: 20px 14px 16px !important;
+    border-radius: 24px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal img {
+    width: 104px !important;
+    height: 68px !important;
+    margin-top: 2px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal h2 {
+    font-size: clamp(2.2rem, 12vw, 3.15rem) !important;
+    line-height: 0.98 !important;
+    margin: 8px auto 10px !important;
+    max-width: 10ch !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal p {
+    font-size: 0.92rem !important;
+    line-height: 1.22 !important;
+    margin: 0 auto 12px !important;
+    max-width: 28ch !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal section > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal section > div a {
+    min-height: 92px !important;
+    padding: 10px 5px !important;
+    justify-content: center !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal section > div a small {
+    font-size: 0.62rem !important;
+    line-height: 1.08 !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-coin-modal section > div a strong {
+    font-size: clamp(0.98rem, 4vw, 1.32rem) !important;
+    line-height: 1.04 !important;
+  }
+}
+
+/* AI scouting button: make the call-to-action readable on the fight artwork. */
+.fmm-home-v35-final .fmm-v35-ai {
+  position: relative !important;
+  z-index: 8 !important;
+  opacity: 1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  background: linear-gradient(90deg, #28d7ff 0%, #4d8dff 38%, #a855f7 100%) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.10) inset,
+    0 0 20px rgba(77, 141, 255, 0.60),
+    0 10px 22px rgba(0, 0, 0, 0.50) !important;
+  text-shadow: 0 2px 7px rgba(0, 0, 0, 0.68) !important;
+  letter-spacing: 0.045em !important;
+  filter: none !important;
+}
+
+.fmm-home-v35-final .fmm-v35-ai::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 0 38%, rgba(255, 255, 255, 0.26) 46%, transparent 55%);
+  transform: translateX(-120%);
+  animation: fmm-v46-ai-shine 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Affiliate card: use the real handshake art and keep it visible, not under the headline. */
+.fmm-home-v35-final .fmm-v35-aff-card {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(94px, 29vw, 150px) !important;
+  column-gap: 12px !important;
+  align-items: center !important;
+  padding: 18px 16px !important;
+}
+
+.fmm-home-v35-final .fmm-v35-aff-card::after {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.95) 0 58%, rgba(0, 0, 0, 0.22) 100%),
+    radial-gradient(circle at 82% 45%, rgba(255, 225, 70, 0.15), transparent 42%),
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.88)) !important;
+}
+
+.fmm-home-v35-final .fmm-v35-aff-card img {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  z-index: 2 !important;
+  grid-column: 2 !important;
+  grid-row: 1 / span 4 !important;
+  width: 100% !important;
+  max-width: 150px !important;
+  height: auto !important;
+  max-height: 112px !important;
+  object-fit: contain !important;
+  opacity: 0.98 !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  padding: 6px !important;
+  box-shadow:
+    0 0 20px rgba(255, 232, 82, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset !important;
+}
+
+.fmm-home-v35-final .fmm-v35-aff-card span,
+.fmm-home-v35-final .fmm-v35-aff-card strong,
+.fmm-home-v35-final .fmm-v35-aff-card small,
+.fmm-home-v35-final .fmm-v35-aff-card b {
+  grid-column: 1 !important;
+  max-width: none !important;
+}
+
+.fmm-home-v35-final .fmm-v35-aff-card strong {
+  font-size: clamp(1.35rem, 6.8vw, 2.35rem) !important;
+  line-height: 0.96 !important;
+}
+
+.fmm-home-v35-final .fmm-v35-aff-card small {
+  line-height: 1.18 !important;
+}
+
+@media (max-width: 380px) {
+  .fmm-home-v35-final .fmm-v35-aff-card {
+    grid-template-columns: minmax(0, 1fr) 92px !important;
+    gap: 8px !important;
+    padding-inline: 13px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-aff-card img {
+    max-height: 92px !important;
+    padding: 5px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-aff-card strong {
+    font-size: 1.24rem !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-aff-card b {
+    padding: 11px 15px !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* Upcoming cards: keep the small tag as a pill and protect poster/title pairing. */
+.fmm-home-v35-final .fmm-v35-event-rail figure img {
+  opacity: 1 !important;
+  filter: saturate(1.08) contrast(1.04) !important;
+}
+
+.fmm-home-v35-final .fmm-v35-event-rail figcaption {
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  background: var(--event-color) !important;
+  color: #fff !important;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45) !important;
+}
+
+.fmm-home-v35-final .fmm-v35-demo {
+  animation: fmm-v46-demo-pulse 2.5s ease-in-out infinite !important;
+}
+
+@keyframes fmm-v46-ai-shine {
+  0%, 58% { transform: translateX(-120%); opacity: 0; }
+  68% { opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes fmm-v46-demo-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.16); }
+  50% { box-shadow: 0 0 34px rgba(34, 197, 94, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.24); }
+}

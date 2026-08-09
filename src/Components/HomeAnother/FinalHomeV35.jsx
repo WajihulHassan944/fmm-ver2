@@ -310,20 +310,70 @@ const getFighterImage = (fight = {}, side = "A") => {
   );
 };
 
-const getPoster = (fight = {}, index = 0) => {
-  const fallback = fallbackEvents[index % fallbackEvents.length]?.image || `${ASSET_BASE}/event-poster-1.webp`;
-  const src = pick(
+const isDesignFallbackPoster = (value = "") => {
+  const src = String(value || "");
+  return src.includes("/images/mobile-home/") || src.includes("/images/fmm-experience/");
+};
+
+const getExplicitPoster = (fight = {}) => {
+  const posterFields = [
     fight?.fightPosterImage,
     fight?.posterImage,
     fight?.poster,
-    fight?.image,
     fight?.bannerImage,
     fight?.eventPoster,
     fight?.homepagePromotion?.posterImage,
     fight?.homepagePromotion?.image,
-    fallback,
-  );
-  return String(src || fallback).startsWith("data:") ? fallback : src;
+  ];
+  const posterSrc = posterFields.find((item) => item && !String(item).startsWith("data:") && !isDesignFallbackPoster(item));
+  if (posterSrc) return posterSrc;
+
+  // Some older records store a generic UI/fighter asset in `image`; do not pair
+  // those local design fallbacks with live fight names because it creates the
+  // exact poster/name mismatch reported by the client.
+  const imageSrc = fight?.image && !String(fight.image).startsWith("data:") && !isDesignFallbackPoster(fight.image) ? fight.image : "";
+  return imageSrc || "";
+};
+
+const getPoster = (fight = {}, index = 0) => {
+  const fallback = fallbackEvents[index % fallbackEvents.length]?.image || `${ASSET_BASE}/event-poster-1.webp`;
+  return getExplicitPoster(fight) || fallback;
+};
+
+const buildUpcomingEvent = (fight = {}, index = 0) => {
+  const explicitPoster = getExplicitPoster(fight);
+  const fallback = fallbackEvents[index % fallbackEvents.length];
+
+  // If the backend sends a fight without its own poster, keep the paired design
+  // poster/name/date together. This prevents the visual mismatch where a design
+  // poster for one event appears with another fight's names.
+  if (!explicitPoster && fallback) {
+    const fallbackSport = sportAssets[fallback.sport] || sportAssets.boxing;
+    return {
+      id: getFightId(fight) || fallback.id || `fallback-${index}`,
+      f1: fallback.f1,
+      f2: fallback.f2,
+      tag: fallback.tag || fallbackSport.longLabel,
+      color: fallback.tagColor || fallbackSport.color || "#ef4444",
+      date: fallback.date,
+      prize: fallback.prize,
+      image: fallback.image,
+      href: "/upcomingfights",
+    };
+  }
+
+  const key = getSportKey(fight);
+  return {
+    id: getFightId(fight) || `fallback-${index}`,
+    f1: getFighterName(fight, "A"),
+    f2: getFighterName(fight, "B"),
+    tag: cleanText(pick(fight?.tag, fight?.league, fight?.promotion, sportAssets[key]?.longLabel), sportAssets[key]?.longLabel).toUpperCase(),
+    color: sportAssets[key]?.color || fallback?.tagColor || "#ef4444",
+    date: getDateLabel(fight, fallback?.date),
+    prize: getPrize(fight, fallback?.prize),
+    image: explicitPoster || fallback?.image || `${ASSET_BASE}/event-poster-1.webp`,
+    href: getFightHref(fight),
+  };
 };
 
 const getPrize = (fight = {}, fallback = "$100,000") => {
@@ -534,20 +584,7 @@ const FinalHomeV35 = ({
 
   const upcomingEvents = (realFights.length ? realFights : fallbackEvents)
     .slice(0, 8)
-    .map((fight, index) => {
-      const key = getSportKey(fight);
-      return {
-        id: getFightId(fight) || `fallback-${index}`,
-        f1: getFighterName(fight, "A"),
-        f2: getFighterName(fight, "B"),
-        tag: cleanText(pick(fight?.tag, fight?.league, fight?.promotion, sportAssets[key]?.longLabel), sportAssets[key]?.longLabel).toUpperCase(),
-        color: sportAssets[key]?.color || fallbackEvents[index % fallbackEvents.length]?.tagColor || "#ef4444",
-        date: getDateLabel(fight, fallbackEvents[index % fallbackEvents.length]?.date),
-        prize: getPrize(fight, fallbackEvents[index % fallbackEvents.length]?.prize),
-        image: getPoster(fight, index),
-        href: getFightHref(fight),
-      };
-    });
+    .map((fight, index) => buildUpcomingEvent(fight, index));
 
   const fighterA = getFighterName(featuredFight, "A");
   const fighterB = getFighterName(featuredFight, "B");
@@ -561,7 +598,7 @@ const FinalHomeV35 = ({
   const predictionHref = featuredHref || "/upcomingfights";
   const watchPartyHref = "/watch-party";
   const leaguesHref = "/FantasyLeagues";
-  const demoHref = "/playforfree";
+  const demoHref = "/mock-game";
   const coinCheckoutHref = isLoggedIn ? "/checkout?product=fm-coins" : SIGNUP_HREF;
 
   const hasRealLeaders = Array.isArray(leaderboardRows) && leaderboardRows.length > 0;
@@ -575,7 +612,7 @@ const FinalHomeV35 = ({
   const communityB = 100 - communityA;
 
   return (
-    <div className="fmm-home-v35-final" data-layout={layout}>
+    <div className={`fmm-home-v35-final ${coinModalOpen ? "is-coin-modal-open" : ""} ${aiScoutOpen ? "is-ai-scout-open" : ""}`} data-layout={layout}>
       <div className="fmm-v35-page-bg" aria-hidden="true" />
 
       <header className="fmm-v35-topbar">
@@ -707,11 +744,11 @@ const FinalHomeV35 = ({
         <section className="fmm-v35-upcoming" aria-labelledby="fmm-v35-upcoming-title">
           <div className="fmm-v35-heading-row"><h2 id="fmm-v35-upcoming-title">UPCOMING EVENTS</h2><Link href="/upcomingfights">VIEW ALL ›</Link></div>
           <div className="fmm-v35-event-rail">
-            {upcomingEvents.map((event) => (
+            {upcomingEvents.map((event, index) => (
               <article key={event.id} style={{ "--event-color": event.color }}>
                 <Link href={event.href}>
                   <figure>
-                    <img src={event.image} alt="" />
+                    <img src={event.image} alt="" onError={(error) => { error.currentTarget.onerror = null; error.currentTarget.src = fallbackEvents[index % fallbackEvents.length]?.image || `${ASSET_BASE}/event-poster-1.webp`; }} />
                     <figcaption>{event.tag}</figcaption>
                   </figure>
                   <h3>{event.f1} <em>VS</em> {event.f2}</h3>
@@ -776,7 +813,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-affiliate" aria-label="Affiliate promoter and socials">
-          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/handshake-transparent.png`} alt="Affiliate partnership handshake" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
+          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/affiliate-modal-handshake.webp`} alt="Affiliate partnership handshake" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
           <button type="button" className="fmm-v35-chest" onClick={() => setCoinModalOpen(true)} aria-label="Open coin funnel"><img src={`${ASSET_BASE}/chest-transparent.png`} alt="Treasure chest" /><i /><i /><i /></button>
           <div className="fmm-v35-socials">{socialLinks.map(({ href, label, bg, path }) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label} title={label} style={{ "--social-bg": bg }}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={path} /></svg></a>)}</div>
         </section>

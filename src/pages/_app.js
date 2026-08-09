@@ -111,6 +111,7 @@ import "@/styles/fmm-client-v41-home-functional-cleanup.css";
 import "@/styles/fmm-client-v42-final-standalone-fixes.css";
 import "@/styles/fmm-client-v43-home-desktop-navbar.css";
 import "@/styles/fmm-client-v44-etsy-mobile-coins.css";
+import "@/styles/fmm-client-v46-final-home-click-visual-fixes.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

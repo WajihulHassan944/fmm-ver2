@@ -6,7 +6,7 @@ const PlayForFree = () => {
   const router = useRouter();
 
   const handlePlayNowClick = () => {
-    router.push('/login'); 
+    router.push('/mock-game'); 
   };
 
   return (
@@ -75,7 +75,7 @@ const PlayForFree = () => {
           onClick={handlePlayNowClick} 
           style={{ cursor: 'pointer' }}
         >
-          Play now for free
+          Try the demo fight
         </button>
       </div>
     </>
