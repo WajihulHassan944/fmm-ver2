@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { buildPublicApiUrl } from "@/Utils/publicApi";
 import {
   FaBell,
   FaBullseye,
@@ -128,13 +129,35 @@ const fallbackEvents = [
   },
 ];
 
-const apparelItems = [
+const fallbackApparelItems = [
   { name: "MMADNESS HOODIE", price: "$49.99", image: `${ASSET_BASE}/ap1.webp` },
   { name: "FIGHT TEE", price: "$29.99", image: `${ASSET_BASE}/ap2.webp` },
   { name: "SNAPBACK CAP", price: "$24.99", image: `${ASSET_BASE}/ap3.webp` },
   { name: "FIGHT SHORTS", price: "$39.99", image: `${ASSET_BASE}/ap1-2.webp` },
   { name: "TRAINING GLOVES", price: "$34.99", image: `${ASSET_BASE}/ap2-2.webp` },
 ];
+
+const formatHomeApparelPrice = (price, currency = "USD") => {
+  const amount = Number(price || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return "VIEW";
+  return currency === "USD" ? `$${amount.toFixed(2)}` : `${amount.toFixed(2)} ${currency}`;
+};
+
+const pickHomeApparelImage = (item = {}) => {
+  const firstImage = Array.isArray(item.images) ? item.images[0] : null;
+  if (typeof firstImage === "string") return firstImage;
+  if (firstImage && typeof firstImage === "object") {
+    return firstImage.url_fullxfull || firstImage.url_570xN || firstImage.url_170x135 || "";
+  }
+  return item.image || `${ASSET_BASE}/ap2.webp`;
+};
+
+const normalizeHomeApparelItem = (item = {}) => ({
+  name: cleanText(item.name || item.title || "FANTASY MMADNESS GEAR", "FANTASY MMADNESS GEAR").toUpperCase(),
+  price: item.displayPrice || formatHomeApparelPrice(item.price, item.currency),
+  image: pickHomeApparelImage(item),
+  href: "/apparel",
+});
 
 const statCards = [
   { Icon: FaUsers, value: "128,000+", label: "PREDICTORS", sub: "+842 today", tone: "purple", href: "/leaderboard" },
@@ -405,10 +428,32 @@ const FinalHomeV35 = ({
   const [aiScoutOpen, setAiScoutOpen] = useState(false);
   const [layout, setLayout] = useState("classic");
 
+  const [homeApparelItems, setHomeApparelItems] = useState(() => fallbackApparelItems.map(normalizeHomeApparelItem));
+
   useEffect(() => {
     if (typeof document === "undefined") return undefined;
     document.body.classList.add("fmm-final-home-route-v41");
     return () => document.body.classList.remove("fmm-final-home-route-v41");
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadEtsyApparel = async () => {
+      try {
+        const response = await fetch(buildPublicApiUrl("/api/public/apparel-products?limit=8"), {
+          headers: { Accept: "application/json" },
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(payload?.products) || !payload.products.length) return;
+        if (!cancelled) setHomeApparelItems(payload.products.map(normalizeHomeApparelItem).slice(0, 8));
+      } catch (_error) {
+        // Keep the bundled design products when Etsy credentials/API are unavailable.
+      }
+    };
+    loadEtsyApparel();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const isLoggedIn = Boolean(currentUser?._id || currentUser?.email || currentUser?.username);
@@ -699,7 +744,7 @@ const FinalHomeV35 = ({
 
         <section className="fmm-v35-apparel" aria-labelledby="fmm-v35-apparel-title">
           <div className="fmm-v35-heading-row"><h2 id="fmm-v35-apparel-title">APPAREL</h2><Link href="/apparel">VIEW ALL ›</Link></div>
-          <div>{apparelItems.map((item) => <Link href="/apparel" key={item.name}><img src={item.image} alt="" /><span>{item.name}</span><strong>{item.price}</strong></Link>)}</div>
+          <div>{homeApparelItems.map((item) => <Link href={item.href || "/apparel"} key={`${item.name}-${item.price}`}><img src={item.image} alt="" /><span>{item.name}</span><strong>{item.price}</strong></Link>)}</div>
         </section>
 
         <section className="fmm-v35-affiliate" aria-label="Affiliate promoter and socials">

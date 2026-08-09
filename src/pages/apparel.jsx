@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   FaArrowLeft,
@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { buildPublicApiUrl } from "@/Utils/publicApi";
 
-const APPAREL_ITEMS = [
+const FALLBACK_APPAREL_ITEMS = [
   {
     sku: "FMM-HOODIE-001",
     name: "MMAdness Hoodie",
@@ -61,6 +61,41 @@ const APPAREL_ITEMS = [
 const getCartKey = (item) => `${item.sku}:${item.size}`;
 const money = (value) => `$${Number(value || 0).toFixed(2)}`;
 
+const formatCatalogMoney = (value, currency = "USD") => {
+  const amount = Number(value || 0);
+  if (currency === "USD") return `$${amount.toFixed(2)}`;
+  return `${amount.toFixed(2)} ${currency}`;
+};
+
+const pickCatalogImage = (item = {}) => {
+  const firstImage = Array.isArray(item.images) ? item.images[0] : null;
+  if (typeof firstImage === "string") return firstImage;
+  if (firstImage && typeof firstImage === "object") {
+    return firstImage.url_fullxfull || firstImage.url_570xN || firstImage.url_170x135 || "";
+  }
+  return item.image || "/images/mobile-home/app-fixed-v32/ap2-hq.webp";
+};
+
+const normalizeApparelCatalogItem = (item = {}) => {
+  const price = Number(item.price || 0);
+  const currency = item.currency || "USD";
+  const externalUrl = item.buyUrl || item.externalUrl || item.url || "";
+  return {
+    sku: item.sku || item.etsyListingId || item.id || item.name,
+    name: item.name || item.title || "Fantasy MMAdness Apparel",
+    price,
+    currency,
+    displayPrice: item.displayPrice || formatCatalogMoney(price, currency),
+    image: pickCatalogImage(item),
+    tag: item.tag || (item.source === "etsy" ? "Official Etsy shop" : "Official drop"),
+    sizes: Array.isArray(item.sizes) && item.sizes.length ? item.sizes : ["One Size"],
+    source: item.source || "fallback",
+    externalUrl,
+    isExternalCheckout: Boolean(item.isExternalCheckout || item.source === "etsy" || externalUrl),
+  };
+};
+
+
 const ApparelPage = () => {
   const reduxUser = useSelector((state) => state.auth?.user || state.user || {});
   const [cart, setCart] = useState([]);
@@ -77,6 +112,38 @@ const ApparelPage = () => {
     notes: "",
   });
   const [status, setStatus] = useState({ state: "idle", message: "", orderNumber: "" });
+
+  const [products, setProducts] = useState(() => FALLBACK_APPAREL_ITEMS.map(normalizeApparelCatalogItem));
+  const [catalogStatus, setCatalogStatus] = useState({ source: "fallback", message: "Loading official catalog..." });
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      try {
+        const response = await fetch(buildPublicApiUrl("/api/public/apparel-products?limit=100"), {
+          headers: { Accept: "application/json" },
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(payload?.products) || !payload.products.length) {
+          throw new Error(payload?.message || "Using local apparel catalog.");
+        }
+        if (cancelled) return;
+        setProducts(payload.products.map(normalizeApparelCatalogItem));
+        setCatalogStatus({
+          source: payload.source || "backend",
+          message: payload.source === "etsy" ? "Live Etsy catalog" : "Official apparel catalog",
+        });
+      } catch (_error) {
+        if (cancelled) return;
+        setProducts(FALLBACK_APPAREL_ITEMS.map(normalizeApparelCatalogItem));
+        setCatalogStatus({ source: "fallback", message: "Official fallback catalog" });
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -178,7 +245,8 @@ const ApparelPage = () => {
           <div className="fmm-apparel-hero-copy-v19">
             <p><FaTshirt aria-hidden="true" /> Official fight gear</p>
             <h1>Fantasy MMAdness Apparel</h1>
-            <span>Products are ready to order. Players and guests can add items, enter shipping details, and submit an order without being forced to log in.</span>
+            <span>{catalogStatus.source === "etsy" ? "Showing live products from the official Fantasy MMAdness Etsy shop. Buy buttons open the Etsy listing so price, options, and availability stay accurate." : "Products are ready to order. Players and guests can add items, enter shipping details, and submit an order without being forced to log in."}</span>
+            <small className="fmm-apparel-catalog-status-v44">{catalogStatus.message}</small>
             <div className="fmm-apparel-hero-actions-v19">
               <Link href="/"><FaArrowLeft aria-hidden="true" /> Back Home</Link>
               <button type="button" onClick={() => setCheckoutOpen(true)} disabled={!cart.length}>
@@ -202,7 +270,7 @@ const ApparelPage = () => {
         )}
 
         <section className="fmm-apparel-grid-v19" aria-label="Official Fantasy MMAdness apparel products">
-          {APPAREL_ITEMS.map((item) => (
+          {products.map((item) => (
             <article key={item.sku}>
               <div className="fmm-apparel-product-image-v19"><img src={item.image} alt={item.name} loading="lazy" decoding="async" /></div>
               <p>{item.tag}</p>
@@ -214,15 +282,26 @@ const ApparelPage = () => {
                   {item.sizes.map((size) => <option key={size} value={size}>{size}</option>)}
                 </select>
               </label>
-              <button
-                type="button"
-                onClick={() => {
-                  const select = typeof document !== "undefined" ? document.getElementById(`size-${item.sku}`) : null;
-                  addToCart(item, select?.value || item.sizes[0]);
-                }}
-              >
-                <FaShoppingBag aria-hidden="true" /> Add to order
-              </button>
+              {item.isExternalCheckout && item.externalUrl ? (
+                <a
+                  className="fmm-apparel-buy-etsy-v44"
+                  href={item.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaShoppingBag aria-hidden="true" /> Buy on Etsy
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const select = typeof document !== "undefined" ? document.getElementById(`size-${item.sku}`) : null;
+                    addToCart(item, select?.value || item.sizes[0]);
+                  }}
+                >
+                  <FaShoppingBag aria-hidden="true" /> Add to order
+                </button>
+              )}
             </article>
           ))}
         </section>
@@ -357,6 +436,19 @@ const ApparelPage = () => {
             color: rgba(255,255,255,.76);
             line-height: 1.7;
           }
+          .fmm-apparel-catalog-status-v44 {
+            width: fit-content;
+            display: inline-flex;
+            margin-top: 14px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 207, 69, .28);
+            border-radius: 999px;
+            color: #ffcf45;
+            background: rgba(255, 207, 69, .08);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+          }
           .fmm-apparel-hero-actions-v19 {
             margin-top: 26px;
             display: flex;
@@ -465,6 +557,16 @@ const ApparelPage = () => {
             outline: none;
           }
           .fmm-apparel-grid-v19 button { width: 100%; min-height: 42px; font-size: .72rem; }
+          .fmm-apparel-grid-v19 a.fmm-apparel-buy-etsy-v44 {
+            width: 100%;
+            min-height: 42px;
+            padding: 0 12px;
+            color: #2b1300;
+            background: linear-gradient(180deg, #ffe06a, #efb51a);
+            border-color: rgba(255,216,85,.7);
+            font-size: .72rem;
+            white-space: nowrap;
+          }
           .fmm-apparel-checkout-v19 { position: fixed; inset: 0; z-index: 2500; pointer-events: none; visibility: hidden; }
           .fmm-apparel-checkout-v19.is-open { pointer-events: auto; visibility: visible; }
           .fmm-apparel-checkout-backdrop-v19 { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 0; background: rgba(0,0,0,.68); opacity: 0; transition: opacity .2s ease; }

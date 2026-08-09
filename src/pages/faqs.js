@@ -6,7 +6,8 @@ import { FaChevronDown, FaQuestionCircle, FaSearch, FaShieldAlt, FaTrophy } from
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
 
 
-const SCORING_SOURCE_TRUTH_COPY = 'Combat sports scoring uses one official round-by-round source: correct round-winner pick = 100 points, paired round-loser credit = +25, correct actual finish-round pick = +500 Finish Bonus, and a wrong pick on a non-finish round earns a 25-point Survival Bonus.';
+const SCORING_SOURCE_TRUTH_COPY = 'A knockout, TKO, or submission is a Finish — and correctly calling the round it happens in pays a 500-point Finish Bonus on top of your round-winner points. If you pick the right fighter to win the finish round, you earn 100 (Round Winner) + 25 (auto-paired) + 500 (Finish Bonus) = 625 points for that round alone. If you miss the finish round pick, that round scores 0. Every other round pays a flat 25-point Survival Bonus regardless of accuracy, plus your round-winner points if you called it right.';
+const STAT_ACCURACY_SOURCE_TRUTH_COPY = "Your stat predictions (punches, strikes, kicks, and more) work like a floor you are trying to clear. If the fighter's actual number is equal to or higher than your prediction, you score — and you earn points equal to exactly what you predicted. Predict 25 punches and he throws 25 or more? You get 25 points. Predict 100 and he only throws 40? You get 0 — you guessed too high.";
 const LEGACY_NO_KO_COPY_RE = new RegExp(`(?:there is )?${'no separate public'}\\s+KO\\s+bonus(?:\\s+is)?\\s+advertised(?: on the site)?\\.?`, 'gi');
 
 const sanitizeFaqCopy = (value = '') => String(value || '')
@@ -20,6 +21,7 @@ const sanitizeFaqCopy = (value = '') => String(value || '')
   .replace(/This page changes the visual presentation only\.?/gi, '')
   .replace(LEGACY_NO_KO_COPY_RE, SCORING_SOURCE_TRUTH_COPY)
   .replace(/Knockout\s*\/\s*finish bonus\s*(?:=|:)?\s*500\s*(?:pts?|points?)?/gi, '+500 Finish Bonus for a correct actual finish-round pick')
+  .replace(/Points are awarded based on accurate predictions, such as head punches, body punches, round winners, and knockouts\.\s*Overestimations are not penalized, but only accurate or lower-than-actual predictions earn points\.\s*For example, predicting fewer punches than thrown will still earn points, while predicting more does not\.?/gi, STAT_ACCURACY_SOURCE_TRUTH_COPY)
   .replace(/\s+/g, ' ')
   .trim();
 
