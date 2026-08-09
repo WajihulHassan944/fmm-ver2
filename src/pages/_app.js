@@ -112,6 +112,7 @@ import "@/styles/fmm-client-v42-final-standalone-fixes.css";
 import "@/styles/fmm-client-v43-home-desktop-navbar.css";
 import "@/styles/fmm-client-v44-etsy-mobile-coins.css";
 import "@/styles/fmm-client-v46-final-home-click-visual-fixes.css";
+import "@/styles/fmm-client-v47-final-demo-handshake-events.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -242,11 +243,12 @@ function AppContent({ children }) {
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
-  // Keep the global site header hidden for admin only. The homepage still needs
-  // the normal desktop/laptop navbar, while CSS hides it on phone so the
-  // standalone mobile app topbar remains clean.
-  const hideLayout = isAdministrationRoute;
-  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute;
+  const isStandaloneDemoRoute = ["/free-demo", "/mock-game", "/playforfree"].includes(router.pathname);
+  // Keep the global site header hidden for admin and the standalone demo app.
+  // The homepage still needs the normal desktop/laptop navbar, while CSS hides
+  // it on phone so the standalone mobile app topbar remains clean.
+  const hideLayout = isAdministrationRoute || isStandaloneDemoRoute;
+  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute;
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
@@ -255,7 +257,7 @@ function AppContent({ children }) {
     ? isAdminLoginRoute
       ? "admin-login-main"
       : "admin-experience-main"
-    : `site-experience-main${isHomeExperienceRoute ? " is-home-experience-main" : ""}`;
+    : `site-experience-main${isHomeExperienceRoute ? " is-home-experience-main" : ""}${isStandaloneDemoRoute ? " is-standalone-demo-main" : ""}`;
 
   useEffect(() => {
     if (!router.isReady) return undefined;
@@ -300,6 +302,7 @@ function AppContent({ children }) {
           "/fighter-performance-tracker",
           "/leaderboard",
           "/mock-game",
+          "/free-demo",
           "/UserDashboard",
           "/YourFights",
           "/trashed-fights",

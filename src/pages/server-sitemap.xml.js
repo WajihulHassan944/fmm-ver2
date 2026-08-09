@@ -31,6 +31,7 @@ const staticRoutes = [
   '/pro-wrestling/how-to-play',
   '/pro-wrestling/history',
   '/playforfree',
+  '/free-demo',
   '/about',
   '/contact',
   '/faqs',
