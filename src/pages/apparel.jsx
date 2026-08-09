@@ -58,6 +58,34 @@ const FALLBACK_APPAREL_ITEMS = [
   },
 ];
 
+const APPAREL_IMAGE_FALLBACKS = [
+  "/images/mobile-home/app-fixed-v32/ap1-hq.webp",
+  "/images/mobile-home/app-fixed-v32/ap2-hq.webp",
+  "/images/mobile-home/app-fixed-v32/ap3-hq.webp",
+  "/images/mobile-home/app-fixed-v32/ap1-2-hq.webp",
+  "/images/mobile-home/app-fixed-v32/ap2-2-hq.webp",
+];
+
+const getApparelFallbackImage = (index = 0) => APPAREL_IMAGE_FALLBACKS[index % APPAREL_IMAGE_FALLBACKS.length];
+
+const unwrapMaybeMarkdownUrl = (value = "") => {
+  const text = String(value || "").trim();
+  const markdownMatch = text.match(/\((https?:\/\/[^)]+)\)/i);
+  if (markdownMatch?.[1]) return markdownMatch[1];
+  const bracketMatch = text.match(/^\[(https?:\/\/[^\]]+)\]$/i);
+  if (bracketMatch?.[1]) return bracketMatch[1];
+  return text;
+};
+
+const normalizeApparelImageUrl = (value, fallbackIndex = 0) => {
+  const raw = unwrapMaybeMarkdownUrl(value);
+  if (!raw) return getApparelFallbackImage(fallbackIndex);
+  if (raw.includes("/images/mobile-home/app-fixed-v15/")) {
+    return raw.replace("/images/mobile-home/app-fixed-v15/", "/images/mobile-home/app-fixed-v32/");
+  }
+  return raw;
+};
+
 const getCartKey = (item) => `${item.sku}:${item.size}`;
 const money = (value) => `$${Number(value || 0).toFixed(2)}`;
 
@@ -67,16 +95,16 @@ const formatCatalogMoney = (value, currency = "USD") => {
   return `${amount.toFixed(2)} ${currency}`;
 };
 
-const pickCatalogImage = (item = {}) => {
+const pickCatalogImage = (item = {}, fallbackIndex = 0) => {
   const firstImage = Array.isArray(item.images) ? item.images[0] : null;
-  if (typeof firstImage === "string") return firstImage;
+  if (typeof firstImage === "string") return normalizeApparelImageUrl(firstImage, fallbackIndex);
   if (firstImage && typeof firstImage === "object") {
-    return firstImage.url_fullxfull || firstImage.url_570xN || firstImage.url_170x135 || "";
+    return normalizeApparelImageUrl(firstImage.url_fullxfull || firstImage.url_570xN || firstImage.url_170x135 || "", fallbackIndex);
   }
-  return item.image || "/images/mobile-home/app-fixed-v32/ap2-hq.webp";
+  return normalizeApparelImageUrl(item.image, fallbackIndex);
 };
 
-const normalizeApparelCatalogItem = (item = {}) => {
+const normalizeApparelCatalogItem = (item = {}, fallbackIndex = 0) => {
   const price = Number(item.price || 0);
   const currency = item.currency || "USD";
   const externalUrl = item.buyUrl || item.externalUrl || item.url || "";
@@ -86,7 +114,7 @@ const normalizeApparelCatalogItem = (item = {}) => {
     price,
     currency,
     displayPrice: item.displayPrice || formatCatalogMoney(price, currency),
-    image: pickCatalogImage(item),
+    image: pickCatalogImage(item, fallbackIndex),
     tag: item.tag || (item.source === "etsy" ? "Official Etsy shop" : "Official drop"),
     sizes: Array.isArray(item.sizes) && item.sizes.length ? item.sizes : ["One Size"],
     source: item.source || "fallback",
@@ -113,14 +141,14 @@ const ApparelPage = () => {
   });
   const [status, setStatus] = useState({ state: "idle", message: "", orderNumber: "" });
 
-  const [products, setProducts] = useState(() => FALLBACK_APPAREL_ITEMS.map(normalizeApparelCatalogItem));
+  const [products, setProducts] = useState(() => FALLBACK_APPAREL_ITEMS.map((item, index) => normalizeApparelCatalogItem(item, index)));
   const [catalogStatus, setCatalogStatus] = useState({ source: "fallback", message: "Loading official catalog..." });
 
   useEffect(() => {
     let cancelled = false;
     const loadProducts = async () => {
       try {
-        const response = await fetch(buildPublicApiUrl("/api/public/apparel-products?limit=100"), {
+        const response = await fetch(buildPublicApiUrl("/api/public/apparel-products?limit=100&v=45"), {
           headers: { Accept: "application/json" },
         });
         const payload = await response.json().catch(() => ({}));
@@ -128,14 +156,14 @@ const ApparelPage = () => {
           throw new Error(payload?.message || "Using local apparel catalog.");
         }
         if (cancelled) return;
-        setProducts(payload.products.map(normalizeApparelCatalogItem));
+        setProducts(payload.products.map((item, index) => normalizeApparelCatalogItem(item, index)));
         setCatalogStatus({
           source: payload.source || "backend",
           message: payload.source === "etsy" ? "Live Etsy catalog" : "Official apparel catalog",
         });
       } catch (_error) {
         if (cancelled) return;
-        setProducts(FALLBACK_APPAREL_ITEMS.map(normalizeApparelCatalogItem));
+        setProducts(FALLBACK_APPAREL_ITEMS.map((item, index) => normalizeApparelCatalogItem(item, index)));
         setCatalogStatus({ source: "fallback", message: "Official fallback catalog" });
       }
     };
@@ -270,9 +298,9 @@ const ApparelPage = () => {
         )}
 
         <section className="fmm-apparel-grid-v19" aria-label="Official Fantasy MMAdness apparel products">
-          {products.map((item) => (
+          {products.map((item, index) => (
             <article key={item.sku}>
-              <div className="fmm-apparel-product-image-v19"><img src={item.image} alt={item.name} loading="lazy" decoding="async" /></div>
+              <div className="fmm-apparel-product-image-v19"><img src={item.image} alt={item.name} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = getApparelFallbackImage(index); }} /></div>
               <p>{item.tag}</p>
               <h2>{item.name}</h2>
               <strong>{item.displayPrice}</strong>
@@ -321,7 +349,7 @@ const ApparelPage = () => {
               <div className="fmm-apparel-cart-list-v19">
                 {cart.map((item) => (
                   <article key={getCartKey(item)}>
-                    <img src={item.image} alt="" />
+                    <img src={item.image} alt="" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = getApparelFallbackImage(1); }} />
                     <div>
                       <strong>{item.name}</strong>
                       <span>Size {item.size} · {money(item.price)}</span>
