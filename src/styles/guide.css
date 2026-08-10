@@ -327,3 +327,46 @@
     width: 100%;
   }
 }
+
+/* v48: finalized scoring glossary alignment */
+.xp-guide-field-glossary {
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid rgba(255, 214, 102, 0.25);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(12, 16, 25, 0.92), rgba(42, 10, 20, 0.78));
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+.xp-guide-field-glossary h3 {
+  margin: 0 0 8px;
+  color: #ffd45a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.xp-guide-field-glossary > p {
+  margin: 0 0 16px;
+  color: rgba(255, 255, 255, 0.72);
+}
+.xp-guide-field-glossary > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+.xp-guide-field-glossary article {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.xp-guide-field-glossary article strong {
+  color: #ffffff;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+}
+.xp-guide-field-glossary article span {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}

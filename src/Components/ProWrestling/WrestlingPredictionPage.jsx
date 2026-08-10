@@ -180,15 +180,14 @@ const WrestlingPredictionPage = () => {
             </div>
 
             <section className="pw-winner-pick">
-              <div><p className="pw-eyebrow"><FaTrophy /> Headline prediction</p><h2>Who wins the match?</h2><span>The correct official winner receives the configured scoring bonus.</span></div>
+              <div><p className="pw-eyebrow"><FaTrophy /> Headline prediction</p><h2>Who wins the match?</h2><span>The correct official winner receives the finalized 100-point winner bonus.</span></div>
               <div className="pw-winner-options">
                 {[
                   ['A', match.competitorA.displayName, getWrestlerImage(match.competitorA, 'A')],
-                  ['DRAW', 'The match ends in a draw', null],
                   ['B', match.competitorB.displayName, getWrestlerImage(match.competitorB, 'B')],
                 ].map(([value, label, image]) => (
                   <button type="button" key={value} className={winnerPrediction === value ? 'is-selected' : ''} disabled={!editable} onClick={() => setWinnerPrediction(value)}>
-                    {image ? <img src={image} alt="" /> : <FaTrophy />}<span><small>{value === 'DRAW' ? 'Draw pick' : `Wrestler ${value}`}</small><strong>{label}</strong></span>{winnerPrediction === value && <FaCheck />}
+                    {image ? <img src={image} alt="" /> : <FaTrophy />}<span><small>{`Wrestler ${value}`}</small><strong>{label}</strong></span>{winnerPrediction === value && <FaCheck />}
                   </button>
                 ))}
               </div>

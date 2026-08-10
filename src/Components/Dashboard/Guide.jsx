@@ -81,10 +81,24 @@ const GUIDE_ITEMS = [
 ];
 
 const SCORING_ITEMS = [
-  ['ROUND WINNER', 'Correct round-winner pick = 100 pts'],
-  ['PAIRED CREDIT', 'Same pick auto-pairs round-loser credit = +25 pts'],
-  ['FINISH ROUND', 'Correct actual KO/TKO/submission finish-round pick = +500 pts'],
-  ['SURVIVAL', 'Wrong pick on a non-finish round = 25 pts'],
+  ['RW · ROUND WINNER', 'Correct round-winner pick = 100 pts'],
+  ['RL · PAIRED CREDIT', 'Same pick auto-pairs round-loser credit = +25 pts'],
+  ['KO · FINISH BONUS', 'Correct actual KO/TKO/submission finish-round pick = +500 pts'],
+  ['SP · SURVIVAL BONUS', 'Wrong pick on a non-finish round = 25 pts'],
+];
+
+const FIELD_GLOSSARY = [
+  ['HP', 'Head punches — Boxing / Bare-Knuckle stat prediction'],
+  ['BP', 'Body punches — Boxing / Bare-Knuckle stat prediction'],
+  ['TP', 'Total punches — tracked separately, not auto-derived from HP + BP'],
+  ['ST', 'Strikes — MMA / Kickboxing stat prediction'],
+  ['KI', 'Kicks — MMA / Kickboxing stat prediction'],
+  ['KN', 'Knees — MMA / Kickboxing stat prediction'],
+  ['EL', 'Elbows — MMA / Kickboxing stat prediction'],
+  ['RW', 'Round Winner — correct fighter pick for the round'],
+  ['RL', 'Round Loser paired credit — automatic +25 with the same correct round pick'],
+  ['KO', 'Finish Bonus — KO, TKO, or submission finish-round bonus'],
+  ['SP', 'Survival Bonus — 25 pts when the round is not the actual finish round'],
 ];
 
 const Guide = () => {
@@ -144,6 +158,13 @@ const Guide = () => {
           </div>
           <div className="xp-guide-score-grid">
             {SCORING_ITEMS.map(([code, label]) => <article key={code}><strong>{code}</strong><span>{label}</span></article>)}
+          </div>
+          <div className="xp-guide-field-glossary">
+            <h3>Field glossary</h3>
+            <p>These labels now match the scoring source of truth used across fight pages, FAQs, and admin scoring.</p>
+            <div>
+              {FIELD_GLOSSARY.map(([code, label]) => <article key={code}><strong>{code}</strong><span>{label}</span></article>)}
+            </div>
           </div>
         </section>
       </section>

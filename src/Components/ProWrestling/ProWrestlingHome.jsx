@@ -64,13 +64,13 @@ const ProWrestlingHome = () => {
     <>
       <Head>
         <title>Pro Wrestling Predictions | Fantasy MMAdness</title>
-        <meta name="description" content="Predict every punch, kick, power move, finisher, and winner in Fantasy MMAdness Pro Wrestling contests." />
+        <meta name="description" content="Predict a full 25-minute Pro Wrestling match with live stats, a 100-point winner pick, and a 500-point finish market." />
       </Head>
       <div className="pw-page pw-home-page">
         <WrestlingHero
           title="Predict the action."
           accent="Win the wrestling pot."
-          description="A full-match prediction game built directly into Fantasy MMAdness. Enter a real contest, forecast both wrestlers' offense, follow live scoring, and climb a dedicated Pro Wrestling leaderboard."
+          description="A full 25-minute match prediction game built directly into Fantasy MMAdness. Predict both wrestlers' stats, choose Wrestler A or Wrestler B as the winner, call the finish market, follow live scoring, and climb the Pro Wrestling leaderboard."
           actions={[
             { href: featured ? `/pro-wrestling/matches/${featured._id}` : '#pw-contests', label: featured ? 'Enter featured contest' : 'Explore contests', icon: FaFistRaised },
             { href: '/pro-wrestling/how-to-play', label: 'View scoring rules', secondary: true, icon: FaShieldAlt },
@@ -84,7 +84,7 @@ const ProWrestlingHome = () => {
           <div className="pw-featured-poster">
             <div className="pw-featured-poster-label"><FaCrown /> New game mode</div>
             <img src="/images/pro-wrestling/wrestling-match-premium.webp" alt="Fantasy MMAdness Pro Wrestling arena" />
-            <div><small>Full-match scorecard</small><strong>HP · BP · K · PM · FM</strong><span>Predict both wrestlers plus the official winner.</span></div>
+            <div><small>Full-match scorecard</small><strong>HP · BP · K · PM · FM</strong><span>Predict both wrestlers, the official winner, and the finish market.</span></div>
           </div>
         </WrestlingHero>
 
@@ -118,14 +118,14 @@ const ProWrestlingHome = () => {
           <section className="pw-section pw-action-system">
             <WrestlingSectionHeading
               eyebrow="The scorecard"
-              title="Five action categories. Two wrestlers. One winner pick."
-              description="The system rewards prediction accuracy across the entire match rather than relying only on a winner selection."
+              title="Five action categories. Two wrestlers. No draw pick."
+              description="The finalized rules use a full 25-minute match structure: stat predictions for both wrestlers, a flat 100-point winner bonus, and a 500-point pinfall/submission finish market with a 25-point survival result when the finish market misses."
             />
             <div className="pw-action-grid">
               {WRESTLING_STATS.map((stat, index) => (
                 <article key={stat.key}><span>{String(index + 1).padStart(2, '0')}</span><strong>{stat.short}</strong><h3>{stat.label}</h3><p>{stat.description}</p></article>
               ))}
-              <article className="is-winner"><span>06</span><FaTrophy /><h3>Match winner</h3><p>Lock in Wrestler A, Wrestler B, or a draw for the headline bonus.</p></article>
+              <article className="is-winner"><span>06</span><FaTrophy /><h3>Match winner</h3><p>Lock in Wrestler A or Wrestler B only. There is no public draw pick in the finalized rules.</p></article><article className="is-winner"><span>07</span><FaShieldAlt /><h3>Finish market</h3><p>Pinfall or submission correctly called earns +500. Non-finish outcomes pay the 25-point survival result.</p></article>
             </div>
           </section>
 
@@ -137,13 +137,13 @@ const ProWrestlingHome = () => {
               <div className="pw-flow-steps">
                 {[
                   ['01', 'Join the contest', 'Pay the listed token entry fee from the existing fight wallet.'],
-                  ['02', 'Build your scorecard', 'Forecast HP, BP, K, PM, FM, and the winner for both competitors.'],
+                  ['02', 'Build your scorecard', 'Forecast HP, BP, K, PM, FM for both competitors, choose Wrestler A or Wrestler B, and call the finish market.'],
                   ['03', 'Follow live scoring', 'Watch actual action totals, provisional points, and rank movement.'],
                   ['04', 'Review the result', 'See the official score breakdown, final leaderboard, and payout.'],
                 ].map(([number, title, copy]) => <article key={number}><span>{number}</span><div><strong>{title}</strong><p>{copy}</p></div></article>)}
               </div>
             </div>
-            <div className="pw-flow-art"><img src="/images/pro-wrestling/prediction-mockup.webp" alt="Pro Wrestling prediction interface preview" /><div><FaTrophy /><strong>Accuracy creates the edge.</strong><span>Exact and near-exact predictions earn the strongest category scores.</span></div></div>
+            <div className="pw-flow-art"><img src="/images/pro-wrestling/prediction-mockup.webp" alt="Pro Wrestling prediction interface preview" /><div><FaTrophy /><strong>Accuracy creates the edge.</strong><span>Stats are tracked through the full 25-minute match; winner and finish scoring use the finalized 100/500/25 model.</span></div></div>
           </section>
 
           <section className="pw-section">

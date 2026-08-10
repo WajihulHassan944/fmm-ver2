@@ -10,12 +10,11 @@ export const WRESTLING_STATS = [
 
 export const EMPTY_WRESTLING_STATS = Object.freeze({ HP: 0, BP: 0, K: 0, PM: 0, FM: 0 });
 export const WRESTLING_FINISH_TYPES = [
-  { value: 'PINFALL', label: 'Pinfall' },
-  { value: 'SUBMISSION', label: 'Submission' },
-  { value: 'DQ', label: 'Disqualification' },
-  { value: 'COUNT_OUT', label: 'Count out' },
-  { value: 'DRAW', label: 'Draw' },
-  { value: 'OTHER', label: 'Other' },
+  { value: 'PINFALL', label: 'Pinfall finish' },
+  { value: 'SUBMISSION', label: 'Submission finish' },
+  { value: 'DQ', label: 'Disqualification / no finish market' },
+  { value: 'COUNT_OUT', label: 'Count out / no finish market' },
+  { value: 'OTHER', label: 'Other non-finish result' },
 ];
 export const WRESTLING_TIME_RANGES = [
   { value: 'UNDER_5', label: 'Under 5 minutes', minSeconds: 0, maxSeconds: 299 },
@@ -160,8 +159,8 @@ export const getWinnerName = (match, winnerValue) => {
   const winner = String(winnerValue || '').toUpperCase();
   if (winner === 'A') return match?.competitorA?.displayName || 'Competitor A';
   if (winner === 'B') return match?.competitorB?.displayName || 'Competitor B';
-  if (winner === 'DRAW') return 'Draw';
   if (winner === 'NO_CONTEST') return 'No contest';
+  if (winner === 'DRAW') return 'Legacy draw / no winner bonus';
   return 'Pending';
 };
 export const winnerLabel = (winnerValue, match) => getWinnerName(match, winnerValue);

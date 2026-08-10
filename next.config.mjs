@@ -4,6 +4,11 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   productionBrowserSourceMaps: false,
+  env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL && !/localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(process.env.NEXT_PUBLIC_SITE_URL)
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'https://www.fantasymmadness.com',
+  },
 
   webpack: (config) => {
     config.ignoreWarnings = [/Failed to parse source map/];

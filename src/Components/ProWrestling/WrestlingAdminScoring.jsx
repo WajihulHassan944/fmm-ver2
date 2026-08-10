@@ -127,7 +127,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
 
   const setOfficialResult = () => {
     if (!winner) {
-      toast.error('Select the official winner or draw.');
+      toast.error('Select the official winner.');
       return;
     }
     if (!officialMatchTime.trim()) {
@@ -308,7 +308,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
               </div>
             ))}
             <div className="pw-admin-result-fields">
-              <label><span>Official winner</span><select value={winner} disabled={terminal} onChange={(event) => setWinner(event.target.value)}><option value="">Winner not set</option><option value="A">{match.competitorA.displayName}</option><option value="B">{match.competitorB.displayName}</option><option value="DRAW">Draw</option></select></label>
+              <label><span>Official winner</span><select value={winner} disabled={terminal} onChange={(event) => setWinner(event.target.value)}><option value="">Winner not set</option><option value="A">{match.competitorA.displayName}</option><option value="B">{match.competitorB.displayName}</option></select></label>
               <label><span>Finish type</span><select value={finishType} disabled={terminal} onChange={(event) => setFinishType(event.target.value)}>{WRESTLING_FINISH_TYPES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
               <label><span>Official match duration</span><input value={officialMatchTime} disabled={terminal} onChange={(event) => setOfficialMatchTime(event.target.value)} placeholder="MM:SS, e.g. 14:37" /></label>
               <label className="is-wide"><span>Admin reason / audit note</span><input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Optional reason recorded in the audit trail" /></label>
@@ -359,7 +359,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
             <header><div><p>Audited administrator correction</p><h2>{getPlayerName(correction)}</h2><span>Every changed value is submitted to the existing correction endpoint and recorded in the audit log.</span></div><button type="button" onClick={() => setCorrection(null)}><FaTimes /></button></header>
             <div className="pw-admin-correction-head"><span>{match.competitorA.displayName}</span><strong>Category</strong><span>{match.competitorB.displayName}</span></div>
             {WRESTLING_STATS.map((stat) => <div className="pw-admin-correction-row" key={stat.key}><input type="number" min="0" value={correction.competitorA[stat.key]} onChange={(event) => updateCorrection('competitorA', stat.key, event.target.value)} /><span><b>{stat.short}</b><small>{stat.label}</small></span><input type="number" min="0" value={correction.competitorB[stat.key]} onChange={(event) => updateCorrection('competitorB', stat.key, event.target.value)} /></div>)}
-            <label><span>Winner prediction</span><select value={correction.winnerPrediction} onChange={(event) => setCorrection((current) => ({ ...current, winnerPrediction: event.target.value }))}><option value="">Select predicted winner</option><option value="A">{match.competitorA.displayName}</option><option value="B">{match.competitorB.displayName}</option><option value="DRAW">Draw</option></select></label>
+            <label><span>Winner prediction</span><select value={correction.winnerPrediction} onChange={(event) => setCorrection((current) => ({ ...current, winnerPrediction: event.target.value }))}><option value="">Select predicted winner</option><option value="A">{match.competitorA.displayName}</option><option value="B">{match.competitorB.displayName}</option></select></label>
             <label><span>Finish type prediction</span><select value={correction.finishTypePrediction || ''} onChange={(event) => setCorrection((current) => ({ ...current, finishTypePrediction: event.target.value }))}><option value="">Select finish type</option>{WRESTLING_FINISH_TYPES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
             <label><span>Match time range prediction</span><select value={correction.matchTimeRangePrediction || ''} onChange={(event) => setCorrection((current) => ({ ...current, matchTimeRangePrediction: event.target.value }))}><option value="">Select time range</option>{WRESTLING_TIME_RANGES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
             <label><span>Required audit reason</span><textarea rows="3" value={correctionReason} onChange={(event) => setCorrectionReason(event.target.value)} /></label>

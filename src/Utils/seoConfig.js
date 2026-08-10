@@ -1,7 +1,27 @@
-const configuredSiteUrl = String(process.env.NEXT_PUBLIC_SITE_URL || '').trim();
-const safeSiteUrl = configuredSiteUrl && !/localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(configuredSiteUrl)
-  ? configuredSiteUrl
-  : 'https://www.fantasymmadness.com';
+const PRODUCTION_SITE_URL = 'https://www.fantasymmadness.com';
+
+const normalizeSiteUrlCandidate = (value = '') => {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+  if (/localhost|127\.0\.0\.1|0\.0\.0\.0|\.local(?:host)?/i.test(trimmed)) return '';
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const url = new URL(withProtocol);
+    if (/localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(url.hostname)) return '';
+    return `${url.protocol}//${url.hostname}${url.port ? `:${url.port}` : ''}`;
+  } catch (_error) {
+    return '';
+  }
+};
+
+const configuredSiteUrl = normalizeSiteUrlCandidate(
+  process.env.NEXT_PUBLIC_SITE_URL
+  || process.env.NEXT_PUBLIC_CANONICAL_SITE_URL
+  || process.env.SITE_URL
+  || process.env.VERCEL_PROJECT_PRODUCTION_URL
+  || '',
+);
+const safeSiteUrl = configuredSiteUrl || PRODUCTION_SITE_URL;
 export const SITE_URL = safeSiteUrl.replace(/\/$/, '');
 export const SITE_NAME = 'Fantasy MMAdness';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/fmm-pages/premium-duel-banner.webp`;
@@ -170,6 +190,24 @@ export const SEO_ROUTE_MAP = {
     title: 'Play Fantasy Fight Contests Free | Fantasy MMAdness',
     description: 'Start playing Fantasy MMAdness free and enter fight prediction contests for MMA, Boxing, and combat sports.',
     keywords: 'play fantasy MMA free, free boxing contests, free fantasy fight game',
+    image: `${SITE_URL}/images/fmm-pages/player-fight-night-premium.webp`,
+  },
+  '/free-demo': {
+    title: 'Free Demo Fight | Try Fantasy MMAdness',
+    description: 'Try the Fantasy MMAdness demo fight flow with no coins required before entering real fight cards.',
+    keywords: 'free demo fight, fantasy fight demo, try Fantasy MMAdness',
+    image: `${SITE_URL}/images/fmm-pages/player-fight-night-premium.webp`,
+  },
+  '/mock-game': {
+    title: 'Mock Fight Game | Fantasy MMAdness Demo',
+    description: 'Practice Fantasy MMAdness fight predictions with a mock game and demo leaderboard.',
+    keywords: 'mock fight game, fantasy fight practice, prediction demo',
+    image: `${SITE_URL}/images/fmm-pages/player-fight-night-premium.webp`,
+  },
+  '/CreateAccount': {
+    title: 'Create Account | Fantasy MMAdness',
+    description: 'Create your Fantasy MMAdness account to enter fight contests, manage your wallet, and track your leaderboard rank.',
+    keywords: 'Fantasy MMAdness sign up, create fight prediction account, fantasy MMA account',
     image: `${SITE_URL}/images/fmm-pages/player-fight-night-premium.webp`,
   },
 };

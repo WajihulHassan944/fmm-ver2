@@ -187,13 +187,34 @@ const normalizeHomeApparelItem = (item = {}, fallbackIndex = 0) => ({
   href: "/apparel",
 });
 
-const statCards = [
-  { Icon: FaUsers, value: "128,000+", label: "PREDICTORS", sub: "+842 today", tone: "purple", href: "/leaderboard" },
-  { Icon: FaTrophy, value: "$250,000+", label: "IN PRIZES", sub: "$12,450 today", tone: "gold", href: "/fights-rewards" },
-  { Icon: FaSignal, value: "56", label: "LIVE EVENTS", tone: "blue", href: "/upcomingfights" },
-  { Icon: FaChartLine, value: "LIVE", label: "LEADERBOARDS", tone: "green", href: "/leaderboard" },
-  { Icon: FaShieldAlt, value: "REAL FIGHTS", label: "REAL ACTION", tone: "yellow", href: "/guides" },
-];
+const formatCompactMetric = (value, fallback = 'LIVE') => {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return fallback;
+  return number >= 1000 ? `${new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(number)}+` : number.toLocaleString();
+};
+
+const formatMoneyMetric = (value, fallback = 'OPEN') => {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return fallback;
+  return number >= 1000 ? `$${new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(number)}+` : `$${number.toLocaleString()}`;
+};
+
+const buildHomeStatCards = ({ homepageStats = {}, fightCount = 0, leaderboardCount = 0, prizePool = 0 }) => {
+  const registered = numberFrom(homepageStats.players, homepageStats.registeredUsers, homepageStats.predictors, homepageStats.totalUsers);
+  const todayJoined = numberFrom(homepageStats.todayUsers, homepageStats.playersToday, homepageStats.joinedToday);
+  const totalPrize = numberFrom(homepageStats.totalPrizePool, homepageStats.prizePools, homepageStats.prizes, prizePool);
+  const todayPaid = numberFrom(homepageStats.paidOutToday, homepageStats.todayPayouts, homepageStats.dailyPrizes);
+  const activeFights = numberFrom(homepageStats.activeFights, homepageStats.liveEvents, fightCount);
+  const rankedPlayers = numberFrom(homepageStats.leaderboardPlayers, homepageStats.rankedPlayers, leaderboardCount);
+
+  return [
+    { Icon: FaUsers, value: formatCompactMetric(registered, activeFights > 0 ? `${activeFights}` : 'LIVE'), label: registered > 0 ? 'PREDICTORS' : 'ACTIVE CARDS', sub: todayJoined > 0 ? `+${todayJoined.toLocaleString()} today` : '', tone: 'purple', href: '/leaderboard' },
+    { Icon: FaTrophy, value: formatMoneyMetric(totalPrize, 'PRIZES'), label: totalPrize > 0 ? 'IN PRIZES' : 'PRIZE TERMS', sub: todayPaid > 0 ? `$${todayPaid.toLocaleString()} today` : '', tone: 'gold', href: '/fights-rewards' },
+    { Icon: FaSignal, value: activeFights > 0 ? activeFights.toLocaleString() : 'OPEN', label: activeFights > 0 ? 'LIVE EVENTS' : 'FIGHT CARDS', tone: 'blue', href: '/upcomingfights' },
+    { Icon: FaChartLine, value: rankedPlayers > 0 ? rankedPlayers.toLocaleString() : 'LIVE', label: 'LEADERBOARDS', tone: 'green', href: '/leaderboard' },
+    { Icon: FaShieldAlt, value: 'REAL FIGHTS', label: 'REAL ACTION', tone: 'yellow', href: '/guides' },
+  ];
+};
 
 const socialLinks = [
   { href: "https://x.com/FMmadness2024", label: "X", short: "X", bg: "#030305", path: "M18.9 3H22l-7.5 8.6L23 21h-6.9l-5.4-6.4L4.4 21H1.3l8-9.2L1 3h7l4.9 5.8L18.9 3z" },
@@ -394,7 +415,7 @@ const getEntry = (fight = {}) => {
 
 const getEntries = (fight = {}) => {
   const predictions = Array.isArray(fight?.userPredictions) ? fight.userPredictions.length : 0;
-  return Math.max(22450, numberFrom(fight?.entries, fight?.playerCount, fight?.players, predictions));
+  return numberFrom(fight?.entries, fight?.playerCount, fight?.players, predictions);
 };
 
 const getDateLabel = (fight = {}, fallback = "TBA · LIVE NOW") => {
@@ -573,6 +594,14 @@ const FinalHomeV35 = ({
     [heroSlides, sports, now],
   );
 
+  const realPrizePoolTotal = allRealFights.reduce((sum, fight) => sum + numberFrom(fight?.prizePool, fight?.prize, fight?.winningAmount, fight?.cashPrize, fight?.currentPot, fight?.pot), 0);
+  const liveStatCards = useMemo(() => buildHomeStatCards({
+    homepageStats,
+    fightCount: allRealFights.length,
+    leaderboardCount: Array.isArray(leaderboardRows) ? leaderboardRows.length : 0,
+    prizePool: realPrizePoolTotal,
+  }), [homepageStats, allRealFights.length, leaderboardRows, realPrizePoolTotal]);
+
   const featuredFight = realFights[0] || allRealFights[0] || {
     id: "fallback-main",
     sport: "boxing",
@@ -606,6 +635,7 @@ const FinalHomeV35 = ({
   const featuredPrize = getPrize(featuredFight, "$100,000");
   const featuredEntry = getEntry(featuredFight);
   const featuredEntries = getEntries(featuredFight);
+  const featuredEntriesLabel = featuredEntries > 0 ? featuredEntries.toLocaleString() : "OPEN";
   const predictionHref = featuredHref || "/upcomingfights";
   const watchPartyHref = "/watch-party";
   const leaguesHref = "/FantasyLeagues";
@@ -706,7 +736,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-stats" aria-label="Fantasy MMAdness stats">
-          {statCards.map(({ Icon, value, label, sub, tone, href }) => (
+          {liveStatCards.map(({ Icon, value, label, sub, tone, href }) => (
             <Link href={href} key={label} className={`is-${tone}`}>
               <Icon /><strong>{value}</strong><span>{label}</span>{sub ? <small>{sub}</small> : null}
             </Link>
@@ -746,7 +776,7 @@ const FinalHomeV35 = ({
             <div className="fmm-v35-fw-meta">
               <strong>{featuredPrize}<small> CASH POOL</small></strong>
               <strong>{featuredEntry}<small> ENTRY FEE</small></strong>
-              <strong>{featuredEntries.toLocaleString()}<small> ENTRIES</small></strong>
+              <strong>{featuredEntriesLabel}<small> ENTRIES</small></strong>
             </div>
             <Link href={predictionHref}>MAKE PREDICTIONS</Link>
           </div>
@@ -781,7 +811,7 @@ const FinalHomeV35 = ({
             <span>FEATURED FIGHT · HEAVYWEIGHT BOUT</span>
             <h2 id="fmm-v35-detail-title">JONES <em>VS</em> ASPINALL</h2>
             <div className="fmm-v35-detail-meta"><b>JUL 12</b><b>10:00 PM ET</b><b>T-MOBILE ARENA</b></div>
-            <div className="fmm-v35-detail-money"><p><small>CASH PRIZE POOL</small><strong>$100,000</strong></p><p><small>FM ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>22,450</strong></p></div>
+            <div className="fmm-v35-detail-money"><p><small>CASH PRIZE POOL</small><strong>$100,000</strong></p><p><small>FM ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
             <Link href={predictionHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
           </div>
