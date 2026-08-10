@@ -251,7 +251,7 @@ const getFightId = (fight = {}) => fight?._id || fight?.id || fight?.matchId || 
 
 const getFightHref = (fight = {}) => {
   const id = getFightId(fight);
-  if (!id || String(id).startsWith("fallback")) return "/upcomingfights";
+  if (!id || String(id).startsWith("fallback")) return "/free-demo?start=scorecard&genre=boxing";
   const rawSport = String(
     pick(
       fight?.__source,
@@ -844,7 +844,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-wallet-grid" aria-label="Rewards and wallet">
-          <button type="button" className="fmm-v35-mini-card" onClick={() => setCoinModalOpen(true)}><span>DAILY REWARD</span><img src={`${ASSET_BASE}/pasted-1785074122794-0.png`} alt="" /><small>COME BACK EVERY DAY & BUILD YOUR STREAK!</small><strong>CLAIM REWARD</strong></button>
+          <button type="button" className="fmm-v35-mini-card is-daily-reward" onClick={() => setCoinModalOpen(true)}><span>DAILY REWARD</span><FaGift className="fmm-v49-reward-icon" aria-hidden="true" /><small>COME BACK EVERY DAY & BUILD YOUR STREAK!</small><strong>CLAIM REWARD</strong></button>
           <button type="button" className="fmm-v35-mini-card is-coins" onClick={() => setCoinModalOpen(true)}><span>COINS WALLET</span><FaCoins /><b>{tokenBalance.toLocaleString()}</b><small>COINS</small><strong>ADD COINS <FaPlus /></strong></button>
         </section>
 
@@ -854,8 +854,8 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-affiliate" aria-label="Affiliate promoter and socials">
-          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/handshake-transparent.png`} alt="Affiliate partnership hands" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
-          <button type="button" className="fmm-v35-chest" onClick={() => setCoinModalOpen(true)} aria-label="Open coin funnel"><img src={`${ASSET_BASE}/chest-transparent.png`} alt="Treasure chest" />{Array.from({ length: 7 }).map((_, index) => <i key={index} />)}</button>
+          <Link href="/affiliate-create-account" className="fmm-v35-aff-card"><img src={`${ASSET_BASE}/handshake-cutout-v49.png`} alt="Affiliate partnership hands" /><span>🤝 AFFILIATES & CREATORS</span><strong>YOU'RE THE PROMOTER NOW</strong><small>Promote fights. Build a league. Get players moving.</small><b>BECOME A PARTNER →</b></Link>
+          <button type="button" className="fmm-v35-chest" onClick={() => setCoinModalOpen(true)} aria-label="Open coin funnel"><img src={`${ASSET_BASE}/chest-transparent.png`} alt="Treasure chest" />{Array.from({ length: 12 }).map((_, index) => <i key={index} />)}</button>
           <div className="fmm-v35-socials">{socialLinks.map(({ href, label, bg, path }) => <a href={href} target="_blank" rel="noreferrer" key={label} aria-label={label} title={label} style={{ "--social-bg": bg }}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={path} /></svg></a>)}</div>
         </section>
       </main>

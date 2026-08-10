@@ -113,6 +113,7 @@ import "@/styles/fmm-client-v43-home-desktop-navbar.css";
 import "@/styles/fmm-client-v44-etsy-mobile-coins.css";
 import "@/styles/fmm-client-v46-final-home-click-visual-fixes.css";
 import "@/styles/fmm-client-v47-final-demo-handshake-events.css";
+import "@/styles/fmm-client-v49-demo-navigation-chest-final.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";

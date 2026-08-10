@@ -20,6 +20,7 @@ import {
   FaEllipsisH,
   FaFire,
   FaFistRaised,
+  FaGift,
   FaHandshake,
   FaHome,
   FaMedal,
@@ -330,7 +331,15 @@ const Header = () => {
     );
   };
 
-  const mobileLinks = flattenNav(currentNav);
+  const mobileLinks = [
+    { label: 'Contests', href: '/upcomingfights', icon: FaTrophy },
+    { label: 'Make Predictions', href: '/upcomingfights', icon: FaBullseye },
+    { label: 'Leaderboard', href: '/leaderboard', icon: FaCrown },
+    { label: 'Leagues', href: '/FantasyLeagues', icon: FaTrophy },
+    { label: 'Apparel', href: '/apparel', icon: FaGift },
+    { label: 'Fight News', href: '/fights-news', icon: FaNewspaper },
+    { label: 'Profile', href: mobileAccountHref, icon: FaUserCircle },
+  ];
 
   return (
     <header className={`header theme-header ${isHomeRoute ? 'is-home-route' : ''}`}>
@@ -415,7 +424,7 @@ const Header = () => {
 
       {mobileOpen && (
         <div className="theme-mobile-menu">
-          <Link href={dashboardHomeHref}><FaHome aria-hidden="true" /> Home</Link>
+          <Link href="/"><FaHome aria-hidden="true" /> Home</Link>
           {mobileLinks.map((item) => {
             const Icon = item.icon;
             return (

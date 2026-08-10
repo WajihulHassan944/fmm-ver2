@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { FaCheck, FaChevronLeft, FaComments, FaHome, FaRedo, FaTrophy } from 'react-icons/fa';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
@@ -86,6 +87,8 @@ const steps = ['MEET', 'SCORECARD', 'LIVE SCORE', 'LEADERBOARD', 'COMMENTS', 'RE
 const roundTotal = (round, side, cats) => cats.reduce((total, [key]) => total + Number(round[side]?.[key] || 0), 0);
 
 export default function FreeDemoFight() {
+  const router = useRouter();
+  const autoStartedRef = useRef(false);
   const [genreKey, setGenreKey] = useState('');
   const [card, setCard] = useState(null);
   const [step, setStep] = useState(0);
@@ -116,6 +119,17 @@ export default function FreeDemoFight() {
     setStep(0);
     setRevealed(0);
   };
+
+  useEffect(() => {
+    if (!router.isReady || autoStartedRef.current) return;
+    const start = String(router.query.start || '').toLowerCase();
+    if (start !== 'scorecard') return;
+    const requestedGenre = String(router.query.genre || 'boxing').toLowerCase();
+    const safeGenre = demoGenres[requestedGenre] ? requestedGenre : 'boxing';
+    autoStartedRef.current = true;
+    startGenre(safeGenre);
+    setStep(1);
+  }, [router.isReady, router.query.start, router.query.genre]);
 
   const updateCard = (side, key, delta) => {
     setCard((current) => ({
@@ -229,15 +243,25 @@ export default function FreeDemoFight() {
                       ))}
                     </div>
                   ))}
-                  <div className="fmm-demo-pick-row">
-                    <button type="button" className={card.winner === 'a' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, winner: 'a' }))}>PICK {genre.fa}</button>
-                    <button type="button" className={card.winner === 'b' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, winner: 'b' }))}>PICK {genre.fb}</button>
+                  <div className="fmm-demo-control-label">ROUND WINNER / ROUND LOSER</div>
+                  <div className="fmm-demo-pick-row is-rwrl">
+                    <button type="button" className={card.winner === 'a' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, winner: 'a' }))}>
+                      <span>PICK {genre.fa}</span><b>{card.winner === 'a' ? 'RW' : card.winner === 'b' ? 'RL' : 'RW/RL'}</b>
+                    </button>
+                    <button type="button" className={card.winner === 'b' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, winner: 'b' }))}>
+                      <span>PICK {genre.fb}</span><b>{card.winner === 'b' ? 'RW' : card.winner === 'a' ? 'RL' : 'RW/RL'}</b>
+                    </button>
                   </div>
                   {genreKey !== 'wrestling' && (
-                    <div className="fmm-demo-pick-row is-red">
-                      <button type="button" className={card.outcome === 'a' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, outcome: 'a' }))}>{genre.fa} BY FINISH</button>
-                      <button type="button" className={card.outcome === 'b' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, outcome: 'b' }))}>{genre.fb} BY FINISH</button>
-                    </div>
+                    <>
+                      <div className="fmm-demo-control-label">KO / SP OUTCOME</div>
+                      <div className="fmm-demo-pick-row is-red is-outcome">
+                        <button type="button" className={card.outcome === 'a-ko' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, outcome: 'a-ko' }))}>{genre.fa} KO</button>
+                        <button type="button" className={card.outcome === 'b-ko' ? 'is-active' : ''} onClick={() => setCard((current) => ({ ...current, outcome: 'b-ko' }))}>{genre.fb} KO</button>
+                        <button type="button" className={card.outcome === 'sp' ? 'is-active is-sp' : 'is-sp'} onClick={() => setCard((current) => ({ ...current, outcome: 'sp' }))}>SP / SURVIVAL</button>
+                      </div>
+                      <p className="fmm-demo-mini-note">KO selects the finish market. SP keeps the fight in survival/full-distance mode.</p>
+                    </>
                   )}
                   <div className="fmm-demo-actions"><button type="button" onClick={() => setStep(0)}>← BACK</button><button type="button" className="fmm-demo-primary" onClick={nextStep}>SUBMIT & WATCH IT SCORE →</button></div>
                 </div>
@@ -283,7 +307,8 @@ export default function FreeDemoFight() {
                 <div className="fmm-demo-panel">
                   <h2 className="fmm-demo-finished"><FaCheck /> CARD COMPLETE — {genre.title}</h2>
                   <ul>
-                    <li>Scorecards: predict stats per fighter plus the winner.</li>
+                    <li>Scorecards: predict stats per fighter plus RW/RL winner pick.</li>
+                    <li>KO/SP outcome buttons set finish or survival mode.</li>
                     <li>Round scoring: each round adds to your total.</li>
                     <li>Leaderboard: your score ranks against all players.</li>
                     <li>Comments: every fight has its own discussion thread.</li>
