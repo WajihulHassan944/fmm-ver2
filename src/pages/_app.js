@@ -114,12 +114,17 @@ import "@/styles/fmm-client-v44-etsy-mobile-coins.css";
 import "@/styles/fmm-client-v46-final-home-click-visual-fixes.css";
 import "@/styles/fmm-client-v47-final-demo-handshake-events.css";
 import "@/styles/fmm-client-v49-demo-navigation-chest-final.css";
+import "@fontsource/anton/400.css";
+import "@fontsource/rajdhani/500.css";
+import "@fontsource/rajdhani/600.css";
+import "@fontsource/rajdhani/700.css";
+import "@/styles/fantasy-mobile-app-exact.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
 import { useRouter } from "next/router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/Redux/userSlice";
 import { setAffiliateUser } from "@/Redux/affiliateSlice";
@@ -160,6 +165,11 @@ const ChatbaseWidget = dynamic(() => import("@/Components/ChatbaseWidget"), {
   loading: () => null,
 });
 
+const FantasyMobileExperience = dynamic(
+  () => import("@/Components/MobileApp/FantasyMobileExperience"),
+  { ssr: false, loading: () => null },
+);
+
 const RouteExperienceFrame = dynamic(
   () => import("@/Components/Theme/RouteExperienceFrame"),
   {
@@ -184,6 +194,27 @@ const AUTH_PROFILE_CRITICAL_PREFIXES = [
 
 const routeMatchesPrefix = (pathname = "", prefixes = []) =>
   prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+
+const MOBILE_APP_ROUTE_TABS = {
+  "/": "home",
+  "/home": "home",
+  "/fights": "contests",
+  "/upcomingfights": "contests",
+  "/UserDashboard": "predict",
+  "/leaderboard": "leaderboard",
+  "/global-leaderboard": "leaderboard",
+  "/FantasyLeagues": "leagues",
+  "/watch-party": "watch",
+  "/profile": "profile",
+  "/account-settings": "settings",
+  "/free-demo": "demo",
+  "/mock-game": "demo",
+  "/playforfree": "demo",
+  "/blogs": "blogs",
+  "/fights-news": "blogs",
+};
+
+const EXACT_MOBILE_QUERY = "(max-width: 767px)";
 
 function App({ Component, ...rest }) {
   const { store, props } = wrapper.useWrappedStore(rest); // Wrapped store for SSR
@@ -236,6 +267,7 @@ function App({ Component, ...rest }) {
 function AppContent({ children }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const [isExactMobile, setIsExactMobile] = useState(false);
   const isPlaying = useSelector((state) => state.music.isPlaying);
   const seekPosition = useSelector((state) => state.music.seekPosition);
   const howlerRef = useRef(null);
@@ -254,11 +286,21 @@ function AppContent({ children }) {
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
   );
+  const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
+  const renderLegacyExperience = !exactMobileTab || !isExactMobile;
   const mainClassName = isAdministrationRoute
     ? isAdminLoginRoute
       ? "admin-login-main"
       : "admin-experience-main"
     : `site-experience-main${isHomeExperienceRoute ? " is-home-experience-main" : ""}${isStandaloneDemoRoute ? " is-standalone-demo-main" : ""}`;
+
+  useEffect(() => {
+    const media = window.matchMedia(EXACT_MOBILE_QUERY);
+    const sync = () => setIsExactMobile(media.matches);
+    sync();
+    media.addEventListener?.("change", sync);
+    return () => media.removeEventListener?.("change", sync);
+  }, []);
 
   useEffect(() => {
     if (!router.isReady) return undefined;
@@ -426,11 +468,12 @@ function AppContent({ children }) {
         <ToastContainer />
       </div>
 
-      {!hideLayout && <Header />}
-      {showAdminChrome && <AdminHeader />}
-      {!hideFooterChrome && <ChatbaseWidget />}
+      {renderLegacyExperience && !hideLayout && <Header />}
+      {renderLegacyExperience && showAdminChrome && <AdminHeader />}
+      {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
+      {exactMobileTab && <FantasyMobileExperience initialTab={exactMobileTab} />}
 
-      <main className={mainClassName}>
+      {renderLegacyExperience && <main className={mainClassName}>
         {useRouteExperienceFrame ? (
           <RouteExperienceFrame pathname={router.pathname}>
             {children}
@@ -438,8 +481,8 @@ function AppContent({ children }) {
         ) : (
           children
         )}
-      </main>
-      {!hideFooterChrome && <Footer />}
+      </main>}
+      {renderLegacyExperience && !hideFooterChrome && <Footer />}
     </>
   );
 }

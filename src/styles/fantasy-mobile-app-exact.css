@@ -1,0 +1,78 @@
+/* Exact motion and mobile-shell rules from the locked client prototype. */
+.fmm-exact-mobile-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: #05060a;
+  isolation: isolate;
+}
+
+.fmm-exact-mobile-portal > div {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  body:has(.fmm-exact-mobile-portal) {
+    overflow: hidden !important;
+    background: #05060a !important;
+  }
+
+  .fmm-exact-desktop-only {
+    display: none !important;
+  }
+}
+
+@keyframes glimmerCrown { 0%,100% { filter: drop-shadow(0 0 6px rgba(242,181,68,.6)); transform: rotate(-2deg) scale(1); } 50% { filter: drop-shadow(0 0 18px rgba(242,181,68,1)); transform: rotate(2deg) scale(1.05); } }
+  @keyframes pulseLive { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  @keyframes shimmerBtn { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes floatEmber { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: .9; } 100% { transform: translateY(-260px) translateX(20px); opacity: 0; } }
+  @keyframes glowPulse { 0%,100% { box-shadow: 0 0 0px rgba(242,181,68,0); } 50% { box-shadow: 0 0 22px rgba(242,181,68,.45); } }
+  @keyframes bounceChest { 0% { transform: scale(1) rotate(0deg); } 30% { transform: scale(1.25) rotate(-8deg); } 55% { transform: scale(.95) rotate(6deg); } 100% { transform: scale(1) rotate(0deg); } }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%,10px); } to { opacity: 1; transform: translate(-50%,0); } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes joinGlow { 0%,100% { box-shadow: 0 6px 20px rgba(242,181,68,.35), 0 0 0 rgba(242,181,68,0); } 50% { box-shadow: 0 6px 20px rgba(242,181,68,.35), 0 0 26px 6px rgba(242,181,68,.55); } }
+  @keyframes wordmarkGlow { 0%,100% { filter: drop-shadow(0 0 10px rgba(168,85,247,.35)); } 50% { filter: drop-shadow(0 0 22px rgba(239,68,68,.55)); } }
+  @keyframes coinFloat { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 15% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(28px) rotate(180deg); opacity: 0; } }
+  @keyframes chestBounceLoop { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-6px) rotate(4deg); } }
+  @keyframes ribbonGlow { 0%,100% { box-shadow: 0 0 10px rgba(242,181,68,.4); } 50% { box-shadow: 0 0 20px rgba(242,181,68,.8); } }
+  @keyframes moneyPulse { 0%,100% { text-shadow: 0 0 6px rgba(34,197,94,.5); } 50% { text-shadow: 0 0 16px rgba(34,197,94,1), 0 0 26px rgba(34,197,94,.6); } }
+  @keyframes moneyPulseGold { 0%,100% { text-shadow: 0 0 6px rgba(242,181,68,.5); } 50% { text-shadow: 0 0 16px rgba(242,181,68,1), 0 0 26px rgba(242,181,68,.6); } }
+  @keyframes quickFlash { 0% { opacity: .9; } 100% { opacity: 0; } }
+  @keyframes cardPop { 0% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  @keyframes ptsTwinkle { 0%,100% { text-shadow: 0 0 4px rgba(242,181,68,.6), 0 0 0 rgba(255,255,255,0); } 50% { text-shadow: 0 0 14px rgba(242,181,68,1), 0 0 22px rgba(255,236,150,.8); } }
+  @keyframes ptsCoinRise { 0% { transform: translateY(6px) rotate(0deg); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-16px) rotate(180deg); opacity: 0; } }
+  @keyframes stadiumFlickerRed { 0%,100% { opacity: .55; } 50% { opacity: .95; } }
+  @keyframes stadiumFlickerBlue { 0%,100% { opacity: .95; } 50% { opacity: .55; } }
+  @keyframes bulbFlash { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+  @keyframes navIconPulse { 0%,100% { filter: drop-shadow(0 0 2px currentColor); transform: scale(1); } 50% { filter: drop-shadow(0 0 9px currentColor); transform: scale(1.12); } }
+  @keyframes chestBubbleFloat { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+  @keyframes coinFly1 { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(-30px,-70px) rotate(-90deg); opacity: 0; } }
+  @keyframes coinFly2 { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(4px,-80px) rotate(120deg); opacity: 0; } }
+  @keyframes coinFly3 { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(32px,-64px) rotate(90deg); opacity: 0; } }
+  @keyframes chestSparkle { 0%,100% { filter: drop-shadow(0 0 10px rgba(242,181,68,.6)); } 50% { filter: drop-shadow(0 0 22px rgba(255,236,150,1)) drop-shadow(0 0 34px rgba(242,181,68,.7)); } }
+  @keyframes chestBurstCoin { 0% { transform: translate(0,0) scale(.6) rotate(0); opacity: 1; } 100% { transform: var(--burstEnd) scale(1.2) rotate(360deg); opacity: 0; } }
+  @keyframes chestBurstPop { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+  @keyframes glisten { 0%,100% { opacity: 0; transform: scale(.6); } 50% { opacity: 1; transform: scale(1); } }
+  @keyframes chestRingPulse { 0% { transform: scale(.85); opacity: .8; } 100% { transform: scale(1.5); opacity: 0; } }
+  @keyframes chestGlowBreathe { 0%,100% { opacity: .5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+  @keyframes chestShine { 0% { transform: translateX(-120%) rotate(20deg); } 100% { transform: translateX(220%) rotate(20deg); } }
+  @keyframes ambientDrift1 { 0% { transform: translate(0,0); } 50% { transform: translate(14px,-26px); } 100% { transform: translate(0,0); } }
+  @keyframes ambientDrift2 { 0% { transform: translate(0,0); } 50% { transform: translate(-18px,20px); } 100% { transform: translate(0,0); } }
+  @keyframes ambientDrift3 { 0% { transform: translate(0,0); } 50% { transform: translate(10px,18px); } 100% { transform: translate(0,0); } }
+  @keyframes flameFlicker1 { 0%,100% { transform: scaleY(1) scaleX(1) translateY(0); opacity: .85; } 30% { transform: scaleY(1.15) scaleX(.94) translateY(-3px); opacity: 1; } 60% { transform: scaleY(.92) scaleX(1.05) translateY(2px); opacity: .75; } }
+  @keyframes flameFlicker2 { 0%,100% { transform: scaleY(1) scaleX(1) translateY(0); opacity: .8; } 40% { transform: scaleY(.9) scaleX(1.08) translateY(3px); opacity: 1; } 70% { transform: scaleY(1.18) scaleX(.92) translateY(-2px); opacity: .7; } }
+  @keyframes crownSparkle { 0%,100% { opacity: 0; transform: scale(.4) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(90deg); } }
+  @keyframes cameraFlash { 0%, 92%, 100% { opacity: 0; } 94% { opacity: .9; } 96% { opacity: 0; } 97% { opacity: .6; } 99% { opacity: 0; } }
+  @keyframes ringSpin { from { stroke-dashoffset: var(--dash); } to { stroke-dashoffset: var(--dash); } }
+  .fmm-exact-mobile-portal { font-family: 'Rajdhani', sans-serif; -webkit-font-smoothing: antialiased; }
+  .fmm-exact-mobile-portal, .fmm-exact-mobile-portal * { box-sizing: border-box; }
+  .fmm-exact-mobile-portal ::-webkit-scrollbar { display: none; }
+
+@media (max-width: 500px) {
+    .fm-shell { padding: 0 !important; background: #05060a !important; }
+    .fm-shell > div { transform: none !important; width: 100vw !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+  }
