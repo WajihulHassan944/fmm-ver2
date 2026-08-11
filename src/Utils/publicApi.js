@@ -6,6 +6,29 @@ export const PUBLIC_API_BASE_URL = String(
   process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_PUBLIC_API_BASE_URL,
 ).replace(/\/$/, "");
 
+// Public API records sometimes contain backend-relative media paths (for
+// example, /uploads/fight-poster.webp). Resolve those against the same API
+// origin while leaving bundled frontend assets and already-absolute URLs
+// untouched.
+export const resolvePublicMediaUrl = (value = "") => {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^(?:data:|blob:)/i.test(raw)) return raw;
+  if (raw.startsWith("//")) return `https:${raw}`;
+  if (/^https?:\/\//i.test(raw)) return raw;
+
+  const normalized = raw.replace(/^\.\//, "");
+  if (
+    normalized.startsWith("/images/") ||
+    normalized.startsWith("/Assets/") ||
+    normalized.startsWith("/_next/")
+  ) {
+    return normalized;
+  }
+
+  return `${PUBLIC_API_BASE_URL}/${normalized.replace(/^\/+/, "")}`;
+};
+
 
 const cleanString = (value) => String(value ?? "").trim();
 

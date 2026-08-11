@@ -1,8 +1,10 @@
 /* Derived from the client-approved standalone prototype in the design handoff. */
 import React from 'react';
+import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
 const EVENT_POSTER_COUNT = 6;
+const EVENT_POSTER_SEQUENCE = [1, 2, 3, 5, 6];
 
 const directSlotAssets = {
   'bold-hero': 'hero-banner-crop.png',
@@ -60,16 +62,23 @@ const resolveSlotAsset = (id = '', src = '') => {
   return '/images/hero-fight.webp';
 };
 
-const MobileImageSlot = ({ id, src, fit = 'cover', shape, radius, placeholder }) => {
+const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder }) => {
   const borderRadius = shape === 'circle' ? '50%' : radius ? Number(radius) : 0;
+  const resolvedFallback = explicitAsset(fallbackSrc) || resolveSlotAsset(id);
   return React.createElement('img', {
     id,
-    src: resolveSlotAsset(id, src),
+    src: resolveSlotAsset(id, src || fallbackSrc),
     alt: placeholder || '',
     'data-filled': 'true',
     draggable: false,
     loading: 'lazy',
     decoding: 'async',
+    onError: (event) => {
+      const image = event.currentTarget;
+      if (!image || image.dataset.fallbackApplied === 'true') return;
+      image.dataset.fallbackApplied = 'true';
+      image.src = resolvedFallback;
+    },
     style: {
       display: 'block',
       width: '100%',
@@ -86,6 +95,61 @@ const cleanText = (...values) => {
     if (text && !['null', 'undefined', 'n/a'].includes(text.toLowerCase())) return text;
   }
   return '';
+};
+
+const getEventFallbackImage = (index = 0) => {
+  const number = EVENT_POSTER_SEQUENCE[index % EVENT_POSTER_SEQUENCE.length];
+  return `${ASSET_BASE}/event-poster-${number}.webp`;
+};
+
+const getMediaCandidate = (value) => {
+  if (typeof value === 'string' || typeof value === 'number') return cleanText(value);
+  if (!value || typeof value !== 'object') return '';
+  return cleanText(
+    value.url_fullxfull,
+    value.url_570xN,
+    value.url_170x135,
+    value.secure_url,
+    value.imageUrl,
+    value.url,
+    value.src,
+    value.path,
+  );
+};
+
+const resolveLiveMedia = (...values) => {
+  for (const value of values) {
+    const candidate = getMediaCandidate(value);
+    if (candidate) return resolvePublicMediaUrl(candidate);
+  }
+  return '';
+};
+
+const unwrapMaybeMarkdownUrl = (value = '') => {
+  const text = String(value || '').trim();
+  const markdownMatch = text.match(/\((https?:\/\/[^)]+)\)/i);
+  if (markdownMatch?.[1]) return markdownMatch[1];
+  const bracketMatch = text.match(/^\[(https?:\/\/[^\]]+)\]$/i);
+  if (bracketMatch?.[1]) return bracketMatch[1];
+  return text;
+};
+
+const getApparelImages = (item = {}) => {
+  const rawImages = Array.isArray(item.images) ? item.images : [];
+  const candidates = [
+    ...rawImages,
+    item.image,
+    item.imageUrl,
+    item.thumbnail,
+    item.thumbnailUrl,
+  ];
+
+  return [...new Set(candidates
+    .map(getMediaCandidate)
+    .map(unwrapMaybeMarkdownUrl)
+    .filter(Boolean)
+    .map(resolvePublicMediaUrl)
+    .filter(Boolean))].slice(0, 3);
 };
 
 const resolveSport = (fight = {}) => {
@@ -146,13 +210,23 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     f2: cleanText(fight.matchFighterB, fight.fighterBName, fight.fighterB?.displayName, 'FIGHTER B').toUpperCase(),
     iso,
     prize,
-    image: cleanText(
+    fallbackImage: getEventFallbackImage(index),
+    image: resolveLiveMedia(
+      fight.homepagePromotion?.mobilePosterImage,
+      fight.homepagePromotion?.posterImage,
+      fight.homepagePromotion?.image,
+      fight.fightPosterMobileImage,
       fight.fightPosterImage,
       fight.posterImage,
-      fight.homepagePromotion?.posterImage,
+      fight.matchPosterImage,
       fight.bannerImage,
       fight.promotionBackground,
+      fight.resolvedFighterAImage,
+      fight.fighterAPrimaryImage,
       fight.fighterAImage,
+      fight.resolvedFighterBImage,
+      fight.fighterBPrimaryImage,
+      fight.fighterBImage,
     ),
   };
 };
@@ -876,7 +950,7 @@ class FantasyMobileAppCore extends React.Component {
       { id: 4, sport: 'wrestling', tag: 'AEW DYNAMITE', tagColor: '#a855f7', f1: 'MJF', f2: 'ADAM COLE', iso: '2026-08-17', prize: '$20,000' },
       { id: 5, sport: 'mma', tag: 'ONE FIGHT NIGHT', tagColor: '#4d8dff', f1: 'SUPERLEK', f2: 'TAKERU', iso: '2026-08-25', prize: '$15,000' },
       { id: 6, sport: 'kickboxing', tag: 'GLORY 92', tagColor: '#22c55e', f1: 'ALLAZOV', f2: 'PETROSYAN', iso: '2026-09-05', prize: '$18,000' },
-    ];
+    ].map((event, index) => ({ ...event, fallbackImage: getEventFallbackImage(index) }));
     const liveEvents = Array.isArray(this.props.fights)
       ? this.props.fights.map(normalizeLiveEvent).filter(event => event.f1 && event.f2)
       : [];
@@ -927,14 +1001,28 @@ class FantasyMobileAppCore extends React.Component {
       { name: 'SNAPBACK CAP', price: '$24.99', slot: 'ap3' },
       { name: 'FIGHT SHORTS', price: '$39.99', slot: 'ap4' },
       { name: 'TRAINING GLOVES', price: '$34.99', slot: 'ap5' },
-    ];
+    ].map((item) => ({
+      ...item,
+      id: item.slot,
+      images: [`${ASSET_BASE}/${directSlotAssets[item.slot]}`],
+      fallbackImage: `${ASSET_BASE}/${directSlotAssets[item.slot]}`,
+    }));
     const liveApparel = Array.isArray(this.props.apparel)
-      ? this.props.apparel.map((item, index) => ({
-          name: cleanText(item.title, item.name, `APPAREL ${index + 1}`).toUpperCase(),
-          price: cleanText(item.formattedPrice, item.price?.formatted, item.price ? `$${item.price}` : '', 'VIEW'),
-          slot: `ap${(index % 5) + 1}`,
-          href: cleanText(item.url, item.href),
-        }))
+      ? this.props.apparel.map((item, index) => {
+          const slot = `ap${(index % 5) + 1}`;
+          const fallbackImage = `${ASSET_BASE}/${directSlotAssets[slot]}`;
+          const images = getApparelImages(item);
+          const rawPrice = item.price?.amount ?? item.price?.value ?? item.price;
+          return {
+            id: cleanText(item.sku, item.etsyListingId, item._id, item.id, `apparel-${index}`),
+            name: cleanText(item.title, item.name, `APPAREL ${index + 1}`).toUpperCase(),
+            price: cleanText(item.formattedPrice, item.displayPrice, item.price?.formatted, rawPrice !== undefined && rawPrice !== null && rawPrice !== '' ? `$${rawPrice}` : '', 'VIEW'),
+            slot,
+            images: images.length ? images : [fallbackImage],
+            fallbackImage,
+            href: cleanText(item.buyUrl, item.externalUrl, item.url, item.href),
+          };
+        })
       : [];
     const apparel = liveApparel.length ? liveApparel : fallbackApparel;
 
@@ -977,7 +1065,7 @@ class FantasyMobileAppCore extends React.Component {
       style: { position: 'relative', width: '100%', height: '100dvh', maxHeight: '100dvh', minHeight: 620, background: '#05060a', color: '#fff', overflow: 'hidden', fontFamily: "'Rajdhani',sans-serif", display: 'flex', flexDirection: 'column' }
     },
       React.createElement('div', {
-        style: { flex: '1 1 auto', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingTop: 58 }
+        style: { flex: '1 1 auto', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingTop: 0 }
       },
         this.renderTopBar(coinsFmt, s.notifCount),
         s.activeTab === 'home' && this.renderHome(sports, filteredEvents, events, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s),
@@ -2227,7 +2315,7 @@ class FantasyMobileAppCore extends React.Component {
         },
           s.flashCard[ev.id] && React.createElement('div', { key: s.flashCard[ev.id], style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle,rgba(242,181,68,.55),transparent 70%)', animation: 'quickFlash .6s ease-out forwards', zIndex: 5, pointerEvents: 'none' } }),
           React.createElement('div', { style: { height: 150, position: 'relative' } },
-            React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'cover', src: ev.image }),
+            React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage }),
             React.createElement('div', { style: { position: 'absolute', top: 6, left: 6, background: ev.tagColor, color: '#fff', fontSize: 8, fontWeight: 900, padding: '3px 6px', borderRadius: 5 } }, ev.tag)
           ),
           React.createElement('div', { style: { padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: 4 } },
@@ -2403,14 +2491,14 @@ class FantasyMobileAppCore extends React.Component {
       ),
       React.createElement('div', { style: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 } },
         apparel.map(a => React.createElement('div', {
-          key: a.slot, onClick: () => this.props.onOpenApparel?.(a),
+          key: a.id || a.slot, onClick: () => this.props.onOpenApparel?.(a),
           style: { flex: '0 0 110px', cursor: 'pointer' }
         },
           React.createElement('div', { style: { height: 90, marginBottom: 4, position: 'relative', borderRadius: 10, overflow: 'hidden' } },
-            (() => { const ids = [0, 1, 2].map(i => a.slot + '-' + i); const activeId = this.pickCycleId(ids, s);
+            (() => { const sources = Array.isArray(a.images) && a.images.length ? a.images : [a.fallbackImage]; const ids = sources.map((_, i) => a.slot + '-' + i); const activeId = this.pickCycleId(ids, s);
               return ids.map((id, i) => React.createElement('div', {
                 key: id, style: { position: 'absolute', inset: 0, opacity: id === activeId ? 1 : 0, transition: 'opacity 1s ease', pointerEvents: id === activeId ? 'auto' : 'none' }
-              }, React.createElement(MobileImageSlot, { id, shape: 'rounded', radius: '10', placeholder: a.name + ' #' + (i + 1), fit: 'cover' })));
+              }, React.createElement(MobileImageSlot, { id, shape: 'rounded', radius: '10', placeholder: a.name + ' #' + (i + 1), fit: 'cover', src: sources[i], fallbackSrc: a.fallbackImage })));
             })()
           ),
           React.createElement('div', { style: { fontSize: 9, fontWeight: 700 } }, a.name),
@@ -2524,7 +2612,7 @@ class FantasyMobileAppCore extends React.Component {
           key: ev.id, style: { background: 'rgba(255,255,255,.05)', border: '1px solid ' + ev.tagColor, borderRadius: 12, overflow: 'hidden', boxShadow: '0 0 16px ' + ev.tagColor + '55, inset 0 0 12px ' + ev.tagColor + '20' }
         },
           React.createElement('div', { style: { height: 170, position: 'relative', background: '#000' } },
-            React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image }),
+            React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage }),
             React.createElement('div', { style: { position: 'absolute', top: 8, left: 8, background: ev.tagColor, color: '#fff', fontSize: 9, fontWeight: 900, padding: '4px 8px', borderRadius: 6 } }, ev.tag)
           ),
           React.createElement('div', { style: { padding: 12 } },
@@ -2837,12 +2925,12 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 's', style: { fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 12 } }, 'Predict full-match totals — not round by round'),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image })),
+            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image })),
+            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
@@ -2886,12 +2974,12 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 's', style: { fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 12 } }, 'HP · BP · TP are independent totals — TP is not HP+BP · We count punches thrown, not just landed · Match is ' + (ev.sport === 'boxing' ? '12' : '5') + ' rounds'),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image })),
+            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image })),
+            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
@@ -2936,12 +3024,12 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 's', style: { fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 12 } }, 'Every punch, kick, knee & elbow thrown counts — landed or not · Scheduled for 5 rounds'),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image })),
+            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image })),
+            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
