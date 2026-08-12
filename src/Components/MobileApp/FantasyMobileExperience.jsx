@@ -102,8 +102,14 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   );
   const isAuthenticated = Boolean(user?._id || user?.id || user?.email);
 
-  const goToCheckout = ({ amount, price, product = 'fm-coins' } = {}) => {
-    const next = `/checkout?product=${encodeURIComponent(product)}${amount ? `&amount=${encodeURIComponent(amount)}` : ''}${price ? `&price=${encodeURIComponent(price)}` : ''}`;
+  const goToCheckout = ({ amount, price, product = 'fm-coins', items = [] } = {}) => {
+    const serializedCart = Array.isArray(items) && items.length
+      ? items
+          .map((item) => `${String(item.sku || '').trim()}:${Math.max(1, Number(item.quantity || 1))}`)
+          .filter((item) => !item.startsWith(':'))
+          .join(',')
+      : '';
+    const next = `/checkout?product=${encodeURIComponent(product)}${amount ? `&amount=${encodeURIComponent(amount)}` : ''}${price ? `&price=${encodeURIComponent(price)}` : ''}${serializedCart ? `&cart=${encodeURIComponent(serializedCart)}` : ''}`;
     router.push(next);
   };
 
@@ -165,7 +171,12 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         onSubscribe={() => goToCheckout({ product: 'fm-plus' })}
         onSubmitPrediction={submitPrediction}
         onJoinLeague={joinLeague}
-        onJoin={() => router.push('/CreateAccount')}
+        onJoin={({ name = '', email = '' } = {}) => {
+          const query = new URLSearchParams();
+          if (name.trim()) query.set('playerName', name.trim());
+          if (email.trim()) query.set('email', email.trim());
+          router.push(`/CreateAccount${query.toString() ? `?${query.toString()}` : ''}`);
+        }}
         onOpenApparel={() => router.push('/apparel')}
         onShare={share}
       />

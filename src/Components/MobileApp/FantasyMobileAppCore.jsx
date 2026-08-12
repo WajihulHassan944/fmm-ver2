@@ -291,6 +291,9 @@ class FantasyMobileAppCore extends React.Component {
     rewardClaimed: false,
     hasPurchased: false,
     isSubscribed: false,
+    fmPlusMode: 'monthly',
+    joinDraft: { name: '', email: '' },
+    cart: [],
     streakDay: 5,
     votes: { jones: 76, aspinall: 24 },
     userVote: null,
@@ -937,16 +940,39 @@ class FantasyMobileAppCore extends React.Component {
   };
 
   addCoins = (amount, price) => {
-    if (this.props.onPurchaseCoins) {
-      this.props.onPurchaseCoins({ amount, price, product: 'fm-coins' });
+    const numericPrice = Number(String(price || '').replace(/[^0-9.]/g, '')) || 0;
+    const sku = `fm-${amount}`;
+    this.setState((state) => {
+      const existing = state.cart.find((item) => item.sku === sku);
+      const cart = existing
+        ? state.cart.map((item) => item.sku === sku ? { ...item, quantity: Math.min(10, item.quantity + 1) } : item)
+        : [...state.cart, { sku, coins: amount, price: numericPrice, quantity: 1 }];
+      return { cart, modal: null, activeTab: 'cart' };
+    });
+    this.showToast(`${amount.toLocaleString()} FM pack added to cart`);
+  };
+
+  changeCartQuantity = (sku, delta) => this.setState((state) => ({
+    cart: state.cart
+      .map((item) => item.sku === sku
+        ? { ...item, quantity: Math.min(10, Math.max(0, item.quantity + delta)) }
+        : item)
+      .filter((item) => item.quantity > 0),
+  }));
+
+  removeCartItem = (sku) => this.setState((state) => ({
+    cart: state.cart.filter((item) => item.sku !== sku),
+  }));
+
+  continueCartCheckout = () => {
+    if (!this.state.cart.length) {
+      this.openModal('addcoins');
       return;
     }
-    this.playCheer();
-    const bonus = !this.state.hasPurchased;
-    const total = bonus ? amount * 2 : amount;
-    this.setState(s => ({ coins: s.coins + total, modal: null, hasPurchased: true }));
-    this.showToast(bonus ? ('🎉 First purchase bonus — ' + total.toLocaleString() + ' FM added (2X)!') : (total.toLocaleString() + ' FM added!'));
-    this.showToast('+' + amount.toLocaleString() + ' FM added!');
+    this.props.onPurchaseCoins?.({
+      product: 'fm-coins',
+      items: this.state.cart.map(({ sku, quantity }) => ({ sku, quantity })),
+    });
   };
 
   vote = (fighter) => {
@@ -970,7 +996,7 @@ class FantasyMobileAppCore extends React.Component {
 
   joinNow = () => {
     if (this.props.onJoin) {
-      this.props.onJoin();
+      this.props.onJoin(this.state.joinDraft);
       return;
     }
     this.playCheer(); this.playBell(); this.showToast('Welcome to Fantasy MMAdness!'); this.closeModal();
@@ -1112,7 +1138,8 @@ class FantasyMobileAppCore extends React.Component {
       s.activeTab === 'leagues' && this.renderLeagues(s, events),
       s.activeTab === 'settings' && this.renderSettings(s),
       s.activeTab === 'demo' && this.renderDemo(s),
-      s.activeTab === 'blogs' && this.renderBlogsPage(blogs)
+      s.activeTab === 'blogs' && this.renderBlogsPage(blogs),
+      s.activeTab === 'cart' && this.renderCart(s)
     );
 
     const screen = React.createElement('div', {
@@ -1185,6 +1212,18 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg,#ffe08a,#a8720f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, color: '#3a2500' } }, 'FM'),
           React.createElement('span', { style: { fontWeight: 700, fontSize: 13, animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, coinsFmt),
           React.createElement('div', { style: { width: 16, height: 16, borderRadius: '50%', background: '#f2b544', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#3a2500' } }, '+')
+        ),
+        React.createElement('div', {
+          onClick: () => this.setTab('cart'),
+          'aria-label': 'Open FM coin cart',
+          style: { position: 'relative', width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }
+        },
+          React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: '#f2b544', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+            React.createElement('circle', { cx: 9, cy: 21, r: 1 }),
+            React.createElement('circle', { cx: 20, cy: 21, r: 1 }),
+            React.createElement('path', { d: 'M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6' })
+          ),
+          this.state.cart.length > 0 && React.createElement('div', { style: { position: 'absolute', top: -4, right: -4, background: '#f2b544', color: '#2b1b00', fontSize: 10, fontWeight: 900, borderRadius: '50%', width: 17, height: 17, display: 'flex', alignItems: 'center', justifyContent: 'center' } }, this.state.cart.reduce((total, item) => total + item.quantity, 0))
         ),
         React.createElement('div', {
           onClick: () => this.openModal('notif'),
@@ -1457,6 +1496,7 @@ class FantasyMobileAppCore extends React.Component {
       ),
       React.createElement('div', {
         onClick: () => this.openModal('join'),
+        role: 'button', tabIndex: 0, 'aria-label': 'Join Fantasy MMAdness free',
         style: { position: 'absolute', left: '22%', right: '22%', bottom: '4%', height: '11%', cursor: 'pointer' }
       })
     );
@@ -2655,7 +2695,10 @@ class FantasyMobileAppCore extends React.Component {
     return React.createElement('div', { style: { padding: '0 16px 16px' } },
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 8 } },
         React.createElement('div', { style: { fontSize: 12, fontWeight: 800, letterSpacing: 1, color: 'rgba(255,255,255,.7)' } }, 'APPAREL'),
-        React.createElement('div', { onClick: () => this.props.onOpenApparel?.(), style: { fontSize: 11, color: '#4d8dff', fontWeight: 700, cursor: 'pointer' } }, 'VIEW ALL ›')
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' } },
+          React.createElement('div', { onClick: () => this.props.onOpenApparel?.(), role: 'button', tabIndex: 0, style: { fontSize: 10, color: '#4d8dff', fontWeight: 700, cursor: 'pointer' } }, 'VIEW ALL'),
+          React.createElement('a', { href: 'https://www.etsy.com/shop/FANTASYMMADNESS', target: '_blank', rel: 'noopener noreferrer', style: { fontSize: 10, color: '#f2b544', fontWeight: 800, cursor: 'pointer', textDecoration: 'none' } }, 'SHOP ON ETSY ›')
+        )
       ),
       React.createElement('div', { style: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 } },
         apparel.map(a => React.createElement('div', {
@@ -2672,6 +2715,50 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { fontSize: 9, fontWeight: 700 } }, a.name),
           React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, a.price)
         ))
+      )
+    );
+  }
+
+  renderCart(s) {
+    const subtotal = s.cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    const baseCoins = s.cart.reduce((total, item) => total + item.coins * item.quantity, 0);
+    return React.createElement('div', { style: { padding: '8px 16px 24px' } },
+      React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 4 } },
+        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, color: '#f2b544' } }, '🪙 FM COIN CART'),
+        React.createElement('div', { onClick: () => this.setTab('home'), style: { color: '#4d8dff', fontSize: 10, fontWeight: 900, cursor: 'pointer', whiteSpace: 'nowrap' } }, 'CONTINUE SHOPPING')
+      ),
+      React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.48)', marginBottom: 16 } },
+        s.cart.length ? `${baseCoins.toLocaleString()} FM selected · secure Kurv checkout` : 'No coin packs selected yet'
+      ),
+      !s.cart.length && React.createElement('section', { style: { padding: '28px 16px', textAlign: 'center', borderRadius: 14, border: '1px dashed rgba(242,181,68,.35)', background: 'rgba(242,181,68,.06)' } },
+        React.createElement('div', { style: { fontSize: 34, marginBottom: 8 } }, '🛒'),
+        React.createElement('strong', { style: { display: 'block', fontSize: 13, marginBottom: 5 } }, 'YOUR CART IS EMPTY'),
+        React.createElement('div', { style: { color: 'rgba(255,255,255,.55)', fontSize: 10, marginBottom: 15 } }, 'Choose a coin pack to top up your fight wallet.'),
+        React.createElement('div', { role: 'button', tabIndex: 0, onClick: () => this.openModal('addcoins'), style: { display: 'inline-flex', alignItems: 'center', minHeight: 42, borderRadius: 999, padding: '0 20px', background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 900, cursor: 'pointer' } }, 'CHOOSE A COIN PACK')
+      ),
+      s.cart.map((item) => React.createElement('article', { key: item.sku, style: { display: 'grid', gridTemplateColumns: '52px minmax(0,1fr) auto', gap: 11, alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,.08)' } },
+        React.createElement('div', { style: { width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#ffe08a,#a8720f)', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 900, color: '#3a2500' } }, 'FM'),
+        React.createElement('div', { style: { minWidth: 0 } },
+          React.createElement('strong', { style: { display: 'block', fontSize: 12 } }, `${item.coins.toLocaleString()} FM COIN PACK`),
+          React.createElement('small', { style: { display: 'block', color: 'rgba(255,255,255,.48)', marginTop: 2 } }, `${(item.coins * item.quantity).toLocaleString()} FM coins`),
+          React.createElement('b', { style: { display: 'block', color: '#f2b544', fontSize: 12, marginTop: 2 } }, `$${(item.price * item.quantity).toFixed(2)}`),
+          React.createElement('span', { role: 'button', tabIndex: 0, onClick: () => this.removeCartItem(item.sku), style: { display: 'inline-block', marginTop: 4, color: 'rgba(255,255,255,.45)', fontSize: 9, textDecoration: 'underline', cursor: 'pointer' } }, 'Remove')
+        ),
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, border: '1px solid rgba(255,255,255,.18)', borderRadius: 999, padding: '4px 7px' } },
+          React.createElement('span', { role: 'button', tabIndex: 0, 'aria-label': `Decrease ${item.coins} FM pack quantity`, onClick: () => this.changeCartQuantity(item.sku, -1), style: { width: 24, height: 24, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900, cursor: 'pointer' } }, '−'),
+          React.createElement('span', { style: { minWidth: 14, textAlign: 'center', fontSize: 12, fontWeight: 900 } }, item.quantity),
+          React.createElement('span', { role: 'button', tabIndex: 0, 'aria-label': `Increase ${item.coins} FM pack quantity`, onClick: () => this.changeCartQuantity(item.sku, 1), style: { width: 24, height: 24, display: 'grid', placeItems: 'center', color: '#f2b544', fontWeight: 900, cursor: 'pointer' } }, '+')
+        )
+      )),
+      s.cart.length > 0 && React.createElement(React.Fragment, null,
+        React.createElement('section', { style: { marginTop: 16, padding: 14, borderRadius: 12, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)' } },
+          React.createElement('strong', { style: { display: 'block', fontSize: 10, letterSpacing: 1, color: 'rgba(255,255,255,.55)', marginBottom: 8 } }, 'ORDER SUMMARY'),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: 'rgba(255,255,255,.72)', fontSize: 12 } }, React.createElement('span', null, 'Coins'), React.createElement('b', null, `${baseCoins.toLocaleString()} FM`)),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, paddingTop: 10, marginTop: 6, borderTop: '1px solid rgba(255,255,255,.14)', color: '#f2b544', fontSize: 16, fontWeight: 900 } }, React.createElement('span', null, 'Total'), React.createElement('b', null, `$${subtotal.toFixed(2)}`)),
+          React.createElement('small', { style: { display: 'block', marginTop: 8, color: '#22c55e', lineHeight: 1.45 } }, 'First-purchase doubling is calculated and confirmed by the server after payment.')
+        ),
+        React.createElement('div', { role: 'button', tabIndex: 0, onClick: this.continueCartCheckout, style: { width: '100%', minHeight: 50, display: 'grid', placeItems: 'center', marginTop: 16, borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 1000, fontSize: 13, cursor: 'pointer' } }, `CHECKOUT $${subtotal.toFixed(2)} · ${baseCoins.toLocaleString()} FM`),
+        React.createElement('div', { style: { textAlign: 'center', marginTop: 9, color: 'rgba(255,255,255,.45)', fontSize: 9.5 } }, '🔒 Billing and card details continue on the secure checkout flow')
       )
     );
   }
@@ -3032,10 +3119,19 @@ class FantasyMobileAppCore extends React.Component {
           ))
         )
       ),
+      !s.isSubscribed && React.createElement('div', { key: 'plans', style: { display: 'flex', gap: 8, marginBottom: 10 } },
+        [['monthly', '$4.99/mo', 'Auto-renews · cancel anytime'], ['pass', '$4.99', '30-day pass · no auto-renew']].map(([mode, price, description]) => React.createElement('div', {
+          role: 'button', tabIndex: 0, key: mode, onClick: () => this.setState({ fmPlusMode: mode }),
+          style: { flex: 1, minWidth: 0, padding: '10px 8px', borderRadius: 10, cursor: 'pointer', textAlign: 'center', background: s.fmPlusMode === mode ? 'rgba(168,85,247,.18)' : 'rgba(255,255,255,.04)', border: '1.5px solid ' + (s.fmPlusMode === mode ? '#a855f7' : 'rgba(255,255,255,.12)'), color: '#fff' }
+        },
+          React.createElement('strong', { style: { display: 'block', fontSize: 13 } }, price),
+          React.createElement('small', { style: { display: 'block', marginTop: 2, fontSize: 8.5, color: 'rgba(255,255,255,.55)', lineHeight: 1.35 } }, description)
+        ))
+      ),
       React.createElement('div', {
         onClick: this.subscribeFmPlus,
         style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#a855f7,#4d8dff)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(168,85,247,.6)' }
-      }, s.isSubscribed ? 'YOU\u2019RE AN FM+ MEMBER \u2713' : 'JOIN FM+ \u2014 $4.99/MO')
+      }, s.isSubscribed ? 'YOU\u2019RE AN FM+ MEMBER \u2713' : (s.fmPlusMode === 'pass' ? 'GET 30-DAY PASS \u2014 $4.99' : 'JOIN FM+ \u2014 $4.99/MO'))
     ]);
 
     if (s.modal === 'wallet' || s.modal === 'addcoins') return overlay([
@@ -3065,7 +3161,8 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 20, color: '#f2b544', marginBottom: 4 } }, 'JOIN FANTASY MMAdness'),
       React.createElement('div', { key: 's', style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 8 } }, 'Free to play. Real prizes.'),
       React.createElement('div', { key: 'bonus', style: { fontSize: 11, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '8px 10px', marginBottom: 14 } }, '🎁 Sign up now — get 500 FM coins free to make your first picks'),
-      React.createElement('input', { key: 'e', placeholder: 'Email address', style: { width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
+      React.createElement('input', { key: 'n', value: s.joinDraft.name, onChange: (event) => this.setState((state) => ({ joinDraft: { ...state.joinDraft, name: event.target.value } })), placeholder: 'Player name', style: { boxSizing: 'border-box', width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
+      React.createElement('input', { key: 'e', value: s.joinDraft.email, onChange: (event) => this.setState((state) => ({ joinDraft: { ...state.joinDraft, email: event.target.value } })), placeholder: 'Email address', type: 'email', style: { boxSizing: 'border-box', width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
       React.createElement('input', { key: 'p', type: 'password', placeholder: 'Create password', style: { width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 14, fontFamily: "'Rajdhani',sans-serif" } }),
       React.createElement('div', { key: 'b', onClick: this.joinNow, style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 900, fontSize: 14, cursor: 'pointer' } }, 'JOIN NOW »')
     ]);

@@ -93,6 +93,10 @@
     display: none !important;
   }
 
+  body:has(.fm-cart-page) .header.theme-header {
+    display: none !important;
+  }
+
   .fmm-exact-desktop-only {
     display: none !important;
   }
