@@ -6,9 +6,6 @@ import {
   FaBolt,
   FaChevronRight,
   FaHome,
-  FaLayerGroup,
-  FaShieldAlt,
-  FaTrophy,
 } from 'react-icons/fa';
 
 const BACKGROUNDS = {
@@ -261,11 +258,6 @@ const RouteExperienceFrame = ({ pathname, children }) => {
     : isAffiliateAuthenticated
       ? { href: '/AffiliateDashboard', label: 'Affiliate dashboard' }
       : { href: '/auth?mode=signup&role=player', label: 'Join free' };
-  const proof = meta.group === 'affiliate'
-    ? [['Creator ready', 'League and promotion tools'], ['Audience first', 'Community-led fight cards'], ['Existing flows', 'Production APIs preserved']]
-    : meta.group === 'community'
-      ? [['Live discussion', 'Fight-night conversation'], ['Built for fans', 'Prediction-focused topics'], ['Clear standards', 'Moderated community space']]
-      : [['Fight-night UI', 'Homepage design language'], ['Responsive', 'Desktop through mobile'], ['Production connected', 'Existing workflows retained']];
 
   return (
     <div
@@ -290,19 +282,6 @@ const RouteExperienceFrame = ({ pathname, children }) => {
             </div>
           </div>
 
-          <aside className="route-experience-proof" aria-label="Experience highlights">
-            <div className="route-experience-proof-header">
-              <FaLayerGroup aria-hidden="true" />
-              <span>Experience standard</span>
-            </div>
-            {proof.map(([title, copy], index) => (
-              <div className="route-experience-proof-row" key={title}>
-                <span className="route-experience-proof-index">0{index + 1}</span>
-                <div><strong>{title}</strong><small>{copy}</small></div>
-                {index === 0 ? <FaTrophy aria-hidden="true" /> : <FaShieldAlt aria-hidden="true" />}
-              </div>
-            ))}
-          </aside>
         </div>
       </section>
       <section className="route-experience-content">{children}</section>

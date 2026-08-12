@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 
 import {
+  buildPublicApiUrl,
   fetchPublicBlogs,
   fetchPublicHomeSummary,
   fetchPublicLeaderboard,
@@ -28,7 +29,7 @@ const toNumber = (...values) => {
   return null;
 };
 
-export default function FantasyMobileExperience({ initialTab = 'home' }) {
+export default function FantasyMobileExperience({ initialTab = 'home', forceRender = false }) {
   const router = useRouter();
   const user = useSelector(getUser);
   const isStaff = useSelector((state) => Boolean(state?.adminAuth?.isAdminAuthenticated));
@@ -38,6 +39,8 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
     leaderboard: [],
     blogs: [],
     apparel: [],
+    leagues: [],
+    leagueUsers: [],
     stats: {},
   });
 
@@ -50,7 +53,7 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
   }, []);
 
   useEffect(() => {
-    if (!isMobile) return undefined;
+    if (!isMobile && !forceRender) return undefined;
     let active = true;
 
     Promise.allSettled([
@@ -59,12 +62,14 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
       fetchPublicLeaderboard({ limit: 50 }),
       fetchPublicBlogs({ limit: 12 }),
       safeFetchJson('/api/public/apparel-products', { limit: 12 }),
-    ]).then(([fightsResult, summaryResult, leaderboardResult, blogsResult, apparelResult]) => {
+      safeFetchJson('/api/public/leagues', { limit: 30 }),
+    ]).then(([fightsResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult]) => {
       if (!active) return;
       const summary = summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {};
       const leaderboardPayload = leaderboardResult.status === 'fulfilled' ? leaderboardResult.value || {} : {};
       const blogPayload = blogsResult.status === 'fulfilled' ? blogsResult.value || {} : {};
       const apparelPayload = apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {};
+      const leaguePayload = leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {};
       const fights = fightsResult.status === 'fulfilled' && Array.isArray(fightsResult.value)
         ? fightsResult.value
         : Array.isArray(summary.featuredFights)
@@ -80,6 +85,8 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
             : [],
         blogs: Array.isArray(blogPayload.rows) ? blogPayload.rows : [],
         apparel: Array.isArray(apparelPayload.products) ? apparelPayload.products : [],
+        leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : [],
+        leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : [],
         stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : {},
       });
     });
@@ -87,7 +94,7 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
     return () => {
       active = false;
     };
-  }, [isMobile]);
+  }, [forceRender, isMobile]);
 
   const initialCoins = useMemo(
     () => toNumber(user?.tokens, user?.walletTokens, user?.wallet?.balance),
@@ -97,7 +104,7 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
 
   const goToCheckout = ({ amount, price, product = 'fm-coins' } = {}) => {
     const next = `/checkout?product=${encodeURIComponent(product)}${amount ? `&amount=${encodeURIComponent(amount)}` : ''}${price ? `&price=${encodeURIComponent(price)}` : ''}`;
-    router.push(isAuthenticated ? next : `/CreateAccount?next=${encodeURIComponent(next)}`);
+    router.push(next);
   };
 
   const submitPrediction = ({ event } = {}) => {
@@ -110,6 +117,21 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
     return false;
   };
 
+  const joinLeague = async ({ league } = {}) => {
+    const leagueId = String(league?._id || league?.id || '').trim();
+    if (!isAuthenticated) {
+      router.push(`/login?next=${encodeURIComponent('/FantasyLeagues')}`);
+      return false;
+    }
+    if (!leagueId || !user?._id || !user?.email) return false;
+    const response = await fetch(buildPublicApiUrl(`/affiliate/${encodeURIComponent(leagueId)}/join`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user._id, userEmail: user.email }),
+    }).catch(() => null);
+    return Boolean(response?.ok);
+  };
+
   const share = async ({ platform, text } = {}) => {
     const url = typeof window !== 'undefined' ? window.location.href : 'https://www.fantasymmadness.com';
     if (navigator.share) {
@@ -120,7 +142,7 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
     if (platform === 'X') window.open(`https://x.com/intent/post?url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
   };
 
-  if (!isMobile) return null;
+  if (!isMobile && !forceRender) return null;
 
   return (
     <div className="fmm-exact-mobile-portal" data-fmm-mobile-screen={initialTab}>
@@ -133,10 +155,13 @@ export default function FantasyMobileExperience({ initialTab = 'home' }) {
         leaderboard={data.leaderboard}
         blogs={data.blogs}
         apparel={data.apparel}
+        leagues={data.leagues}
+        leagueUsers={data.leagueUsers}
         stats={data.stats}
         onPurchaseCoins={goToCheckout}
         onSubscribe={() => goToCheckout({ product: 'fm-plus' })}
         onSubmitPrediction={submitPrediction}
+        onJoinLeague={joinLeague}
         onJoin={() => router.push('/CreateAccount')}
         onOpenApparel={() => router.push('/apparel')}
         onShare={share}

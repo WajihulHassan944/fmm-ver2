@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { buildPublicApiUrl } from "@/Utils/publicApi";
+import { dateOnlyToLocalDate, getDateOnlyKey } from "@/Utils/dateOnly";
 import {
   FaBell,
   FaBullseye,
@@ -30,7 +31,7 @@ const sportAssets = {
     color: "#ef4444",
     image: `${ASSET_BASE}/sport-boxing.webp`,
     frames: [`${ASSET_BASE}/sport-boxing.webp`, `${ASSET_BASE}/sport-boxing-0.webp`, `${ASSET_BASE}/sport-boxing-1.webp`, `${ASSET_BASE}/sport-boxing-2.webp`],
-    count: "38,245",
+    count: "0",
     href: "/upcomingfights?status=all&category=boxing",
   },
   mma: {
@@ -39,7 +40,7 @@ const sportAssets = {
     color: "#4d8dff",
     image: `${ASSET_BASE}/sport-mma.webp`,
     frames: [`${ASSET_BASE}/sport-mma.webp`, `${ASSET_BASE}/sport-mma-2.webp`, `${ASSET_BASE}/sport-mma-3.webp`],
-    count: "52,221",
+    count: "0",
     href: "/upcomingfights?status=all&category=mma",
   },
   bareknuckle: {
@@ -48,7 +49,7 @@ const sportAssets = {
     color: "#f2b544",
     image: `${ASSET_BASE}/sport-bareknuckle.webp`,
     frames: [`${ASSET_BASE}/sport-bareknuckle.webp`, `${ASSET_BASE}/sport-bareknuckle-0.webp`],
-    count: "12,582",
+    count: "0",
     href: "/upcomingfights?status=all&category=bareknuckle",
   },
   kickboxing: {
@@ -57,7 +58,7 @@ const sportAssets = {
     color: "#22c55e",
     image: `${ASSET_BASE}/sport-kickboxing.webp`,
     frames: [`${ASSET_BASE}/sport-kickboxing.webp`, `${ASSET_BASE}/sport-kickboxing-0.webp`],
-    count: "8,715",
+    count: "0",
     href: "/upcomingfights?status=all&category=kickboxing",
   },
   "pro-wrestling": {
@@ -66,68 +67,10 @@ const sportAssets = {
     color: "#a855f7",
     image: `${ASSET_BASE}/sport-wrestling.webp`,
     frames: [`${ASSET_BASE}/sport-wrestling.webp`, `${ASSET_BASE}/sport-wrestling-4.webp`],
-    count: "16,148",
+    count: "0",
     href: "/pro-wrestling",
   },
 };
-
-const fallbackEvents = [
-  {
-    id: "fallback-2",
-    sport: "boxing",
-    tag: "PREMIER BOXING",
-    tagColor: "#4d8dff",
-    f1: "SPENCE JR.",
-    f2: "TSZYU",
-    date: "AUG 4 · 3D : 18H",
-    prize: "$35,000",
-    image: `${ASSET_BASE}/event-poster-2.webp`,
-  },
-  {
-    id: "fallback-3",
-    sport: "bareknuckle",
-    tag: "BKFC 68",
-    tagColor: "#f2b544",
-    f1: "ALVES",
-    f2: "WARD",
-    date: "AUG 10 · 9D : 18H",
-    prize: "$25,000",
-    image: `${ASSET_BASE}/event-poster-3.webp`,
-  },
-  {
-    id: "fallback-4",
-    sport: "pro-wrestling",
-    tag: "AEW DYNAMITE",
-    tagColor: "#a855f7",
-    f1: "MJF",
-    f2: "ADAM COLE",
-    date: "AUG 17 · 16D : 18H",
-    prize: "$20,000",
-    image: `${ASSET_BASE}/event-poster-1.webp`,
-  },
-  {
-    id: "fallback-5",
-    sport: "mma",
-    tag: "ONE FIGHT NIGHT",
-    tagColor: "#4d8dff",
-    f1: "SUPERLEK",
-    f2: "TAKERU",
-    date: "AUG 25 · 24D : 18H",
-    prize: "$15,000",
-    image: `${ASSET_BASE}/event-poster-5.webp`,
-  },
-  {
-    id: "fallback-6",
-    sport: "kickboxing",
-    tag: "GLORY 92",
-    tagColor: "#22c55e",
-    f1: "ALLAZOV",
-    f2: "PETROSYAN",
-    date: "SEP 5 · 35D : 18H",
-    prize: "$18,000",
-    image: `${ASSET_BASE}/event-poster-6.webp`,
-  },
-];
 
 const fallbackApparelItems = [
   { name: "MMADNESS HOODIE", price: "$49.99", image: `${ASSET_BASE}/ap1.webp` },
@@ -251,20 +194,21 @@ const getFightId = (fight = {}) => fight?._id || fight?.id || fight?.matchId || 
 
 const getFightHref = (fight = {}) => {
   const id = getFightId(fight);
-  if (!id || String(id).startsWith("fallback")) return "/free-demo?start=scorecard&genre=boxing";
+  if (!id || String(id).startsWith("fallback")) return "/upcomingfights";
   const rawSport = String(
     pick(
       fight?.__source,
       fight?.sport,
       fight?.category,
       fight?.fightCategory,
+      fight?.matchCategoryTwo,
       fight?.matchCategory,
       fight?.combatSport,
       fight?.type,
     ),
   ).toLowerCase();
   if (rawSport.includes("wrestl") || rawSport.includes("pro-wrestling")) return `/pro-wrestling/matches/${id}`;
-  return `/fight/${id}`;
+  return `/fight/${id}?play=1`;
 };
 
 const getSportKey = (fight = {}) => {
@@ -273,6 +217,7 @@ const getSportKey = (fight = {}) => {
       fight?.sport,
       fight?.category,
       fight?.fightCategory,
+      fight?.matchCategoryTwo,
       fight?.matchCategory,
       fight?.combatSport,
       fight?.type,
@@ -304,12 +249,13 @@ const getFighterName = (fight = {}, side = "A") => {
       isA ? fight?.fighter1Name : fight?.fighter2Name,
       isA ? fight?.redCornerName : fight?.blueCornerName,
       isA ? fight?.homeFighter : fight?.awayFighter,
+      isA ? fight?.matchFighterA : fight?.matchFighterB,
       isA ? fight?.f1 : fight?.f2,
       fighter?.displayName,
       fighter?.fullName,
       fighter?.name,
       fighter?.firstName && fighter?.lastName ? `${fighter.firstName} ${fighter.lastName}` : "",
-      isA ? "JONES" : "ASPINALL",
+      isA ? "FIGHTER A" : "FIGHTER B",
     ),
   ).toUpperCase();
 };
@@ -327,7 +273,7 @@ const getFighterImage = (fight = {}, side = "A") => {
     fighter?.image,
     fighter?.imageUrl,
     fighter?.avatar,
-    isA ? `${ASSET_BASE}/transparent-featured-left.png` : `${ASSET_BASE}/transparent-featured-right.png`,
+    sportAssets[getSportKey(fight)]?.image || sportAssets.mma.image,
   );
 };
 
@@ -338,6 +284,7 @@ const isDesignFallbackPoster = (value = "") => {
 
 const getExplicitPoster = (fight = {}) => {
   const posterFields = [
+    fight?.fightPosterMobileImage,
     fight?.fightPosterImage,
     fight?.posterImage,
     fight?.poster,
@@ -345,6 +292,7 @@ const getExplicitPoster = (fight = {}) => {
     fight?.eventPoster,
     fight?.homepagePromotion?.posterImage,
     fight?.homepagePromotion?.image,
+    fight?.promotionBackground,
   ];
   const posterSrc = posterFields.find((item) => item && !String(item).startsWith("data:") && !isDesignFallbackPoster(item));
   if (posterSrc) return posterSrc;
@@ -356,48 +304,24 @@ const getExplicitPoster = (fight = {}) => {
   return imageSrc || "";
 };
 
-const getPoster = (fight = {}, index = 0) => {
-  const fallback = fallbackEvents[index % fallbackEvents.length]?.image || `${ASSET_BASE}/event-poster-1.webp`;
-  return getExplicitPoster(fight) || fallback;
-};
-
 const buildUpcomingEvent = (fight = {}, index = 0) => {
   const explicitPoster = getExplicitPoster(fight);
-  const fallback = fallbackEvents[index % fallbackEvents.length];
-
-  // If the backend sends a fight without its own poster, keep the paired design
-  // poster/name/date together. This prevents the visual mismatch where a design
-  // poster for one event appears with another fight's names.
-  if (!explicitPoster && fallback) {
-    const fallbackSport = sportAssets[fallback.sport] || sportAssets.boxing;
-    return {
-      id: getFightId(fight) || fallback.id || `fallback-${index}`,
-      f1: fallback.f1,
-      f2: fallback.f2,
-      tag: fallback.tag || fallbackSport.longLabel,
-      color: fallback.tagColor || fallbackSport.color || "#ef4444",
-      date: fallback.date,
-      prize: fallback.prize,
-      image: fallback.image,
-      href: "/upcomingfights",
-    };
-  }
-
   const key = getSportKey(fight);
   return {
     id: getFightId(fight) || `fallback-${index}`,
     f1: getFighterName(fight, "A"),
     f2: getFighterName(fight, "B"),
     tag: cleanText(pick(fight?.tag, fight?.league, fight?.promotion, sportAssets[key]?.longLabel), sportAssets[key]?.longLabel).toUpperCase(),
-    color: sportAssets[key]?.color || fallback?.tagColor || "#ef4444",
-    date: getDateLabel(fight, fallback?.date),
-    prize: getPrize(fight, fallback?.prize),
-    image: explicitPoster || fallback?.image || `${ASSET_BASE}/event-poster-1.webp`,
+    color: sportAssets[key]?.color || "#ef4444",
+    date: getDateLabel(fight),
+    prize: getPrize(fight),
+    image: explicitPoster || getFighterImage(fight, "A") || getFighterImage(fight, "B") || sportAssets[key]?.image || sportAssets.mma.image,
+    fallbackImage: sportAssets[key]?.image || sportAssets.mma.image,
     href: getFightHref(fight),
   };
 };
 
-const getPrize = (fight = {}, fallback = "$100,000") => {
+const getPrize = (fight = {}, fallback = "PRIZE TERMS PENDING") => {
   const raw = pick(fight?.prizePool, fight?.prize, fight?.winningAmount, fight?.cashPrize, fight?.currentPot, fight?.pot);
   if (!raw) return fallback;
   const numeric = numberFrom(raw);
@@ -410,19 +334,20 @@ const getEntry = (fight = {}) => {
   const raw = pick(fight?.entryFee, fight?.fee, fight?.entryCost, fight?.cost, fight?.matchTokens, fight?.tokensRequired);
   const numeric = numberFrom(raw);
   if (numeric > 0) return `${numeric.toLocaleString()} FM`;
-  return "100 FM";
+  return "FREE";
 };
 
 const getEntries = (fight = {}) => {
   const predictions = Array.isArray(fight?.userPredictions) ? fight.userPredictions.length : 0;
-  return numberFrom(fight?.entries, fight?.playerCount, fight?.players, predictions);
+  return numberFrom(fight?.entryCount, fight?.entries, fight?.playerCount, fight?.players, predictions);
 };
 
 const getDateLabel = (fight = {}, fallback = "TBA · LIVE NOW") => {
-  const raw = pick(fight?.date, fight?.matchDate, fight?.startDate, fight?.scheduledAt, fight?.eventDate, fight?.iso);
+  const raw = pick(fight?.matchDateKey, fight?.eventDateKey, fight?.date, fight?.matchDate, fight?.startDate, fight?.scheduledAt, fight?.eventDate, fight?.iso);
   if (!raw) return fallback;
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return String(raw);
+  const dateKey = getDateOnlyKey(raw);
+  const date = dateOnlyToLocalDate(dateKey, fight?.matchTime || fight?.time || "23:59");
+  if (!date || Number.isNaN(date.getTime())) return String(raw);
   const now = new Date();
   const diffMs = date.getTime() - now.getTime();
   const days = Math.max(0, Math.floor(diffMs / 86400000));
@@ -432,7 +357,7 @@ const getDateLabel = (fight = {}, fallback = "TBA · LIVE NOW") => {
 };
 
 const getShortDate = (fight = {}) => {
-  const label = getDateLabel(fight, "JUL 12");
+  const label = getDateLabel(fight, "DATE TBA");
   return label.split("·")[0].trim();
 };
 const parseFinalMonthDayTextDate = (text = "") => {
@@ -559,12 +484,12 @@ const FinalHomeV35 = ({
   const resolvedTokenBalance = numberFrom(currentUser?.tokens, currentUser?.walletTokens, currentUser?.wallet?.balance);
   // Match the standalone design wallet and use one balance value everywhere.
   // A missing/zero anonymous balance falls back to the same demo value shown in the wallet section.
-  const tokenBalance = resolvedTokenBalance > 0 ? resolvedTokenBalance : 2450;
-  const notificationCount = isLoggedIn ? Math.max(1, numberFrom(currentUser?.notificationsUnread, currentUser?.unreadNotifications) || 3) : 3;
-  const playerLevel = Math.max(1, numberFrom(currentUser?.fightIqLevel, currentUser?.level) || 18);
-  const xpValue = numberFrom(currentUser?.xp, currentUser?.totalXp) || 2450;
-  const xpTarget = Math.max(3000, Math.ceil(xpValue / 1000) * 1000);
-  const xpPct = Math.min(96, Math.max(12, Math.round((xpValue / xpTarget) * 100)));
+  const tokenBalance = resolvedTokenBalance > 0 ? resolvedTokenBalance : 0;
+  const notificationCount = isLoggedIn ? numberFrom(currentUser?.notificationsUnread, currentUser?.unreadNotifications) : 0;
+  const playerLevel = Math.max(1, numberFrom(currentUser?.fightIqLevel, currentUser?.level) || 1);
+  const xpValue = numberFrom(currentUser?.xp, currentUser?.totalXp);
+  const xpTarget = Math.max(1000, Math.ceil(Math.max(1, xpValue) / 1000) * 1000);
+  const xpPct = Math.min(100, Math.max(0, Math.round((xpValue / xpTarget) * 100)));
 
   const sports = useMemo(() => {
     const sectionMap = new Map((homeFightSections || []).map((section) => [section.key, section]));
@@ -605,26 +530,14 @@ const FinalHomeV35 = ({
   const featuredFight = realFights[0] || allRealFights[0] || {
     id: "fallback-main",
     sport: "boxing",
-    f1: "XANDER ZAYAS",
-    f2: "JARON BOOTS ENNIS",
-    prize: "$100,000",
-    entryFee: 100,
+    f1: "FIGHTER A",
+    f2: "FIGHTER B",
   };
 
-  // Keep homepage Upcoming Events visually locked to the final design pack.
-  // Live backend fight records can have mismatched title/poster combinations,
-  // which caused the client-reported issue where only the first card matched.
-  const upcomingEvents = fallbackEvents.map((event, index) => ({
-    id: event.id || `design-event-${index}`,
-    f1: event.f1,
-    f2: event.f2,
-    tag: event.tag,
-    color: event.tagColor || sportAssets[event.sport]?.color || "#ef4444",
-    date: event.date,
-    prize: event.prize,
-    image: event.image,
-    href: event.sport === "pro-wrestling" ? "/pro-wrestling" : `/upcomingfights?category=${encodeURIComponent(event.sport || "all")}`,
-  }));
+  const upcomingEvents = allRealFights
+    .filter((fight, index, rows) => rows.findIndex((row) => String(getFightId(row)) === String(getFightId(fight))) === index)
+    .slice(0, 8)
+    .map(buildUpcomingEvent);
 
   const fighterA = getFighterName(featuredFight, "A");
   const fighterB = getFighterName(featuredFight, "B");
@@ -632,15 +545,15 @@ const FinalHomeV35 = ({
   const fighterBFirst = firstName(fighterB);
   const featuredHref = getFightHref(featuredFight);
   const featuredSport = sportAssets[getSportKey(featuredFight)] || sportAssets.boxing;
-  const featuredPrize = getPrize(featuredFight, "$100,000");
+  const featuredPrize = getPrize(featuredFight);
   const featuredEntry = getEntry(featuredFight);
   const featuredEntries = getEntries(featuredFight);
-  const featuredEntriesLabel = featuredEntries > 0 ? featuredEntries.toLocaleString() : "OPEN";
+  const featuredEntriesLabel = featuredEntries > 0 ? featuredEntries.toLocaleString() : "NO ENTRIES YET";
   const predictionHref = featuredHref || "/upcomingfights";
   const watchPartyHref = "/watch-party";
   const leaguesHref = "/FantasyLeagues";
   const demoHref = "/free-demo";
-  const coinCheckoutHref = isLoggedIn ? "/checkout?product=fm-coins" : SIGNUP_HREF;
+  const coinCheckoutHref = "/checkout?product=fm-coins";
 
   const hasRealLeaders = Array.isArray(leaderboardRows) && leaderboardRows.length > 0;
   const leaders = (hasRealLeaders ? leaderboardRows : []).slice(0, 4).map((row, index) => ({
@@ -649,8 +562,14 @@ const FinalHomeV35 = ({
     points: numberFrom(row.points, row.totalPoints, row.score),
   }));
 
-  const communityA = Math.max(48, Math.min(76, Math.round(52 + ((fighterA.length + fighterB.length) % 20))));
-  const communityB = 100 - communityA;
+  const communityA = 50;
+  const communityB = 50;
+  const liveTickerItems = [
+    ["🔥", allRealFights.length ? `${allRealFights.length} published fight card${allRealFights.length === 1 ? "" : "s"} available` : "New fight cards publish here automatically", "#ff6b3b"],
+    ["🥊", "Contest dates, fees and prize terms come from the registered fight", "#f2b544"],
+    ["🏆", leaders.length ? `${leaders.length} ranked predictor${leaders.length === 1 ? "" : "s"} currently shown` : "Leaderboard opens after scored predictions", "#22c55e"],
+    ["⚡", "Fight status and entries refresh from the production feed", "#4d8dff"],
+  ];
 
   return (
     <div className={`fmm-home-v35-final ${coinModalOpen ? "is-coin-modal-open" : ""} ${aiScoutOpen ? "is-ai-scout-open" : ""}`} data-layout={layout}>
@@ -664,7 +583,7 @@ const FinalHomeV35 = ({
           <b>FM</b><strong>{tokenBalance.toLocaleString()}</strong><i><FaPlus /></i>
         </button>
         <Link href={isLoggedIn ? "/profile" : "/login?next=/profile"} className="fmm-v35-notify" aria-label={`Notifications and profile: ${notificationCount} unread`}>
-          <FaBell /><span className="fmm-v42-sr-only">Notifications</span><em>{notificationCount}</em>
+          <FaBell /><span className="fmm-v42-sr-only">Notifications</span>{notificationCount > 0 ? <em>{notificationCount}</em> : null}
         </Link>
       </header>
 
@@ -715,21 +634,7 @@ const FinalHomeV35 = ({
 
         <section className="fmm-v35-ticker" aria-label="Live ticker">
           <div>
-            {[
-              ["🔥", "KO_Beast just won 1,200 FM on UFC 323", "#ff6b3b"],
-              ["🥊", "842 predictors joined today", "#f2b544"],
-              ["🏆", "Prediction_Prof climbed to #3", "#f2b544"],
-              ["⚡", "BKFC 68 entries closing in 16 days", "#4d8dff"],
-              ["💰", "$12,450 paid out today", "#22c55e"],
-              ["🎯", "76% picking Jones to win", "#a855f7"],
-            ].concat([
-              ["🔥", "KO_Beast just won 1,200 FM on UFC 323", "#ff6b3b"],
-              ["🥊", "842 predictors joined today", "#f2b544"],
-              ["🏆", "Prediction_Prof climbed to #3", "#f2b544"],
-              ["⚡", "BKFC 68 entries closing in 16 days", "#4d8dff"],
-              ["💰", "$12,450 paid out today", "#22c55e"],
-              ["🎯", "76% picking Jones to win", "#a855f7"],
-            ]).map(([icon, copy, color], index) => (
+            {liveTickerItems.concat(liveTickerItems).map(([icon, copy, color], index) => (
               <span key={`${copy}-${index}`} style={{ "--ticker-color": color }}><b>{icon}</b>{copy}</span>
             ))}
           </div>
@@ -785,11 +690,11 @@ const FinalHomeV35 = ({
         <section className="fmm-v35-upcoming" aria-labelledby="fmm-v35-upcoming-title">
           <div className="fmm-v35-heading-row"><h2 id="fmm-v35-upcoming-title">UPCOMING EVENTS</h2><Link href="/upcomingfights">VIEW ALL ›</Link></div>
           <div className="fmm-v35-event-rail">
-            {upcomingEvents.map((event, index) => (
+            {upcomingEvents.length ? upcomingEvents.map((event, index) => (
               <article key={event.id} style={{ "--event-color": event.color }}>
                 <Link href={event.href}>
                   <figure>
-                    <img src={event.image} alt="" onError={(error) => { error.currentTarget.onerror = null; error.currentTarget.src = fallbackEvents[index % fallbackEvents.length]?.image || `${ASSET_BASE}/event-poster-1.webp`; }} />
+                    <img src={event.image} alt="" onError={(error) => { error.currentTarget.onerror = null; error.currentTarget.src = event.fallbackImage || sportAssets.mma.image; }} />
                     <figcaption>{event.tag}</figcaption>
                   </figure>
                   <h3>{event.f1} <em>VS</em> {event.f2}</h3>
@@ -799,19 +704,19 @@ const FinalHomeV35 = ({
                 <div><Link href={event.href}>⚡ {firstName(event.f1)}</Link><Link href={event.href}>⚡ {firstName(event.f2)}</Link></div>
                 <Link href={event.href} className="fmm-v35-enter">ENTER NOW</Link>
               </article>
-            ))}
+            )) : <div className="fmm-v41-leader-empty"><span>New fight cards will appear here as soon as they are published.</span></div>}
           </div>
         </section>
 
         <section className="fmm-v35-feature-detail" aria-labelledby="fmm-v35-detail-title">
           <img className="fmm-v35-detail-bg" src={`${ASSET_BASE}/pasted-1785011607947-0.png`} alt="" aria-hidden="true" />
-          <img className="fmm-v35-detail-fighter is-left" src={`${ASSET_BASE}/transparent-fd-jones.png`} alt="" />
-          <img className="fmm-v35-detail-fighter is-right" src={`${ASSET_BASE}/transparent-fd-aspinall.png`} alt="" />
+          <img className="fmm-v35-detail-fighter is-left" src={getFighterImage(featuredFight, "A")} alt="" />
+          <img className="fmm-v35-detail-fighter is-right" src={getFighterImage(featuredFight, "B")} alt="" />
           <div className="fmm-v35-detail-copy">
-            <span>FEATURED FIGHT · HEAVYWEIGHT BOUT</span>
-            <h2 id="fmm-v35-detail-title">JONES <em>VS</em> ASPINALL</h2>
-            <div className="fmm-v35-detail-meta"><b>JUL 12</b><b>10:00 PM ET</b><b>T-MOBILE ARENA</b></div>
-            <div className="fmm-v35-detail-money"><p><small>CASH PRIZE POOL</small><strong>$100,000</strong></p><p><small>FM ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
+            <span>FEATURED FIGHT · {featuredSport.longLabel}</span>
+            <h2 id="fmm-v35-detail-title">{fighterA} <em>VS</em> {fighterB}</h2>
+            <div className="fmm-v35-detail-meta"><b>{getShortDate(featuredFight)}</b><b>{cleanText(featuredFight?.matchTime || featuredFight?.time || "TIME TBA")}</b><b>{cleanText(featuredFight?.venue || "VENUE TBA")}</b></div>
+            <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong>{featuredPrize}</strong></p><p><small>FM ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
             <Link href={predictionHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
           </div>
@@ -831,7 +736,7 @@ const FinalHomeV35 = ({
           </article>
           <article className="fmm-v35-dash-card fmm-v35-progress">
             <img src={`${ASSET_BASE}/pasted-1785013690779-0.png`} alt="" />
-            <div><span>YOUR PROGRESSION</span><i>{playerLevel}</i><small>FIGHT IQ</small><strong>{xpValue.toLocaleString()} XP</strong><em><b style={{ width: `${xpPct}%` }} /></em><p>NEXT LEVEL: {xpTarget.toLocaleString()} XP</p><u>♛ LEGEND · LEVEL {Math.max(playerLevel, 18)}</u></div>
+            <div><span>YOUR PROGRESSION</span><i>{playerLevel}</i><small>FIGHT IQ</small><strong>{xpValue.toLocaleString()} XP</strong><em><b style={{ width: `${xpPct}%` }} /></em><p>NEXT LEVEL: {xpTarget.toLocaleString()} XP</p><u>♛ FIGHT IQ · LEVEL {playerLevel}</u></div>
           </article>
           <Link href="/leaderboard" className="fmm-v35-dash-card fmm-v35-leader">
             <img src={`${ASSET_BASE}/pasted-1785012542538-0.png`} alt="" />
@@ -880,18 +785,18 @@ const FinalHomeV35 = ({
               <span>🤖</span>
               <div>
                 <h2 id="fmm-v39-ai-title">AI SCOUTING ASSISTANT</h2>
-                <p>JONES vs ASPINALL · UFC 323</p>
+                <p>{fighterA} vs {fighterB} · {cleanText(featuredFight?.matchName || featuredFight?.eventName || featuredSport.longLabel)}</p>
               </div>
             </header>
             <blockquote>
-              “Aspinall’s takedown defense has improved 22% since his last title bout, but Jones lands 3.4 more significant strikes per round historically. Fights that go past round 2 favor the underdog here.”
+              Verified scouting metrics are not published for this contest yet. The assistant will show sourced matchup data here when it is available.
             </blockquote>
             <div className="fmm-v39-ai-stats">
-              <article><strong>64%</strong><span>PICKED JONES</span></article>
-              <article><strong>36%</strong><span>PICKED ASPINALL</span></article>
-              <article><strong>+2X</strong><span>UNDERDOG BONUS</span></article>
+              <article><strong>{getShortDate(featuredFight)}</strong><span>FIGHT DATE</span></article>
+              <article><strong>{featuredFight?.maxRounds || "TBA"}</strong><span>ROUNDS</span></article>
+              <article><strong>{featuredEntries > 0 ? featuredEntries.toLocaleString() : "—"}</strong><span>ENTRIES</span></article>
             </div>
-            <p className="fmm-v39-ai-note">💡 Users who followed this insight went 3-1 last event</p>
+            <p className="fmm-v39-ai-note">💡 No inferred or promotional statistics are substituted for missing fight data.</p>
             <Link href={predictionHref} className="fmm-v39-ai-cta" onClick={() => setAiScoutOpen(false)}>USE THIS INSIGHT — MAKE MY PICK</Link>
           </section>
         </div>
@@ -910,7 +815,7 @@ const FinalHomeV35 = ({
               ["1,000 FM", "$0.99", "Starter"],
               ["5,000 FM", "$3.99", "Most Popular"],
               ["15,000 FM", "$9.99", "Power Pack"],
-            ].map(([amount, price, label]) => <Link href={coinCheckoutHref} key={amount}><small>{label}</small><strong>{amount}</strong><b>{price}</b></Link>)}</div>
+            ].map(([amount, price, label]) => <Link href={`${coinCheckoutHref}&amount=${encodeURIComponent(amount.replace(/[^0-9]/g, ""))}`} key={amount}><small>{label}</small><strong>{amount}</strong><b>{price}</b></Link>)}</div>
           </section>
         </div>
       )}

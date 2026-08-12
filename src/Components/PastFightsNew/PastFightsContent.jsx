@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
 import { FaSearch } from 'react-icons/fa';
+import { formatDateOnly, getDateOnlyKey } from '@/Utils/dateOnly';
 
 const PastFightsContent = ({ matches }) => {
   const router = useRouter();
@@ -31,7 +32,7 @@ const PastFightsContent = ({ matches }) => {
 
     const filtered = matches
       .map((match) => {
-        const matchDate = match.matchDate?.split('T')[0];
+        const matchDate = match.matchDateKey || getDateOnlyKey(match.matchDate);
         const matchDateTime = new Date(`${matchDate}T${match.matchTime}:00`);
         if (matchDateTime < currentTime) {
           return { ...match, matchDate };
@@ -107,7 +108,7 @@ const PastFightsContent = ({ matches }) => {
               <div className="fight-date">
                 <span className="date">{fight.matchDate?.split('-')[2]}</span>
                 <span className="month">
-                  {new Date(fight.matchDate).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
+                  {formatDateOnly(fight.matchDate, { month: 'short' }).split(' ')[0].toUpperCase()}
                 </span>
               </div>
               <div className="fight-info">
@@ -128,7 +129,7 @@ const PastFightsContent = ({ matches }) => {
               <div className="fight-date">
                 <span className="date">{fight.matchDate?.split('-')[2]}</span>
                 <span className="month">
-                  {new Date(fight.matchDate).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
+                  {formatDateOnly(fight.matchDate, { month: 'short' }).split(' ')[0].toUpperCase()}
                 </span>
               </div>
               <div className="fight-info">

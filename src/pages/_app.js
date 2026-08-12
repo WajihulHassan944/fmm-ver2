@@ -215,6 +215,17 @@ const MOBILE_APP_ROUTE_TABS = {
 };
 
 const EXACT_MOBILE_QUERY = "(max-width: 767px)";
+const FULLSCREEN_PROTOTYPE_ROUTES = new Set([
+  "/leaderboard",
+  "/global-leaderboard",
+  "/FantasyLeagues",
+  "/watch-party",
+]);
+const IMMERSIVE_ROUTES = new Set([
+  ...FULLSCREEN_PROTOTYPE_ROUTES,
+  "/contact",
+  "/checkout",
+]);
 
 function App({ Component, ...rest }) {
   const { store, props } = wrapper.useWrappedStore(rest); // Wrapped store for SSR
@@ -281,13 +292,15 @@ function AppContent({ children }) {
   // The homepage still needs the normal desktop/laptop navbar, while CSS hides
   // it on phone so the standalone mobile app topbar remains clean.
   const hideLayout = isAdministrationRoute || isStandaloneDemoRoute;
-  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute;
+  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
   );
   const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
-  const renderLegacyExperience = !exactMobileTab || !isExactMobile;
+  const forcePrototypeExperience = FULLSCREEN_PROTOTYPE_ROUTES.has(router.pathname);
+  const renderPrototypeExperience = Boolean(exactMobileTab && (isExactMobile || forcePrototypeExperience));
+  const renderLegacyExperience = !renderPrototypeExperience;
   const mainClassName = isAdministrationRoute
     ? isAdminLoginRoute
       ? "admin-login-main"
@@ -471,7 +484,7 @@ function AppContent({ children }) {
       {renderLegacyExperience && !hideLayout && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
       {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
-      {exactMobileTab && <FantasyMobileExperience initialTab={exactMobileTab} />}
+      {renderPrototypeExperience && <FantasyMobileExperience initialTab={exactMobileTab} forceRender={forcePrototypeExperience} />}
 
       {renderLegacyExperience && <main className={mainClassName}>
         {useRouteExperienceFrame ? (

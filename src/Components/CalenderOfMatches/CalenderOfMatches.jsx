@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { buildPublicApiUrl, fetchPublicFightCalendar } from '@/Utils/publicApi';
+import { getDateOnlyKey } from '@/Utils/dateOnly';
 import Calendar from 'react-calendar';
 import {
   FaArrowLeft,
@@ -17,10 +18,7 @@ import {
 } from 'react-icons/fa';
 
 const formatDateKey = (value) => {
-  if (!value && !(value instanceof Date)) return '';
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().split('T')[0];
+  return getDateOnlyKey(value);
 };
 
 const formatTime = (value) => {

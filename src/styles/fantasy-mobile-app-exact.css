@@ -13,6 +13,9 @@
 .fmm-exact-mobile-portal > div {
   width: 100%;
   height: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  box-shadow: 0 0 80px rgba(77, 141, 255, 0.14), 0 0 120px rgba(239, 68, 68, 0.1);
 }
 
 @media (max-width: 767px) {
@@ -23,6 +26,12 @@
 
   .fmm-exact-desktop-only {
     display: none !important;
+  }
+
+  .fmm-exact-mobile-portal > div {
+    max-width: none;
+    margin: 0;
+    box-shadow: none;
   }
 }
 

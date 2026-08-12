@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import {
   FaArrowRight,
   FaBolt,
@@ -18,50 +19,11 @@ import { useSelector } from 'react-redux';
 import Login from '@/Components/Login/Login';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 
-const FALLBACK_USERS = [
-  { _id: 'league-user-1', firstName: 'KO', lastName: 'Beast', playerName: 'KO_Beast', profileUrl: '/images/fmm-experience/fighter-jadden-addison.webp' },
-  { _id: 'league-user-2', firstName: 'Fight', lastName: 'Wizard', playerName: 'FightWizard', profileUrl: '/images/fmm-experience/fighter-zaveer-davis.webp' },
-  { _id: 'league-user-3', firstName: 'Champ', lastName: 'Mind', playerName: 'ChampMind', profileUrl: '/images/fmm-experience/fighter-conor-benn.webp' },
-  { _id: 'league-user-4', firstName: 'Kelly', lastName: 'D', playerName: 'KellyD', profileUrl: '/images/fmm-experience/fighter-chris-eubank-jr.webp' },
-  { _id: 'league-user-5', firstName: 'The', lastName: 'Ghost', playerName: 'TheGhost', profileUrl: '/images/fmm-experience/fighter-anthony-yarde.webp' },
-];
-
-const FALLBACK_LEAGUES = [
-  {
-    _id: 'league-boxing-main-event',
-    firstName: 'Main Event',
-    lastName: 'Boxing Room',
-    playerName: 'Main Event Boxing League',
-    profileUrl: '/images/mobile-home/categories/fmm-category-boxing-reference-v2.png',
-    rewardTitle: 'Weekly boxing leaderboard rewards',
-    usersJoined: FALLBACK_USERS.slice(0, 4).map((member) => ({ userId: member._id })),
-  },
-  {
-    _id: 'league-mma-sharp-picks',
-    firstName: 'MMA',
-    lastName: 'Sharp Picks',
-    playerName: 'MMA Sharp Picks League',
-    profileUrl: '/images/mobile-home/categories/fmm-category-mma-reference-v2.png',
-    rewardTitle: 'Top predictor badge',
-    usersJoined: FALLBACK_USERS.slice(1, 5).map((member) => ({ userId: member._id })),
-  },
-  {
-    _id: 'league-bare-knuckle',
-    firstName: 'Bare Knuckle',
-    lastName: 'Fight Room',
-    playerName: 'Bare Knuckle Fight Room',
-    profileUrl: '/images/mobile-home/categories/fmm-category-bare-knuckle-reference-v2.png',
-    rewardTitle: 'Creator challenge rewards',
-    usersJoined: FALLBACK_USERS.slice(0, 3).map((member) => ({ userId: member._id })),
-  },
-];
-
 const FantasyLeagues = () => {
-  const [affiliates, setAffiliates] = useState(FALLBACK_LEAGUES);
-  const [users, setUsers] = useState(FALLBACK_USERS);
+  const [affiliates, setAffiliates] = useState([]);
+  const [users, setUsers] = useState([]);
   const [openCardIds, setOpenCardIds] = useState({});
   const [redirectToLogin, setRedirectToLogin] = useState(false);
   const [pendingAffiliateJoin, setPendingAffiliateJoin] = useState(null);
@@ -85,18 +47,13 @@ const FantasyLeagues = () => {
       const leagueRows = safeArray(payload?.leagues || payload?.affiliates || payload?.data || payload);
       const userRows = safeArray(payload?.users);
 
-      if (leagueRows.length) {
-        setAffiliates(leagueRows);
-        setUsers(userRows.length ? userRows : FALLBACK_USERS);
-      } else {
-        setAffiliates(FALLBACK_LEAGUES);
-        setUsers(FALLBACK_USERS);
-      }
+      setAffiliates(leagueRows);
+      setUsers(userRows);
     } catch (error) {
       console.error('Failed to fetch league data:', error);
-      setAffiliates(FALLBACK_LEAGUES);
-      setUsers(FALLBACK_USERS);
-      setLoadError('');
+      setAffiliates([]);
+      setUsers([]);
+      setLoadError('League directory could not be loaded. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -148,15 +105,6 @@ const FantasyLeagues = () => {
     );
   };
 
-  useEffect(() => {
-    if (isAuthenticated && user?._id && pendingAffiliateJoin) {
-      handleJoinLeague(pendingAffiliateJoin);
-      setPendingAffiliateJoin(null);
-    }
-    // handleJoinLeague intentionally uses current authenticated user data.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user?._id, pendingAffiliateJoin]);
-
   const handleLoginSuccess = () => {
     setRedirectToLogin(false);
   };
@@ -171,7 +119,7 @@ const FantasyLeagues = () => {
     handleJoinLeague(affiliate);
   };
 
-  const handleJoinLeague = async (affiliate) => {
+  async function handleJoinLeague(affiliate) {
     const userId = user?._id;
     const userEmail = user?.email;
 
@@ -183,7 +131,7 @@ const FantasyLeagues = () => {
     setJoiningId(affiliate._id);
 
     try {
-      const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/join`, {
+      const response = await fetch(buildPublicApiUrl(`/affiliate/${affiliate._id}/join`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, userEmail }),
@@ -191,7 +139,7 @@ const FantasyLeagues = () => {
 
       if (response.ok) {
         alert('Successfully joined the league');
-        const updatedRes = await fetch(`${API_BASE}/affiliates`);
+        const updatedRes = await fetch(buildPublicApiUrl('/affiliates'));
         const updatedAffiliates = await updatedRes.json();
         setAffiliates(safeArray(updatedAffiliates));
       } else {
@@ -203,7 +151,16 @@ const FantasyLeagues = () => {
     } finally {
       setJoiningId(null);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (isAuthenticated && user?._id && pendingAffiliateJoin) {
+      handleJoinLeague(pendingAffiliateJoin);
+      setPendingAffiliateJoin(null);
+    }
+    // handleJoinLeague intentionally uses current authenticated user data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user?._id, pendingAffiliateJoin]);
 
   if (redirectToLogin) {
     return <Login onSuccess={handleLoginSuccess} />;
@@ -231,7 +188,7 @@ const FantasyLeagues = () => {
               </p>
               <div className={styles.heroActions}>
                 <a href="#league-directory" className={styles.primaryAction}>Explore leagues <FaArrowRight /></a>
-                <a href="/myLeagueRecords" className={styles.secondaryAction}>My league records</a>
+                <Link href="/myLeagueRecords" className={styles.secondaryAction}>My league records</Link>
               </div>
             </div>
 
@@ -383,9 +340,9 @@ const FantasyLeagues = () => {
             ) : (
               <section className={styles.emptyState}>
                 <FaSearch />
-                <h3>No leagues match that search</h3>
-                <p>Clear the search field to see the complete directory.</p>
-                <button type="button" onClick={() => setQuery('')}>Clear search</button>
+                <h3>{query ? 'No leagues match that search' : 'No public leagues yet'}</h3>
+                <p>{query ? 'Clear the search field to see the complete directory.' : 'The live directory will update when a creator publishes the first league.'}</p>
+                {query ? <button type="button" onClick={() => setQuery('')}>Clear search</button> : null}
               </section>
             )}
           </div>

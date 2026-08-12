@@ -46,7 +46,7 @@ const GlobalLeaderboard = ({ initialLeaderboardData = null }) => {
 
   const podium = rows.slice(0, 3);
   const currentRank = rows.find((player) => String(getPlayerId(player)) === String(currentUser?._id || currentUser?.id))?.rank;
-  const leadingScore = rows[0]?.points || 0;
+  const leadingScore = rows[0]?.points;
 
   return (
     <>
@@ -66,9 +66,9 @@ const GlobalLeaderboard = ({ initialLeaderboardData = null }) => {
             { href: '/guides', label: 'Review scoring', variant: 'secondary' },
           ]}
           stats={[
-            { value: playerCount || rows.length, label: 'Ranked players', icon: FaUsers },
-            { value: leadingScore.toLocaleString(), label: 'Leading points', icon: FaTrophy },
-            { value: currentRank ? `#${currentRank}` : '—', label: 'Your rank', icon: FaChartLine },
+            { value: (playerCount || rows.length) > 0 ? (playerCount || rows.length).toLocaleString() : 'Awaiting scores', label: 'Ranked players', icon: FaUsers },
+            { value: Number.isFinite(leadingScore) ? leadingScore.toLocaleString() : 'Not ranked yet', label: 'Leading points', icon: FaTrophy },
+            { value: currentRank ? `#${currentRank}` : 'Not ranked yet', label: 'Your rank', icon: FaChartLine },
           ]}
         >
           <div className="xp-podium-card">

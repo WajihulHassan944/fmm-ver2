@@ -1,3 +1,5 @@
+import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
+
 export const FMM_ASSET_BASE = '/images/fmm-experience';
 
 const GENERIC_FIGHTER_FALLBACKS = {
@@ -107,12 +109,12 @@ const normalizeTime = (value) => {
 };
 
 export const parseFightDate = (match) => {
-  const raw = match?.matchDate || match?.date || match?.scheduledAt || match?.startDate;
+  const raw = match?.matchDateKey || match?.eventDateKey || match?.matchDate || match?.date || match?.scheduledAt || match?.startDate;
   if (!raw) return null;
-  const dateOnly = String(raw).split('T')[0];
+  const dateOnly = getDateOnlyKey(raw);
   const time = normalizeTime(match?.matchTime || match?.time || (String(raw).includes('T') ? String(raw).split('T')[1] : ''));
-  const parsed = new Date(`${dateOnly}T${time}:00`);
-  if (!Number.isNaN(parsed.getTime())) return parsed;
+  const parsed = dateOnlyToLocalDate(dateOnly, time);
+  if (parsed && !Number.isNaN(parsed.getTime())) return parsed;
   const fallback = new Date(raw);
   return Number.isNaN(fallback.getTime()) ? null : fallback;
 };
@@ -236,7 +238,7 @@ export const getPublicFightDuplicateKey = (match = {}) => {
     return normalizeFightKeyPart(getFightId(match)) || normalizeFightKeyPart(match?.matchName);
   }
   const orderedPair = [fighterA, fighterB].sort().join('::');
-  const rawDate = String(match?.matchDate || match?.date || match?.scheduledAt || '').split('T')[0];
+  const rawDate = getDateOnlyKey(match?.matchDateKey || match?.eventDateKey || match?.matchDate || match?.date || match?.scheduledAt || '');
   const datePart = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : '';
   return [
     orderedPair,
