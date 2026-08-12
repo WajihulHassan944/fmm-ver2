@@ -5,11 +5,14 @@ import { useSelector } from 'react-redux';
 import {
   buildPublicApiUrl,
   fetchPublicBlogs,
+  fetchPublicFights,
   fetchPublicHomeSummary,
   fetchPublicLeaderboard,
   fetchPublicPredictionFights,
+  fetchPromotedHomeFights,
   safeFetchJson,
 } from '@/Utils/publicApi';
+import { dedupePublicFights, getFightId, getPublicFightDuplicateKey, sortFights } from '@/Utils/fightExperience';
 import FantasyMobileAppCore from './FantasyMobileAppCore';
 
 const MOBILE_QUERY = '(max-width: 767px)';
@@ -57,24 +60,71 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     let active = true;
 
     Promise.allSettled([
-      fetchPublicPredictionFights({ limit: 100, status: 'upcoming', noCache: 'true' }),
+      fetchPublicPredictionFights({ limit: 300, status: 'upcoming', noCache: 'true' }),
+      fetchPublicPredictionFights({ limit: 300, noCache: 'true' }),
+      fetchPublicFights({ limit: 300, noCache: 'true' }),
+      fetchPromotedHomeFights({ limit: 24, noCache: 'true' }),
       fetchPublicHomeSummary({ fightLimit: 24, leaderboardLimit: 20, noCache: 'true' }),
       fetchPublicLeaderboard({ limit: 50 }),
       fetchPublicBlogs({ limit: 12 }),
       safeFetchJson('/api/public/apparel-products', { limit: 12 }),
       safeFetchJson('/api/public/leagues', { limit: 30 }),
-    ]).then(([fightsResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult]) => {
+    ]).then(([upcomingResult, playableResult, publicResult, promotedResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult]) => {
       if (!active) return;
+      const upcomingRows = upcomingResult.status === 'fulfilled' && Array.isArray(upcomingResult.value) ? upcomingResult.value : [];
+      const playableRows = playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [];
+      const publicRows = publicResult.status === 'fulfilled' && Array.isArray(publicResult.value) ? publicResult.value : [];
+      const promotedRows = promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [];
       const summary = summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {};
       const leaderboardPayload = leaderboardResult.status === 'fulfilled' ? leaderboardResult.value || {} : {};
       const blogPayload = blogsResult.status === 'fulfilled' ? blogsResult.value || {} : {};
       const apparelPayload = apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {};
       const leaguePayload = leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {};
-      const fights = fightsResult.status === 'fulfilled' && Array.isArray(fightsResult.value)
-        ? fightsResult.value
-        : Array.isArray(summary.featuredFights)
-          ? summary.featuredFights
-          : [];
+      const summaryRows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
+      const predictionRows = [...upcomingRows, ...playableRows];
+      const predictionByKey = new Map();
+      predictionRows.forEach((fight) => {
+        [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
+          .filter(Boolean)
+          .forEach((key) => {
+            if (!predictionByKey.has(key)) predictionByKey.set(key, fight);
+          });
+      });
+      const playableKeys = new Set(predictionRows.flatMap((fight) => [
+        String(getFightId(fight) || '').trim(),
+        getPublicFightDuplicateKey(fight),
+      ]).filter(Boolean));
+      const promotedKeys = new Set(promotedRows.flatMap((fight) => [
+        String(getFightId(fight) || '').trim(),
+        getPublicFightDuplicateKey(fight),
+      ]).filter(Boolean));
+      const fights = sortFights(dedupePublicFights([
+        ...promotedRows,
+        ...predictionRows,
+        ...summaryRows,
+        ...publicRows,
+      ]), 'asc')
+        .map((fight) => {
+          const keys = [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean);
+          const predictionFight = keys.map((key) => predictionByKey.get(key)).find(Boolean);
+          const mergedFight = predictionFight ? {
+            ...fight,
+            ...predictionFight,
+            homepagePromotion: predictionFight.homepagePromotion || fight.homepagePromotion,
+            fightPosterMobileImage: predictionFight.fightPosterMobileImage || fight.fightPosterMobileImage,
+            fightPosterImage: predictionFight.fightPosterImage || fight.fightPosterImage,
+            posterImage: predictionFight.posterImage || fight.posterImage,
+            matchPosterImage: predictionFight.matchPosterImage || fight.matchPosterImage,
+            bannerImage: predictionFight.bannerImage || fight.bannerImage,
+            promotionBackground: predictionFight.promotionBackground || fight.promotionBackground,
+          } : fight;
+          return {
+            ...mergedFight,
+            __playable: keys.some((key) => playableKeys.has(key)),
+            __homepagePromoted: keys.some((key) => promotedKeys.has(key)),
+          };
+        })
+        .sort((left, right) => Number(Boolean(right.__homepagePromoted)) - Number(Boolean(left.__homepagePromoted)));
 
       setData({
         fights,
@@ -170,6 +220,10 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         onPurchaseCoins={goToCheckout}
         onSubscribe={() => goToCheckout({ product: 'fm-plus' })}
         onSubmitPrediction={submitPrediction}
+        onOpenFight={({ event } = {}) => {
+          const id = String(event?.backendId || event?.id || '').trim();
+          router.push(id ? `/fight/${id}` : '/upcomingfights');
+        }}
         onJoinLeague={joinLeague}
         onJoin={({ name = '', email = '' } = {}) => {
           const query = new URLSearchParams();

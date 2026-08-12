@@ -215,6 +215,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
   return {
     id: cleanText(fight._id, fight.id, fight.matchId, `live-${index}`),
     backendId: cleanText(fight._id, fight.id, fight.matchId),
+    playable: fight.__playable !== false,
+    homepagePromoted: fight.__homepagePromoted === true,
     sport,
     tag: cleanText(fight.eventName, fight.matchName, fight.promotion, sportLabel[sport]),
     tagColor: sportColor[sport],
@@ -609,6 +611,18 @@ class FantasyMobileAppCore extends React.Component {
     const fee = this.getEventEntryFee(event);
     return fee > 0 ? `${fee.toLocaleString()} FM` : 'FREE';
   };
+  getEventActionLabel = (event = {}, includeEntry = false) => {
+    if (!event.playable) return 'VIEW FIGHT DETAILS';
+    return includeEntry ? `MAKE PREDICTIONS — ${this.getEventEntryLabel(event)}` : 'MAKE PREDICTIONS';
+  };
+  openAiScout = (event) => this.openModal('aiScout', event);
+  openEvent = (event) => {
+    if (!event?.playable) {
+      this.props.onOpenFight?.({ event });
+      return;
+    }
+    this.enterEvent(event);
+  };
   submitScorecard = async (ev) => {
     const { winner } = this.state.scorecardDraft;
     const entryFee = this.getEventEntryFee(ev);
@@ -874,16 +888,20 @@ class FantasyMobileAppCore extends React.Component {
   setSport = (id) => this.setState({ activeSport: this.state.activeSport === id ? 'all' : id });
 
   enterEvent = async (ev) => {
+    if (!ev?.playable) {
+      this.props.onOpenFight?.({ event: ev });
+      return;
+    }
+    if (this.props.onSubmitPrediction) {
+      const continueLocally = await this.props.onSubmitPrediction({ type: ev.sport, event: ev });
+      if (continueLocally === false) return;
+    }
     if (this.state.enteredEvents[ev.id]) return;
     const entryFee = this.getEventEntryFee(ev);
     if (this.state.coins < entryFee) {
       this.showToast(`This contest needs ${entryFee.toLocaleString()} FM — add coins to continue`);
       this.openModal('addcoins');
       return;
-    }
-    if (this.props.onSubmitPrediction) {
-      const continueLocally = await this.props.onSubmitPrediction({ type: ev.sport, event: ev });
-      if (continueLocally === false) return;
     }
     if (ev.sport === 'wrestling') { this.openModal('wrestlingScorecard', ev); return; }
     if (ev.sport === 'boxing' || ev.sport === 'bareknuckle') { this.openModal('boxingScorecard', ev); return; }
@@ -1370,7 +1388,7 @@ class FantasyMobileAppCore extends React.Component {
     const glass = { background: 'rgba(255,255,255,.055)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 16, backdropFilter: 'blur(6px)' };
     return React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '0 16px 16px' } },
       React.createElement('div', {
-        onClick: () => featuredEvent ? this.enterEvent(featuredEvent) : this.setTab('contests'),
+        onClick: () => featuredEvent ? this.openEvent(featuredEvent) : this.setTab('contests'),
         style: { ...glass, gridColumn: '1 / 3', padding: 14, cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '1px solid rgba(239,68,68,.4)', animation: 'glowPulse 3s ease-in-out infinite' }
       },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544' } }, '★ FEATURED · ' + (featuredEvent?.tag || 'NEXT FIGHT CARD')),
@@ -1429,9 +1447,10 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('span', null, ev.date), React.createElement('span', null, '⏱ ' + ev.countdown), React.createElement('span', { style: { color: '#22c55e', animation: 'moneyPulse 1.8s ease-in-out infinite' } }, ev.prize)
         ),
         React.createElement('div', {
-          onClick: () => this.enterEvent(ev),
+          role: 'button', tabIndex: 0,
+          onClick: () => this.openEvent(ev),
           style: { textAlign: 'center', padding: '11px 0', borderRadius: 10, fontSize: 13, fontWeight: 900, cursor: 'pointer', background: ev.entered ? 'rgba(34,197,94,.15)' : ev.tagColor, color: ev.entered ? '#22c55e' : '#fff' }
-        }, ev.entered ? 'ENTERED ✓' : `ENTER NOW — ${this.getEventEntryLabel(ev)}`)
+        }, ev.entered ? 'ENTERED ✓' : this.getEventActionLabel(ev, ev.playable))
       ),
       React.createElement('div', { style: { display: 'flex', justifyContent: 'center', gap: 6, padding: '10px 0 16px' } },
         filteredEvents.map((e, idx) => React.createElement('div', {
@@ -2461,7 +2480,7 @@ class FantasyMobileAppCore extends React.Component {
     const entry = this.getEventEntryLabel(event);
     const entryCount = event.entries > 0 ? `${event.entries.toLocaleString()} ENTRIES` : 'NO ENTRIES YET';
     return React.createElement('div', {
-      onClick: () => this.enterEvent(event),
+      onClick: () => this.openEvent(event),
       style: { margin: '0 16px 16px', position: 'relative', borderRadius: 14, overflow: 'hidden', minHeight: 190, border: '1px solid ' + event.tagColor, boxShadow: '0 0 18px ' + event.tagColor + '55', cursor: 'pointer', background: '#080a10' }
     },
       React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-live-' + event.id, shape: 'rect', placeholder: event.f1 + ' vs ' + event.f2, fit: 'cover', src: event.image, fallbackSrc: event.fallbackImage })),
@@ -2474,7 +2493,19 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('span', { style: { color: '#ffce54' } }, entry),
           React.createElement('span', { style: { color: '#ff4d6d' } }, entryCount)
         ),
-        React.createElement('strong', { style: { background: '#f2b544', color: '#2b1b00', borderRadius: 8, padding: '9px 18px', fontSize: 11 } }, 'MAKE PREDICTIONS')
+        React.createElement('div', { style: { display: 'flex', width: '100%', maxWidth: 330, gap: 7, alignItems: 'stretch' } },
+          React.createElement('div', {
+            role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${event.f1} versus ${event.f2}`,
+            onClick: (clickEvent) => { clickEvent.stopPropagation(); this.openAiScout(event); },
+            style: { flex: '0 0 62px', minHeight: 38, display: 'grid', placeItems: 'center', borderRadius: 8, background: 'linear-gradient(135deg,#4d8dff,#a855f7)', color: '#fff', fontSize: 8.5, lineHeight: 1.05, whiteSpace: 'pre-line', fontWeight: 1000, letterSpacing: .4, boxShadow: '0 0 14px rgba(77,141,255,.55)', cursor: 'pointer' }
+          }, 'AI\nSCOUT'),
+          React.createElement('strong', {
+            role: 'button', tabIndex: 0, 'aria-label': `${this.getEventActionLabel(event)} for ${event.f1} versus ${event.f2}`,
+            onClick: (clickEvent) => { clickEvent.stopPropagation(); this.openEvent(event); },
+            style: { flex: 1, display: 'grid', placeItems: 'center', background: '#f2b544', color: '#2b1b00', borderRadius: 8, padding: '9px 10px', fontSize: 11 }
+          }, this.getEventActionLabel(event))
+        ),
+        React.createElement('span', { style: { marginTop: 5, color: '#9bbcff', fontSize: 8, fontWeight: 900, letterSpacing: .35 } }, 'AI SCOUTING REPORT')
       )
     );
   }
@@ -2499,14 +2530,16 @@ class FantasyMobileAppCore extends React.Component {
             React.createElement('div', { style: { fontSize: 13, fontWeight: 900, lineHeight: 1.2 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
             React.createElement('div', { style: { fontSize: 10, color: 'rgba(255,255,255,.55)', fontWeight: 700 } }, ev.date, ' · ', ev.countdown),
             React.createElement('div', { style: { fontSize: 12, fontWeight: 800, color: '#22c55e' , animation: 'moneyPulse 1.8s ease-in-out infinite' } }, ev.prize),
-            React.createElement('div', { style: { display: 'flex', gap: 4 } },
-              React.createElement('div', { onClick: (e) => { e.stopPropagation(); this.quickPick(ev, 'a'); }, style: { flex: 1, textAlign: 'center', padding: '5px 0', borderRadius: 6, fontSize: 9, fontWeight: 800, background: 'rgba(255,255,255,.08)', cursor: 'pointer' } }, '⚡ ' + ev.f1.split(' ')[0]),
-              React.createElement('div', { onClick: (e) => { e.stopPropagation(); this.quickPick(ev, 'b'); }, style: { flex: 1, textAlign: 'center', padding: '5px 0', borderRadius: 6, fontSize: 9, fontWeight: 800, background: 'rgba(255,255,255,.08)', cursor: 'pointer' } }, '⚡ ' + ev.f2.split(' ')[0])
-            ),
             React.createElement('div', {
-              onClick: () => this.enterEvent(ev),
+              role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${ev.f1} versus ${ev.f2}`,
+              onClick: () => this.openAiScout(ev),
+              style: { textAlign: 'center', padding: '6px 0', borderRadius: 7, fontSize: 8.5, fontWeight: 900, background: 'linear-gradient(90deg,rgba(77,141,255,.22),rgba(168,85,247,.22))', border: '1px solid rgba(77,141,255,.45)', color: '#b9cbff', cursor: 'pointer' }
+            }, 'AI SCOUTING'),
+            React.createElement('div', {
+              role: 'button', tabIndex: 0, 'aria-label': `${this.getEventActionLabel(ev)} for ${ev.f1} versus ${ev.f2}`,
+              onClick: () => this.openEvent(ev),
               style: { marginTop: 4, textAlign: 'center', padding: '7px 0', borderRadius: 8, fontSize: 11, fontWeight: 900, cursor: ev.entered ? 'default' : 'pointer', background: ev.entered ? 'rgba(34,197,94,.15)' : ev.tagColor, color: ev.entered ? '#22c55e' : '#fff' }
-            }, ev.entered ? 'ENTERED ✓' : 'ENTER NOW')
+            }, ev.entered ? 'ENTERED ✓' : this.getEventActionLabel(ev))
           )
         ))
       )
@@ -2570,7 +2603,16 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('small', { style: { display: 'block', color: 'rgba(255,255,255,.55)', fontSize: 7, fontWeight: 900 } }, label),
           React.createElement('strong', { style: { display: 'block', color, fontSize: 11, marginTop: 3 } }, value)
         ))),
-        React.createElement('div', { onClick: () => this.enterEvent(event), style: { textAlign: 'center', padding: '10px 0', borderRadius: 10, background: 'linear-gradient(90deg,#ef4444,#b91c1c)', fontWeight: 900, fontSize: 13, cursor: 'pointer' } }, 'MAKE PREDICTIONS')
+        React.createElement('div', {
+          role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${event.f1} versus ${event.f2}`,
+          onClick: () => this.openAiScout(event),
+          style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, textAlign: 'center', padding: '10px 0', borderRadius: 10, marginBottom: 8, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 11.5, color: '#fff', cursor: 'pointer', boxShadow: '0 0 16px rgba(77,141,255,.5)' }
+        }, 'AI SCOUTING REPORT'),
+        React.createElement('div', {
+          role: 'button', tabIndex: 0, 'aria-label': `${this.getEventActionLabel(event)} for ${event.f1} versus ${event.f2}`,
+          onClick: () => this.openEvent(event),
+          style: { textAlign: 'center', padding: '10px 0', borderRadius: 10, background: 'linear-gradient(90deg,#ef4444,#b91c1c)', fontWeight: 900, fontSize: 13, cursor: 'pointer' }
+        }, this.getEventActionLabel(event, event.playable))
       )
     );
   }
@@ -2878,9 +2920,10 @@ class FantasyMobileAppCore extends React.Component {
               React.createElement('span', { style: { color: '#ff4d6d', animation: 'ptsTwinkle 1.6s ease-in-out infinite' } }, ev.entries > 0 ? ev.entries.toLocaleString() + ' ENTRIES' : 'NO ENTRIES YET')
             ),
             React.createElement('div', {
-              onClick: () => this.enterEvent(ev),
+              role: 'button', tabIndex: 0,
+              onClick: () => this.openEvent(ev),
               style: { textAlign: 'center', padding: '9px 0', borderRadius: 8, fontSize: 12, fontWeight: 900, cursor: 'pointer', background: ev.entered ? 'rgba(34,197,94,.15)' : ev.tagColor, color: ev.entered ? '#22c55e' : '#fff' }
-            }, ev.entered ? 'ENTERED ✓' : 'ENTER NOW — ' + this.getEventEntryLabel(ev))
+            }, ev.entered ? 'ENTERED ✓' : this.getEventActionLabel(ev, ev.playable))
           )
         ))
       )
@@ -2999,9 +3042,10 @@ class FantasyMobileAppCore extends React.Component {
             React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.7)', lineHeight: 1.5 } }, `${ev.venue || 'Venue TBA'} · ${ev.maxRounds > 0 ? `${ev.maxRounds} rounds` : 'Rounds TBA'} · ${ev.prize || 'Prize terms pending'} · ${this.getEventEntryLabel(ev)}`)
           ),
           React.createElement('div', {
-            onClick: () => this.enterEvent(ev),
+            role: 'button', tabIndex: 0,
+            onClick: () => this.openEvent(ev),
             style: { textAlign: 'center', padding: '12px 0', borderRadius: 10, fontWeight: 900, fontSize: 13, cursor: 'pointer', background: ev.tagColor, color: '#fff' }
-          }, `OPEN SCORECARD — ${this.getEventEntryLabel(ev)}`)
+          }, this.getEventActionLabel(ev, ev.playable))
         ))
       )
     );
@@ -3450,36 +3494,49 @@ class FantasyMobileAppCore extends React.Component {
       }, '📤 SAVE & SHARE')
     ]);
 
-    if (s.modal === 'aiScout') return overlay([
-      closeBtn,
-      React.createElement('div', {
-        key: 'card', style: {
-          borderRadius: 16, padding: 18, marginBottom: 14, position: 'relative', overflow: 'hidden',
-          background: 'linear-gradient(160deg,#0d1a2e,#05060a 65%)', border: '1px solid rgba(77,141,255,.5)', boxShadow: '0 0 26px rgba(77,141,255,.35)'
-        }
-      },
-        React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle at 15% 0%, rgba(77,141,255,.25), transparent 55%), radial-gradient(circle at 85% 100%, rgba(242,181,68,.15), transparent 55%)', pointerEvents: 'none' } }),
-        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 } },
-          React.createElement('div', { style: { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#4d8dff,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 } }, '🤖'),
-          React.createElement('div', null,
-            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#fff' } }, 'AI SCOUTING ASSISTANT'),
-            React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.5)', letterSpacing: .5 } }, 'JONES vs ASPINALL · UFC 323')
+    if (s.modal === 'aiScout') {
+      const event = s.modalData || events[0] || null;
+      const votes = event ? s.eventVotes[event.id] || { a: 50, b: 50 } : { a: 50, b: 50 };
+      const fighterA = event?.f1 || 'RED CORNER';
+      const fighterB = event?.f2 || 'BLUE CORNER';
+      return overlay([
+        closeBtn,
+        React.createElement('div', {
+          key: 'card', style: {
+            borderRadius: 16, padding: 18, marginBottom: 14, position: 'relative', overflow: 'hidden',
+            background: 'linear-gradient(160deg,#0d1a2e,#05060a 65%)', border: '1px solid rgba(77,141,255,.5)', boxShadow: '0 0 26px rgba(77,141,255,.35)'
+          }
+        },
+          React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle at 15% 0%, rgba(77,141,255,.25), transparent 55%), radial-gradient(circle at 85% 100%, rgba(242,181,68,.15), transparent 55%)', pointerEvents: 'none' } }),
+          React.createElement('div', { style: { position: 'relative' } },
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 } },
+              React.createElement('div', { style: { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#4d8dff,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 1000 } }, 'AI'),
+              React.createElement('div', null,
+                React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#fff' } }, 'AI SCOUTING ASSISTANT'),
+                React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.55)', letterSpacing: .5 } }, `${fighterA} vs ${fighterB}${event?.tag ? ` · ${event.tag}` : ''}`)
+              )
+            ),
+            React.createElement('div', { style: { display: 'grid', gap: 8, marginBottom: 10 } },
+              [[fighterA, this.scoutingNote(fighterA), '#ef4444'], [fighterB, this.scoutingNote(fighterB), '#4d8dff']].map(([name, note, color]) => React.createElement('div', { key: name, style: { padding: 10, borderRadius: 9, background: 'rgba(255,255,255,.05)', borderLeft: `3px solid ${color}` } },
+                React.createElement('strong', { style: { display: 'block', color, fontSize: 11, marginBottom: 3 } }, name),
+                React.createElement('span', { style: { display: 'block', color: 'rgba(255,255,255,.75)', fontSize: 10.5, lineHeight: 1.45 } }, note)
+              ))
+            ),
+            React.createElement('div', { style: { display: 'flex', gap: 8 } },
+              [[`${votes.a}%`, `PICKED ${fighterA}`], [`${votes.b}%`, `PICKED ${fighterB}`]].map(([value, label]) => React.createElement('div', { key: label, style: { flex: 1, minWidth: 0, textAlign: 'center', background: 'rgba(255,255,255,.05)', borderRadius: 8, padding: '8px 4px' } },
+                React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#f2c869' } }, value),
+                React.createElement('div', { style: { fontSize: 7, fontWeight: 800, color: 'rgba(255,255,255,.5)', overflowWrap: 'anywhere' } }, label)
+              ))
+            )
           )
         ),
-        React.createElement('div', { style: { fontSize: 12, lineHeight: 1.6, color: 'rgba(255,255,255,.85)', marginBottom: 10 } }, '"Aspinall\u2019s takedown defense has improved 22% since his last title bout, but Jones lands 3.4 more significant strikes per round historically. Fights that go past round 2 favor the underdog here."'),
-        React.createElement('div', { style: { display: 'flex', gap: 8, marginBottom: 10 } },
-          [['64%', 'PICKED JONES'], ['36%', 'PICKED ASPINALL'], ['+2X', 'UNDERDOG BONUS']].map(([v, l], i) => React.createElement('div', { key: i, style: { flex: 1, textAlign: 'center', background: 'rgba(255,255,255,.05)', borderRadius: 8, padding: '8px 4px' } },
-            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#f2c869' } }, v),
-            React.createElement('div', { style: { fontSize: 7, fontWeight: 800, color: 'rgba(255,255,255,.5)' } }, l)
-          ))
-        ),
-        React.createElement('div', { style: { background: 'rgba(242,181,68,.12)', border: '1px solid rgba(242,181,68,.4)', borderRadius: 8, padding: 8, fontSize: 10.5, fontWeight: 800, color: '#f2c869', textAlign: 'center' } }, '\ud83d\udca1 Users who followed this insight went 3-1 last event')
-      ),
-      React.createElement('div', {
-        onClick: () => { this.closeModal(); this.openModal('predictModal', { id: 1, tag: 'UFC 323', f1: 'JONES', f2: 'ASPINALL', prize: '$100,000' }); },
-        style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(77,141,255,.6)' }
-      }, 'USE THIS INSIGHT \u2014 MAKE MY PICK')
-    ]);
+        React.createElement('div', {
+          role: 'button', tabIndex: 0,
+          onClick: () => { this.closeModal(); if (event) this.openEvent(event); },
+          style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 13, cursor: event ? 'pointer' : 'default', opacity: event ? 1 : .55, boxShadow: '0 0 14px rgba(77,141,255,.6)' }
+        }, event ? `USE THIS INSIGHT · ${this.getEventActionLabel(event)}` : 'NO FIGHT SELECTED')
+      ]);
+    }
 
     if (s.modal === 'fighterAffiliate') return overlay([
       closeBtn,
