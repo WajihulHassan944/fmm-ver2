@@ -1100,23 +1100,31 @@ class FantasyMobileAppCore extends React.Component {
     const coinsFmt = s.coins.toLocaleString();
     const xpPct = s.xpMounted ? 81.6 : 0;
 
+    const activeView = React.createElement('div', {
+      className: `fmm-prototype-view fmm-prototype-view--${s.activeTab}`,
+    },
+      s.activeTab === 'home' && this.renderHome(sports, filteredEvents, events, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s),
+      s.activeTab === 'contests' && this.renderContests(sports, filteredEvents, s),
+      s.activeTab === 'leaderboard' && this.renderLeaderboard(leaderboardFull),
+      s.activeTab === 'predict' && this.renderPredict(events, s),
+      s.activeTab === 'profile' && this.renderProfile(coinsFmt, streakDays, xpPct),
+      s.activeTab === 'watch' && this.renderWatchParty(s, jonesPct, aspinallPct, events),
+      s.activeTab === 'leagues' && this.renderLeagues(s, events),
+      s.activeTab === 'settings' && this.renderSettings(s),
+      s.activeTab === 'demo' && this.renderDemo(s),
+      s.activeTab === 'blogs' && this.renderBlogsPage(blogs)
+    );
+
     const screen = React.createElement('div', {
+      className: 'fmm-prototype-screen',
       style: { position: 'relative', width: '100%', height: '100dvh', maxHeight: '100dvh', minHeight: 620, background: '#05060a', color: '#fff', overflow: 'hidden', fontFamily: "'Rajdhani',sans-serif", display: 'flex', flexDirection: 'column' }
     },
       React.createElement('div', {
+        className: 'fmm-prototype-scroll',
         style: { flex: '1 1 auto', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingTop: 0 }
       },
         this.renderTopBar(coinsFmt, s.notifCount),
-        s.activeTab === 'home' && this.renderHome(sports, filteredEvents, events, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s),
-        s.activeTab === 'contests' && this.renderContests(sports, filteredEvents, s),
-        s.activeTab === 'leaderboard' && this.renderLeaderboard(leaderboardFull),
-        s.activeTab === 'predict' && this.renderPredict(events, s),
-        s.activeTab === 'profile' && this.renderProfile(coinsFmt, streakDays, xpPct),
-        s.activeTab === 'watch' && this.renderWatchParty(s, jonesPct, aspinallPct, events),
-        s.activeTab === 'leagues' && this.renderLeagues(s, events),
-        s.activeTab === 'settings' && this.renderSettings(s),
-        s.activeTab === 'demo' && this.renderDemo(s),
-        s.activeTab === 'blogs' && this.renderBlogsPage(blogs)
+        activeView
       ),
       this.renderBottomNav(navItems),
       this.renderModal(s, events, jonesPct, aspinallPct),
@@ -1157,7 +1165,7 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderTopBar(coinsFmt, notifCount) {
-    return React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 8px', position: 'relative', zIndex: 5 } },
+    return React.createElement('div', { className: 'fmm-prototype-topbar', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 8px', position: 'relative', zIndex: 5 } },
       React.createElement('div', {
         onClick: () => this.openModal('menu'),
         style: { width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid rgba(255,255,255,.08)' }
@@ -1202,6 +1210,7 @@ class FantasyMobileAppCore extends React.Component {
     };
     const tabColors = { home: '#f2b544', predict: '#ef4444', contests: '#4d8dff', leaderboard: '#22c55e', profile: '#a855f7' };
     return React.createElement('div', {
+      className: 'fmm-prototype-bottom-nav',
       style: {
         position: 'relative', flex: '0 0 auto', display: 'flex', background: 'rgba(8,9,13,.96)',
         borderTop: '1px solid rgba(255,255,255,.08)', padding: '10px 4px 22px', backdropFilter: 'blur(10px)', zIndex: 400

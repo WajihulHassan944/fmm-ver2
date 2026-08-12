@@ -145,7 +145,10 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   if (!isMobile && !forceRender) return null;
 
   return (
-    <div className="fmm-exact-mobile-portal" data-fmm-mobile-screen={initialTab}>
+    <div
+      className={`fmm-exact-mobile-portal ${isMobile ? 'is-phone-shell' : 'is-desktop-shell'}`}
+      data-fmm-mobile-screen={initialTab}
+    >
       <FantasyMobileAppCore
         initialTab={initialTab}
         initialCoins={isAuthenticated ? initialCoins ?? 0 : undefined}

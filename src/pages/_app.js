@@ -481,7 +481,7 @@ function AppContent({ children }) {
         <ToastContainer />
       </div>
 
-      {renderLegacyExperience && !hideLayout && <Header />}
+      {!hideLayout && (!renderPrototypeExperience || !isExactMobile) && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
       {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
       {renderPrototypeExperience && <FantasyMobileExperience initialTab={exactMobileTab} forceRender={forcePrototypeExperience} />}
