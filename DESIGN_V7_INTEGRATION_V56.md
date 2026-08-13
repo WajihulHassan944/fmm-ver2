@@ -16,7 +16,7 @@ This build layers the current design-v7 handoff onto the last approved v55 front
 - Champion-profile and league-detail taps open data-backed modals.
 - All fight entry CTAs route to that fight's real scorecard. The free demo remains a separately labelled demo action.
 - Community pick percentages are hidden until submitted picks exist; no 50/50 sample is presented as production data.
-- FM+ monthly and 30-day pass choices route into the responsive Kurv checkout. Active FM+ accounts receive the 25-FM streak-save display/behavior.
+- FM+ plan choices route into Authorize.Net Accept Hosted. The 30-day pass is enabled; monthly auto-renew is marked coming soon until recurring billing is activated. Active FM+ accounts receive the 25-FM streak-save display/behavior.
 
 ## Desktop and administration
 
@@ -35,4 +35,3 @@ This build layers the current design-v7 handoff onto the last approved v55 front
 
 - Next.js production build passes across all 124 routes.
 - Updated JSX/JS files pass Babel parser validation.
-

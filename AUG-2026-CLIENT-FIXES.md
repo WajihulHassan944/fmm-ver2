@@ -10,5 +10,5 @@
 - Fight posters and fighter images use fixed aspect boxes with `object-fit: cover`; missing fight art uses sport-neutral artwork rather than another named fight's poster.
 - Homepage apparel images have fixed sizing and keep their Etsy-backed fallback behavior.
 - The phone shell starts at the top edge with no extra black spacer above navigation.
-- The new FM coin cart implements the three specified packs, quantity controls, first-purchase message, logged-in wallet matching, checkout-as-account-creation for logged-out buyers, AVS fields, consent gates, and idempotent Kurv handoff. Apparel remains outside the cart on Etsy.
+- The new FM coin cart implements the three specified packs, quantity controls, first-purchase message, logged-in wallet matching, checkout-as-account-creation for logged-out buyers, AVS fields, consent gates, and idempotent Authorize.Net Accept Hosted handoff. Apparel remains outside the cart on Etsy.
 - Canonical URLs use `https://www.fantasymmadness.com`; localhost canonicals and internal developer copy are not rendered.

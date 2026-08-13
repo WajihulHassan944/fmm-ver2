@@ -16,7 +16,7 @@
 
 - Cart contents are passed to the existing `/checkout` page.
 - The backend remains authoritative for product prices and first-purchase doubling.
-- Payment continues through the Kurv hosted checkout.
+- Historical note: v58 supersedes this handoff with Authorize.Net Accept Hosted.
 - No simulated payment success or client-side wallet credit was added.
 - Apparel remains on Etsy and is not mixed into the FM coin cart.
 
@@ -34,7 +34,7 @@
 
 - All v52 data/date/contest fixes remain included.
 - All v53 desktop navigation and responsive-width fixes remain included.
-- No backend update is required for this regression fix.
+- The current v58 checkout requires the paired v17 backend.
 
 ## Verification
 
