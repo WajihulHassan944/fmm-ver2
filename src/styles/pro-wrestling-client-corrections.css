@@ -306,7 +306,7 @@
 
 .player-round-corner { align-items: center; display: flex; gap: 14px; min-width: 0; }
 .player-round-corner.is-b { justify-content: flex-end; text-align: right; }
-.player-round-corner img { border: 2px solid rgba(255, 255, 255, .13); border-radius: 17px; height: 100px; object-fit: cover; object-position: center top; width: 88px; }
+.player-round-corner img { background: #080a10; border: 2px solid rgba(255, 255, 255, .13); border-radius: 17px; height: 100px; object-fit: contain; object-position: center; width: 88px; }
 .player-round-corner.is-a img { border-color: rgba(47, 156, 255, .5); }
 .player-round-corner.is-b img { border-color: rgba(237, 31, 49, .5); }
 .player-round-corner span { display: grid; min-width: 0; }

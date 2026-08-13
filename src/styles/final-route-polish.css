@@ -167,7 +167,7 @@
 .xp-prediction-countdown { align-items: center; background: rgba(53,212,93,.1); border: 1px solid rgba(53,212,93,.28); border-radius: 999px; color: #8ff3a0; display: inline-flex; font-weight: 900; gap: 8px; margin-top: 18px; min-height: 40px; padding: 0 14px; }
 .xp-prediction-fighters { align-items: center; display: grid; gap: 14px; grid-template-columns: minmax(0,1fr) 82px minmax(0,1fr); margin-top: 18px; }
 .xp-prediction-fighters article { align-items: center; background: linear-gradient(180deg, rgba(255,255,255,.062), rgba(255,255,255,.024)); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; display: grid; gap: 18px; grid-template-columns: 128px minmax(0,1fr); min-height: 158px; padding: 16px; }
-.xp-prediction-fighters img { border-radius: 18px; height: 126px; object-fit: cover; width: 128px; }
+.xp-prediction-fighters img { background: #080a10; border-radius: 18px; height: 128px; object-fit: contain; object-position: center; width: 128px; }
 .xp-prediction-fighters span { color: rgba(255,255,255,.52); font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
 .xp-prediction-fighters strong { color: #fff; display: block; font-family: var(--fmm-font-display, Impact, sans-serif); font-size: 34px; line-height: .95; margin-top: 8px; text-transform: uppercase; }
 .xp-prediction-vs { align-items: center; background: linear-gradient(135deg, #bd0710, #ff2632); border-radius: 50%; box-shadow: 0 18px 42px rgba(223,17,27,.34); color: #fff; display: flex; font-family: var(--fmm-font-display, Impact, sans-serif); font-size: 28px; height: 82px; justify-content: center; width: 82px; }

@@ -595,7 +595,7 @@
 .player-live-fight-card article > img { border-radius: 14px; height: 180px; overflow: hidden; width: 170px; }
 .player-fight-entry-fighter-art img,
 .player-completed-fight-card article > img,
-.player-live-fight-card article > img { height: 100%; object-fit: cover; object-position: center top; width: 100%; }
+.player-live-fight-card article > img { height: 100%; object-fit: contain; object-position: center; width: 100%; }
 .player-fight-entry-card article small,
 .player-completed-fight-card article small,
 .player-live-fight-card article small { color: rgba(255, 255, 255, 0.48); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; }

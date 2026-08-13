@@ -223,13 +223,17 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     router.push(next);
   };
 
-  const submitPrediction = ({ event } = {}) => {
+  const submitPrediction = ({ event, prediction } = {}) => {
     const id = String(event?.backendId || event?.id || '').trim();
+    const selectedWinner = ['a', 'b'].includes(String(prediction?.winner || '').toLowerCase())
+      ? String(prediction.winner).toLowerCase()
+      : '';
     if (!isAuthenticated) {
-      router.push(`/login?next=${encodeURIComponent(id ? `/fight/${id}` : '/UserDashboard')}`);
+      const destination = id ? `/fight/${id}?play=1${selectedWinner ? `&pick=${selectedWinner}` : ''}` : '/UserDashboard';
+      router.push(`/login?next=${encodeURIComponent(destination)}`);
       return false;
     }
-    router.push(id ? `/fight/${id}?play=1` : '/UserDashboard');
+    router.push(id ? `/fight/${id}?play=1${selectedWinner ? `&pick=${selectedWinner}` : ''}` : '/UserDashboard');
     return false;
   };
 

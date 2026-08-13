@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import {
@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import MakePredictions from '../MakePredictions/MakePredictions';
 import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const isSameId = (left, right) => String(left || '') === String(right || '');
 
@@ -42,6 +43,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [showPredictions, setShowPredictions] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
   const [entryStatus, setEntryStatus] = useState('');
+  const autoOpenAttempted = useRef(false);
 
   useEffect(() => {
     if (!match) return undefined;
@@ -63,6 +65,38 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     const interval = window.setInterval(calculateTimeRemaining, 1000);
     return () => window.clearInterval(interval);
   }, [match]);
+
+  useEffect(() => {
+    if (!router.isReady || !match || String(router.query?.play || '') !== '1' || autoOpenAttempted.current) return;
+    autoOpenAttempted.current = true;
+    const userId = user?._id || user?.id;
+    if (!userId || hasSubmittedFightPrediction(match, userId)) return;
+    const tokenCost = Number(match.matchTokens || 0);
+    const walletTokens = Number(user?.tokens || 0);
+    if (walletTokens < tokenCost) {
+      const currentPick = ['a', 'b'].includes(String(router.query?.pick || '').toLowerCase()) ? `&pick=${String(router.query.pick).toLowerCase()}` : '';
+      router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${currentPick}`)}`);
+      return;
+    }
+    let active = true;
+    setIsEntering(true);
+    fetch(buildPublicApiUrl('/api/deduct-tokens'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, matchTokens: match.matchTokens }),
+    })
+      .then(async (response) => ({ response, data: await response.json().catch(() => ({})) }))
+      .then(({ response, data }) => {
+        if (!active) return;
+        if (response.ok) setShowPredictions(true);
+        else if (response.status === 402 || /insufficient/i.test(String(data.message || ''))) {
+          router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1`)}`);
+        } else setEntryStatus(data.message || 'Could not open this scorecard. Please try again.');
+      })
+      .catch(() => { if (active) setEntryStatus('The scorecard could not be opened. Please try again.'); })
+      .finally(() => { if (active) setIsEntering(false); });
+    return () => { active = false; };
+  }, [match, matchId, router, router.isReady, router.query?.pick, router.query?.play, user?._id, user?.id, user?.tokens]);
 
   if (!match) {
     return (
@@ -91,7 +125,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     }
     setIsEntering(true);
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/deduct-tokens', {
+      const response = await fetch(buildPublicApiUrl('/api/deduct-tokens'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -197,7 +231,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
         <section className="player-fight-entry-action-bar">
           <div>
             <FaShieldAlt />
-            <span><strong>Original entry flow preserved</strong><small>Token deduction and prediction submission use the existing endpoints.</small></span>
+            <span><strong>Secure fight entry</strong><small>Your entry is confirmed before the scorecard opens.</small></span>
           </div>
           <button type="button" onClick={handleMatchClick} disabled={isEntering || submittedPrediction}>
             {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : enoughTokens ? 'Make predictions' : 'Add coins to enter'} <FaArrowRight />

@@ -527,17 +527,35 @@ const FinalHomeV35 = ({
     prizePool: realPrizePoolTotal,
   }), [homepageStats, allRealFights.length, leaderboardRows, realPrizePoolTotal]);
 
-  const featuredFight = realFights[0] || allRealFights[0] || {
+  const fallbackFeaturedFight = realFights[0] || allRealFights[0] || {
     id: "fallback-main",
     sport: "boxing",
     f1: "FIGHTER A",
     f2: "FIGHTER B",
   };
 
-  const upcomingEvents = allRealFights
+  // These two placements are controlled independently in the back office.
+  // If only one placement has been assigned, keep the second section useful by
+  // selecting another published card instead of repeating the same fight.
+  const featuredThisWeekFight = allRealFights.find((fight) => Boolean(fight?.featuredThisWeek))
+    || fallbackFeaturedFight;
+  const featuredFight = allRealFights.find((fight) => Boolean(fight?.featuredFight))
+    || allRealFights.find((fight) => String(getFightId(fight)) !== String(getFightId(featuredThisWeekFight)))
+    || featuredThisWeekFight;
+
+  const upcomingEvents = (realFights.length ? realFights : allRealFights)
     .filter((fight, index, rows) => rows.findIndex((row) => String(getFightId(row)) === String(getFightId(fight))) === index)
     .slice(0, 8)
     .map(buildUpcomingEvent);
+
+  const weeklyFighterA = getFighterName(featuredThisWeekFight, "A");
+  const weeklyFighterB = getFighterName(featuredThisWeekFight, "B");
+  const weeklyHref = getFightHref(featuredThisWeekFight);
+  const weeklySport = sportAssets[getSportKey(featuredThisWeekFight)] || sportAssets.boxing;
+  const weeklyPrize = getPrize(featuredThisWeekFight);
+  const weeklyEntry = getEntry(featuredThisWeekFight);
+  const weeklyEntries = getEntries(featuredThisWeekFight);
+  const weeklyEntriesLabel = weeklyEntries > 0 ? weeklyEntries.toLocaleString() : "NO ENTRIES YET";
 
   const fighterA = getFighterName(featuredFight, "A");
   const fighterB = getFighterName(featuredFight, "B");
@@ -676,18 +694,18 @@ const FinalHomeV35 = ({
 
         <section className="fmm-v35-featured-week" aria-labelledby="fmm-v35-featured-week-title">
           <img className="fmm-v35-fw-bg" src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" aria-hidden="true" />
-          <img className="fmm-v35-fw-fighter is-left" src={getFighterImage(featuredFight, "A")} alt="" />
-          <img className="fmm-v35-fw-fighter is-right" src={getFighterImage(featuredFight, "B")} alt="" />
+          <img className="fmm-v35-fw-fighter is-left" src={getFighterImage(featuredThisWeekFight, "A")} alt="" />
+          <img className="fmm-v35-fw-fighter is-right" src={getFighterImage(featuredThisWeekFight, "B")} alt="" />
           <div className="fmm-v35-fw-top"><span>★ FEATURED THIS WEEK</span><b>⏱ LIVE NOW</b></div>
           <div className="fmm-v35-fw-copy">
-            <small>{featuredSport.longLabel}</small>
-            <h2 id="fmm-v35-featured-week-title">{fighterA} <em>VS</em> {fighterB}</h2>
+            <small>{weeklySport.longLabel}</small>
+            <h2 id="fmm-v35-featured-week-title">{weeklyFighterA} <em>VS</em> {weeklyFighterB}</h2>
             <div className="fmm-v35-fw-meta">
-              <strong>{featuredPrize}<small> CASH POOL</small></strong>
-              <strong>{featuredEntry}<small> ENTRY FEE</small></strong>
-              <strong>{featuredEntriesLabel}<small> ENTRIES</small></strong>
+              <strong>{weeklyPrize}<small> CASH POOL</small></strong>
+              <strong>{weeklyEntry}<small> ENTRY FEE</small></strong>
+              <strong>{weeklyEntriesLabel}<small> ENTRIES</small></strong>
             </div>
-            <Link href={predictionHref}>MAKE PREDICTIONS</Link>
+            <Link href={weeklyHref}>MAKE PREDICTIONS</Link>
           </div>
         </section>
 

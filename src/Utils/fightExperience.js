@@ -249,19 +249,34 @@ export const getPublicFightDuplicateKey = (match = {}) => {
 };
 
 export const dedupePublicFights = (matches = []) => {
-  const selected = new Map();
+  const selected = [];
+  const aliasToIndex = new Map();
 
   safeArray(matches).forEach((match) => {
-    const key = getPublicFightDuplicateKey(match) || normalizeFightKeyPart(getFightId(match));
-    if (!key) return;
+    const idKey = normalizeFightKeyPart(getFightId(match));
+    const duplicateKey = getPublicFightDuplicateKey(match);
+    const aliases = [idKey ? `id:${idKey}` : '', duplicateKey ? `fight:${duplicateKey}` : ''].filter(Boolean);
+    if (!aliases.length) return;
 
-    const current = selected.get(key);
-    if (!current || getFightQualityScore(match) > getFightQualityScore(current)) {
-      selected.set(key, match);
+    const existingIndex = aliases.map((alias) => aliasToIndex.get(alias)).find((index) => index !== undefined);
+    if (existingIndex === undefined) {
+      const nextIndex = selected.length;
+      selected.push(match);
+      aliases.forEach((alias) => aliasToIndex.set(alias, nextIndex));
+      return;
     }
+
+    const current = selected[existingIndex];
+    if (!current || getFightQualityScore(match) > getFightQualityScore(current)) selected[existingIndex] = match;
+    const chosen = selected[existingIndex] || match;
+    const chosenId = normalizeFightKeyPart(getFightId(chosen));
+    const chosenDuplicate = getPublicFightDuplicateKey(chosen);
+    [...aliases, chosenId ? `id:${chosenId}` : '', chosenDuplicate ? `fight:${chosenDuplicate}` : '']
+      .filter(Boolean)
+      .forEach((alias) => aliasToIndex.set(alias, existingIndex));
   });
 
-  return Array.from(selected.values());
+  return selected.filter(Boolean);
 };
 
 export const sortFights = (matches, direction = 'asc') => [...safeArray(matches)].sort((a, b) => {
