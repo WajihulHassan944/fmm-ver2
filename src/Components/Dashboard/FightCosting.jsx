@@ -41,6 +41,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
   });
   const [showPredictions, setShowPredictions] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
+  const [entryStatus, setEntryStatus] = useState('');
 
   useEffect(() => {
     if (!match) return undefined;
@@ -74,10 +75,18 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
   }
 
   const submittedPrediction = hasSubmittedFightPrediction(match, user?._id || user?.id);
+  const tokenCost = Number(match.matchTokens || 0);
+  const walletTokens = Number(user?.tokens || 0);
+  const enoughTokens = walletTokens >= tokenCost;
+  const openCoinCheckout = () => router.push(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1`)}`);
 
   const handleMatchClick = async () => {
     if (submittedPrediction) {
-      alert('You have already submitted predictions for this fight.');
+      setEntryStatus('You have already submitted predictions for this fight.');
+      return;
+    }
+    if (!enoughTokens) {
+      openCoinCheckout();
       return;
     }
     setIsEntering(true);
@@ -95,11 +104,15 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
       if (response.ok) {
         setShowPredictions(true);
       } else {
-        alert(data.message || 'Could not deduct tokens. Please try again.');
+        if (response.status === 402 || /insufficient/i.test(String(data.message || ''))) {
+          openCoinCheckout();
+          return;
+        }
+        setEntryStatus(data.message || 'Could not open this scorecard. Please try again.');
       }
     } catch (error) {
       console.error('Error in deducting tokens:', error);
-      alert('An error occurred. Please try again later.');
+      setEntryStatus('The scorecard could not be opened. Please try again.');
     } finally {
       setIsEntering(false);
     }
@@ -120,9 +133,6 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const fighterAImage = getFighterImage(match, 'A', 0);
   const fighterBImage = getFighterImage(match, 'B', 1);
-  const tokenCost = Number(match.matchTokens || 0);
-  const walletTokens = Number(user?.tokens || 0);
-  const enoughTokens = walletTokens >= tokenCost;
   const players = Array.isArray(match.userPredictions) ? match.userPredictions.length : 0;
 
   return (
@@ -138,7 +148,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
               <em>{user?.currentPlan || 'Member'} plan</em>
             </span>
           </div>
-          <button type="button" className="player-fight-entry-wallet" onClick={() => router.push('/checkout')}>
+          <button type="button" className="player-fight-entry-wallet" onClick={openCoinCheckout}>
             <FaCoins />
             <span><small>Fight wallet</small><strong>{walletTokens}</strong><em>tokens available</em></span>
           </button>
@@ -190,9 +200,10 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
             <span><strong>Original entry flow preserved</strong><small>Token deduction and prediction submission use the existing endpoints.</small></span>
           </div>
           <button type="button" onClick={handleMatchClick} disabled={isEntering || submittedPrediction}>
-            {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : 'Make predictions'} <FaArrowRight />
+            {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : enoughTokens ? 'Make predictions' : 'Add coins to enter'} <FaArrowRight />
           </button>
         </section>
+        {entryStatus ? <p role="alert" style={{ margin: '10px 0 0', color: '#ff8a8a', fontWeight: 800, textAlign: 'center' }}>{entryStatus}</p> : null}
       </div>
     </section>
   );

@@ -100,6 +100,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [promotionUpdatingId, setPromotionUpdatingId] = useState('');
+  const [placementUpdatingKey, setPlacementUpdatingKey] = useState('');
+  const [scoutingUpdatingId, setScoutingUpdatingId] = useState('');
   const [showDataQuality, setShowDataQuality] = useState(false);
 
   const normalizeMatchFeedRows = (payload) => (
@@ -307,6 +309,52 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     }
   };
 
+  const toggleHomepagePlacement = async (fight, surface) => {
+    const id = getId(fight);
+    const key = `${id}:${surface}`;
+    if (!id || placementUpdatingKey) return;
+    const field = surface === 'featured-this-week' ? 'featuredThisWeek' : 'featuredFight';
+    setPlacementUpdatingKey(key);
+    try {
+      const token = getAdminToken();
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(id)}/homepage-placement`, {
+        method: 'PATCH',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ surface, selected: !Boolean(fight[field]), sourceType: getSourceType(fight) }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to update homepage placement.');
+      toast.success(`${getTitle(fight)} ${payload.selected ? 'selected for' : 'removed from'} ${surface === 'featured-this-week' ? 'Featured This Week' : 'Featured Fight'}.`);
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update homepage placement.');
+    } finally {
+      setPlacementUpdatingKey('');
+    }
+  };
+
+  const generateScoutingReport = async (fight) => {
+    const id = getId(fight);
+    if (!id || scoutingUpdatingId) return;
+    setScoutingUpdatingId(String(id));
+    try {
+      const token = getAdminToken();
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(id)}/ai-scouting-report`, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ sourceType: getSourceType(fight) }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to generate scouting report.');
+      toast.success(`AI scouting report generated from ${Number(payload.pickCount || 0).toLocaleString()} submitted cards.`);
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message || 'Failed to generate scouting report.');
+    } finally {
+      setScoutingUpdatingId('');
+    }
+  };
+
   const deleteFight = async (fight) => {
     if (!getId(fight)) return;
     return bulkDeleteFights([fight]);
@@ -453,6 +501,25 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                           onClick={() => toggleHomepagePromotion(fight)}
                         >
                           <FaBullhorn /> {promotionUpdatingId === String(id) ? 'Updating...' : isHomepagePromoted(fight) ? 'Remove banner' : 'Homepage banner'}
+                        </button>
+                        <button
+                          type="button"
+                          className={fight.featuredThisWeek ? 'is-warning' : ''}
+                          disabled={Boolean(placementUpdatingKey)}
+                          onClick={() => toggleHomepagePlacement(fight, 'featured-this-week')}
+                        >
+                          <FaBullhorn /> {placementUpdatingKey === `${id}:featured-this-week` ? 'Updating...' : fight.featuredThisWeek ? 'Remove weekly' : 'Featured this week'}
+                        </button>
+                        <button
+                          type="button"
+                          className={fight.featuredFight ? 'is-warning' : ''}
+                          disabled={Boolean(placementUpdatingKey)}
+                          onClick={() => toggleHomepagePlacement(fight, 'featured-fight')}
+                        >
+                          <FaFistRaised /> {placementUpdatingKey === `${id}:featured-fight` ? 'Updating...' : fight.featuredFight ? 'Remove feature' : 'Featured fight'}
+                        </button>
+                        <button type="button" disabled={scoutingUpdatingId === String(id)} onClick={() => generateScoutingReport(fight)}>
+                          <FaRobot /> {scoutingUpdatingId === String(id) ? 'Generating...' : fight.aiScoutingReport ? 'Refresh AI report' : 'Generate AI report'}
                         </button>
                         <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
                         <Link href={`/administration/DeleteUpdateMatches?matchId=${id}`}><FaEdit /> Edit fight</Link>

@@ -11,6 +11,10 @@ const PACKS = [
   { sku: 'fm-5000', coins: 5000, priceCents: 399, label: 'Most popular', popular: true },
   { sku: 'fm-15000', coins: 15000, priceCents: 999, label: 'Power pack' },
 ];
+const FM_PLUS_PLANS = [
+  { id: 'monthly', label: 'Monthly', priceCents: 499, description: 'Auto-renews · cancel anytime', badge: 'BEST FOR REGULAR PLAY' },
+  { id: 'pass', label: '30-day pass', priceCents: 499, description: 'One-time payment · no auto-renew', badge: 'NO AUTO-RENEW' },
+];
 
 const money = (cents) => `$${(Number(cents || 0) / 100).toFixed(2)}`;
 
@@ -30,9 +34,11 @@ const parseCartQuery = (value) => {
 export default function MembershipCheckout() {
   const router = useRouter();
   const user = useSelector((state) => state?.user?.user || state?.user || null);
+  const isFmPlus = String(router.query.product || '').toLowerCase() === 'fm-plus';
   const requestedAmount = Number(router.query.amount || 0);
   const initialSku = PACKS.find((pack) => pack.coins === requestedAmount)?.sku || 'fm-5000';
   const [cart, setCart] = useState(() => ({ [initialSku]: 1 }));
+  const [fmPlusPlan, setFmPlusPlan] = useState('monthly');
   const [form, setForm] = useState({
     email: user?.email || '',
     firstName: user?.firstName || '',
@@ -51,6 +57,11 @@ export default function MembershipCheckout() {
 
   useEffect(() => {
     if (!router.isReady) return;
+    if (isFmPlus) {
+      const requestedPlan = String(router.query.plan || '').toLowerCase();
+      if (FM_PLUS_PLANS.some((plan) => plan.id === requestedPlan)) setFmPlusPlan(requestedPlan);
+      return;
+    }
     const requestedCart = parseCartQuery(router.query.cart);
     if (requestedCart) {
       setCart(requestedCart);
@@ -59,7 +70,7 @@ export default function MembershipCheckout() {
     if (!requestedAmount) return;
     const requestedPack = PACKS.find((pack) => pack.coins === requestedAmount);
     if (requestedPack) setCart({ [requestedPack.sku]: 1 });
-  }, [requestedAmount, router.isReady, router.query.cart]);
+  }, [isFmPlus, requestedAmount, router.isReady, router.query.cart, router.query.plan]);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -79,7 +90,8 @@ export default function MembershipCheckout() {
   const items = useMemo(() => PACKS
     .map((pack) => ({ ...pack, quantity: Math.max(0, Number(cart[pack.sku] || 0)) }))
     .filter((pack) => pack.quantity > 0), [cart]);
-  const subtotalCents = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
+  const selectedPlan = FM_PLUS_PLANS.find((plan) => plan.id === fmPlusPlan) || FM_PLUS_PLANS[0];
+  const subtotalCents = isFmPlus ? selectedPlan.priceCents : items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
   const baseCoins = items.reduce((sum, item) => sum + item.coins * item.quantity, 0);
 
   const changeQuantity = (sku, delta) => {
@@ -93,7 +105,7 @@ export default function MembershipCheckout() {
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!items.length) return setStatus('Add at least one coin pack to continue.');
+    if (!isFmPlus && !items.length) return setStatus('Add at least one coin pack to continue.');
     if (!form.ageConfirmed || !form.termsAccepted) return setStatus('Confirm age eligibility and accept the terms to continue.');
     setSubmitting(true);
     setStatus('');
@@ -104,7 +116,7 @@ export default function MembershipCheckout() {
           ? window.crypto.randomUUID()
           : `fmm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       }
-      const response = await fetch(buildPublicApiUrl('/api/checkout/coin-orders'), {
+      const response = await fetch(buildPublicApiUrl(isFmPlus ? '/api/checkout/fm-plus-orders' : '/api/checkout/coin-orders'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,10 +124,10 @@ export default function MembershipCheckout() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          items: items.map(({ sku, quantity }) => ({ sku, quantity })),
+          ...(isFmPlus ? { plan: fmPlusPlan } : { items: items.map(({ sku, quantity }) => ({ sku, quantity })) }),
           email: form.email,
           billing: form,
-          returnUrl: `${window.location.origin}/checkout?status=return`,
+          returnUrl: `${window.location.origin}/checkout?product=${isFmPlus ? 'fm-plus' : 'fm-coins'}&status=return`,
         }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -131,20 +143,28 @@ export default function MembershipCheckout() {
   return (
     <>
       <Head>
-        <title>FM Coin Cart | Fantasy MMAdness</title>
-        <meta name="description" content="Choose FM coin packs and continue to the secure hosted Fantasy MMAdness checkout." />
+        <title>{isFmPlus ? 'FM+ Checkout' : 'FM Coin Cart'} | Fantasy MMAdness</title>
+        <meta name="description" content={isFmPlus ? 'Choose an FM+ plan and continue to secure hosted checkout.' : 'Choose FM coin packs and continue to the secure hosted Fantasy MMAdness checkout.'} />
       </Head>
       <main className="fm-cart-page">
         <div className="fm-cart-shell">
           <header className="fm-cart-header">
             <Link href="/" aria-label="Back to Fantasy MMAdness"><FaArrowLeft /></Link>
-            <div className="fm-cart-heading"><span><FaShoppingCart /> FM COIN CART</span><h1>Fuel your next fight card.</h1></div>
+            <div className="fm-cart-heading"><span><FaShoppingCart /> {isFmPlus ? 'FM+ CHECKOUT' : 'FM COIN CART'}</span><h1>{isFmPlus ? 'Level up every fight.' : 'Fuel your next fight card.'}</h1></div>
             <i><FaLock /></i>
           </header>
 
           <form onSubmit={submit}>
             <section className="fm-cart-products">
-              <div className="fm-cart-section-title"><span>1</span><div><h2>Choose coin packs</h2><p>Apparel remains on Etsy; this cart is only for FM coins.</p></div></div>
+              <div className="fm-cart-section-title"><span>1</span><div><h2>{isFmPlus ? 'Choose your FM+ plan' : 'Choose coin packs'}</h2><p>{isFmPlus ? 'Both plans unlock the same benefits; choose whether you want auto-renew.' : 'Apparel remains on Etsy; this cart is only for FM coins.'}</p></div></div>
+              {isFmPlus ? <>
+                <div className="fm-plus-plan-grid">
+                  {FM_PLUS_PLANS.map((plan) => <button type="button" key={plan.id} className={fmPlusPlan === plan.id ? 'is-active' : ''} onClick={() => { setFmPlusPlan(plan.id); idempotencyKey.current = ''; }}>
+                    <b>{plan.badge}</b><span>{plan.label}</span><strong>{money(plan.priceCents)}{plan.id === 'monthly' ? '/mo' : ''}</strong><small>{plan.description}</small>
+                  </button>)}
+                </div>
+                <aside className="fm-plus-benefits"><strong>FM+ BENEFITS</strong>{['1,000 bonus FM coins', 'Early Fantasy Card access', 'Exclusive FM+ leagues', 'No ads', '25 FM streak saves'].map((benefit) => <span key={benefit}><FaCheck /> {benefit}</span>)}</aside>
+              </> : <>
               <div className="fm-cart-pack-grid">
                 {PACKS.map((pack) => {
                   const quantity = Number(cart[pack.sku] || 0);
@@ -159,12 +179,13 @@ export default function MembershipCheckout() {
                 })}
               </div>
               <aside className="fm-cart-bonus"><FaCheck /><span><strong>First purchase bonus</strong><small>If eligible, the server doubles the purchased coins once. The final bonus appears after payment confirmation.</small></span></aside>
+              </>}
             </section>
 
             <section className="fm-cart-billing">
               <div className="fm-cart-section-title"><span>2</span><div><h2>Billing details</h2><p>Used for account matching and address verification at hosted checkout.</p></div></div>
               {user?.email
-                ? <aside className="fm-cart-account is-signed-in"><FaCheck /><span><strong>Signed in as {user.email}</strong><small>Coins credit directly to this player wallet after Kurv confirms payment.</small></span></aside>
+                ? <aside className="fm-cart-account is-signed-in"><FaCheck /><span><strong>Signed in as {user.email}</strong><small>{isFmPlus ? 'FM+ benefits and bonus coins apply to this player account after Kurv confirms payment.' : 'Coins credit directly to this player wallet after Kurv confirms payment.'}</small></span></aside>
                 : <aside className="fm-cart-account"><FaCoins /><span><strong>Player account included — plus 500 FM welcome coins</strong><small>After Kurv confirms payment, we create your wallet from these details and email a single-use password-set link. No extra signup form.</small></span></aside>}
               <div className="fm-cart-fields">
                 <label className="is-wide"><span>Email *</span><input name="email" type="email" required value={form.email} onChange={update} autoComplete="email" /></label>
@@ -182,10 +203,10 @@ export default function MembershipCheckout() {
 
             <aside className="fm-cart-summary">
               <h2>Order summary</h2>
-              {items.length ? items.map((item) => <p key={item.sku}><span>{item.coins.toLocaleString()} FM × {item.quantity}</span><strong>{money(item.priceCents * item.quantity)}</strong></p>) : <p><span>Your cart is empty</span><strong>—</strong></p>}
-              <div><span>Coins</span><strong>{baseCoins.toLocaleString()} FM</strong></div>
+              {isFmPlus ? <p><span>FM+ {selectedPlan.label}</span><strong>{money(selectedPlan.priceCents)}</strong></p> : items.length ? items.map((item) => <p key={item.sku}><span>{item.coins.toLocaleString()} FM × {item.quantity}</span><strong>{money(item.priceCents * item.quantity)}</strong></p>) : <p><span>Your cart is empty</span><strong>—</strong></p>}
+              <div><span>{isFmPlus ? 'Bonus' : 'Coins'}</span><strong>{isFmPlus ? '1,000 FM' : `${baseCoins.toLocaleString()} FM`}</strong></div>
               <div className="is-total"><span>Total</span><strong>{money(subtotalCents)}</strong></div>
-              <button type="submit" disabled={submitting || !items.length}>{submitting ? 'CREATING CHECKOUT…' : 'CONTINUE TO SECURE PAYMENT'}</button>
+              <button type="submit" disabled={submitting || (!isFmPlus && !items.length)}>{submitting ? 'CREATING CHECKOUT…' : 'CONTINUE TO SECURE PAYMENT'}</button>
               <small><FaShieldAlt /> Payment details are entered on Kurv Merchant’s hosted checkout. Card data is never collected by this page.</small>
               {status ? <p className="fm-cart-status" role="alert">{status}</p> : null}
             </aside>
@@ -193,8 +214,8 @@ export default function MembershipCheckout() {
         </div>
       </main>
       <style jsx>{`
-        .fm-cart-page{box-sizing:border-box;min-height:100dvh;width:100%;max-width:100vw;overflow-x:hidden;padding:110px 18px 70px;background:radial-gradient(circle at 12% 10%,rgba(239,68,68,.2),transparent 28rem),radial-gradient(circle at 88% 18%,rgba(77,141,255,.18),transparent 30rem),#05060a;color:#fff;font-family:Rajdhani,sans-serif}.fm-cart-page *{box-sizing:border-box;min-width:0}.fm-cart-shell{width:min(1180px,100%);margin:auto}.fm-cart-header{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:16px;align-items:center;margin-bottom:24px}.fm-cart-heading{min-width:0}.fm-cart-header>a,.fm-cart-header>i{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff}.fm-cart-header>i{color:#f2b544}.fm-cart-header span{display:flex;align-items:center;color:#f2b544;font-size:12px;font-weight:900;letter-spacing:.12em}.fm-cart-header h1{max-width:100%;overflow-wrap:anywhere;margin:3px 0 0;font-family:Anton,sans-serif;font-size:clamp(30px,5vw,58px);line-height:1.02;text-transform:uppercase}.fm-cart-header svg{flex:0 0 auto;margin-right:6px}form{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px);gap:18px}.fm-cart-products,.fm-cart-billing,.fm-cart-summary{min-width:0;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));padding:22px}.fm-cart-products,.fm-cart-billing{grid-column:1}.fm-cart-summary{grid-column:2;grid-row:1 / span 2;align-self:start;position:sticky;top:20px}.fm-cart-section-title{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px}.fm-cart-section-title>span{flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#f2b544;color:#2b1b00;font-weight:900}.fm-cart-section-title h2,.fm-cart-summary h2{margin:0;font-family:Anton,sans-serif;font-size:23px;line-height:1.1;text-transform:uppercase}.fm-cart-section-title p{margin:3px 0 0;color:rgba(255,255,255,.58);font-size:13px}.fm-cart-pack-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.fm-cart-pack-grid article{min-width:0;position:relative;text-align:center;padding:20px 8px 14px;border-radius:15px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11)}.fm-cart-pack-grid article.is-popular{border-color:#f2b544;box-shadow:0 0 24px rgba(242,181,68,.18)}.fm-cart-pack-grid article>b{position:absolute;top:-9px;left:50%;transform:translateX(-50%);white-space:nowrap;border-radius:999px;padding:3px 9px;background:#f2b544;color:#2b1b00;font-size:8px}.fm-cart-pack-grid article>svg{font-size:25px;color:#f2b544}.fm-cart-pack-grid small{display:block;color:rgba(255,255,255,.55);font-weight:800}.fm-cart-pack-grid h3{margin:5px 0 0;font-size:20px}.fm-cart-pack-grid article>strong{display:block;color:#f2b544;font-size:17px}.fm-cart-pack-grid article>div{display:flex;justify-content:center;align-items:center;gap:13px;margin-top:10px}.fm-cart-pack-grid button{flex:0 0 30px;width:30px!important;height:30px!important;min-height:30px!important;padding:0!important;border:0;border-radius:8px;background:rgba(255,255,255,.1)!important;color:#fff!important;cursor:pointer}.fm-cart-bonus,.fm-cart-account{display:flex;gap:10px;margin:14px 0;padding:12px;border-radius:12px;background:rgba(242,181,68,.09);border:1px solid rgba(242,181,68,.35);color:#f2b544}.fm-cart-bonus>svg,.fm-cart-account>svg{flex:0 0 auto}.fm-cart-bonus{margin-bottom:0;background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.35);color:#22c55e}.fm-cart-account.is-signed-in{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.35);color:#22c55e}.fm-cart-bonus span,.fm-cart-account span{display:grid}.fm-cart-bonus small,.fm-cart-account small{color:rgba(255,255,255,.6);line-height:1.4}.fm-cart-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fm-cart-fields label{display:grid;min-width:0;gap:5px}.fm-cart-fields label.is-wide{grid-column:1/-1}.fm-cart-fields span{color:#f2b544;font-size:11px;font-weight:900;text-transform:uppercase}.fm-cart-fields input{display:block;width:100%!important;max-width:100%;min-width:0;min-height:47px;border:1px solid rgba(255,255,255,.16);border-radius:11px;padding:0 13px;background:#080b11;color:#fff}.fm-cart-check{display:flex;align-items:flex-start;gap:9px;margin-top:13px;color:rgba(255,255,255,.72);font-size:12px;line-height:1.45}.fm-cart-check input{appearance:auto!important;flex:0 0 18px;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;margin:0!important;padding:0!important;border-radius:4px!important;box-shadow:none!important}.fm-cart-check a{color:#f2b544}.fm-cart-summary p,.fm-cart-summary>div{display:flex;justify-content:space-between;gap:12px;margin:0;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}.fm-cart-summary p span,.fm-cart-summary p strong{overflow-wrap:anywhere}.fm-cart-summary>div.is-total{font-size:19px;color:#f2b544;border-bottom:0}.fm-cart-summary button{width:100%;min-height:50px;margin-top:12px;border:0;border-radius:12px;background:linear-gradient(90deg,#f2b544,#ffcf58);color:#2b1b00;font-weight:1000;cursor:pointer;white-space:normal;line-height:1.25}.fm-cart-summary button:disabled{opacity:.5;cursor:not-allowed}.fm-cart-summary>small{display:block;margin-top:12px;color:rgba(255,255,255,.5);line-height:1.45}.fm-cart-status{display:block!important;margin-top:12px!important;padding:10px!important;border:1px solid rgba(239,68,68,.4)!important;border-radius:9px;color:#ff8a8a!important;background:rgba(239,68,68,.08)}
-        @media(max-width:800px){.fm-cart-page{padding:max(14px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(32px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}.fm-cart-header{grid-template-columns:40px minmax(0,1fr) 40px;gap:8px;margin-bottom:16px}.fm-cart-header>a,.fm-cart-header>i{width:40px;height:40px;border-radius:12px}.fm-cart-header span{font-size:10px;letter-spacing:.08em}.fm-cart-header h1{font-size:clamp(22px,7.3vw,32px)}form{grid-template-columns:minmax(0,1fr);gap:12px}.fm-cart-products,.fm-cart-billing,.fm-cart-summary{grid-column:1;grid-row:auto;width:100%;padding:15px;border-radius:17px}.fm-cart-summary{position:static}.fm-cart-section-title{gap:9px;margin-bottom:15px}.fm-cart-section-title h2,.fm-cart-summary h2{font-size:20px}.fm-cart-section-title p{font-size:11px;line-height:1.4}.fm-cart-pack-grid{grid-template-columns:minmax(0,1fr);gap:9px}.fm-cart-pack-grid article{display:grid;grid-template-columns:30px minmax(0,1fr) auto auto;align-items:center;column-gap:8px;text-align:left;padding:13px 10px}.fm-cart-pack-grid article>b{left:auto;right:9px;transform:none}.fm-cart-pack-grid article>svg{grid-row:1 / span 2;margin:0!important}.fm-cart-pack-grid small{grid-column:2}.fm-cart-pack-grid h3{grid-column:2;margin:0;font-size:17px}.fm-cart-pack-grid article>strong{grid-column:3;grid-row:1 / span 2;font-size:15px;white-space:nowrap}.fm-cart-pack-grid article>div{grid-column:4;grid-row:1 / span 2;margin:0;gap:5px}.fm-cart-fields{grid-template-columns:minmax(0,1fr)}.fm-cart-fields label.is-wide{grid-column:auto}.fm-cart-account,.fm-cart-bonus{font-size:12px}.fm-cart-summary p,.fm-cart-summary>div{font-size:12px}}
+        .fm-plus-plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.fm-plus-plan-grid button{min-height:150px;padding:18px 12px;border:1.5px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(255,255,255,.045);color:#fff;text-align:left;cursor:pointer}.fm-plus-plan-grid button.is-active{border-color:#a855f7;background:rgba(168,85,247,.14);box-shadow:0 0 22px rgba(168,85,247,.24)}.fm-plus-plan-grid b{display:block;color:#d8a8ff;font-size:8px;letter-spacing:.08em}.fm-plus-plan-grid span{display:block;margin-top:10px;font-family:Anton,sans-serif;font-size:22px;color:#fff}.fm-plus-plan-grid strong{display:block;color:#f2b544;font-size:20px}.fm-plus-plan-grid small{display:block;margin-top:5px;color:rgba(255,255,255,.58);font-weight:700}.fm-plus-benefits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:14px;padding:13px;border:1px solid rgba(168,85,247,.35);border-radius:12px;background:rgba(168,85,247,.08)}.fm-plus-benefits>strong{grid-column:1/-1;color:#d8a8ff;font-size:11px}.fm-plus-benefits span{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.75);font-size:11px;font-weight:800}.fm-plus-benefits svg{flex:0 0 auto;color:#22c55e}
+        @media(max-width:800px){.fm-cart-page{padding:max(14px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(32px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}.fm-cart-header{grid-template-columns:40px minmax(0,1fr) 40px;gap:8px;margin-bottom:16px}.fm-cart-header>a,.fm-cart-header>i{width:40px;height:40px;border-radius:12px}.fm-cart-header span{font-size:10px;letter-spacing:.08em}.fm-cart-header h1{font-size:clamp(22px,7.3vw,32px)}form{grid-template-columns:minmax(0,1fr);gap:12px}.fm-cart-products,.fm-cart-billing,.fm-cart-summary{grid-column:1;grid-row:auto;width:100%;padding:15px;border-radius:17px}.fm-cart-summary{position:static}.fm-cart-section-title{gap:9px;margin-bottom:15px}.fm-cart-section-title h2,.fm-cart-summary h2{font-size:20px}.fm-cart-section-title p{font-size:11px;line-height:1.4}.fm-cart-pack-grid{grid-template-columns:minmax(0,1fr);gap:9px}.fm-cart-pack-grid article{display:grid;grid-template-columns:30px minmax(0,1fr) auto auto;align-items:center;column-gap:8px;text-align:left;padding:13px 10px}.fm-cart-pack-grid article>b{left:auto;right:9px;transform:none}.fm-cart-pack-grid article>svg{grid-row:1 / span 2;margin:0!important}.fm-cart-pack-grid small{grid-column:2}.fm-cart-pack-grid h3{grid-column:2;margin:0;font-size:17px}.fm-cart-pack-grid article>strong{grid-column:3;grid-row:1 / span 2;font-size:15px;white-space:nowrap}.fm-cart-pack-grid article>div{grid-column:4;grid-row:1 / span 2;margin:0;gap:5px}.fm-plus-plan-grid{grid-template-columns:minmax(0,1fr)}.fm-plus-plan-grid button{min-height:118px}.fm-plus-benefits{grid-template-columns:minmax(0,1fr)}.fm-cart-fields{grid-template-columns:minmax(0,1fr)}.fm-cart-fields label.is-wide{grid-column:auto}.fm-cart-account,.fm-cart-bonus{font-size:12px}.fm-cart-summary p,.fm-cart-summary>div{font-size:12px}}
         @media(max-width:355px){.fm-cart-page{padding-left:8px;padding-right:8px}.fm-cart-header{grid-template-columns:36px minmax(0,1fr) 36px;gap:6px}.fm-cart-header>a,.fm-cart-header>i{width:36px;height:36px}.fm-cart-header h1{font-size:20px}.fm-cart-products,.fm-cart-billing,.fm-cart-summary{padding:12px}.fm-cart-pack-grid article{grid-template-columns:28px minmax(0,1fr) auto}.fm-cart-pack-grid article>strong{grid-column:2;text-align:left}.fm-cart-pack-grid article>div{grid-column:3}.fm-cart-section-title>span{flex-basis:26px;width:26px;height:26px}}
       `}</style>
     </>

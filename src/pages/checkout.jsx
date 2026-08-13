@@ -5,13 +5,12 @@ import React from 'react';
 const MembershipCheckout = dynamic(
   () => import('@/Components/CreateAccount/MembershipCheckout'),
   {
-    loading: () => <p>Loading...</p>,
+    loading: () => null,
   }
 );
 
 const Index = () => {
   const reduxUser = useSelector((state) => state.user); // Access user details from Redux store
-console.log("redux", reduxUser);
   return <MembershipCheckout userId={reduxUser._id}  />; // Pass user as a prop to MembershipCheckout
 };
 

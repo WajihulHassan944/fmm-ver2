@@ -18,6 +18,12 @@
   box-shadow: 0 0 80px rgba(77, 141, 255, 0.14), 0 0 120px rgba(239, 68, 68, 0.1);
 }
 
+/* Phone-mapped routes are server-rendered immediately, then hidden by CSS on
+   desktop. This removes the legacy-screen flash while viewport JS initializes. */
+.fmm-exact-mobile-portal.is-responsive-shell {
+  display: none;
+}
+
 /* Desktop adaptation for routes that use the approved mobile-app visual system. */
 @media (min-width: 768px) {
   body:has(.fmm-exact-mobile-portal) {
@@ -84,6 +90,10 @@
 }
 
 @media (max-width: 767px) {
+  .fmm-exact-mobile-portal.is-responsive-shell {
+    display: block;
+  }
+
   body:has(.fmm-exact-mobile-portal) {
     overflow: hidden !important;
     background: #05060a !important;

@@ -137,6 +137,7 @@ import SeoHead from "@/Components/SEO/SeoHead";
 import { API_BASE_URL } from "@/Utils/swarmApi";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import FantasyMobileExperience from "@/Components/MobileApp/FantasyMobileExperience";
 
 import { shouldUseRouteExperienceFrame } from "@/Utils/routeExperience";
 
@@ -164,11 +165,6 @@ const ChatbaseWidget = dynamic(() => import("@/Components/ChatbaseWidget"), {
   ssr: false,
   loading: () => null,
 });
-
-const FantasyMobileExperience = dynamic(
-  () => import("@/Components/MobileApp/FantasyMobileExperience"),
-  { ssr: false, loading: () => null },
-);
 
 const RouteExperienceFrame = dynamic(
   () => import("@/Components/Theme/RouteExperienceFrame"),
@@ -299,8 +295,11 @@ function AppContent({ children }) {
   );
   const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
   const forcePrototypeExperience = FULLSCREEN_PROTOTYPE_ROUTES.has(router.pathname);
-  const renderPrototypeExperience = Boolean(exactMobileTab && (isExactMobile || forcePrototypeExperience));
-  const renderLegacyExperience = !renderPrototypeExperience;
+  // Render the phone shell in the initial HTML for mapped routes. CSS keeps it
+  // hidden on desktop, while mobile no longer waits for a post-hydration chunk
+  // and media-query state update before the app appears.
+  const renderPrototypeExperience = Boolean(exactMobileTab);
+  const renderLegacyExperience = !forcePrototypeExperience && (!exactMobileTab || !isExactMobile);
   const mainClassName = isAdministrationRoute
     ? isAdminLoginRoute
       ? "admin-login-main"

@@ -414,10 +414,13 @@ const mergeRowsWithMatchFeedFighterImages = async (rows = [], query = {}, includ
 };
 
 export const fetchPublicFights = async (query = {}) => {
+  const shouldHydrateImages = query.hydrateImages !== false;
+  const apiQuery = { ...query };
+  delete apiQuery.hydrateImages;
   const includeDrafts = ["true", "1", "yes"].includes(
-    String(query.includeDrafts || query.admin || "").toLowerCase(),
+    String(apiQuery.includeDrafts || apiQuery.admin || "").toLowerCase(),
   );
-  const publicQuery = { limit: 100, ...query };
+  const publicQuery = { limit: 100, ...apiQuery };
 
   try {
     const payload = await safeFetchJson("/api/public/fights", publicQuery);
@@ -425,7 +428,9 @@ export const fetchPublicFights = async (query = {}) => {
       includeDrafts,
     }));
     if (rows.length) {
-      const hydratedRows = await mergeRowsWithMatchFeedFighterImages(rows, publicQuery, includeDrafts);
+      const hydratedRows = shouldHydrateImages
+        ? await mergeRowsWithMatchFeedFighterImages(rows, publicQuery, includeDrafts)
+        : rows;
       return dedupePublicFights(normalizePublicFightRows(hydratedRows));
     }
   } catch (error) {
@@ -444,10 +449,13 @@ export const fetchPublicFights = async (query = {}) => {
 };
 
 export const fetchPublicPredictionFights = async (query = {}) => {
+  const shouldHydrateImages = query.hydrateImages !== false;
+  const apiQuery = { ...query };
+  delete apiQuery.hydrateImages;
   const includeDrafts = ["true", "1", "yes"].includes(
-    String(query.includeDrafts || query.admin || "").toLowerCase(),
+    String(apiQuery.includeDrafts || apiQuery.admin || "").toLowerCase(),
   );
-  const requestQuery = { limit: 100, ...query };
+  const requestQuery = { limit: 100, ...apiQuery };
 
   const normalizePlayableRows = (payload) =>
     normalizePublicFightRows(filterPublicFights(normalizePaginatedPayload(payload).rows, {
@@ -466,11 +474,9 @@ export const fetchPublicPredictionFights = async (query = {}) => {
     );
     const rows = normalizePlayableRows(payload);
     if (rows.length) {
-      const hydratedRows = await mergeRowsWithMatchFeedFighterImages(
-        rows,
-        requestQuery,
-        includeDrafts,
-      );
+      const hydratedRows = shouldHydrateImages
+        ? await mergeRowsWithMatchFeedFighterImages(rows, requestQuery, includeDrafts)
+        : rows;
       return dedupePublicFights(
         normalizePublicFightRows(hydratedRows).map((fight) => ({
           ...fight,
@@ -524,7 +530,7 @@ export const fetchPublicLeaderboard = async (query = {}) => {
   try {
     const payload = await safeFetchJson(
       "/api/public/leaderboard",
-      { limit, fresh: Date.now(), ...query },
+      { limit, ...query },
       { timeoutMs: 8000 },
     );
     const leaderboard = normalizeLeaderboardRows(payload?.leaderboard, limit);

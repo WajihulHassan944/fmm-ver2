@@ -50,6 +50,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [timeRemaining, setTimeRemaining] = useState({ diffHrs: 0, diffMins: 0, diffSecs: 0, hasStarted: false });
   const [buttonText, setButtonText] = useState('Submit Predictions');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmation, setConfirmation] = useState(null);
 
   useEffect(() => {
     setRounds((current) => {
@@ -190,8 +191,14 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         console.warn('Prediction status sync failed after score save:', statusResponse.status);
       }
 
-      onSubmitted?.();
-      window.location.reload();
+      const winnerVotes = rounds.reduce((counts, round) => {
+        const side = getWinnerSide(round);
+        if (side) counts[side] += 1;
+        return counts;
+      }, { A: 0, B: 0 });
+      setConfirmation({
+        pickName: winnerVotes.B > winnerVotes.A ? match.matchFighterB : winnerVotes.A > winnerVotes.B ? match.matchFighterA : 'Round-by-round card submitted',
+      });
     } catch (error) {
       console.error('Error saving predictions:', error);
       alert('Failed to save predictions.');
@@ -205,6 +212,36 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     return (
       <section className="xp-prediction-arena is-empty">
         <div className="theme-container"><div className="xp-empty-card">Match not found</div></div>
+      </section>
+    );
+  }
+
+  if (confirmation) {
+    const rawSport = String(match.matchCategoryTwo || match.matchCategory || 'mma').toLowerCase();
+    const sport = rawSport.includes('bare') ? 'bareknuckle' : rawSport.includes('kick') ? 'kickboxing' : rawSport.includes('wrest') ? 'wrestling' : rawSport.includes('box') ? 'boxing' : 'mma';
+    const sports = ['boxing', 'mma', 'bareknuckle', 'kickboxing', 'wrestling'];
+    const nextSport = sports[(sports.indexOf(sport) + 1 + sports.length) % sports.length];
+    const nextLabel = { boxing: 'BOXING', mma: 'MMA', bareknuckle: 'BARE KNUCKLE', kickboxing: 'KICKBOXING', wrestling: 'PRO WRESTLING' }[nextSport];
+    const leaveConfirmation = (href) => {
+      onSubmitted?.();
+      router.push(href);
+    };
+    return (
+      <section style={{ minHeight: '100dvh', padding: 'max(28px, env(safe-area-inset-top)) 14px max(32px, env(safe-area-inset-bottom))', display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 0%,rgba(34,197,94,.18),transparent 35rem),#05060a', color: '#fff', fontFamily: 'Rajdhani,sans-serif' }}>
+        <div style={{ width: 'min(480px,100%)', boxSizing: 'border-box', padding: '24px 18px', borderRadius: 22, border: '1px solid rgba(34,197,94,.45)', background: 'linear-gradient(160deg,rgba(34,197,94,.12),rgba(255,255,255,.035))', boxShadow: '0 0 32px rgba(34,197,94,.16)', textAlign: 'center' }}>
+          <div style={{ fontSize: 42 }}>🥊</div>
+          <h1 style={{ margin: '4px 0', fontFamily: 'Anton,sans-serif', fontSize: 30, color: '#22c55e' }}>YOU’RE IN</h1>
+          <p style={{ margin: '0 0 16px', color: 'rgba(255,255,255,.65)', fontWeight: 700 }}>{match.matchFighterA} vs {match.matchFighterB}</p>
+          <div style={{ padding: 13, borderRadius: 12, background: 'rgba(255,255,255,.055)', border: '1px solid rgba(255,255,255,.12)', textAlign: 'left', marginBottom: 13 }}>
+            <small style={{ display: 'block', color: 'rgba(255,255,255,.45)', fontWeight: 900, letterSpacing: '.08em' }}>YOUR CARD</small>
+            <strong style={{ display: 'block', marginTop: 3, color: '#f2b544', overflowWrap: 'anywhere' }}>{confirmation.pickName}</strong>
+            <span style={{ display: 'block', marginTop: 4, color: 'rgba(255,255,255,.55)', fontSize: 12 }}>Live scoring starts from official fight data. Your saved values will not be replaced with samples.</span>
+          </div>
+          <button type="button" onClick={() => leaveConfirmation(`/upcomingfights?category=${nextSport}`)} style={{ width: '100%', minHeight: 50, border: 0, borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 1000, cursor: 'pointer' }}>NOW TRY {nextLabel} ›</button>
+          <p style={{ margin: '7px 0 12px', color: 'rgba(255,255,255,.4)', fontSize: 11, fontWeight: 700 }}>Players entering more than one sport can build a broader season score.</p>
+          <button type="button" onClick={() => leaveConfirmation('/YourFights')} style={{ width: '100%', minHeight: 46, borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)', color: '#fff', fontWeight: 900, cursor: 'pointer' }}>VIEW MY ENTRIES</button>
+          <button type="button" onClick={() => leaveConfirmation('/')} style={{ marginTop: 10, border: 0, background: 'transparent', color: 'rgba(255,255,255,.55)', fontWeight: 800, cursor: 'pointer' }}>RETURN HOME</button>
+        </div>
       </section>
     );
   }

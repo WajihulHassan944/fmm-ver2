@@ -16,6 +16,42 @@ import { dedupePublicFights, getFightId, getPublicFightDuplicateKey, sortFights 
 import FantasyMobileAppCore from './FantasyMobileAppCore';
 
 const MOBILE_QUERY = '(max-width: 767px)';
+const EXPERIENCE_CACHE_PREFIX = 'fmm-mobile-v7:';
+const EMPTY_DATA = Object.freeze({ fights: [], leaderboard: [], blogs: [], apparel: [], leagues: [], leagueUsers: [], stats: {} });
+const memoryExperienceCache = new Map();
+
+const readExperienceCache = (key) => {
+  if (memoryExperienceCache.has(key)) return memoryExperienceCache.get(key);
+  if (typeof window === 'undefined') return null;
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(EXPERIENCE_CACHE_PREFIX + key) || 'null');
+    if (parsed?.data && Date.now() - Number(parsed.savedAt || 0) < 30 * 60 * 1000) {
+      memoryExperienceCache.set(key, parsed.data);
+      return parsed.data;
+    }
+  } catch (_error) {}
+  return null;
+};
+
+const writeExperienceCache = (key, value) => {
+  memoryExperienceCache.set(key, value);
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(EXPERIENCE_CACHE_PREFIX + key, JSON.stringify({ savedAt: Date.now(), data: value }));
+  } catch (_error) {}
+};
+
+const fetchSignedInEntries = async () => {
+  if (typeof window === 'undefined') return [];
+  const token = window.localStorage.getItem('authToken');
+  if (!token) return [];
+  const response = await fetch(buildPublicApiUrl('/api/users/me/fight-entries?limit=150'), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) return [];
+  const payload = await response.json().catch(() => ({}));
+  return Array.isArray(payload.entries) ? payload.entries : [];
+};
 
 const getUser = (state) => {
   const direct = state?.user;
@@ -36,16 +72,11 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   const router = useRouter();
   const user = useSelector(getUser);
   const isStaff = useSelector((state) => Boolean(state?.adminAuth?.isAdminAuthenticated));
+  const userId = String(user?._id || user?.id || '').trim();
+  const cacheKey = userId || 'guest';
   const [isMobile, setIsMobile] = useState(false);
-  const [data, setData] = useState({
-    fights: [],
-    leaderboard: [],
-    blogs: [],
-    apparel: [],
-    leagues: [],
-    leagueUsers: [],
-    stats: {},
-  });
+  const [data, setData] = useState(EMPTY_DATA);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const media = window.matchMedia(MOBILE_QUERY);
@@ -58,20 +89,26 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   useEffect(() => {
     if (!isMobile && !forceRender) return undefined;
     let active = true;
+    const cached = readExperienceCache(cacheKey);
+    if (cached) {
+      setData(cached);
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
 
     Promise.allSettled([
-      fetchPublicPredictionFights({ limit: 300, status: 'upcoming', noCache: 'true' }),
-      fetchPublicPredictionFights({ limit: 300, noCache: 'true' }),
-      fetchPublicFights({ limit: 300, noCache: 'true' }),
-      fetchPromotedHomeFights({ limit: 24, noCache: 'true' }),
-      fetchPublicHomeSummary({ fightLimit: 24, leaderboardLimit: 20, noCache: 'true' }),
+      fetchPublicPredictionFights({ limit: 300, hydrateImages: false }),
+      fetchPublicFights({ limit: 300, hydrateImages: false }),
+      fetchPromotedHomeFights({ limit: 24 }),
+      fetchPublicHomeSummary({ fightLimit: 24, leaderboardLimit: 20 }),
       fetchPublicLeaderboard({ limit: 50 }),
       fetchPublicBlogs({ limit: 12 }),
       safeFetchJson('/api/public/apparel-products', { limit: 12 }),
       safeFetchJson('/api/public/leagues', { limit: 30 }),
-    ]).then(([upcomingResult, playableResult, publicResult, promotedResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult]) => {
+      userId ? fetchSignedInEntries() : Promise.resolve([]),
+    ]).then(([playableResult, publicResult, promotedResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult, entriesResult]) => {
       if (!active) return;
-      const upcomingRows = upcomingResult.status === 'fulfilled' && Array.isArray(upcomingResult.value) ? upcomingResult.value : [];
       const playableRows = playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [];
       const publicRows = publicResult.status === 'fulfilled' && Array.isArray(publicResult.value) ? publicResult.value : [];
       const promotedRows = promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [];
@@ -80,8 +117,9 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       const blogPayload = blogsResult.status === 'fulfilled' ? blogsResult.value || {} : {};
       const apparelPayload = apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {};
       const leaguePayload = leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {};
+      const entryRows = entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [];
       const summaryRows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
-      const predictionRows = [...upcomingRows, ...playableRows];
+      const predictionRows = playableRows;
       const predictionByKey = new Map();
       predictionRows.forEach((fight) => {
         [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
@@ -98,15 +136,21 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         String(getFightId(fight) || '').trim(),
         getPublicFightDuplicateKey(fight),
       ]).filter(Boolean));
+      const entryByKey = new Map();
+      entryRows.forEach((fight) => {
+        [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean).forEach((key) => entryByKey.set(key, fight));
+      });
       const fights = sortFights(dedupePublicFights([
         ...promotedRows,
         ...predictionRows,
+        ...entryRows,
         ...summaryRows,
         ...publicRows,
       ]), 'asc')
         .map((fight) => {
           const keys = [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean);
           const predictionFight = keys.map((key) => predictionByKey.get(key)).find(Boolean);
+          const entryFight = keys.map((key) => entryByKey.get(key)).find(Boolean);
           const mergedFight = predictionFight ? {
             ...fight,
             ...predictionFight,
@@ -118,15 +162,26 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
             bannerImage: predictionFight.bannerImage || fight.bannerImage,
             promotionBackground: predictionFight.promotionBackground || fight.promotionBackground,
           } : fight;
-          return {
+          const withEntry = entryFight ? {
             ...mergedFight,
+            ...entryFight,
+            homepagePromotion: mergedFight.homepagePromotion || entryFight.homepagePromotion,
+            fightPosterMobileImage: mergedFight.fightPosterMobileImage || entryFight.fightPosterMobileImage,
+            fightPosterImage: mergedFight.fightPosterImage || entryFight.fightPosterImage,
+            posterImage: mergedFight.posterImage || entryFight.posterImage,
+            matchPosterImage: mergedFight.matchPosterImage || entryFight.matchPosterImage,
+            bannerImage: mergedFight.bannerImage || entryFight.bannerImage,
+            promotionBackground: mergedFight.promotionBackground || entryFight.promotionBackground,
+          } : mergedFight;
+          return {
+            ...withEntry,
             __playable: keys.some((key) => playableKeys.has(key)),
             __homepagePromoted: keys.some((key) => promotedKeys.has(key)),
           };
         })
         .sort((left, right) => Number(Boolean(right.__homepagePromoted)) - Number(Boolean(left.__homepagePromoted)));
 
-      setData({
+      const nextData = {
         fights,
         leaderboard: Array.isArray(leaderboardPayload.leaderboard)
           ? leaderboardPayload.leaderboard
@@ -138,13 +193,18 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : [],
         leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : [],
         stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : {},
-      });
+      };
+      setData(nextData);
+      writeExperienceCache(cacheKey, nextData);
+      setIsLoading(false);
+    }).catch(() => {
+      if (active) setIsLoading(false);
     });
 
     return () => {
       active = false;
     };
-  }, [forceRender, isMobile]);
+  }, [cacheKey, forceRender, isMobile, userId]);
 
   const initialCoins = useMemo(
     () => toNumber(user?.tokens, user?.walletTokens, user?.wallet?.balance),
@@ -152,14 +212,14 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   );
   const isAuthenticated = Boolean(user?._id || user?.id || user?.email);
 
-  const goToCheckout = ({ amount, price, product = 'fm-coins', items = [] } = {}) => {
+  const goToCheckout = ({ amount, price, product = 'fm-coins', plan = '', items = [] } = {}) => {
     const serializedCart = Array.isArray(items) && items.length
       ? items
           .map((item) => `${String(item.sku || '').trim()}:${Math.max(1, Number(item.quantity || 1))}`)
           .filter((item) => !item.startsWith(':'))
           .join(',')
       : '';
-    const next = `/checkout?product=${encodeURIComponent(product)}${amount ? `&amount=${encodeURIComponent(amount)}` : ''}${price ? `&price=${encodeURIComponent(price)}` : ''}${serializedCart ? `&cart=${encodeURIComponent(serializedCart)}` : ''}`;
+    const next = `/checkout?product=${encodeURIComponent(product)}${plan ? `&plan=${encodeURIComponent(plan)}` : ''}${amount ? `&amount=${encodeURIComponent(amount)}` : ''}${price ? `&price=${encodeURIComponent(price)}` : ''}${serializedCart ? `&cart=${encodeURIComponent(serializedCart)}` : ''}`;
     router.push(next);
   };
 
@@ -198,11 +258,9 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     if (platform === 'X') window.open(`https://x.com/intent/post?url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
   };
 
-  if (!isMobile && !forceRender) return null;
-
   return (
     <div
-      className={`fmm-exact-mobile-portal ${isMobile ? 'is-phone-shell' : 'is-desktop-shell'}`}
+      className={`fmm-exact-mobile-portal ${forceRender ? (isMobile ? 'is-phone-shell' : 'is-desktop-shell') : 'is-responsive-shell is-phone-shell'}`}
       data-fmm-mobile-screen={initialTab}
     >
       <FantasyMobileAppCore
@@ -218,7 +276,8 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         leagueUsers={data.leagueUsers}
         stats={data.stats}
         onPurchaseCoins={goToCheckout}
-        onSubscribe={() => goToCheckout({ product: 'fm-plus' })}
+        dataLoading={isLoading}
+        onSubscribe={({ plan = 'monthly' } = {}) => goToCheckout({ product: 'fm-plus', plan })}
         onSubmitPrediction={submitPrediction}
         onOpenFight={({ event } = {}) => {
           const id = String(event?.backendId || event?.id || '').trim();

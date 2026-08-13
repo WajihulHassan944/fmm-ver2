@@ -562,8 +562,12 @@ const FinalHomeV35 = ({
     points: numberFrom(row.points, row.totalPoints, row.score),
   }));
 
-  const communityA = 50;
-  const communityB = 50;
+  const scoutingReport = featuredFight?.aiScoutingReport && typeof featuredFight.aiScoutingReport === 'object'
+    ? featuredFight.aiScoutingReport
+    : null;
+  const communityPickCount = Number(scoutingReport?.pickCount || 0);
+  const communityA = communityPickCount > 0 ? Number(scoutingReport?.pickSplit?.fighterA) : null;
+  const communityB = communityPickCount > 0 ? Number(scoutingReport?.pickSplit?.fighterB) : null;
   const liveTickerItems = [
     ["🔥", allRealFights.length ? `${allRealFights.length} published fight card${allRealFights.length === 1 ? "" : "s"} available` : "New fight cards publish here automatically", "#ff6b3b"],
     ["🥊", "Contest dates, fees and prize terms come from the registered fight", "#f2b544"],
@@ -732,7 +736,7 @@ const FinalHomeV35 = ({
         <section className="fmm-v35-dashboard" aria-label="Predictions and progression">
           <article className="fmm-v35-dash-card fmm-v35-community">
             <img src={`${ASSET_BASE}/pasted-1785014371576-0.png`} alt="" />
-            <div><span>COMMUNITY PREDICTIONS</span><small>{fighterAFirst} VS {fighterBFirst}</small><div className="fmm-v35-donut" style={{ "--pct": communityA }}><b /></div><p><b>{fighterAFirst}</b><strong>{communityA}%</strong></p><p><b>{fighterBFirst}</b><strong>{communityB}%</strong></p></div>
+            <div><span>COMMUNITY PREDICTIONS</span><small>{fighterAFirst} VS {fighterBFirst}</small>{communityPickCount > 0 ? <><div className="fmm-v35-donut" style={{ "--pct": communityA }}><b /></div><p><b>{fighterAFirst}</b><strong>{communityA}%</strong></p><p><b>{fighterBFirst}</b><strong>{communityB}%</strong></p></> : <p className="fmm-v41-leader-empty"><span>No submitted picks yet.</span></p>}</div>
           </article>
           <article className="fmm-v35-dash-card fmm-v35-progress">
             <img src={`${ASSET_BASE}/pasted-1785013690779-0.png`} alt="" />
@@ -740,7 +744,7 @@ const FinalHomeV35 = ({
           </article>
           <Link href="/leaderboard" className="fmm-v35-dash-card fmm-v35-leader">
             <img src={`${ASSET_BASE}/pasted-1785012542538-0.png`} alt="" />
-            <div><header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>{leaders.length ? leaders.slice(0, 3).map((row) => <p key={`${row.rank}-${row.name}`}><b>{row.rank}.</b><span>{row.name}</span><strong>{row.points.toLocaleString()}</strong></p>) : <p className="fmm-v41-leader-empty"><span>Scores publish after official results.</span></p>}{isLoggedIn ? <p className="is-you"><b>18.</b><span>{cleanText(currentUser?.firstName || currentUser?.username || "You")} (You)</span><strong>{tokenBalance.toLocaleString()} ↑</strong></p> : null}</div>
+            <div><header><span>LEADERBOARD</span><small>VIEW ALL ›</small></header>{leaders.length ? leaders.slice(0, 3).map((row) => <p key={`${row.rank}-${row.name}`}><b>{row.rank}.</b><span>{row.name}</span><strong>{row.points.toLocaleString()}</strong></p>) : <p className="fmm-v41-leader-empty"><span>Scores publish after official results.</span></p>}</div>
           </Link>
           <button type="button" className="fmm-v35-dash-card fmm-v35-streak" onClick={() => setCoinModalOpen(true)}>
             <img src={`${ASSET_BASE}/pasted-1785014166827-0.png`} alt="" />
@@ -789,8 +793,10 @@ const FinalHomeV35 = ({
               </div>
             </header>
             <blockquote>
-              Verified scouting metrics are not published for this contest yet. The assistant will show sourced matchup data here when it is available.
+              {scoutingReport?.summary || "Verified scouting metrics are not published for this contest yet. The assistant will show sourced matchup data here when it is available."}
             </blockquote>
+            {scoutingReport?.pickSplitNote ? <p className="fmm-v39-ai-note">{scoutingReport.pickSplitNote}</p> : null}
+            {scoutingReport?.underdogAngle ? <p className="fmm-v39-ai-note">{scoutingReport.underdogAngle}</p> : null}
             <div className="fmm-v39-ai-stats">
               <article><strong>{getShortDate(featuredFight)}</strong><span>FIGHT DATE</span></article>
               <article><strong>{featuredFight?.maxRounds || "TBA"}</strong><span>ROUNDS</span></article>

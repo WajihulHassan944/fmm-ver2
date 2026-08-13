@@ -2206,22 +2206,18 @@ const HomeAnother = () => {
       setMatchError(null);
 
       try {
-        const fresh = Date.now();
         const [summaryResult, predictionResult, promotedResult] =
           await Promise.allSettled([
             fetchPublicHomeSummary({
               fightLimit: HOME_FIGHT_FEED_LIMIT,
               leaderboardLimit: 5,
-              fresh,
-              noCache: "true",
             }),
             fetchPublicPredictionFights({
               limit: HOME_FIGHT_FEED_LIMIT,
               status: "upcoming",
-              fresh,
-              noCache: "true",
+              hydrateImages: false,
             }),
-            fetchPromotedHomeFights({ limit: 45, fresh, noCache: "true" }),
+            fetchPromotedHomeFights({ limit: 45 }),
           ]);
         const summary =
           summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
@@ -2238,10 +2234,10 @@ const HomeAnother = () => {
           Array.isArray(promotedResult.value)
             ? promotedResult.value
             : [];
-        const fights =
-          predictionFights.length >= summaryFights.length
-            ? predictionFights
-            : summaryFights;
+        const fights = dedupeHomepageFights([
+          ...predictionFights,
+          ...summaryFights,
+        ]);
 
         if (!active) return;
 
