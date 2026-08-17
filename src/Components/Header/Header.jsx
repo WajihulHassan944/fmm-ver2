@@ -389,7 +389,7 @@ const Header = () => {
           decoding="async"
           onError={(event) => {
             event.currentTarget.onerror = null;
-            event.currentTarget.src = '/images/fmm-experience/fantasy-mmadness-logo.png';
+            event.currentTarget.src = '/images/fmm-experience/fantasy-mmadness-logo.webp';
           }}
         />
         <span className="theme-mobile-wordmark" aria-hidden="true">

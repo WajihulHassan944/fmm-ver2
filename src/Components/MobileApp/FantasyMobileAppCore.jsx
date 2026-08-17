@@ -4,7 +4,27 @@ import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
-const EVENT_POSTER_COUNT = 6;
+const EVENT_POSTER_FILES = [
+  'event-poster-1.webp',
+  'event-poster-2.webp',
+  'event-poster-3.webp',
+  'event-poster-5.webp',
+  'event-poster-6.webp',
+];
+
+const SPORT_STORY_FILES = {
+  boxing: ['sport-boxing.webp', 'sport-boxing-0.webp', 'sport-boxing-1.webp', 'sport-boxing-2.webp'],
+  mma: ['sport-mma.webp', 'sport-mma-2.webp', 'sport-mma-3.webp'],
+  bareknuckle: ['sport-bareknuckle.webp', 'sport-bareknuckle-0.webp'],
+  kickboxing: ['sport-kickboxing.webp', 'sport-kickboxing-0.webp'],
+  wrestling: ['sport-wrestling.webp', 'sport-wrestling-4.webp'],
+};
+
+const getPosterAsset = (value = 1) => {
+  const numericValue = Number(value);
+  const safeIndex = Number.isFinite(numericValue) ? Math.max(0, Math.abs(Math.trunc(numericValue)) - 1) : 0;
+  return `${ASSET_BASE}/${EVENT_POSTER_FILES[safeIndex % EVENT_POSTER_FILES.length]}`;
+};
 
 const directSlotAssets = {
   'bold-hero': 'hero-banner-crop.png',
@@ -42,22 +62,22 @@ const resolveSlotAsset = (id = '', src = '') => {
 
   const eventMatch = String(id).match(/^event-poster-(\d+)$/);
   if (eventMatch) {
-    const requested = ((Number(eventMatch[1]) - 1) % EVENT_POSTER_COUNT) + 1;
-    return `${ASSET_BASE}/event-poster-${requested}.webp`;
+    return getPosterAsset(eventMatch[1]);
   }
 
-  const sportMatch = String(id).match(/^sport-(boxing|mma|bareknuckle|kickboxing|wrestling)-/);
+  const sportMatch = String(id).match(/^sport-(boxing|mma|bareknuckle|kickboxing|wrestling)-(\d+)$/);
   if (sportMatch) {
-    return `${ASSET_BASE}/sport-${sportMatch[1]}.webp`;
+    const storyFiles = SPORT_STORY_FILES[sportMatch[1]] || SPORT_STORY_FILES.mma;
+    const storyIndex = Number(sportMatch[2]) || 0;
+    return `${ASSET_BASE}/${storyFiles[storyIndex % storyFiles.length]}`;
   }
 
   const shadowMatch = String(id).match(/^shadow-(?:sf)?(\d+)$/);
   if (shadowMatch) {
-    const number = ((Number(shadowMatch[1]) - 1) % EVENT_POSTER_COUNT) + 1;
-    return `${ASSET_BASE}/event-poster-${number}.webp`;
+    return getPosterAsset(shadowMatch[1]);
   }
 
-  if (String(id).startsWith('demo-')) return `${ASSET_BASE}/event-poster-1.webp`;
+  if (String(id).startsWith('demo-')) return getPosterAsset(1);
   return '/images/hero-fight.webp';
 };
 
@@ -192,6 +212,8 @@ const sumLiveStrikes = (rows = [], sport = 'mma') => (Array.isArray(rows) ? rows
 
 const normalizeLiveEvent = (fight = {}, index = 0) => {
   const sport = resolveSport(fight);
+  const sourceType = cleanText(fight.sourceType, fight.collection).toLowerCase();
+  const matchType = cleanText(fight.matchType, fight.type).toLowerCase();
   const rawDate = cleanText(fight.matchDateKey, fight.eventDateKey, fight.matchDate, fight.eventDate, fight.date, fight.lockAt);
   const iso = getDateOnlyKey(rawDate);
   const rawPrize = cleanText(fight.prize, fight.prizePool, fight.winningAmount, fight.currentPot, fight.pot);
@@ -221,10 +243,17 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
   const fighterOneStats = Array.isArray(liveStats?.fighterOneStats) ? liveStats.fighterOneStats : [];
   const fighterTwoStats = Array.isArray(liveStats?.fighterTwoStats) ? liveStats.fighterTwoStats : [];
   const userEntry = fight.userEntry && typeof fight.userEntry === 'object' ? fight.userEntry : null;
+  const matchStatus = cleanText(fight.matchStatus, fight.status, fight.liveStatus).toLowerCase();
+  const liveMoments = [fight.liveMoments, fight.timeline, fight.matchMoments]
+    .find((value) => Array.isArray(value)) || [];
 
   return {
     id: cleanText(fight._id, fight.id, fight.matchId, `live-${index}`),
     backendId: cleanText(fight._id, fight.id, fight.matchId),
+    sourceType,
+    isShadow: sourceType === 'shadow' || matchType === 'shadow' || fight.isShadow === true || fight.is_shadow === true,
+    createdAt: cleanText(fight.createdAt, fight.publishedAt, fight.updatedAt),
+    shadowLastUsedAt: cleanText(fight.shadowLastUsedAt, fight.shadow_last_used_at),
     playable: fight.__playable !== false && !fight.predictionSubmitted && !fight.userPredictionSubmitted,
     homepagePromoted: fight.__homepagePromoted === true,
     featuredThisWeek: Boolean(fight.featuredThisWeek),
@@ -249,6 +278,12 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     currentRound: toSafeNumber(fight.currentRound, fight.liveRound, Math.max(fighterOneStats.length, fighterTwoStats.length)),
     liveStrikesA: sumLiveStrikes(fighterOneStats, sport),
     liveStrikesB: sumLiveStrikes(fighterTwoStats, sport),
+    matchStatus,
+    isLive: ['live', 'ongoing', 'in-progress', 'in_progress'].includes(matchStatus),
+    elapsedSeconds: toOptionalNumber(fight.elapsedSeconds, fight.matchSeconds, fight.liveElapsedSeconds),
+    liveHeatA: toOptionalNumber(fight.liveHeatA, fight.crowdHeatA, fight.fighterAHeat),
+    liveHeatB: toOptionalNumber(fight.liveHeatB, fight.crowdHeatB, fight.fighterBHeat),
+    liveMoments,
     userEntry,
     aiScoutingReport: fight.aiScoutingReport && typeof fight.aiScoutingReport === 'object' ? fight.aiScoutingReport : null,
     serverEntered: Boolean(userEntry || fight.predictionSubmitted || fight.userPredictionSubmitted),
@@ -284,6 +319,34 @@ const toSafeNumber = (...values) => {
   return 0;
 };
 
+const toOptionalNumber = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined || value === '') continue;
+    const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  }
+  return null;
+};
+
+const secondsUntil = (...values) => {
+  for (const value of values) {
+    if (!value) continue;
+    const time = new Date(value).getTime();
+    if (Number.isFinite(time)) return Math.max(0, Math.floor((time - Date.now()) / 1000));
+  }
+  return 0;
+};
+
+const isTodayUtc = (value) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const now = new Date();
+  return date.getUTCFullYear() === now.getUTCFullYear()
+    && date.getUTCMonth() === now.getUTCMonth()
+    && date.getUTCDate() === now.getUTCDate();
+};
+
 const emptyWrestlingDraft = () => ({
   a: { hp: 0, bp: 0, k: 0, pm: 0, fm: 0 },
   b: { hp: 0, bp: 0, k: 0, pm: 0, fm: 0 },
@@ -316,16 +379,33 @@ class FantasyMobileAppCore extends React.Component {
   state = {
     activeTab: this.props.initialTab || 'home',
     activeSport: 'all',
+    leaderboardTier: cleanText(this.props.currentUser?.skillTier, this.props.currentUser?.tier, 'rookie').toLowerCase(),
     modal: null,
     modalData: null,
     coins: Number.isFinite(Number(this.props.initialCoins)) ? Number(this.props.initialCoins) : 0,
-    rewardClaimed: false,
-    hasPurchased: false,
+    displayCoins: Number.isFinite(Number(this.props.initialCoins)) ? Number(this.props.initialCoins) : 0,
+    confetti: null,
+    showWelcomePulse: true,
+    idleNudgeShown: false,
+    bellWiggle: false,
+    walletFlash: false,
+    reactBurst: {},
+    notificationsDismissed: false,
+    profileDraft: {
+      firstName: cleanText(this.props.currentUser?.firstName),
+      lastName: cleanText(this.props.currentUser?.lastName),
+      playerName: cleanText(this.props.currentUser?.playerName, this.props.currentUser?.username),
+      email: cleanText(this.props.currentUser?.email),
+    },
+    profileSaving: false,
+    supportDraft: '',
+    rewardClaimed: isTodayUtc(this.props.currentUser?.dailyRewardClaimedAt),
+    hasPurchased: this.props.currentUser?.hasReceivedFirstPurchaseBonus === true,
     isSubscribed: hasActiveFmPlus(this.props.currentUser),
-    fmPlusMode: 'monthly',
+    fmPlusMode: 'pass',
     joinDraft: { name: '', email: '' },
     cart: [],
-    streakDay: 5,
+    streakDay: Math.min(7, toSafeNumber(this.props.currentUser?.loginStreak, this.props.currentUser?.streakDays, this.props.currentUser?.currentStreak)),
     votes: { jones: 76, aspinall: 24 },
     userVote: null,
     toast: null,
@@ -341,7 +421,7 @@ class FantasyMobileAppCore extends React.Component {
     reactions: [],
     friendFeed: [],
     reactionDraft: '',
-    streakExpiresIn: 6 * 3600,
+    streakExpiresIn: secondsUntil(this.props.currentUser?.streakExpiresAt, this.props.currentUser?.streakExpiry),
     watchMode: 'rounds',
     matchSeconds: 0,
     triggeredMoments: [],
@@ -392,7 +472,6 @@ class FantasyMobileAppCore extends React.Component {
       { id: 'sc3b', name: 'Unassigned', event: 'GLORY 92', corner: 'ALLAZOV', side: 'blue', status: 'open' },
     ],
     sportPhotoIndex: 0,
-    filledSlots: {},
     scorecardDraft: emptyWrestlingDraft(),
     wrestlingScorecards: {},
     boxingDraft: emptyBoxingDraft(),
@@ -405,8 +484,14 @@ class FantasyMobileAppCore extends React.Component {
   };
 
   componentDidMount() {
-    clearInterval(this._communityInterval); clearInterval(this._sportPhotoInterval); clearInterval(this._streakInterval); clearInterval(this._shadowInterval); clearInterval(this._friendInterval); clearInterval(this._watchInterval); clearInterval(this._filledPollInterval);
+    clearInterval(this._communityInterval); clearInterval(this._sportPhotoInterval); clearInterval(this._streakInterval); clearInterval(this._friendInterval); clearInterval(this._watchInterval);
+    clearInterval(this._coinTween);
+    clearTimeout(this._welcomeTimer); clearTimeout(this._idleTimer); clearTimeout(this._confettiTimeout); clearTimeout(this._bellTimeout); clearTimeout(this._walletTimeout);
     setTimeout(() => this.setState({ xpMounted: true }), 200);
+    this._welcomeTimer = setTimeout(() => this.setState({ showWelcomePulse: false }), 6000);
+    this._idleTimer = setTimeout(() => {
+      if (this.state.activeTab === 'home' && !this.state.idleNudgeShown) this.setState({ idleNudgeShown: true });
+    }, 30000);
     this._communityInterval = setInterval(() => {
       this.setState(s => ({ communityIndex: (s.communityIndex + 1) % 5 }));
     }, 4500);
@@ -416,29 +501,10 @@ class FantasyMobileAppCore extends React.Component {
     this._streakInterval = setInterval(() => {
       this.setState(s => s.rewardClaimed ? s : { streakExpiresIn: Math.max(0, s.streakExpiresIn - 1) });
     }, 1000);
-    this._shadowInterval = setInterval(() => {
-      this.setState(s => ({
-        shadowFights: s.shadowFights.map(sf => {
-          if (sf.status !== 'scheduled') return sf;
-          const next = sf.goLiveIn - 1;
-          if (next <= 0) return { ...sf, status: 'live', goLiveIn: 0 };
-          return { ...sf, goLiveIn: next };
-        })
-      }));
-    }, 1000);
-    this._filledPollInterval = setInterval(() => {
-      const updates = {};
-      let any = false;
-      document.querySelectorAll('.fmm-exact-mobile-portal img[data-filled][id]').forEach(el => {
-        const id = el.id, filled = el.hasAttribute('data-filled');
-        if (this.state.filledSlots[id] !== filled) { updates[id] = filled; any = true; }
-      });
-      if (any) this.setState(s => ({ filledSlots: { ...s.filledSlots, ...updates } }));
-    }, 2000);
     if ((this.props.initialTab || 'home') === 'watch') this.startWatchTicker();
   }
 
-  componentDidUpdate(previousProps) {
+  componentDidUpdate(previousProps, previousState) {
     const updates = {};
     const previousCoins = Number(previousProps.initialCoins);
     const nextCoins = Number(this.props.initialCoins);
@@ -455,8 +521,74 @@ class FantasyMobileAppCore extends React.Component {
     if (previousMembership !== nextMembership && nextMembership !== this.state.isSubscribed) {
       updates.isSubscribed = nextMembership;
     }
+    const previousUserId = cleanText(previousProps.currentUser?._id, previousProps.currentUser?.id);
+    const nextUserId = cleanText(this.props.currentUser?._id, this.props.currentUser?.id);
+    if (previousUserId !== nextUserId || previousProps.currentUser?.updatedAt !== this.props.currentUser?.updatedAt) {
+      updates.profileDraft = {
+        firstName: cleanText(this.props.currentUser?.firstName),
+        lastName: cleanText(this.props.currentUser?.lastName),
+        playerName: cleanText(this.props.currentUser?.playerName, this.props.currentUser?.username),
+        email: cleanText(this.props.currentUser?.email),
+      };
+      updates.leaderboardTier = cleanText(this.props.currentUser?.skillTier, this.props.currentUser?.tier, this.state.leaderboardTier, 'rookie').toLowerCase();
+      updates.streakDay = Math.min(7, toSafeNumber(this.props.currentUser?.loginStreak, this.props.currentUser?.streakDays, this.props.currentUser?.currentStreak));
+      updates.streakExpiresIn = secondsUntil(this.props.currentUser?.streakExpiresAt, this.props.currentUser?.streakExpiry);
+      updates.rewardClaimed = isTodayUtc(this.props.currentUser?.dailyRewardClaimedAt);
+      updates.hasPurchased = this.props.currentUser?.hasReceivedFirstPurchaseBonus === true;
+    }
     if (Object.keys(updates).length) this.setState(updates);
+
+    if (previousState && previousState.notifCount !== this.state.notifCount && this.state.notifCount > previousState.notifCount) {
+      clearTimeout(this._bellTimeout);
+      this.setState({ bellWiggle: true });
+      this._bellTimeout = setTimeout(() => this.setState({ bellWiggle: false }), 600);
+    }
+    if (previousState && previousState.coins !== this.state.coins) {
+      clearTimeout(this._walletTimeout);
+      clearInterval(this._coinTween);
+      const start = Number.isFinite(Number(this.state.displayCoins)) ? Number(this.state.displayCoins) : previousState.coins;
+      const end = this.state.coins;
+      const startedAt = Date.now();
+      this.setState({ walletFlash: true });
+      this._walletTimeout = setTimeout(() => this.setState({ walletFlash: false }), 700);
+      this._coinTween = setInterval(() => {
+        const progress = Math.min(1, (Date.now() - startedAt) / 600);
+        const value = Math.round(start + (end - start) * (1 - Math.pow(1 - progress, 3)));
+        this.setState({ displayCoins: value });
+        if (progress >= 1) clearInterval(this._coinTween);
+      }, 30);
+    }
   }
+
+  fireConfetti = () => {
+    const colors = ['#f2b544', '#ef4444', '#a855f7', '#22c55e', '#4d8dff'];
+    const pieces = Array.from({ length: 18 }, (_, index) => ({
+      id: `${Date.now()}-${index}`,
+      left: Math.random() * 100,
+      color: colors[index % colors.length],
+      delay: Math.random() * 0.3,
+      duration: 0.9 + Math.random() * 0.5,
+    }));
+    this.setState({ confetti: pieces });
+    clearTimeout(this._confettiTimeout);
+    this._confettiTimeout = setTimeout(() => this.setState({ confetti: null }), 1600);
+  };
+
+  countdownColor = (countdown = '') => {
+    const days = Number.parseInt(String(countdown), 10);
+    if (!Number.isFinite(days)) return '#fff';
+    if (days <= 1) return '#ef4444';
+    if (days <= 3) return '#f2b544';
+    return '#fff';
+  };
+
+  quickReact = (id) => {
+    const key = `${id}-${Date.now()}`;
+    this.setState((state) => ({ reactBurst: { ...state.reactBurst, [id]: key } }));
+    setTimeout(() => this.setState((state) => state.reactBurst[id] === key
+      ? { reactBurst: { ...state.reactBurst, [id]: null } }
+      : null), 900);
+  };
 
   getCtx() {
     if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -545,6 +677,15 @@ class FantasyMobileAppCore extends React.Component {
     if (name === 'wrestlingScorecard') reset.scorecardDraft = emptyWrestlingDraft();
     if (name === 'boxingScorecard') reset.boxingDraft = emptyBoxingDraft();
     if (name === 'mmaScorecard') reset.mmaDraft = emptyMmaDraft();
+    if (name === 'editProfile') {
+      reset.profileDraft = {
+        firstName: cleanText(this.props.currentUser?.firstName),
+        lastName: cleanText(this.props.currentUser?.lastName),
+        playerName: cleanText(this.props.currentUser?.playerName, this.props.currentUser?.username),
+        email: cleanText(this.props.currentUser?.email),
+      };
+      reset.profileSaving = false;
+    }
     this.setState({ modal: name, modalData: data || null, ...reset });
   };
   closeModal = () => this.setState({ modal: null, modalData: null });
@@ -552,21 +693,11 @@ class FantasyMobileAppCore extends React.Component {
   setTab = (tab) => {
     if (tab === 'watch' && this.state.activeTab !== 'watch') this.startWatchTicker();
     if (tab !== 'watch' && this.state.activeTab === 'watch') this.stopWatchTicker();
+    this.props.onTabChange?.(tab);
     this.setState({ activeTab: tab, modal: null });
   };
   startWatchTicker() {
     clearInterval(this._watchInterval);
-    this._watchInterval = setInterval(() => {
-      this.setState(s => {
-        const jGain = 0;
-        const aGain = 0;
-        return {
-          liveTicks: { jones: s.liveTicks.jones + jGain, aspinall: s.liveTicks.aspinall + aGain },
-          watchPoints: s.watchPoints + jGain * 10,
-        };
-      });
-      this.tickMatchClock();
-    }, 1600);
   }
   stopWatchTicker() { clearInterval(this._watchInterval); clearInterval(this._friendInterval); }
   setReactionDraft = (v) => this.setState({ reactionDraft: v });
@@ -576,7 +707,7 @@ class FantasyMobileAppCore extends React.Component {
     this.setState(s => ({ friendFeed: [...s.friendFeed, { id: Date.now() + Math.random(), name: 'You', text, mine: true }].slice(-8), reactionDraft: '' }));
     this.playBell();
   };
-  setWatchMode = (m) => this.setState({ watchMode: m, matchSeconds: 0, triggeredMoments: [] });
+  setWatchMode = (m) => this.setState({ watchMode: m });
   tickMatchClock() {
     if (this.state.watchMode !== 'moments') return;
     this.setState(s => {
@@ -596,7 +727,13 @@ class FantasyMobileAppCore extends React.Component {
       return { matchSeconds: secs, triggeredMoments: justHit ? [...s.triggeredMoments, justHit[0]] : s.triggeredMoments };
     });
   }
-  componentWillUnmount() { this.stopWatchTicker(); clearInterval(this._communityInterval); clearInterval(this._sportPhotoInterval); clearInterval(this._shadowInterval); clearInterval(this._streakInterval); clearInterval(this._demoInterval); clearInterval(this._filledPollInterval); clearInterval(this._aiDemoInterval); }
+  componentWillUnmount() {
+    this.stopWatchTicker();
+    [this._communityInterval, this._sportPhotoInterval, this._streakInterval, this._demoInterval, this._aiDemoInterval, this._coinTween]
+      .forEach((timer) => clearInterval(timer));
+    [this._welcomeTimer, this._idleTimer, this._confettiTimeout, this._bellTimeout, this._walletTimeout, this._toastTimer]
+      .forEach((timer) => clearTimeout(timer));
+  }
 
   joinShadowLobby = (sf) => {
     this.playBell();
@@ -608,10 +745,8 @@ class FantasyMobileAppCore extends React.Component {
   };
 
   pickCycleId(ids, s) {
-    const filled = ids.filter(id => s.filledSlots[id]);
-    if (filled.length === 0) return ids[0];
-    if (filled.length === 1) return filled[0];
-    return filled[s.sportPhotoIndex % filled.length];
+    if (!ids.length) return '';
+    return ids[s.sportPhotoIndex % ids.length];
   }
 
   quickPick = (ev, side) => {
@@ -971,25 +1106,24 @@ class FantasyMobileAppCore extends React.Component {
     this.showToast(`Entered ${ev.tag}${entryFee ? `! -${entryFee} FM` : '!'}`);
   };
 
-  saveStreak = () => {
+  saveStreak = async () => {
     const cost = this.state.isSubscribed ? 25 : 50;
     if (this.state.coins < cost) { this.showToast('Not enough FM coins to save your streak'); this.openModal('addcoins'); return; }
+    if (!this.props.onSaveStreak) { this.showToast('Sign in to save your streak'); return; }
+    const result = await this.props.onSaveStreak().catch(() => null);
+    if (!result) { this.showToast('Streak could not be saved'); return; }
     this.playBell();
-    this.setState(s => ({ coins: s.coins - cost, streakExpiresIn: 24 * 3600 }));
     this.showToast(`🔥 Streak saved for ${cost} FM — timer reset!`);
   };
 
-  unlockNextReward = () => {
+  unlockNextReward = async () => {
     if (this.state.coins < 75) { this.showToast('Not enough FM coins to skip the wait'); this.openModal('addcoins'); return; }
+    if (!this.props.onSkipStreakWait) { this.showToast('Sign in to skip the wait'); return; }
+    const result = await this.props.onSkipStreakWait().catch(() => null);
+    if (!result) { this.showToast('The next reward could not be unlocked'); return; }
     this.playCheer(); this.playBell();
-    this.setState(s => ({
-      coins: s.coins - 75 + 250,
-      rewardClaimed: false,
-      streakDay: Math.min(7, s.streakDay + 1),
-      chestBounce: s.chestBounce + 1,
-      streakExpiresIn: 24 * 3600,
-    }));
-    this.showToast('⚡ Skipped the wait — next reward unlocked for 75 FM!');
+    this.setState((state) => ({ rewardClaimed: false, chestBounce: state.chestBounce + 1 }));
+    this.showToast('⚡ Next reward unlocked for 75 FM!');
   };
 
   subscribeFmPlus = () => {
@@ -997,20 +1131,18 @@ class FantasyMobileAppCore extends React.Component {
       this.props.onSubscribe({ plan: this.state.fmPlusMode });
       return;
     }
-    this.playCheer();
-    this.setState(s => ({ isSubscribed: true, coins: s.coins + 1000, modal: null }));
-    this.showToast('⭐ Welcome to FM+ — 1,000 bonus FM added!');
+    this.showToast('Secure FM+ checkout is unavailable right now');
   };
 
-  claimReward = () => {
+  claimReward = async () => {
     if (this.state.rewardClaimed) return;
+    if (!this.props.onClaimReward) { this.showToast('Sign in to claim the daily reward'); return; }
+    const result = await this.props.onClaimReward().catch(() => null);
+    if (!result) { this.showToast('Reward is not ready yet'); return; }
     this.playCheer(); this.playBell();
     this.setState(s => ({
-      coins: s.coins + 250,
       rewardClaimed: true,
-      streakDay: Math.min(7, s.streakDay + 1),
       chestBounce: s.chestBounce + 1,
-      streakExpiresIn: 24 * 3600,
     }));
     this.showToast('+250 FM claimed!');
   };
@@ -1068,7 +1200,22 @@ class FantasyMobileAppCore extends React.Component {
     this.showToast('Prediction locked: ' + fighter);
   };
 
-  markNotifsRead = () => this.setState({ notifCount: 0 });
+  markNotifsRead = () => this.setState({ notifCount: 0, notificationsDismissed: true });
+
+  buildNotificationItems = (events = [], state = this.state) => {
+    if (state.notificationsDismissed) return [];
+    const items = [];
+    (events || []).forEach((event) => {
+      const daysAway = Number.parseInt(String(event.countdown || ''), 10);
+      if (Number.isFinite(daysAway) && daysAway <= 7) {
+        items.push(['🥊', `${event.tag} predictions lock in ${daysAway} day${daysAway === 1 ? '' : 's'}`]);
+      }
+      if (event.entered && Number.isFinite(daysAway) && daysAway <= 3) {
+        items.push(['🔴', `${event.f1} vs ${event.f2} goes live soon — your entry is in`]);
+      }
+    });
+    return items.slice(0, 8);
+  };
 
   joinNow = () => {
     if (this.props.onJoin) {
@@ -1081,6 +1228,45 @@ class FantasyMobileAppCore extends React.Component {
   copyReferral = () => {
     this.props.onShare?.({ platform: 'copy', text: 'Join my Fantasy MMAdness fight card.' });
     this.showToast('Referral link copied!');
+  };
+
+  updateProfileDraft = (field, value) => this.setState((state) => ({
+    profileDraft: { ...state.profileDraft, [field]: value },
+  }));
+
+  saveProfile = async () => {
+    if (!this.props.onUpdateProfile) {
+      this.showToast('Sign in to update your profile');
+      return;
+    }
+    this.setState({ profileSaving: true });
+    try {
+      const saved = await this.props.onUpdateProfile({ ...this.state.profileDraft });
+      if (!saved) throw new Error('Profile update failed');
+      this.closeModal();
+      this.showToast('✓ Profile updated');
+    } catch (_error) {
+      this.showToast('Profile could not be updated');
+    } finally {
+      this.setState({ profileSaving: false });
+    }
+  };
+
+  submitSupport = async () => {
+    const message = String(this.state.supportDraft || '').trim();
+    if (!message) {
+      this.showToast('Describe the issue first');
+      return;
+    }
+    try {
+      const sent = await this.props.onSupport?.({ message });
+      if (!sent) throw new Error('Support request not accepted');
+      this.setState({ supportDraft: '' });
+      this.closeModal();
+      this.showToast('✓ Support request ready');
+    } catch (_error) {
+      this.showToast('Open Contact to send this request');
+    }
   };
   shareToSocial = (platform) => {
     this.playCheer();
@@ -1102,7 +1288,12 @@ class FantasyMobileAppCore extends React.Component {
     const liveEvents = Array.isArray(this.props.fights)
       ? this.props.fights.map(normalizeLiveEvent).filter(event => event.f1 && event.f2)
       : [];
-    const eventsRaw = liveEvents;
+    const retentionShadow = this.props.retention?.shadowFight
+      ? normalizeLiveEvent(this.props.retention.shadowFight, liveEvents.length)
+      : null;
+    const eventsRaw = retentionShadow && !liveEvents.some((event) => event.id === retentionShadow.id)
+      ? [...liveEvents, retentionShadow]
+      : liveEvents;
     const now = new Date();
     const MS_DAY = 86400000;
     const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -1127,11 +1318,17 @@ class FantasyMobileAppCore extends React.Component {
 
     const liveLeaderboard = Array.isArray(this.props.leaderboard)
       ? this.props.leaderboard.map((row, index) => ({
-          rank: Number(row.rank || index + 1),
+          rank: Number(row.globalRank || row.rank || index + 1),
+          tierRank: Number(row.tierRank || row.rank || index + 1),
           name: cleanText(row.displayName, row.playerName, row.username, row.name, `Player ${index + 1}`),
           pts: Number(row.totalPoints ?? row.points ?? row.score ?? 0).toLocaleString(),
           medal: index === 0 ? '#f2b544' : index === 1 ? '#c9ccd1' : index === 2 ? '#c9772e' : null,
           you: cleanText(row._id, row.id) && cleanText(row._id, row.id) === cleanText(this.props.currentUser?._id, this.props.currentUser?.id),
+          skillTier: cleanText(row.skillTier, row.userTier, row.tier).toLowerCase(),
+          championTitle: cleanText(row.championTitle, row.seasonTitle, row.title),
+          profileUrl: resolveLiveMedia(row.profileUrl, row.avatar, row.image),
+          accuracy: cleanText(row.accuracy, row.pickAccuracy),
+          fightIq: cleanText(row.fightIq, row.fightIQ, row.totalPoints, row.points),
         }))
       : [];
     const leaderboardFull = liveLeaderboard;
@@ -1167,11 +1364,6 @@ class FantasyMobileAppCore extends React.Component {
       : [];
     const apparel = liveApparel.length ? liveApparel : fallbackApparel;
 
-    const fallbackBlogs = [
-      { id: 'b1', title: 'UFC 323 PREVIEW: JONES VS ASPINALL', body: 'Breaking down the heavyweight title clash — striking gaps, grappling exchanges, and where the smart FM picks lie ahead of fight night.', icon: '🥊', colors: ['#ef4444', '#f2b544'] },
-      { id: 'b2', title: '5 KEYS TO MAKING BETTER PICKS', body: 'From reach and cardio metrics to camp form, here are five habits that separate top-of-leaderboard predictors from the rest.', icon: '🎯', colors: ['#a855f7', '#4d8dff'] },
-      { id: 'b3', title: 'FIGHT IQ STRATEGY: THINK LIKE A FIGHTER', body: 'Level up your Fight IQ score by studying gameplans the way real corners do — round by round, not just the final decision.', icon: '🧠', colors: ['#22c55e', '#4d8dff'] },
-    ];
     const liveBlogs = Array.isArray(this.props.blogs)
       ? this.props.blogs.map((blog, index) => ({
           id: cleanText(blog._id, blog.id, `blog-${index}`),
@@ -1181,15 +1373,9 @@ class FantasyMobileAppCore extends React.Component {
           colors: [['#ef4444', '#f2b544'], ['#a855f7', '#4d8dff'], ['#22c55e', '#4d8dff']][index % 3],
         }))
       : [];
-    const blogs = liveBlogs.length ? liveBlogs : fallbackBlogs;
+    const blogs = liveBlogs;
 
     const streakDays = [1, 2, 3, 4, 5, 6, 7].map(d => ({ d, done: d <= s.streakDay, current: d === s.streakDay }));
-
-    const votesTotal = s.votes.jones + s.votes.aspinall;
-    const jonesPct = Math.round(s.votes.jones);
-    const aspinallPct = 100 - jonesPct;
-    const dashArray = 251.2;
-    const dashOffset = dashArray * (1 - jonesPct / 100);
 
     const navItems = [
       { id: 'home', label: 'HOME' },
@@ -1199,18 +1385,28 @@ class FantasyMobileAppCore extends React.Component {
       { id: 'profile', label: 'PROFILE' },
     ].map(n => ({ ...n, active: s.activeTab === n.id }));
 
-    const coinsFmt = s.coins.toLocaleString();
-    const xpPct = s.xpMounted ? 81.6 : 0;
+    const coinsFmt = Number(s.displayCoins ?? s.coins).toLocaleString();
+    const notificationItems = this.buildNotificationItems(events, s);
+    const liveNotificationCount = notificationItems.length;
+    const currentXp = toSafeNumber(this.props.currentUser?.fightIq, this.props.currentUser?.fightIQ, this.props.currentUser?.xp, this.props.currentUser?.totalPoints);
+    const nextXp = toSafeNumber(this.props.currentUser?.nextLevelXp, this.props.currentUser?.xpTarget);
+    const xpPct = s.xpMounted && currentXp > 0 && nextXp > 0 ? Math.min(100, (currentXp / nextXp) * 100) : 0;
 
     const activeView = React.createElement('div', {
       className: `fmm-prototype-view fmm-prototype-view--${s.activeTab}`,
+      key: s.activeTab,
+      style: { animation: 'tabFadeIn .22s ease-out' },
     },
-      s.activeTab === 'home' && this.renderHome(sports, filteredEvents, events, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s),
+      s.activeTab === 'home' && this.renderHome(sports, filteredEvents, events, leaderboardFull, apparel, blogs, streakDays, xpPct, s),
+      s.activeTab === 'home' && s.idleNudgeShown && filteredEvents.find((event) => !event.entered) && React.createElement('div', {
+        onClick: () => { this.setState({ idleNudgeShown: false }); this.setTab('contests'); },
+        style: { margin: '0 16px 4px', padding: '10px 12px', borderRadius: 10, cursor: 'pointer', background: 'rgba(242,181,68,.12)', border: '1px solid rgba(242,181,68,.4)', fontSize: 11, fontWeight: 800, color: '#f2b544', animation: 'liveToastIn 5s ease-in-out' }
+      }, `👀 Still open — ${filteredEvents.find((event) => !event.entered).tag} locks in ${filteredEvents.find((event) => !event.entered).countdown}`),
       s.activeTab === 'contests' && this.renderContests(sports, filteredEvents, s),
-      s.activeTab === 'leaderboard' && this.renderLeaderboard(leaderboardFull),
+      s.activeTab === 'leaderboard' && this.renderLeaderboard(leaderboardFull, s),
       s.activeTab === 'predict' && this.renderPredict(events, s),
-      s.activeTab === 'profile' && this.renderProfile(coinsFmt, streakDays, xpPct),
-      s.activeTab === 'watch' && this.renderWatchParty(s, jonesPct, aspinallPct, events),
+      s.activeTab === 'profile' && this.renderProfile(coinsFmt, streakDays, xpPct, events),
+      s.activeTab === 'watch' && this.renderWatchParty(s, events),
       s.activeTab === 'leagues' && this.renderLeagues(s, events),
       s.activeTab === 'settings' && this.renderSettings(s),
       s.activeTab === 'demo' && this.renderDemo(s),
@@ -1226,11 +1422,11 @@ class FantasyMobileAppCore extends React.Component {
         className: 'fmm-prototype-scroll',
         style: { flex: '1 1 auto', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingTop: 0 }
       },
-        this.renderTopBar(coinsFmt, s.notifCount),
+        this.renderTopBar(coinsFmt, liveNotificationCount),
         activeView
       ),
       this.renderBottomNav(navItems),
-      this.renderModal(s, events, jonesPct, aspinallPct),
+      this.renderModal(s, events),
       s.toast && React.createElement('div', {
         style: {
           position: 'absolute', bottom: 100, left: '50%', transform: 'translateX(-50%)',
@@ -1238,7 +1434,12 @@ class FantasyMobileAppCore extends React.Component {
           color: '#f2b544', padding: '10px 18px', borderRadius: 999, fontSize: 14, fontWeight: 700,
           whiteSpace: 'nowrap', zIndex: 500, animation: 'toastIn .25s ease-out', boxShadow: '0 8px 24px rgba(0,0,0,.5)'
         }
-      }, s.toast)
+      }, s.toast),
+      s.confetti && React.createElement('div', { style: { position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 1000 } },
+        s.confetti.map((piece) => React.createElement('div', {
+          key: piece.id,
+          style: { position: 'absolute', left: piece.left + '%', top: 0, width: 8, height: 8, background: piece.color, borderRadius: 2, animation: `confettiFall ${piece.duration}s ease-in ${piece.delay}s forwards` }
+        })))
     );
 
     return { screen };
@@ -1282,7 +1483,8 @@ class FantasyMobileAppCore extends React.Component {
           onClick: () => this.openModal('wallet'),
           style: {
             display: 'flex', alignItems: 'center', gap: 6, background: 'linear-gradient(135deg,#1c1f27,#0f1116)',
-            border: '1px solid rgba(242,181,68,.5)', borderRadius: 999, padding: '6px 10px', cursor: 'pointer'
+            border: '1px solid rgba(242,181,68,.5)', borderRadius: 999, padding: '6px 10px', cursor: 'pointer',
+            animation: this.state.walletFlash ? 'walletFlash .7s ease-out' : (this.state.showWelcomePulse ? 'welcomeRing 2s ease-in-out infinite' : 'none')
           }
         },
           React.createElement('div', { style: { width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg,#ffe08a,#a8720f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, color: '#3a2500' } }, 'FM'),
@@ -1303,7 +1505,7 @@ class FantasyMobileAppCore extends React.Component {
         ),
         React.createElement('div', {
           onClick: () => this.openModal('notif'),
-          style: { position: 'relative', width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }
+          style: { position: 'relative', width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', animation: this.state.bellWiggle ? 'bellWiggle .6s ease-out' : 'none' }
         },
           React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: '#fff', strokeWidth: 2 },
             React.createElement('path', { d: 'M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9' }),
@@ -1342,16 +1544,16 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  renderHome(sports, filteredEvents, allEvents, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s) {
+  renderHome(sports, filteredEvents, allEvents, leaderboardFull, apparel, blogs, streakDays, xpPct, s) {
     const bannerEvent = allEvents.find((event) => event.featuredThisWeek) || allEvents[0];
     const detailEvent = allEvents.find((event) => event.featuredFight)
       || allEvents.find((event) => event.id !== bannerEvent?.id)
       || bannerEvent;
     const top = s.layout === 'bold'
       ? React.createElement(React.Fragment, null,
-          this.renderBoldHero(),
+          this.renderBoldHero(allEvents),
           this.renderStorySports(sports),
-          this.renderBento(jonesPct, aspinallPct, dashOffset, xpPct, s, bannerEvent),
+          this.renderBento(xpPct, s, bannerEvent),
           this.renderEventCarousel(filteredEvents, s)
         )
       : React.createElement(React.Fragment, null,
@@ -1366,9 +1568,10 @@ class FantasyMobileAppCore extends React.Component {
     return React.createElement(React.Fragment, null,
       this.renderLayoutSwitch(s),
       top,
+      this.renderDeadWeekShadowBanner(allEvents, s),
       this.renderStartHere(allEvents, s),
       this.renderMyEntries(allEvents, s),
-      this.renderWatchLeaguesPromo(),
+      this.renderWatchLeaguesPromo(allEvents, s),
       React.createElement('div', {
         onClick: () => this.setTab('demo'),
         style: { margin: '0 16px 16px', textAlign: 'center', padding: '16px 0 12px', borderRadius: 10, background: '#16a34a', border: '2px solid #22c55e', color: '#fff', fontWeight: 900, fontSize: 12, cursor: 'pointer', boxShadow: '0 0 22px rgba(34,197,94,.7)', position: 'relative' }
@@ -1376,8 +1579,8 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 900, padding: '3px 10px', borderRadius: 999, animation: 'pulseLive 1s infinite', boxShadow: '0 0 10px rgba(239,68,68,.8)', whiteSpace: 'nowrap' } }, 'NEW HERE?'),
         React.createElement('div', { style: { color: '#eaffef', marginTop: 4 } }, 'TRY A FREE DEMO FIGHT — NO COINS NEEDED')
       ),
-      s.layout === 'classic' && allEvents.length > 0 && this.renderCommunityAndProgress(allEvents, xpPct, s),
-      this.renderRewardsRow(streakDays, s),
+      s.layout === 'classic' && allEvents.length > 0 && this.renderCommunityAndProgress(allEvents, leaderboardFull, xpPct, s),
+      this.renderRewardsRow(streakDays, s, leaderboardFull),
       this.renderApparel(apparel, s),
       this.renderBlogsAndAffiliate(s)
     );
@@ -1421,9 +1624,40 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
+  daysToNearestLiveFight(events = []) {
+    const now = Date.now();
+    const times = events
+      .filter((event) => !event.isShadow && event.iso)
+      .map((event) => dateOnlyToLocalDate(event.iso, event.matchTime || '23:59'))
+      .filter(Boolean)
+      .map((date) => (date.getTime() - now) / 86400000)
+      .filter((days) => days >= 0);
+    return times.length ? Math.min(...times) : Infinity;
+  }
+
+  renderDeadWeekShadowBanner(events, s) {
+    const backendRetention = this.props.retention && typeof this.props.retention === 'object' ? this.props.retention : {};
+    const deadWeek = typeof backendRetention.deadWeek === 'boolean'
+      ? backendRetention.deadWeek
+      : this.daysToNearestLiveFight(events) > 7;
+    if (!deadWeek) return null;
+    const shadow = (events || []).find((event) => event.isShadow);
+    if (!shadow) return null;
+    const entryLabel = this.getEventEntryLabel(shadow);
+    return React.createElement('div', {
+      onClick: () => this.setTab('leagues'),
+      style: { margin: '0 16px 16px', padding: 14, borderRadius: 14, background: 'linear-gradient(160deg,rgba(168,85,247,.16),rgba(255,255,255,.02))', border: '1.5px solid rgba(168,85,247,.5)', cursor: 'pointer', boxShadow: '0 0 18px rgba(168,85,247,.2)' }
+    },
+      React.createElement('div', { style: { fontSize: 9.5, fontWeight: 900, letterSpacing: .8, color: '#a855f7', marginBottom: 4 } }, '🕶 NO LIVE FIGHT THIS WEEK'),
+      React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16, marginBottom: 3 } }, 'MYSTERY SHADOW FIGHT IS LIVE'),
+      React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.6)' } }, `${this.getSportLabel(shadow.sport)} · identity hidden · ${entryLabel} entry · test your skills while you wait`)
+    );
+  }
+
   renderStartHere(events, s) {
     if (this.props.dataLoading || this.myEntries(events, s).length) return null;
-    const first = (events || []).find((event) => event.playable);
+    const first = (events || []).find((event) => event.playable && !event.isShadow)
+      || (events || []).find((event) => event.playable);
     if (!first) return null;
     const entryLabel = this.getEventEntryLabel(first);
     return React.createElement('div', { style: { margin: '0 16px 16px', padding: 14, borderRadius: 14, background: 'linear-gradient(160deg,rgba(242,181,68,.16),rgba(255,255,255,.02))', border: '1.5px solid rgba(242,181,68,.5)' } },
@@ -1451,10 +1685,10 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#22c55e' } }, `${mine.length} LIVE`)),
       React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, mine.map((event) => {
         const storedSplit = event.aiScoutingReport?.pickSplit;
-        const localVotes = s.eventVotes[event.id] || { a: 50, b: 50 };
-        const split = storedSplit ? { a: Number(storedSplit.fighterA), b: Number(storedSplit.fighterB) } : localVotes;
+        const hasRealSplit = storedSplit && Number.isFinite(Number(storedSplit.fighterA)) && Number.isFinite(Number(storedSplit.fighterB));
+        const split = hasRealSplit ? { a: Number(storedSplit.fighterA), b: Number(storedSplit.fighterB) } : null;
         const pickSide = event.userEntry?.pickSide || (s.boxingScorecards[event.id] || s.mmaScorecards[event.id] || s.wrestlingScorecards[event.id] || {}).winner;
-        const withYou = pickSide === 'b' ? split.b : split.a;
+        const withYou = split ? (pickSide === 'b' ? split.b : split.a) : null;
         const pickName = event.userEntry?.pickName || (pickSide === 'b' ? event.f2 : pickSide === 'a' ? event.f1 : 'CARD SUBMITTED');
         return React.createElement('div', {
           key: event.id, onClick: () => this.openWatchFor(event),
@@ -1466,9 +1700,9 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, marginBottom: 5 } }, `${event.f1} vs ${event.f2}`),
           React.createElement('div', { style: { fontSize: 10.5, fontWeight: 800, color: 'rgba(255,255,255,.65)', marginBottom: 7 } }, 'Your pick: ', React.createElement('span', { style: { color: '#22c55e', fontWeight: 900 } }, pickName)),
           React.createElement('div', { style: { height: 4, borderRadius: 999, background: 'rgba(255,255,255,.12)', overflow: 'hidden', marginBottom: 5 } },
-            React.createElement('div', { style: { width: `${Math.max(0, Math.min(100, Number(withYou) || 0))}%`, height: '100%', background: 'linear-gradient(90deg,#22c55e,#4ade80)', transition: 'width .6s ease' } })),
+            React.createElement('div', { style: { width: `${withYou === null ? 0 : Math.max(0, Math.min(100, Number(withYou) || 0))}%`, height: '100%', background: 'linear-gradient(90deg,#22c55e,#4ade80)', transition: 'width .6s ease' } })),
           React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 9.5, fontWeight: 800 } },
-            React.createElement('span', { style: { color: 'rgba(255,255,255,.5)' } }, `${Number(withYou) || 0}% of players are with you`),
+            React.createElement('span', { style: { color: 'rgba(255,255,255,.5)' } }, withYou === null ? 'Pick split updates from real entries' : `${Number(withYou) || 0}% of players are with you`),
             React.createElement('span', { style: { color: '#4d8dff' } }, 'WATCH LIVE ›')),
         );
       })),
@@ -1488,15 +1722,20 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  renderBoldHero() {
+  renderBoldHero(events = []) {
+    const liveCount = events.filter((event) => event.isLive).length;
+    const activeCount = events.length;
+    const playerCount = toSafeNumber(this.props.stats?.players);
+    const fightMetric = liveCount > 0 ? `🔥 ${liveCount} LIVE` : `🥊 ${activeCount || '—'} ACTIVE`;
+    const playerMetric = playerCount > 0 ? `${playerCount.toLocaleString()} PLAYERS` : 'REAL SCORES';
     return React.createElement('div', { style: { position: 'relative', margin: '0 16px 14px', borderRadius: 20, overflow: 'hidden', height: 340, border: '1px solid rgba(242,181,68,.3)' } },
       React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex' } },
         React.createElement(MobileImageSlot, { id: 'bold-hero', shape: 'rect', placeholder: 'Wide fight action hero photo' , fit: 'contain'})
       ),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.25) 0%,rgba(5,6,10,.55) 55%,rgba(5,6,10,.96) 100%)' } }),
       React.createElement('div', { style: { position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', justifyContent: 'space-between' } },
-        React.createElement('div', { style: { background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 999, padding: '5px 12px', fontSize: 10, fontWeight: 800, color: '#f2b544', whiteSpace: 'nowrap', flex: '0 0 auto' } }, '🔥 56 LIVE'),
-        React.createElement('div', { style: { background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 999, padding: '5px 12px', fontSize: 10, fontWeight: 800, color: '#22c55e', whiteSpace: 'nowrap', flex: '0 0 auto' } }, '$250K+ PRIZES')
+        React.createElement('div', { style: { background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 999, padding: '5px 12px', fontSize: 10, fontWeight: 800, color: '#f2b544', whiteSpace: 'nowrap', flex: '0 0 auto' } }, fightMetric),
+        React.createElement('div', { style: { background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 999, padding: '5px 12px', fontSize: 10, fontWeight: 800, color: '#22c55e', whiteSpace: 'nowrap', flex: '0 0 auto' } }, playerMetric)
       ),
       React.createElement('div', { style: { position: 'absolute', bottom: 16, left: 16, right: 16 } },
         React.createElement('div', {
@@ -1540,15 +1779,22 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  renderBento(jonesPct, aspinallPct, dashOffset, xpPct, s, featuredEvent) {
+  renderBento(xpPct, s, featuredEvent) {
     const glass = { background: 'rgba(255,255,255,.055)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 16, backdropFilter: 'blur(6px)' };
+    const split = featuredEvent?.aiScoutingReport?.pickSplit;
+    const fighterAPct = toOptionalNumber(split?.fighterA, split?.a);
+    const fighterBPct = toOptionalNumber(split?.fighterB, split?.b);
+    const hasRealSplit = fighterAPct !== null && fighterBPct !== null;
+    const user = this.props.currentUser || {};
+    const fightIq = toOptionalNumber(user.fightIq, user.fightIQ, user.xp, user.totalPoints);
+    const level = toOptionalNumber(user.level, user.fightIqLevel, user.fightIQLevel);
     return React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '0 16px 16px' } },
       React.createElement('div', {
         onClick: () => featuredEvent ? this.openEvent(featuredEvent) : this.setTab('contests'),
         style: { ...glass, gridColumn: '1 / 3', padding: 14, cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '1px solid rgba(239,68,68,.4)', animation: 'glowPulse 3s ease-in-out infinite' }
       },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544' } }, '★ FEATURED · ' + (featuredEvent?.tag || 'NEXT FIGHT CARD')),
-        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, margin: '4px 0' } }, featuredEvent?.f1 || 'FIGHTER A', ' ', React.createElement('span', { style: { color: '#ef4444' } }, 'VS'), ' ', featuredEvent?.f2 || 'FIGHTER B'),
+        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, margin: '4px 0' } }, featuredEvent ? React.createElement(React.Fragment, null, featuredEvent.f1, ' ', React.createElement('span', { style: { color: '#ef4444' } }, 'VS'), ' ', featuredEvent.f2) : 'REGISTERED FIGHTS APPEAR HERE'),
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
           React.createElement('div', { style: { fontSize: 13, fontWeight: 800, color: '#22c55e' , animation: 'moneyPulse 1.8s ease-in-out infinite' } }, featuredEvent?.prize ? featuredEvent.prize + ' POOL' : 'PRIZE TERMS PENDING'),
           React.createElement('div', { style: { background: '#f2b544', color: '#2b1b00', fontWeight: 900, fontSize: 11, padding: '7px 14px', borderRadius: 8 } }, 'PREDICT')
@@ -1557,16 +1803,16 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { ...glass, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 } },
         React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: '#a855f7' } }, 'COMMUNITY VOTE'),
         React.createElement('svg', { width: 54, height: 54, viewBox: '0 0 90 90' },
-          React.createElement('circle', { cx: 45, cy: 45, r: 38, fill: 'none', stroke: '#4d8dff', strokeWidth: 12 }),
-          React.createElement('circle', { cx: 45, cy: 45, r: 38, fill: 'none', stroke: '#ef4444', strokeWidth: 12, strokeDasharray: 238.8, strokeDashoffset: 238.8 * (1 - jonesPct / 100), transform: 'rotate(-90 45 45)', style: { transition: 'stroke-dashoffset .6s ease' } })
+          React.createElement('circle', { cx: 45, cy: 45, r: 38, fill: 'none', stroke: hasRealSplit ? '#4d8dff' : 'rgba(255,255,255,.14)', strokeWidth: 12 }),
+          hasRealSplit && React.createElement('circle', { cx: 45, cy: 45, r: 38, fill: 'none', stroke: '#ef4444', strokeWidth: 12, strokeDasharray: 238.8, strokeDashoffset: 238.8 * (1 - fighterAPct / 100), transform: 'rotate(-90 45 45)', style: { transition: 'stroke-dashoffset .6s ease' } })
         ),
-        React.createElement('div', { style: { fontSize: 10, fontWeight: 700 } }, React.createElement('span', { style: { color: '#ef4444' } }, jonesPct + '%'), ' / ', React.createElement('span', { style: { color: '#4d8dff' } }, aspinallPct + '%'))
+        React.createElement('div', { style: { fontSize: 10, fontWeight: 700 } }, hasRealSplit ? React.createElement(React.Fragment, null, React.createElement('span', { style: { color: '#ef4444' } }, fighterAPct + '%'), ' / ', React.createElement('span', { style: { color: '#4d8dff' } }, fighterBPct + '%')) : 'PICKS OPEN AFTER ENTRIES')
       ),
       React.createElement('div', { style: { ...glass, position: 'relative', overflow: 'hidden', padding: 12, display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' } },
         React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'progression-bg', shape: 'rect', placeholder: 'Boxing gloves photo', fit: 'cover', src: 'uploads/pasted-1785013690779-0.png' })),
         React.createElement('div', { style: { position: 'relative' } },
-        React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: '#f2b544' } }, 'FIGHT IQ · LVL 18'),
-        React.createElement('div', { style: { fontSize: 16, fontWeight: 800, color: '#c084fc' } }, '2,450 XP'),
+        React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: '#f2b544' } }, `FIGHT IQ${level !== null ? ` · LVL ${level}` : ''}`),
+        React.createElement('div', { style: { fontSize: 16, fontWeight: 800, color: '#c084fc' } }, fightIq === null ? 'AWAITING SCORES' : `${fightIq.toLocaleString()} XP`),
         React.createElement('div', { style: { height: 5, background: 'rgba(255,255,255,.1)', borderRadius: 3, overflow: 'hidden' } },
           React.createElement('div', { style: { height: '100%', width: xpPct + '%', background: 'linear-gradient(90deg,#a855f7,#ec4899)', transition: 'width 1s ease' } })
         )
@@ -1762,7 +2008,11 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  renderWatchLeaguesPromo() {
+  renderWatchLeaguesPromo(events = [], s = this.state) {
+    const entries = this.myEntries(events, s);
+    const liveFight = entries.find((event) => event.isLive) || events.find((event) => event.isLive);
+    const watchLabel = liveFight ? 'LIVE NOW' : entries.length ? 'YOUR CARD' : 'WATCH PARTY';
+    const watchCopy = liveFight ? 'Live scoring · crowd reactions' : entries.length ? 'Your entry is ready for fight night' : 'Opens with registered fight data';
     return React.createElement('div', { style: { display: 'flex', gap: 8, padding: '0 16px 16px' } },
       React.createElement('div', {
         onClick: () => this.setTab('watch'),
@@ -1771,10 +2021,10 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'promo-watch-bg', shape: 'rect', placeholder: 'Stadium photo', fit: 'cover', src: 'uploads/pasted-1785011607947-0.png' })),
         React.createElement('div', { style: { position: 'relative' } },
           React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 900, color: '#ff8a8a' } },
-            React.createElement('span', { style: { width: 7, height: 7, borderRadius: '50%', background: '#ef4444', animation: 'pulseLive 1.2s infinite' } }), 'LIVE NOW'
+            React.createElement('span', { style: { width: 7, height: 7, borderRadius: '50%', background: liveFight ? '#ef4444' : '#f2b544', animation: liveFight ? 'pulseLive 1.2s infinite' : 'none' } }), watchLabel
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, marginTop: 4, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.6)' } }, '▶ WATCH PARTY'),
-          React.createElement('div', { style: { fontSize: 10, color: '#ffe93b', fontWeight: 900, marginTop: 2, textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, 'Live scoring · crowd reactions')
+          React.createElement('div', { style: { fontSize: 10, color: '#ffe93b', fontWeight: 900, marginTop: 2, textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, watchCopy)
         )
       ),
       React.createElement('div', {
@@ -1814,16 +2064,20 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginTop: 7 } }, 'Points update only from official fight stats; no simulated scoring is added on this screen.'));
   }
 
-  renderWatchParty(s, jonesPct, aspinallPct, events = []) {
+  renderWatchParty(s, events = []) {
     const liveEvent = this.watchFight(s, events);
     const fighterA = liveEvent?.f1 || 'RED CORNER';
     const fighterB = liveEvent?.f2 || 'BLUE CORNER';
     const rounds = Array.from({ length: Math.max(1, toSafeNumber(liveEvent?.maxRounds) || 5) }, (_, index) => index + 1);
-    const current = Math.min(rounds.length, Math.max(1, toSafeNumber(liveEvent?.currentRound) || 1));
-    const moments = [
-      [12, '🥊', 'Feeling out'], [28, '🦵', 'Near-fall'], [50, '🏃', 'Run-in'], [74, '💥', 'Finisher'], [98, '3️⃣', 'Near-fall'],
-    ];
-    const mm = Math.floor(s.matchSeconds / 60), ss = String(s.matchSeconds % 60).padStart(2, '0');
+    const current = Math.min(rounds.length, toSafeNumber(liveEvent?.currentRound));
+    const moments = (Array.isArray(liveEvent?.liveMoments) ? liveEvent.liveMoments : []).map((moment, index) => {
+      const at = toSafeNumber(moment?.elapsedSeconds, moment?.at, moment?.second, index + 1);
+      return [at, cleanText(moment?.icon, '●'), cleanText(moment?.label, moment?.text, moment?.description, 'Official live update')];
+    });
+    const elapsedSeconds = toSafeNumber(liveEvent?.elapsedSeconds);
+    const mm = Math.floor(elapsedSeconds / 60), ss = String(elapsedSeconds % 60).padStart(2, '0');
+    const heatA = toOptionalNumber(liveEvent?.liveHeatA);
+    const heatB = toOptionalNumber(liveEvent?.liveHeatB);
     return React.createElement('div', { style: { padding: '8px 16px', position: 'relative', overflow: 'hidden' } },
       React.createElement('div', { style: { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 } },
         React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'watch-stadium-bg', shape: 'rect', placeholder: 'Stadium crowd photo', fit: 'cover', src: 'uploads/pasted-1785011607947-0.png' })),
@@ -1848,7 +2102,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { position: 'relative', zIndex: 1 } },
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 } },
         React.createElement('span', { style: { width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'pulseLive 1.2s infinite' } }),
-        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#ef4444' } }, liveEvent ? 'LIVE · ' + liveEvent.tag : 'WATCH PARTY · WAITING FOR LIVE FIGHT')
+        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: liveEvent?.isLive ? '#ef4444' : '#f2b544' } }, liveEvent ? `${liveEvent.isLive ? 'LIVE' : 'WATCH PARTY'} · ${liveEvent.tag}` : 'WATCH PARTY · WAITING FOR A REGISTERED FIGHT')
       ),
       this.renderYourCard(s, liveEvent),
       React.createElement('div', { style: { display: 'flex', gap: 6, marginBottom: 10 } },
@@ -1858,13 +2112,13 @@ class FantasyMobileAppCore extends React.Component {
         }, m === 'rounds' ? '🥊 ROUNDS (MMA/BOXING)' : '🤼 LIVE MOMENTS (WRESTLING)'))
       ),
       s.watchMode === 'rounds' ? React.createElement(React.Fragment, null,
-        React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 14 } }, fighterA + ' VS ' + fighterB + ' · ROUND ' + current + ' OF ' + rounds.length),
+        React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 14 } }, fighterA + ' VS ' + fighterB + (current > 0 ? ' · ROUND ' + current + ' OF ' + rounds.length : ' · WAITING FOR OFFICIAL ROUND DATA')),
         React.createElement('div', { style: { display: 'flex', gap: 5, marginBottom: 16 } },
           rounds.map(r => React.createElement('div', {
             key: r, style: {
               flex: 1, height: 8, borderRadius: 4,
-              background: r < current ? '#22c55e' : r === current ? '#ef4444' : 'rgba(255,255,255,.1)',
-              animation: r === current ? 'pulseLive 1s infinite' : 'none'
+              background: current > 0 && r < current ? '#22c55e' : current > 0 && r === current ? '#ef4444' : 'rgba(255,255,255,.1)',
+              animation: current > 0 && r === current ? 'pulseLive 1s infinite' : 'none'
             }
           }))
         )
@@ -1872,27 +2126,28 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 8 } }, 'NO FIXED ROUNDS — SCORED BY LIVE MOMENTS AS THEY HAPPEN'),
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, color: '#f2b544', textAlign: 'center', marginBottom: 10 } }, mm + ':' + ss),
         React.createElement('div', { style: { position: 'relative', height: 4, background: 'rgba(255,255,255,.1)', borderRadius: 2, margin: '0 10px 22px' } },
-          React.createElement('div', { style: { position: 'absolute', left: 0, top: 0, height: '100%', width: Math.min(100, s.matchSeconds / 1.2) + '%', background: 'linear-gradient(90deg,#f2b544,#ef4444)', borderRadius: 2, transition: 'width .3s linear' } }),
+          React.createElement('div', { style: { position: 'absolute', left: 0, top: 0, height: '100%', width: Math.min(100, elapsedSeconds / 15) + '%', background: 'linear-gradient(90deg,#f2b544,#ef4444)', borderRadius: 2, transition: 'width .3s linear' } }),
           moments.map(([at, icon, label]) => React.createElement('div', {
             key: at, style: {
-              position: 'absolute', left: (at / 1.2) + '%', top: -10, transform: 'translateX(-50%)', fontSize: 16,
-              opacity: s.triggeredMoments.includes(at) ? 1 : 0.3,
-              filter: s.triggeredMoments.includes(at) ? 'drop-shadow(0 0 8px #f2b544)' : 'none',
-              animation: s.triggeredMoments.includes(at) ? 'bounceChest .5s ease' : 'none'
+              position: 'absolute', left: Math.min(100, at / 15) + '%', top: -10, transform: 'translateX(-50%)', fontSize: 16,
+              opacity: at <= elapsedSeconds ? 1 : 0.3,
+              filter: at <= elapsedSeconds ? 'drop-shadow(0 0 8px #f2b544)' : 'none',
+              animation: at <= elapsedSeconds ? 'bounceChest .5s ease' : 'none'
             }, title: label
-          }, icon))
+          }, icon)),
+          !moments.length && React.createElement('div', { style: { position: 'absolute', top: 10, left: 0, right: 0, textAlign: 'center', fontSize: 8.5, fontWeight: 800, color: 'rgba(255,255,255,.4)' } }, 'OFFICIAL LIVE MOMENTS WILL APPEAR HERE')
         )
       ),
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: 16, marginBottom: 14 } },
         React.createElement('div', { style: { textAlign: 'center' } },
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15 } }, fighterA),
-          React.createElement('div', { style: { fontSize: 26, fontWeight: 900, color: '#ef4444' } }, s.watchMode === 'moments' ? Math.min(99, s.liveTicks.jones) + '%' : (liveEvent?.liveStrikesA || 0)),
+          React.createElement('div', { style: { fontSize: 26, fontWeight: 900, color: '#ef4444' } }, s.watchMode === 'moments' ? (heatA === null ? '—' : heatA + '%') : (liveEvent?.liveStrikesA || 0)),
           React.createElement('div', { style: { fontSize: 9, color: 'rgba(255,255,255,.5)', fontWeight: 700 } }, s.watchMode === 'moments' ? 'CROWD HEAT' : (liveEvent ? 'OFFICIAL STRIKES' : 'WAITING FOR LIVE DATA'))
         ),
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 20, color: 'rgba(255,255,255,.3)', alignSelf: 'center' } }, 'VS'),
         React.createElement('div', { style: { textAlign: 'center' } },
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15 } }, fighterB),
-          React.createElement('div', { style: { fontSize: 26, fontWeight: 900, color: '#4d8dff' } }, s.watchMode === 'moments' ? Math.min(99, s.liveTicks.aspinall) + '%' : (liveEvent?.liveStrikesB || 0)),
+          React.createElement('div', { style: { fontSize: 26, fontWeight: 900, color: '#4d8dff' } }, s.watchMode === 'moments' ? (heatB === null ? '—' : heatB + '%') : (liveEvent?.liveStrikesB || 0)),
           React.createElement('div', { style: { fontSize: 9, color: 'rgba(255,255,255,.5)', fontWeight: 700 } }, s.watchMode === 'moments' ? 'CROWD HEAT' : (liveEvent ? 'OFFICIAL STRIKES' : 'WAITING FOR LIVE DATA'))
         )
       ),
@@ -2122,6 +2377,8 @@ class FantasyMobileAppCore extends React.Component {
   renderLeagues(s, events) {
     const leagues = Array.isArray(this.props.leagues) ? this.props.leagues : [];
     const users = Array.isArray(this.props.leagueUsers) ? this.props.leagueUsers : [];
+    const shadowEvents = (events || []).filter((event) => event.isShadow);
+    const latestRealEvent = (events || []).find((event) => !event.isShadow);
     const userById = new Map(users.map((user) => [String(user?._id || user?.id || ''), user]));
     return React.createElement('div', { style: { padding: '8px 16px 24px', position: 'relative', overflow: 'hidden', minHeight: '100%' } },
       React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'leagues-live-bg', shape: 'rect', placeholder: 'Fight league arena', fit: 'cover', src: 'uploads/pasted-1785012202182-0.png' })),
@@ -2129,10 +2386,25 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 4, color: '#a855f7' } }, 'LEAGUES & HEAD-TO-HEAD'),
         React.createElement('p', { style: { margin: '0 0 14px', color: 'rgba(255,255,255,.6)', fontSize: 11, fontWeight: 700 } }, 'Real creator leagues from the Fantasy MMAdness community.'),
-        events.length > 0 && React.createElement('div', { style: { marginBottom: 14, padding: 10, borderRadius: 10, background: 'rgba(77,141,255,.1)', border: '1px solid rgba(77,141,255,.35)' } },
+        latestRealEvent && React.createElement('div', { style: { marginBottom: 14, padding: 10, borderRadius: 10, background: 'rgba(77,141,255,.1)', border: '1px solid rgba(77,141,255,.35)' } },
           React.createElement('strong', { style: { color: '#4d8dff', fontSize: 10 } }, 'NEW FIGHT ALERT'),
-          React.createElement('div', { style: { fontSize: 12, fontWeight: 900, marginTop: 3 } }, events[0].f1 + ' vs ' + events[0].f2),
-          React.createElement('small', { style: { color: 'rgba(255,255,255,.55)' } }, events[0].date + ' · ' + events[0].tag)
+          React.createElement('div', { style: { fontSize: 12, fontWeight: 900, marginTop: 3 } }, latestRealEvent.f1 + ' vs ' + latestRealEvent.f2),
+          React.createElement('small', { style: { color: 'rgba(255,255,255,.55)' } }, latestRealEvent.date + ' · ' + latestRealEvent.tag)
+        ),
+        shadowEvents.length > 0 && React.createElement('section', { style: { marginBottom: 16 } },
+          React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.62)', marginBottom: 3 } }, '🕶 SHADOW FIGHTS'),
+          React.createElement('div', { style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginBottom: 9, lineHeight: 1.45 } }, 'Archived mystery cards surfaced by the live backend during off-fight weeks.'),
+          React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, shadowEvents.map((event) => React.createElement('article', {
+            key: event.id, onClick: () => this.openEvent(event),
+            style: { padding: 13, borderRadius: 12, background: 'linear-gradient(160deg,rgba(168,85,247,.14),rgba(255,255,255,.03))', border: '1px solid rgba(168,85,247,.45)', cursor: 'pointer' }
+          },
+            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 4 } },
+              React.createElement('strong', { style: { color: '#d8a8ff', fontSize: 10, letterSpacing: .6 } }, `${this.getSportLabel(event.sport)} · IDENTITY HIDDEN`),
+              React.createElement('span', { style: { color: '#f2b544', fontSize: 9.5, fontWeight: 900 } }, event.countdown)),
+            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16, marginBottom: 4 } }, 'MYSTERY SHADOW FIGHT'),
+            React.createElement('div', { style: { fontSize: 9.5, color: 'rgba(255,255,255,.55)', fontWeight: 700 } }, `${this.getEventEntryLabel(event)} entry · official archived result scoring`),
+            React.createElement('div', { style: { marginTop: 9, textAlign: 'center', padding: '9px 0', borderRadius: 8, background: '#a855f7', fontSize: 11, fontWeight: 900 } }, event.playable ? 'OPEN MYSTERY CARD' : 'VIEW SHADOW FIGHT')
+          )))
         ),
         leagues.length === 0
           ? React.createElement('section', { style: { marginTop: 28, padding: 24, borderRadius: 14, border: '1px solid rgba(168,85,247,.4)', background: 'rgba(168,85,247,.08)', textAlign: 'center' } },
@@ -2578,7 +2850,7 @@ class FantasyMobileAppCore extends React.Component {
             boxShadow: sp.active ? '0 0 16px ' + sp.color + '99, inset 0 0 12px ' + sp.color + '30' : '0 0 8px ' + sp.color + '55'
           }
         },
-          (() => { const ids = [0, 1, 2, 3, 4].map(i => 'sport-' + sp.id + '-' + i); const activeId = this.pickCycleId(ids, s);
+          (() => { const ids = (SPORT_STORY_FILES[sp.id] || SPORT_STORY_FILES.mma).map((_, i) => 'sport-' + sp.id + '-' + i); const activeId = this.pickCycleId(ids, s);
             return ids.map((id, i) => React.createElement('div', {
               key: id, style: { position: 'absolute', inset: 0, opacity: id === activeId ? 1 : 0, transition: 'opacity 1s ease', pointerEvents: id === activeId ? 'auto' : 'none' }
             }, React.createElement(MobileImageSlot, { id, shape: 'rect', placeholder: sp.name + ' — fighter ' + (i + 1), fit: 'cover' })));
@@ -2586,53 +2858,10 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 5, pointerEvents: 'none' } },
             React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, letterSpacing: .2, lineHeight: 1.1, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, sp.name),
             React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 3, fontSize: 7, fontWeight: 700, color: sp.color } },
-              React.createElement('span', { style: { width: 4, height: 4, borderRadius: '50%', background: sp.color, animation: 'pulseLive 1.4s infinite' } }), 'LIVE'
+              React.createElement('span', { style: { width: 4, height: 4, borderRadius: '50%', background: Number(sp.count) > 0 ? sp.color : 'rgba(255,255,255,.35)', animation: Number(sp.count) > 0 ? 'pulseLive 1.4s infinite' : 'none' } }), Number(sp.count) > 0 ? 'LIVE' : 'NO CARD'
             )
           )
         ))
-      )
-    );
-  }
-
-  renderFeaturedBannerLegacy() {
-    return React.createElement('div', {
-      onClick: () => this.setTab('predict'),
-      style: {
-        margin: '0 16px 16px', position: 'relative', borderRadius: 14, overflow: 'hidden', height: 190,
-        border: '1px solid rgba(242,181,68,.4)', animation: 'glowPulse 3s ease-in-out infinite', cursor: 'pointer'
-      }
-    },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-arena-bg', shape: 'rect', placeholder: 'Arena crowd photo', fit: 'cover', src: 'uploads/pasted-1785015130714-0.png' })),
-      React.createElement('div', { style: { position: 'absolute', left: 0, bottom: 0, width: '20%', height: '55%' } },
-        React.createElement('div', { style: { position: 'absolute', inset: '8% 12% 0 12%', background: '#000', clipPath: 'ellipse(55% 100% at 50% 100%)', overflow: 'hidden' } },
-          React.createElement(MobileImageSlot, { id: 'featured-left', shape: 'rect', placeholder: 'Jones photo' , fit: 'contain', src: 'uploads/transparent-featured-left.png'})
-        )
-      ),
-      React.createElement('div', { style: { position: 'absolute', right: 0, bottom: 0, width: '20%', height: '55%' } },
-        React.createElement('div', { style: { position: 'absolute', inset: '8% 12% 0 12%', background: '#000', clipPath: 'ellipse(55% 100% at 50% 100%)', overflow: 'hidden' } },
-          React.createElement(MobileImageSlot, { id: 'featured-right', shape: 'rect', placeholder: 'Aspinall photo' , fit: 'contain', src: 'uploads/transparent-featured-right.png'})
-        )
-      ),
-      React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', padding: 12, pointerEvents: 'none' } },
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-          React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544', display: 'flex', gap: 4, alignItems: 'center' } }, '★ FEATURED THIS WEEK'),
-          React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#ff2020', textShadow: '0 1px 4px rgba(0,0,0,.9)' } }, '⏱ 2 DAYS LEFT')
-        ),
-        React.createElement('div', { style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
-          React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22 } }, 'UFC 323'),
-          React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 26, letterSpacing: .5 } },
-            'JONES ', React.createElement('span', { style: { color: '#ef4444' } }, 'VS'), ' ASPINALL'
-          ),
-          React.createElement('div', { style: { display: 'flex', gap: 14, marginTop: 4 } },
-            React.createElement('div', { style: { fontSize: 12, fontWeight: 900, color: '#2eff6e', textShadow: '0 1px 4px rgba(0,0,0,.8)', animation: 'moneyPulse 1.8s ease-in-out infinite' } }, '$100,000 POOL'),
-            React.createElement('div', { style: { fontSize: 12, fontWeight: 900, color: '#ffce54', textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, '$5 ENTRY'),
-            React.createElement('div', { style: { fontSize: 12, fontWeight: 900, color: '#ff2020', textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, '22,450 ENTRIES')
-          )
-        ),
-        React.createElement('div', {
-          onClick: (e) => { e.stopPropagation(); this.openModal('predictModal', { id: 1, tag: 'UFC 323', f1: 'JONES', f2: 'ASPINALL', prize: '$100,000' }); },
-          style: { pointerEvents: 'auto', alignSelf: 'center', background: '#f2b544', color: '#2b1b00', fontWeight: 900, fontSize: 12, padding: '9px 18px', borderRadius: 8, cursor: 'pointer' }
-        }, 'MAKE PREDICTIONS')
       )
     );
   }
@@ -2681,17 +2910,22 @@ class FantasyMobileAppCore extends React.Component {
       ),
       React.createElement('div', { style: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 } },
         filteredEvents.length === 0 ? React.createElement('div', { style: { fontSize: 12, color: 'rgba(255,255,255,.4)', padding: 10 } }, 'No events for this sport yet.') :
-        filteredEvents.map(ev => React.createElement('div', {
-          key: ev.id, style: { flex: '0 0 140px', position: 'relative', background: 'rgba(255,255,255,.05)', border: '1px solid ' + ev.tagColor, borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 0 14px ' + ev.tagColor + '55, inset 0 0 10px ' + ev.tagColor + '20', animation: s.flashCard[ev.id] ? 'cardPop .35s ease' : 'none' }
+        filteredEvents.map((ev, index) => React.createElement('div', {
+          key: ev.id,
+          onDoubleClick: () => this.quickReact(ev.id),
+          title: 'Double tap to react',
+          style: { flex: '0 0 140px', position: 'relative', background: 'rgba(255,255,255,.05)', border: '1px solid ' + ev.tagColor, borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 0 14px ' + ev.tagColor + '55, inset 0 0 10px ' + ev.tagColor + '20', animation: s.flashCard[ev.id] ? 'cardPop .35s ease' : 'none' }
         },
           s.flashCard[ev.id] && React.createElement('div', { key: s.flashCard[ev.id], style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle,rgba(242,181,68,.55),transparent 70%)', animation: 'quickFlash .6s ease-out forwards', zIndex: 5, pointerEvents: 'none' } }),
+          index === 0 && ev.createdAt && Date.now() - new Date(ev.createdAt).getTime() < 86400000 && React.createElement('div', { style: { position: 'absolute', top: 8, right: 8, zIndex: 7, background: '#22c55e', color: '#06210f', fontSize: 9, fontWeight: 900, padding: '4px 8px', borderRadius: 6, animation: 'newTagFlash 1s ease-in-out infinite' } }, 'NEW'),
+          s.reactBurst[ev.id] && React.createElement('div', { key: s.reactBurst[ev.id], style: { position: 'absolute', left: '50%', top: '50%', zIndex: 8, fontSize: 40, pointerEvents: 'none', animation: 'reactBurst .8s ease-out forwards' } }, '🔥'),
           React.createElement('div', { style: { height: 150, position: 'relative' } },
             React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage }),
             React.createElement('div', { style: { position: 'absolute', top: 6, left: 6, background: ev.tagColor, color: '#fff', fontSize: 8, fontWeight: 900, padding: '3px 6px', borderRadius: 5 } }, ev.tag)
           ),
           React.createElement('div', { style: { padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: 4 } },
             React.createElement('div', { style: { fontSize: 13, fontWeight: 900, lineHeight: 1.2 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
-            React.createElement('div', { style: { fontSize: 10, color: 'rgba(255,255,255,.55)', fontWeight: 700 } }, ev.date, ' · ', ev.countdown),
+            React.createElement('div', { style: { fontSize: 10, color: this.countdownColor(ev.countdown), fontWeight: 700 } }, ev.date, ' · ', ev.countdown),
             React.createElement('div', { style: { fontSize: 12, fontWeight: 800, color: '#22c55e' , animation: 'moneyPulse 1.8s ease-in-out infinite' } }, ev.prize),
             React.createElement('div', {
               role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${ev.f1} versus ${ev.f2}`,
@@ -2705,37 +2939,6 @@ class FantasyMobileAppCore extends React.Component {
             }, ev.entered ? 'ENTERED ✓' : this.getEventActionLabel(ev))
           )
         ))
-      )
-    );
-  }
-
-  renderFeaturedDetailLegacy(s) {
-    return React.createElement('div', { style: { margin: '0 16px 16px', position: 'relative', overflow: 'hidden', border: '1px solid #ef4444', borderRadius: 14, padding: 12, boxShadow: '0 0 18px rgba(239,68,68,.45), inset 0 0 14px rgba(239,68,68,.1)' } },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-detail-bg', shape: 'rect', placeholder: 'Arena photo', fit: 'cover', src: 'uploads/pasted-1785015130714-0.png' })),
-      React.createElement('div', { style: { position: 'relative' } },
-      React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#ffce54', textShadow: '0 1px 4px rgba(0,0,0,.8)', marginBottom: 6 } }, 'FEATURED FIGHT · HEAVYWEIGHT BOUT'),
-      React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 } },
-        React.createElement('div', { style: { width: 100, height: 100, flex: '0 0 auto', background: '#000', borderRadius: '50%' } }, React.createElement(MobileImageSlot, { id: 'fd-jones', shape: 'circle', placeholder: 'Jones', fit: 'cover', src: 'uploads/transparent-fd-jones.png' })),
-        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 20, textAlign: 'center', flex: 1, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, 'JONES ', React.createElement('span', { style: { color: '#ff2020' } }, 'VS'), ' ASPINALL'),
-        React.createElement('div', { style: { width: 100, height: 100, flex: '0 0 auto', background: '#000', borderRadius: '50%' } }, React.createElement(MobileImageSlot, { id: 'fd-aspinall', shape: 'circle', placeholder: 'Aspinall', fit: 'cover', src: 'uploads/transparent-fd-aspinall.png' }))
-      ),
-      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', fontSize: 10, fontWeight: 900, textShadow: '0 1px 4px rgba(0,0,0,.9)', marginBottom: 8 } },
-        React.createElement('div', { style: { color: '#3d9bff' } }, 'JUL 12'), React.createElement('div', { style: { color: '#ffce54' } }, '10:00 PM ET'), React.createElement('div', { style: { color: '#2eff6e' } }, 'T-MOBILE ARENA')
-      ),
-      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', marginBottom: 10 } },
-        [['PRIZE POOL', '$100,000', '#2eff6e'], ['ENTRY FEE', '100 FM', '#ffce54'], ['ENTRIES', '22,450', '#3d9bff']].map(([l, v, c], i) => React.createElement('div', { key: i, style: { textAlign: 'center' } },
-          React.createElement('div', { style: { fontSize: l === 'ENTRY FEE' ? 10.5 : 9.5, color: '#ff2020', fontWeight: 900, letterSpacing: .3, textShadow: '0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(255,32,32,.5)' } }, l),
-          React.createElement('div', { style: { fontSize: v === '100 FM' ? 19 : 13, fontWeight: 900, color: c, textShadow: '0 2px 5px rgba(0,0,0,.8), 0 0 12px ' + c + 'cc, 0 0 20px ' + c + '80', animation: (i < 2 ? (i === 0 ? 'moneyPulse' : 'moneyPulseGold') + ' 1.8s ease-in-out infinite' : 'none') } }, v)
-        ))
-      ),
-      React.createElement('div', {
-        onClick: (e) => { e.stopPropagation(); this.openModal('aiScout'); },
-        style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, textAlign: 'center', padding: '11px 0', borderRadius: 10, marginBottom: 8, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', border: 'none', fontWeight: 900, fontSize: 12.5, color: '#fff', cursor: 'pointer', boxShadow: '0 0 16px rgba(77,141,255,.6)', animation: 'glowPulse 3s ease-in-out infinite' }
-      }, '\ud83e\udd16 AI SCOUTING REPORT \u2014 NEW FOR THIS FIGHT'),
-      React.createElement('div', {
-        onClick: () => this.openModal('predictModal', { id: 1, tag: 'UFC 323', f1: 'JONES', f2: 'ASPINALL', prize: '$100,000' }),
-        style: { textAlign: 'center', padding: '10px 0', borderRadius: 10, background: 'linear-gradient(90deg,#ef4444,#b91c1c)', fontWeight: 900, fontSize: 13, cursor: 'pointer' }
-      }, 'MAKE PREDICTIONS')
       )
     );
   }
@@ -2780,10 +2983,19 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  renderCommunityAndProgress(allEvents, xpPct, s) {
+  renderCommunityAndProgress(allEvents, leaderboard, xpPct, s) {
     const ev = allEvents[s.communityIndex % allEvents.length];
-    const votes = s.eventVotes[ev.id] || { a: 50, b: 50 };
-    const dashOffset = 251.2 * (1 - votes.a / 100);
+    const storedSplit = ev.aiScoutingReport?.pickSplit;
+    const hasRealSplit = storedSplit && Number.isFinite(Number(storedSplit.fighterA)) && Number.isFinite(Number(storedSplit.fighterB));
+    const votes = hasRealSplit ? { a: Number(storedSplit.fighterA), b: Number(storedSplit.fighterB) } : null;
+    const dashOffset = 251.2 * (1 - (votes?.a || 0) / 100);
+    const user = this.props.currentUser || {};
+    const fightIq = toOptionalNumber(user.fightIq, user.fightIQ, user.xp, user.totalPoints);
+    const fightIqTarget = toOptionalNumber(user.nextLevelXp, user.xpTarget);
+    const level = toOptionalNumber(user.level, user.fightIqLevel, user.fightIQLevel);
+    const tier = cleanText(user.skillTier, user.tier, 'rookie').toUpperCase();
+    const liveRows = Array.isArray(leaderboard) ? leaderboard : [];
+    const currentRow = liveRows.find((row) => row.you);
     return React.createElement('div', { style: { display: 'flex', gap: 8, padding: '0 16px 16px' } },
       React.createElement('div', { style: { flex: 1.1, position: 'relative', overflow: 'hidden', border: '1px solid #ef444490', borderRadius: 12, padding: 10, boxShadow: '0 0 14px #ef444440' } },
         React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'community-predictions-bg', shape: 'rect', placeholder: 'Boxing match photo', fit: 'cover', src: 'uploads/pasted-1785014371576-0.png' })),
@@ -2795,18 +3007,18 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontSize: 11, color: '#ffce54', fontWeight: 900, marginBottom: 6, textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, ev.f1 + ' vs ' + ev.f2),
         React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } },
           React.createElement('svg', { width: 60, height: 60, viewBox: '0 0 90 90' },
-            React.createElement('circle', { cx: 45, cy: 45, r: 40, fill: 'none', stroke: '#3d9bff', strokeWidth: 10 }),
-            React.createElement('circle', { cx: 45, cy: 45, r: 40, fill: 'none', stroke: '#ff2020', strokeWidth: 10, strokeDasharray: 251.2, strokeDashoffset: dashOffset, transform: 'rotate(-90 45 45)', style: { transition: 'stroke-dashoffset .6s ease' } })
+            React.createElement('circle', { cx: 45, cy: 45, r: 40, fill: 'none', stroke: hasRealSplit ? '#3d9bff' : 'rgba(255,255,255,.14)', strokeWidth: 10 }),
+            hasRealSplit && React.createElement('circle', { cx: 45, cy: 45, r: 40, fill: 'none', stroke: '#ff2020', strokeWidth: 10, strokeDasharray: 251.2, strokeDashoffset: dashOffset, transform: 'rotate(-90 45 45)', style: { transition: 'stroke-dashoffset .6s ease' } })
           ),
           React.createElement('div', { style: { flex: 1, display: 'flex', flexDirection: 'column', gap: 4 } },
             React.createElement('div', {
-              onClick: () => this.quickPick(ev, 'a'),
+              onClick: () => this.openFeaturedPick(ev),
               style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, fontWeight: 900, color: '#ff2020', cursor: 'pointer', textShadow: '0 1px 4px rgba(0,0,0,.9)' }
-            }, React.createElement('span', null, ev.f1, votes.a < 50 && React.createElement('span', { style: { fontSize: 8, fontWeight: 900, color: '#ffce54', marginLeft: 5, animation: 'pulseLive 1.2s infinite' } }, '🐺 2X')), votes.a + '%'),
+            }, React.createElement('span', null, ev.f1), hasRealSplit ? votes.a + '%' : 'PICK'),
             React.createElement('div', {
-              onClick: () => this.quickPick(ev, 'b'),
+              onClick: () => this.openFeaturedPick(ev),
               style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, fontWeight: 900, color: '#3d9bff', cursor: 'pointer', textShadow: '0 1px 4px rgba(0,0,0,.9)' }
-            }, React.createElement('span', null, ev.f2, votes.b < 50 && React.createElement('span', { style: { fontSize: 8, fontWeight: 900, color: '#ffce54', marginLeft: 5, animation: 'pulseLive 1.2s infinite' } }, '🐺 2X')), votes.b + '%')
+            }, React.createElement('span', null, ev.f2), hasRealSplit ? votes.b + '%' : 'PICK')
           )
         )
         )
@@ -2816,23 +3028,25 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'relative', display: 'flex', flexDirection: 'column', gap: 6 } },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#a855f7' } }, 'YOUR PROGRESSION'),
         React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
-          React.createElement('div', { style: { width: 26, height: 26, clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900 } }, '18'),
+          React.createElement('div', { style: { width: 26, height: 26, clipPath: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900 } }, level ?? '—'),
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: 10, color: '#ffce54', fontWeight: 900, textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, 'FIGHT IQ'),
-            React.createElement('div', { style: { fontSize: 12, fontWeight: 800, color: '#c084fc' } }, '2,450 XP')
+            React.createElement('div', { style: { fontSize: 12, fontWeight: 800, color: '#c084fc' } }, fightIq === null ? 'AWAITING SCORES' : `${fightIq.toLocaleString()} XP`)
           )
         ),
         React.createElement('div', { style: { height: 5, background: 'rgba(255,255,255,.1)', borderRadius: 3, overflow: 'hidden' } },
           React.createElement('div', { style: { height: '100%', width: xpPct + '%', background: 'linear-gradient(90deg,#a855f7,#ec4899)', transition: 'width 1s ease' } })
         ),
-        React.createElement('div', { style: { fontSize: 9, color: '#ffce54', fontWeight: 800, textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, 'NEXT LEVEL: 3,000 XP'),
-        React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544' } }, '👑 LEGEND · LEVEL 18')
+        React.createElement('div', { style: { fontSize: 9, color: '#ffce54', fontWeight: 800, textShadow: '0 1px 4px rgba(0,0,0,.8)' } }, fightIqTarget ? `NEXT LEVEL: ${fightIqTarget.toLocaleString()} XP` : 'LEVEL PROGRESS UPDATES AFTER OFFICIAL SCORING'),
+        React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544' } }, `🏅 ${tier}${level !== null ? ` · LEVEL ${level}` : ''}`)
         )
       )
     );
   }
 
-  renderRewardsRow(streakDays, s) {
+  renderRewardsRow(streakDays, s, leaderboard) {
+    const liveRows = Array.isArray(leaderboard) ? leaderboard : [];
+    const currentRow = liveRows.find((row) => row.you);
     return React.createElement('div', { style: { display: 'flex', gap: 8, padding: '0 16px 16px' } },
       React.createElement('div', { style: { flex: 1, background: 'radial-gradient(circle at 50% -30%, rgba(255,255,255,.18), transparent 55%), radial-gradient(ellipse 80% 60% at 15% 110%, rgba(239,68,68,.22), transparent 60%), radial-gradient(ellipse 80% 60% at 85% 110%, rgba(77,141,255,.22), transparent 60%), rgba(255,255,255,.05)', border: '1px solid #f2b54490', borderRadius: 12, padding: 10, textAlign: 'center', boxShadow: s.rewardClaimed ? '0 0 14px #f2b54440' : '0 0 20px #f2b54480, inset 0 0 16px #f2b54425' } },
         React.createElement('div', { key: s.chestBounce, style: { fontSize: 28, animation: s.chestBounce ? 'bounceChest .5s ease' : (s.rewardClaimed ? 'none' : 'chestBounceLoop 1.8s ease-in-out infinite') } }, '🎁'),
@@ -2861,12 +3075,12 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544' } }, 'LEADERBOARD'),
           React.createElement('div', { onClick: () => this.setTab('leaderboard'), style: { fontSize: 10, color: '#4d8dff', fontWeight: 700, cursor: 'pointer' } }, 'VIEW ALL ›')
         ),
-        [1, 2, 3].map(r => React.createElement('div', { key: r, style: { display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 700, padding: '2px 0', color: 'rgba(255,255,255,.75)' } },
-          React.createElement('span', null, r + '. ' + ['FightIQ_King', 'KO_Beast', 'Prediction_Prof'][r - 1]),
-          React.createElement('span', { style: { color: '#f2b544' } }, [4850, 4320, 3915][r - 1])
-        )),
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, padding: '3px 0', marginTop: 2, borderTop: '1px solid rgba(255,255,255,.1)', color: '#22c55e' } },
-          React.createElement('span', null, '18. KellyD (You)'), React.createElement('span', null, '2,450 ↑')
+        liveRows.length ? liveRows.slice(0, 3).map((row) => React.createElement('div', { key: `${row.rank}-${row.name}`, style: { display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 700, padding: '2px 0', color: 'rgba(255,255,255,.75)' } },
+          React.createElement('span', null, `${row.rank}. ${row.name}`),
+          React.createElement('span', { style: { color: '#f2b544' } }, row.pts)
+        )) : React.createElement('div', { style: { fontSize: 9.5, color: 'rgba(255,255,255,.55)', lineHeight: 1.4 } }, 'Standings open after the first official score.'),
+        currentRow && React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, padding: '3px 0', marginTop: 2, borderTop: '1px solid rgba(255,255,255,.1)', color: '#22c55e' } },
+          React.createElement('span', null, `${currentRow.rank}. ${currentRow.name} (You)`), React.createElement('span', null, currentRow.pts)
         )
         )
       ),
@@ -2874,7 +3088,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'streak-bonus-bg', shape: 'rect', placeholder: 'Kickboxing photo', fit: 'cover', src: 'uploads/pasted-1785014166827-0.png' })),
         React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544', marginBottom: 6 } }, 'STREAK BONUS'),
-        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, marginBottom: 6 } }, '🔥 7 DAY STREAK'),
+        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, marginBottom: 6 } }, s.streakDay ? `🔥 ${s.streakDay} DAY STREAK` : '🔥 START YOUR STREAK'),
         React.createElement('div', { style: { display: 'flex', gap: 3, marginBottom: 6 } },
           streakDays.map(d => React.createElement('div', {
             key: d.d, style: {
@@ -2884,7 +3098,7 @@ class FantasyMobileAppCore extends React.Component {
           }, d.done ? '✓' : ''))
         ),
         React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, '+250 FM'),
-        !s.rewardClaimed && React.createElement('div', {
+        !s.rewardClaimed && s.streakExpiresIn > 0 && React.createElement('div', {
           style: { fontSize: 8.5, fontWeight: 900, marginTop: 6, color: s.streakExpiresIn < 3600 ? '#ff2020' : '#ffce54', textShadow: '0 1px 4px rgba(0,0,0,.8)', animation: s.streakExpiresIn < 3600 ? 'pulseLive 1s infinite' : 'none' }
         }, '⏳ Streak expires in ' + Math.floor(s.streakExpiresIn / 3600) + 'h ' + Math.floor((s.streakExpiresIn % 3600) / 60) + 'm'),
         s.streakExpiresIn < 3600 && s.streakExpiresIn > 0 && React.createElement('div', {
@@ -2979,7 +3193,9 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, marginBottom: 4, color: '#4d8dff' } }, '📰 BLOGS & FIGHT NEWS'),
       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 14 } }, 'All the latest fight breakdowns, matchup previews, and app news'),
       React.createElement('div', null,
-        blogs.map(b => React.createElement('div', {
+        blogs.length === 0
+          ? React.createElement('div', { style: { padding: 22, borderRadius: 12, background: 'rgba(77,141,255,.08)', border: '1px solid rgba(77,141,255,.3)', color: 'rgba(255,255,255,.6)', fontSize: 11, lineHeight: 1.5, textAlign: 'center' } }, 'No published fight news is available yet. New stories will appear here automatically from the live content feed.')
+          : blogs.map(b => React.createElement('div', {
           key: b.id, onClick: () => this.openModal('blog', b),
           style: { padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,.08)', cursor: 'pointer' }
         },
@@ -3147,51 +3363,71 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  scoutingNote(name) {
-    const notes = {
-      JONES: 'Elite reach & takedown defense — historically slow starters, dangerous in later rounds.',
-      ASPINALL: 'Explosive finisher, but limited championship-rounds experience — durability is the question.',
-      'SPENCE JR.': 'Textbook boxing IQ, methodical pressure — rarely finishes early.',
-      TSZYU: 'Heavy hands, fades if fight goes past round 8.',
-      ALVES: 'Relentless forward pressure, thrives in chaotic exchanges.',
-      WARD: 'Sharp counter-striker, wins on output over 5.',
-      MJF: 'Master of pacing a match, saves big spots for the finish.',
-      'ADAM COLE': 'High-risk aerial game — leaves openings late in longer matches.',
-      SUPERLEK: 'Elite clinch/knee game, historically dominant in decisions.',
-      TAKERU: 'Fast starter, knockout power in every exchange.',
-      ALLAZOV: 'Heavy leg kicks, wears opponents down by round 3.',
-      PETROSYAN: 'Technical boxing specialist, elite counter-puncher.',
-    };
-    return notes[name] || 'Solid all-around record — no major weaknesses on the scouting report.';
-  }
+  setTier = (tier) => this.setState({ leaderboardTier: tier });
 
-  renderLeaderboard(list) {
+  renderLeaderboard(list, s = this.state) {
     const rows = Array.isArray(list) ? list : [];
-    const podium = rows.slice(0, 3);
+    const userTier = cleanText(this.props.currentUser?.skillTier, this.props.currentUser?.tier, 'rookie').toLowerCase();
+    const tier = s.leaderboardTier === 'global' ? 'global' : cleanText(s.leaderboardTier, userTier, 'rookie').toLowerCase();
+    const hasTierData = rows.some((row) => row.skillTier);
+    const shownRows = tier === 'global'
+      ? rows
+      : hasTierData
+        ? rows.filter((row) => row.skillTier === tier)
+        : [];
+    const podium = shownRows.slice(0, 3);
+    const champions = rows.filter((row) => row.championTitle).slice(0, 3);
+    const tierLabel = tier === 'global' ? 'GLOBAL' : tier.toUpperCase();
+    const personalTierLabel = ['rookie', 'regular', 'expert'].includes(userTier) ? userTier.toUpperCase() : 'ROOKIE';
+    const rankFor = (player) => tier === 'global' ? player.rank : player.tierRank;
+
+    const emptyState = (title, copy, action, actionLabel) => React.createElement('section', { style: { padding: 26, borderRadius: 14, border: '1px solid rgba(242,181,68,.4)', background: 'rgba(242,181,68,.08)', textAlign: 'center', animation: 'emptyFloat 3s ease-in-out infinite' } },
+      React.createElement('strong', { style: { display: 'block', color: '#f2b544', fontSize: 15 } }, title),
+      React.createElement('p', { style: { color: 'rgba(255,255,255,.6)', fontSize: 11, lineHeight: 1.5 } }, copy),
+      action && React.createElement('div', { onClick: action, style: { display: 'inline-block', marginTop: 5, padding: '9px 15px', borderRadius: 8, background: '#f2b544', color: '#2b1b00', fontSize: 11, fontWeight: 900, cursor: 'pointer' } }, actionLabel)
+    );
+
     return React.createElement('div', { style: { padding: '8px 16px 24px', position: 'relative', minHeight: '100%', overflow: 'hidden' } },
       React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'leaderboard-live-bg', shape: 'rect', placeholder: 'Leaderboard arena', fit: 'cover', src: 'uploads/pasted-1785012542538-0.png' })),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.84),rgba(5,6,10,.99))' } }),
       React.createElement('div', { style: { position: 'relative' } },
-        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 4, color: '#f2b544' } }, 'GLOBAL LEADERBOARD'),
-        React.createElement('div', { style: { color: 'rgba(255,255,255,.55)', fontSize: 10, fontWeight: 700, marginBottom: 14 } }, 'Official scores from submitted Fantasy MMAdness fight cards.'),
+        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 4, color: '#f2b544' } }, 'LEADERBOARD'),
+        React.createElement('div', { style: { color: 'rgba(255,255,255,.55)', fontSize: 10, fontWeight: 700 } }, 'Official scores from submitted Fantasy MMAdness fight cards.'),
+        React.createElement('div', { style: { display: 'flex', gap: 8, margin: '10px 0 4px' } },
+          [[userTier, personalTierLabel], ['global', 'GLOBAL']].map(([id, label]) => React.createElement('button', {
+            type: 'button', key: id, onClick: () => this.setTier(id),
+            style: { flex: 1, border: 0, textAlign: 'center', padding: '9px 0', borderRadius: 999, cursor: 'pointer', fontFamily: "'Rajdhani',sans-serif", fontWeight: 900, fontSize: 11, letterSpacing: .5, background: tier === id ? 'linear-gradient(90deg,#ffd873,#f2b544)' : 'rgba(255,255,255,.06)', color: tier === id ? '#2b1b00' : 'rgba(255,255,255,.6)' }
+          }, label))),
+        tier !== 'global' && React.createElement('div', { style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginBottom: 8 } }, `Ranked against ${tierLabel.toLowerCase()} players at your experience level — the Global board remains one tap away.`),
+        champions.length > 0 && React.createElement(React.Fragment, null,
+          React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.55)', letterSpacing: 1, margin: '14px 0 8px' } }, '🏆 HALL OF FAME — PAST CHAMPIONS'),
+          React.createElement('div', { style: { display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4, marginBottom: 18 } }, champions.map((champion) => React.createElement('div', {
+            key: `${champion.rank}-${champion.name}`, onClick: () => this.openModal('champProfile', champion),
+            style: { flex: '0 0 150px', background: 'linear-gradient(160deg,rgba(242,181,68,.14),rgba(255,255,255,.03))', border: '1px solid rgba(242,181,68,.5)', borderRadius: 14, padding: 12, cursor: 'pointer', boxShadow: '0 0 18px rgba(242,181,68,.35)', textAlign: 'center' }
+          },
+            React.createElement('div', { style: { width: 54, height: 54, margin: '0 auto 7px', borderRadius: '50%', overflow: 'hidden' } }, React.createElement(MobileImageSlot, { id: `champion-${champion.rank}`, shape: 'circle', placeholder: champion.name, fit: 'cover', src: champion.profileUrl })),
+            React.createElement('div', { style: { fontWeight: 900, fontSize: 12 } }, champion.name),
+            React.createElement('div', { style: { fontSize: 8.5, fontWeight: 700, color: '#f2c869', lineHeight: 1.3 } }, champion.championTitle)
+          )))),
+        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.55)', letterSpacing: 1, margin: '14px 0 8px' } }, `${tierLabel} · CURRENT SEASON`),
         rows.length === 0
-          ? React.createElement('section', { style: { padding: 26, borderRadius: 14, border: '1px solid rgba(242,181,68,.4)', background: 'rgba(242,181,68,.08)', textAlign: 'center' } },
-              React.createElement('strong', { style: { display: 'block', color: '#f2b544', fontSize: 15 } }, 'STANDINGS OPEN AFTER THE FIRST SCORE'),
-              React.createElement('p', { style: { color: 'rgba(255,255,255,.6)', fontSize: 11, lineHeight: 1.5 } }, 'No ranked players have an official score yet. Submitted results will publish here automatically.'),
-              React.createElement('div', { onClick: () => this.setTab('contests'), style: { display: 'inline-block', marginTop: 5, padding: '9px 15px', borderRadius: 8, background: '#f2b544', color: '#2b1b00', fontSize: 11, fontWeight: 900, cursor: 'pointer' } }, 'OPEN CONTESTS')
-            )
-          : React.createElement(React.Fragment, null,
-              React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 14 } }, podium.map((player, index) => React.createElement('div', { key: `${player.rank}-${player.name}`, onClick: () => this.openModal('champProfile', player), style: { textAlign: 'center', padding: '12px 5px', borderRadius: 12, border: '1px solid rgba(242,181,68,.35)', background: 'rgba(242,181,68,.08)', cursor: 'pointer' } },
-                React.createElement('div', { style: { color: index === 0 ? '#f2b544' : 'rgba(255,255,255,.65)', fontWeight: 900, fontSize: 10 } }, '#' + player.rank),
-                React.createElement('strong', { style: { display: 'block', margin: '5px 0 2px', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis' } }, player.name),
-                React.createElement('span', { style: { color: '#f2b544', fontSize: 10, fontWeight: 900 } }, player.pts + ' PTS')
-              ))),
-              React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 6 } }, rows.map((player) => React.createElement('div', { key: `${player.rank}-${player.name}`, onClick: () => this.openModal('champProfile', player), style: { display: 'flex', alignItems: 'center', gap: 9, padding: '10px 12px', borderRadius: 10, background: player.you ? 'rgba(242,181,68,.14)' : 'rgba(255,255,255,.05)', border: player.you ? '1px solid rgba(242,181,68,.45)' : '1px solid rgba(255,255,255,.08)', cursor: 'pointer' } },
-                React.createElement('strong', { style: { width: 28, color: player.medal || '#fff', textAlign: 'center' } }, '#' + player.rank),
-                React.createElement('span', { style: { flex: 1, fontSize: 13, fontWeight: 800 } }, player.name),
-                React.createElement('b', { style: { color: '#f2b544', fontSize: 12 } }, player.pts + ' PTS')
-              )))
-            )
+          ? emptyState('STANDINGS OPEN AFTER THE FIRST SCORE', 'No ranked players have an official score yet. Submitted results will publish here automatically.', () => this.setTab('contests'), 'OPEN CONTESTS')
+          : tier !== 'global' && !hasTierData
+            ? emptyState('SKILL TIER IS BEING CALCULATED', 'Your real scores are live on the Global board. The tier lens will appear as soon as the server assigns player tiers.', () => this.setTier('global'), 'VIEW GLOBAL BOARD')
+            : shownRows.length === 0
+              ? emptyState(`NO ${tierLabel} SCORES YET`, 'This tier will populate automatically after eligible fight cards are scored.', () => this.setTier('global'), 'VIEW GLOBAL BOARD')
+              : React.createElement(React.Fragment, null,
+                  React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 14 } }, podium.map((player, index) => React.createElement('div', { key: `${rankFor(player)}-${player.name}`, onClick: () => this.openModal('champProfile', player), style: { textAlign: 'center', padding: '12px 5px', borderRadius: 12, border: '1px solid rgba(242,181,68,.35)', background: 'rgba(242,181,68,.08)', cursor: 'pointer' } },
+                    React.createElement('div', { style: { color: index === 0 ? '#f2b544' : 'rgba(255,255,255,.65)', fontWeight: 900, fontSize: 10 } }, '#' + rankFor(player)),
+                    React.createElement('strong', { style: { display: 'block', margin: '5px 0 2px', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis' } }, player.name),
+                    React.createElement('span', { style: { color: '#f2b544', fontSize: 10, fontWeight: 900 } }, player.pts + ' PTS')
+                  ))),
+                  React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 6 } }, shownRows.map((player) => React.createElement('div', { key: `${rankFor(player)}-${player.name}`, onClick: () => this.openModal('champProfile', player), style: { display: 'flex', alignItems: 'center', gap: 9, padding: '10px 12px', borderRadius: 10, background: player.you ? 'rgba(242,181,68,.14)' : 'rgba(255,255,255,.05)', border: player.you ? '1px solid rgba(242,181,68,.45)' : '1px solid rgba(255,255,255,.08)', cursor: 'pointer' } },
+                    React.createElement('strong', { style: { width: 28, color: player.medal || '#fff', textAlign: 'center' } }, '#' + rankFor(player)),
+                    React.createElement('span', { style: { flex: 1, fontSize: 13, fontWeight: 800 } }, player.name),
+                    React.createElement('b', { style: { color: '#f2b544', fontSize: 12, animation: 'ptsTwinkle 2s ease-in-out infinite' } }, player.pts + ' PTS')
+                  )))
+                )
       )
     );
   }
@@ -3220,16 +3456,40 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
-  renderProfile(coinsFmt, streakDays, xpPct) {
-    const menu = ['Edit Profile', 'Payment Methods', 'Support', 'Log Out'];
+  renderProfile(coinsFmt, streakDays, xpPct, events = []) {
+    const user = this.props.currentUser || {};
+    const displayName = cleanText(
+      user.playerName,
+      user.username,
+      [user.firstName, user.lastName].filter(Boolean).join(' '),
+      user.email ? String(user.email).split('@')[0] : '',
+      'PLAYER',
+    );
+    const skillTier = cleanText(user.skillTier, user.tier, 'rookie').toUpperCase();
+    const level = toOptionalNumber(user.level, user.fightIqLevel, user.fightIQLevel);
+    const entered = toOptionalNumber(user.contestsEntered, user.matchesPlayed, user.totalEntries);
+    const enteredCount = entered ?? this.myEntries(events).length;
+    const winRate = toOptionalNumber(user.winRate, user.winPercentage, user.accuracy, user.pickAccuracy);
+    const currentStreak = toOptionalNumber(user.currentStreak, user.streakDays, user.loginStreak) ?? Math.max(0, this.state.streakDay);
+    const fightIq = toOptionalNumber(user.fightIq, user.fightIQ, user.xp, user.totalPoints);
+    const fightIqTarget = toOptionalNumber(user.nextLevelXp, user.xpTarget);
+    const progressPct = fightIq !== null && fightIqTarget
+      ? Math.min(100, (fightIq / fightIqTarget) * 100)
+      : xpPct;
+    const menu = [
+      ['Edit Profile', () => this.openModal('editProfile')],
+      ['Payment Methods', () => this.openModal('paymentMethods')],
+      ['Support', () => this.openModal('support')],
+      ['Log Out', () => this.props.onLogout?.()],
+    ];
     return React.createElement('div', { style: { padding: '8px 16px' } },
       React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 16 } },
-        React.createElement('div', { style: { width: 72, height: 72, borderRadius: '50%' } }, React.createElement(MobileImageSlot, { id: 'avatar', shape: 'circle', placeholder: 'Photo', fit: 'cover' })),
-        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 20 } }, 'KellyD'),
-        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: '#f2b544' } }, '👑 LEGEND · LEVEL 18')
+        React.createElement('div', { style: { width: 72, height: 72, borderRadius: '50%' } }, React.createElement(MobileImageSlot, { id: 'avatar', shape: 'circle', placeholder: displayName, fit: 'cover', src: user.profileUrl })),
+        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 20 } }, displayName),
+        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: '#f2b544' } }, `🏅 ${skillTier}${level !== null ? ` · LEVEL ${level}` : ''}`)
       ),
       React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 } },
-        [['CONTESTS ENTERED', '47'], ['WIN RATE', '62%'], ['FM COINS', coinsFmt], ['CURRENT STREAK', '5 DAYS']].map(([l, v], i) => React.createElement('div', {
+        [['CONTESTS ENTERED', enteredCount.toLocaleString()], ['WIN RATE', winRate === null ? '—' : `${winRate}%`], ['FM COINS', coinsFmt], ['CURRENT STREAK', currentStreak ? `${currentStreak} DAYS` : '—']].map(([l, v], i) => React.createElement('div', {
           key: i, style: { background: 'radial-gradient(circle at 50% -30%, rgba(255,255,255,.18), transparent 55%), radial-gradient(ellipse 80% 60% at 15% 110%, rgba(239,68,68,.22), transparent 60%), radial-gradient(ellipse 80% 60% at 85% 110%, rgba(77,141,255,.22), transparent 60%), rgba(255,255,255,.05)', border: '1px solid #f2b54480', borderRadius: 12, padding: 12, textAlign: 'center', boxShadow: '0 0 12px #f2b54435' }
         },
           React.createElement('div', { style: { fontSize: 16, fontWeight: 800, color: '#f2b544', animation: i === 2 ? 'moneyPulseGold 1.8s ease-in-out infinite' : 'none' } }, v),
@@ -3237,9 +3497,9 @@ class FantasyMobileAppCore extends React.Component {
         ))
       ),
       React.createElement('div', { style: { marginBottom: 16 } },
-        React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 4 } }, 'FIGHT IQ · 2,450 / 3,000 XP'),
+        React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 4 } }, fightIq === null ? 'FIGHT IQ · CALCULATES AFTER SCORED CARDS' : `FIGHT IQ · ${fightIq.toLocaleString()}${fightIqTarget ? ` / ${fightIqTarget.toLocaleString()} XP` : ' XP'}`),
         React.createElement('div', { style: { height: 6, background: 'rgba(255,255,255,.1)', borderRadius: 3, overflow: 'hidden' } },
-          React.createElement('div', { style: { height: '100%', width: xpPct + '%', background: 'linear-gradient(90deg,#a855f7,#ec4899)' } })
+          React.createElement('div', { style: { height: '100%', width: progressPct + '%', background: 'linear-gradient(90deg,#a855f7,#ec4899)' } })
         )
       ),
       React.createElement('div', {
@@ -3251,23 +3511,38 @@ class FantasyMobileAppCore extends React.Component {
           key: 'settings', onClick: () => this.setTab('settings'),
           style: { padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(242,181,68,.3)', fontWeight: 700, fontSize: 13, cursor: 'pointer', color: '#f2b544' }
         }, '⚙ Settings'),
-        menu.map(m => React.createElement('div', {
-          key: m, onClick: () => this.showToast(m === 'Log Out' ? 'Logged out (demo)' : m + ' — coming soon'),
-          style: { padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)', fontWeight: 700, fontSize: 13, cursor: 'pointer', color: m === 'Log Out' ? '#ef4444' : '#fff' }
-        }, m))
+        menu.map(([label, action]) => React.createElement('div', {
+          key: label, onClick: action,
+          style: { padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)', fontWeight: 700, fontSize: 13, cursor: 'pointer', color: label === 'Log Out' ? '#ef4444' : '#fff' }
+        }, label))
       )
     );
   }
 
-  renderModal(s, events, jonesPct, aspinallPct) {
+  renderModal(s, events) {
     if (!s.modal) return null;
+    const currentUser = this.props.currentUser || {};
+    const profileName = cleanText(
+      currentUser.playerName,
+      currentUser.username,
+      [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' '),
+      currentUser.email ? String(currentUser.email).split('@')[0] : '',
+      'PLAYER',
+    );
+    const currentLeaderboardRow = (Array.isArray(this.props.leaderboard) ? this.props.leaderboard : []).find((row) => (
+      cleanText(row?._id, row?.id) && cleanText(row?._id, row?.id) === cleanText(currentUser?._id, currentUser?.id)
+    ));
+    const firstPurchaseEligible = currentUser?.hasReceivedFirstPurchaseBonus !== true;
+    const notificationItems = this.buildNotificationItems(events, s);
     const overlay = (children, opts) => React.createElement('div', {
+      className: 'fmm-prototype-modal-backdrop',
       onClick: this.closeModal,
-      style: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,.65)', zIndex: 900, display: 'flex', alignItems: (opts && opts.top) ? 'flex-start' : 'flex-end', justifyContent: 'center' }
+      style: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,.65)', zIndex: 900, display: 'flex', alignItems: (opts && opts.top) ? 'flex-start' : 'flex-end', justifyContent: 'center', animation: 'modalBackdropIn .2s ease-out' }
     },
       React.createElement('div', {
+        className: 'fmm-prototype-modal',
         onClick: (e) => e.stopPropagation(),
-        style: { width: '100%', maxHeight: '80%', overflowY: 'auto', background: '#12141b', borderRadius: (opts && opts.top) ? '0 0 18px 18px' : '18px 18px 0 0', padding: 18, border: '1px solid rgba(255,255,255,.1)' }
+        style: { width: '100%', maxHeight: '80%', overflowY: 'auto', background: '#12141b', borderRadius: (opts && opts.top) ? '0 0 18px 18px' : '18px 18px 0 0', padding: 18, border: '1px solid rgba(255,255,255,.1)', animation: 'modalSlideIn .28s cubic-bezier(.2,.8,.2,1)' }
       }, children)
     );
     const closeBtn = React.createElement('div', { onClick: this.closeModal, style: { position: 'absolute', top: 10, right: 14, fontSize: 20, color: 'rgba(255,255,255,.5)', cursor: 'pointer' } }, '×');
@@ -3292,9 +3567,10 @@ class FantasyMobileAppCore extends React.Component {
         style: { padding: '12px 4px', fontWeight: 700, fontSize: 14, borderBottom: '1px solid rgba(255,255,255,.06)', cursor: 'pointer', color: '#22c55e' }
       }, '🎓 Free Demo Mode'),
       ...['Rules', 'Support'].map(t => React.createElement('div', {
-        key: t, onClick: () => this.showToast(t + ' — coming soon'),
+        key: t, onClick: () => this.openModal(t === 'Rules' ? 'rules' : 'support'),
         style: { padding: '12px 4px', fontWeight: 700, fontSize: 14, borderBottom: '1px solid rgba(255,255,255,.06)', cursor: 'pointer', color: 'rgba(255,255,255,.7)' }
-      }, t))
+      }, t)),
+      React.createElement('div', { key: 'copyright', style: { marginTop: 16, paddingTop: 12, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textAlign: 'center' } }, '© 2023–2026 Fantasy MMAdness. All rights reserved.')
     ]);
 
     if (s.modal === 'notif') return overlay([
@@ -3303,14 +3579,85 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544' } }, 'NOTIFICATIONS'),
         React.createElement('div', { onClick: this.markNotifsRead, style: { fontSize: 11, color: '#4d8dff', fontWeight: 700, cursor: 'pointer' } }, 'Mark all read')
       ),
-      ...[
-        ['🥊', 'UFC 323 predictions lock in 2 days'],
-        ['🏆', 'You climbed to rank 18 on the leaderboard'],
-        ['🎁', 'Daily reward is ready to claim'],
-      ].map(([icon, txt], i) => React.createElement('div', { key: i, style: { display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.06)' } },
+      ...(notificationItems.length ? notificationItems : [['✓', 'You’re all caught up. New fight reminders will appear here.']]).map(([icon, txt], i) => React.createElement('div', { key: `${i}-${txt}`, style: { display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.06)' } },
         React.createElement('div', { style: { fontSize: 18 } }, icon),
         React.createElement('div', { style: { fontSize: 12, fontWeight: 600 } }, txt)
       ))
+    ]);
+
+    if (s.modal === 'editProfile') return overlay([
+      closeBtn,
+      React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, marginBottom: 12, color: '#f2b544' } }, 'EDIT PROFILE'),
+      React.createElement('div', { key: 'fields', style: { display: 'flex', flexDirection: 'column', gap: 10 } },
+        [['First Name', 'firstName', 'First name'], ['Last Name', 'lastName', 'Last name'], ['Display Name', 'playerName', 'Player name'], ['Email', 'email', 'Email address']].map(([label, key, placeholder]) => React.createElement('label', { key, style: { display: 'block' } },
+          React.createElement('span', { style: { display: 'block', fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 4 } }, label),
+          React.createElement('input', {
+            value: s.profileDraft[key] || '',
+            onChange: (event) => this.updateProfileDraft(key, event.target.value),
+            placeholder,
+            type: key === 'email' ? 'email' : 'text',
+            disabled: key === 'email',
+            style: { width: '100%', boxSizing: 'border-box', background: key === 'email' ? 'rgba(255,255,255,.035)' : 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: '10px 12px', color: key === 'email' ? 'rgba(255,255,255,.5)' : '#fff', fontSize: 13, fontWeight: 600, fontFamily: "'Rajdhani',sans-serif" },
+          })
+        ))
+      ),
+      React.createElement('div', { key: 'email-note', style: { marginTop: 7, fontSize: 9, color: 'rgba(255,255,255,.4)' } }, 'Contact support to change the verified account email.'),
+      React.createElement('button', {
+        key: 'save', type: 'button', disabled: s.profileSaving, onClick: this.saveProfile,
+        style: { width: '100%', border: 0, marginTop: 16, textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', color: '#fff', fontFamily: "'Rajdhani',sans-serif", fontWeight: 900, fontSize: 13, cursor: s.profileSaving ? 'wait' : 'pointer', opacity: s.profileSaving ? .65 : 1 }
+      }, s.profileSaving ? 'SAVING…' : 'SAVE CHANGES')
+    ]);
+
+    if (s.modal === 'paymentMethods') return overlay([
+      closeBtn,
+      React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, marginBottom: 4, color: '#f2b544' } }, 'PAYMENT METHODS'),
+      React.createElement('div', { key: 'sub', style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 14 } }, 'Buy FM coins through the secure hosted checkout.'),
+      React.createElement('div', { key: 'security', style: { padding: 13, borderRadius: 11, background: 'rgba(77,141,255,.08)', border: '1px solid rgba(77,141,255,.28)', marginBottom: 12 } },
+        React.createElement('strong', { style: { display: 'block', color: '#8ab4ff', fontSize: 12, marginBottom: 4 } }, '🔐 Secure hosted card entry'),
+        React.createElement('span', { style: { display: 'block', fontSize: 10, lineHeight: 1.5, color: 'rgba(255,255,255,.62)' } }, 'Fantasy MMAdness does not display, collect, or store your full card number. Saved-card details are never invented or exposed in this app view.')
+      ),
+      React.createElement('button', {
+        key: 'open', type: 'button', onClick: () => { this.closeModal(); this.openModal('addcoins'); },
+        style: { width: '100%', border: '1px solid rgba(242,181,68,.45)', textAlign: 'center', padding: '12px 0', borderRadius: 10, background: 'rgba(242,181,68,.1)', color: '#f2b544', fontFamily: "'Rajdhani',sans-serif", fontWeight: 900, fontSize: 12, cursor: 'pointer' }
+      }, 'OPEN FM COIN CART')
+    ]);
+
+    if (s.modal === 'support') return overlay([
+      closeBtn,
+      React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, marginBottom: 4, color: '#f2b544' } }, 'SUPPORT'),
+      React.createElement('div', { key: 'sub', style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 14 } }, 'Find an answer or send the team the details.'),
+      React.createElement('div', { key: 'links', style: { display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 } },
+        [['🔍', 'Search FAQs', () => { this.closeModal(); this.props.onOpenFaqs?.(); }], ['📧', 'Email support@fantasymmadness.com', () => { if (typeof window !== 'undefined') window.location.href = 'mailto:support@fantasymmadness.com'; }]].map(([icon, label, action]) => React.createElement('button', {
+          key: label, type: 'button', onClick: action,
+          style: { width: '100%', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 10, padding: 12, color: '#fff', fontFamily: "'Rajdhani',sans-serif", cursor: 'pointer' }
+        }, React.createElement('span', { style: { fontSize: 16 } }, icon), React.createElement('strong', { style: { fontSize: 12 } }, label)))
+      ),
+      React.createElement('textarea', {
+        key: 'message', value: s.supportDraft, onChange: (event) => this.setState({ supportDraft: event.target.value }),
+        placeholder: 'Describe your issue here…', rows: 4,
+        style: { width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: 10, color: '#fff', fontSize: 12, fontWeight: 600, resize: 'vertical', marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" }
+      }),
+      React.createElement('button', {
+        key: 'send', type: 'button', onClick: this.submitSupport,
+        style: { width: '100%', border: 0, textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', color: '#fff', fontFamily: "'Rajdhani',sans-serif", fontWeight: 900, fontSize: 13, cursor: 'pointer' }
+      }, 'CONTINUE TO CONTACT')
+    ]);
+
+    if (s.modal === 'rules') return overlay([
+      closeBtn,
+      React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, marginBottom: 12, color: '#f2b544' } }, 'RULES'),
+      React.createElement('div', { key: 'rules', style: { display: 'flex', flexDirection: 'column', gap: 12 } },
+        [
+          ['Scoring', 'Points come from official fight stats and the category-specific scoring shown on each fight card.'],
+          ['Predictions lock', 'Picks lock at the published lock time for that fight. No changes are accepted after lock.'],
+          ['Free vs. paid entries', 'Free-to-play contests exist alongside paid entries; no purchase is required to play.'],
+          ['Affiliates & Shadow Fights', 'Affiliates cannot enter pools they host. Shadow fights are clearly identified as archived mystery cards.'],
+          ['Age requirement', 'You must meet the published age and location requirements for any paid contest.'],
+        ].map(([heading, body]) => React.createElement('div', { key: heading },
+          React.createElement('strong', { style: { display: 'block', fontSize: 12, marginBottom: 3 } }, heading),
+          React.createElement('span', { style: { display: 'block', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,.6)', lineHeight: 1.5 } }, body)
+        ))
+      )
     ]);
 
     if (s.modal === 'subscribe') return overlay([
@@ -3323,9 +3670,9 @@ class FantasyMobileAppCore extends React.Component {
       },
         React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 0%, rgba(168,85,247,.25), transparent 55%), radial-gradient(circle at 80% 100%, rgba(77,141,255,.2), transparent 55%)', pointerEvents: 'none' } }),
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, color: '#fff', marginBottom: 2 } }, '\u2b50 FM+ MEMBERSHIP'),
-        React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 12 } }, '$4.99 / month \u00b7 cancel anytime'),
+        React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 12 } }, '30-day pass available now · monthly renewal coming soon'),
         React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 4 } },
-          ['1,000 bonus FM coins every month', 'Early access to new Fantasy Cards', 'Exclusive FM+ private leagues', 'No ads across the app', '2X streak-save discount (25 FM instead of 50)'].map((f, i) => React.createElement('div', {
+          ['1,000 bonus FM coins with the pass', 'Early access to new Fantasy Cards', 'Exclusive FM+ private leagues', 'No ads across the app', '2X streak-save discount (25 FM instead of 50)'].map((f, i) => React.createElement('div', {
             key: i, style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.85)' }
           },
             React.createElement('span', { style: { color: '#a855f7', fontWeight: 900 } }, '\u2713'), f
@@ -3333,9 +3680,9 @@ class FantasyMobileAppCore extends React.Component {
         )
       ),
       !s.isSubscribed && React.createElement('div', { key: 'plans', style: { display: 'flex', gap: 8, marginBottom: 10 } },
-        [['monthly', '$4.99/mo', 'Auto-renews · cancel anytime'], ['pass', '$4.99', '30-day pass · no auto-renew']].map(([mode, price, description]) => React.createElement('div', {
-          role: 'button', tabIndex: 0, key: mode, onClick: () => this.setState({ fmPlusMode: mode }),
-          style: { flex: 1, minWidth: 0, padding: '10px 8px', borderRadius: 10, cursor: 'pointer', textAlign: 'center', background: s.fmPlusMode === mode ? 'rgba(168,85,247,.18)' : 'rgba(255,255,255,.04)', border: '1.5px solid ' + (s.fmPlusMode === mode ? '#a855f7' : 'rgba(255,255,255,.12)'), color: '#fff' }
+        [['monthly', '$4.99/mo', 'Coming soon'], ['pass', '$4.99', '30-day pass · no auto-renew']].map(([mode, price, description]) => React.createElement('div', {
+          role: 'button', tabIndex: mode === 'pass' ? 0 : -1, key: mode, onClick: mode === 'pass' ? () => this.setState({ fmPlusMode: mode }) : undefined,
+          style: { flex: 1, minWidth: 0, padding: '10px 8px', borderRadius: 10, cursor: mode === 'pass' ? 'pointer' : 'not-allowed', opacity: mode === 'pass' ? 1 : .45, textAlign: 'center', background: s.fmPlusMode === mode ? 'rgba(168,85,247,.18)' : 'rgba(255,255,255,.04)', border: '1.5px solid ' + (s.fmPlusMode === mode ? '#a855f7' : 'rgba(255,255,255,.12)'), color: '#fff' }
         },
           React.createElement('strong', { style: { display: 'block', fontSize: 13 } }, price),
           React.createElement('small', { style: { display: 'block', marginTop: 2, fontSize: 8.5, color: 'rgba(255,255,255,.55)', lineHeight: 1.35 } }, description)
@@ -3344,7 +3691,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', {
         onClick: this.subscribeFmPlus,
         style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#a855f7,#4d8dff)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(168,85,247,.6)' }
-      }, s.isSubscribed ? 'YOU\u2019RE AN FM+ MEMBER \u2713' : (s.fmPlusMode === 'pass' ? 'GET 30-DAY PASS \u2014 $4.99' : 'JOIN FM+ \u2014 $4.99/MO'))
+      }, s.isSubscribed ? 'YOU\u2019RE AN FM+ MEMBER \u2713' : 'GET 30-DAY PASS \u2014 $4.99')
     ]);
 
     if (s.modal === 'wallet' || s.modal === 'addcoins') return overlay([
@@ -3353,20 +3700,20 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { key: 'b', style: { fontSize: 26, fontWeight: 800, marginBottom: 12, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, s.coins.toLocaleString() + ' coins'),
       React.createElement('div', { key: 'l', style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 8 } }, 'ADD MORE'),
       React.createElement('div', { key: 'p', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
-        !s.hasPurchased && React.createElement('div', { key: 'fb', style: { fontSize: 10.5, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '7px 9px', marginBottom: 2 } }, '🎁 First purchase gets you DOUBLE coins — today only'),
+        firstPurchaseEligible && React.createElement('div', { key: 'fb', style: { fontSize: 10.5, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '7px 9px', marginBottom: 2 } }, '🎁 First confirmed purchase gets DOUBLE coins'),
         [[1000, '$0.99', false], [5000, '$3.99', true], [15000, '$9.99', false]].map(([amt, price, popular]) => React.createElement('div', {
           key: amt, onClick: () => this.addCoins(amt, price),
           style: { position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: 10, background: popular ? 'rgba(242,181,68,.1)' : 'rgba(255,255,255,.05)', border: popular ? '1.5px solid #f2b544' : '1px solid rgba(242,181,68,.3)', cursor: 'pointer' }
         },
           popular && React.createElement('div', { style: { position: 'absolute', top: -9, left: 12, fontSize: 8.5, fontWeight: 900, letterSpacing: .4, color: '#2b1b00', background: 'linear-gradient(90deg,#ffd873,#f2b544)', borderRadius: 999, padding: '2px 8px' } }, 'MOST POPULAR'),
-          React.createElement('span', { style: { fontWeight: 800 } }, amt.toLocaleString() + ' FM' + (!s.hasPurchased ? ' → ' + (amt * 2).toLocaleString() + ' FM' : '')),
+          React.createElement('span', { style: { fontWeight: 800 } }, amt.toLocaleString() + ' FM' + (firstPurchaseEligible ? ' → ' + (amt * 2).toLocaleString() + ' FM' : '')),
           React.createElement('span', { style: { fontWeight: 800, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, price)
         ))
       ),
       React.createElement('div', {
         key: 'fmplus', onClick: () => this.openModal('subscribe'),
         style: { marginTop: 12, textAlign: 'center', padding: '11px 0', borderRadius: 10, background: 'linear-gradient(90deg,#a855f7,#4d8dff)', fontWeight: 900, fontSize: 12, cursor: 'pointer', boxShadow: '0 0 14px rgba(168,85,247,.5)' }
-      }, s.isSubscribed ? '✓ FM+ MEMBER — MANAGE' : '⭐ GO FM+ — BONUS COINS EVERY MONTH')
+      }, s.isSubscribed ? '✓ FM+ MEMBER — MANAGE' : '⭐ GO FM+ — 30-DAY PASS')
     ]);
 
     if (s.modal === 'champProfile') {
@@ -3394,8 +3741,34 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 'rows', style: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 } },
           [['Members', league.members], ['Reward', league.rewardTitle], ['Status', league.joined ? 'Joined' : 'Open']].filter((row) => row[1] !== undefined && row[1] !== null && row[1] !== '').map(([label, value]) => React.createElement('div', { key: label, style: { display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', paddingBottom: 6, borderBottom: '1px solid rgba(255,255,255,.08)' } }, React.createElement('span', null, label), React.createElement('span', { style: { color: '#fff', fontWeight: 900 } }, value)))),
         league.joined
-          ? React.createElement('div', { key: 'view', onClick: () => { this.closeModal(); this.setTab('leaderboard'); }, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: '#a855f7', fontWeight: 900, fontSize: 12.5, cursor: 'pointer' } }, 'VIEW STANDINGS')
+          ? React.createElement('div', { key: 'view', onClick: () => this.openModal('leagueBoard', league), style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: '#a855f7', fontWeight: 900, fontSize: 12.5, cursor: 'pointer' } }, 'VIEW STANDINGS')
           : React.createElement('div', { key: 'join', onClick: () => { this.joinLiveLeague(league); this.closeModal(); }, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: '#a855f7', fontWeight: 900, fontSize: 12.5, cursor: 'pointer' } }, 'JOIN LEAGUE'),
+      ]);
+    }
+
+    if (s.modal === 'leagueBoard') {
+      const league = s.modalData || {};
+      const rawRows = Array.isArray(league.leaderboard)
+        ? league.leaderboard
+        : Array.isArray(league.standings)
+          ? league.standings
+          : [];
+      const rows = rawRows.map((row, index) => ({
+        rank: Number(row.rank || index + 1),
+        name: cleanText(row.displayName, row.playerName, row.username, row.name, `Player ${index + 1}`),
+        points: toOptionalNumber(row.totalPoints, row.points, row.score),
+      }));
+      return overlay([
+        closeBtn,
+        React.createElement('div', { key: 'k', style: { fontSize: 9.5, fontWeight: 900, letterSpacing: .8, color: '#a855f7', marginBottom: 3 } }, 'LEAGUE STANDINGS'),
+        React.createElement('div', { key: 'n', style: { fontFamily: "'Anton',sans-serif", fontSize: 20, marginBottom: 12 } }, cleanText(league.name, league.leagueName, league.playerName, 'LEAGUE')),
+        rows.length
+          ? React.createElement('div', { key: 'rows', style: { display: 'flex', flexDirection: 'column', gap: 6 } }, rows.map((row) => React.createElement('div', { key: `${row.rank}-${row.name}`, style: { display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 9, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)' } },
+              React.createElement('strong', { style: { width: 28, color: row.rank === 1 ? '#f2b544' : '#fff' } }, `#${row.rank}`),
+              React.createElement('span', { style: { flex: 1, fontSize: 12, fontWeight: 800 } }, row.name),
+              React.createElement('b', { style: { color: '#f2b544', fontSize: 11 } }, row.points === null ? '—' : `${row.points.toLocaleString()} PTS`)
+            )))
+          : React.createElement('div', { key: 'empty', style: { padding: 20, borderRadius: 12, textAlign: 'center', background: 'rgba(168,85,247,.08)', border: '1px solid rgba(168,85,247,.32)', color: 'rgba(255,255,255,.6)', fontSize: 11, lineHeight: 1.5, animation: 'emptyFloat 3s ease-in-out infinite' } }, 'No scored members are available for this league yet. Standings will populate from the league API after official results.')
       ]);
     }
 
@@ -3406,8 +3779,8 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { key: 'bonus', style: { fontSize: 11, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '8px 10px', marginBottom: 14 } }, '🎁 Sign up now — get 500 FM coins free to make your first picks'),
       React.createElement('input', { key: 'n', value: s.joinDraft.name, onChange: (event) => this.setState((state) => ({ joinDraft: { ...state.joinDraft, name: event.target.value } })), placeholder: 'Player name', style: { boxSizing: 'border-box', width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
       React.createElement('input', { key: 'e', value: s.joinDraft.email, onChange: (event) => this.setState((state) => ({ joinDraft: { ...state.joinDraft, email: event.target.value } })), placeholder: 'Email address', type: 'email', style: { boxSizing: 'border-box', width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
-      React.createElement('input', { key: 'p', type: 'password', placeholder: 'Create password', style: { width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 14, fontFamily: "'Rajdhani',sans-serif" } }),
-      React.createElement('div', { key: 'b', onClick: this.joinNow, style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 900, fontSize: 14, cursor: 'pointer' } }, 'JOIN NOW »')
+      React.createElement('div', { key: 'note', style: { color: 'rgba(255,255,255,.48)', fontSize: 10, fontWeight: 700, lineHeight: 1.45, margin: '2px 0 14px' } }, 'Continue to the secure account form to choose your password and finish registration.'),
+      React.createElement('div', { key: 'b', onClick: this.joinNow, style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 900, fontSize: 14, cursor: 'pointer' } }, 'CONTINUE TO ACCOUNT SETUP »')
     ]);
 
     if (s.modal === 'predictModal') {
@@ -3672,23 +4045,23 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 0%, rgba(168,85,247,.25), transparent 55%), radial-gradient(circle at 80% 100%, rgba(239,68,68,.2), transparent 55%)', pointerEvents: 'none' } }),
         React.createElement('div', { style: { fontSize: 9, fontWeight: 900, letterSpacing: 2, color: '#f2c869', marginBottom: 10 } }, 'FANTASY MMAdness · FIGHT IQ RECEIPT'),
         React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 } },
-          React.createElement('div', { style: { width: 44, height: 44, borderRadius: '50%' } }, React.createElement(MobileImageSlot, { id: 'avatar', shape: 'circle', placeholder: 'Photo', fit: 'cover' })),
+          React.createElement('div', { style: { width: 44, height: 44, borderRadius: '50%' } }, React.createElement(MobileImageSlot, { id: 'avatar', shape: 'circle', placeholder: profileName, fit: 'cover', src: currentUser.profileUrl })),
           React.createElement('div', null,
-            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16 } }, 'KellyD'),
-            React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: '#f2b544' } }, '👑 LEGEND · LEVEL 18')
+            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16 } }, profileName),
+            React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: '#f2b544' } }, `🏅 ${cleanText(currentUser.skillTier, currentUser.tier, 'rookie').toUpperCase()}${toOptionalNumber(currentUser.level, currentUser.fightIqLevel) !== null ? ` · LEVEL ${toOptionalNumber(currentUser.level, currentUser.fightIqLevel)}` : ''}`)
           )
         ),
         React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 } },
-          [['4-1', 'THIS WEEK'], ['80%', 'ACCURACY'], ['#18', 'GLOBAL RANK']].map(([v, l], i) => React.createElement('div', { key: i, style: { textAlign: 'center' } },
+          [[(toOptionalNumber(currentUser.contestsEntered, currentUser.matchesPlayed, currentLeaderboardRow?.matchesPlayed) ?? this.myEntries(events, s).length).toLocaleString(), 'ENTRIES'], [toOptionalNumber(currentUser.accuracy, currentUser.pickAccuracy, currentUser.winRate) === null ? '—' : `${toOptionalNumber(currentUser.accuracy, currentUser.pickAccuracy, currentUser.winRate)}%`, 'ACCURACY'], [toOptionalNumber(currentLeaderboardRow?.globalRank, currentLeaderboardRow?.rank) === null ? '—' : `#${toOptionalNumber(currentLeaderboardRow?.globalRank, currentLeaderboardRow?.rank)}`, 'GLOBAL RANK']].map(([v, l], i) => React.createElement('div', { key: i, style: { textAlign: 'center' } },
             React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#fff' } }, v),
             React.createElement('div', { style: { fontSize: 7.5, fontWeight: 800, color: 'rgba(255,255,255,.5)' } }, l)
           ))
         ),
-        React.createElement('div', { style: { background: 'rgba(242,181,68,.12)', border: '1px solid rgba(242,181,68,.4)', borderRadius: 8, padding: 8, fontSize: 10, fontWeight: 800, color: '#f2c869', textAlign: 'center' } }, '🐺 BEST CALL: Underdog Aspinall pick — 2X points'),
+        React.createElement('div', { style: { background: 'rgba(242,181,68,.12)', border: '1px solid rgba(242,181,68,.4)', borderRadius: 8, padding: 8, fontSize: 10, fontWeight: 800, color: '#f2c869', textAlign: 'center' } }, toOptionalNumber(currentUser.fightIq, currentUser.fightIQ, currentLeaderboardRow?.totalPoints) === null ? 'Official Fight IQ appears after scored cards.' : `FIGHT IQ · ${toOptionalNumber(currentUser.fightIq, currentUser.fightIQ, currentLeaderboardRow?.totalPoints).toLocaleString()} OFFICIAL POINTS`),
         React.createElement('div', { style: { fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,.35)', marginTop: 12, textAlign: 'center' } }, 'fantasymmadness.com')
       ),
       React.createElement('div', {
-        onClick: () => this.showToast('Receipt saved — ready to share!'),
+        onClick: () => this.props.onShare?.({ platform: 'share', text: `${profileName}'s Fantasy MMAdness Fight IQ` }),
         style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#a855f7,#ec4899)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(168,85,247,.6)' }
       }, '📤 SAVE & SHARE')
     ]);
@@ -3717,13 +4090,15 @@ class FantasyMobileAppCore extends React.Component {
 
     if (s.modal === 'aiScout') {
       const event = s.modalData || events[0] || null;
-      const report = event?.aiScoutingReport || (event ? {
-        summary: `${event.f1} faces ${event.f2} in this ${this.getSportLabel(event.sport)} matchup. Use the registered fight card and official updates as the source of truth.`,
-        pickSplitNote: '',
-        underdogAngle: '',
-        source: 'fight-data-fallback',
-      } : null);
-      if (!report || !event) return null;
+      const report = event?.aiScoutingReport || null;
+      if (!event) return null;
+      if (!report) return overlay([
+        closeBtn,
+        React.createElement('div', { key: 'title', style: { fontFamily: "'Anton',sans-serif", fontSize: 19, color: '#8ab4ff', marginBottom: 7 } }, 'AI SCOUTING REPORT'),
+        React.createElement('div', { key: 'fight', style: { fontSize: 12, fontWeight: 900, marginBottom: 9 } }, `${event.f1} vs ${event.f2}`),
+        React.createElement('div', { key: 'empty', style: { padding: 16, borderRadius: 11, background: 'rgba(77,141,255,.08)', border: '1px solid rgba(77,141,255,.3)', color: 'rgba(255,255,255,.62)', fontSize: 11, fontWeight: 700, lineHeight: 1.5, textAlign: 'center' } }, 'The verified scouting report has not been generated for this registered fight yet. It will appear here automatically when the live fight record includes it.'),
+        React.createElement('div', { key: 'continue', role: 'button', tabIndex: 0, onClick: () => { this.closeModal(); this.openEvent(event); }, style: { marginTop: 14, textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 12, cursor: 'pointer' } }, this.getEventActionLabel(event)),
+      ]);
       const votes = report.pickSplit
         ? { a: Number(report.pickSplit.fighterA) || 0, b: Number(report.pickSplit.fighterB) || 0 }
         : null;
@@ -3780,9 +4155,9 @@ class FantasyMobileAppCore extends React.Component {
         )
       ),
       React.createElement('div', { key: 'b', style: { fontSize: 12, lineHeight: 1.6, color: 'rgba(255,255,255,.8)', marginBottom: 12 } }, 'This Fantasy Card is hosted directly by the fighter. Fans who follow ' + (s.modalData ? s.modalData.host : 'this fighter') + ' get notified the moment a new card drops \u2014 draft your roster, compete with other fans, and the fighter earns a share of every pot.'),
-      React.createElement('div', { key: 'stats', style: { display: 'flex', gap: 8, marginBottom: 12 } },
-        [['48.2K', 'FOLLOWERS'], ['12,400', 'FM POT'], ['3', 'CARDS HOSTED']].map(([v, l], i) => React.createElement('div', { key: i, style: { flex: 1, textAlign: 'center', background: 'rgba(242,181,68,.1)', border: '1px solid rgba(242,181,68,.3)', borderRadius: 8, padding: '8px 4px' } },
-          React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#f2c869' } }, v),
+      s.modalData && [s.modalData.followers, s.modalData.pot, s.modalData.cardsHosted].some((value) => toOptionalNumber(value) !== null) && React.createElement('div', { key: 'stats', style: { display: 'flex', gap: 8, marginBottom: 12 } },
+        [[toOptionalNumber(s.modalData.followers), 'FOLLOWERS'], [toOptionalNumber(s.modalData.pot), 'FM POT'], [toOptionalNumber(s.modalData.cardsHosted), 'CARDS HOSTED']].map(([v, l], i) => React.createElement('div', { key: i, style: { flex: 1, textAlign: 'center', background: 'rgba(242,181,68,.1)', border: '1px solid rgba(242,181,68,.3)', borderRadius: 8, padding: '8px 4px' } },
+          React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#f2c869' } }, v === null ? '—' : v.toLocaleString()),
           React.createElement('div', { style: { fontSize: 7, fontWeight: 800, color: 'rgba(255,255,255,.5)' } }, l)
         ))
       ),
@@ -3811,15 +4186,16 @@ class FantasyMobileAppCore extends React.Component {
           step
         ))
       ),
-      React.createElement('div', { key: 'link', style: { padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,.06)', fontSize: 12, fontWeight: 700, marginBottom: 10 } }, 'fantasymmadness.com/ref/kellyd'),
-      React.createElement('div', { key: 'btn', onClick: this.copyReferral, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(77,141,255,.6)', marginBottom: 14 } }, 'COPY REFERRAL LINK'),
+      React.createElement('div', { key: 'link', style: { padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,.06)', fontSize: 12, fontWeight: 700, marginBottom: 10, overflowWrap: 'anywhere' } }, currentUser.playerName || currentUser._id || currentUser.id ? `fantasymmadness.com/ref/${encodeURIComponent(cleanText(currentUser.playerName, currentUser._id, currentUser.id))}` : 'Sign in to create your referral link.'),
+      React.createElement('div', { key: 'btn', onClick: currentUser.playerName || currentUser._id || currentUser.id ? this.copyReferral : () => this.props.onJoin?.(), style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(77,141,255,.6)', marginBottom: 14 } }, currentUser.playerName || currentUser._id || currentUser.id ? 'COPY REFERRAL LINK' : 'CREATE AN ACCOUNT'),
       React.createElement('div', { key: 'kitLabel', style: { fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 8 } }, 'ONE-TAP SHARE — LINK + FIGHT POSTER PRE-LOADED'),
-      React.createElement('div', { key: 'kit', style: { display: 'flex', gap: 8 } },
+      React.createElement('div', { key: 'kit', style: { display: 'flex', gap: 8, marginBottom: 12 } },
         [['X', '#000'], ['Instagram', '#dd2a7b'], ['Facebook', '#1877f2'], ['TikTok', '#25f4ee']].map(([name, color]) => React.createElement('div', {
           key: name, onClick: () => this.shareToSocial(name),
           style: { flex: 1, textAlign: 'center', padding: '10px 4px', borderRadius: 10, background: color, fontWeight: 900, fontSize: 10, cursor: 'pointer', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,.4)' }
         }, name))
-      )
+      ),
+      React.createElement('div', { key: 'dashboard', onClick: () => { this.closeModal(); this.props.onOpenAffiliateDashboard?.(); }, style: { textAlign: 'center', padding: '11px 0', borderRadius: 999, border: '1.5px solid rgba(242,181,68,.5)', color: '#f2b544', fontWeight: 900, fontSize: 12, cursor: 'pointer' } }, '📊 OPEN MY LIVE AFFILIATE DASHBOARD')
     ]);
 
     return null;

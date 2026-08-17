@@ -103,7 +103,7 @@ const normalizeHomeApparelImageUrl = (value, fallbackIndex = 0) => {
   const raw = unwrapHomeMaybeMarkdownUrl(value);
   if (!raw) return getHomeApparelFallbackImage(fallbackIndex);
   if (raw.includes("/images/mobile-home/app-fixed-v15/")) {
-    return raw.replace("/images/mobile-home/app-fixed-v15/", "/images/mobile-home/app-fixed-v32/");
+    return raw.replace("/images/mobile-home/app-fixed-v15/", "/images/mobile-home/final-v35/");
   }
   return raw;
 };

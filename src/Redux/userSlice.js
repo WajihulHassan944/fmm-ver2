@@ -22,6 +22,13 @@ const userSlice = createSlice({
     hasAvailedFreePlan: false,
     verified: false,
     tokens: '0', // Add tokens to the initial state
+    skillTier: 'rookie',
+    skillTierUpdatedAt: null,
+    rollingPerformancePercentile: null,
+    loginStreak: 0,
+    streakExpiresAt: null,
+    dailyRewardClaimedAt: null,
+    streakSkipUnlockedAt: null,
   },
   reducers: {
     setUser: (state, action) => {
@@ -50,6 +57,13 @@ const userSlice = createSlice({
         hasAvailedFreePlan: false,
         verified: false,
         tokens: '0', // Reset tokens to 0 when clearing user
+        skillTier: 'rookie',
+        skillTierUpdatedAt: null,
+        rollingPerformancePercentile: null,
+        loginStreak: 0,
+        streakExpiresAt: null,
+        dailyRewardClaimedAt: null,
+        streakSkipUnlockedAt: null,
       };
     },
   },

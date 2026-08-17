@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/Redux/authSlice';
+import { clearUser, setUser } from '@/Redux/userSlice';
 
 import {
   buildPublicApiUrl,
@@ -16,8 +18,8 @@ import { dedupePublicFights, getFightId, getPublicFightDuplicateKey, sortFights 
 import FantasyMobileAppCore from './FantasyMobileAppCore';
 
 const MOBILE_QUERY = '(max-width: 767px)';
-const EXPERIENCE_CACHE_PREFIX = 'fmm-mobile-v7:';
-const EMPTY_DATA = Object.freeze({ fights: [], leaderboard: [], blogs: [], apparel: [], leagues: [], leagueUsers: [], stats: {} });
+const EXPERIENCE_CACHE_PREFIX = 'fmm-mobile-v12:';
+const EMPTY_DATA = Object.freeze({ fights: [], leaderboard: [], blogs: [], apparel: [], leagues: [], leagueUsers: [], stats: {}, retention: {} });
 const memoryExperienceCache = new Map();
 
 const readExperienceCache = (key) => {
@@ -70,6 +72,7 @@ const toNumber = (...values) => {
 
 export default function FantasyMobileExperience({ initialTab = 'home', forceRender = false }) {
   const router = useRouter();
+  const dispatch = useDispatch();
   const user = useSelector(getUser);
   const isStaff = useSelector((state) => Boolean(state?.adminAuth?.isAdminAuthenticated));
   const userId = String(user?._id || user?.id || '').trim();
@@ -77,6 +80,8 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState(EMPTY_DATA);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeMobileTab, setActiveMobileTab] = useState(initialTab);
+  const [liveRefreshTick, setLiveRefreshTick] = useState(0);
 
   useEffect(() => {
     const media = window.matchMedia(MOBILE_QUERY);
@@ -85,6 +90,14 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     media.addEventListener?.('change', sync);
     return () => media.removeEventListener?.('change', sync);
   }, []);
+
+  useEffect(() => {
+    if (activeMobileTab !== 'watch' || (!isMobile && !forceRender)) return undefined;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') setLiveRefreshTick((value) => value + 1);
+    }, 15000);
+    return () => window.clearInterval(timer);
+  }, [activeMobileTab, forceRender, isMobile]);
 
   useEffect(() => {
     if (!isMobile && !forceRender) return undefined;
@@ -102,7 +115,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       fetchPublicFights({ limit: 300, hydrateImages: false }),
       fetchPromotedHomeFights({ limit: 24 }),
       fetchPublicHomeSummary({ fightLimit: 24, leaderboardLimit: 20 }),
-      fetchPublicLeaderboard({ limit: 50 }),
+      fetchPublicLeaderboard({ limit: 100 }),
       fetchPublicBlogs({ limit: 12 }),
       safeFetchJson('/api/public/apparel-products', { limit: 12 }),
       safeFetchJson('/api/public/leagues', { limit: 30 }),
@@ -193,6 +206,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : [],
         leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : [],
         stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : {},
+        retention: summary.retention && typeof summary.retention === 'object' ? summary.retention : {},
       };
       setData(nextData);
       writeExperienceCache(cacheKey, nextData);
@@ -204,7 +218,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     return () => {
       active = false;
     };
-  }, [cacheKey, forceRender, isMobile, userId]);
+  }, [cacheKey, forceRender, isMobile, liveRefreshTick, userId]);
 
   const initialCoins = useMemo(
     () => toNumber(user?.tokens, user?.walletTokens, user?.wallet?.balance),
@@ -252,6 +266,45 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     return Boolean(response?.ok);
   };
 
+  const applyAccountResponse = async (response) => {
+    if (!response) return false;
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.user) return false;
+    dispatch(setUser(payload.user));
+    return payload;
+  };
+
+  const updateProfile = async (draft = {}) => {
+    if (!isAuthenticated || !userId || typeof window === 'undefined') return false;
+    const token = window.localStorage.getItem('authToken');
+    if (!token) return false;
+    const body = {};
+    ['firstName', 'lastName', 'playerName'].forEach((field) => { body[field] = String(draft[field] || '').trim(); });
+    const response = await fetch(buildPublicApiUrl('/api/users/me/profile'), {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).catch(() => null);
+    return applyAccountResponse(response);
+  };
+
+  const runStreakAction = async (action) => {
+    if (!isAuthenticated || typeof window === 'undefined') return false;
+    const token = window.localStorage.getItem('authToken');
+    if (!token) return false;
+    const response = await fetch(buildPublicApiUrl(`/api/users/me/streak/${action}`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    }).catch(() => null);
+    return applyAccountResponse(response);
+  };
+
+  const logOut = () => {
+    dispatch(logout());
+    dispatch(clearUser());
+    router.replace('/');
+  };
+
   const share = async ({ platform, text } = {}) => {
     const url = typeof window !== 'undefined' ? window.location.href : 'https://www.fantasymmadness.com';
     if (navigator.share) {
@@ -279,6 +332,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         leagues={data.leagues}
         leagueUsers={data.leagueUsers}
         stats={data.stats}
+        retention={data.retention}
         onPurchaseCoins={goToCheckout}
         dataLoading={isLoading}
         onSubscribe={({ plan = 'monthly' } = {}) => goToCheckout({ product: 'fm-plus', plan })}
@@ -295,6 +349,18 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
           router.push(`/CreateAccount${query.toString() ? `?${query.toString()}` : ''}`);
         }}
         onOpenApparel={() => router.push('/apparel')}
+        onUpdateProfile={updateProfile}
+        onLogout={logOut}
+        onClaimReward={() => runStreakAction('claim')}
+        onSaveStreak={() => runStreakAction('save')}
+        onSkipStreakWait={() => runStreakAction('skip-wait')}
+        onOpenFaqs={() => router.push('/faqs')}
+        onSupport={({ message = '' } = {}) => {
+          router.push(`/contact${message ? `?message=${encodeURIComponent(message)}` : ''}`);
+          return true;
+        }}
+        onOpenAffiliateDashboard={() => router.push('/AffiliateDashboard')}
+        onTabChange={setActiveMobileTab}
         onShare={share}
       />
     </div>

@@ -16,7 +16,7 @@ const FALLBACK_APPAREL_ITEMS = [
     name: "MMAdness Hoodie",
     price: 49.99,
     displayPrice: "$49.99",
-    image: "/images/mobile-home/app-fixed-v32/ap1-hq.webp",
+    image: "/images/mobile-home/final-v35/ap1.webp",
     tag: "Heavyweight drop",
     sizes: ["S", "M", "L", "XL", "2XL"],
   },
@@ -25,7 +25,7 @@ const FALLBACK_APPAREL_ITEMS = [
     name: "Fight Tee",
     price: 29.99,
     displayPrice: "$29.99",
-    image: "/images/mobile-home/app-fixed-v32/ap2-hq.webp",
+    image: "/images/mobile-home/final-v35/ap2.webp",
     tag: "Everyday fight gear",
     sizes: ["S", "M", "L", "XL", "2XL"],
   },
@@ -34,7 +34,7 @@ const FALLBACK_APPAREL_ITEMS = [
     name: "Snapback Cap",
     price: 24.99,
     displayPrice: "$24.99",
-    image: "/images/mobile-home/app-fixed-v32/ap3-hq.webp",
+    image: "/images/mobile-home/final-v35/ap3.webp",
     tag: "Arena-ready",
     sizes: ["One Size"],
   },
@@ -43,7 +43,7 @@ const FALLBACK_APPAREL_ITEMS = [
     name: "Fight Shorts",
     price: 39.99,
     displayPrice: "$39.99",
-    image: "/images/mobile-home/app-fixed-v32/ap1-2-hq.webp",
+    image: "/images/mobile-home/final-v35/ap1-2.webp",
     tag: "Training style",
     sizes: ["S", "M", "L", "XL", "2XL"],
   },
@@ -52,18 +52,18 @@ const FALLBACK_APPAREL_ITEMS = [
     name: "Training Gloves",
     price: 34.99,
     displayPrice: "$34.99",
-    image: "/images/mobile-home/app-fixed-v32/ap2-2-hq.webp",
+    image: "/images/mobile-home/final-v35/ap2-2.webp",
     tag: "Ready to ship",
     sizes: ["S/M", "L/XL"],
   },
 ];
 
 const APPAREL_IMAGE_FALLBACKS = [
-  "/images/mobile-home/app-fixed-v32/ap1-hq.webp",
-  "/images/mobile-home/app-fixed-v32/ap2-hq.webp",
-  "/images/mobile-home/app-fixed-v32/ap3-hq.webp",
-  "/images/mobile-home/app-fixed-v32/ap1-2-hq.webp",
-  "/images/mobile-home/app-fixed-v32/ap2-2-hq.webp",
+  "/images/mobile-home/final-v35/ap1.webp",
+  "/images/mobile-home/final-v35/ap2.webp",
+  "/images/mobile-home/final-v35/ap3.webp",
+  "/images/mobile-home/final-v35/ap1-2.webp",
+  "/images/mobile-home/final-v35/ap2-2.webp",
 ];
 
 const getApparelFallbackImage = (index = 0) => APPAREL_IMAGE_FALLBACKS[index % APPAREL_IMAGE_FALLBACKS.length];
@@ -81,7 +81,7 @@ const normalizeApparelImageUrl = (value, fallbackIndex = 0) => {
   const raw = unwrapMaybeMarkdownUrl(value);
   if (!raw) return getApparelFallbackImage(fallbackIndex);
   if (raw.includes("/images/mobile-home/app-fixed-v15/")) {
-    return raw.replace("/images/mobile-home/app-fixed-v15/", "/images/mobile-home/app-fixed-v32/");
+    return raw.replace("/images/mobile-home/app-fixed-v15/", "/images/mobile-home/final-v35/");
   }
   return raw;
 };
