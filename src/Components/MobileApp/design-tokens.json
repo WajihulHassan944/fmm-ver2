@@ -1,0 +1,39 @@
+{
+  "color": {
+    "bg": "#05060a",
+    "bgAlt": "#0b0c12",
+    "red": "#ef4444",
+    "blue": "#4d8dff",
+    "gold": "#f2b544",
+    "goldLight": "#f2c869",
+    "goldPale": "#ffd873",
+    "goldOnDark": "#2b1b00",
+    "purple": "#a855f7",
+    "green": "#22c55e",
+    "textPrimary": "#ffffff",
+    "textSecondary": "rgba(255,255,255,.7)",
+    "textMuted": "rgba(255,255,255,.5)",
+    "surface": "rgba(255,255,255,.05)",
+    "border": "rgba(255,255,255,.12)"
+  },
+  "font": {
+    "heading": "'Anton', sans-serif",
+    "body": "'Rajdhani', sans-serif"
+  },
+  "fontSize": {
+    "sectionLabel": 12,
+    "screenTitle": 22,
+    "cardTitle": 15,
+    "bodyLarge": 12,
+    "body": 11.5,
+    "bodySmall": 10.5,
+    "caption": 9.5,
+    "micro": 8.5
+  },
+  "fontWeight": { "regular": 700, "medium": 800, "bold": 900 },
+  "radius": { "sm": 4, "md": 8, "lg": 10, "xl": 12, "card": 18, "pill": 999 },
+  "spacing": { "screenPaddingX": 16, "cardPadding": 14, "cardPaddingLarge": 16, "stackGap": 8, "fieldGap": 10 },
+  "viewport": { "designWidth": 390 },
+  "carouselTiming": { "photoCycleMs": 7000, "communityPredictionsCycleMs": 4500 },
+  "minimums": { "touchTargetPx": 44 }
+}

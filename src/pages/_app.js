@@ -124,7 +124,7 @@ import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/Redux/userSlice";
 import { setAffiliateUser } from "@/Redux/affiliateSlice";
@@ -137,7 +137,6 @@ import SeoHead from "@/Components/SEO/SeoHead";
 import { API_BASE_URL } from "@/Utils/swarmApi";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import FantasyMobileExperience from "@/Components/MobileApp/FantasyMobileExperience";
 
 import { shouldUseRouteExperienceFrame } from "@/Utils/routeExperience";
 
@@ -210,12 +209,23 @@ const MOBILE_APP_ROUTE_TABS = {
   "/fights-news": "blogs",
 };
 
-const EXACT_MOBILE_QUERY = "(max-width: 767px)";
 const FULLSCREEN_PROTOTYPE_ROUTES = new Set([
+  "/",
+  "/home",
+  "/fights",
+  "/upcomingfights",
+  "/UserDashboard",
   "/leaderboard",
   "/global-leaderboard",
   "/FantasyLeagues",
   "/watch-party",
+  "/profile",
+  "/account-settings",
+  "/free-demo",
+  "/mock-game",
+  "/playforfree",
+  "/blogs",
+  "/fights-news",
 ]);
 const IMMERSIVE_ROUTES = new Set([
   ...FULLSCREEN_PROTOTYPE_ROUTES,
@@ -274,7 +284,6 @@ function App({ Component, ...rest }) {
 function AppContent({ children }) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [isExactMobile, setIsExactMobile] = useState(false);
   const isPlaying = useSelector((state) => state.music.isPlaying);
   const seekPosition = useSelector((state) => state.music.seekPosition);
   const howlerRef = useRef(null);
@@ -284,35 +293,21 @@ function AppContent({ children }) {
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
   const isStandaloneDemoRoute = ["/free-demo", "/mock-game", "/playforfree"].includes(router.pathname);
-  // Keep the global site header hidden for admin and the standalone demo app.
-  // The homepage still needs the normal desktop/laptop navbar, while CSS hides
-  // it on phone so the standalone mobile app topbar remains clean.
-  const hideLayout = isAdministrationRoute || isStandaloneDemoRoute;
-  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || IMMERSIVE_ROUTES.has(router.pathname);
+  const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
+  // Every app-owned page mounts the v12 experience directly from its route
+  // file. Desktop keeps the website navigation; phone CSS hides it so the app
+  // begins at the top safe area without a duplicate header or black gap.
+  const hideLayout = isAdministrationRoute;
+  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || Boolean(exactMobileTab) || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
   );
-  const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
-  const forcePrototypeExperience = FULLSCREEN_PROTOTYPE_ROUTES.has(router.pathname);
-  // Render the phone shell in the initial HTML for mapped routes. CSS keeps it
-  // hidden on desktop, while mobile no longer waits for a post-hydration chunk
-  // and media-query state update before the app appears.
-  const renderPrototypeExperience = Boolean(exactMobileTab);
-  const renderLegacyExperience = !forcePrototypeExperience && (!exactMobileTab || !isExactMobile);
   const mainClassName = isAdministrationRoute
     ? isAdminLoginRoute
       ? "admin-login-main"
       : "admin-experience-main"
     : `site-experience-main${isHomeExperienceRoute ? " is-home-experience-main" : ""}${isStandaloneDemoRoute ? " is-standalone-demo-main" : ""}`;
-
-  useEffect(() => {
-    const media = window.matchMedia(EXACT_MOBILE_QUERY);
-    const sync = () => setIsExactMobile(media.matches);
-    sync();
-    media.addEventListener?.("change", sync);
-    return () => media.removeEventListener?.("change", sync);
-  }, []);
 
   useEffect(() => {
     if (!router.isReady) return undefined;
@@ -480,12 +475,11 @@ function AppContent({ children }) {
         <ToastContainer />
       </div>
 
-      {!hideLayout && (!renderPrototypeExperience || !isExactMobile) && <Header />}
-      {renderLegacyExperience && showAdminChrome && <AdminHeader />}
-      {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
-      {renderPrototypeExperience && <FantasyMobileExperience initialTab={exactMobileTab} forceRender={forcePrototypeExperience} />}
+      {!hideLayout && <Header />}
+      {showAdminChrome && <AdminHeader />}
+      {!hideFooterChrome && <ChatbaseWidget />}
 
-      {renderLegacyExperience && <main className={mainClassName}>
+      <main className={mainClassName}>
         {useRouteExperienceFrame ? (
           <RouteExperienceFrame pathname={router.pathname}>
             {children}
@@ -493,8 +487,8 @@ function AppContent({ children }) {
         ) : (
           children
         )}
-      </main>}
-      {renderLegacyExperience && !hideFooterChrome && <Footer />}
+      </main>
+      {!hideFooterChrome && <Footer />}
     </>
   );
 }

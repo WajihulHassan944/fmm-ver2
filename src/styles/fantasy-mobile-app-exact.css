@@ -126,6 +126,8 @@
 }
 
 @keyframes glimmerCrown { 0%,100% { filter: drop-shadow(0 0 6px rgba(242,181,68,.6)); transform: rotate(-2deg) scale(1); } 50% { filter: drop-shadow(0 0 18px rgba(242,181,68,1)); transform: rotate(2deg) scale(1.05); } }
+  @keyframes heroGloss { 0% { transform: translateX(-120%) skewX(-20deg); } 100% { transform: translateX(220%) skewX(-20deg); } }
+  @keyframes cardIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
   @keyframes iconPopIn { 0% { opacity: 0; transform: scale(.3) translateY(8px); } 60% { opacity: 1; transform: scale(1.12) translateY(0); } 100% { transform: scale(1); } }
   @keyframes welcomeRing { 0% { box-shadow: 0 0 0 0 rgba(242,181,68,.7); } 100% { box-shadow: 0 0 0 14px rgba(242,181,68,0); } }
   @keyframes liveToastIn { 0% { opacity: 0; transform: translateY(8px); } 15% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }

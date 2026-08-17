@@ -1,3 +1,5 @@
-import FreeDemoFight from '@/Components/FreeDemoFight/FreeDemoFight';
+import MobileAppRoutePage from '@/Components/MobileApp/MobileAppRoutePage';
 
-export default FreeDemoFight;
+export default function MockGamePage() {
+  return <MobileAppRoutePage initialTab="demo" />;
+}

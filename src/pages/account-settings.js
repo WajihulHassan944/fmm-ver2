@@ -1,11 +1,5 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
+import MobileAppRoutePage from '@/Components/MobileApp/MobileAppRoutePage';
 
-const UserAccountSettings = dynamic(
-  () => import('@/Components/UserProfile/UserAccountSettings'),
-  { loading: () => <p>Loading...</p> },
-);
-
-const AccountSettingsPage = () => <UserAccountSettings />;
-
-export default AccountSettingsPage;
+export default function AccountSettingsPage() {
+  return <MobileAppRoutePage initialTab="settings" />;
+}

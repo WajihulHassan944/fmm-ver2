@@ -1,15 +1,5 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
+import MobileAppRoutePage from '@/Components/MobileApp/MobileAppRoutePage';
 
-const DashboardMain = dynamic(
-  () => import('@/Components/Dashboard/DashboardMain'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <DashboardMain />
+export default function PredictionsPage() {
+  return <MobileAppRoutePage initialTab="predict" />;
 }
-
-export default index

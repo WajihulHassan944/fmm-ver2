@@ -2,8 +2,10 @@
 import React from 'react';
 import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
+import designTokens from './design-tokens.json';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
+const DESIGN_WIDTH = designTokens.viewport.designWidth;
 const EVENT_POSTER_FILES = [
   'event-poster-1.webp',
   'event-poster-2.webp',
@@ -494,10 +496,10 @@ class FantasyMobileAppCore extends React.Component {
     }, 30000);
     this._communityInterval = setInterval(() => {
       this.setState(s => ({ communityIndex: (s.communityIndex + 1) % 5 }));
-    }, 4500);
+    }, designTokens.carouselTiming.communityPredictionsCycleMs);
     this._sportPhotoInterval = setInterval(() => {
       this.setState(s => ({ sportPhotoIndex: (s.sportPhotoIndex + 1) % 5 }));
-    }, 7000);
+    }, designTokens.carouselTiming.photoCycleMs);
     this._streakInterval = setInterval(() => {
       this.setState(s => s.rewardClaimed ? s : { streakExpiresIn: Math.max(0, s.streakExpiresIn - 1) });
     }, 1000);
@@ -1416,7 +1418,7 @@ class FantasyMobileAppCore extends React.Component {
 
     const screen = React.createElement('div', {
       className: 'fmm-prototype-screen',
-      style: { position: 'relative', width: '100%', height: '100dvh', maxHeight: '100dvh', minHeight: 620, background: '#05060a', color: '#fff', overflow: 'hidden', fontFamily: "'Rajdhani',sans-serif", display: 'flex', flexDirection: 'column' }
+      style: { position: 'relative', width: '100%', height: '100dvh', maxHeight: '100dvh', minHeight: 620, background: designTokens.color.bg, color: designTokens.color.textPrimary, overflow: 'hidden', fontFamily: designTokens.font.body, display: 'flex', flexDirection: 'column', '--fmm-design-width': DESIGN_WIDTH }
     },
       React.createElement('div', {
         className: 'fmm-prototype-scroll',
@@ -1551,13 +1553,13 @@ class FantasyMobileAppCore extends React.Component {
       || bannerEvent;
     const top = s.layout === 'bold'
       ? React.createElement(React.Fragment, null,
-          this.renderBoldHero(allEvents),
+          this.renderApprovedBoldHero(),
           this.renderStorySports(sports),
           this.renderBento(xpPct, s, bannerEvent),
           this.renderEventCarousel(filteredEvents, s)
         )
       : React.createElement(React.Fragment, null,
-          this.props.currentUser ? this.renderReturningHero(allEvents, s) : this.renderHero(),
+          this.props.currentUser ? this.renderReturningHero(allEvents, s) : this.renderApprovedHero(),
           this.renderTicker(),
           this.renderStatsBar(),
           this.renderSportSelector(sports, s),
@@ -1719,6 +1721,40 @@ class FantasyMobileAppCore extends React.Component {
           color: s.layout === l ? '#1a0e00' : 'rgba(255,255,255,.5)', border: '1px solid ' + (s.layout === l ? 'transparent' : 'rgba(255,255,255,.1)')
         }
       }, l === 'classic' ? 'CLASSIC' : '⚡ BOLD'))
+    );
+  }
+
+  // Direct v12 prototype port. The approved visual is a single authored hero
+  // asset with its original gloss pass and click target; it must not be
+  // reconstructed from older stacked overlays.
+  renderApprovedBoldHero() {
+    return React.createElement('div', { style: { position: 'relative', margin: '0 16px 14px', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(242,181,68,.3)', background: '#000' } },
+      React.createElement('img', { src: `${ASSET_BASE}/hero-banner-crop.png`, alt: 'Fantasy MMAdness combat prediction game', style: { width: '100%', height: 'auto', display: 'block', objectFit: 'contain' } }),
+      React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '35%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent)', animation: 'heroGloss 3.5s ease-in-out infinite', pointerEvents: 'none' } }),
+      React.createElement('div', { style: { position: 'absolute', bottom: 16, right: 16 } },
+        React.createElement('button', {
+          type: 'button',
+          onClick: () => this.props.currentUser ? this.setTab('contests') : this.openModal('join'),
+          style: {
+            border: 0, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999,
+            background: 'linear-gradient(90deg,#ffd873,#f2b544,#ffe9a8,#f2b544,#ffd873)', backgroundSize: '200% 100%',
+            animation: 'shimmerBtn 2.5s linear infinite, joinGlow 2s ease-in-out infinite' + (this.state.showWelcomePulse ? ', welcomeRing 1.4s ease-out infinite' : ''), color: '#2b1b00', fontFamily: "'Rajdhani',sans-serif", fontWeight: 900, fontSize: 11, cursor: 'pointer'
+          }
+        }, this.props.currentUser ? 'MAKE A PICK »' : 'JOIN FREE »')
+      )
+    );
+  }
+
+  renderApprovedHero() {
+    return React.createElement('div', { style: { position: 'relative', width: '100%', overflow: 'hidden', background: '#05060a' } },
+      React.createElement('img', { src: `${ASSET_BASE}/hero-banner-crop.png`, alt: 'Fantasy MMAdness combat prediction game', style: { width: '100%', height: 'auto', display: 'block' } }),
+      React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '35%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent)', animation: 'heroGloss 3.5s ease-in-out infinite', pointerEvents: 'none' } }),
+      React.createElement('button', {
+        type: 'button',
+        'aria-label': 'Join Fantasy MMAdness free',
+        onClick: () => this.openModal('join'),
+        style: { position: 'absolute', left: '22%', right: '22%', bottom: '4%', height: '11%', cursor: 'pointer', border: 0, padding: 0, background: 'transparent' }
+      })
     );
   }
 

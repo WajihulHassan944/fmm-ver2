@@ -1,5 +1,5 @@
-import HomeAnother from "@/Components/HomeAnother/HomeAnother";
+import MobileAppRoutePage from '@/Components/MobileApp/MobileAppRoutePage';
 
-const HomePage = () => <HomeAnother />;
-
-export default HomePage;
+export default function HomePage() {
+  return <MobileAppRoutePage initialTab="home" />;
+}
