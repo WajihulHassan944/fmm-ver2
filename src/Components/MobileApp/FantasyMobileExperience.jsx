@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '@/Redux/authSlice';
-import { clearUser, setUser } from '@/Redux/userSlice';
+import { useSelector } from 'react-redux';
 
 import {
   buildPublicApiUrl,
@@ -18,8 +16,8 @@ import { dedupePublicFights, getFightId, getPublicFightDuplicateKey, sortFights 
 import FantasyMobileAppCore from './FantasyMobileAppCore';
 
 const MOBILE_QUERY = '(max-width: 767px)';
-const EXPERIENCE_CACHE_PREFIX = 'fmm-mobile-v12:';
-const EMPTY_DATA = Object.freeze({ fights: [], leaderboard: [], blogs: [], apparel: [], leagues: [], leagueUsers: [], stats: {}, retention: {} });
+const EXPERIENCE_CACHE_PREFIX = 'fmm-mobile-v7:';
+const EMPTY_DATA = Object.freeze({ fights: [], leaderboard: [], blogs: [], apparel: [], leagues: [], leagueUsers: [], notifications: [], shadowFights: [], affiliateCampaigns: [], stats: {} });
 const memoryExperienceCache = new Map();
 
 const readExperienceCache = (key) => {
@@ -55,6 +53,14 @@ const fetchSignedInEntries = async () => {
   return Array.isArray(payload.entries) ? payload.entries : [];
 };
 
+const fetchSignedInNotifications = async (userId) => {
+  if (!userId) return [];
+  const response = await fetch(buildPublicApiUrl(`/notifications/${encodeURIComponent(userId)}`));
+  if (!response.ok) return [];
+  const payload = await response.json().catch(() => []);
+  return Array.isArray(payload) ? payload : Array.isArray(payload.notifications) ? payload.notifications : [];
+};
+
 const getUser = (state) => {
   const direct = state?.user;
   if (direct?._id || direct?.email || direct?.playerName) return direct;
@@ -72,7 +78,6 @@ const toNumber = (...values) => {
 
 export default function FantasyMobileExperience({ initialTab = 'home', forceRender = false }) {
   const router = useRouter();
-  const dispatch = useDispatch();
   const user = useSelector(getUser);
   const isStaff = useSelector((state) => Boolean(state?.adminAuth?.isAdminAuthenticated));
   const userId = String(user?._id || user?.id || '').trim();
@@ -80,8 +85,6 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState(EMPTY_DATA);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeMobileTab, setActiveMobileTab] = useState(initialTab);
-  const [liveRefreshTick, setLiveRefreshTick] = useState(0);
 
   useEffect(() => {
     const media = window.matchMedia(MOBILE_QUERY);
@@ -90,14 +93,6 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     media.addEventListener?.('change', sync);
     return () => media.removeEventListener?.('change', sync);
   }, []);
-
-  useEffect(() => {
-    if (activeMobileTab !== 'watch' || (!isMobile && !forceRender)) return undefined;
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') setLiveRefreshTick((value) => value + 1);
-    }, 15000);
-    return () => window.clearInterval(timer);
-  }, [activeMobileTab, forceRender, isMobile]);
 
   useEffect(() => {
     if (!isMobile && !forceRender) return undefined;
@@ -115,12 +110,13 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       fetchPublicFights({ limit: 300, hydrateImages: false }),
       fetchPromotedHomeFights({ limit: 24 }),
       fetchPublicHomeSummary({ fightLimit: 24, leaderboardLimit: 20 }),
-      fetchPublicLeaderboard({ limit: 100 }),
+      fetchPublicLeaderboard({ limit: 50 }),
       fetchPublicBlogs({ limit: 12 }),
       safeFetchJson('/api/public/apparel-products', { limit: 12 }),
       safeFetchJson('/api/public/leagues', { limit: 30 }),
       userId ? fetchSignedInEntries() : Promise.resolve([]),
-    ]).then(([playableResult, publicResult, promotedResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult, entriesResult]) => {
+      userId ? fetchSignedInNotifications(userId) : Promise.resolve([]),
+    ]).then(([playableResult, publicResult, promotedResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult, entriesResult, notificationsResult]) => {
       if (!active) return;
       const playableRows = playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [];
       const publicRows = publicResult.status === 'fulfilled' && Array.isArray(publicResult.value) ? publicResult.value : [];
@@ -131,6 +127,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       const apparelPayload = apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {};
       const leaguePayload = leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {};
       const entryRows = entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [];
+      const notificationRows = notificationsResult.status === 'fulfilled' && Array.isArray(notificationsResult.value) ? notificationsResult.value : [];
       const summaryRows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
       const predictionRows = playableRows;
       const predictionByKey = new Map();
@@ -205,8 +202,10 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         apparel: Array.isArray(apparelPayload.products) ? apparelPayload.products : [],
         leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : [],
         leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : [],
+        notifications: notificationRows,
+        shadowFights: fights.filter((fight) => Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow'))),
+        affiliateCampaigns: Array.isArray(leaguePayload.affiliateCampaigns) ? leaguePayload.affiliateCampaigns : [],
         stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : {},
-        retention: summary.retention && typeof summary.retention === 'object' ? summary.retention : {},
       };
       setData(nextData);
       writeExperienceCache(cacheKey, nextData);
@@ -218,7 +217,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     return () => {
       active = false;
     };
-  }, [cacheKey, forceRender, isMobile, liveRefreshTick, userId]);
+  }, [cacheKey, forceRender, isMobile, userId]);
 
   const initialCoins = useMemo(
     () => toNumber(user?.tokens, user?.walletTokens, user?.wallet?.balance),
@@ -266,45 +265,6 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     return Boolean(response?.ok);
   };
 
-  const applyAccountResponse = async (response) => {
-    if (!response) return false;
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok || !payload?.user) return false;
-    dispatch(setUser(payload.user));
-    return payload;
-  };
-
-  const updateProfile = async (draft = {}) => {
-    if (!isAuthenticated || !userId || typeof window === 'undefined') return false;
-    const token = window.localStorage.getItem('authToken');
-    if (!token) return false;
-    const body = {};
-    ['firstName', 'lastName', 'playerName'].forEach((field) => { body[field] = String(draft[field] || '').trim(); });
-    const response = await fetch(buildPublicApiUrl('/api/users/me/profile'), {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    }).catch(() => null);
-    return applyAccountResponse(response);
-  };
-
-  const runStreakAction = async (action) => {
-    if (!isAuthenticated || typeof window === 'undefined') return false;
-    const token = window.localStorage.getItem('authToken');
-    if (!token) return false;
-    const response = await fetch(buildPublicApiUrl(`/api/users/me/streak/${action}`), {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    }).catch(() => null);
-    return applyAccountResponse(response);
-  };
-
-  const logOut = () => {
-    dispatch(logout());
-    dispatch(clearUser());
-    router.replace('/');
-  };
-
   const share = async ({ platform, text } = {}) => {
     const url = typeof window !== 'undefined' ? window.location.href : 'https://www.fantasymmadness.com';
     if (navigator.share) {
@@ -313,6 +273,16 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     }
     await navigator.clipboard?.writeText(url).catch(() => {});
     if (platform === 'X') window.open(`https://x.com/intent/post?url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const enableBrowserAlerts = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return { ok: false, message: 'This browser does not support alerts.' };
+    }
+    const permission = await window.Notification.requestPermission();
+    return permission === 'granted'
+      ? { ok: true, message: 'Browser alerts enabled.' }
+      : { ok: false, message: 'Browser alert permission was not granted.' };
   };
 
   return (
@@ -331,11 +301,15 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         apparel={data.apparel}
         leagues={data.leagues}
         leagueUsers={data.leagueUsers}
+        notifications={data.notifications}
+        unreadNotificationCount={data.notifications.filter((item) => !(item.read || item.isRead)).length}
+        shadowFights={data.shadowFights}
+        affiliateCampaigns={data.affiliateCampaigns}
+        livePresence={{ viewerCount: toNumber(data.stats?.watchPartyViewers, data.stats?.liveViewerCount) || 0 }}
         stats={data.stats}
-        retention={data.retention}
         onPurchaseCoins={goToCheckout}
         dataLoading={isLoading}
-        onSubscribe={({ plan = 'monthly' } = {}) => goToCheckout({ product: 'fm-plus', plan })}
+        onSubscribe={() => goToCheckout({ product: 'fm-plus', plan: 'pass' })}
         onSubmitPrediction={submitPrediction}
         onOpenFight={({ event } = {}) => {
           const id = String(event?.backendId || event?.id || '').trim();
@@ -349,18 +323,8 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
           router.push(`/CreateAccount${query.toString() ? `?${query.toString()}` : ''}`);
         }}
         onOpenApparel={() => router.push('/apparel')}
-        onUpdateProfile={updateProfile}
-        onLogout={logOut}
-        onClaimReward={() => runStreakAction('claim')}
-        onSaveStreak={() => runStreakAction('save')}
-        onSkipStreakWait={() => runStreakAction('skip-wait')}
-        onOpenFaqs={() => router.push('/faqs')}
-        onSupport={({ message = '' } = {}) => {
-          router.push(`/contact${message ? `?message=${encodeURIComponent(message)}` : ''}`);
-          return true;
-        }}
-        onOpenAffiliateDashboard={() => router.push('/AffiliateDashboard')}
-        onTabChange={setActiveMobileTab}
+        onOpenAffiliateDashboard={() => router.push(isAuthenticated ? '/AffiliateDashboard' : `/login?next=${encodeURIComponent('/AffiliateDashboard')}`)}
+        onEnablePush={enableBrowserAlerts}
         onShare={share}
       />
     </div>

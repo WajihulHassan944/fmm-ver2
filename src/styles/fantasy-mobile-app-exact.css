@@ -87,13 +87,6 @@
     overflow: hidden;
     box-shadow: 0 26px 70px rgba(0, 0, 0, 0.35);
   }
-
-  .fmm-exact-mobile-portal.is-desktop-shell .fmm-prototype-modal {
-    width: min(720px, calc(100% - 48px)) !important;
-    margin-bottom: 24px;
-    border-radius: 20px !important;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.62);
-  }
 }
 
 @media (max-width: 767px) {
@@ -126,21 +119,6 @@
 }
 
 @keyframes glimmerCrown { 0%,100% { filter: drop-shadow(0 0 6px rgba(242,181,68,.6)); transform: rotate(-2deg) scale(1); } 50% { filter: drop-shadow(0 0 18px rgba(242,181,68,1)); transform: rotate(2deg) scale(1.05); } }
-  @keyframes heroGloss { 0% { transform: translateX(-120%) skewX(-20deg); } 100% { transform: translateX(220%) skewX(-20deg); } }
-  @keyframes cardIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
-  @keyframes iconPopIn { 0% { opacity: 0; transform: scale(.3) translateY(8px); } 60% { opacity: 1; transform: scale(1.12) translateY(0); } 100% { transform: scale(1); } }
-  @keyframes welcomeRing { 0% { box-shadow: 0 0 0 0 rgba(242,181,68,.7); } 100% { box-shadow: 0 0 0 14px rgba(242,181,68,0); } }
-  @keyframes liveToastIn { 0% { opacity: 0; transform: translateY(8px); } 15% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }
-  @keyframes confettiFall { 0% { transform: translateY(-10px) rotate(0deg); opacity: 1; } 100% { transform: translateY(140px) rotate(360deg); opacity: 0; } }
-  @keyframes bellWiggle { 0%,100% { transform: rotate(0deg); } 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(5deg); } }
-  @keyframes walletFlash { 0% { box-shadow: 0 0 0 rgba(242,181,68,0); } 30% { box-shadow: 0 0 18px rgba(242,181,68,.9); } 100% { box-shadow: 0 0 0 rgba(242,181,68,0); } }
-  @keyframes iconBreathe { 0%,100% { filter: drop-shadow(0 0 3px rgba(242,181,68,.5)); } 50% { filter: drop-shadow(0 0 10px rgba(242,181,68,.9)); } }
-  @keyframes newTagFlash { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
-  @keyframes modalSlideIn { 0% { opacity: 0; transform: translateY(24px) scale(.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-  @keyframes modalBackdropIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-  @keyframes tabFadeIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-  @keyframes emptyFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-  @keyframes reactBurst { 0% { opacity: 1; transform: translate(-50%,-50%) scale(.4); } 100% { opacity: 0; transform: translate(-50%,-160%) scale(1.6); } }
   @keyframes pulseLive { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
   @keyframes shimmerBtn { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
   @keyframes floatEmber { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: .9; } 100% { transform: translateY(-260px) translateX(20px); opacity: 0; } }
@@ -182,19 +160,33 @@
   @keyframes crownSparkle { 0%,100% { opacity: 0; transform: scale(.4) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(90deg); } }
   @keyframes cameraFlash { 0%, 92%, 100% { opacity: 0; } 94% { opacity: .9; } 96% { opacity: 0; } 97% { opacity: .6; } 99% { opacity: 0; } }
   @keyframes ringSpin { from { stroke-dashoffset: var(--dash); } to { stroke-dashoffset: var(--dash); } }
+  @keyframes heroGloss { 0%, 12% { transform: translateX(-160%); opacity: 0; } 35% { opacity: .75; } 55%, 100% { transform: translateX(380%); opacity: 0; } }
+  @keyframes iconPopIn { from { opacity: 0; transform: scale(.55) translateY(8px); } 70% { transform: scale(1.08) translateY(-1px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  @keyframes iconBreathe { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.18); } }
+  @keyframes welcomeRing { 0% { box-shadow: 0 0 0 0 rgba(242,181,68,.75); } 100% { box-shadow: 0 0 0 15px rgba(242,181,68,0); } }
+  @keyframes liveToastIn { 0% { opacity: 0; transform: translateY(-10px) scale(.98); } 12%, 88% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-5px) scale(.99); } }
+  @keyframes tabFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes walletFlash { 0%,100% { filter: brightness(1); transform: scale(1); } 45% { filter: brightness(1.7); transform: scale(1.05); box-shadow: 0 0 24px rgba(242,181,68,.85); } }
+  @keyframes bellWiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-15deg); } 40% { transform: rotate(13deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(5deg); } }
+  @keyframes confettiFall { 0% { opacity: 0; transform: translateY(-12px) rotate(0deg); } 12% { opacity: 1; } 100% { opacity: 0; transform: translateY(105vh) rotate(620deg); } }
+  @keyframes modalBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalSlideIn { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes newTagFlash { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+  @keyframes reactBurst { 0% { opacity: 0; transform: translateY(8px) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-42px) scale(1.35); } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes chestOpenClose { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.12) rotate(-3deg); } }
   .fmm-exact-mobile-portal { font-family: 'Rajdhani', sans-serif; -webkit-font-smoothing: antialiased; }
   .fmm-exact-mobile-portal, .fmm-exact-mobile-portal * { box-sizing: border-box; }
   .fmm-exact-mobile-portal ::-webkit-scrollbar { display: none; }
-
-@media (prefers-reduced-motion: reduce) {
-  .fmm-exact-mobile-portal *,
-  .fmm-exact-mobile-portal *::before,
-  .fmm-exact-mobile-portal *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
+  .fmm-exact-mobile-portal button,
+  .fmm-exact-mobile-portal [role="button"] { transition: transform .18s ease, filter .18s ease, box-shadow .18s ease; }
+  @media (hover: hover) {
+    .fmm-exact-mobile-portal button:hover,
+    .fmm-exact-mobile-portal [role="button"]:hover { transform: translateY(-1px); filter: brightness(1.12); }
   }
-}
+  @media (prefers-reduced-motion: reduce) {
+    .fmm-exact-mobile-portal *, .fmm-exact-mobile-portal *::before, .fmm-exact-mobile-portal *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+  }
 
 @media (max-width: 500px) {
     .fm-shell { padding: 0 !important; background: #05060a !important; }

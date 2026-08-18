@@ -1,5 +1,5 @@
-import MobileAppRoutePage from '@/Components/MobileApp/MobileAppRoutePage';
+import FightsHub from '@/Components/Fights/FightsHub';
 
 export default function FightsPage() {
-  return <MobileAppRoutePage initialTab="contests" />;
+  return <FightsHub initialStatus="all" />;
 }

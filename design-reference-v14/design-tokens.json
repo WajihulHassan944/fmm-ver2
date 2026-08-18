@@ -1,5 +1,5 @@
 {
-  "_note": "Exact values extracted from Fantasy MMADness mobile app version 14. Import these directly; do not approximate them.",
+  "_note": "Exact values extracted from the prototype. Import these directly — do not retype, approximate, or let an AI assistant regenerate them. Any value not in this file should be read from FantasyMMADNESS-standalone.html, not invented.",
   "color": {
     "bg": "#05060a",
     "bgAlt": "#0b0c12",
@@ -38,7 +38,8 @@
   },
   "font": {
     "heading": "'Anton', sans-serif",
-    "body": "'Rajdhani', sans-serif"
+    "body": "'Rajdhani', sans-serif",
+    "_source": "Google Fonts. Both must be loaded; no substitutions."
   },
   "fontSize": {
     "sectionLabel": 12,
@@ -49,12 +50,14 @@
     "bodySmall": 10.5,
     "caption": 9.5,
     "micro": 8.5,
-    "_unit": "px"
+    "_unit": "px",
+    "_note": "Half-pixel sizes are intentional and tuned for the 390px mobile viewport. Do not round them."
   },
   "fontWeight": {
     "regular": 700,
     "medium": 800,
-    "bold": 900
+    "bold": 900,
+    "_note": "Rajdhani reads light at normal weights; 700 is the effective body weight throughout. Do not substitute 400/500."
   },
   "letterSpacing": {
     "sectionLabel": 1.5,
@@ -80,16 +83,33 @@
     "_unit": "px"
   },
   "shadow": {
-    "goldButton": "0 6px 22px rgba(242,181,68,.3)"
+    "goldButton": "0 6px 22px rgba(242,181,68,.3)",
+    "_note": "Elevation is a glow, not a drop shadow. Layered radial-gradient stadium glows plus a coloured box-shadow border-glow are the signature motif."
   },
   "viewport": {
-    "designWidth": 390
+    "designWidth": 390,
+    "_note": "All sizes above are tuned to a 390px-wide mobile viewport. Scale proportionally, never re-space by eye."
+  },
+  "animation": {
+    "pulseLive": "live indicator dot",
+    "moneyPulse": "currency emphasis",
+    "moneyPulseGold": "gold currency emphasis",
+    "ptsTwinkle": "shimmer on point values",
+    "glimmerCrown": "icon bubble glimmer",
+    "stadiumFlickerRed": "arena light background",
+    "stadiumFlickerBlue": "arena light background",
+    "bulbFlash": "arena bulb flash",
+    "cardPop": "quick-pick feedback",
+    "quickFlash": "quick-pick feedback",
+    "toastIn": "toast entrance",
+    "_source": "Keyframe definitions are in FantasyMMADNESS-standalone.html. Copy them verbatim."
   },
   "carouselTiming": {
     "photoCycleMs": 7000,
     "communityPredictionsCycleMs": 4500
   },
   "minimums": {
-    "touchTargetPx": 44
+    "touchTargetPx": 44,
+    "_note": "No interactive element may be smaller than 44px in either dimension."
   }
 }

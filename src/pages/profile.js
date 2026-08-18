@@ -1,5 +1,15 @@
-import MobileAppRoutePage from '@/Components/MobileApp/MobileAppRoutePage';
+import dynamic from 'next/dynamic';
+import React from 'react';
 
-export default function ProfilePage() {
-  return <MobileAppRoutePage initialTab="profile" />;
+const UserProfile = dynamic(
+  () => import('@/Components/UserProfile/UserProfile'),
+  {
+    loading: () => <p>Loading...</p>,
+  }
+);
+
+const index = () => {
+  return <UserProfile />
 }
+
+export default index

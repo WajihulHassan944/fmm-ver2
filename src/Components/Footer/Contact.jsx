@@ -1,23 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import React, { useState } from 'react';
 import { FaEnvelope, FaPaperPlane, FaShieldAlt } from 'react-icons/fa';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const Contact = () => {
-  const router = useRouter();
   const [buttonText, setButtonText] = useState('Send Message');
   const [statusText, setStatusText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const requestedMessage = Array.isArray(router.query.message)
-      ? router.query.message[0]
-      : router.query.message;
-    if (typeof requestedMessage === 'string' && requestedMessage.trim()) {
-      setMessage((current) => current || requestedMessage.trim());
-    }
-  }, [router.query.message]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -45,7 +33,6 @@ const Contact = () => {
       setButtonText('Sent');
       setStatusText('Message sent. The Fantasy MMAdness team will follow up.');
       event.currentTarget.reset();
-      setMessage('');
       window.setTimeout(() => setButtonText('Send Message'), 1800);
     } catch (error) {
       console.error('Contact form error:', error);
@@ -85,14 +72,7 @@ const Contact = () => {
           </label>
           <label>
             <span>Message *</span>
-            <textarea
-              name="message"
-              placeholder="Write your message here..."
-              rows={7}
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              required
-            />
+            <textarea name="message" placeholder="Write your message here..." rows={7} required />
           </label>
           <button type="submit" disabled={isSubmitting}>{buttonText} <FaPaperPlane /></button>
           {statusText ? <p className="fmm-contact-status-v18">{statusText}</p> : null}
