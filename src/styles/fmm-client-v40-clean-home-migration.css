@@ -1,0 +1,49 @@
+/* v40: clean final-home migration. This file only removes legacy stacking side effects and fixes final click/social polish. */
+
+.fmm-home-single-final-v40 {
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+/* Only the final homepage component should render inside the home page wrapper. */
+.fmm-home-single-final-v40 > :not(.fmm-home-v35-final) {
+  display: none !important;
+}
+
+/* Make static HTML/fetch output cleaner: social buttons are icon-only in the actual DOM. */
+.fmm-home-v35-final .fmm-v35-socials a {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.fmm-home-v35-final .fmm-v35-socials a svg {
+  font-size: initial !important;
+}
+
+/* Final mobile nav routes are the only mobile home footer controls. */
+@media (max-width: 767px) {
+  body:has(.fmm-home-single-final-v40) footer,
+  body:has(.fmm-home-single-final-v40) .site-footer,
+  body:has(.fmm-home-single-final-v40) .Footer,
+  body:has(.fmm-home-single-final-v40) .footer {
+    display: none !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-bottom-nav {
+    z-index: 9990 !important;
+  }
+}
+
+/* Desktop should show a single centered final-home surface, not a stacked legacy merge. */
+@media (min-width: 768px) {
+  .fmm-home-v35-final .fmm-v35-bottom-nav {
+    display: none !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-aff-card img {
+    object-fit: contain !important;
+    background: rgba(255,255,255,.94) !important;
+    border-radius: 16px !important;
+    padding: 8px !important;
+  }
+}

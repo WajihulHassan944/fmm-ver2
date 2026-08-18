@@ -1,0 +1,17 @@
+.promotionWrapper{
+    width: calc(100% - 230px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin-left: 230px; /* Leaves 230px space from the left */
+    
+}
+
+@media (max-width: 767px){
+    .promotionWrapper{
+        width: 100%;
+        margin-left: 0;
+    }
+     
+}

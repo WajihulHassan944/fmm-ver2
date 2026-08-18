@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1040" viewBox="0 0 1920 1040" role="img" aria-label="Fantasy MMAdness premium prize pot arena background">
+  <defs>
+    <radialGradient id="redGlow" cx="22%" cy="22%" r="70%">
+      <stop offset="0" stop-color="#ff2639" stop-opacity="0.62"/>
+      <stop offset="0.34" stop-color="#8b0915" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#010207" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="goldGlow" cx="58%" cy="18%" r="54%">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0.5"/>
+      <stop offset="0.42" stop-color="#8b5a16" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#010207" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blueGlow" cx="86%" cy="30%" r="62%">
+      <stop offset="0" stop-color="#2878ff" stop-opacity="0.34"/>
+      <stop offset="0.42" stop-color="#12346f" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#010207" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#080a12"/>
+      <stop offset="0.52" stop-color="#16060a"/>
+      <stop offset="1" stop-color="#03040a"/>
+    </linearGradient>
+    <linearGradient id="badgeRed" x1="0" x2="1">
+      <stop offset="0" stop-color="#ff2439"/>
+      <stop offset="1" stop-color="#ff7c3c"/>
+    </linearGradient>
+    <linearGradient id="badgeDark" x1="0" x2="1">
+      <stop offset="0" stop-color="#111827" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#03060e" stop-opacity="0.78"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff1a8"/>
+      <stop offset="0.46" stop-color="#ffc95b"/>
+      <stop offset="1" stop-color="#9b5e0b"/>
+    </linearGradient>
+    <pattern id="grid" width="96" height="96" patternUnits="userSpaceOnUse">
+      <path d="M96 0H0V96" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1040" fill="#03050b"/>
+  <rect width="1920" height="1040" fill="url(#floor)" opacity="0.92"/>
+  <rect width="1920" height="1040" fill="url(#redGlow)"/>
+  <rect width="1920" height="1040" fill="url(#goldGlow)"/>
+  <rect width="1920" height="1040" fill="url(#blueGlow)"/>
+  <rect width="1920" height="1040" fill="url(#grid)" opacity="0.72"/>
+
+  <g opacity="0.16" filter="url(#soft)">
+    <path d="M300 0 730 1040H548L112 0Z" fill="#ff2439" opacity="0.5"/>
+    <path d="M1010 0 740 1040H618L880 0Z" fill="#ffd27a" opacity="0.34"/>
+    <path d="M1514 0 1192 1040h-144L1368 0Z" fill="#2878ff" opacity="0.42"/>
+  </g>
+
+  <g transform="translate(760 300)" opacity="0.18">
+    <path d="M200 0 520 126 594 432 372 666 34 604 -118 312Z" fill="none" stroke="#ffffff" stroke-width="3"/>
+    <path d="M210 58 474 160 535 410 350 604 72 552 -56 318Z" fill="none" stroke="#ff2c3d" stroke-width="2" opacity="0.86"/>
+    <path d="M226 122 418 196 464 382 328 526 118 486 22 320Z" fill="none" stroke="#ffd27a" stroke-width="2" opacity="0.62"/>
+  </g>
+
+  <g transform="translate(170 198) rotate(-8)" filter="url(#shadow)" opacity="0.78">
+    <rect x="0" y="0" width="278" height="76" rx="38" fill="url(#badgeDark)" stroke="#ffcd78" stroke-opacity="0.42"/>
+    <circle cx="42" cy="38" r="18" fill="url(#badgeRed)"/>
+    <text x="72" y="34" fill="#ffd892" font-family="Impact, Arial Black, sans-serif" font-size="18" letter-spacing="3">WIN MONEY</text>
+    <text x="72" y="58" fill="#ffffff" fill-opacity="0.74" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="2">FIGHT CARD</text>
+    <text x="35" y="45" fill="#fff" font-family="Arial Black, Arial" font-size="22">$</text>
+  </g>
+
+  <g transform="translate(650 116) rotate(5)" filter="url(#shadow)" opacity="0.72">
+    <rect width="348" height="94" rx="26" fill="url(#badgeDark)" stroke="#ffffff" stroke-opacity="0.1"/>
+    <text x="30" y="40" fill="#ffffff" font-family="Impact, Arial Black, sans-serif" font-size="25" letter-spacing="4">FANTASY MMADNESS</text>
+    <text x="30" y="70" fill="#ff3547" font-family="Arial Black, Arial" font-size="18" letter-spacing="3">PICK • PLAY • WIN</text>
+  </g>
+
+  <g transform="translate(1156 214) rotate(8)" filter="url(#shadow)" opacity="0.82">
+    <rect width="310" height="94" rx="24" fill="url(#badgeDark)" stroke="#ffd27a" stroke-opacity="0.3"/>
+    <text x="28" y="42" fill="#ffd27a" font-family="Impact, Arial Black, sans-serif" font-size="34" letter-spacing="4">$25K+</text>
+    <text x="28" y="70" fill="#ffffff" font-family="Arial Black, Arial" font-size="16" letter-spacing="4">PRIZE POT</text>
+  </g>
+
+  <g transform="translate(1192 664) rotate(-4)" filter="url(#shadow)" opacity="0.58">
+    <rect width="360" height="90" rx="25" fill="url(#badgeDark)" stroke="#2878ff" stroke-opacity="0.34"/>
+    <text x="28" y="38" fill="#ffffff" font-family="Impact, Arial Black, sans-serif" font-size="24" letter-spacing="4">LIVE LEADERBOARD</text>
+    <rect x="28" y="56" width="238" height="8" rx="4" fill="#ff2639" opacity="0.78"/>
+    <rect x="28" y="70" width="292" height="8" rx="4" fill="#ffd27a" opacity="0.62"/>
+  </g>
+
+  <g transform="translate(820 720) rotate(6)" filter="url(#shadow)" opacity="0.42">
+    <rect width="296" height="78" rx="22" fill="url(#badgeDark)" stroke="#ff2639" stroke-opacity="0.28"/>
+    <text x="24" y="34" fill="#ffffff" font-family="Impact, Arial Black, sans-serif" font-size="22" letter-spacing="4">TOKEN JACKPOT</text>
+    <text x="24" y="58" fill="#ffd27a" font-family="Arial Black, Arial" font-size="15" letter-spacing="3">CASH PRIZE POOL</text>
+  </g>
+
+  <g transform="translate(1280 454)" opacity="0.42" filter="url(#shadow)">
+    <circle cx="0" cy="0" r="42" fill="url(#coin)"/>
+    <circle cx="44" cy="26" r="42" fill="url(#coin)"/>
+    <circle cx="-50" cy="40" r="42" fill="url(#coin)"/>
+    <circle cx="5" cy="48" r="42" fill="url(#coin)"/>
+    <text x="-13" y="13" fill="#3b2102" font-family="Arial Black, Arial" font-size="40">$</text>
+  </g>
+
+  <g transform="translate(442 650)" opacity="0.22">
+    <text x="0" y="0" fill="#ffffff" font-family="Impact, Arial Black, sans-serif" font-size="144" letter-spacing="10">FANTASY</text>
+    <text x="96" y="118" fill="#ff2639" font-family="Impact, Arial Black, sans-serif" font-size="134" letter-spacing="8">MMADNESS</text>
+  </g>
+
+  <g opacity="0.28">
+    <path d="M0 838c314-74 566-110 916-94 352 16 608 86 1004 44v252H0Z" fill="#010207"/>
+    <path d="M0 872c382-80 741-88 1080-34 314 50 554 48 840 14" fill="none" stroke="#ff2639" stroke-opacity="0.24" stroke-width="3"/>
+    <path d="M0 912c360-56 644-60 916-18 386 58 650 62 1004 14" fill="none" stroke="#ffd27a" stroke-opacity="0.16" stroke-width="2"/>
+  </g>
+
+  <g opacity="0.12">
+    <text x="96" y="1012" fill="#ffffff" font-family="Arial Black, Arial" font-size="18" letter-spacing="7">BOXING • MMA • BARE-KNUCKLE • KICKBOXING • PRO WRESTLING</text>
+  </g>
+</svg>

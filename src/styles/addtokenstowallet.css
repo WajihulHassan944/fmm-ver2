@@ -1,0 +1,62 @@
+.addTokensToWallet .cardone .card-features{
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(/Assets/cointwo.png) !important;
+    background-color: black;
+}
+@media (max-width: 767px){
+    .addTokensToWallet{
+        padding-bottom: 50px;
+    }
+}
+
+.custom-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    width: 350px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.custom-popup h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.custom-popup input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.custom-popup .btn-grads {
+    background: linear-gradient(45deg, #f39c12, #e74c3c);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background 0.3s ease;
+}
+
+.custom-popup .btn-grads:hover {
+    background: linear-gradient(45deg, #e74c3c, #f39c12);
+}
+
+.custom-popup .btn-grads:last-child {
+    background: #95a5a6;
+}
+
+.custom-popup .btn-grads:last-child:hover {
+    background: #7f8c8d;
+}

@@ -1,0 +1,576 @@
+
+.faqwrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 180px;
+    padding-bottom: 70px;
+    width: 100%;
+    min-height: 100vh; /* Full-screen height */
+    position: relative;
+    background: #fafafa;
+    
+   
+}
+.faqwrapper h1{
+    color: #d20a0a;
+    font-size: 49px;
+    text-align: center;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    margin-bottom: 50px;
+   
+}
+.faqmain {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+  }
+  
+  .faqItem {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+      0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+      0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  }
+  
+  .faqHeader {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0f0f0;
+    padding: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .faqHeader:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .faqHeader p {
+    color: #000;
+    font-family: "UfcSansRegular", Arial, sans-serif;
+    font-size: 21.5px;
+    font-weight: 600;
+    padding-bottom: 8px;
+    padding-top: 10px;
+    letter-spacing: 0.3px;
+  }
+  
+  .faqHeader i {
+    color: #546e7a;
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .faqHeader i.icon.fa-angle-up {
+    transform: rotate(180deg);
+  }
+  
+  .faqBody {
+    background: #fff;
+    padding: 0 16px;
+    font-family: Roboto;
+    color: #000;
+    font-size: 15px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  
+  .faqBody.open {
+    max-height: 500px; /* Large enough for content */
+    padding: 16px 16px;
+  }
+  
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  .faqwrapper-admin {
+    width: calc(100% - 230px);
+    margin-left: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f8f9fa; /* Light background for admin page */
+    font-family: 'Arial', sans-serif;
+    padding-top:70px;
+ /*   background: linear-gradient(0deg, rgba(255, 180, 0, .5) 0, rgba(255, 180, 0, 0) 100%); */
+  }
+  
+  .faqwrapper-admin h1 {
+    color: #d20a0a;
+    font-size: 40px;
+    text-align: center;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+   
+  }
+  .flexedDivFaq{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 30px;
+  }
+  .faqwrapper-admin .add-faq-btn {
+    background: linear-gradient(216.01deg, #d20a0a 26.18%, #9e0808 93.27%);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    font-size: 22px;
+    outline: none;
+    padding: 12px 24px;
+    text-align: center;
+    width: 165px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
+    outline: none;
+    border:none;
+  }
+  
+  .faqwrapper-admin .add-faq-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .faqwrapper-admin .faqmain-admin {
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .faqwrapper-admin .faqItem-admin {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .faqwrapper-admin .faqItem-admin:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .faqwrapper-admin .faqHeader-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #495057; /* Neutral dark gray */
+  }
+  
+  .faqwrapper-admin .faqHeader-admin p {
+    margin: 0;
+  }
+  
+  .faqwrapper-admin .faqBody-admin {
+    display: none;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #6c757d; /* Subtle gray for the body text */
+  }
+  
+  .faqwrapper-admin .faqBody-admin.open {
+    display: block;
+  }
+  
+  .faqwrapper-admin .update-btn,
+  .faqwrapper-admin .delete-btn {
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .faqwrapper-admin .update-btn {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .faqwrapper-admin .update-btn:hover {
+    background-color: #e0a800;
+  }
+  
+  .faqwrapper-admin .delete-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .faqwrapper-admin .delete-btn:hover {
+    background-color: #b02a37;
+  }
+  
+  .faqwrapper-admin .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .faqwrapper-admin .popup-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .faqwrapper-admin .popup-content h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #343a40;
+  }
+  
+  .faqwrapper-admin .popup-content input,
+  .faqwrapper-admin .popup-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #495057;
+  }
+  
+  .faqwrapper-admin .popup-content input:focus,
+  .faqwrapper-admin .popup-content textarea:focus {
+    border-color: #80bdff;
+    outline: none;
+  }
+  
+  .faqwrapper-admin .add-btn,
+  .faqwrapper-admin .close-btn {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .faqwrapper-admin .add-btn {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .faqwrapper-admin .add-btn:hover {
+    background-color: #218838;
+  }
+  
+  .faqwrapper-admin .close-btn {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .faqwrapper-admin .close-btn:hover {
+    background-color: #5a6268;
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  .newswrapper-admin {
+    width: calc(100% - 230px);
+    margin-left: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f8f9fa; /* Light background for admin page */
+    font-family: 'Arial', sans-serif;
+    padding-top: 70px;
+  }
+  
+  .newswrapper-admin h1 {
+    color: #0a74d2; /* Blue for news */
+    font-size: 40px;
+    text-align: center;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+  }
+  
+  .flexedDivNews {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 30px;
+  }
+  
+  .newswrapper-admin .add-news-btn {
+    background: linear-gradient(216.01deg, #0a74d2 26.18%, #086bb2 93.27%);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    font-size: 22px;
+    outline: none;
+    padding: 12px 24px;
+    text-align: center;
+    width: 165px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
+    border: none;
+  }
+  
+  .newswrapper-admin .add-news-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .newswrapper-admin .newsmain-admin {
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .newswrapper-admin .newsItem-admin {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .newswrapper-admin .newsItem-admin:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .newswrapper-admin .newsHeader-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #495057; /* Neutral dark gray */
+  }
+  
+  .newswrapper-admin .newsHeader-admin p {
+    margin: 0;
+  }
+  
+  .newswrapper-admin .newsBody-admin {
+    display: none;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #6c757d; /* Subtle gray for the body text */
+  }
+  
+  .newswrapper-admin .newsBody-admin.open {
+    display: block;
+  }
+  
+  .newswrapper-admin .update-btn,
+  .newswrapper-admin .delete-btn {
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .newswrapper-admin .update-btn {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .newswrapper-admin .update-btn:hover {
+    background-color: #e0a800;
+  }
+  
+  .newswrapper-admin .delete-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .newswrapper-admin .delete-btn:hover {
+    background-color: #b02a37;
+  }
+  
+  .newswrapper-admin .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .newswrapper-admin .popup-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .newswrapper-admin .popup-content h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #343a40;
+  }
+  
+  .newswrapper-admin .popup-content input,
+  .newswrapper-admin .popup-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #495057;
+  }
+  
+  .newswrapper-admin .popup-content input:focus,
+  .newswrapper-admin .popup-content textarea:focus {
+    border-color: #80bdff;
+    outline: none;
+  }
+  
+  .newswrapper-admin .add-btn,
+  .newswrapper-admin .close-btn {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .newswrapper-admin .add-btn {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .newswrapper-admin .add-btn:hover {
+    background-color: #218838;
+  }
+  
+  .newswrapper-admin .close-btn {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .newswrapper-admin .close-btn:hover {
+    background-color: #5a6268;
+  }
+
+  
+
+
+
+
+
+
+
+
+  
+
+  @media (max-width: 767px){
+    
+.faqmain {
+    width: 90%;
+    }
+  }

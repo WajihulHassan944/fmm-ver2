@@ -1,0 +1,113 @@
+/* v41: functional cleanup only. Keep the final homepage design, remove leaked legacy chrome/fragments, and tighten click targets. */
+body.fmm-final-home-route-v41 .footer,
+body.fmm-final-home-route-v41 footer,
+body.fmm-final-home-route-v41 .chatbase-widget,
+body.fmm-final-home-route-v41 #chatbase-bubble,
+body.fmm-final-home-route-v41 [data-chatbase-widget] {
+  display: none !important;
+}
+
+.fmm-home-single-final-v40 {
+  overflow-x: hidden !important;
+}
+
+.fmm-home-single-final-v40 .fmm-home-v35-final {
+  isolation: isolate;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-socials {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(16px, 4vw, 28px) !important;
+  text-align: center !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-socials a {
+  position: relative !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  text-indent: -9999px !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-socials a::before,
+.fmm-home-single-final-v40 .fmm-v35-socials a::after {
+  content: "" !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-socials a svg {
+  width: 48% !important;
+  height: 48% !important;
+  display: block !important;
+  color: #fff !important;
+  fill: #fff !important;
+  text-indent: 0 !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-socials a svg path {
+  fill: currentColor !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-bottom-nav a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-bottom-nav a.is-predict {
+  touch-action: manipulation !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v41-leader-empty {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-height: 54px !important;
+  padding: 10px 0 !important;
+  border: 0 !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v41-leader-empty span {
+  display: inline-block !important;
+  max-width: 92% !important;
+  color: rgba(255,255,255,.82) !important;
+  font-size: clamp(10px, 2.7vw, 14px) !important;
+  line-height: 1.35 !important;
+  letter-spacing: .02em !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-aff-card img {
+  object-fit: contain !important;
+  object-position: center right !important;
+}
+
+.fmm-home-single-final-v40 .fmm-v35-hero-hit,
+.fmm-home-single-final-v40 .fmm-v35-featured-week a,
+.fmm-home-single-final-v40 .fmm-v35-red-btn,
+.fmm-home-single-final-v40 .fmm-v35-enter,
+.fmm-home-single-final-v40 .fmm-v35-promos a,
+.fmm-home-single-final-v40 .fmm-v35-demo,
+.fmm-home-single-final-v40 .fmm-v35-apparel a,
+.fmm-home-single-final-v40 .fmm-v35-aff-card,
+.fmm-home-single-final-v40 .fmm-v35-chest,
+.fmm-home-single-final-v40 .fmm-v35-mini-card,
+.fmm-home-single-final-v40 .fmm-v35-wallet {
+  cursor: pointer !important;
+}
+
+@media (max-width: 767px) {
+  body.fmm-final-home-route-v41 {
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+  }
+
+  body.fmm-final-home-route-v41 .site-experience-main.is-home-experience-main {
+    padding-bottom: 0 !important;
+  }
+}

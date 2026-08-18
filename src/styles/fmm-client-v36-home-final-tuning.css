@@ -1,0 +1,374 @@
+/* v36 final homepage tuning: align Classic/Bold, hero animation, and combat sport selector with final reference. */
+
+body:has(.fmm-home-v35-final) {
+  background: #05060a !important;
+}
+
+.fmm-home-v35-final .fmm-v35-layout-switch {
+  position: relative;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 10px !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.fmm-home-v35-final .fmm-v35-layout-switch button {
+  height: 31px !important;
+  min-width: 76px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, .12) !important;
+  background: rgba(255, 255, 255, .055) !important;
+  color: rgba(255, 255, 255, .55) !important;
+  font: 900 10px/1 var(--v35-ui) !important;
+  letter-spacing: 1.15px !important;
+  text-transform: uppercase !important;
+  box-shadow: inset 0 0 12px rgba(255,255,255,.035), 0 3px 12px rgba(0,0,0,.28) !important;
+  transform: translateZ(0);
+}
+
+.fmm-home-v35-final .fmm-v35-layout-switch button.is-active {
+  border-color: transparent !important;
+  color: #1b0e00 !important;
+  background: linear-gradient(90deg, #f2b544 0%, #ff8a3c 44%, #ef4444 100%) !important;
+  box-shadow: 0 0 16px rgba(239,68,68,.34), 0 0 14px rgba(242,181,68,.22) !important;
+}
+
+.fmm-home-v35-final .fmm-v35-layout-switch button:not(.is-active)::first-letter {
+  color: #f2b544;
+}
+
+/* Hero animation layer. The image remains the exact design banner; these overlays recreate the prototype's moving particles/glows. */
+.fmm-home-v35-final .fmm-v35-hero {
+  isolation: isolate;
+  overflow: hidden !important;
+  transform: translateZ(0);
+}
+
+.fmm-home-v35-final .fmm-v35-hero::before,
+.fmm-home-v35-final .fmm-v35-hero::after,
+.fmm-home-v35-final .fmm-v36-hero-rays,
+.fmm-home-v35-final .fmm-v36-hero-scan,
+.fmm-home-v35-final .fmm-v36-hero-burst,
+.fmm-home-v35-final .fmm-v36-hero-burst i {
+  position: absolute;
+  pointer-events: none;
+}
+
+.fmm-home-v35-final .fmm-v35-hero::before {
+  content: "";
+  z-index: 3;
+  inset: 0;
+  background:
+    radial-gradient(circle at 7% 10%, rgba(255,255,255,.78) 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 2%, rgba(242,181,68,.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 58% 6%, rgba(77,141,255,.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 84% 13%, rgba(255,255,255,.58) 0 1px, transparent 2px),
+    radial-gradient(circle at 97% 28%, rgba(239,68,68,.65) 0 1px, transparent 2px);
+  opacity: .9;
+  mix-blend-mode: screen;
+  animation: fmmV36StarFloat 5.2s linear infinite;
+}
+
+.fmm-home-v35-final .fmm-v35-hero::after {
+  content: "";
+  z-index: 5;
+  left: -45%;
+  top: 0;
+  width: 30%;
+  height: 100%;
+  transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.06) 26%, rgba(255,255,255,.34) 48%, rgba(255,221,104,.23) 58%, transparent 100%);
+  mix-blend-mode: screen;
+  animation: fmmV36HeroShine 3.7s ease-in-out infinite;
+}
+
+.fmm-home-v35-final .fmm-v36-hero-rays {
+  z-index: 2;
+  inset: -18% -12%;
+  opacity: .62;
+  background:
+    conic-gradient(from 230deg at 16% 12%, transparent 0 15deg, rgba(239,68,68,.22) 22deg 26deg, transparent 34deg 360deg),
+    conic-gradient(from 120deg at 84% 14%, transparent 0 15deg, rgba(77,141,255,.24) 22deg 27deg, transparent 36deg 360deg),
+    radial-gradient(circle at 49% 5%, rgba(255,232,150,.2), transparent 17%);
+  mix-blend-mode: screen;
+  animation: fmmV36RayBreathe 2.8s ease-in-out infinite;
+}
+
+.fmm-home-v35-final .fmm-v36-hero-scan {
+  z-index: 4;
+  inset: auto 0 0;
+  height: 36%;
+  background: linear-gradient(0deg, rgba(242,181,68,.22), rgba(239,68,68,.09) 35%, transparent 78%);
+  mix-blend-mode: screen;
+  opacity: .72;
+  animation: fmmV36HeroHeat 1.9s ease-in-out infinite;
+}
+
+.fmm-home-v35-final .fmm-v36-hero-burst {
+  z-index: 6;
+  inset: 0;
+  overflow: hidden;
+}
+
+.fmm-home-v35-final .fmm-v36-hero-burst i {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #f2b544;
+  box-shadow: 0 0 10px #f2b544, 0 0 18px rgba(242,181,68,.55);
+  opacity: 0;
+  animation: fmmV36Confetti 3.8s linear infinite;
+}
+
+.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(1){left:6%;top:32%;animation-delay:.1s;background:#ef4444}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(2){left:14%;top:68%;animation-delay:.6s}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(3){left:22%;top:18%;animation-delay:1s;background:#4d8dff}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(4){left:33%;top:76%;animation-delay:1.4s;background:#22c55e}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(5){left:47%;top:8%;animation-delay:.25s}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(6){left:53%;top:55%;animation-delay:1.8s;background:#a855f7}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(7){left:63%;top:72%;animation-delay:.85s;background:#ef4444}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(8){left:73%;top:13%;animation-delay:1.15s;background:#4d8dff}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(9){left:87%;top:36%;animation-delay:.45s}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(10){left:94%;top:62%;animation-delay:2s;background:#22c55e}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(11){left:40%;top:92%;animation-delay:2.4s}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(12){left:80%;top:84%;animation-delay:2.8s;background:#ef4444}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(13){left:10%;top:87%;animation-delay:3.1s;background:#4d8dff}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(14){left:28%;top:48%;animation-delay:3.3s;background:#a855f7}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(15){left:69%;top:43%;animation-delay:3.5s}.fmm-home-v35-final .fmm-v36-hero-burst i:nth-child(16){left:91%;top:8%;animation-delay:3.7s;background:#fff}
+
+.fmm-home-v35-final .fmm-v35-hero-hit::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-110%) skewX(-16deg);
+  animation: fmmV36CtaSweep 2.4s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+/* Sport selector: match the design's five compact full-card background panels. */
+.fmm-home-v35-final .fmm-v35-sports button {
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.fmm-home-v35-final .fmm-v36-sport-frames {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  overflow: hidden;
+  background: #05060a;
+}
+
+.fmm-home-v35-final .fmm-v36-sport-frames img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  opacity: 0;
+  transform: scale(1.04);
+  filter: saturate(1.12) contrast(1.06);
+  animation: fmmV36SportFade 9s ease-in-out infinite;
+}
+
+.fmm-home-v35-final .fmm-v36-sport-frames img:first-child { opacity: 1; }
+.fmm-home-v35-final .fmm-v36-sport-frames img:nth-child(1) { animation-delay: 0s; }
+.fmm-home-v35-final .fmm-v36-sport-frames img:nth-child(2) { animation-delay: 3s; }
+.fmm-home-v35-final .fmm-v36-sport-frames img:nth-child(3) { animation-delay: 6s; }
+.fmm-home-v35-final .fmm-v36-sport-frames img:nth-child(4) { animation-delay: 9s; }
+
+.fmm-home-v35-final .fmm-v35-sports button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.18) 40%, rgba(5,6,10,.86) 72%, rgba(5,6,10,.96) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0) 0 45%, rgba(0,0,0,.86) 100%);
+  pointer-events: none;
+}
+
+.fmm-home-v35-final .fmm-v35-sports button::after {
+  z-index: 2 !important;
+  background: radial-gradient(circle at 35% 18%, color-mix(in srgb, var(--sport-color), transparent 74%), transparent 42%) !important;
+  opacity: .92;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.fmm-home-v35-final .fmm-v35-sports strong,
+.fmm-home-v35-final .fmm-v35-sports span:not(.fmm-v36-sport-frames),
+.fmm-home-v35-final .fmm-v35-sports small {
+  z-index: 4 !important;
+}
+
+@keyframes fmmV36HeroShine {
+  0%, 36% { transform: translateX(0) skewX(-18deg); opacity: 0; }
+  48% { opacity: .76; }
+  72% { transform: translateX(520%) skewX(-18deg); opacity: 0; }
+  100% { transform: translateX(520%) skewX(-18deg); opacity: 0; }
+}
+
+@keyframes fmmV36StarFloat {
+  0% { transform: translateY(14px); opacity: .72; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-30px); opacity: .72; }
+}
+
+@keyframes fmmV36RayBreathe {
+  0%,100% { opacity: .45; transform: scale(1); }
+  50% { opacity: .85; transform: scale(1.035); }
+}
+
+@keyframes fmmV36HeroHeat {
+  0%,100% { transform: translateY(6px); opacity: .5; }
+  50% { transform: translateY(-5px); opacity: .95; }
+}
+
+@keyframes fmmV36Confetti {
+  0% { transform: translate3d(0, 18px, 0) scale(.55); opacity: 0; }
+  18% { opacity: 1; }
+  72% { opacity: .95; }
+  100% { transform: translate3d(8px, -38px, 0) scale(1.05); opacity: 0; }
+}
+
+@keyframes fmmV36CtaSweep {
+  0%, 34% { transform: translateX(-120%) skewX(-16deg); opacity: 0; }
+  52% { opacity: .9; }
+  78%, 100% { transform: translateX(120%) skewX(-16deg); opacity: 0; }
+}
+
+@keyframes fmmV36SportFade {
+  0%, 20% { opacity: 1; transform: scale(1.02); }
+  28%, 100% { opacity: 0; transform: scale(1.1); }
+}
+
+@media (max-width: 767px) {
+  .fmm-home-v35-final .fmm-v35-topbar {
+    background:
+      radial-gradient(circle at 7% 0%, rgba(239,68,68,.18), transparent 38%),
+      radial-gradient(circle at 92% 0%, rgba(77,141,255,.14), transparent 38%),
+      linear-gradient(180deg, rgba(5,6,10,.98), rgba(12,9,17,.92)) !important;
+    padding: 12px 16px 8px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-layout-switch {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 7px 0 9px !important;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(242,181,68,.06), transparent 44%),
+      linear-gradient(180deg, rgba(9,10,15,.95), rgba(5,6,10,.99)) !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-layout-switch button {
+    height: 30px !important;
+    min-width: 78px !important;
+    padding: 0 15px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-hero {
+    margin-top: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-hero-sparks i {
+    width: 4px !important;
+    height: 4px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-stats {
+    padding-top: 12px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-section-label.is-sport {
+    margin: 0 0 8px !important;
+    padding: 0 6px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    letter-spacing: 1.6px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports {
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: hidden !important;
+    padding: 0 16px 14px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports button {
+    flex: 0 0 calc((100% - 24px) / 5) !important;
+    min-width: 0 !important;
+    height: 118px !important;
+    border-width: 2px !important;
+    border-radius: 11px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports strong {
+    left: 4px !important;
+    right: 4px !important;
+    bottom: 31px !important;
+    font-size: clamp(8px, 2.35vw, 10px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: .25px !important;
+    text-align: left !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports span:not(.fmm-v36-sport-frames) {
+    left: 4px !important;
+    right: 4px !important;
+    bottom: 18px !important;
+    font-size: clamp(6px, 1.8vw, 7px) !important;
+    line-height: 1 !important;
+    color: rgba(255,255,255,.58) !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports small {
+    left: 4px !important;
+    right: auto !important;
+    bottom: 5px !important;
+    gap: 3px !important;
+    font-size: clamp(5px, 1.75vw, 7px) !important;
+    line-height: 1 !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports .is-active small {
+    padding: 2px 5px !important;
+    border-radius: 999px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .fmm-home-v35-final .fmm-v35-layout-switch {
+    margin-bottom: 12px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports button {
+    height: 156px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports strong {
+    font-size: clamp(18px, 1.9vw, 24px) !important;
+    bottom: 45px !important;
+  }
+
+  .fmm-home-v35-final .fmm-v35-sports span:not(.fmm-v36-sport-frames) {
+    bottom: 27px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fmm-home-v35-final .fmm-v36-hero-rays,
+  .fmm-home-v35-final .fmm-v36-hero-scan,
+  .fmm-home-v35-final .fmm-v36-hero-burst i,
+  .fmm-home-v35-final .fmm-v35-hero::before,
+  .fmm-home-v35-final .fmm-v35-hero::after,
+  .fmm-home-v35-final .fmm-v35-hero-hit::before,
+  .fmm-home-v35-final .fmm-v36-sport-frames img {
+    animation: none !important;
+  }
+}

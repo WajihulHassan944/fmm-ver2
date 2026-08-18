@@ -1,0 +1,280 @@
+.myprofile{
+    display: flex;
+    background-image: linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.2)),url('/Assets/new-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    flex-direction: column;
+    
+   
+}
+.divTwoProfile{
+    flex-basis: 50%;
+    padding-left: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:10px;
+    margin-top:-70px;
+}
+.profile-btn{
+    background-color: black;
+    border:2px solid #fff;
+    width:60%;
+}
+.divTwoProfile h1{
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+    font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+    font-style:normal; /* Condensed style */
+    font-size:20px;
+    margin:10px 0;
+    color: #eee;
+    text-transform:uppercase;
+}
+.pairOfHtags{
+    margin:25px 0;
+}
+.input-group-profile{
+    display: flex;
+    flex-direction: column;
+    
+}
+.input-group-profile label{
+    color:#eee;
+    margin-bottom:5px;
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+    font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+    font-style:normal; 
+}
+.input-group-profile input{
+    background: black;
+}
+
+.myprofile .btn-grad{
+    width: 30%;
+}
+
+
+.myprofile .createAccount{
+    margin-top: -150px;
+}
+@media (max-width: 767px){
+   
+.myprofile .createAccount{
+    margin-top: -90px;
+    flex-direction: column;
+}
+   
+    .divTwoProfile{
+        flex-basis: 100%;
+        padding-left: 1%;
+        gap:10px;
+        margin-top:10px;
+    }
+    .divTwoProfile h1{
+        font-size:16px;
+        margin:10px 0;
+        }
+        
+    .myprofile .btn-grad{
+        width:100% !important;
+    }
+    .profile-btn{
+        width:250px !important;
+    }
+    
+.pairOfHtags{
+    width: 300px;
+    margin:25px 0;
+    margin-left: 0;
+    overflow: auto;
+
+}
+    
+}
+
+
+
+
+
+
+
+
+
+.referrer-modal__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .referrer-modal__content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+  
+  .referrer-modal__title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .referrer-modal__link {
+    background-color: #f5f5f5;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    word-break: break-all;
+    font-size: 0.95rem;
+  }
+  
+  .referrer-modal__buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .referrer-modal__button {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background-color: #0084ff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .referrer-modal__button:hover {
+    background-color: #006edc;
+  }
+  
+  .referrer-modal__button--cancel {
+    background-color: #ccc;
+    color: #333;
+  }
+  
+  .referrer-modal__button--cancel:hover {
+    background-color: #bbb;
+  }
+
+
+
+
+
+
+
+
+.uploadAvatar{
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('/Assets/RING1.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    flex-direction: column;
+    text-align: center;
+}
+.uploadAvatar h1{
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+    font-weight: 500; /* Weight corresponding to UFCSans-CondensedMedium */
+    font-stretch: condensed; /* Condensed style */
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 45px;
+    line-height: 2.5rem;
+    color: #fff;
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+    margin-top:80px;
+    
+}
+.btn-grad{
+    width:17%;
+    border:2px solid gray;
+    padding:5px;
+    padding-top:7px;
+}
+.uploadAvatar img{
+  width:200px;
+  margin-bottom: 20px;
+  border-radius:50%;
+}
+
+
+@media (max-width: 767px){
+  .uploadAvatar .btn-grad{
+    width:60%;
+  }
+}
+
+
+
+
+
+  
+.thankyou-wrapper{
+    min-height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background-color: #0a0806;  
+    overflow-x: hidden;
+}
+.content{
+    padding-top:200px;
+    padding-left: 50px;
+    flex-basis: 50%;
+    text-align: left;
+}
+.thankyou-wrapper .content h1{
+    color:#fff;
+    margin-bottom: 15px;
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  
+    text-transform: uppercase;
+
+}
+.thankyou-wrapper .content p{
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 100;
+    color:#ffc000;
+
+    font-family: 'Bungee', sans-serif;
+    
+}
+
+
+
+.thankyou-wrapper .imgwrap{
+    flex-basis: 50%;
+    display: flex;
+    align-items: flex-end;
+padding-top:80px;
+    margin-right: -200px;
+    
+}
+.imgwrap img{
+    width:100%;   
+}
+  

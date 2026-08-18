@@ -1,0 +1,295 @@
+.tracker-container-fighter {
+  background: rgba(0,0,0,0.8);
+  padding: 32px;
+  max-width: 760px;
+  margin: 0 auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(255, 0, 0, 0.2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #f0f0f0;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+}
+
+.tracker-container-fighter .tracker-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #ff3c3c;
+}
+
+.tracker-container-fighter .fighter-select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: rgba(0,0,0,0.8);
+  color: #eee;
+  transition: border-color 0.3s;
+}
+
+.tracker-container-fighter .fighter-select:focus {
+  border-color: #ff3c3c;
+  outline: none;
+}
+
+.tracker-container-fighter .fighter-card {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #333;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  background-color: rgba(0,0,0,0.8);
+  transition: box-shadow 0.3s ease;
+}
+
+.tracker-container-fighter .fighter-card:hover {
+  box-shadow: 0 4px 20px rgba(255, 60, 60, 0.2);
+}
+
+.tracker-container-fighter .fighter-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin-right: 20px;
+  object-fit: cover;
+}
+
+.tracker-container-fighter .fighter-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tracker-container-fighter .fighter-nickname,
+.tracker-container-fighter .fighter-class {
+  color: #ccc;
+}
+
+.tracker-container-fighter .record {
+  color: #aaa;
+}
+
+.tracker-container-fighter .grid-row {
+  gap: 24px;
+}
+
+.grid-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.fight-history,
+.fantasy-points,
+.stats-summary,
+.community-accuracy {
+  background: rgba(0,0,0,0.8);
+  border: 1px solid #444;
+  color: #eee;
+   flex: 1;
+  padding: 18px;
+   border-radius: 10px;
+}
+
+.fight-history h4,
+.fantasy-points h4,
+.stats-summary h4,
+.community-accuracy h4 {
+  color: #ff3c3c;
+  margin-bottom: 15px;
+}
+
+.tracker-container-fighter .win {
+  color: #e11d48;
+}
+
+.tracker-container-fighter .points div strong {
+  color: #ff3c3c;
+}
+
+.tracker-container-fighter .label {
+  color: #ccc;
+}
+
+.tracker-container-fighter .bar {
+  background: #444;
+}
+
+.tracker-container-fighter .filled {
+  background: linear-gradient(to right, #ff3c3c, #8b0000);
+}
+
+.tracker-container-fighter .stat-values {
+  color: #bbb;
+}
+
+.tracker-container-fighter .accuracy-circle .circle {
+  background: #3a3a3a;
+  color: #ff3c3c;
+}
+
+.tracker-container-fighter .accuracy-text {
+  color: #ddd;
+}
+
+.tracker-container-fighter .next-fight {
+  border-top: 1px dashed #444;
+}
+
+.tracker-container-fighter .calendar-icon {
+  color: #ff3c3c;
+}
+
+.paddingTop{
+    padding-top: 170px;
+    padding-bottom: 50px;
+    background-image: url(/Assets/leaguesTwo.jpg);
+    background-position: center 100px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+.tracker-container-fighter .fight-item{
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    margin: 5px 0;
+}
+
+
+.stat-bar {
+  margin-bottom: 16px;
+}
+
+.label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #ccc;
+}
+
+.bar {
+  background: #444;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.filled {
+  background: linear-gradient(to right, #ff3c3c, #8b0000);
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.stat-values {
+  font-size: 13px;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  color: #bbb;
+}
+
+.vs {
+  color: #888;
+  font-weight: 500;
+}
+.next-fight {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px dashed #555;
+  color: #eee;
+}
+
+.next-fight h4 {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ff3c3c;
+}
+
+.next-opponent {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  margin-top: 10px;
+  color: #ccc;
+}
+
+.calendar-icon {
+  font-size: 20px;
+  margin-right: 12px;
+  color: #ff3c3c;
+}
+
+.next-opponent strong {
+  color: #fff;
+  font-weight: 700;
+}
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-content {
+  background: #121212;
+  color: #f0f0f0;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid #ff3c3c;
+  position: relative;
+}
+
+.popup-content h4 {
+  font-size: 24px;
+  color: #ff3c3c;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.popup-round {
+  background: #1e1e1e;
+  border-left: 4px solid #ff3c3c;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  color: #ddd;
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.1);
+}
+
+.popup-round strong {
+  display: block;
+  color: #ff5e5e;
+  margin-bottom: 8px;
+}
+
+.popup-content button {
+  background: #ff3c3c;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s ease-in-out;
+}
+
+.popup-content button:hover {
+  background: #e60000;
+}

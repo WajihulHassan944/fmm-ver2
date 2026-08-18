@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="960" viewBox="0 0 1920 960" fill="none">
+  <defs>
+    <radialGradient id="redSpot" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(260 210) rotate(38) scale(700 460)">
+      <stop stop-color="#ff2336" stop-opacity="0.7"/>
+      <stop offset="0.42" stop-color="#ff2336" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#ff2336" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="goldSpot" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(960 180) rotate(90) scale(430 850)">
+      <stop stop-color="#ffd169" stop-opacity="0.48"/>
+      <stop offset="0.5" stop-color="#ff9d25" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ff9d25" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blueSpot" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1660 210) rotate(142) scale(760 500)">
+      <stop stop-color="#347fff" stop-opacity="0.62"/>
+      <stop offset="0.48" stop-color="#347fff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#347fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="960" y1="410" x2="960" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#131923" stop-opacity="0"/>
+      <stop offset="0.36" stop-color="#121725" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#020308" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="cash" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#a9ffca" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#1eff94" stop-opacity="0.42"/>
+    </linearGradient>
+    <filter id="blur6" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#ff2336" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="960" fill="#02040a"/>
+  <rect width="1920" height="960" fill="url(#redSpot)"/>
+  <rect width="1920" height="960" fill="url(#goldSpot)"/>
+  <rect width="1920" height="960" fill="url(#blueSpot)"/>
+  <g opacity="0.16">
+    <rect x="0" y="118" width="1920" height="190" fill="#ffffff" opacity="0.03"/>
+    <path d="M0 300C260 210 530 166 960 166C1390 166 1660 210 1920 300" stroke="#ffffff" stroke-width="2" opacity="0.35"/>
+    <path d="M74 356C342 266 602 226 960 226C1318 226 1578 266 1846 356" stroke="#ffffff" stroke-width="1.4" opacity="0.25"/>
+    <path d="M168 438C430 350 665 318 960 318C1255 318 1490 350 1752 438" stroke="#ffffff" stroke-width="1.2" opacity="0.22"/>
+  </g>
+  <g opacity="0.16" filter="url(#blur6)">
+    <circle cx="212" cy="365" r="64" fill="#ffffff"/>
+    <circle cx="1685" cy="332" r="58" fill="#ffffff"/>
+    <circle cx="1120" cy="140" r="42" fill="#37ff9d"/>
+    <circle cx="708" cy="258" r="43" fill="#37ff9d"/>
+  </g>
+  <g opacity="0.52">
+    <text x="250" y="235" fill="#38ff9b" font-family="Arial Black, Impact, sans-serif" font-size="116" transform="rotate(-13 250 235)" filter="url(#blur6)">$</text>
+    <text x="1370" y="220" fill="#ffd169" font-family="Arial Black, Impact, sans-serif" font-size="96" transform="rotate(12 1370 220)" filter="url(#blur6)">$</text>
+    <text x="1038" y="176" fill="#38ff9b" font-family="Arial Black, Impact, sans-serif" font-size="68" transform="rotate(8 1038 176)" filter="url(#blur6)">$</text>
+    <text x="1514" y="418" fill="#38ff9b" font-family="Arial Black, Impact, sans-serif" font-size="74" transform="rotate(-10 1514 418)" filter="url(#blur6)">$</text>
+    <text x="520" y="410" fill="#ffd169" font-family="Arial Black, Impact, sans-serif" font-size="66" transform="rotate(12 520 410)" filter="url(#blur6)">$</text>
+  </g>
+  <g opacity="0.32">
+    <g transform="translate(760 310) rotate(-12)">
+      <rect x="0" y="0" width="92" height="42" rx="6" fill="url(#cash)"/>
+      <circle cx="46" cy="21" r="10" fill="#02040a" opacity="0.36"/>
+    </g>
+    <g transform="translate(1180 318) rotate(16)">
+      <rect x="0" y="0" width="98" height="44" rx="6" fill="url(#cash)"/>
+      <circle cx="49" cy="22" r="10" fill="#02040a" opacity="0.36"/>
+    </g>
+    <g transform="translate(1460 510) rotate(-18)">
+      <rect x="0" y="0" width="82" height="38" rx="5" fill="url(#cash)"/>
+      <circle cx="41" cy="19" r="8" fill="#02040a" opacity="0.34"/>
+    </g>
+    <g transform="translate(415 515) rotate(15)">
+      <rect x="0" y="0" width="86" height="39" rx="5" fill="url(#cash)"/>
+      <circle cx="43" cy="20" r="8" fill="#02040a" opacity="0.34"/>
+    </g>
+  </g>
+  <g opacity="0.22">
+    <path d="M58 510C310 392 594 348 960 348C1326 348 1610 392 1862 510" stroke="#ffffff" stroke-width="2"/>
+    <path d="M190 635C444 520 688 478 960 478C1232 478 1476 520 1730 635" stroke="#ffffff" stroke-width="1.5"/>
+    <path d="M335 782C552 670 756 632 960 632C1164 632 1368 670 1585 782" stroke="#ffffff" stroke-width="1"/>
+    <path d="M960 348V940" stroke="#ffffff" stroke-width="1"/>
+    <path d="M640 378L410 935" stroke="#ffffff" stroke-width="1"/>
+    <path d="M1280 378L1510 935" stroke="#ffffff" stroke-width="1"/>
+  </g>
+  <g opacity="0.34" filter="url(#glow)">
+    <path d="M130 600C270 540 386 520 520 534C644 546 744 585 832 638" stroke="#ff2638" stroke-width="7" stroke-linecap="round"/>
+    <path d="M1088 638C1176 585 1276 546 1400 534C1534 520 1650 540 1790 600" stroke="#347fff" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <rect y="365" width="1920" height="595" fill="url(#floor)"/>
+  <g opacity="0.11">
+    <path d="M0 720H1920" stroke="#ffffff" stroke-width="1"/>
+    <path d="M0 808H1920" stroke="#ffffff" stroke-width="1"/>
+    <path d="M0 896H1920" stroke="#ffffff" stroke-width="1"/>
+    <path d="M120 960L960 420L1800 960" stroke="#ffffff" stroke-width="1" fill="none"/>
+  </g>
+  <text x="960" y="595" text-anchor="middle" fill="#ffffff" opacity="0.055" font-family="Arial Black, Impact, sans-serif" font-size="158" letter-spacing="10">FANTASY MMADNESS</text>
+</svg>

@@ -1,0 +1,2736 @@
+/* base hidden rule removed for desktop-home parity */
+
+@media (min-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  body:has(.fmm-app-fixed-home) {
+    background: #05060a !important;
+    color: #fff;
+    overscroll-behavior-y: contain;
+  }
+
+  body:has(.fmm-app-fixed-home) .header.theme-header.is-home-route,
+  body:has(.fmm-app-fixed-home) footer,
+  body:has(.fmm-app-fixed-home) .Footer,
+  body:has(.fmm-app-fixed-home) .fmm-desktop-home-shell,
+  body:has(.fmm-app-fixed-home) .chatbase-widget-container,
+  body:has(.fmm-app-fixed-home) iframe[title*="chat" i] {
+    display: none !important;
+  }
+
+  body:has(.fmm-app-fixed-home) .site-experience-main.is-home-experience-main,
+  body:has(.fmm-app-fixed-home) .theme-home.fmm-home.page-shell,
+  body:has(.fmm-app-fixed-home) .theme-home,
+  body:has(.fmm-app-fixed-home) #__next {
+    min-height: 100dvh;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #05060a !important;
+    max-width: none !important;
+    overflow-x: hidden;
+  }
+
+  .fmm-app-fixed-home {
+    --app-bg: #05060a;
+    --app-surface: #0b0f18;
+    --app-surface-2: #101725;
+    --app-line: rgba(255, 255, 255, 0.1);
+    --app-red: #ef4444;
+    --app-blue: #4d8dff;
+    --app-gold: #f2b544;
+    --app-purple: #a855f7;
+    --app-green: #22c55e;
+    --app-text: #ffffff;
+    --app-muted: rgba(255, 255, 255, 0.68);
+    --app-heading-font: "Anton", "Impact", "Arial Black", sans-serif;
+    --app-ui-font: "Rajdhani", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    min-height: 100dvh;
+    padding: 0 0 calc(98px + env(safe-area-inset-bottom));
+    color: var(--app-text);
+    background:
+      radial-gradient(circle at 24% -6%, rgba(239, 68, 68, 0.3), transparent 32%),
+      radial-gradient(circle at 90% 4%, rgba(77, 141, 255, 0.22), transparent 34%),
+      linear-gradient(180deg, #080b12 0%, #05060a 42%, #030408 100%);
+    font-family: var(--app-ui-font);
+    letter-spacing: 0.02em;
+    overflow: hidden;
+  }
+
+  .fmm-app-fixed-home *,
+  .fmm-app-fixed-home *::before,
+  .fmm-app-fixed-home *::after {
+    box-sizing: border-box;
+  }
+
+  .fmm-app-fixed-home a,
+  .fmm-app-fixed-home button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fmm-app-fixed-home a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .fmm-app-fixed-home button {
+    appearance: none;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+  }
+
+  .fmm-app-topbar {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: 0;
+    right: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    pointer-events: none;
+  }
+
+  .fmm-app-menu-button,
+  .fmm-app-wallet,
+  .fmm-app-notify,
+  .fmm-app-sound-toggle {
+    pointer-events: auto;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .fmm-app-menu-button {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    padding: 11px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(10, 15, 25, 0.92), rgba(20, 26, 40, 0.78));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  .fmm-app-menu-button span {
+    width: 20px;
+    height: 2px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.42);
+  }
+
+  .fmm-app-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fmm-app-wallet {
+    min-width: 108px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(242, 181, 68, 0.24), rgba(10, 13, 18, 0.92));
+    border: 1px solid rgba(242, 181, 68, 0.48);
+    box-shadow: 0 12px 30px rgba(242, 181, 68, 0.18), inset 0 0 20px rgba(242, 181, 68, 0.06);
+  }
+
+  .fmm-app-wallet b {
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #2a1600;
+    background: radial-gradient(circle at 35% 25%, #fff2a3, #f2b544 52%, #a76700);
+    font-size: 10px;
+    font-weight: 1000;
+    box-shadow: 0 0 14px rgba(242, 181, 68, 0.72);
+  }
+
+  .fmm-app-wallet strong {
+    color: #fff4c8;
+    font-size: 14px;
+    font-weight: 1000;
+    line-height: 1;
+  }
+
+  .fmm-app-wallet i {
+    width: 19px;
+    height: 19px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #06070a;
+    background: #fff;
+    font-size: 9px;
+  }
+
+  .fmm-app-notify {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(9, 13, 22, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+    overflow: visible;
+  }
+
+  .fmm-app-notify img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+
+  .fmm-app-notify svg {
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .fmm-app-notify em {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    min-width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    padding: 0 4px;
+    border-radius: 999px;
+    color: #07080c;
+    background: var(--app-gold);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 1000;
+    border: 2px solid #05060a;
+  }
+
+  .fmm-app-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    background: rgba(0, 0, 0, 0.66);
+    backdrop-filter: blur(8px);
+  }
+
+  .fmm-app-menu-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 130;
+    width: min(318px, 86vw);
+    padding: calc(16px + env(safe-area-inset-top)) 16px 24px;
+    background: linear-gradient(180deg, rgba(12, 17, 29, 0.98), rgba(4, 6, 11, 0.98));
+    border-right: 1px solid rgba(242, 181, 68, 0.24);
+    box-shadow: 30px 0 80px rgba(0, 0, 0, 0.65);
+    animation: fmmAppDrawerIn 0.24s ease both;
+  }
+
+  .fmm-app-menu-drawer header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .fmm-app-menu-drawer header img {
+    width: 164px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .fmm-app-menu-drawer header button {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .fmm-app-menu-drawer nav {
+    display: grid;
+    gap: 9px;
+  }
+
+  .fmm-app-menu-drawer nav a {
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: 24px 1fr 14px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    border-radius: 16px;
+    color: rgba(255, 255, 255, 0.86);
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.095);
+  }
+
+  .fmm-app-menu-drawer nav a svg:first-child {
+    color: var(--app-gold);
+  }
+
+  .fmm-app-menu-drawer nav a span {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-hero {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+    margin: 0;
+    overflow: hidden;
+    background: #07080d;
+  }
+
+  .fmm-app-hero > img {
+    display: block;
+    width: 100%;
+    min-height: 318px;
+    object-fit: cover;
+    object-position: center top;
+    filter: saturate(1.08) contrast(1.04);
+  }
+
+  .fmm-app-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 118px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(5, 6, 10, 0), #05060a 82%);
+  }
+
+  .fmm-app-hero-glow {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(30px);
+    opacity: 0.58;
+    animation: fmmAppGlowPulse 3.4s ease-in-out infinite;
+  }
+
+  .fmm-app-hero-glow.is-red {
+    left: -52px;
+    top: 112px;
+    background: rgba(239, 68, 68, 0.46);
+  }
+
+  .fmm-app-hero-glow.is-blue {
+    right: -55px;
+    top: 72px;
+    background: rgba(77, 141, 255, 0.42);
+    animation-delay: 0.9s;
+  }
+
+  .fmm-app-crown-sparkles {
+    position: absolute;
+    top: 74px;
+    left: 50%;
+    z-index: 2;
+    width: 132px;
+    height: 86px;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .fmm-app-crown-sparkles i {
+    position: absolute;
+    color: #ffe58a;
+    font-style: normal;
+    text-shadow: 0 0 12px rgba(242, 181, 68, 0.95), 0 0 22px rgba(255, 255, 255, 0.38);
+    animation: fmmAppSparkle 1.85s ease-in-out infinite;
+  }
+
+  .fmm-app-crown-sparkles i:nth-child(1) { left: 4px; top: 30px; font-size: 10px; animation-delay: 0s; }
+  .fmm-app-crown-sparkles i:nth-child(2) { left: 32px; top: 10px; font-size: 14px; animation-delay: 0.22s; }
+  .fmm-app-crown-sparkles i:nth-child(3) { left: 64px; top: 0; font-size: 18px; animation-delay: 0.44s; }
+  .fmm-app-crown-sparkles i:nth-child(4) { right: 32px; top: 12px; font-size: 13px; animation-delay: 0.66s; }
+  .fmm-app-crown-sparkles i:nth-child(5) { right: 4px; top: 34px; font-size: 10px; animation-delay: 0.88s; }
+  .fmm-app-crown-sparkles i:nth-child(6) { left: 58px; bottom: 2px; font-size: 12px; animation-delay: 1.1s; }
+
+  .fmm-app-join-hit {
+    position: absolute;
+    left: 50%;
+    bottom: 32px;
+    z-index: 6;
+    width: min(236px, 60vw);
+    height: 72px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+  }
+
+  .fmm-app-ticker {
+    position: relative;
+    z-index: 4;
+    margin-top: -8px;
+    overflow: hidden;
+    border-top: 1px solid rgba(242, 181, 68, 0.48);
+    border-bottom: 1px solid rgba(242, 181, 68, 0.38);
+    background: linear-gradient(90deg, rgba(14, 18, 28, 0.98), rgba(20, 8, 12, 0.95), rgba(14, 18, 28, 0.98));
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.34), inset 0 0 22px rgba(242, 181, 68, 0.05);
+  }
+
+  .fmm-app-ticker div {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    width: max-content;
+    min-height: 38px;
+    padding-left: 100%;
+    animation: fmmAppMarquee 27s linear infinite;
+  }
+
+  .fmm-app-ticker span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .fmm-app-ticker span b {
+    color: var(--ticker-color, #f2b544);
+    filter: drop-shadow(0 0 8px var(--ticker-color, #f2b544));
+  }
+
+  .fmm-app-stats {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    padding: 10px 8px 14px;
+    background: linear-gradient(180deg, #05060a 0%, #070a12 100%);
+  }
+
+  .fmm-app-stats a {
+    min-height: 76px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 7px 3px;
+    border-radius: 14px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+    border: 1px solid rgba(255, 255, 255, 0.095);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .fmm-app-stats a svg {
+    font-size: 16px;
+    filter: drop-shadow(0 0 12px currentColor);
+  }
+
+  .fmm-app-stats a strong {
+    color: #fff;
+    font-family: var(--app-heading-font);
+    font-size: clamp(13px, 3.1vw, 17px);
+    line-height: 0.95;
+    letter-spacing: 0.035em;
+  }
+
+  .fmm-app-stats a span {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-stats a small {
+    color: rgba(255, 255, 255, 0.54);
+    font-size: 7px;
+    font-weight: 800;
+  }
+
+  .fmm-app-stats .is-purple svg { color: var(--app-purple); }
+  .fmm-app-stats .is-gold svg { color: var(--app-gold); }
+  .fmm-app-stats .is-blue svg { color: var(--app-blue); }
+  .fmm-app-stats .is-green svg { color: var(--app-green); }
+
+  .fmm-app-sports {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 12px 16px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .fmm-app-sports::-webkit-scrollbar,
+  .fmm-app-upcoming-rail::-webkit-scrollbar,
+  .fmm-app-apparel > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fmm-app-sports button {
+    position: relative;
+    flex: 0 0 104px;
+    height: 118px;
+    overflow: hidden;
+    border-radius: 18px;
+    scroll-snap-align: start;
+    background: #0b0f18;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.34);
+  }
+
+  .fmm-app-sports button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, transparent 22%, rgba(0, 0, 0, 0.25) 48%, rgba(0, 0, 0, 0.9) 100%),
+      linear-gradient(135deg, color-mix(in srgb, var(--sport-color) 34%, transparent), transparent 58%);
+    pointer-events: none;
+  }
+
+  .fmm-app-sports button.is-active {
+    border-color: var(--sport-color);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--sport-color) 45%, transparent), 0 0 24px color-mix(in srgb, var(--sport-color) 35%, transparent), 0 18px 36px rgba(0, 0, 0, 0.42);
+  }
+
+  .fmm-app-sports img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+  }
+
+  .fmm-app-sports strong {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 22px;
+    z-index: 2;
+    font-family: var(--app-heading-font);
+    font-size: 15px;
+    line-height: 0.95;
+    letter-spacing: 0.045em;
+    text-align: left;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.78);
+  }
+
+  .fmm-app-sports small {
+    position: absolute;
+    left: 7px;
+    bottom: 7px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+  }
+
+  .fmm-app-sports small i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--app-green);
+    box-shadow: 0 0 10px var(--app-green);
+    animation: fmmAppLivePulse 1.4s ease-in-out infinite;
+  }
+
+  .fmm-app-featured-week {
+    position: relative;
+    min-height: 216px;
+    margin: 2px 12px 18px;
+    overflow: hidden;
+    border-radius: 24px;
+    border: 1px solid rgba(242, 181, 68, 0.34);
+    background: radial-gradient(circle at 50% 28%, rgba(239, 68, 68, 0.2), transparent 46%), #090d15;
+    box-shadow: 0 22px 46px rgba(0, 0, 0, 0.46), inset 0 0 36px rgba(242, 181, 68, 0.05);
+  }
+
+  .fmm-app-featured-bg,
+  .fmm-app-featured-fights > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.52;
+    filter: saturate(1.1) contrast(1.06);
+  }
+
+  .fmm-app-featured-week::before,
+  .fmm-app-featured-fights::before,
+  .fmm-app-affiliate a:first-child::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(5, 6, 10, 0.9), rgba(5, 6, 10, 0.2) 42%, rgba(5, 6, 10, 0.92)),
+      linear-gradient(180deg, rgba(5, 6, 10, 0.14), rgba(5, 6, 10, 0.78));
+  }
+
+  .fmm-app-featured-cutout {
+    position: absolute;
+    bottom: -14px;
+    z-index: 2;
+    width: 37%;
+    max-width: 150px;
+    height: 175px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .fmm-app-featured-cutout.is-left {
+    left: -14px;
+  }
+
+  .fmm-app-featured-cutout.is-right {
+    right: -14px;
+  }
+
+  .fmm-app-featured-cutout img,
+  .fmm-app-featured-cutout span,
+  .fmm-app-featured-cutout picture,
+  .fmm-app-featured-cutout .fight-img-wrap {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .fmm-app-featured-content {
+    position: relative;
+    z-index: 4;
+    min-height: 216px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 12px 82px 14px;
+    text-align: center;
+  }
+
+  .fmm-app-featured-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .fmm-app-featured-head span,
+  .fmm-app-featured-fights-inner > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    color: #07070a;
+    background: linear-gradient(135deg, #fff4ba, var(--app-gold));
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    box-shadow: 0 0 16px rgba(242, 181, 68, 0.42);
+  }
+
+  .fmm-app-featured-head b {
+    color: #ffdad4;
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-featured-main {
+    align-self: center;
+    display: grid;
+    gap: 7px;
+  }
+
+  .fmm-app-featured-main small {
+    color: var(--app-blue);
+    font-size: 9px;
+    font-weight: 1000;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(77, 141, 255, 0.48);
+  }
+
+  .fmm-app-featured-main h2,
+  .fmm-app-main-fight-row h2,
+  .fmm-app-section-head h2 {
+    margin: 0;
+    font-family: var(--app-heading-font);
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-featured-main h2 {
+    color: #fff;
+    font-size: clamp(25px, 8.2vw, 38px);
+    line-height: 0.9;
+    letter-spacing: 0.035em;
+    text-shadow: 0 0 18px rgba(255, 255, 255, 0.26), 0 5px 15px rgba(0, 0, 0, 0.72);
+  }
+
+  .fmm-app-featured-main h2 em,
+  .fmm-app-main-fight-row h2 em,
+  .fmm-app-upcoming h3 em,
+  .fmm-app-mini-fight-list em {
+    color: var(--app-red);
+    font-style: normal;
+    text-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+  }
+
+  .fmm-app-featured-main div,
+  .fmm-app-featured-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .fmm-app-featured-main div strong,
+  .fmm-app-featured-meta span {
+    min-height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 10px;
+    color: #fff7dd;
+    background: rgba(0, 0, 0, 0.48);
+    border: 1px solid rgba(242, 181, 68, 0.2);
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+  }
+
+  .fmm-app-featured-content > a,
+  .fmm-app-featured-fights-inner > a,
+  .fmm-app-enter-now,
+  .fmm-app-demo-cta,
+  .fmm-app-rewards button strong,
+  .fmm-app-rewards a b,
+  .fmm-app-affiliate a:first-child b {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    border-radius: 999px;
+    color: #fff;
+    background: linear-gradient(135deg, #ff2d2d, #b70714 46%, #70040a);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 32px rgba(239, 68, 68, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-featured-content > a::after,
+  .fmm-app-featured-fights-inner > a::after,
+  .fmm-app-enter-now::after,
+  .fmm-app-demo-cta::after,
+  .fmm-app-rewards button strong::after,
+  .fmm-app-rewards a b::after,
+  .fmm-app-affiliate a:first-child b::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -45%;
+    width: 34%;
+    transform: skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: fmmAppButtonShine 3s ease-in-out infinite;
+  }
+
+  .fmm-app-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 14px 10px;
+  }
+
+  .fmm-app-section-head h2 {
+    color: #fff;
+    font-size: 24px;
+    letter-spacing: 0.05em;
+  }
+
+  .fmm-app-section-head a {
+    color: var(--app-gold);
+    font-size: 10px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+
+  .fmm-app-upcoming {
+    margin: 0 0 18px;
+  }
+
+  .fmm-app-upcoming-rail,
+  .fmm-app-apparel > div {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 14px 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .fmm-app-upcoming-rail > p {
+    width: 100%;
+    min-height: 100px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.62);
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 800;
+  }
+
+  .fmm-app-upcoming article {
+    position: relative;
+    flex: 0 0 158px;
+    overflow: hidden;
+    border-radius: 20px;
+    scroll-snap-align: start;
+    background: linear-gradient(180deg, rgba(15, 20, 32, 0.98), rgba(7, 9, 15, 0.98));
+    border: 1px solid color-mix(in srgb, var(--event-color) 46%, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.36), 0 0 22px color-mix(in srgb, var(--event-color) 18%, transparent);
+  }
+
+  .fmm-app-upcoming article > a:first-child {
+    display: block;
+  }
+
+  .fmm-app-upcoming figure {
+    position: relative;
+    height: 138px;
+    margin: 0;
+    overflow: hidden;
+    background: #05060a;
+  }
+
+  .fmm-app-upcoming figure::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 34%, rgba(0, 0, 0, 0.9));
+  }
+
+  .fmm-app-upcoming figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.03);
+  }
+
+  .fmm-app-upcoming figcaption {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    z-index: 2;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-upcoming article > a:first-child > div {
+    display: grid;
+    gap: 5px;
+    padding: 9px 9px 8px;
+  }
+
+  .fmm-app-upcoming h3 {
+    min-height: 32px;
+    margin: 0;
+    color: #fff;
+    font-family: var(--app-heading-font);
+    font-size: 15px;
+    line-height: 1.02;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-upcoming time {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-upcoming article > a:first-child strong {
+    color: var(--app-gold);
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+  }
+
+  .fmm-app-quick-picks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    padding: 0 8px 8px;
+  }
+
+  .fmm-app-quick-picks a {
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 8px;
+    font-weight: 1000;
+    white-space: nowrap;
+  }
+
+  .fmm-app-enter-now {
+    width: calc(100% - 16px);
+    min-height: 34px;
+    margin: 0 8px 10px;
+    font-size: 9px;
+  }
+
+  .fmm-app-featured-fights {
+    position: relative;
+    overflow: hidden;
+    margin: 0 12px 18px;
+    border-radius: 24px;
+    background: #070a11;
+    border: 1px solid rgba(239, 68, 68, 0.34);
+    box-shadow: 0 20px 46px rgba(0, 0, 0, 0.48), inset 0 0 30px rgba(239, 68, 68, 0.06);
+  }
+
+  .fmm-app-featured-fights-inner {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .fmm-app-main-fight-row {
+    display: grid;
+    grid-template-columns: 78px 1fr 78px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fmm-app-main-fight-row figure {
+    width: 78px;
+    height: 78px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.045), 0 0 20px rgba(239, 68, 68, 0.14);
+  }
+
+  .fmm-app-main-fight-row figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .fmm-app-main-fight-row h2 {
+    color: #fff;
+    font-size: clamp(20px, 6.6vw, 31px);
+    line-height: 0.92;
+    letter-spacing: 0.045em;
+  }
+
+  .fmm-app-featured-meta span small {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 7px;
+    font-weight: 1000;
+    letter-spacing: 0.11em;
+  }
+
+  .fmm-app-featured-meta span strong {
+    color: #fff7d2;
+    font-size: 12px;
+    font-weight: 1000;
+  }
+
+  .fmm-app-mini-fight-list {
+    display: grid;
+    gap: 7px;
+    text-align: left;
+  }
+
+  .fmm-app-mini-fight-list a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 8px;
+    padding: 9px 10px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.085);
+  }
+
+  .fmm-app-mini-fight-list span {
+    grid-column: 1 / -1;
+    color: var(--app-blue);
+    font-size: 8px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-mini-fight-list strong {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-mini-fight-list small {
+    color: var(--app-gold);
+    font-size: 8px;
+    font-weight: 1000;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-watch-leagues,
+  .fmm-app-community,
+  .fmm-app-rewards,
+  .fmm-app-leader-streak {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 0 12px 16px;
+  }
+
+  .fmm-app-watch-leagues a,
+  .fmm-app-community article,
+  .fmm-app-rewards button,
+  .fmm-app-rewards a,
+  .fmm-app-leader-streak > a,
+  .fmm-app-apparel a {
+    position: relative;
+    overflow: hidden;
+    min-height: 112px;
+    padding: 12px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(17, 24, 38, 0.94), rgba(8, 10, 17, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.34), inset 0 0 24px rgba(255, 255, 255, 0.035);
+  }
+
+  .fmm-app-watch-leagues a:first-child {
+    border-color: rgba(239, 68, 68, 0.26);
+    background: radial-gradient(circle at 22% 14%, rgba(239, 68, 68, 0.24), transparent 40%), linear-gradient(180deg, rgba(17, 24, 38, 0.94), rgba(8, 10, 17, 0.96));
+  }
+
+  .fmm-app-watch-leagues a:last-child {
+    border-color: rgba(77, 141, 255, 0.26);
+    background: radial-gradient(circle at 22% 14%, rgba(77, 141, 255, 0.23), transparent 42%), linear-gradient(180deg, rgba(17, 24, 38, 0.94), rgba(8, 10, 17, 0.96));
+  }
+
+  .fmm-app-watch-leagues span,
+  .fmm-app-community span,
+  .fmm-app-rewards span,
+  .fmm-app-leader-streak span,
+  .fmm-app-apparel span,
+  .fmm-app-affiliate span {
+    display: block;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 9px;
+    font-weight: 1000;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-watch-leagues strong,
+  .fmm-app-rewards strong,
+  .fmm-app-leader-streak strong,
+  .fmm-app-affiliate strong {
+    display: block;
+    margin-top: 7px;
+    color: #fff;
+    font-family: var(--app-heading-font);
+    font-size: 19px;
+    line-height: 0.98;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-watch-leagues small,
+  .fmm-app-affiliate small,
+  .fmm-app-leader-streak small {
+    display: block;
+    margin-top: 7px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .fmm-app-demo-cta {
+    width: calc(100% - 24px);
+    min-height: 58px;
+    margin: 0 12px 16px;
+    padding: 0 14px;
+    gap: 10px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f2b544, #ef4444 56%, #6f0b10);
+    color: #06070a;
+    box-shadow: 0 16px 38px rgba(242, 181, 68, 0.22), 0 16px 38px rgba(239, 68, 68, 0.18);
+  }
+
+  .fmm-app-demo-cta b {
+    color: #06070a;
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+  }
+
+  .fmm-app-demo-cta span {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.34);
+  }
+
+  .fmm-app-community article {
+    min-height: 156px;
+    padding: 0;
+  }
+
+  .fmm-app-community article > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.34;
+    filter: saturate(1.1);
+  }
+
+  .fmm-app-community article::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(5, 6, 10, 0.12), rgba(5, 6, 10, 0.88));
+  }
+
+  .fmm-app-community article > div {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .fmm-app-community strong {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .fmm-app-community strong b {
+    color: var(--app-gold);
+  }
+
+  .fmm-app-community i {
+    display: block;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.11);
+  }
+
+  .fmm-app-community i b {
+    display: block;
+    height: 100%;
+    min-width: 4%;
+    max-width: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--app-red), var(--app-gold));
+    box-shadow: 0 0 12px rgba(242, 181, 68, 0.48);
+  }
+
+  .fmm-app-community small,
+  .fmm-app-community em {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 900;
+  }
+
+  .fmm-app-rewards button,
+  .fmm-app-rewards a {
+    min-height: 126px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .fmm-app-rewards svg {
+    width: 28px;
+    height: 28px;
+    color: var(--app-gold);
+    filter: drop-shadow(0 0 14px rgba(242, 181, 68, 0.55));
+  }
+
+  .fmm-app-rewards button strong,
+  .fmm-app-rewards a b {
+    width: 100%;
+    min-height: 32px;
+    margin-top: 8px;
+    font-size: 8px;
+  }
+
+  .fmm-app-rewards button.is-claiming {
+    animation: fmmAppCardPop 0.48s ease;
+  }
+
+  .fmm-app-leader-streak > a {
+    min-height: 174px;
+    padding: 11px;
+  }
+
+  .fmm-app-leader-streak > a > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.24;
+  }
+
+  .fmm-app-leader-streak > a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(5, 6, 10, 0.18), rgba(5, 6, 10, 0.92));
+  }
+
+  .fmm-app-leader-streak > a > *:not(img) {
+    position: relative;
+    z-index: 2;
+  }
+
+  .fmm-app-leader-streak header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .fmm-app-leader-streak header small {
+    color: var(--app-gold);
+    margin: 0;
+    font-size: 8px;
+    font-weight: 1000;
+  }
+
+  .fmm-app-leader-streak p {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 0 0 6px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .fmm-app-leader-streak p strong {
+    margin: 0;
+    color: var(--app-gold);
+    font-family: inherit;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .fmm-app-leader-streak p.is-me {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(242, 181, 68, 0.18);
+    color: #fff;
+  }
+
+  .fmm-app-leader-streak div {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .fmm-app-leader-streak i {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--app-gold);
+    color: #08090d;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 1000;
+    box-shadow: 0 0 12px rgba(242, 181, 68, 0.4);
+  }
+
+  .fmm-app-leader-streak a:last-child b {
+    display: inline-flex;
+    width: fit-content;
+    margin-top: 10px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    color: #071108;
+    background: var(--app-green);
+    font-size: 10px;
+    font-weight: 1000;
+  }
+
+  .fmm-app-apparel {
+    margin-bottom: 16px;
+  }
+
+  .fmm-app-apparel a {
+    flex: 0 0 132px;
+    min-height: 164px;
+    padding: 9px;
+    scroll-snap-align: start;
+  }
+
+  .fmm-app-apparel img {
+    width: 100%;
+    height: 94px;
+    object-fit: cover;
+    border-radius: 14px;
+    background: #0b0e16;
+  }
+
+  .fmm-app-apparel span {
+    margin-top: 8px;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1.15;
+  }
+
+  .fmm-app-apparel strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--app-gold);
+    font-size: 13px;
+    font-weight: 1000;
+  }
+
+  .fmm-app-affiliate {
+    display: grid;
+    gap: 12px;
+    padding: 0 12px 16px;
+  }
+
+  .fmm-app-affiliate a:first-child {
+    position: relative;
+    min-height: 154px;
+    overflow: hidden;
+    padding: 18px 150px 16px 14px;
+    border-radius: 24px;
+    background: radial-gradient(circle at 18% 18%, rgba(242, 181, 68, 0.23), transparent 38%), linear-gradient(135deg, #0f172a, #090a10 65%);
+    border: 1px solid rgba(242, 181, 68, 0.26);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.44);
+  }
+
+  .fmm-app-affiliate a:first-child > *:not(img) {
+    position: relative;
+    z-index: 2;
+  }
+
+  .fmm-app-affiliate a:first-child img {
+    position: absolute;
+    right: -20px;
+    bottom: -8px;
+    z-index: 1;
+    width: 170px;
+    max-height: 148px;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.58));
+  }
+
+  .fmm-app-affiliate a:first-child strong {
+    color: #fff;
+    font-size: 24px;
+    text-shadow: 0 0 18px rgba(242, 181, 68, 0.18);
+  }
+
+  .fmm-app-affiliate a:first-child b {
+    width: fit-content;
+    min-height: 34px;
+    margin-top: 12px;
+    padding: 0 14px;
+    color: #07070a;
+    background: linear-gradient(135deg, #ffe89a, var(--app-gold));
+    box-shadow: 0 12px 28px rgba(242, 181, 68, 0.28);
+    font-size: 9px;
+  }
+
+  .fmm-app-chest {
+    position: relative;
+    min-height: 118px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 34%, rgba(242, 181, 68, 0.26), transparent 40%), linear-gradient(180deg, rgba(16, 24, 39, 0.92), rgba(7, 8, 13, 0.98));
+    border: 1px solid rgba(242, 181, 68, 0.25);
+    box-shadow: inset 0 0 34px rgba(242, 181, 68, 0.08), 0 18px 40px rgba(0, 0, 0, 0.42);
+  }
+
+  .fmm-app-chest img {
+    width: 132px;
+    height: 100px;
+    object-fit: contain;
+    animation: fmmAppChestBounce 2.1s ease-in-out infinite;
+    filter: drop-shadow(0 22px 18px rgba(0, 0, 0, 0.55));
+  }
+
+  .fmm-app-chest span {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    color: var(--app-gold);
+    filter: drop-shadow(0 0 8px rgba(242, 181, 68, 0.8));
+    animation: fmmAppCoinFloat 2.4s ease-in-out infinite;
+  }
+
+  .fmm-app-chest span:nth-of-type(1) { left: 22%; top: 24%; animation-delay: 0s; }
+  .fmm-app-chest span:nth-of-type(2) { left: 50%; top: 15%; animation-delay: 0.36s; }
+  .fmm-app-chest span:nth-of-type(3) { right: 22%; top: 27%; animation-delay: 0.72s; }
+
+  .fmm-app-socials {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .fmm-app-socials span {
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    font-family: var(--app-heading-font);
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.035), 0 12px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .fmm-app-bottom-nav {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 100;
+    height: 72px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: 4px;
+    padding: 7px 8px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(16, 21, 33, 0.96), rgba(7, 9, 15, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.66), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .fmm-app-bottom-nav a {
+    position: relative;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 17px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 7px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    white-space: pre-line;
+  }
+
+  .fmm-app-bottom-nav a svg {
+    font-size: 17px;
+  }
+
+  .fmm-app-bottom-nav a.is-active {
+    color: #fff;
+    background: rgba(239, 68, 68, 0.13);
+    box-shadow: inset 0 0 18px rgba(239, 68, 68, 0.12);
+  }
+
+  .fmm-app-bottom-nav a.is-center {
+    transform: translateY(-17px);
+    min-height: 72px;
+    color: #fff;
+    background: linear-gradient(135deg, #ff3f3f, #9c0610);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    font-size: 7px;
+  }
+
+  .fmm-app-bottom-nav a.is-center svg {
+    font-size: 22px;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.44));
+  }
+
+  .fmm-app-sound-toggle {
+    position: fixed;
+    right: 18px;
+    bottom: calc(94px + env(safe-area-inset-bottom));
+    z-index: 102;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(10, 14, 22, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+  }
+
+  @media (max-width: 390px) {
+    .fmm-app-topbar {
+      padding: 0 10px;
+    }
+
+    .fmm-app-wallet {
+      min-width: 98px;
+    }
+
+    .fmm-app-hero {
+      min-height: 300px;
+    }
+
+    .fmm-app-hero > img {
+      min-height: 300px;
+    }
+
+    .fmm-app-stats {
+      gap: 5px;
+      padding-inline: 6px;
+    }
+
+    .fmm-app-stats a {
+      min-height: 70px;
+    }
+
+    .fmm-app-stats a strong {
+      font-size: 12px;
+    }
+
+    .fmm-app-stats a span {
+      font-size: 7px;
+    }
+
+    .fmm-app-sports button {
+      flex-basis: 96px;
+      height: 112px;
+    }
+
+    .fmm-app-featured-content {
+      padding-inline: 72px;
+    }
+
+    .fmm-app-main-fight-row {
+      grid-template-columns: 66px 1fr 66px;
+    }
+
+    .fmm-app-main-fight-row figure {
+      width: 66px;
+      height: 66px;
+    }
+
+    .fmm-app-watch-leagues,
+    .fmm-app-community,
+    .fmm-app-rewards,
+    .fmm-app-leader-streak {
+      gap: 8px;
+      padding-inline: 10px;
+    }
+
+    .fmm-app-watch-leagues strong,
+    .fmm-app-rewards strong,
+    .fmm-app-leader-streak strong,
+    .fmm-app-affiliate strong {
+      font-size: 16px;
+    }
+
+    .fmm-app-affiliate a:first-child {
+      padding-right: 126px;
+    }
+
+    .fmm-app-affiliate a:first-child img {
+      width: 142px;
+    }
+  }
+
+  @keyframes fmmAppDrawerIn {
+    from { transform: translateX(-100%); opacity: 0.7; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fmmAppGlowPulse {
+    0%, 100% { transform: scale(0.92); opacity: 0.44; }
+    50% { transform: scale(1.08); opacity: 0.72; }
+  }
+
+  @keyframes fmmAppSparkle {
+    0%, 100% { transform: translateY(0) scale(0.72) rotate(0deg); opacity: 0.35; }
+    50% { transform: translateY(-6px) scale(1.14) rotate(12deg); opacity: 1; }
+  }
+
+  @keyframes fmmAppMarquee {
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes fmmAppLivePulse {
+    0%, 100% { transform: scale(0.75); opacity: 0.64; }
+    50% { transform: scale(1.25); opacity: 1; }
+  }
+
+  @keyframes fmmAppButtonShine {
+    0%, 48% { transform: translateX(0) skewX(-20deg); }
+    72%, 100% { transform: translateX(430%) skewX(-20deg); }
+  }
+
+  @keyframes fmmAppCardPop {
+    0% { transform: scale(1); }
+    42% { transform: scale(1.045); box-shadow: 0 0 34px rgba(242, 181, 68, 0.34); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes fmmAppChestBounce {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-7px) rotate(1deg); }
+  }
+
+  @keyframes fmmAppCoinFloat {
+    0%, 100% { transform: translateY(6px) scale(0.84); opacity: 0.45; }
+    50% { transform: translateY(-7px) scale(1.08); opacity: 1; }
+  }
+}
+
+
+/* V12 phone-home hotfixes: vertical scroll, softer typography, visible hero CTA. */
+@media (min-width: 768px) {
+  html:has(.fmm-app-fixed-home),
+  body:has(.fmm-app-fixed-home) {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body:has(.fmm-app-fixed-home) #__next,
+  body:has(.fmm-app-fixed-home) main,
+  body:has(.fmm-app-fixed-home) .site-experience-main.is-home-experience-main,
+  body:has(.fmm-app-fixed-home) .theme-home.fmm-home.page-shell,
+  body:has(.fmm-app-fixed-home) .theme-home,
+  body:has(.fmm-app-fixed-home) .page-shell {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .fmm-app-fixed-home {
+    --app-heading-font: "Rajdhani", "Arial Narrow", "Inter Tight", system-ui, sans-serif;
+    min-height: 100svh !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    letter-spacing: 0.01em;
+    padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .fmm-app-hero,
+  .fmm-app-menu-drawer,
+  .fmm-app-featured-week,
+  .fmm-app-featured-fights,
+  .fmm-app-affiliate a:first-child,
+  .fmm-app-chest {
+    overflow: hidden !important;
+  }
+
+  .fmm-app-join-hit {
+    bottom: 22px;
+    width: min(224px, 62vw);
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    border-radius: 999px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 34%),
+      linear-gradient(135deg, #ffe47a 0%, #f4b52e 48%, #9b5d00 100%);
+    border: 1px solid rgba(255, 236, 160, 0.8);
+    box-shadow:
+      0 12px 30px rgba(242, 181, 68, 0.34),
+      0 0 26px rgba(242, 181, 68, 0.28),
+      inset 0 -2px 0 rgba(82, 42, 0, 0.42);
+  }
+
+  .fmm-app-join-hit::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -44%;
+    width: 34%;
+    transform: skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+    animation: fmmAppButtonShine 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .fmm-app-join-hit span {
+    position: relative;
+    z-index: 1;
+    color: #180d00;
+    font-family: var(--app-ui-font);
+    font-size: clamp(14px, 4.4vw, 18px);
+    font-weight: 850;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+  }
+
+  .fmm-app-wallet b,
+  .fmm-app-wallet strong,
+  .fmm-app-notify em,
+  .fmm-app-ticker span,
+  .fmm-app-stats a span,
+  .fmm-app-stats a small,
+  .fmm-app-sports small,
+  .fmm-app-featured-head span,
+  .fmm-app-featured-fights-inner > span,
+  .fmm-app-featured-head b,
+  .fmm-app-featured-main small,
+  .fmm-app-featured-main div strong,
+  .fmm-app-section-head a,
+  .fmm-app-upcoming figcaption,
+  .fmm-app-upcoming time,
+  .fmm-app-upcoming article > a:first-child strong,
+  .fmm-app-quick-picks a,
+  .fmm-app-enter-now,
+  .fmm-app-mini-fight-list span,
+  .fmm-app-mini-fight-list small,
+  .fmm-app-watch-leagues span,
+  .fmm-app-community span,
+  .fmm-app-rewards span,
+  .fmm-app-leader-streak span,
+  .fmm-app-apparel span,
+  .fmm-app-affiliate span,
+  .fmm-app-bottom-nav a {
+    font-weight: 750;
+  }
+
+  .fmm-app-stats a strong {
+    font-family: var(--app-ui-font);
+    font-size: clamp(11px, 2.75vw, 14px);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: 0.015em;
+  }
+
+  .fmm-app-stats a span {
+    font-size: 7px;
+    line-height: 1.08;
+    letter-spacing: 0.065em;
+  }
+
+  .fmm-app-stats a small {
+    font-size: 7px;
+    letter-spacing: 0.02em;
+  }
+
+  .fmm-app-ticker span {
+    font-size: 11px;
+    letter-spacing: 0.055em;
+  }
+
+  .fmm-app-sports strong {
+    font-family: var(--app-ui-font);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.015em;
+  }
+
+  .fmm-app-sports small {
+    font-size: 8px;
+    letter-spacing: 0.075em;
+  }
+
+  .fmm-app-featured-main h2,
+  .fmm-app-main-fight-row h2,
+  .fmm-app-section-head h2,
+  .fmm-app-watch-leagues strong,
+  .fmm-app-rewards strong,
+  .fmm-app-leader-streak strong,
+  .fmm-app-affiliate strong,
+  .fmm-app-socials span {
+    font-family: var(--app-heading-font);
+    font-weight: 800;
+    letter-spacing: 0.025em;
+  }
+
+  .fmm-app-featured-main h2 {
+    font-size: clamp(22px, 7.2vw, 32px);
+    line-height: 0.96;
+  }
+
+  .fmm-app-section-head h2 {
+    font-size: 21px;
+  }
+
+  .fmm-app-upcoming h3 {
+    font-family: var(--app-heading-font);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+  }
+
+  .fmm-app-featured-meta span strong,
+  .fmm-app-mini-fight-list strong,
+  .fmm-app-community strong,
+  .fmm-app-apparel strong,
+  .fmm-app-leader-streak p,
+  .fmm-app-leader-streak p strong {
+    font-weight: 800;
+    letter-spacing: 0.035em;
+  }
+
+  .fmm-app-bottom-nav a {
+    font-size: 7px;
+    letter-spacing: 0.045em;
+  }
+
+  .fmm-app-bottom-nav a.is-center {
+    font-weight: 800;
+  }
+
+  @media (max-width: 390px) {
+    .fmm-app-join-hit {
+      bottom: 19px;
+      width: min(208px, 60vw);
+      height: 46px;
+    }
+
+    .fmm-app-join-hit span {
+      font-size: 14px;
+    }
+
+    .fmm-app-stats a strong {
+      font-size: 11px;
+    }
+  }
+}
+
+
+/* ========================================================================== 
+   Fantasy MMAdness v14 — desktop homepage uses the same sections as phone home.
+   The old desktop-only homepage is hidden; this app-style home is scaled for
+   desktop/tablet while keeping the mobile layout untouched.
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  html:has(.fmm-app-fixed-home),
+  body:has(.fmm-app-fixed-home) {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #05060a !important;
+  }
+
+  body:has(.fmm-app-fixed-home) .header.theme-header.is-home-route,
+  body:has(.fmm-app-fixed-home) footer,
+  body:has(.fmm-app-fixed-home) .Footer,
+  body:has(.fmm-app-fixed-home) .fmm-desktop-home-shell,
+  body:has(.fmm-app-fixed-home) .chatbase-widget-container,
+  body:has(.fmm-app-fixed-home) iframe[title*="chat" i] {
+    display: none !important;
+  }
+
+  body:has(.fmm-app-fixed-home) #__next,
+  body:has(.fmm-app-fixed-home) main,
+  body:has(.fmm-app-fixed-home) .site-experience-main.is-home-experience-main,
+  body:has(.fmm-app-fixed-home) .theme-home.fmm-home.page-shell,
+  body:has(.fmm-app-fixed-home) .theme-home,
+  body:has(.fmm-app-fixed-home) .page-shell {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #05060a !important;
+  }
+
+  .fmm-app-fixed-home {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100dvh !important;
+    max-width: none !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    padding-bottom: 116px !important;
+  }
+
+  .fmm-app-fixed-home :is(a, button) {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .fmm-app-topbar {
+    left: 50% !important;
+    right: auto !important;
+    width: min(1280px, calc(100% - 32px)) !important;
+    transform: translateX(-50%);
+    padding: 0 !important;
+  }
+
+  .fmm-app-menu-button {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 18px !important;
+  }
+
+  .fmm-app-wallet {
+    min-width: 142px !important;
+    height: 50px !important;
+    padding: 0 12px !important;
+  }
+
+  .fmm-app-wallet b {
+    width: 31px !important;
+    height: 31px !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+  }
+
+  .fmm-app-wallet strong {
+    font-size: 18px !important;
+    font-weight: 850 !important;
+  }
+
+  .fmm-app-wallet i {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .fmm-app-notify {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .fmm-app-notify em {
+    min-width: 22px !important;
+    height: 22px !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+  }
+
+  .fmm-app-menu-drawer {
+    width: min(420px, 44vw) !important;
+  }
+
+  .fmm-app-menu-drawer header img {
+    width: 210px !important;
+  }
+
+  .fmm-app-menu-drawer nav a {
+    min-height: 54px !important;
+  }
+
+  .fmm-app-hero,
+  .fmm-app-stats,
+  .fmm-app-sports,
+  .fmm-app-featured-week,
+  .fmm-app-upcoming,
+  .fmm-app-featured-fights,
+  .fmm-app-watch-leagues,
+  .fmm-app-demo-cta,
+  .fmm-app-community,
+  .fmm-app-rewards,
+  .fmm-app-leader-streak,
+  .fmm-app-apparel,
+  .fmm-app-affiliate {
+    width: min(1280px, calc(100% - 32px));
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .fmm-app-hero {
+    min-height: clamp(430px, 50vw, 660px) !important;
+    border-radius: 0 0 38px 38px !important;
+    border: 1px solid rgba(242, 181, 68, 0.2);
+    border-top: 0;
+    box-shadow: 0 30px 84px rgba(0, 0, 0, 0.54);
+  }
+
+  .fmm-app-hero > img {
+    height: clamp(430px, 50vw, 660px) !important;
+    min-height: 0 !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+  }
+
+  .fmm-app-hero::after {
+    height: 190px !important;
+  }
+
+  .fmm-app-crown-sparkles {
+    top: 88px !important;
+    transform: translateX(-50%) scale(1.3) !important;
+  }
+
+  .fmm-app-join-hit {
+    bottom: 36px !important;
+    width: 278px !important;
+    height: 58px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 34%),
+      linear-gradient(135deg, #ffe47a 0%, #f4b52e 48%, #9b5d00 100%) !important;
+    border: 1px solid rgba(255, 236, 160, 0.8) !important;
+    box-shadow: 0 16px 40px rgba(242, 181, 68, 0.35), inset 0 -2px 0 rgba(82, 42, 0, 0.42) !important;
+  }
+
+  .fmm-app-join-hit span {
+    color: #180d00 !important;
+    font-size: 17px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+  }
+
+  .fmm-app-ticker {
+    width: 100% !important;
+    max-width: none !important;
+    margin-top: 0 !important;
+  }
+
+  .fmm-app-ticker div {
+    min-height: 46px !important;
+  }
+
+  .fmm-app-ticker span {
+    font-size: 13px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    padding: 24px 0 22px !important;
+    background: transparent !important;
+  }
+
+  .fmm-app-stats a {
+    min-height: 128px !important;
+    border-radius: 24px !important;
+    gap: 8px !important;
+    padding: 18px 14px !important;
+  }
+
+  .fmm-app-stats a svg {
+    font-size: 26px !important;
+  }
+
+  .fmm-app-stats a strong {
+    font-size: clamp(20px, 2vw, 30px) !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-stats a span,
+  .fmm-app-stats a small {
+    font-size: 11px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-sports {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    overflow: visible !important;
+    padding: 0 0 28px !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-app-sports button {
+    flex: initial !important;
+    width: 100% !important;
+    height: clamp(190px, 18vw, 260px) !important;
+    min-height: 180px !important;
+    border-radius: 28px !important;
+  }
+
+  .fmm-app-sports strong {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 42px !important;
+    font-size: clamp(22px, 2vw, 34px) !important;
+    font-weight: 800 !important;
+    line-height: 0.92 !important;
+  }
+
+  .fmm-app-sports small {
+    left: 16px !important;
+    bottom: 16px !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-featured-week {
+    min-height: clamp(330px, 34vw, 460px) !important;
+    margin-bottom: 28px !important;
+    border-radius: 34px !important;
+  }
+
+  .fmm-app-featured-content {
+    min-height: clamp(330px, 34vw, 460px) !important;
+    padding: 28px clamp(180px, 20vw, 280px) 30px !important;
+  }
+
+  .fmm-app-featured-cutout {
+    width: 28% !important;
+    max-width: 330px !important;
+    height: 86% !important;
+    bottom: -22px !important;
+  }
+
+  .fmm-app-featured-cutout.is-left {
+    left: 2% !important;
+  }
+
+  .fmm-app-featured-cutout.is-right {
+    right: 2% !important;
+  }
+
+  .fmm-app-featured-head span,
+  .fmm-app-featured-fights-inner > span {
+    min-height: 34px !important;
+    padding: 0 18px !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-featured-head b,
+  .fmm-app-featured-main small {
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-featured-main h2 {
+    font-size: clamp(42px, 5vw, 78px) !important;
+    font-weight: 800 !important;
+    line-height: 0.9 !important;
+  }
+
+  .fmm-app-featured-main div {
+    gap: 12px !important;
+  }
+
+  .fmm-app-featured-main div strong,
+  .fmm-app-featured-meta span {
+    min-height: 54px !important;
+    border-radius: 16px !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-featured-content > a,
+  .fmm-app-featured-fights-inner > a,
+  .fmm-app-enter-now,
+  .fmm-app-demo-cta,
+  .fmm-app-rewards button strong,
+  .fmm-app-rewards a b,
+  .fmm-app-affiliate a:first-child b {
+    min-height: 50px !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-section-head {
+    padding: 0 0 14px !important;
+  }
+
+  .fmm-app-section-head h2 {
+    font-size: clamp(28px, 3vw, 44px) !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-section-head a {
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-upcoming {
+    margin-bottom: 30px !important;
+  }
+
+  .fmm-app-upcoming-rail {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 18px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-app-upcoming article {
+    flex: initial !important;
+    width: 100% !important;
+    border-radius: 28px !important;
+  }
+
+  .fmm-app-upcoming figure {
+    height: clamp(190px, 16vw, 240px) !important;
+  }
+
+  .fmm-app-upcoming figcaption,
+  .fmm-app-upcoming time,
+  .fmm-app-upcoming article > a:first-child strong,
+  .fmm-app-quick-picks a {
+    font-size: 11px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-upcoming article > a:first-child > div {
+    padding: 14px !important;
+  }
+
+  .fmm-app-upcoming h3 {
+    min-height: 48px !important;
+    font-size: clamp(18px, 1.5vw, 24px) !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-quick-picks {
+    gap: 8px !important;
+    padding: 0 14px 12px !important;
+  }
+
+  .fmm-app-quick-picks a {
+    min-height: 36px !important;
+  }
+
+  .fmm-app-enter-now {
+    width: calc(100% - 28px) !important;
+    margin: 0 14px 16px !important;
+  }
+
+  .fmm-app-featured-fights {
+    border-radius: 34px !important;
+    margin-bottom: 30px !important;
+  }
+
+  .fmm-app-featured-fights-inner {
+    gap: 20px !important;
+    padding: 28px !important;
+  }
+
+  .fmm-app-main-fight-row {
+    grid-template-columns: minmax(150px, 220px) 1fr minmax(150px, 220px) !important;
+    gap: 24px !important;
+  }
+
+  .fmm-app-main-fight-row figure {
+    width: clamp(150px, 14vw, 220px) !important;
+    height: clamp(150px, 14vw, 220px) !important;
+  }
+
+  .fmm-app-main-fight-row h2 {
+    font-size: clamp(38px, 4.5vw, 72px) !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-featured-meta {
+    gap: 14px !important;
+  }
+
+  .fmm-app-featured-meta span small,
+  .fmm-app-mini-fight-list span,
+  .fmm-app-mini-fight-list small {
+    font-size: 11px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-featured-meta span strong,
+  .fmm-app-mini-fight-list strong {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-mini-fight-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .fmm-app-mini-fight-list a {
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .fmm-app-watch-leagues,
+  .fmm-app-community,
+  .fmm-app-rewards,
+  .fmm-app-leader-streak {
+    gap: 18px !important;
+    padding: 0 0 28px !important;
+  }
+
+  .fmm-app-watch-leagues a,
+  .fmm-app-community article,
+  .fmm-app-rewards button,
+  .fmm-app-rewards a,
+  .fmm-app-leader-streak > a,
+  .fmm-app-apparel a {
+    min-height: 170px !important;
+    border-radius: 28px !important;
+    padding: 20px !important;
+  }
+
+  .fmm-app-watch-leagues span,
+  .fmm-app-community span,
+  .fmm-app-rewards span,
+  .fmm-app-leader-streak span,
+  .fmm-app-apparel span,
+  .fmm-app-affiliate span {
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-watch-leagues strong,
+  .fmm-app-rewards strong,
+  .fmm-app-leader-streak strong,
+  .fmm-app-affiliate strong {
+    font-size: clamp(25px, 2.4vw, 38px) !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-watch-leagues small,
+  .fmm-app-affiliate small,
+  .fmm-app-leader-streak small,
+  .fmm-app-community small,
+  .fmm-app-community em {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  .fmm-app-demo-cta {
+    width: min(1280px, calc(100% - 32px)) !important;
+    min-height: 78px !important;
+    margin-bottom: 28px !important;
+    padding: 0 24px !important;
+    gap: 16px !important;
+    border-radius: 28px !important;
+  }
+
+  .fmm-app-demo-cta b,
+  .fmm-app-demo-cta span {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-community article {
+    min-height: 230px !important;
+  }
+
+  .fmm-app-community article > div {
+    padding: 20px !important;
+  }
+
+  .fmm-app-community strong {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-community i {
+    height: 10px !important;
+  }
+
+  .fmm-app-rewards button,
+  .fmm-app-rewards a {
+    min-height: 190px !important;
+  }
+
+  .fmm-app-rewards svg {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .fmm-app-leader-streak > a {
+    min-height: 250px !important;
+  }
+
+  .fmm-app-leader-streak p,
+  .fmm-app-leader-streak p strong,
+  .fmm-app-leader-streak header small,
+  .fmm-app-leader-streak a:last-child b {
+    font-size: 14px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-leader-streak i {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .fmm-app-apparel {
+    margin-bottom: 28px !important;
+  }
+
+  .fmm-app-apparel > div {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    scroll-snap-type: none !important;
+  }
+
+  .fmm-app-apparel a {
+    flex: initial !important;
+    width: 100% !important;
+    min-height: 260px !important;
+  }
+
+  .fmm-app-apparel img {
+    height: clamp(150px, 12vw, 190px) !important;
+    border-radius: 20px !important;
+  }
+
+  .fmm-app-apparel span {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+  }
+
+  .fmm-app-apparel strong {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-affiliate {
+    grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr) !important;
+    gap: 18px !important;
+    padding: 0 0 28px !important;
+  }
+
+  .fmm-app-affiliate a:first-child {
+    min-height: 240px !important;
+    padding: 30px min(350px, 28vw) 30px 28px !important;
+    border-radius: 32px !important;
+  }
+
+  .fmm-app-affiliate a:first-child img {
+    width: min(340px, 30vw) !important;
+    max-height: 250px !important;
+    right: 0 !important;
+    bottom: -12px !important;
+  }
+
+  .fmm-app-affiliate a:first-child b {
+    min-height: 44px !important;
+    padding: 0 18px !important;
+  }
+
+  .fmm-app-chest {
+    min-height: 240px !important;
+    border-radius: 32px !important;
+  }
+
+  .fmm-app-chest img {
+    width: 210px !important;
+    height: 160px !important;
+  }
+
+  .fmm-app-socials {
+    grid-column: 1 / -1;
+  }
+
+  .fmm-app-socials span {
+    height: 64px !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-bottom-nav {
+    left: 50% !important;
+    right: auto !important;
+    width: min(760px, calc(100% - 40px)) !important;
+    max-width: none !important;
+    height: 82px !important;
+    transform: translateX(-50%);
+    border-radius: 28px !important;
+  }
+
+  .fmm-app-bottom-nav a {
+    min-height: 64px !important;
+    font-size: 9px !important;
+    font-weight: 750 !important;
+  }
+
+  .fmm-app-bottom-nav a svg {
+    font-size: 20px !important;
+  }
+
+  .fmm-app-bottom-nav a.is-center {
+    min-height: 80px !important;
+    font-size: 8px !important;
+    font-weight: 800 !important;
+  }
+
+  .fmm-app-sound-toggle {
+    right: calc((100% - min(1280px, calc(100% - 32px))) / 2 + 18px) !important;
+    bottom: 108px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .fmm-app-hero,
+  .fmm-app-stats,
+  .fmm-app-sports,
+  .fmm-app-featured-week,
+  .fmm-app-upcoming,
+  .fmm-app-featured-fights,
+  .fmm-app-watch-leagues,
+  .fmm-app-demo-cta,
+  .fmm-app-community,
+  .fmm-app-rewards,
+  .fmm-app-leader-streak,
+  .fmm-app-apparel,
+  .fmm-app-affiliate,
+  .fmm-app-topbar {
+    width: min(100% - 28px, 900px) !important;
+  }
+
+  .fmm-app-hero {
+    min-height: clamp(390px, 58vw, 560px) !important;
+  }
+
+  .fmm-app-hero > img {
+    height: clamp(390px, 58vw, 560px) !important;
+  }
+
+  .fmm-app-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .fmm-app-stats a {
+    min-height: 112px !important;
+    padding-inline: 8px !important;
+  }
+
+  .fmm-app-stats a strong {
+    font-size: clamp(16px, 2.6vw, 23px) !important;
+  }
+
+  .fmm-app-stats a span,
+  .fmm-app-stats a small {
+    font-size: 9px !important;
+  }
+
+  .fmm-app-sports {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .fmm-app-sports button {
+    height: 180px !important;
+  }
+
+  .fmm-app-featured-content {
+    padding-inline: clamp(128px, 18vw, 190px) !important;
+  }
+
+  .fmm-app-featured-main h2 {
+    font-size: clamp(32px, 6vw, 56px) !important;
+  }
+
+  .fmm-app-featured-cutout {
+    max-width: 230px !important;
+  }
+
+  .fmm-app-upcoming-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .fmm-app-main-fight-row {
+    grid-template-columns: 120px 1fr 120px !important;
+    gap: 16px !important;
+  }
+
+  .fmm-app-main-fight-row figure {
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  .fmm-app-main-fight-row h2 {
+    font-size: clamp(30px, 5vw, 54px) !important;
+  }
+
+  .fmm-app-mini-fight-list,
+  .fmm-app-apparel > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .fmm-app-affiliate {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fmm-app-socials {
+    grid-column: auto !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 860px) {
+  .fmm-app-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .fmm-app-stats a:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .fmm-app-sports,
+  .fmm-app-upcoming-rail,
+  .fmm-app-watch-leagues,
+  .fmm-app-community,
+  .fmm-app-rewards,
+  .fmm-app-leader-streak,
+  .fmm-app-apparel > div {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fmm-app-featured-week,
+  .fmm-app-featured-content {
+    min-height: 320px !important;
+  }
+
+  .fmm-app-featured-content {
+    padding: 22px 110px 24px !important;
+  }
+
+  .fmm-app-featured-cutout {
+    max-width: 145px !important;
+  }
+
+  .fmm-app-featured-head span,
+  .fmm-app-featured-head b,
+  .fmm-app-featured-main small {
+    font-size: 10px !important;
+  }
+
+  .fmm-app-featured-main h2 {
+    font-size: clamp(27px, 7vw, 42px) !important;
+  }
+
+  .fmm-app-main-fight-row {
+    grid-template-columns: 88px 1fr 88px !important;
+    gap: 10px !important;
+  }
+
+  .fmm-app-main-fight-row figure {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  .fmm-app-main-fight-row h2 {
+    font-size: clamp(24px, 6.8vw, 38px) !important;
+  }
+
+  .fmm-app-affiliate a:first-child {
+    padding-right: 180px !important;
+  }
+
+  .fmm-app-affiliate a:first-child img {
+    width: 190px !important;
+  }
+}

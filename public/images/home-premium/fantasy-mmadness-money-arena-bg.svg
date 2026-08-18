@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="960" viewBox="0 0 1920 960" fill="none">
+  <defs>
+    <radialGradient id="redGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(225 180) rotate(32) scale(590 430)">
+      <stop stop-color="#ff2035" stop-opacity="0.55"/>
+      <stop offset="0.42" stop-color="#ff2035" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ff2035" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="goldGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(960 210) rotate(90) scale(420 780)">
+      <stop stop-color="#ffd166" stop-opacity="0.28"/>
+      <stop offset="0.55" stop-color="#ff9f1c" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ff9f1c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blueGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1690 170) rotate(145) scale(610 460)">
+      <stop stop-color="#2f7bff" stop-opacity="0.48"/>
+      <stop offset="0.46" stop-color="#2f7bff" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#2f7bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="960" y1="430" x2="960" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101420" stop-opacity="0"/>
+      <stop offset="0.42" stop-color="#151923" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#020308" stop-opacity="0.95"/>
+    </linearGradient>
+    <filter id="blurMoney" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="960" fill="#02040a"/>
+  <rect width="1920" height="960" fill="url(#redGlow)"/>
+  <rect width="1920" height="960" fill="url(#goldGlow)"/>
+  <rect width="1920" height="960" fill="url(#blueGlow)"/>
+  <g opacity="0.16">
+    <path d="M120 528C385 398 632 350 960 350C1288 350 1535 398 1800 528" stroke="#FFFFFF" stroke-width="2"/>
+    <path d="M214 636C466 514 685 474 960 474C1235 474 1454 514 1706 636" stroke="#FFFFFF" stroke-width="1.5"/>
+    <path d="M330 770C538 660 735 624 960 624C1185 624 1382 660 1590 770" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M960 350V940" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M640 380L410 935" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M1280 380L1510 935" stroke="#FFFFFF" stroke-width="1"/>
+  </g>
+  <g opacity="0.22" filter="url(#blurMoney)">
+    <text x="243" y="246" fill="#19ff9a" font-family="Arial Black, Impact, sans-serif" font-size="94" transform="rotate(-14 243 246)">$</text>
+    <text x="1322" y="226" fill="#ffd166" font-family="Arial Black, Impact, sans-serif" font-size="78" transform="rotate(11 1322 226)">$</text>
+    <text x="1035" y="180" fill="#19ff9a" font-family="Arial Black, Impact, sans-serif" font-size="56" transform="rotate(8 1035 180)">$</text>
+    <text x="1522" y="385" fill="#19ff9a" font-family="Arial Black, Impact, sans-serif" font-size="60" transform="rotate(-11 1522 385)">$</text>
+    <text x="515" y="388" fill="#ffd166" font-family="Arial Black, Impact, sans-serif" font-size="54" transform="rotate(13 515 388)">$</text>
+  </g>
+  <g opacity="0.28">
+    <circle cx="410" cy="244" r="22" fill="#ffd166"/>
+    <circle cx="1468" cy="284" r="18" fill="#ffd166"/>
+    <circle cx="1170" cy="286" r="15" fill="#19ff9a"/>
+    <circle cx="726" cy="236" r="16" fill="#19ff9a"/>
+    <circle cx="1738" cy="462" r="13" fill="#ffd166"/>
+  </g>
+  <g opacity="0.25">
+    <path d="M140 612C250 560 340 538 468 538C593 538 694 562 816 618" stroke="#ff2636" stroke-width="6" stroke-linecap="round"/>
+    <path d="M1104 618C1226 562 1327 538 1452 538C1580 538 1670 560 1780 612" stroke="#2f7bff" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <rect y="375" width="1920" height="585" fill="url(#floor)"/>
+  <g opacity="0.12">
+    <path d="M0 720H1920" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0 808H1920" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0 896H1920" stroke="#FFFFFF" stroke-width="1"/>
+  </g>
+  <rect width="1920" height="960" fill="url(#goldGlow)" opacity="0.35"/>
+</svg>

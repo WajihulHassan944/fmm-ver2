@@ -1,0 +1,407 @@
+/* Container for the thread details */
+.threadDetailsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 50px;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png);
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+    color: #fff; /* Ensure text is visible on dark background */
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Thread title */
+.threadDetailsContainer h2 {
+    font-size: 32px;
+    font-family: 'Bungee', sans-serif;
+    color: #fff;
+    background-color: #720e0c;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Thread body */
+.threadDetailsContainer p {
+    font-size: 18px;
+    color: #f0f0f0;
+    margin-bottom: 15px;
+    max-width: 700px;
+    text-align: left;
+}
+
+/* Replies section */
+.threadDetailsContainer h3 {
+    font-size: 26px;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%;
+    max-width: 700px;
+    
+}
+
+/* Individual reply */
+.threadDetailsContainer div {
+    background-color: rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+    padding: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    width: 100%;
+    padding-bottom: 0;
+    max-width: 700px;
+    color: #fff;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+
+}
+
+/* Like button */
+.threadDetailsContainer button {
+    padding: 5px 15px;
+    border: none;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for like button */
+.threadDetailsContainer button:hover {
+    background-color: #ff3b3b;
+}
+
+/* Textarea for adding reply */
+.threadDetailsContainer textarea {
+    width: 100%;
+    max-width: 700px;
+    height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Submit button */
+.threadDetailsContainer button[type="submit"] {
+    padding: 10px 30px;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+   }
+
+/* Hover effect for submit button */
+.threadDetailsContainer button[type="submit"]:hover {
+    background-color: #ff3b3b;
+}
+
+.threadDetailsContainer form{
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.threadDetailsContainer .toMakeFlexDisplay{
+    display: flex;
+    background: transparent;
+    gap:30px;
+    padding-left: 0;
+    box-shadow: none;
+    margin-bottom: 0 !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Container for the thread details */
+.threadDetailsContainerUpdated {
+    display: flex;
+    flex-direction: column;
+    padding-top: 130px;
+    padding-bottom: 70px;
+    width: 100%;
+    padding-left: 72px;
+    padding-right: 30px;
+    min-height: 100vh; /* Full-screen height */
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.7)),url(/Assets/backone.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+/* Thread title */
+.threadDetailsContainerUpdated h2 {
+   
+    font-size: 60px;
+    margin-bottom: 10px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;color: #16B4CA;
+}
+.threadBodyWrap{
+    margin-bottom: 20px;
+    width: 100%; /* Make it stretch to the container width */
+    overflow: hidden; /* Hide overflow to handle text overflow */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    
+    gap:20px;
+    max-width: 800px;
+    background: #fff;
+    padding:20px;
+    box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+.userImagedetails{
+    width:130px;
+    height: 130px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.userImagedetails img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+  
+}
+.maindetailsOfthread{
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    gap:10px;
+}
+.threadBodyWrap .tomakespacebet{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap:50px;
+    width: 100%;
+}
+.threadBodyWrap .threaddetailbody{
+    font-size: 20px;
+  margin-bottom: 5px;
+  font-family: sans-serif;
+}
+.threadBodyWrap .threadDetailOneP{
+    font-size: 19px;
+    margin-bottom: 5px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+.threadBodyWrap .threadDetailTwoP{
+    font-size: 19px;
+    margin-bottom: 10px;
+    
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+    color: #e2211c;
+}
+
+
+
+
+/* Replies section */
+.threadDetailsContainerUpdated h3 {
+    font-size: 30px;
+  margin-bottom: 10px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;color: #16B4CA;
+  
+    
+}
+
+/* Individual reply */
+.threadDetailsContainerUpdated .replyItem {
+    margin-bottom: 10px;
+    padding: 15px;
+    width: 100%;
+    max-width: 800px;
+    color: black;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+    background-color: #fff;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap:20px;
+
+}
+.replyAuthorImage{
+    width:75px;
+    height:75px;
+}
+.replyAuthorImage img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+}
+.repliesBodyUpdated{
+    font-size: 20px;
+    margin-bottom: 5px;
+    font-family: sans-serif;
+}
+.replyAuthorContents{
+    display: flex;
+    flex-direction: column;
+}
+.replyItem .toMakeFlexDisplayUpdated{
+    display: flex;
+    gap:30px;
+    align-items: center;
+}
+/* Like button */
+.threadDetailsContainerUpdated button {
+    padding: 5px 15px;
+    border: none;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for like button */
+.threadDetailsContainerUpdated button:hover {
+    background-color: #ff3b3b;
+}
+
+
+
+
+
+
+.threadDetailsForm{
+    display: flex;
+    flex-direction: column;
+    
+}
+/* Textarea for adding reply */
+.threadDetailsContainerUpdated textarea {
+    width: 100%;
+    max-width: 400px;
+    height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Submit button */
+.threadDetailsContainerUpdated button[type="submit"] {
+    padding: 10px 30px;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    width:28.2%;
+   }
+
+/* Hover effect for submit button */
+.threadDetailsContainerUpdated button[type="submit"]:hover {
+    background-color: #ff3b3b;
+}
+
+
+@media (max-width: 767px){
+ 
+/* Container for the thread details */
+.threadDetailsContainerUpdated {
+    padding-top: 137px;
+    padding-bottom: 70px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+/* Thread title */
+.threadDetailsContainerUpdated h2 {
+   text-align: center;
+    font-size: 30px;
+    margin-bottom: 20px;
+    
+}
+.threadBodyWrap{
+    justify-content: center;
+  text-align: center;
+    flex-direction: column;
+    
+    gap:20px;
+    max-width: 800px;
+    padding:20px;
+  }
+.userImagedetails{
+    width:120px;
+    height: 120px;
+   
+}
+.maindetailsOfthread{
+    
+    justify-content: center;
+    align-items: center;
+    gap:10px;
+}
+.threadBodyWrap .tomakespacebet{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap:10px;
+}
+
+/* Submit button */
+.threadDetailsContainerUpdated button[type="submit"] {
+    width:100%;
+   }
+
+   
+}

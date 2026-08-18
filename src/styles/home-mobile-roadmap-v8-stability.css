@@ -1,0 +1,321 @@
+@media (max-width: 767px) {
+  /* Mobile homepage only. Desktop remains governed by the restored V6 source. */
+  body:has(.fmm-roadmap-home) .header.theme-header.is-home-route,
+  body:has(.fmm-roadmap-home) .theme-header.is-home-route {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:has(.fmm-roadmap-home) main.site-experience-main.is-home-experience-main,
+  body:has(.fmm-roadmap-home) .site-experience-main.is-home-experience-main,
+  body:has(.fmm-roadmap-home) .fmm-home.page-shell,
+  body:has(.fmm-roadmap-home) .theme-home,
+  body:has(.fmm-roadmap-home) .page-shell,
+  body:has(.fmm-roadmap-home) .fmm-roadmap-home {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: auto !important;
+    transform: none !important;
+  }
+
+  body:has(.fmm-roadmap-home) footer,
+  .site-experience-main.is-home-experience-main + footer {
+    display: none !important;
+  }
+
+  .site-experience-main.is-home-experience-main .fmm-roadmap-home {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 12px calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-x: hidden !important;
+  }
+
+  .fmm-roadmap-hero {
+    margin: 0 -12px 8px !important;
+  }
+
+  /* Explicit wallet / coins destination so it is visible without relying on hero artwork. */
+  .fmm-roadmap-coins {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 9px 0 10px;
+  }
+
+  .fmm-roadmap-coins-balance,
+  .fmm-roadmap-coins-shortcut {
+    min-width: 0;
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255, 201, 47, 0.24);
+    background: linear-gradient(180deg, rgba(14, 18, 27, 0.98), rgba(5, 8, 14, 0.99));
+    box-shadow: 0 13px 28px rgba(0, 0, 0, 0.28);
+  }
+
+  .fmm-roadmap-coins-balance {
+    grid-column: 1 / -1;
+    min-height: 76px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 11px;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .fmm-roadmap-coins-balance::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    right: -42px;
+    top: -48px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 198, 35, 0.2), transparent 68%);
+    pointer-events: none;
+  }
+
+  .fmm-roadmap-coins-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #5d3600;
+    background: radial-gradient(circle at 30% 25%, #fff6aa 0%, #ffd650 38%, #ac6f07 100%);
+    box-shadow: 0 10px 20px rgba(255, 184, 21, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+
+  .fmm-roadmap-coins-icon svg {
+    font-size: 1.28rem;
+  }
+
+  .fmm-roadmap-coins-balance small,
+  .fmm-roadmap-coins-balance strong,
+  .fmm-roadmap-coins-balance em,
+  .fmm-roadmap-coins-add,
+  .fmm-roadmap-coins-shortcut strong,
+  .fmm-roadmap-coins-shortcut small {
+    display: block;
+    font-family: var(--fmm-static-heading);
+    text-transform: uppercase;
+  }
+
+  .fmm-roadmap-coins-balance small {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  .fmm-roadmap-coins-balance strong {
+    margin-top: 2px;
+    color: #ffd24a;
+    font-size: 1.42rem;
+    line-height: 1;
+  }
+
+  .fmm-roadmap-coins-balance em {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.56);
+    font-size: 0.52rem;
+    font-style: normal;
+    letter-spacing: 0.05em;
+  }
+
+  .fmm-roadmap-coins-add {
+    position: relative;
+    z-index: 1;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 10px;
+    border-radius: 9px;
+    color: #241500;
+    background: linear-gradient(180deg, #ffd94e, #e5a70f);
+    font-size: 0.58rem;
+    white-space: nowrap;
+  }
+
+  .fmm-roadmap-coins-shortcut {
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 9px;
+    border-radius: 13px;
+  }
+
+  .fmm-roadmap-coins-shortcut > svg:first-child {
+    font-size: 1.1rem;
+  }
+
+  .fmm-roadmap-coins-shortcut.is-rewards > svg:first-child {
+    color: #ffca38;
+  }
+
+  .fmm-roadmap-coins-shortcut.is-leaderboard > svg:first-child {
+    color: #d655ff;
+  }
+
+  .fmm-roadmap-coins-shortcut strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.65rem;
+  }
+
+  .fmm-roadmap-coins-shortcut small {
+    margin-top: 4px;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.55);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.48rem;
+  }
+
+  .fmm-roadmap-coins-shortcut > svg:last-child {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.8rem;
+  }
+
+  /* Keep all five categories in one clean row without text collisions. */
+  .fmm-roadmap-category-grid {
+    gap: 4px !important;
+  }
+
+  .fmm-roadmap-category-card {
+    min-height: 128px;
+    border-radius: 9px !important;
+  }
+
+  .fmm-roadmap-category-art {
+    aspect-ratio: 1 / 0.82 !important;
+  }
+
+  .fmm-roadmap-category-card > strong {
+    margin-top: 4px !important;
+    font-size: clamp(0.44rem, 1.65vw, 0.62rem) !important;
+  }
+
+  .fmm-roadmap-category-card > small {
+    font-size: clamp(0.38rem, 1.35vw, 0.52rem) !important;
+  }
+
+  .fmm-roadmap-category-card > span:last-child {
+    margin-top: 3px !important;
+    padding-block: 3px !important;
+  }
+
+  /* Featured posters stay compact and cannot stretch the homepage. */
+  .fmm-roadmap-poster-rail {
+    grid-auto-columns: minmax(118px, 34vw) !important;
+    gap: 8px !important;
+    max-height: 228px;
+    overflow-y: hidden !important;
+  }
+
+  .fmm-roadmap-poster-card {
+    height: 218px !important;
+    min-height: 218px !important;
+    max-height: 218px !important;
+  }
+
+  .fmm-roadmap-poster-card img,
+  .fmm-roadmap-poster-card > span img {
+    display: block !important;
+    width: 100% !important;
+    height: 218px !important;
+    max-height: 218px !important;
+    aspect-ratio: auto !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  .fmm-roadmap-poster-card > span:not(:has(img)) {
+    left: 5px !important;
+    right: 5px !important;
+    bottom: 5px !important;
+  }
+
+  /* Stable live fight and prediction layouts: no graph/text overlap. */
+  .fmm-roadmap-fights .fmm-static-live-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+  }
+
+  .fmm-roadmap-fights .fmm-static-live-fight,
+  .fmm-roadmap-community-card {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .fmm-roadmap-community-card .fmm-static-community-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr) !important;
+    gap: 9px !important;
+  }
+
+  .fmm-roadmap-community-card .fmm-static-community-rounds {
+    grid-column: 1 / -1 !important;
+  }
+
+  .fmm-roadmap-community-card .fmm-static-community-method > div,
+  .fmm-roadmap-community-card .fmm-static-community-rounds > div {
+    min-width: 0 !important;
+    grid-template-columns: minmax(42px, 62px) minmax(0, 1fr) 26px !important;
+    gap: 5px !important;
+  }
+
+  .fmm-roadmap-community-card label,
+  .fmm-roadmap-community-card strong,
+  .fmm-roadmap-community-card small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fmm-roadmap-fights .fmm-static-fight-rail {
+    grid-auto-columns: minmax(176px, 56vw) !important;
+  }
+
+  .fmm-roadmap-live-dashboard,
+  .fmm-roadmap-destinations,
+  .fmm-roadmap-affiliate-bubble {
+    position: relative;
+    z-index: 1;
+  }
+
+  .fmm-roadmap-bottom-nav {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 380px) {
+    .fmm-roadmap-coins {
+      gap: 6px;
+    }
+
+    .fmm-roadmap-coins-shortcut {
+      padding: 7px;
+    }
+
+    .fmm-roadmap-category-card {
+      min-height: 118px;
+    }
+
+    .fmm-roadmap-poster-rail {
+      grid-auto-columns: minmax(112px, 36vw) !important;
+    }
+  }
+}

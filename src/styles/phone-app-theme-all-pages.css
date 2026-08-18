@@ -1,0 +1,676 @@
+/* Phone-wide Fantasy MMAdness app shell. Desktop styles remain untouched. */
+@media (max-width: 767px) {
+  html,
+  body,
+  #__next {
+    background: #020306 !important;
+    min-height: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .site-experience-main {
+    background:
+      radial-gradient(circle at 18% 0%, rgba(226, 20, 36, 0.22), transparent 42vw),
+      radial-gradient(circle at 92% 12%, rgba(31, 113, 255, 0.16), transparent 46vw),
+      linear-gradient(180deg, #020306 0%, #05070c 48%, #020306 100%) !important;
+    color: #ffffff !important;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .site-experience-main + .theme-footer,
+  .site-experience-main + footer.theme-footer,
+  .site-experience-main ~ .theme-footer,
+  .site-experience-main ~ footer.theme-footer,
+  .site-experience-main + .footerDistributed,
+  .site-experience-main ~ .footerDistributed,
+  body:not(:has(.admin-experience-main)) #chatbase-bubble-button,
+  body:not(:has(.admin-experience-main)) #chatbase-message-bubbles,
+  body:not(:has(.admin-experience-main)) iframe[src*="chatbase"] {
+    display: none !important;
+  }
+
+  .site-experience-main .theme-container,
+  .route-experience-page .theme-container,
+  .experience-page .theme-container,
+  .pw-page .theme-container,
+  .player-profile-page .theme-container,
+  .player-account-page .theme-container,
+  .player-fights-page .theme-container,
+  .player-workspace-nav-inner {
+    max-width: 430px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    width: 100% !important;
+  }
+
+  .experience-page,
+  .route-experience-page,
+  .pw-page,
+  .player-profile-page,
+  .player-account-page,
+  .player-fights-page,
+  .player-dynamic-empty,
+  .membership-wrapper.addTokensToWallet {
+    background:
+      radial-gradient(circle at 18% 2%, rgba(226, 20, 36, 0.21), transparent 38vw),
+      radial-gradient(circle at 92% 14%, rgba(34, 98, 255, 0.14), transparent 42vw),
+      #020306 !important;
+    color: #ffffff !important;
+    min-height: 100vh !important;
+    overflow: hidden;
+  }
+
+  .experience-page *,
+  .route-experience-page *,
+  .pw-page *,
+  .player-profile-page *,
+  .player-account-page *,
+  .player-fights-page *,
+  .membership-wrapper.addTokensToWallet * {
+    box-sizing: border-box;
+  }
+
+  .experience-page a,
+  .route-experience-page a,
+  .pw-page a,
+  .player-profile-page a,
+  .player-account-page a,
+  .player-fights-page a {
+    text-decoration: none;
+  }
+
+  .route-experience-hero,
+  .experience-page .xp-hero,
+  .pw-hero,
+  .player-profile-hero,
+  .player-account-hero,
+  .player-fights-hero {
+    background-image:
+      linear-gradient(180deg, rgba(2, 3, 6, 0.18), rgba(2, 3, 6, 0.92)),
+      radial-gradient(circle at 14% 18%, rgba(226, 20, 36, 0.26), transparent 42vw),
+      radial-gradient(circle at 90% 12%, rgba(34, 98, 255, 0.18), transparent 44vw),
+      url('/images/fmm-pages/featured-fight-stage-desktop-home-bg.webp') !important;
+    background-position: center !important;
+    background-size: cover !important;
+    border-bottom: 0 !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+    padding: 88px 0 16px !important;
+    position: relative !important;
+  }
+
+  .route-experience-hero::before,
+  .route-experience-hero::after,
+  .experience-page .xp-hero::before,
+  .experience-page .xp-hero::after,
+  .pw-hero::after {
+    display: none !important;
+  }
+
+  .route-experience-grid,
+  .xp-hero-grid-overlay,
+  .pw-hero-grid,
+  .pw-detail-hero-grid {
+    opacity: 0.26 !important;
+  }
+
+  .route-experience-hero-inner,
+  .experience-page .xp-hero-layout,
+  .pw-hero-layout,
+  .player-profile-hero-layout,
+  .player-account-hero-layout,
+  .player-fights-hero-layout {
+    display: block !important;
+    min-height: 0 !important;
+    max-width: 430px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    width: 100% !important;
+  }
+
+  .route-experience-breadcrumb,
+  .route-experience-proof,
+  .experience-page .xp-hero-visual,
+  .pw-hero-visual,
+  .player-profile-hero-layout > aside,
+  .player-account-hero-layout > aside,
+  .player-fights-hero-layout > aside {
+    display: none !important;
+  }
+
+  .route-experience-copy,
+  .experience-page .xp-hero-copy,
+  .pw-hero-copy,
+  .player-profile-hero-layout > div,
+  .player-account-hero-layout > div,
+  .player-fights-hero-layout > div {
+    background:
+      radial-gradient(circle at 4% 24%, rgba(235, 23, 38, 0.34), transparent 54%),
+      radial-gradient(circle at 96% 20%, rgba(34, 98, 255, 0.28), transparent 58%),
+      linear-gradient(180deg, rgba(13, 18, 27, 0.9), rgba(4, 7, 12, 0.96));
+    border: 1px solid rgba(234, 24, 38, 0.32);
+    border-radius: 18px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.56), inset 0 0 28px rgba(234, 24, 38, 0.08);
+    overflow: hidden;
+    padding: 17px 16px 18px !important;
+    position: relative;
+  }
+
+  .route-experience-copy::after,
+  .experience-page .xp-hero-copy::after,
+  .pw-hero-copy::after,
+  .player-profile-hero-layout > div::after,
+  .player-account-hero-layout > div::after,
+  .player-fights-hero-layout > div::after {
+    background: linear-gradient(90deg, #e21424, transparent 48%, #2262ff);
+    bottom: 0;
+    content: '';
+    height: 2px;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+
+  .route-experience-eyebrow,
+  .experience-page .xp-eyebrow,
+  .pw-eyebrow,
+  .player-profile-hero-layout > div > p:first-of-type,
+  .player-account-hero-layout > div > p:first-of-type,
+  .player-fights-hero-layout > div > p:first-of-type {
+    align-items: center !important;
+    color: #ef1d2f !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 10px !important;
+    font-weight: 1000 !important;
+    gap: 7px !important;
+    letter-spacing: 0.09em !important;
+    margin: 0 0 10px !important;
+    text-transform: uppercase !important;
+  }
+
+  .route-experience-copy h1,
+  .experience-page .xp-hero-copy h1,
+  .pw-hero-copy h1,
+  .player-profile-hero-layout h1,
+  .player-account-hero-layout h1,
+  .player-fights-hero-layout h1 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif) !important;
+    font-size: clamp(30px, 11vw, 39px) !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 0.9 !important;
+    margin: 0 !important;
+    max-width: 360px !important;
+    text-transform: uppercase !important;
+  }
+
+  .route-experience-copy h1 span,
+  .experience-page .xp-hero-copy h1 span,
+  .pw-hero-copy h1 span,
+  .player-profile-hero-layout h1 span,
+  .player-account-hero-layout h1 span,
+  .player-fights-hero-layout h1 span {
+    color: #ef1d2f !important;
+    display: inline !important;
+    font-style: italic;
+  }
+
+  .route-experience-description,
+  .experience-page .xp-hero-description,
+  .pw-hero-description,
+  .player-profile-hero-layout > div > p:last-of-type,
+  .player-account-hero-layout > div > p:last-of-type,
+  .player-fights-hero-layout > div > p:last-of-type {
+    color: rgba(255, 255, 255, 0.72) !important;
+    font-size: 12.5px !important;
+    line-height: 1.5 !important;
+    margin: 11px 0 0 !important;
+    max-width: 360px !important;
+  }
+
+  .route-experience-actions,
+  .experience-page .xp-hero-actions,
+  .pw-hero-actions,
+  .player-fights-hero-actions {
+    display: grid !important;
+    gap: 9px !important;
+    grid-template-columns: 1fr !important;
+    margin-top: 14px !important;
+  }
+
+  .route-experience-actions .theme-btn,
+  .experience-page .xp-hero-actions .theme-btn,
+  .pw-hero-actions .pw-btn,
+  .player-fights-hero-actions a,
+  .player-fights-hero-actions button,
+  .theme-btn,
+  .pw-btn,
+  .player-profile-save,
+  .player-account-save,
+  .player-fight-library-open,
+  .player-profile-action-card a,
+  .player-profile-action-card button,
+  .player-profile-public-card button,
+  .player-account-summary-grid article button,
+  .player-account-summary-grid article a {
+    align-items: center !important;
+    background: linear-gradient(180deg, #f22634, #ba0a16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 24px rgba(226, 20, 36, 0.22) !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 1000 !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    letter-spacing: 0.05em !important;
+    min-height: 42px !important;
+    padding: 0 14px !important;
+    text-transform: uppercase !important;
+    width: 100% !important;
+  }
+
+  .route-experience-actions .theme-btn-secondary,
+  .experience-page .xp-hero-actions .theme-btn-secondary,
+  .pw-hero-actions .pw-btn-secondary,
+  .player-fights-hero-actions button {
+    background: rgba(255, 255, 255, 0.055) !important;
+    box-shadow: none !important;
+  }
+
+  .route-experience-content,
+  .experience-page main,
+  .pw-main,
+  .player-profile-main,
+  .player-account-main,
+  .player-fights-main {
+    padding-bottom: 28px !important;
+    padding-top: 16px !important;
+  }
+
+  .route-experience-content > *,
+  .experience-page main > *,
+  .pw-main > *,
+  .player-profile-main > *,
+  .player-account-main > *,
+  .player-fights-main > * {
+    max-width: 430px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .xp-section-heading,
+  .pw-section-heading,
+  .player-fights-section > header,
+  .player-fights-wrestling-section > header {
+    align-items: flex-start !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 9px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .xp-section-heading h2,
+  .pw-section-heading h2,
+  .player-profile-form header h2,
+  .player-account-panel header h2,
+  .player-profile-public-card h2,
+  .player-fights-section > header h2,
+  .player-fights-wrestling-section > header h2 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 22px !important;
+    letter-spacing: 0.035em !important;
+    line-height: 0.96 !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .xp-section-heading p,
+  .pw-section-heading p,
+  .player-fights-section > header small,
+  .player-fights-wrestling-section > header small {
+    color: rgba(255, 255, 255, 0.64) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+  }
+
+  .xp-section-heading .xp-text-link,
+  .pw-section-heading a,
+  .player-fights-wrestling-section > header > a {
+    align-items: center !important;
+    color: #ef1d2f !important;
+    display: inline-flex !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 1000 !important;
+    gap: 6px !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  .xp-card,
+  .xp-empty-state,
+  .xp-panel,
+  .xp-stat-card,
+  .route-experience-content .card,
+  .route-experience-content article,
+  .pw-match-card,
+  .pw-action-card,
+  .pw-state-card,
+  .pw-flow-section,
+  .pw-contest-command-card,
+  .pw-detail-category-list article,
+  .pw-versus-research > article,
+  .pw-wrestler-card,
+  .pw-history-entry-list > article,
+  .player-profile-form,
+  .player-profile-side > section,
+  .player-account-panel,
+  .player-account-summary-grid article,
+  .player-fights-stat-grid article,
+  .player-fights-wrestling-section,
+  .player-fights-wrestling-grid > a,
+  .player-fight-library-card,
+  .player-dynamic-empty.is-inline,
+  .premium-add-tokens .membership-card,
+  .premium-add-tokens .token-card,
+  .premium-add-tokens .transaction-card {
+    background: linear-gradient(180deg, rgba(14, 19, 28, 0.95), rgba(5, 8, 13, 0.98)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.34), inset 0 0 24px rgba(226, 20, 36, 0.055) !important;
+    color: #ffffff !important;
+    overflow: hidden;
+  }
+
+  .xp-card,
+  .xp-empty-state,
+  .xp-panel,
+  .xp-stat-card,
+  .route-experience-content article,
+  .pw-match-card,
+  .pw-action-card,
+  .pw-state-card,
+  .pw-flow-section,
+  .player-profile-form,
+  .player-profile-side > section,
+  .player-account-panel,
+  .player-account-summary-grid article,
+  .player-fights-stat-grid article,
+  .player-fights-wrestling-section,
+  .player-fight-library-card,
+  .player-dynamic-empty.is-inline {
+    padding: 14px !important;
+  }
+
+  .xp-grid,
+  .xp-card-grid,
+  .xp-stat-grid,
+  .pw-match-grid,
+  .pw-action-grid,
+  .pw-wrestler-grid,
+  .pw-wrestler-preview-grid,
+  .pw-contest-command-metrics,
+  .player-profile-layout,
+  .player-profile-field-grid,
+  .player-account-summary-grid,
+  .player-account-layout,
+  .player-fights-stat-grid,
+  .player-fights-wrestling-grid,
+  .player-fight-library-grid {
+    display: grid !important;
+    gap: 10px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .player-workspace-nav {
+    background: rgba(2, 3, 6, 0.96) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    position: sticky !important;
+    top: 72px !important;
+    z-index: 30 !important;
+  }
+
+  .player-workspace-nav-inner {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    padding-bottom: 8px !important;
+    padding-top: 8px !important;
+    scrollbar-width: none !important;
+  }
+
+  .player-workspace-nav-inner::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .player-workspace-nav a {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 999px !important;
+    color: rgba(255, 255, 255, 0.74) !important;
+    flex: 0 0 auto !important;
+    font-size: 10px !important;
+    min-height: 36px !important;
+    padding: 0 12px !important;
+  }
+
+  .player-profile-avatar-editor,
+  .player-payment-method-list label,
+  .player-account-toggle-list label,
+  .player-fight-library-card,
+  .pw-detail-fight-stage article,
+  .pw-prediction-competitors article,
+  .pw-live-fight-stage article {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 12px !important;
+  }
+
+  .player-profile-avatar-editor,
+  .player-payment-method-list label,
+  .player-account-toggle-list label {
+    display: grid !important;
+    gap: 10px !important;
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    padding: 10px !important;
+  }
+
+  .player-profile-avatar-editor img,
+  .player-profile-public-card img,
+  .player-profile-hero-layout aside img,
+  .player-account-hero-layout aside img,
+  .player-fights-hero-layout aside img,
+  .player-fight-library-visual img,
+  .pw-detail-fight-stage article img,
+  .pw-prediction-competitors article img,
+  .pw-live-fight-stage article img,
+  .pw-wrestler-card img {
+    border-radius: 999px !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+  }
+
+  .player-profile-avatar-editor img {
+    height: 56px !important;
+    width: 56px !important;
+  }
+
+  .player-profile-field-grid label,
+  .player-account-panel label,
+  .premium-add-tokens label,
+  .route-experience-content label,
+  .experience-page label,
+  .pw-page label {
+    color: rgba(255, 255, 255, 0.74) !important;
+    display: grid;
+    gap: 7px;
+    font-size: 11px !important;
+  }
+
+  .player-profile-field-grid .is-wide,
+  .player-account-field-grid .is-wide,
+  .player-account-panel .is-wide {
+    grid-column: 1 !important;
+  }
+
+  .site-experience-main input,
+  .site-experience-main select,
+  .site-experience-main textarea,
+  .pw-page input,
+  .pw-page select,
+  .pw-page textarea,
+  .experience-page input,
+  .experience-page select,
+  .experience-page textarea,
+  .route-experience-page input,
+  .route-experience-page select,
+  .route-experience-page textarea {
+    background: rgba(255, 255, 255, 0.055) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    width: 100% !important;
+  }
+
+  .site-experience-main textarea,
+  .pw-page textarea,
+  .experience-page textarea,
+  .route-experience-page textarea {
+    min-height: 110px !important;
+    padding-bottom: 10px !important;
+    padding-top: 10px !important;
+  }
+
+  .site-experience-main input::placeholder,
+  .site-experience-main textarea::placeholder {
+    color: rgba(255, 255, 255, 0.42) !important;
+  }
+
+  .site-experience-main table,
+  .pw-page table,
+  .experience-page table,
+  .route-experience-page table {
+    display: block !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+
+  .site-experience-main img,
+  .pw-page img,
+  .experience-page img,
+  .route-experience-page img {
+    max-width: 100%;
+  }
+
+  .player-profile-form header,
+  .player-account-panel header,
+  .player-fights-section > header,
+  .player-fights-wrestling-section > header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .player-fight-library-card {
+    display: grid !important;
+    gap: 11px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .player-fight-library-visual {
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .player-fight-library-visual img {
+    height: 62px !important;
+    width: 62px !important;
+  }
+
+  .player-fight-library-visual img + img {
+    margin-left: -12px !important;
+  }
+
+  .player-fight-library-content h3,
+  .player-fights-wrestling-grid h3,
+  .pw-match-card h3,
+  .xp-card h3 {
+    color: #ffffff !important;
+    font-family: var(--fmm-font-display, Impact, sans-serif) !important;
+    font-size: 17px !important;
+    line-height: 1.05 !important;
+    margin: 0 0 8px !important;
+    text-transform: uppercase !important;
+  }
+
+  .player-fight-library-meta,
+  .player-fight-library-metrics,
+  .pw-hero-stats,
+  .xp-hero-stats {
+    display: grid !important;
+    gap: 7px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .player-fight-library-meta span,
+  .player-fight-library-metrics span,
+  .pw-hero-stats article,
+  .xp-hero-stats div {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 8px !important;
+  }
+
+  .player-dynamic-empty:not(.is-inline) {
+    align-items: center !important;
+    display: grid !important;
+    justify-items: center !important;
+    padding: 120px 20px 40px !important;
+    text-align: center !important;
+  }
+
+  .player-dynamic-empty svg,
+  .xp-empty-state svg,
+  .pw-state-card svg {
+    color: #ffbd43 !important;
+  }
+
+  .premium-add-tokens {
+    padding: 88px 14px 28px !important;
+  }
+
+  .premium-add-tokens .membership-card,
+  .premium-add-tokens .token-card,
+  .premium-add-tokens .transaction-card {
+    margin-bottom: 10px !important;
+  }
+
+  .react-calendar {
+    background: rgba(5, 8, 13, 0.96) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 14px !important;
+    color: #ffffff !important;
+    max-width: 100% !important;
+  }
+
+  .Toastify__toast-container {
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+  }
+}

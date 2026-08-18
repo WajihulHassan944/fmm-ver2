@@ -1,0 +1,130 @@
+/* Container for the thread details */
+.threadDetailsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 50px;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/Assets/banner.png);
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+    color: #fff; /* Ensure text is visible on dark background */
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Thread title */
+.threadDetailsContainer h2 {
+    font-size: 32px;
+    font-family: 'Bungee', sans-serif;
+    color: #fff;
+    background-color: #720e0c;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Thread body */
+.threadDetailsContainer p {
+    font-size: 18px;
+    color: #f0f0f0;
+    margin-bottom: 15px;
+    max-width: 700px;
+    text-align: left;
+}
+
+/* Replies section */
+.threadDetailsContainer h3 {
+    font-size: 26px;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%;
+    max-width: 700px;
+    
+}
+
+/* Individual reply */
+.threadDetailsContainer div {
+    background-color: rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+    padding: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    width: 100%;
+    padding-bottom: 0;
+    max-width: 700px;
+    color: #fff;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+
+}
+
+/* Like button */
+.threadDetailsContainer button {
+    padding: 5px 15px;
+    border: none;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for like button */
+.threadDetailsContainer button:hover {
+    background-color: #ff3b3b;
+}
+
+/* Textarea for adding reply */
+.threadDetailsContainer textarea {
+    width: 100%;
+    max-width: 700px;
+    height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+/* Submit button */
+.threadDetailsContainer button[type="submit"] {
+    padding: 10px 30px;
+    background-color: #d30c23;
+    color: #fff;
+    font-family: 'Bungee', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+   }
+
+/* Hover effect for submit button */
+.threadDetailsContainer button[type="submit"]:hover {
+    background-color: #ff3b3b;
+}
+
+.threadDetailsContainer form{
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.threadDetailsContainer .toMakeFlexDisplay{
+    display: flex;
+    background: transparent;
+    gap:30px;
+    padding-left: 0;
+    box-shadow: none;
+    margin-bottom: 0 !important;
+}
+
+

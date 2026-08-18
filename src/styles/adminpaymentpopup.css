@@ -1,0 +1,77 @@
+.payment-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7); /* Slightly darker for better contrast */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.payment-popup {
+    background: #ffffff;
+    padding: 30px; /* Increased padding for better spacing */
+    border-radius: 8px; /* Slightly more rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Softer shadow for depth */
+    width: 400px; /* Fixed width for consistency */
+    max-width: 90%; /* Responsive max width */
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition */
+    opacity: 0; /* Start invisible for animation */
+    transform: translateY(-20px); /* Start slightly above */
+}
+
+.payment-popup.active {
+    opacity: 1; /* Fully visible when active */
+    transform: translateY(0); /* Slide down into view */
+}
+
+.popup-title {
+    font-size: 1.5rem; /* Larger font for title */
+    margin-bottom: 15px; /* Spacing below title */
+    font-weight: bold; /* Bold for emphasis */
+    text-align: center; /* Centered text */
+}
+
+.popup-content {
+    font-size: 1rem; /* Standard font size for content */
+    margin-bottom: 20px; /* Spacing below content */
+    text-align: center; /* Centered text */
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.popup-button {
+    flex: 1; /* Allow buttons to take equal space */
+    margin: 0 5px; /* Margin between buttons */
+    padding: 10px; /* Button padding */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners for buttons */
+    cursor: pointer; /* Pointer on hover */
+    font-size: 1rem; /* Standard font size for buttons */
+    transition: background 0.3s; /* Smooth background transition */
+}
+
+.popup-button.confirm {
+    background-color: #28a745; /* Green for confirm */
+    color: white; /* White text */
+}
+
+.popup-button.confirm:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.popup-button.cancel {
+    background-color: #dc3545; /* Red for cancel */
+    color: white; /* White text */
+}
+
+.popup-button.cancel:hover {
+    background-color: #c82333; /* Darker red on hover */
+}

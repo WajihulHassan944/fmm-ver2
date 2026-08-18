@@ -1,0 +1,223 @@
+.homeLeaderboard{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 180px;
+    padding-bottom: 70px;
+    width: 100%;
+    min-height: 100vh; /* Full-screen height */
+    background: linear-gradient(136.74deg, #e7e7e9 19.43%, #fff 89.46%);
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .15);
+    position: relative;
+}
+.homeLeaderboard .home-leaderboard-heading{
+    color: #d20a0a;
+    font-size: 48px;
+    text-align: center;
+    font-family: 'UFCSans';
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01px;
+    position: relative;
+    margin-bottom: 5px;
+}
+.home-leaderboard-subheading{
+    font-size: 36px;
+    text-align: center;
+    font-family: 'UFCSansMedium';
+    text-transform: uppercase;
+color:rgba(0, 0, 0, 0.87);
+font-style: italic;
+margin-bottom: 20px;
+}
+.homeLeaderboardItemsWrap{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+   }
+.homeLeaderboardItem{
+    margin: 48px 0;
+    display: flex;
+    padding: 24px;
+    background: #FFFFFF;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    width:75%;
+}
+.home-leaderboard-item-image{
+    width:350px;
+    height: 100%;
+    max-height: 220px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+.homeLeaderboardItem img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.home-leaderboard-fighters{
+    color: #D20A0A;
+    padding: 0 0 8px;
+    font-size: 26px;
+    font-family: 'UFCSans';
+    text-transform: uppercase;
+}
+.home-leaderboard-date{
+    font-size: 17px;
+    font-family: UFCSans;
+    color: #000000;
+}
+.home-leaderboard-names{
+    color: #3F3F3F;
+    font-size: 16px;
+    font-family: 'UfcSansRegular';
+}
+.home-leaderboard-points{
+    color: #3F3F3F;
+    font-size: 16px;
+    font-family: 'UfcSansRegular';
+}
+.home-leaderboard-buttons{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap:10px;
+    margin-top: 10px;
+}
+.home-leaderboard-buttons button{
+    background: linear-gradient(216.01deg, #d20a0a 26.18%, #9e0808 93.27%);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'UfcSansRegular';
+    font-weight: 600;
+    font-size: 21px;
+    letter-spacing: 0.5px;
+    outline: none;
+    padding: 8px 24px;
+    text-align: center;
+    width: 165px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
+    border:none;
+}
+
+@media (max-width: 767px){
+    .homeLeaderboard{
+        padding-top: 180px;
+        padding-bottom: 70px;
+        width: 100%;
+        overflow-x: hidden;
+       }
+    .homeLeaderboardItemsWrap{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+       }
+    .homeLeaderboardItem{
+        margin: 48px 0;
+        display: flex;
+        padding: 24px;
+        background: #FFFFFF;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 18px;
+        width:90%;
+        flex-direction: column;
+    }
+    .home-leaderboard-item-image{
+        width:350px;
+        height: 100%;
+        max-height: 220px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+    .homeLeaderboardItem img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .home-leaderboard-fighters{
+        color: #D20A0A;
+        padding: 0 0 8px;
+        font-size: 26px;
+        font-family: 'UFCSans';
+        text-transform: uppercase;
+    }
+    .home-leaderboard-date{
+        font-size: 17px;
+        font-family: UFCSans;
+        color: #000000;
+    }
+    .home-leaderboard-names{
+        color: #3F3F3F;
+        font-size: 16px;
+        font-family: 'UfcSansRegular';
+    }
+    .home-leaderboard-points{
+        color: #3F3F3F;
+        font-size: 16px;
+        font-family: 'UfcSansRegular';
+    }
+    .home-leaderboard-buttons{
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap:10px;
+        margin-top: 10px;
+    }
+    .home-leaderboard-buttons button{
+        background: linear-gradient(216.01deg, #d20a0a 26.18%, #9e0808 93.27%);
+        color: #fff;
+        cursor: pointer;
+        font-family: 'UfcSansRegular';
+        font-weight: 600;
+        font-size: 21px;
+        letter-spacing: 0.5px;
+        outline: none;
+        padding: 8px 24px;
+        text-align: center;
+        width: 165px;
+        text-decoration: none;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
+        border:none;
+    }
+     
+}
+.refreshingLeaderboard{
+    color: #3F3F3F;
+    font-size: 20px;
+    font-family: 'UfcSansRegular';
+}
+.globalss{
+    z-index: 4;
+}
+.background-video {
+    position: fixed;
+    top: 0; /* Removed top offset for full-screen coverage */
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 1; /* Ensures content is layered over the video */
+    pointer-events: none; /* Prevents interaction with the video */
+  }
+  
+  .background-video iframe {
+    width: 100%;
+    height: 100%;
+  }
+  
+  

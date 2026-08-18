@@ -1,0 +1,647 @@
+/* ========================================================================== 
+   Fantasy MMAdness — legacy route experience bridge
+   Applies the homepage visual system to the remaining public/account pages
+   without replacing their existing data flows or business logic.
+   ========================================================================== */
+
+.route-experience-page,
+.route-experience-page * {
+  box-sizing: border-box;
+}
+
+.route-experience-page {
+  --route-red: var(--fmm-red, #df111b);
+  --route-red-bright: #ff2632;
+  --route-blue: var(--fmm-blue, #168fe6);
+  --route-text: var(--fmm-text, #f4f6fa);
+  --route-muted: var(--fmm-muted, rgba(244, 246, 250, 0.67));
+  --route-panel: rgba(11, 17, 25, 0.91);
+  --route-panel-soft: rgba(255, 255, 255, 0.038);
+  --route-border: rgba(255, 255, 255, 0.11);
+  --route-border-strong: rgba(255, 255, 255, 0.19);
+  --route-display: var(--fmm-font-display, 'UFCSans', 'Arial Narrow', Impact, sans-serif);
+  --route-body: var(--fmm-font-body, 'UfcSansRegular', Inter, Arial, sans-serif);
+  background:
+    radial-gradient(circle at 82% 4%, rgba(223, 17, 27, 0.13), transparent 32rem),
+    radial-gradient(circle at 8% 28%, rgba(22, 143, 230, 0.09), transparent 30rem),
+    linear-gradient(180deg, #04070b 0%, #070b11 52%, #030509 100%);
+  color: var(--route-text);
+  font-family: var(--route-body) !important;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.route-experience-page::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+  content: '';
+  inset: 0;
+  mask-image: linear-gradient(to bottom, #000, transparent 72%);
+  pointer-events: none;
+  position: absolute;
+}
+
+.route-experience-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.route-experience-hero {
+  background-image:
+    linear-gradient(90deg, rgba(3, 6, 10, 0.98) 0%, rgba(3, 6, 10, 0.91) 42%, rgba(3, 6, 10, 0.48) 76%, rgba(3, 6, 10, 0.72) 100%),
+    linear-gradient(180deg, rgba(3, 6, 10, 0.05), rgba(3, 6, 10, 0.92)),
+    var(--route-experience-bg);
+  background-position: center;
+  background-size: cover;
+  border-bottom: 1px solid var(--route-border);
+  min-height: 520px;
+  overflow: hidden;
+  padding: 142px 0 66px;
+  position: relative;
+}
+
+.route-experience-page.is-compact .route-experience-hero {
+  min-height: 420px;
+  padding-bottom: 48px;
+}
+
+.route-experience-hero::before,
+.route-experience-hero::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.route-experience-hero::before {
+  background:
+    radial-gradient(circle at 76% 35%, rgba(223, 17, 27, 0.24), transparent 25rem),
+    radial-gradient(circle at 56% 20%, rgba(22, 143, 230, 0.16), transparent 26rem);
+}
+
+.route-experience-hero::after {
+  background: linear-gradient(90deg, transparent 0 7.5%, rgba(223, 17, 27, 0.72) 7.5% 7.62%, transparent 7.62% 92.3%, rgba(22, 143, 230, 0.58) 92.3% 92.42%, transparent 92.42%);
+  opacity: 0.32;
+}
+
+.route-experience-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  inset: 0;
+  mask-image: radial-gradient(circle at center, #000 0%, transparent 76%);
+  pointer-events: none;
+  position: absolute;
+}
+
+.route-experience-hero-inner {
+  align-items: end;
+  display: grid;
+  gap: clamp(40px, 7vw, 112px);
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 0.44fr);
+  min-height: 310px;
+  position: relative;
+  z-index: 2;
+}
+
+.route-experience-copy {
+  max-width: 850px;
+}
+
+.route-experience-breadcrumb {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.42);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--route-display) !important;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 8px;
+  letter-spacing: 0.08em;
+  margin-bottom: 27px;
+  text-transform: uppercase;
+}
+
+.route-experience-breadcrumb a {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72) !important;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.route-experience-eyebrow {
+  align-items: center;
+  color: var(--route-red) !important;
+  display: flex;
+  font-family: var(--route-display) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  gap: 9px;
+  letter-spacing: 0.16em !important;
+  margin: 0 0 15px !important;
+  text-transform: uppercase;
+}
+
+.route-experience-copy h1 {
+  color: #fff !important;
+  font-family: var(--route-display) !important;
+  font-size: clamp(49px, 6vw, 82px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 0.91 !important;
+  margin: 0 !important;
+  max-width: 900px;
+  text-transform: uppercase !important;
+  text-wrap: balance;
+}
+
+.route-experience-page.is-compact .route-experience-copy h1 {
+  font-size: clamp(43px, 5vw, 68px) !important;
+}
+
+.route-experience-description {
+  color: rgba(244, 246, 250, 0.76) !important;
+  font-size: clamp(15px, 1.35vw, 18px) !important;
+  line-height: 1.65 !important;
+  margin: 22px 0 0 !important;
+  max-width: 720px;
+}
+
+.route-experience-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.route-experience-actions .theme-btn {
+  font-size: 15px !important;
+  min-height: 50px;
+}
+
+.route-experience-proof {
+  backdrop-filter: blur(18px);
+  background: linear-gradient(180deg, rgba(15, 22, 31, 0.88), rgba(7, 11, 17, 0.86));
+  border: 1px solid var(--route-border);
+  border-radius: 19px;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.48);
+  overflow: hidden;
+}
+
+.route-experience-proof-header {
+  align-items: center;
+  border-bottom: 1px solid var(--route-border);
+  color: rgba(255, 255, 255, 0.64);
+  display: flex;
+  font-family: var(--route-display) !important;
+  font-size: 11px;
+  font-weight: 900;
+  gap: 9px;
+  letter-spacing: 0.09em;
+  padding: 15px 17px;
+  text-transform: uppercase;
+}
+
+.route-experience-proof-header svg {
+  color: var(--route-red);
+}
+
+.route-experience-proof-row {
+  align-items: center;
+  border-bottom: 1px solid var(--route-border);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  padding: 16px 17px;
+}
+
+.route-experience-proof-row:last-child {
+  border-bottom: 0;
+}
+
+.route-experience-proof-index {
+  color: var(--route-red);
+  font-family: var(--route-display);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.route-experience-proof-row div {
+  display: grid;
+  min-width: 0;
+}
+
+.route-experience-proof-row strong {
+  color: #fff !important;
+  font-family: var(--route-display) !important;
+  font-size: 14px !important;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.route-experience-proof-row small {
+  color: var(--route-muted);
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.route-experience-proof-row > svg {
+  color: rgba(255, 255, 255, 0.24);
+  font-size: 14px;
+}
+
+.route-experience-content {
+  min-height: 420px;
+  padding: 56px 0 92px;
+  position: relative;
+}
+
+.route-experience-content::before {
+  background: radial-gradient(circle, rgba(223, 17, 27, 0.12), transparent 66%);
+  content: '';
+  height: 620px;
+  pointer-events: none;
+  position: absolute;
+  right: -260px;
+  top: -120px;
+  width: 620px;
+}
+
+.route-experience-content > :not(script) {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  max-width: 1440px;
+  position: relative;
+  width: min(1440px, calc(100% - 40px));
+  z-index: 1;
+}
+
+/* Shared typography and controls for all bridged pages. */
+.route-experience-content :is(h1, h2, h3, h4, h5, h6),
+.route-experience-content :is(button, .btn-grad, [class*='Button'], [class*='button']) {
+  font-family: var(--route-display) !important;
+}
+
+.route-experience-content :is(h1, h2, h3, h4) {
+  color: #fff !important;
+  letter-spacing: -0.018em;
+}
+
+.route-experience-content p,
+.route-experience-content li,
+.route-experience-content label {
+  color: rgba(244, 246, 250, 0.72);
+  line-height: 1.6;
+}
+
+.route-experience-content a {
+  color: inherit;
+}
+
+.route-experience-content :is(button, a.btn-grad, a[class*='Button'], button[class*='Button'], .playNowLink, .joinButton) {
+  align-items: center;
+  border-radius: 10px !important;
+  display: inline-flex;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  justify-content: center;
+  letter-spacing: 0.045em !important;
+  min-height: 46px;
+  padding: 12px 18px !important;
+  text-transform: uppercase;
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.route-experience-content :is(button, a.btn-grad, a[class*='Button'], button[class*='Button']):hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.route-experience-content :is(input, select, textarea) {
+  background: rgba(1, 4, 8, 0.58) !important;
+  border: 1px solid var(--route-border-strong) !important;
+  border-radius: 11px !important;
+  color: #fff !important;
+  font-family: var(--route-body) !important;
+  font-size: 15px !important;
+  min-height: 48px;
+  outline: 0;
+  padding: 12px 14px !important;
+}
+
+.route-experience-content textarea {
+  min-height: 130px;
+}
+
+.route-experience-content :is(input, select, textarea):focus {
+  border-color: rgba(223, 17, 27, 0.72) !important;
+  box-shadow: 0 0 0 4px rgba(223, 17, 27, 0.12) !important;
+}
+
+.route-experience-content :is(table) {
+  background: rgba(9, 14, 21, 0.87);
+  border: 1px solid var(--route-border);
+  border-collapse: separate;
+  border-radius: 16px;
+  border-spacing: 0;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  color: #fff;
+  overflow: hidden;
+  width: 100%;
+}
+
+.route-experience-content :is(th, td) {
+  border-bottom: 1px solid var(--route-border);
+  font-size: 14px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.route-experience-content th {
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--route-display) !important;
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.route-experience-content tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Existing legacy card families are normalized into one premium surface. */
+.route-experience-content :is(
+  .blogCard,
+  .blogDetailsCard,
+  .fighter-card,
+  .board-card,
+  .fightItem,
+  .fightscontainer,
+  .userdashboard,
+  .profileCard,
+  .contact-form,
+  .contactInfo,
+  .faq-item,
+  .testimonial-card,
+  .guideItem,
+  .forumThread,
+  .thread-card,
+  .chat-messages,
+  .roundResultDiv,
+  .fightDetailsContainer,
+  .makePredictions,
+  .loginCard,
+  .membership-card,
+  .checkout-card
+) {
+  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.021)) !important;
+  border: 1px solid var(--route-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 25px 72px rgba(0, 0, 0, 0.38) !important;
+}
+
+.route-experience-content img {
+  max-width: 100%;
+}
+
+/* Remove superseded legacy full-viewport backgrounds and large fixed offsets. */
+.route-experience-content :is(
+  .blogsWrapper,
+  .publicProfileWrapper,
+  .yourFightsWrapper,
+  .contactWrapper,
+  .faqsWrapper,
+  .guideWrapper,
+  .guideMainWrapper,
+  .affiliateGuideWrapper,
+  .testimonialWrapper,
+  .referral-container,
+  .invite-container,
+  .past-fights-container,
+  .fighterTrackerWrapper,
+  .tracker-container-fighter,
+  .fantasyChatroom,
+  .chatroom-wrapper,
+  .forum-wrapper,
+  .communityForumWrapper,
+  .privacyPolicyWrapper,
+  .termsWrapper,
+  .spinWheelWrapper
+) {
+  background: transparent !important;
+  min-height: auto !important;
+}
+
+.route-experience-content :is(.home-arrow-circle, .homeup-arrow-circle, .dashboard-arrow-circle, .homecreateacc-arrow-circle) {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid var(--route-border) !important;
+  border-radius: 10px;
+  color: #fff !important;
+  display: flex;
+  height: 42px;
+  justify-content: center;
+  left: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  width: 42px;
+}
+
+.route-experience-content .blogsWrapper,
+.route-experience-content .blogDetailsCard,
+.route-experience-content .tracker-container-fighter,
+.route-experience-content .referral-container,
+.route-experience-content .invite-container,
+.route-experience-content .details-of-past-fight {
+  padding-top: 0 !important;
+}
+
+.route-experience-content .blogHeader {
+  display: none !important;
+}
+
+.route-experience-content .blogsWrapperActual {
+  gap: 20px !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.route-experience-content .blogCard {
+  overflow: hidden;
+}
+
+.route-experience-content .blogCard img,
+.route-experience-content .blogDetailsCard img {
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.route-experience-content .tracker-container-fighter {
+  max-width: 1180px !important;
+}
+
+.route-experience-content .fighter-card {
+  padding: 24px !important;
+}
+
+.route-experience-content .chat-topbar {
+  background: rgba(8, 13, 20, 0.96) !important;
+  border: 1px solid var(--route-border) !important;
+  border-radius: 16px 16px 0 0;
+  position: relative !important;
+  top: 0 !important;
+}
+
+.route-experience-content .chat-messages {
+  border-radius: 0 0 16px 16px !important;
+  min-height: 520px;
+}
+
+.route-experience-content .member-header {
+  background: linear-gradient(135deg, rgba(223, 17, 27, 0.16), rgba(22, 143, 230, 0.08)), rgba(8, 13, 20, 0.9) !important;
+  border: 1px solid var(--route-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.38);
+}
+
+.route-experience-content .member-header-image,
+.route-experience-content .leaderboard-item-image img,
+.route-experience-content .chat-user-img {
+  border: 2px solid rgba(223, 17, 27, 0.64) !important;
+  box-shadow: 0 0 0 5px rgba(223, 17, 27, 0.09);
+}
+
+.route-experience-content .fightsWrap {
+  gap: 22px;
+}
+
+.route-experience-content .fightItem {
+  overflow: hidden;
+}
+
+.route-experience-content .referral-container {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.route-experience-content .board-card {
+  max-width: 980px;
+  width: 100%;
+}
+
+.route-experience-content .invite-container {
+  min-height: 420px !important;
+}
+
+.route-experience-content .login-wrapper {
+  background: transparent !important;
+  min-height: 520px !important;
+  padding: 0 !important;
+}
+
+.route-experience-content .loginCard {
+  margin: 0 auto !important;
+  max-width: 560px;
+  padding: 32px !important;
+}
+
+.route-experience-content .loginCard img {
+  height: 72px;
+  object-fit: contain;
+  width: 100px;
+}
+
+@media (max-width: 1100px) {
+  .route-experience-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .route-experience-proof {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .route-experience-proof-header {
+    grid-column: 1 / -1;
+  }
+
+  .route-experience-proof-row {
+    border-bottom: 0;
+    border-right: 1px solid var(--route-border);
+  }
+
+  .route-experience-proof-row:last-child {
+    border-right: 0;
+  }
+
+  .route-experience-content .blogsWrapperActual {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .route-experience-hero,
+  .route-experience-page.is-compact .route-experience-hero {
+    min-height: auto;
+    padding: 116px 0 42px;
+  }
+
+  .route-experience-hero-inner {
+    gap: 28px;
+  }
+
+  .route-experience-copy h1,
+  .route-experience-page.is-compact .route-experience-copy h1 {
+    font-size: clamp(42px, 13vw, 62px) !important;
+  }
+
+  .route-experience-description {
+    font-size: 15px !important;
+  }
+
+  .route-experience-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .route-experience-actions .theme-btn {
+    width: 100%;
+  }
+
+  .route-experience-proof {
+    display: block;
+  }
+
+  .route-experience-proof-row {
+    border-bottom: 1px solid var(--route-border);
+    border-right: 0;
+  }
+
+  .route-experience-content {
+    padding: 34px 0 64px;
+  }
+
+  .route-experience-content > :not(script) {
+    width: min(100% - 24px, 1440px);
+  }
+
+  .route-experience-content .blogsWrapperActual {
+    grid-template-columns: 1fr;
+  }
+
+  .route-experience-content :is(button, a.btn-grad, a[class*='Button'], button[class*='Button']) {
+    font-size: 14px !important;
+  }
+
+  .route-experience-content :is(table) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

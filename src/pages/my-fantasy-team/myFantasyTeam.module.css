@@ -1,0 +1,196 @@
+.myfancyContainer {
+    background: linear-gradient(100deg, rgba(3,7,12,0.94), rgba(3,7,12,0.82)), url('/images/fmm-pages/premium-duel-banner.webp') center / cover fixed;
+    background-repeat: no-repeat;
+    background-position: center 0;
+    background-size: cover;
+    background-attachment: fixed;
+  padding: 56px 24px 72px;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  padding-top: 140px;
+  min-height: 100vh;
+}
+
+.myfancyTitle {
+  text-align: center;
+  color: #fff;
+  font-size: clamp(40px, 6vw, 70px);
+  margin-bottom: 36px;
+  text-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+  font-family: var(--fmm-font-display, 'UFCSans', Impact, sans-serif);
+  text-transform: uppercase;
+}
+
+.myfancyAffiliateCard {
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 32px;
+  border-radius: 22px;
+  max-width: 980px;
+  margin: 0 auto 42px;
+  background: linear-gradient(145deg, rgba(8,12,18,0.96), rgba(8,12,18,0.84));
+  box-shadow: 0 28px 70px rgba(0,0,0,0.45);
+}
+
+.myfancyAffiliateLabel {
+  color: #e60000;
+  font-size: 18px;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.myfancyAffiliateProfile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.myfancyAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.myfancyName {
+  color: #e60000;
+  font-size: 24px;
+  margin: 0;
+}
+
+.myfancyBio {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.myfancyJoinBtn {
+  background: linear-gradient(135deg, #ec1b31, #990611);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  padding: 14px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.myfancyJoinBtn:hover {
+  background-color: #cc0000;
+}
+
+.myfancyTeamGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.myfancyTeamCard {
+  background: linear-gradient(180deg, rgba(8,12,18,0.96), rgba(8,12,18,0.88));
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 24px 18px;
+  text-align: center;
+  border-radius: 18px;
+  width: 220px;
+  box-shadow: 0 16px 34px rgba(0,0,0,0.32);
+}
+
+.myfancyTeamInitial {
+  background-color: transparent;
+  border: 2px solid #e60000;
+  color: #e60000;
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+.myfancyTeamPic{
+    width: 100%;
+    border-radius: 50%;
+}
+
+.myfancyTeamName {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.myfancyTeamRole {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #e60000;
+}
+@media (max-width: 768px) {
+  .myfancyContainer {
+    padding: 20px;
+    padding-top: 170px;
+  
+    background-attachment: scroll;
+  }
+
+  .myfancyTitle {
+    font-size: 32px;
+    margin-bottom: 24px;
+  }
+
+  .myfancyAffiliateCard {
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+
+  .myfancyAffiliateProfile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .myfancyAvatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .myfancyName {
+    font-size: 20px;
+  }
+
+  .myfancyBio {
+    font-size: 13px;
+  }
+
+  .myfancyJoinBtn {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+
+  .myfancyTeamGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .myfancyTeamCard {
+    padding: 16px;
+  }
+
+  .myfancyTeamInitial {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .myfancyTeamName {
+    font-size: 16px;
+  }
+
+  .myfancyTeamRole {
+    font-size: 13px;
+  }
+}

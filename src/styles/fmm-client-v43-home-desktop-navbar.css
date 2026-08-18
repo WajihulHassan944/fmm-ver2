@@ -1,0 +1,108 @@
+/* v43: restore normal website navbar on homepage for laptop/desktop only. */
+
+@media (min-width: 900px) {
+  .header.theme-header.is-home-route,
+  body.fmm-final-home-route-v41 .header.theme-header,
+  body.fmm-final-home-route-v41 .theme-header {
+    display: flex !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(18px) !important;
+  }
+
+  .site-experience-main.is-home-experience-main,
+  body.fmm-final-home-route-v41 .site-experience-main.is-home-experience-main {
+    padding-top: 80px !important;
+    margin-top: 0 !important;
+  }
+
+  .header.theme-header.is-home-route .theme-brand,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-brand {
+    display: inline-flex !important;
+  }
+
+  .header.theme-header.is-home-route .theme-brand-logo,
+  .header.theme-header.is-home-route .theme-brand-logo-default,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-brand-logo,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-brand-logo-default {
+    display: block !important;
+    width: 58px !important;
+    height: 58px !important;
+    object-fit: contain !important;
+  }
+
+  .header.theme-header.is-home-route .theme-nav,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-nav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(10px, 1.15vw, 18px) !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .header.theme-header.is-home-route .theme-nav-link,
+  .header.theme-header.is-home-route .theme-nav-button,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-nav-link,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-nav-button {
+    display: inline-flex !important;
+    white-space: nowrap !important;
+  }
+
+  .header.theme-header.is-home-route .theme-header-actions,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .header.theme-header.is-home-route .theme-header-actions .theme-btn,
+  .header.theme-header.is-home-route .theme-user-chip,
+  .header.theme-header.is-home-route .theme-logout-btn,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-header-actions .theme-btn,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-user-chip,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-logout-btn {
+    display: inline-flex !important;
+  }
+
+  .header.theme-header.is-home-route .theme-home-mobile-chrome,
+  .header.theme-header.is-home-route .theme-home-mobile-wallet,
+  .header.theme-header.is-home-route .theme-home-mobile-notifications,
+  .header.theme-header.is-home-route .theme-mobile-signup-icon,
+  .header.theme-header.is-home-route .theme-mobile-toggle,
+  .header.theme-header.is-home-route .theme-mobile-menu,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-home-mobile-chrome,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-home-mobile-wallet,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-home-mobile-notifications,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-mobile-signup-icon,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-mobile-toggle,
+  body.fmm-final-home-route-v41 .header.theme-header .theme-mobile-menu {
+    display: none !important;
+  }
+}
+
+@media (max-width: 899px) {
+  .header.theme-header.is-home-route,
+  body.fmm-final-home-route-v41 .header.theme-header,
+  body.fmm-final-home-route-v41 .theme-header,
+  body.fmm-final-home-route-v41 .theme-home-mobile-chrome,
+  body.fmm-final-home-route-v41 .theme-mobile-menu,
+  body.fmm-final-home-route-v41 .theme-home-mobile-wallet,
+  body.fmm-final-home-route-v41 .theme-home-mobile-notifications,
+  body.fmm-final-home-route-v41 .theme-mobile-signup-icon,
+  body.fmm-final-home-route-v41 .theme-header-actions {
+    display: none !important;
+  }
+
+  .site-experience-main.is-home-experience-main,
+  body.fmm-final-home-route-v41 .site-experience-main.is-home-experience-main {
+    padding-top: 0 !important;
+  }
+}

@@ -1,0 +1,63 @@
+.VideosContainerFighters {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-top: 170px;
+    background: linear-gradient(136.74deg, #e7e7e9 19.43%, #fff 89.46%);
+    padding-bottom: 70px;
+}
+
+.VideosContainerFighters h1 {
+    color: #d20a0a;
+    font-size: 46px;
+    text-align: center;
+    font-family: 'UFCSansMedium';
+    text-transform: uppercase;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.VideosContainerFighters h2 {
+    color: black;
+    font-size: 27px; /* Adjusted for better spacing */
+    text-align: center;
+    font-family: 'UFCSansMedium';
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.videosWrap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three items per row */
+    gap: 20px; /* Space between grid items */
+    width: 90%; /* Center content and avoid stretching */
+}
+
+.videoItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f9f9f9; /* Optional: Background for video items */
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add some shadow */
+}
+
+.videoItem iframe {
+    width: 100%; /* Make videos responsive */
+    height: 180px; /* Adjust height for smaller size */
+    border-radius: 4px;
+}
+@media (max-width: 768px) {
+    .videosWrap {
+        grid-template-columns: repeat(2, 1fr); /* Two items per row for tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .videosWrap {
+        grid-template-columns: 1fr; /* One item per row for mobile */
+    }
+}

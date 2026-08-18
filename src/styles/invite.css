@@ -1,0 +1,48 @@
+.invite-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-image: url(/Assets/invite2.png);
+    background-size: cover;
+    background-position: center 110px;
+    background-repeat: no-repeat;
+    height: 100vh;
+    padding-top: 33%;
+    
+}
+.invite-container h1{
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+    font-weight: 400; /* Weight corresponding to UFCSans-CondensedMedium */
+    font-style:normal; /* Condensed style */
+    font-size:23px;
+    margin:10px 0;
+    color: #eee;
+    text-shadow: 1px 1px 2px #000, 0 0 5px rgba(255, 255, 255, 0.1);
+}
+.invite-container .signUpBtnInvite{
+    background-image: url(/Assets/background-btn.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border:none;
+    outline: none;
+    color: #fff;
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+  padding: 10px 20px;
+  font-size: 23px;
+  font-weight: 400;
+  margin-top: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  text-decoration: none;
+}
+
+
+@media(max-width:768px){
+    .invite-container{
+        text-align: center;
+        padding-top: 93%;
+        
+        
+    }
+}

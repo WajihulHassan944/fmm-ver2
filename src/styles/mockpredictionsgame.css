@@ -1,0 +1,50 @@
+.makepredictionsmock{
+    padding-top:190px;
+}
+.lb2-nobg-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  font-family: 'Arial Black', sans-serif;
+width: 100%;
+}
+.lb2-nobg-container .lb2-title{
+    margin-bottom: 40px;
+}
+.mockpredheading{
+    color: red;
+    margin-bottom: 30px;
+      font-family: 'Arial Black', sans-serif;
+
+}
+.fight-type-selector {
+  display: flex;
+  gap: 15px;
+  max-width: 400px;
+  margin: 20px auto;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+}
+
+.fight-type-selector label {
+  color: #ff0000;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.fight-type-selector select {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #ff0000;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.fight-type-selector select:hover {
+  border-color: #ff5555;
+  background-color: #111;
+}

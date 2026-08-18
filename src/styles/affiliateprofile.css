@@ -1,0 +1,389 @@
+.inputParent{
+    display: flex;
+    gap:15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.inputParent img{
+    width: 100px;
+    height: 100%;
+    margin-top: 20px;
+    object-fit: cover;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-right: 10px;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: #4997cf; /* Change to preferred color */
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+  
+  .slider.round {
+    border-radius: 34px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  
+  .allpromotion{
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(/Assets/new-bg.png);
+  }
+  .allpromotion .allContainer{
+    margin: auto;
+    
+  }
+  .allpromotion .allContainer h1{
+    font-family: 'UFCSans', "Arial Narrow", Arial, sans-serif;
+    font-weight: 500;
+    font-stretch: condensed;
+    margin-bottom: 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 40px;
+    line-height: 2.5rem;
+    color: #fff;
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+    }
+    
+  .allpromotion .allContainer h2{
+    font-family: Arial, sans-serif;
+    font-weight: 500;
+    margin-bottom: 0;
+    margin-left:auto;
+    letter-spacing: 1.5px;
+    font-size: 20px;
+    line-height: 2.5rem;
+    color: #fff;
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, .55);
+    margin-top: 30px;
+    }
+    .allpromotion .allContainer h1 span{
+      color:blue;
+      cursor: pointer;
+    }
+
+
+    @media (max-width: 767px){
+      .allpromotion .allContainer{
+        padding: 0 20px;
+      }
+      .allpromotion .allContainer h1{
+        letter-spacing: 1px;
+        font-size: 20px;
+        line-height: 2.5rem;
+        }
+        
+      .allpromotion .allContainer h2{
+        letter-spacing: 1px;
+        font-size: 15px;
+        line-height: 2.5rem;
+        margin-top: 30px;
+        }
+        .allpromotion .allContainer h1 span{
+          color:blue;
+          cursor: pointer;
+        }
+    
+     
+    }
+
+    .modalPayout {
+      position: fixed;
+      z-index: 1000; /* Increased to sit on top of other content */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7); /* Darker backdrop for emphasis */
+      display: none;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Disable scroll while modal is open */
+  }
+  
+  .modalPayout.show {
+      display: flex; /* Flexbox to center modal */
+  }
+  
+  .modal-content {
+      background-color: #fff;
+      border-radius: 10px; /* Rounded corners */
+      padding: 30px;
+      width: 90%; /* Adjust modal width */
+      max-width: 500px; /* Max width to prevent it from stretching too much */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+      position: relative; /* For positioning the close button */
+      text-align: center; /* Centered text */
+      animation: fadeIn 0.4s ease; /* Add a smooth fade-in animation */
+  }
+  
+  @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+  }
+  
+  .close {
+      color: #aaa;
+      font-size: 24px;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-weight: bold;
+      cursor: pointer;
+  }
+  
+  .close:hover {
+      color: #333; /* Darker on hover */
+  }
+  
+  .modal-content h2 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 20px;
+  }
+  
+  .modal-content input[type="number"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 1rem;
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+  }
+  
+  .modal-content p {
+      font-size: 1rem;
+      color: #555;
+  }
+  
+  .modal-content button {
+      background-color: #0d8c17;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      margin-top:20px;
+  }
+  
+  .modal-content button:hover {
+      background-color: #0b6f12;
+  }
+  
+  
+
+  .boxesContainerAffiliate{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin-top:70px;
+  }
+  .boxesContainerAffiliate .boxxAffiliate{
+    border-radius: 10px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    width:200px;
+    height:150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0px 6px 12px rgba(0, 0, 0, 0.2); /* Adds inner shadow */
+    
+  }
+  .boxesContainerAffiliate .boxxAffiliate h2{
+    margin:5px 0;
+    padding:0;
+    font-size: 17px;
+  }
+
+.affBalance{
+  background-color: #ff6b6b;
+}
+.affViews{
+  background-color: #4dabf7;
+}
+.affmembers{
+  background-color: #81c784;
+}
+  .affTotalPromotions{
+    background-color: #ffca28;
+  }
+
+
+  @media (max-width: 767px){
+    
+  .boxesContainerAffiliate{
+    justify-content: center;
+    gap: 20px;
+    margin-top:40px;
+    align-items: center;
+  }
+
+
+
+  
+  .boxesContainerAffiliate .boxxAffiliate{
+    border-radius: 8px;
+    width:150px;
+    height:120px;
+    
+  }
+  .boxesContainerAffiliate .boxxAffiliate h2{
+    margin:4px 0;
+    font-size: 15px;
+  }
+  }
+
+
+
+  .myprofileupdated{
+    background-image: linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.2)),url('/Assets/affiliateDashboard/profileu.png');
+   background-attachment: fixed;
+   background-position: center 0; 
+  }
+  .profile-wrapper-updated{
+    max-width: 800px;
+    width: 100%;
+    padding-bottom: 70px;
+  }
+  .updatedBtnFile{
+    padding:10px 30px;
+    border:none;
+    outline: none;
+    background-image: url(/Assets/affiliateDashboard/bar.png);
+    cursor: pointer;
+    color: #fff;
+    background-position: center -2px;
+    border-radius: 5px;
+    font-family: "Inter";
+    font-weight: 600;
+    font-size: 15px;
+  
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .55);
+  }
+  .updated-profile-title{
+    color: red !important;
+    font-family: 'Anton' !important;
+    font-size: 35px !important;
+    text-shadow: 3px 3px 0px black,5px 5px 10px rgba(0, 0, 0, 0.8) !important;
+  
+  }
+  .save-updated-btn{
+    padding:10px 30px;
+    border:none;
+    outline: none;
+    background-image: url(/Assets/affiliateDashboard/bar.png);
+    cursor: pointer;
+    color: #fff;
+    background-position: center -2px;
+    border-radius: 5px;
+    font-family: "Inter";
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .startFight{
+    margin-top: 15px;
+  }
+  @media(max-width:768px){
+    
+  .updatedBtnFile{
+    width: 50%;
+  }
+  .profile-wrapper-updated .registerCard {
+    margin-top: 100px;
+    }
+  }
+
+
+  .affiliateTeamLinkWrap {
+  padding: 16px;
+  padding-left: 5%;
+  margin-bottom: 30px;
+}
+
+.affiliateTeamLinkWrap h1 {
+  color: red;
+  font-size: 32px;
+  margin: 12px 0;
+  margin-bottom: 20px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  word-break: break-all;
+
+}
+
+.affiliateTeamLinkWrap h2 {
+  color: #fff;
+  font-size: 0.9rem;
+  margin: 12px 0;
+  margin-bottom: 20px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  word-break: break-all;
+
+}
+
+.affiliateTeamLinkWrap button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.affiliateTeamLinkWrap button:hover {
+  background-color: darkred;
+}
