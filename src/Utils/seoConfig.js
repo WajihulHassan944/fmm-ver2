@@ -24,7 +24,7 @@ const configuredSiteUrl = normalizeSiteUrlCandidate(
 const safeSiteUrl = configuredSiteUrl || PRODUCTION_SITE_URL;
 export const SITE_URL = safeSiteUrl.replace(/\/$/, '');
 export const SITE_NAME = 'Fantasy MMAdness';
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/fmm-pages/premium-duel-banner.webp`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/social/fantasy-mmadness-og-2026.jpg`;
 
 const baseDescription = 'Play fantasy MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests. Pick fights, climb leaderboards, and compete for fantasy rewards.';
 
@@ -33,13 +33,13 @@ export const SEO_ROUTE_MAP = {
     title: 'Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing',
     description: baseDescription,
     keywords: 'fantasy MMA, fantasy boxing, fantasy combat sports, UFC predictions, boxing predictions, pro wrestling fantasy, fight contests',
-    image: `${SITE_URL}/images/fmm-experience/homepage-fight-hero.webp`,
+    image: `${SITE_URL}/images/social/fantasy-mmadness-og-2026.jpg`,
   },
   '/home': {
     title: 'Fantasy MMAdness | Fresh Fight Contests & Prediction Games',
     description: baseDescription,
     keywords: 'fantasy fight contests, MMA prediction game, boxing prediction game, pro wrestling predictions',
-    image: `${SITE_URL}/images/fmm-pages/player-fight-night-premium.webp`,
+    image: `${SITE_URL}/images/social/fantasy-mmadness-og-2026.jpg`,
   },
 
   '/fantasy-mma': {

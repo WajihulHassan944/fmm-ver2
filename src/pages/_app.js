@@ -119,6 +119,7 @@ import "@fontsource/rajdhani/500.css";
 import "@fontsource/rajdhani/600.css";
 import "@fontsource/rajdhani/700.css";
 import "@/styles/fantasy-mobile-app-exact.css";
+import "@/styles/fmm-client-v62-unified-theme-performance.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -137,7 +138,6 @@ import SeoHead from "@/Components/SEO/SeoHead";
 import { API_BASE_URL } from "@/Utils/swarmApi";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import FantasyMobileExperience from "@/Components/MobileApp/FantasyMobileExperience";
 
 import { shouldUseRouteExperienceFrame } from "@/Utils/routeExperience";
 
@@ -156,6 +156,22 @@ const scheduleWhenIdle = (callback, timeout = 2500) => {
 const Footer = dynamic(() => import("@/Components/Footer/Footer"), {
   loading: () => null,
 });
+
+const FantasyMobileExperience = dynamic(
+  () => import("@/Components/MobileApp/FantasyMobileExperience"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="fmm-app-route-loading" aria-label="Loading Fantasy MMAdness">
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/images/mobile-home/final-v35/hero-banner-crop-v62.webp" />
+          <img src="/images/mobile-home/final-v35/hero-banner-new.jpg" alt="Fantasy MMAdness" fetchPriority="high" />
+        </picture>
+        <div className="fmm-app-route-loading-bar" />
+      </div>
+    ),
+  },
+);
 
 const AdminHeader = dynamic(() => import("@/Components/Header/AdminHeader"), {
   loading: () => null,
@@ -196,7 +212,6 @@ const MOBILE_APP_ROUTE_TABS = {
   "/home": "home",
   "/fights": "contests",
   "/upcomingfights": "contests",
-  "/UserDashboard": "predict",
   "/YourFights": "contests",
   "/leaderboard": "leaderboard",
   "/global-leaderboard": "leaderboard",

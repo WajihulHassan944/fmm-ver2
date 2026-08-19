@@ -76,6 +76,105 @@ const toNumber = (...values) => {
   return null;
 };
 
+
+const composeExperienceData = ({
+  playableRows = [],
+  publicRows = [],
+  promotedRows = [],
+  summary = {},
+  leaderboardPayload = {},
+  blogPayload = {},
+  apparelPayload = {},
+  leaguePayload = {},
+  entryRows = [],
+  notificationRows = [],
+}, base = EMPTY_DATA) => {
+  const summaryRows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
+  const predictionByKey = new Map();
+  playableRows.forEach((fight) => {
+    [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
+      .filter(Boolean)
+      .forEach((key) => {
+        if (!predictionByKey.has(key)) predictionByKey.set(key, fight);
+      });
+  });
+  const playableKeys = new Set(playableRows.flatMap((fight) => [
+    String(getFightId(fight) || '').trim(),
+    getPublicFightDuplicateKey(fight),
+  ]).filter(Boolean));
+  const promotedKeys = new Set(promotedRows.flatMap((fight) => [
+    String(getFightId(fight) || '').trim(),
+    getPublicFightDuplicateKey(fight),
+  ]).filter(Boolean));
+  const entryByKey = new Map();
+  entryRows.forEach((fight) => {
+    [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
+      .filter(Boolean)
+      .forEach((key) => entryByKey.set(key, fight));
+  });
+
+  const fights = sortFights(dedupePublicFights([
+    ...promotedRows,
+    ...playableRows,
+    ...entryRows,
+    ...summaryRows,
+    ...publicRows,
+  ]), 'asc')
+    .map((fight) => {
+      const keys = [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean);
+      const predictionFight = keys.map((key) => predictionByKey.get(key)).find(Boolean);
+      const entryFight = keys.map((key) => entryByKey.get(key)).find(Boolean);
+      const mergedFight = predictionFight ? {
+        ...fight,
+        ...predictionFight,
+        homepagePromotion: predictionFight.homepagePromotion || fight.homepagePromotion,
+        fightPosterMobileImage: predictionFight.fightPosterMobileImage || fight.fightPosterMobileImage,
+        fightPosterImage: predictionFight.fightPosterImage || fight.fightPosterImage,
+        posterImage: predictionFight.posterImage || fight.posterImage,
+        matchPosterImage: predictionFight.matchPosterImage || fight.matchPosterImage,
+        bannerImage: predictionFight.bannerImage || fight.bannerImage,
+        promotionBackground: predictionFight.promotionBackground || fight.promotionBackground,
+      } : fight;
+      const withEntry = entryFight ? {
+        ...mergedFight,
+        ...entryFight,
+        homepagePromotion: mergedFight.homepagePromotion || entryFight.homepagePromotion,
+        fightPosterMobileImage: mergedFight.fightPosterMobileImage || entryFight.fightPosterMobileImage,
+        fightPosterImage: mergedFight.fightPosterImage || entryFight.fightPosterImage,
+        posterImage: mergedFight.posterImage || entryFight.posterImage,
+        matchPosterImage: mergedFight.matchPosterImage || entryFight.matchPosterImage,
+        bannerImage: mergedFight.bannerImage || entryFight.bannerImage,
+        promotionBackground: mergedFight.promotionBackground || entryFight.promotionBackground,
+      } : mergedFight;
+      return {
+        ...withEntry,
+        __playable: keys.some((key) => playableKeys.has(key)),
+        __homepagePromoted: keys.some((key) => promotedKeys.has(key)),
+      };
+    })
+    .sort((left, right) => Number(Boolean(right.__homepagePromoted)) - Number(Boolean(left.__homepagePromoted)));
+
+  return {
+    ...base,
+    fights: fights.length ? fights : base.fights,
+    leaderboard: Array.isArray(leaderboardPayload.leaderboard)
+      ? leaderboardPayload.leaderboard
+      : Array.isArray(summary.leaderboard)
+        ? summary.leaderboard
+        : base.leaderboard,
+    blogs: Array.isArray(blogPayload.rows) ? blogPayload.rows : base.blogs,
+    apparel: Array.isArray(apparelPayload.products) ? apparelPayload.products : base.apparel,
+    leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : base.leagues,
+    leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : base.leagueUsers,
+    notifications: notificationRows.length ? notificationRows : base.notifications,
+    shadowFights: (fights.length ? fights : base.fights).filter((fight) => Boolean(
+      fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')
+    )),
+    affiliateCampaigns: Array.isArray(leaguePayload.affiliateCampaigns) ? leaguePayload.affiliateCampaigns : base.affiliateCampaigns,
+    stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : base.stats,
+  };
+};
+
 export default function FantasyMobileExperience({ initialTab = 'home', forceRender = false }) {
   const router = useRouter();
   const user = useSelector(getUser);
@@ -105,108 +204,56 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       setIsLoading(true);
     }
 
-    Promise.allSettled([
-      fetchPublicPredictionFights({ limit: 300, hydrateImages: false }),
-      fetchPublicFights({ limit: 300, hydrateImages: false }),
-      fetchPromotedHomeFights({ limit: 24 }),
-      fetchPublicHomeSummary({ fightLimit: 24, leaderboardLimit: 20 }),
-      fetchPublicLeaderboard({ limit: 50 }),
-      fetchPublicBlogs({ limit: 12 }),
-      safeFetchJson('/api/public/apparel-products', { limit: 12 }),
-      safeFetchJson('/api/public/leagues', { limit: 30 }),
+    // Keep the initial product view fast. The hero is static and paints immediately;
+    // only the small fight/summary payload is required before live sections unlock.
+    const criticalPromise = Promise.allSettled([
+      fetchPublicPredictionFights({ limit: 80, hydrateImages: false }),
+      fetchPromotedHomeFights({ limit: 12 }),
+      fetchPublicHomeSummary({ fightLimit: 12, leaderboardLimit: 12 }),
       userId ? fetchSignedInEntries() : Promise.resolve([]),
-      userId ? fetchSignedInNotifications(userId) : Promise.resolve([]),
-    ]).then(([playableResult, publicResult, promotedResult, summaryResult, leaderboardResult, blogsResult, apparelResult, leaguesResult, entriesResult, notificationsResult]) => {
-      if (!active) return;
-      const playableRows = playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [];
-      const publicRows = publicResult.status === 'fulfilled' && Array.isArray(publicResult.value) ? publicResult.value : [];
-      const promotedRows = promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [];
-      const summary = summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {};
-      const leaderboardPayload = leaderboardResult.status === 'fulfilled' ? leaderboardResult.value || {} : {};
-      const blogPayload = blogsResult.status === 'fulfilled' ? blogsResult.value || {} : {};
-      const apparelPayload = apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {};
-      const leaguePayload = leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {};
-      const entryRows = entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [];
-      const notificationRows = notificationsResult.status === 'fulfilled' && Array.isArray(notificationsResult.value) ? notificationsResult.value : [];
-      const summaryRows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
-      const predictionRows = playableRows;
-      const predictionByKey = new Map();
-      predictionRows.forEach((fight) => {
-        [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
-          .filter(Boolean)
-          .forEach((key) => {
-            if (!predictionByKey.has(key)) predictionByKey.set(key, fight);
-          });
-      });
-      const playableKeys = new Set(predictionRows.flatMap((fight) => [
-        String(getFightId(fight) || '').trim(),
-        getPublicFightDuplicateKey(fight),
-      ]).filter(Boolean));
-      const promotedKeys = new Set(promotedRows.flatMap((fight) => [
-        String(getFightId(fight) || '').trim(),
-        getPublicFightDuplicateKey(fight),
-      ]).filter(Boolean));
-      const entryByKey = new Map();
-      entryRows.forEach((fight) => {
-        [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean).forEach((key) => entryByKey.set(key, fight));
-      });
-      const fights = sortFights(dedupePublicFights([
-        ...promotedRows,
-        ...predictionRows,
-        ...entryRows,
-        ...summaryRows,
-        ...publicRows,
-      ]), 'asc')
-        .map((fight) => {
-          const keys = [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean);
-          const predictionFight = keys.map((key) => predictionByKey.get(key)).find(Boolean);
-          const entryFight = keys.map((key) => entryByKey.get(key)).find(Boolean);
-          const mergedFight = predictionFight ? {
-            ...fight,
-            ...predictionFight,
-            homepagePromotion: predictionFight.homepagePromotion || fight.homepagePromotion,
-            fightPosterMobileImage: predictionFight.fightPosterMobileImage || fight.fightPosterMobileImage,
-            fightPosterImage: predictionFight.fightPosterImage || fight.fightPosterImage,
-            posterImage: predictionFight.posterImage || fight.posterImage,
-            matchPosterImage: predictionFight.matchPosterImage || fight.matchPosterImage,
-            bannerImage: predictionFight.bannerImage || fight.bannerImage,
-            promotionBackground: predictionFight.promotionBackground || fight.promotionBackground,
-          } : fight;
-          const withEntry = entryFight ? {
-            ...mergedFight,
-            ...entryFight,
-            homepagePromotion: mergedFight.homepagePromotion || entryFight.homepagePromotion,
-            fightPosterMobileImage: mergedFight.fightPosterMobileImage || entryFight.fightPosterMobileImage,
-            fightPosterImage: mergedFight.fightPosterImage || entryFight.fightPosterImage,
-            posterImage: mergedFight.posterImage || entryFight.posterImage,
-            matchPosterImage: mergedFight.matchPosterImage || entryFight.matchPosterImage,
-            bannerImage: mergedFight.bannerImage || entryFight.bannerImage,
-            promotionBackground: mergedFight.promotionBackground || entryFight.promotionBackground,
-          } : mergedFight;
-          return {
-            ...withEntry,
-            __playable: keys.some((key) => playableKeys.has(key)),
-            __homepagePromoted: keys.some((key) => promotedKeys.has(key)),
-          };
-        })
-        .sort((left, right) => Number(Boolean(right.__homepagePromoted)) - Number(Boolean(left.__homepagePromoted)));
+    ]);
 
-      const nextData = {
-        fights,
-        leaderboard: Array.isArray(leaderboardPayload.leaderboard)
-          ? leaderboardPayload.leaderboard
-          : Array.isArray(summary.leaderboard)
-            ? summary.leaderboard
-            : [],
-        blogs: Array.isArray(blogPayload.rows) ? blogPayload.rows : [],
-        apparel: Array.isArray(apparelPayload.products) ? apparelPayload.products : [],
-        leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : [],
-        leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : [],
-        notifications: notificationRows,
-        shadowFights: fights.filter((fight) => Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow'))),
-        affiliateCampaigns: Array.isArray(leaguePayload.affiliateCampaigns) ? leaguePayload.affiliateCampaigns : [],
-        stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : {},
-      };
+    // Secondary collections are intentionally parallel but are not allowed to block
+    // the first useful render. This removes the old "wait for the slowest of 10 APIs" behavior.
+    const secondaryPromise = Promise.allSettled([
+      fetchPublicFights({ limit: 100, hydrateImages: false }),
+      fetchPublicLeaderboard({ limit: 24 }),
+      fetchPublicBlogs({ limit: 6 }),
+      safeFetchJson('/api/public/apparel-products', { limit: 8 }),
+      safeFetchJson('/api/public/leagues', { limit: 12 }),
+      userId ? fetchSignedInNotifications(userId) : Promise.resolve([]),
+    ]);
+
+    criticalPromise.then(([playableResult, promotedResult, summaryResult, entriesResult]) => {
+      if (!active) return;
+      const partial = composeExperienceData({
+        playableRows: playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [],
+        promotedRows: promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [],
+        summary: summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {},
+        entryRows: entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [],
+      }, cached || EMPTY_DATA);
+      setData(partial);
+      setIsLoading(false);
+    }).catch(() => {
+      if (active) setIsLoading(false);
+    });
+
+    Promise.all([criticalPromise, secondaryPromise]).then(([criticalResults, secondaryResults]) => {
+      if (!active) return;
+      const [playableResult, promotedResult, summaryResult, entriesResult] = criticalResults;
+      const [publicResult, leaderboardResult, blogsResult, apparelResult, leaguesResult, notificationsResult] = secondaryResults;
+      const nextData = composeExperienceData({
+        playableRows: playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [],
+        publicRows: publicResult.status === 'fulfilled' && Array.isArray(publicResult.value) ? publicResult.value : [],
+        promotedRows: promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [],
+        summary: summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {},
+        leaderboardPayload: leaderboardResult.status === 'fulfilled' ? leaderboardResult.value || {} : {},
+        blogPayload: blogsResult.status === 'fulfilled' ? blogsResult.value || {} : {},
+        apparelPayload: apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {},
+        leaguePayload: leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {},
+        entryRows: entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [],
+        notificationRows: notificationsResult.status === 'fulfilled' && Array.isArray(notificationsResult.value) ? notificationsResult.value : [],
+      }, cached || EMPTY_DATA);
       setData(nextData);
       writeExperienceCache(cacheKey, nextData);
       setIsLoading(false);

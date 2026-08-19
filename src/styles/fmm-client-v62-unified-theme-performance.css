@@ -1,0 +1,629 @@
+/* v62 — unified app/website design pass based on the latest client handoff. */
+:root {
+  --fmm-v62-bg: #05060a;
+  --fmm-v62-surface: #0b0c12;
+  --fmm-v62-surface-2: #11131b;
+  --fmm-v62-border: rgba(255, 255, 255, 0.1);
+  --fmm-v62-red: #ef4444;
+  --fmm-v62-blue: #4d8dff;
+  --fmm-v62-gold: #f2b544;
+  --fmm-v62-green: #22c55e;
+  --fmm-v62-purple: #a855f7;
+  --fmm-v62-text: #fff;
+  --fmm-v62-muted: rgba(255, 255, 255, 0.64);
+  --fmm-v62-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+}
+
+html,
+body,
+#__next {
+  background: var(--fmm-v62-bg);
+}
+
+/* ---------------------------- Home / unified app ---------------------------- */
+.fmm-exact-mobile-portal .fmm-unified-arena-bg,
+.fmm-exact-mobile-portal .fmm-unified-arena-bg > div,
+.fmm-exact-mobile-portal .fmm-unified-arena-bg img {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fmm-exact-mobile-portal .fmm-unified-arena-bg img {
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+.fmm-exact-mobile-portal .fmm-unified-featured-fighter > div,
+.fmm-exact-mobile-portal .fmm-unified-featured-fighter img {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fmm-exact-mobile-portal .fmm-unified-featured-fighter img {
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.78));
+}
+
+@media (max-width: 767px) {
+  /* The latest handoff uses the complete 853x700 mobile banner. Old v11-v49
+     rules were fighting over fixed heights/aspect ratios, causing cropping. */
+  .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: 853 / 700 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+  }
+
+  .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero picture,
+  .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero picture img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero picture img {
+    object-fit: cover !important;
+    object-position: center top !important;
+  }
+
+  .fmm-exact-mobile-portal .fmm-unified-featured-week {
+    min-height: 200px !important;
+    isolation: isolate;
+  }
+
+  .fmm-exact-mobile-portal .fmm-unified-featured-content {
+    min-height: 200px !important;
+    z-index: 3;
+  }
+
+  .fmm-exact-mobile-portal .fmm-unified-featured-fighter {
+    z-index: 1;
+    width: 38% !important;
+    opacity: 0.92;
+  }
+
+  .fmm-exact-mobile-portal .fmm-unified-featured-overlay {
+    z-index: 2;
+  }
+
+  .fmm-exact-mobile-portal .fmm-unified-featured-fight {
+    min-height: 276px;
+    isolation: isolate;
+  }
+
+  .fmm-exact-mobile-portal .fmm-unified-featured-fight-content {
+    z-index: 2;
+  }
+}
+
+@media (min-width: 768px) {
+  .fmm-exact-mobile-portal.is-desktop-shell {
+    padding: 0 24px !important;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(239, 68, 68, 0.16), transparent 33rem),
+      radial-gradient(circle at 92% 16%, rgba(77, 141, 255, 0.16), transparent 35rem),
+      linear-gradient(180deg, #05060a, #070810 50%, #05060a) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell > div {
+    width: min(1500px, 100%) !important;
+    max-width: 1500px !important;
+    border-left: 1px solid rgba(242, 181, 68, 0.08) !important;
+    border-right: 1px solid rgba(77, 141, 255, 0.08) !important;
+    box-shadow: 0 0 110px rgba(77, 141, 255, 0.1), 0 0 180px rgba(239, 68, 68, 0.07) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-prototype-scroll {
+    padding: 24px 0 70px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-prototype-view--home {
+    width: min(1360px, calc(100% - 48px)) !important;
+    max-width: 1360px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-prototype-view--home .fmm-app-hero {
+    width: calc(100% - 32px) !important;
+    margin: 0 16px 18px !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(242, 181, 68, 0.25) !important;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42), 0 0 36px rgba(239, 68, 68, 0.12) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-ticker {
+    margin: 0 16px 22px !important;
+    border-radius: 14px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-week {
+    min-height: 330px !important;
+    margin: 0 16px 24px !important;
+    border-radius: 24px !important;
+    border-width: 1px !important;
+    box-shadow: var(--fmm-v62-shadow), 0 0 36px rgba(242, 181, 68, 0.12) !important;
+    isolation: isolate;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-content {
+    min-height: 330px !important;
+    padding: 30px 36px !important;
+    justify-content: center !important;
+    z-index: 3;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-content h2 {
+    font-size: clamp(34px, 3.2vw, 52px) !important;
+    letter-spacing: 0.5px !important;
+    margin: 8px 0 12px !important;
+    text-shadow: 0 3px 18px rgba(0, 0, 0, 0.88) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-content > div:last-of-type {
+    max-width: 470px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fighter {
+    width: 37% !important;
+    top: 18px !important;
+    z-index: 1;
+    opacity: 0.98;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-overlay {
+    z-index: 2;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming {
+    padding: 0 16px 24px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming > div:first-child {
+    margin-bottom: 13px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming > div:first-child > div:first-child {
+    font-size: 14px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming-rail {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming-card {
+    flex: initial !important;
+    min-width: 0 !important;
+    border-radius: 18px !important;
+    background: linear-gradient(180deg, rgba(17, 19, 27, 0.96), rgba(7, 8, 14, 0.98)) !important;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming-card > div[style*="height: 150px"] {
+    height: 210px !important;
+    background: #05060a !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight {
+    min-height: 370px !important;
+    margin: 0 16px 26px !important;
+    padding: 28px 34px !important;
+    border-radius: 24px !important;
+    box-shadow: var(--fmm-v62-shadow), 0 0 38px rgba(77, 141, 255, 0.12) !important;
+    isolation: isolate;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content {
+    width: min(820px, 82%) !important;
+    margin: 0 auto !important;
+    z-index: 2;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content > div:nth-child(2) {
+    gap: 28px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content > div:nth-child(2) > div:first-child,
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content > div:nth-child(2) > div:last-child {
+    width: 126px !important;
+    height: 126px !important;
+    flex-basis: 126px !important;
+    border: 2px solid rgba(242, 181, 68, 0.45) !important;
+    box-shadow: 0 0 26px rgba(242, 181, 68, 0.16) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content > div:nth-child(2) > div:nth-child(2) {
+    font-size: clamp(25px, 2.2vw, 36px) !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content > div:nth-child(4) {
+    gap: 12px !important;
+  }
+
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-featured-fight-content > div:nth-child(4) > div {
+    padding: 12px !important;
+    background: rgba(5, 6, 10, 0.56) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1120px) {
+  .fmm-exact-mobile-portal.is-desktop-shell .fmm-unified-upcoming-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ---------------------------- Unified page theme ---------------------------- */
+.experience-page,
+.route-experience-page,
+.player-command-page,
+.affiliate-dashboard-experience-page,
+.auth-experience-page {
+  color: var(--fmm-v62-text);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(239, 68, 68, 0.12), transparent 34rem),
+    radial-gradient(circle at 90% 5%, rgba(77, 141, 255, 0.12), transparent 34rem),
+    var(--fmm-v62-bg) !important;
+}
+
+.theme-container {
+  width: min(1240px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.theme-btn,
+.player-command-page button,
+.affiliate-dashboard-experience-page button,
+.auth-experience-page button {
+  transition: transform 150ms ease, filter 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.theme-btn:hover,
+.player-command-page button:hover,
+.affiliate-dashboard-experience-page button:hover,
+.auth-experience-page button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.theme-btn-primary,
+.player-command-primary,
+.xp-auth-submit {
+  background: linear-gradient(100deg, #ffd873 0%, var(--fmm-v62-gold) 48%, #e49d25 100%) !important;
+  color: #241500 !important;
+  border-color: rgba(255, 228, 152, 0.72) !important;
+  box-shadow: 0 12px 26px rgba(242, 181, 68, 0.24) !important;
+}
+
+.theme-btn-secondary {
+  background: rgba(77, 141, 255, 0.1) !important;
+  border-color: rgba(77, 141, 255, 0.38) !important;
+  color: #d9e4ff !important;
+}
+
+/* Login / registration */
+.auth-experience-page {
+  min-height: calc(100vh - 80px) !important;
+  padding: clamp(22px, 4vw, 54px) 20px !important;
+}
+
+.auth-experience-page .xp-auth-shell {
+  width: min(1240px, 100%) !important;
+  min-height: min(760px, calc(100vh - 128px)) !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 28px !important;
+  background: rgba(7, 8, 13, 0.94) !important;
+  box-shadow: var(--fmm-v62-shadow), 0 0 54px rgba(77, 141, 255, 0.08) !important;
+}
+
+.auth-experience-page .xp-auth-art {
+  position: relative !important;
+  background:
+    linear-gradient(180deg, rgba(5, 6, 10, 0.16), rgba(5, 6, 10, 0.88)),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.18), transparent 48%, rgba(77, 141, 255, 0.16)),
+    url('/images/mobile-home/final-v35/arena-approved-v62.webp') center / cover no-repeat !important;
+}
+
+.auth-experience-page .xp-auth-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 65%, rgba(5, 6, 10, 0.86));
+}
+
+.auth-experience-page .xp-auth-art-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 580px !important;
+}
+
+.auth-experience-page .xp-auth-art-copy h1,
+.auth-experience-page .xp-auth-heading h2 {
+  letter-spacing: 0.3px;
+}
+
+.auth-experience-page .xp-auth-art-copy h1 span,
+.auth-experience-page .xp-auth-heading > span,
+.auth-experience-page .xp-eyebrow {
+  color: var(--fmm-v62-gold) !important;
+}
+
+.auth-experience-page .xp-auth-panel {
+  background: linear-gradient(180deg, rgba(14, 15, 22, 0.98), rgba(6, 7, 11, 0.99)) !important;
+}
+
+.auth-experience-page .xp-auth-mode-switch,
+.auth-experience-page .xp-auth-role-switcher,
+.auth-experience-page .xp-auth-input,
+.auth-experience-page .xp-auth-upload-card,
+.auth-experience-page .xp-auth-completion-card {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.auth-experience-page .xp-auth-mode-switch button.is-active,
+.auth-experience-page .xp-auth-role-switcher button.is-active {
+  background: linear-gradient(135deg, rgba(242, 181, 68, 0.2), rgba(239, 68, 68, 0.12)) !important;
+  border-color: rgba(242, 181, 68, 0.58) !important;
+  color: #fff5d8 !important;
+  box-shadow: inset 0 0 18px rgba(242, 181, 68, 0.08) !important;
+}
+
+.auth-experience-page .xp-auth-input:focus-within {
+  border-color: rgba(77, 141, 255, 0.68) !important;
+  box-shadow: 0 0 0 3px rgba(77, 141, 255, 0.1) !important;
+}
+
+/* User dashboard */
+.player-command-page {
+  min-height: 100vh;
+}
+
+.player-command-page .player-command-hero {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 10, 0.92) 0%, rgba(5, 6, 10, 0.62) 48%, rgba(5, 6, 10, 0.86) 100%),
+    url('/images/mobile-home/final-v35/arena-approved-v62.webp') center / cover no-repeat !important;
+  border-bottom: 1px solid rgba(242, 181, 68, 0.18) !important;
+}
+
+.player-command-page .player-command-hero-copy > p:first-child,
+.player-command-page .player-command-hero-copy h1 span,
+.player-command-page .player-command-section h2,
+.player-command-page .player-command-quick-section h2 {
+  color: var(--fmm-v62-gold) !important;
+}
+
+.player-command-page .player-command-next-card,
+.player-command-page .player-command-stat-grid > *,
+.player-command-page .player-command-quick-grid > *,
+.player-command-page .player-command-fight-card,
+.player-command-page .player-command-wrestling-feature,
+.player-command-page .player-command-testimonial {
+  background: linear-gradient(180deg, rgba(17, 19, 27, 0.95), rgba(7, 8, 13, 0.98)) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28) !important;
+}
+
+.player-command-page .player-command-main {
+  padding-top: 30px !important;
+  padding-bottom: 56px !important;
+}
+
+/* Affiliate dashboard */
+.affiliate-dashboard-experience-page .xp-affiliate-hero {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 10, 0.9), rgba(5, 6, 10, 0.52), rgba(5, 6, 10, 0.88)),
+    url('/images/mobile-home/final-v35/arena-approved-v62.webp') center / cover no-repeat !important;
+  border-bottom: 1px solid rgba(242, 181, 68, 0.18) !important;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-profile-card,
+.affiliate-dashboard-experience-page .xp-affiliate-pipeline-card,
+.affiliate-dashboard-experience-page .xp-dashboard-stat-grid > *,
+.affiliate-dashboard-experience-page .xp-affiliate-fight-card,
+.affiliate-dashboard-experience-page .affiliate-wrestling-command-module,
+.affiliate-dashboard-experience-page .affiliate-dashboard-community-final {
+  background: linear-gradient(180deg, rgba(17, 19, 27, 0.95), rgba(7, 8, 13, 0.98)) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28) !important;
+}
+
+.affiliate-dashboard-experience-page .xp-eyebrow,
+.affiliate-dashboard-experience-page h1 span,
+.affiliate-dashboard-experience-page .xp-page-section > div:first-child {
+  color: var(--fmm-v62-gold) !important;
+}
+
+/* All route-framed public/product pages use the same visual system. */
+.route-experience-page .route-experience-hero {
+  min-height: 300px !important;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 10, 0.92), rgba(5, 6, 10, 0.5) 56%, rgba(5, 6, 10, 0.82)),
+    var(--route-experience-bg) center / cover no-repeat !important;
+  border-bottom: 1px solid rgba(242, 181, 68, 0.16) !important;
+}
+
+.route-experience-page .route-experience-eyebrow,
+.route-experience-page .route-experience-copy h1 span {
+  color: var(--fmm-v62-gold) !important;
+}
+
+.route-experience-page .route-experience-content {
+  background:
+    radial-gradient(circle at 8% 6%, rgba(239, 68, 68, 0.08), transparent 30rem),
+    radial-gradient(circle at 92% 8%, rgba(77, 141, 255, 0.08), transparent 30rem),
+    var(--fmm-v62-bg) !important;
+}
+
+.route-experience-page .route-experience-content :is(.card, article, section[class*='card'], div[class*='card']) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Keep expensive paint effects away from offscreen desktop content. */
+@media (min-width: 768px) {
+  .fmm-prototype-view--home > div,
+  .route-experience-content > *,
+  .player-command-main > *,
+  .affiliate-dashboard-main-final > * {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
+  }
+}
+
+@media (max-width: 900px) {
+  .auth-experience-page .xp-auth-shell {
+    border-radius: 20px !important;
+  }
+
+  .auth-experience-page .xp-auth-art::after {
+    background: linear-gradient(180deg, transparent 58%, rgba(5, 6, 10, 0.88));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fmm-exact-mobile-portal *,
+  .experience-page *,
+  .route-experience-page * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Lightweight route fallback: the approved hero paints while the large interactive
+   app chunk hydrates, so users never stare at an empty shell on a cold visit. */
+.fmm-app-route-loading {
+  position: fixed;
+  z-index: 900;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  background: #05060a;
+}
+
+.fmm-app-route-loading picture,
+.fmm-app-route-loading img {
+  display: block;
+  width: 100%;
+}
+
+.fmm-app-route-loading img {
+  height: auto;
+  object-fit: contain;
+  background: #000;
+}
+
+.fmm-app-route-loading-bar {
+  width: min(280px, 54vw);
+  height: 3px;
+  margin: 22px auto 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fmm-app-route-loading-bar::after {
+  content: '';
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ef4444, #f2b544, #4d8dff);
+  animation: fmmV62Load 900ms ease-in-out infinite alternate;
+}
+
+@keyframes fmmV62Load {
+  from { transform: translateX(-10%); }
+  to { transform: translateX(150%); }
+}
+
+@media (max-width: 767px) {
+  .fmm-app-route-loading {
+    top: 0;
+  }
+  .fmm-app-route-loading picture,
+  .fmm-app-route-loading img {
+    width: 100%;
+    aspect-ratio: 853 / 700;
+    object-fit: cover;
+  }
+}
+
+/* Desktop navigation gets the same fight-night chrome instead of reading as a
+   separate legacy website. */
+@media (min-width: 768px) {
+  .header.theme-header {
+    height: 80px !important;
+    padding-inline: clamp(18px, 3vw, 48px) !important;
+    background: rgba(5, 6, 10, 0.9) !important;
+    border-bottom: 1px solid rgba(242, 181, 68, 0.16) !important;
+    box-shadow: 0 10px 38px rgba(0, 0, 0, 0.34) !important;
+    backdrop-filter: blur(16px) saturate(125%);
+  }
+
+  .header.theme-header .theme-brand {
+    min-width: 166px;
+  }
+
+  .header.theme-header .theme-brand-logo {
+    filter: drop-shadow(0 0 16px rgba(242, 181, 68, 0.15));
+  }
+
+  .header.theme-header .theme-nav {
+    gap: 2px !important;
+    padding: 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.025) !important;
+  }
+
+  .header.theme-header :is(.theme-nav-link, .theme-nav-button) {
+    min-height: 38px !important;
+    border-radius: 999px !important;
+    color: rgba(255, 255, 255, 0.74) !important;
+  }
+
+  .header.theme-header :is(.theme-nav-link, .theme-nav-button):hover,
+  .header.theme-header :is(.theme-nav-link, .theme-nav-button).is-open {
+    color: #fff !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(77, 141, 255, 0.12)) !important;
+  }
+
+  .header.theme-header .theme-nav-menu {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(7, 8, 13, 0.98) !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(18px);
+  }
+
+  .header.theme-header .theme-user-chip {
+    border-color: rgba(242, 181, 68, 0.2) !important;
+    background: rgba(242, 181, 68, 0.06) !important;
+  }
+}

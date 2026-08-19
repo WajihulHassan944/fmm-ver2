@@ -21,16 +21,16 @@ const InvitePage = () => {
         />
         <meta property="og:title" content="Join Fantasy MMAdness – Get 20 Free Tokens!" />
         <meta property="og:description" content="Sign up now using a referral link and earn 20 free tokens to play fantasy boxing and combat sports games!" />
-        <meta property="og:image" content="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
+        <meta property="og:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
         <meta property="og:url" content="https://fantasymmadness.com/invite" />
         <meta property="og:type" content="website" />
         
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Join Fantasy MMAdness – Get 20 Free Tokens!" />
         <meta name="twitter:description" content="Earn tokens by joining through referrals and play our fantasy boxing league for free!" />
-        <meta name="twitter:image" content="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
+        <meta name="twitter:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
 
-        <link rel="icon" href="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1746109925/mmuxewnnzsm3tvh3lzat.png" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className='invite-container'>
