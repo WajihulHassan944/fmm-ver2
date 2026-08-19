@@ -192,3 +192,19 @@
     .fm-shell { padding: 0 !important; background: #05060a !important; }
     .fm-shell > div { transform: none !important; width: 100vw !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
   }
+
+/* Keep the long app homepage responsive by deferring layout/paint for sections
+   that are still below the viewport. The visible hero and nearby content render
+   normally, while deep sections become cheap until the user scrolls to them. */
+.fmm-exact-mobile-portal .fmm-prototype-view--home > div {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
+@media (max-width: 767px) {
+  .fmm-exact-mobile-portal .fmm-app-hero picture,
+  .fmm-exact-mobile-portal .fmm-app-hero img {
+    width: 100%;
+    display: block;
+  }
+}

@@ -106,6 +106,7 @@ const navigationGroups = [
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
       { label: 'July 10K growth', href: '/administration/july-growth', icon: FaBolt },
       { label: 'SEO growth center', href: '/administration/seo-growth', icon: FaSearch },
+      { label: 'Jarvis AI assistant', href: '/administration/jarvis', icon: FaRobot },
       { label: 'Content assistants', href: '/administration/BlogsAiBot', icon: FaRobot, matchPrefixes: ['/administration/SocialAiBot'] },
       { label: 'Social publishing', href: '/administration/MakePost', icon: FaPlus, matchPrefixes: ['/administration/tweet', '/administration/tiktok'] },
       { label: 'Video archive', href: '/administration/YoutubeArchive', icon: FaVideo },

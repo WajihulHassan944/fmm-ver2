@@ -241,12 +241,10 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     const selectedWinner = ['a', 'b'].includes(String(prediction?.winner || '').toLowerCase())
       ? String(prediction.winner).toLowerCase()
       : '';
-    if (!isAuthenticated) {
-      const destination = id ? `/fight/${id}?play=1${selectedWinner ? `&pick=${selectedWinner}` : ''}` : '/UserDashboard';
-      router.push(`/login?next=${encodeURIComponent(destination)}`);
-      return false;
-    }
-    router.push(id ? `/fight/${id}?play=1${selectedWinner ? `&pick=${selectedWinner}` : ''}` : '/UserDashboard');
+    const destination = id ? `/fight/${id}?play=1${selectedWinner ? `&pick=${selectedWinner}` : ''}` : '/UserDashboard';
+    // Prediction CTAs must open the real fight/prediction flow first. Guests can
+    // review the fight there and are asked to authenticate only when entry is required.
+    router.push(destination);
     return false;
   };
 

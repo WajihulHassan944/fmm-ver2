@@ -197,9 +197,11 @@ const MOBILE_APP_ROUTE_TABS = {
   "/fights": "contests",
   "/upcomingfights": "contests",
   "/UserDashboard": "predict",
+  "/YourFights": "contests",
   "/leaderboard": "leaderboard",
   "/global-leaderboard": "leaderboard",
   "/FantasyLeagues": "leagues",
+  "/myLeagueRecords": "leagues",
   "/watch-party": "watch",
   "/profile": "profile",
   "/account-settings": "settings",
@@ -294,7 +296,9 @@ function AppContent({ children }) {
     router.pathname,
   );
   const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
-  const forcePrototypeExperience = FULLSCREEN_PROTOTYPE_ROUTES.has(router.pathname);
+  // Product routes are one responsive app now: use the approved app shell on
+  // both phone and desktop instead of falling back to legacy page bodies.
+  const forcePrototypeExperience = Boolean(exactMobileTab);
   // Render the phone shell in the initial HTML for mapped routes. CSS keeps it
   // hidden on desktop, while mobile no longer waits for a post-hydration chunk
   // and media-query state update before the app appears.

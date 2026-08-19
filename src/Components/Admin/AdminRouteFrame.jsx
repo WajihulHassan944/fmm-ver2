@@ -103,6 +103,11 @@ const ROUTE_COPY = {
     title: 'SEO & growth control center',
     description: 'Review swarm SEO audits, metadata, internal-link previews, content calendars, and traffic-growth actions from one approval-safe workspace.',
   },
+  '/administration/jarvis': {
+    eyebrow: 'AI operations',
+    title: 'Jarvis AI assistant',
+    description: 'Ask a read-only operations copilot about fight workflows, content, promotions, data quality, and the current back-office automation state.',
+  },
   '/administration/BlogsAiBot': {
     eyebrow: 'Automation',
     title: 'Blog AI bot',

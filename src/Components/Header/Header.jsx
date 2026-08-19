@@ -333,7 +333,7 @@ const Header = () => {
 
   const mobileLinks = [
     { label: 'Contests', href: '/upcomingfights', icon: FaTrophy },
-    { label: 'Make Predictions', href: '/upcomingfights', icon: FaBullseye },
+    { label: 'Make Predictions', href: '/UserDashboard', icon: FaBullseye },
     { label: 'Leaderboard', href: '/leaderboard', icon: FaCrown },
     { label: 'Leagues', href: '/FantasyLeagues', icon: FaTrophy },
     { label: 'Apparel', href: '/apparel', icon: FaGift },
