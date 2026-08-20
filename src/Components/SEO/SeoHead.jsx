@@ -31,6 +31,9 @@ const SeoHead = ({ title, description, image, keywords, type = 'website', schema
   const finalDescription = cleanDescription(description || fallback.description);
   const finalImage = image || fallback.image;
   const finalKeywords = keywords || fallback.keywords;
+  const isFinalBrandCover = String(finalImage || '').includes('fantasy-mmadness-link-cover-final.png');
+  const finalImageWidth = isFinalBrandCover ? '1536' : '1200';
+  const finalImageHeight = isFinalBrandCover ? '1024' : '630';
   const canonical = getCanonicalUrl(path);
   const shouldNoIndex = typeof noIndex === 'boolean' ? noIndex : shouldNoIndexPath(path);
   const breadcrumbSchema = buildBreadcrumbSchema(path);
@@ -52,8 +55,8 @@ const SeoHead = ({ title, description, image, keywords, type = 'website', schema
       <meta key="og:description" property="og:description" content={finalDescription} />
       <meta key="og:url" property="og:url" content={canonical} />
       <meta key="og:image" property="og:image" content={finalImage} />
-      <meta key="og:image:width" property="og:image:width" content="1200" />
-      <meta key="og:image:height" property="og:image:height" content="630" />
+      <meta key="og:image:width" property="og:image:width" content={finalImageWidth} />
+      <meta key="og:image:height" property="og:image:height" content={finalImageHeight} />
       <meta key="og:image:alt" property="og:image:alt" content={`${SITE_NAME} combat sports fantasy experience`} />
 
       <meta key="twitter:card" name="twitter:card" content="summary_large_image" />

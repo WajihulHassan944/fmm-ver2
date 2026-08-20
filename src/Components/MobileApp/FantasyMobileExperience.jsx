@@ -367,6 +367,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
           if (email.trim()) query.set('email', email.trim());
           router.push(`/CreateAccount${query.toString() ? `?${query.toString()}` : ''}`);
         }}
+        onOpenHome={() => router.push('/')}
         onOpenApparel={() => router.push('/apparel')}
         onOpenAffiliateDashboard={() => router.push(isAuthenticated ? '/AffiliateDashboard' : `/login?next=${encodeURIComponent('/AffiliateDashboard')}`)}
         onEnablePush={enableBrowserAlerts}

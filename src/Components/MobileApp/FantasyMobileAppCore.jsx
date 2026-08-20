@@ -654,6 +654,12 @@ class FantasyMobileAppCore extends React.Component {
   closeModal = () => this.setState({ modal: null, modalData: null });
 
   setTab = (tab) => {
+    // Home has one canonical implementation. Never expose the legacy prototype
+    // home through an internal tab transition; route back to the real homepage.
+    if (tab === 'home' && typeof this.props.onOpenHome === 'function') {
+      this.props.onOpenHome();
+      return;
+    }
     if (tab === 'watch' && this.state.activeTab !== 'watch') this.startWatchTicker();
     if (tab !== 'watch' && this.state.activeTab === 'watch') this.stopWatchTicker();
     this.setState({ activeTab: tab, modal: null });

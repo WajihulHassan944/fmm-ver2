@@ -23,14 +23,14 @@ const PlayForFree = () => {
         />
         <meta property="og:title" content="Play for Free – Fantasy Boxing League & Game" />
         <meta property="og:description" content="Experience the thrill of fantasy boxing without any financial risk. Sign up for free, make predictions, and compete with others in our fantasy boxing game!" />
-        <meta property="og:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
+        <meta property="og:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-link-cover-final.png" />
         <meta property="og:url" content="https://fantasymmadness.com/play-for-free" />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Play for Free – Fantasy Boxing League & Game" />
         <meta name="twitter:description" content="Join Fantasy MMAdness and enjoy our free fantasy boxing game. Compete, predict fights, and earn tokens – all without spending a dime." />
-        <meta name="twitter:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
+        <meta name="twitter:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-link-cover-final.png" />
 
         <link rel="icon" href="/favicon.ico" />
       </Head>

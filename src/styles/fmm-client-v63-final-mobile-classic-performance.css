@@ -1,0 +1,65 @@
+/* v63 — final client mobile correction: one Home implementation, stable first paint. */
+.fmm-home-v35-final .fmm-v35-hero > picture {
+  display: block;
+  width: 100%;
+  height: auto;
+  line-height: 0;
+}
+
+.fmm-home-v35-final .fmm-v35-hero > picture > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Classic and Bold are display preferences only. Both use the exact same latest
+   DOM/content source; no selector is allowed to reveal legacy Home sections. */
+.fmm-home-v35-final[data-layout="classic"],
+.fmm-home-v35-final[data-layout="bold"] {
+  --fmm-home-current-version: 63;
+}
+
+/* Reserve live-data regions so API enrichment swaps content without pushing the
+   rest of the phone page down after first paint. */
+.fmm-home-v35-final .fmm-v35-event-rail {
+  min-height: 340px;
+  contain: layout paint;
+}
+
+.fmm-home-v35-final .fmm-v35-featured-week,
+.fmm-home-v35-final .fmm-v35-feature-detail,
+.fmm-home-v35-final .fmm-v35-stats,
+.fmm-home-v35-final .fmm-v35-dashboard {
+  contain: layout paint;
+}
+
+@media (max-width: 767px) {
+  .fmm-home-v35-final .fmm-v35-hero > picture {
+    aspect-ratio: 853 / 700;
+  }
+  .fmm-home-v35-final .fmm-v35-hero > picture > img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+  }
+  .fmm-home-v35-final .fmm-v35-event-rail {
+    min-height: 316px;
+  }
+}
+
+@media (min-width: 768px) {
+  .fmm-home-v35-final .fmm-v35-hero > picture {
+    aspect-ratio: 1983 / 793;
+  }
+  .fmm-home-v35-final .fmm-v35-hero > picture > img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+  .fmm-home-v35-final .fmm-v35-event-rail {
+    min-height: 390px;
+  }
+}
