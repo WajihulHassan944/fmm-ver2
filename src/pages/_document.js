@@ -80,10 +80,10 @@ export default function Document() {
         />
         <meta
           property="og:image"
-          content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-link-cover-final.png"
+          content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg"
         />
-        <meta property="og:image:width" content="1536" />
-        <meta property="og:image:height" content="1024" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content="https://www.fantasymmadness.com" />
         <meta property="og:type" content="website" />
 
@@ -99,7 +99,7 @@ export default function Document() {
         />
         <meta
           name="twitter:image"
-          content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-link-cover-final.png"
+          content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg"
         />
 
         <script

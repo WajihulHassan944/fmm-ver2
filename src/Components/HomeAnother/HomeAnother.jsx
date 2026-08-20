@@ -167,9 +167,7 @@ const getHomeFightPosterImage = (fight = {}) =>
     fight?.homepagePromotion?.mobilePosterImage,
   );
 
-const HOME_FIGHT_FEED_LIMIT = 36;
-const HOME_CRITICAL_FIGHT_LIMIT = 18;
-const HOME_PROMOTED_LIMIT = 16;
+const HOME_FIGHT_FEED_LIMIT = 200;
 const HOME_CATEGORY_PREVIEW_LIMIT = 4;
 const PLAYER_SIGNUP_HREF = "/CreateAccount";
 
@@ -1887,7 +1885,7 @@ const MobilePhoneHome = ({
       </section>
 
       <section className="fmm-app-featured-week" aria-labelledby="fmm-app-featured-title">
-        <img className="fmm-app-featured-bg" src={`${appAssetBase}/pasted-1785015130714-v63.webp`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <img className="fmm-app-featured-bg" src={`${appAssetBase}/pasted-1785015130714-0.png`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
         <div className="fmm-app-featured-cutout is-left">
           <FightImage src={getHomeFighterImage(featuredFight, "A", 0) || `${appAssetBase}/transparent-featured-left.png`} alt={fighterA} width={214} height={235} priority sizes="22vw" />
         </div>
@@ -1972,7 +1970,7 @@ const MobilePhoneHome = ({
 
       <section className="fmm-app-watch-leagues" aria-label="Live watch party and leagues">
         <Link href="/pro-wrestling" onClick={() => onPremiumTap("whoosh")}>
-          <img src={`${appAssetBase}/pasted-1785015130714-v63.webp`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+          <img src={`${appAssetBase}/pasted-1785015130714-0.png`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <span>🔴 LIVE NOW</span>
           <strong>WATCH PARTY</strong>
           <small>Live scoring · crowd reactions</small>
@@ -2201,71 +2199,71 @@ const HomeAnother = () => {
 
   useEffect(() => {
     let active = true;
-    let refreshTimer;
+    let firstLoad = true;
 
-    const applySummary = (summary = {}) => {
-      if (!active) return [];
-      const rows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
-      const cleaned = orderFightsForDisplay(rows.filter((fight) => !isPastHomeFight(fight)));
-      setHomepageMatches(cleaned);
-      setHomepageLeaderboard(Array.isArray(summary.leaderboard) ? summary.leaderboard : []);
-      setHomepageStats(summary?.stats && typeof summary.stats === "object" ? summary.stats : {});
-      setMatchStatus("succeeded");
-      return rows;
-    };
-
-    const enrichHomepage = async (summaryRows = []) => {
-      const [predictionResult, promotedResult] = await Promise.allSettled([
-        fetchPublicPredictionFights({
-          limit: HOME_FIGHT_FEED_LIMIT,
-          status: "upcoming",
-          hydrateImages: false,
-        }),
-        fetchPromotedHomeFights({ limit: HOME_PROMOTED_LIMIT }),
-      ]);
-      if (!active) return;
-
-      const predictionFights = predictionResult.status === "fulfilled" && Array.isArray(predictionResult.value)
-        ? predictionResult.value
-        : [];
-      const promotedFights = promotedResult.status === "fulfilled" && Array.isArray(promotedResult.value)
-        ? promotedResult.value
-        : [];
-      const fights = dedupeHomepageFights([...predictionFights, ...summaryRows]);
-
-      // Structure is already on screen from the critical summary. Enrichment only
-      // swaps live data into reserved cards; it does not mount a second homepage.
-      setHomepageMatches(orderFightsForDisplay(fights.filter((fight) => !isPastHomeFight(fight))));
-      setPromotedHeroFights(
-        orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals).filter((fight) => !isPastHomeFight(fight))),
-      );
-    };
-
-    const loadHomepageFights = async ({ firstLoad = false } = {}) => {
+    const loadHomepageFights = async () => {
       if (firstLoad) setMatchStatus("loading");
       setMatchError(null);
 
       try {
-        // Only the compact summary is first-paint critical. The old implementation
-        // blocked the whole homepage on three independent requests (including a
-        // much larger prediction feed), producing the 2–3 second staged appearance.
-        const summary = await fetchPublicHomeSummary({
-          fightLimit: HOME_CRITICAL_FIGHT_LIMIT,
-          leaderboardLimit: 5,
-        });
-        const summaryRows = applySummary(summary || {});
-        enrichHomepage(summaryRows).catch(() => {});
+        const [summaryResult, predictionResult, promotedResult] =
+          await Promise.allSettled([
+            fetchPublicHomeSummary({
+              fightLimit: HOME_FIGHT_FEED_LIMIT,
+              leaderboardLimit: 5,
+            }),
+            fetchPublicPredictionFights({
+              limit: HOME_FIGHT_FEED_LIMIT,
+              status: "upcoming",
+              hydrateImages: false,
+            }),
+            fetchPromotedHomeFights({ limit: 45 }),
+          ]);
+        const summary =
+          summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};
+        const summaryFights = Array.isArray(summary.featuredFights)
+          ? summary.featuredFights
+          : [];
+        const predictionFights =
+          predictionResult.status === "fulfilled" &&
+          Array.isArray(predictionResult.value)
+            ? predictionResult.value
+            : [];
+        const promotedFights =
+          promotedResult.status === "fulfilled" &&
+          Array.isArray(promotedResult.value)
+            ? promotedResult.value
+            : [];
+        const fights = dedupeHomepageFights([
+          ...predictionFights,
+          ...summaryFights,
+        ]);
+
+        if (!active) return;
+
+        setHomepageMatches(orderFightsForDisplay((fights || []).filter((fight) => !isPastHomeFight(fight))));
+        setPromotedHeroFights(
+          orderFightsForDisplay(promotedFights.map(hydrateHomeFightVisuals).filter((fight) => !isPastHomeFight(fight))),
+        );
+        setHomepageLeaderboard(
+          Array.isArray(summary.leaderboard) ? summary.leaderboard : [],
+        );
+        setHomepageStats(summary?.stats && typeof summary.stats === "object" ? summary.stats : {});
+        setMatchStatus("succeeded");
+        firstLoad = false;
       } catch (error) {
         if (!active) return;
+        setHomepageMatches([]);
+        setPromotedHeroFights([]);
+        setHomepageStats({});
         if (firstLoad) setMatchStatus("failed");
-        setMatchError(error?.message || "Unable to load fights");
-        // The static/latest design remains fully rendered even if live data is late.
-        enrichHomepage([]).catch(() => {});
+        setMatchError(error.message || "Unable to load fights");
+        firstLoad = false;
       }
     };
 
-    loadHomepageFights({ firstLoad: true });
-    refreshTimer = window.setInterval(() => loadHomepageFights(), 60000);
+    loadHomepageFights();
+    const refreshTimer = window.setInterval(loadHomepageFights, 60000);
 
     return () => {
       active = false;
@@ -2281,24 +2279,24 @@ const HomeAnother = () => {
 
   useEffect(() => {
     let active = true;
-    const loadWrestling = () => wrestlingRequest(
-      "/api/wrestling/matches?limit=8&status=OPEN,LIVE,SCORING",
-    )
-      .then((payload) => {
-        if (active) setWrestlingMatches(safeWrestlingArray(payload?.data));
-      })
-      .catch((requestError) =>
-        console.info("Pro Wrestling homepage module unavailable:", requestError.message),
-      );
-
-    const idleId = typeof window.requestIdleCallback === "function"
-      ? window.requestIdleCallback(loadWrestling, { timeout: 500 })
-      : window.setTimeout(loadWrestling, 120);
+    const timer = window.setTimeout(() => {
+      wrestlingRequest(
+        "/api/wrestling/matches?limit=8&status=OPEN,LIVE,SCORING",
+      )
+        .then((payload) => {
+          if (active) setWrestlingMatches(safeWrestlingArray(payload?.data));
+        })
+        .catch((requestError) =>
+          console.info(
+            "Pro Wrestling homepage module unavailable:",
+            requestError.message,
+          ),
+        );
+    }, 1800);
 
     return () => {
       active = false;
-      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleId);
-      else window.clearTimeout(idleId);
+      window.clearTimeout(timer);
     };
   }, []);
 
@@ -2698,15 +2696,7 @@ const HomeAnother = () => {
         <link
           rel="preload"
           as="image"
-          href="/images/mobile-home/final-v35/hero-banner-crop-v62.webp"
-          media="(max-width: 767px)"
-          fetchPriority="high"
-        />
-        <link
-          rel="preload"
-          as="image"
-          href="/images/mobile-home/final-v35/hero-banner-new.jpg"
-          media="(min-width: 768px)"
+          href={HOME_HERO_IMAGE}
           fetchPriority="high"
         />
         <script

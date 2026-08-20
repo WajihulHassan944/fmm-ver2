@@ -120,7 +120,6 @@ import "@fontsource/rajdhani/600.css";
 import "@fontsource/rajdhani/700.css";
 import "@/styles/fantasy-mobile-app-exact.css";
 import "@/styles/fmm-client-v62-unified-theme-performance.css";
-import "@/styles/fmm-client-v63-final-mobile-classic-performance.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Provider } from "react-redux";
@@ -209,6 +208,8 @@ const routeMatchesPrefix = (pathname = "", prefixes = []) =>
   prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 const MOBILE_APP_ROUTE_TABS = {
+  "/": "home",
+  "/home": "home",
   "/fights": "contests",
   "/upcomingfights": "contests",
   "/YourFights": "contests",
@@ -310,10 +311,12 @@ function AppContent({ children }) {
     router.pathname,
   );
   const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
-  // Keep product sub-routes inside the interactive app shell, but never intercept
-  // `/` or `/home`. Home has one canonical implementation (FinalHomeV35) for
-  // phone + desktop, so Classic/Bold can no longer fall back to the old prototype.
+  // Product routes are one responsive app now: use the approved app shell on
+  // both phone and desktop instead of falling back to legacy page bodies.
   const forcePrototypeExperience = Boolean(exactMobileTab);
+  // Render the phone shell in the initial HTML for mapped routes. CSS keeps it
+  // hidden on desktop, while mobile no longer waits for a post-hydration chunk
+  // and media-query state update before the app appears.
   const renderPrototypeExperience = Boolean(exactMobileTab);
   const renderLegacyExperience = !forcePrototypeExperience && (!exactMobileTab || !isExactMobile);
   const mainClassName = isAdministrationRoute

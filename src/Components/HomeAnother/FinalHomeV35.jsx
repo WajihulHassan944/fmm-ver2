@@ -640,17 +640,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-hero" aria-label="Fantasy MMAdness combat prediction game">
-          <picture>
-            <source media="(max-width: 767px)" srcSet={`${ASSET_BASE}/hero-banner-crop-v62.webp`} />
-            <img
-              src={`${ASSET_BASE}/hero-banner-new.jpg`}
-              alt="Fantasy MMAdness combat prediction game"
-              width="1983"
-              height="793"
-              fetchPriority="high"
-              decoding="async"
-            />
-          </picture>
+          <img src={`${ASSET_BASE}/hero-banner-crop.png`} alt="Fantasy MMAdness combat prediction game" />
           <span className="fmm-v35-hero-flame is-red" aria-hidden="true" />
           <span className="fmm-v35-hero-flame is-blue" aria-hidden="true" />
           <span className="fmm-v35-hero-sparks" aria-hidden="true">
@@ -703,7 +693,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-featured-week" aria-labelledby="fmm-v35-featured-week-title">
-          <img className="fmm-v35-fw-bg" src={`${ASSET_BASE}/pasted-1785015130714-v63.webp`} alt="" aria-hidden="true" />
+          <img className="fmm-v35-fw-bg" src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" aria-hidden="true" />
           <img className="fmm-v35-fw-fighter is-left" src={getFighterImage(featuredThisWeekFight, "A")} alt="" />
           <img className="fmm-v35-fw-fighter is-right" src={getFighterImage(featuredThisWeekFight, "B")} alt="" />
           <div className="fmm-v35-fw-top"><span>★ FEATURED THIS WEEK</span><b>⏱ LIVE NOW</b></div>
@@ -755,7 +745,7 @@ const FinalHomeV35 = ({
         </section>
 
         <section className="fmm-v35-promos" aria-label="Watch party and leagues">
-          <Link href={watchPartyHref}><img src={`${ASSET_BASE}/pasted-1785015130714-v63.webp`} alt="" /><span>🔴 LIVE NOW</span><strong>WATCH PARTY</strong><small>Live scoring · crowd reactions</small></Link>
+          <Link href={watchPartyHref}><img src={`${ASSET_BASE}/pasted-1785015130714-0.png`} alt="" /><span>🔴 LIVE NOW</span><strong>WATCH PARTY</strong><small>Live scoring · crowd reactions</small></Link>
           <Link href={leaguesHref}><img src={`${ASSET_BASE}/pasted-1785012202182-0.png`} alt="" /><span>⚔ COMPETE</span><strong>LEAGUES · H2H</strong><small>Private leagues & wagers</small></Link>
         </section>
 
