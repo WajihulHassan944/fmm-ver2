@@ -761,6 +761,9 @@ class FantasyMobileAppCore extends React.Component {
   openAiScout = (event) => this.openModal('aiScout', event);
   openEvent = (event) => {
     if (!event?.playable) {
+      // Keep the user inside the app: show the in-app fight detail instead of
+      // routing out to the website /fight/<id> page.
+      if (event) { this.openModal('aiScout', event); return; }
       this.props.onOpenFight?.({ event });
       return;
     }
@@ -1040,6 +1043,7 @@ class FantasyMobileAppCore extends React.Component {
 
   openFeaturedPick = (event) => {
     if (!event?.playable) {
+      if (event) { this.openModal('aiScout', event); return; }
       this.props.onOpenFight?.({ event });
       return;
     }
@@ -1560,7 +1564,7 @@ class FantasyMobileAppCore extends React.Component {
     const shadow = normalizeLiveEvent(s.shadowFights[0]);
     if (!shadow.backendId || !shadow.f1 || !shadow.f2) return null;
     return React.createElement('div', { onClick: () => this.openEvent(shadow), style: { margin: '0 16px 16px', borderRadius: 15, overflow: 'hidden', position: 'relative', minHeight: 116, border: '1px solid rgba(168,85,247,.6)', boxShadow: '0 0 24px rgba(168,85,247,.22)', cursor: 'pointer' } },
-      React.createElement('img', { src: `${ASSET_BASE}/mma-arena-bg.jpg`, alt: '', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .42 } }),
+      React.createElement('img', { src: `${ASSET_BASE}/mma-arena-bg-sm.png`, alt: '', loading: 'lazy', decoding: 'async', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: .42 } }),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(5,6,10,.97),rgba(5,6,10,.66))' } }),
       React.createElement('div', { style: { position: 'relative', padding: 14 } },
         React.createElement('div', { style: { color: '#c084fc', fontSize: 9.5, fontWeight: 900, letterSpacing: .9 } }, 'SHADOW FIGHT · AVAILABLE NOW'),
@@ -1598,7 +1602,7 @@ class FantasyMobileAppCore extends React.Component {
     const first = (events || []).find((event) => event.playable);
     if (!first) return null;
     const entryLabel = this.getEventEntryLabel(first);
-    return React.createElement('div', { style: { margin: '0 16px 16px', padding: 14, borderRadius: 14, position: 'relative', overflow: 'hidden', background: `linear-gradient(90deg,#000 35%,rgba(0,0,0,.72) 62%,rgba(0,0,0,.15)),url(${ASSET_BASE}/pick-winner-fighter.png) right center / auto 100% no-repeat,#000`, border: '1.5px solid rgba(242,181,68,.5)' } },
+    return React.createElement('div', { style: { margin: '0 16px 16px', padding: 14, borderRadius: 14, position: 'relative', overflow: 'hidden', background: `linear-gradient(90deg,#000 35%,rgba(0,0,0,.72) 62%,rgba(0,0,0,.15)),url(${ASSET_BASE}/pick-winner-fighter-sm.png) right center / auto 100% no-repeat,#000`, border: '1.5px solid rgba(242,181,68,.5)' } },
       React.createElement('div', { style: { maxWidth: '68%', fontSize: 9.5, fontWeight: 900, letterSpacing: 1, color: '#f2b544', marginBottom: 6 } }, 'START HERE · STEP 1 OF 1'),
       React.createElement('div', { style: { maxWidth: '68%', fontFamily: "'Anton',sans-serif", fontSize: 19, lineHeight: 1.15, marginBottom: 5 } }, 'PICK A WINNER. THAT’S IT.'),
       React.createElement('div', { style: { maxWidth: '68%', fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', lineHeight: 1.55, marginBottom: 11 } }, 'One tap gets you in. Stats and bonus points come later.'),
@@ -1663,7 +1667,7 @@ class FantasyMobileAppCore extends React.Component {
 
   renderBoldHero(s) {
     return React.createElement('div', { style: { position: 'relative', margin: '0 16px 14px', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(242,181,68,.3)', background: '#000' } },
-      React.createElement('img', { src: `${ASSET_BASE}/bold-hero-new.jpg`, alt: 'Fantasy MMAdness combat prediction game', style: { width: '100%', height: 'auto', display: 'block', objectFit: 'contain' } }),
+      React.createElement('img', { src: `${ASSET_BASE}/bold-hero-new.jpg`, alt: 'Fantasy MMAdness combat prediction game', width: 1983, height: 793, loading: 'lazy', decoding: 'async', style: { width: '100%', height: 'auto', aspectRatio: '1983 / 793', display: 'block', objectFit: 'contain' } }),
       React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '35%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent)', animation: 'heroGloss 3.5s ease-in-out infinite', pointerEvents: 'none' } }),
       React.createElement('div', { style: { position: 'absolute', bottom: 16, right: 16 } },
         React.createElement('div', { onClick: () => this.openModal('join'), style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544,#ffe9a8,#f2b544,#ffd873)', backgroundSize: '200% 100%', animation: 'shimmerBtn 2.5s linear infinite, joinGlow 2s ease-in-out infinite' + (s.showWelcomePulse ? ', welcomeRing 1.4s ease-out infinite' : ''), color: '#2b1b00', fontWeight: 900, fontSize: 11, cursor: 'pointer' } }, 'JOIN FREE »')
@@ -1773,14 +1777,16 @@ class FantasyMobileAppCore extends React.Component {
   renderHero() {
     return React.createElement('div', { className: 'fmm-app-hero', style: { position: 'relative', width: '100%', overflow: 'hidden', background: '#000' } },
       React.createElement('picture', null,
-        React.createElement('source', { media: '(max-width: 767px)', srcSet: `${ASSET_BASE}/hero-banner-new.jpg` }),
+        React.createElement('source', { media: '(max-width: 767px)', srcSet: `${ASSET_BASE}/hero-banner-new-mobile.jpg`, width: 1983, height: 793 }),
         React.createElement('img', {
           src: `${ASSET_BASE}/hero-banner-new.jpg`,
           alt: 'Fantasy MMAdness combat prediction game',
+          width: 1983,
+          height: 793,
           loading: 'eager',
           decoding: 'async',
           fetchPriority: 'high',
-          style: { width: '100%', height: 'auto', display: 'block' },
+          style: { width: '100%', height: 'auto', aspectRatio: '1983 / 793', display: 'block' },
         })
       ),
       React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '34%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent)', animation: 'heroGloss 3.8s ease-in-out infinite', pointerEvents: 'none' } }),
@@ -3178,7 +3184,7 @@ class FantasyMobileAppCore extends React.Component {
         onClick: () => this.openModal('addcoins'),
         style: { position: 'relative', width: 110, height: 110, margin: '20px auto 0', cursor: 'pointer' }
       },
-        React.createElement('img', { src: `${ASSET_BASE}/treasure-chest.jpg`, alt: 'Fantasy MMAdness treasure chest', style: { width: '113%', height: '113%', objectFit: 'contain', animation: 'chestOpenClose 1.8s ease-in-out infinite', filter: 'drop-shadow(0 0 16px rgba(242,181,68,.7))' } }),
+        React.createElement('img', { src: `${ASSET_BASE}/treasure-chest-sm.png`, alt: 'Fantasy MMAdness treasure chest', style: { width: '113%', height: '113%', objectFit: 'contain', animation: 'chestOpenClose 1.8s ease-in-out infinite', filter: 'drop-shadow(0 0 16px rgba(242,181,68,.7))' } }),
         ['💰', '🪙', '💰'].map((c, i) => React.createElement('div', {
           key: i, style: { position: 'absolute', left: '50%', top: '30%', fontSize: 18, animation: 'coinFly' + (i + 1) + ' 1.6s ease-out ' + (i * 0.35) + 's infinite' }
         }, c))
@@ -3218,7 +3224,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: '50%', pointerEvents: 'none' } },
           React.createElement('div', { style: { position: 'absolute', top: '-30%', left: 0, width: '30%', height: '160%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)', animation: 'chestShine 2.6s ease-in-out infinite' } })
         ),
-        React.createElement('img', { src: `${ASSET_BASE}/treasure-chest.jpg`, alt: 'Fantasy MMAdness treasure chest', style: { width: '113%', height: '113%', objectFit: 'contain', animation: s.chestBurst ? 'chestBurstPop .5s ease-out' : 'chestOpenClose 1.8s ease-in-out infinite', filter: 'drop-shadow(0 0 16px rgba(242,181,68,.7))' } }),
+        React.createElement('img', { src: `${ASSET_BASE}/treasure-chest-sm.png`, alt: 'Fantasy MMAdness treasure chest', style: { width: '113%', height: '113%', objectFit: 'contain', animation: s.chestBurst ? 'chestBurstPop .5s ease-out' : 'chestOpenClose 1.8s ease-in-out infinite', filter: 'drop-shadow(0 0 16px rgba(242,181,68,.7))' } }),
         ['💰', '🪙', '💰'].map((c, i) => React.createElement('div', {
           key: i, style: { position: 'absolute', left: '50%', top: '10%', fontSize: 20, animation: 'coinFly' + (i + 1) + ' 1.6s ease-out ' + (i * 0.35) + 's infinite' }
         }, c)),
