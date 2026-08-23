@@ -22,3 +22,13 @@ Nothing is missing — `package.json`, `package-lock.json`, `next.config.mjs`, `
 - `src/Components/MobileApp/FantasyMobileAppCore.jsx` — three references repointed from `hero-banner-crop-v62.webp` to `hero-banner-new.jpg` (the `directSlotAssets['bold-hero']` entry, the mobile `<source srcSet>`, and the classic hero `<img>`) so the new banner shows on mobile and desktop alike. If you'd prefer to keep webp for mobile performance, convert the new jpg to `hero-banner-crop-v62.webp` and revert those three lines.
 
 No other files were modified.
+
+**3. Build fix — React 19 peer dependency conflict**
+Your `npm install` was failing on Vercel with `ERESOLVE`: `@testing-library/react@13.4.0` requires `react@^18`, but the project runs `react@19.2.7`. Bumped the three testing-library packages to their React 19-compatible majors in `package.json`:
+- `@testing-library/react` `^13.4.0` → `^16.1.0`
+- `@testing-library/jest-dom` `^5.17.0` → `^6.6.3`
+- `@testing-library/user-event` `^13.5.0` → `^14.5.2`
+
+`package-lock.json` was deleted so npm regenerates it cleanly against the new versions — the old lock still pinned the React 18 tree and would have reproduced the same conflict. Run `npm install` once locally and commit the fresh lockfile.
+
+These are dev/test-only packages, so nothing in the shipped app changes.
