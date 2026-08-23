@@ -39,6 +39,15 @@ const FALLBACK_APPAREL_ITEMS = [
     sizes: ["One Size"],
   },
   {
+    sku: "FMM-BKFC-TEE-001",
+    name: "BKFC Bareknuckle Boxing Tee",
+    price: 34.99,
+    displayPrice: "$34.99",
+    image: "/images/mobile-home/final-v35/bkfc-tee.png",
+    tag: "Bareknuckle exclusive",
+    sizes: ["S", "M", "L", "XL", "2XL"],
+  },
+  {
     sku: "FMM-SHORTS-001",
     name: "Fight Shorts",
     price: 39.99,

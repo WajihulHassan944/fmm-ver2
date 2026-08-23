@@ -22,7 +22,7 @@ const SOCIAL_PROFILE_URLS = Object.freeze({
 const DESIGN_WIDTH = designTokens.viewport.designWidth;
 
 const directSlotAssets = {
-  'bold-hero': 'hero-banner-crop-v62.webp',
+  'bold-hero': 'hero-banner-new.jpg',
   'hero-left': 'hero-left.webp',
   'hero-right': 'hero-right.webp',
   'story-boxing': 'sport-boxing.webp',
@@ -1773,7 +1773,7 @@ class FantasyMobileAppCore extends React.Component {
   renderHero() {
     return React.createElement('div', { className: 'fmm-app-hero', style: { position: 'relative', width: '100%', overflow: 'hidden', background: '#000' } },
       React.createElement('picture', null,
-        React.createElement('source', { media: '(max-width: 767px)', srcSet: `${ASSET_BASE}/hero-banner-crop-v62.webp` }),
+        React.createElement('source', { media: '(max-width: 767px)', srcSet: `${ASSET_BASE}/hero-banner-new.jpg` }),
         React.createElement('img', {
           src: `${ASSET_BASE}/hero-banner-new.jpg`,
           alt: 'Fantasy MMAdness combat prediction game',
@@ -1796,7 +1796,7 @@ class FantasyMobileAppCore extends React.Component {
       }
     }));
     return React.createElement('div', { style: { position: 'relative', width: '100%', overflow: 'hidden' } },
-      React.createElement('img', { src: `${ASSET_BASE}/hero-banner-crop-v62.webp`, style: { width: '100%', height: 'auto', display: 'block' } }),
+      React.createElement('img', { src: `${ASSET_BASE}/hero-banner-new.jpg`, style: { width: '100%', height: 'auto', display: 'block' } }),
       React.createElement('div', { style: { position: 'absolute', top: '2%', left: '30%', right: '30%', height: '16%', pointerEvents: 'none' } },
         [[8, 20], [88, 10], [50, 5], [30, 55], [70, 50], [15, 75]].map(([left, top], i) => React.createElement('div', {
           key: i, style: {
