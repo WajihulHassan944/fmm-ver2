@@ -55,6 +55,7 @@ export default function MembershipCheckout() {
   const [status, setStatus] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [paymentResult, setPaymentResult] = useState(null);
+  const [returnCountdown, setReturnCountdown] = useState(null);
   const idempotencyKey = useRef('');
   const returnOrder = String(router.query.order || '').trim();
   const checkoutReturnStatus = String(router.query.status || '').trim().toLowerCase();
@@ -139,6 +140,24 @@ export default function MembershipCheckout() {
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  // A user who just paid must not be left on a website page with one more tap
+  // between them and the app. On success we return them automatically; the link
+  // stays as a fallback if the redirect is blocked.
+  useEffect(() => {
+    if (paymentResult?.state !== 'success') return undefined;
+    let remaining = 3;
+    setReturnCountdown(remaining);
+    const timer = window.setInterval(() => {
+      remaining -= 1;
+      setReturnCountdown(remaining);
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        router.replace(safeReturnTo);
+      }
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [paymentResult?.state, router, safeReturnTo]);
+
   const submit = async (event) => {
     event.preventDefault();
     if (!isFmPlus && !items.length) return setStatus('Choose at least one coin pack to continue.');
@@ -216,7 +235,10 @@ export default function MembershipCheckout() {
                 ? paymentResult.message || 'The payment could not be confirmed. Please contact support with the order reference.'
                 : 'The secure processor is confirming the transaction. Coins are credited only after approval.'}</p>
             <small>ORDER: {returnOrder || 'PENDING'}</small>
-            <Link href={paymentResult?.state === 'success' ? safeReturnTo : `/checkout?product=${isFmPlus ? 'fm-plus&plan=pass' : 'fm-coins'}`}>{paymentResult?.state === 'success' ? (safeReturnTo === '/' ? 'RETURN HOME' : 'CONTINUE') : 'RETURN TO CHECKOUT'}</Link>
+            {paymentResult?.state === 'success' && returnCountdown !== null && returnCountdown > 0 ? (
+              <small className="fm-checkout-autoreturn">Taking you back in {returnCountdown}…</small>
+            ) : null}
+            <Link href={paymentResult?.state === 'success' ? safeReturnTo : `/checkout?product=${isFmPlus ? 'fm-plus&plan=pass' : 'fm-coins'}`}>{paymentResult?.state === 'success' ? (safeReturnTo === '/' ? 'RETURN HOME' : 'CONTINUE NOW') : 'RETURN TO CHECKOUT'}</Link>
           </section> : <form onSubmit={submit}>
             {isFmPlus ? (
               <section className="fm-checkout-card fm-plus-products">

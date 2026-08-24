@@ -3,7 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: 2147483000;
-  width: 100vw;
+  width: 100%;
   height: 100dvh;
   overflow: hidden;
   background: #05060a;
@@ -190,15 +190,29 @@
 
 @media (max-width: 500px) {
     .fm-shell { padding: 0 !important; background: #05060a !important; }
-    .fm-shell > div { transform: none !important; width: 100vw !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+    .fm-shell > div { transform: none !important; width: 100% !important; max-width: 100% !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
   }
 
 /* Keep the long app homepage responsive by deferring layout/paint for sections
-   that are still below the viewport. The visible hero and nearby content render
-   normally, while deep sections become cheap until the user scrolls to them. */
-.fmm-exact-mobile-portal .fmm-prototype-view--home > div {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 240px;
+   that are still below the viewport. Desktop only: on phones this deferral is
+   what made features appear over several seconds and caused scroll-height jumps,
+   so mobile renders every section immediately. */
+@media (min-width: 768px) {
+  .fmm-exact-mobile-portal .fmm-prototype-view--home > div {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 240px;
+  }
+}
+
+@media (max-width: 767px) {
+  .fmm-exact-mobile-portal,
+  .fmm-exact-mobile-portal * {
+    max-width: 100%;
+  }
+
+  .fmm-exact-mobile-portal .fmm-prototype-scroll {
+    overflow-x: hidden;
+  }
 }
 
 @media (max-width: 767px) {

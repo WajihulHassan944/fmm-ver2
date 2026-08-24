@@ -68,6 +68,8 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
   const quickPickApplied = useRef('');
+  // Stable per submit attempt so a double-tap or retry cannot double-charge.
+  const idempotencyKeyRef = useRef('');
 
   useEffect(() => {
     setRounds((current) => {
@@ -208,33 +210,58 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     setButtonText('Saving!');
 
     try {
-      const scoreResponse = await fetch(buildPublicApiUrl('/api/scores'), {
+      const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
+      if (!authToken) {
+        alert('Please sign in again to submit your predictions.');
+        setSubmitting(false);
+        setButtonText('Submit Predictions');
+        return;
+      }
+
+      // Single atomic call: charges the entry fee and saves the prediction together.
+      // The server reads the fee from the fight record — we never send a price.
+      // The idempotency key is stable per (fight, attempt) so a double-tap or a
+      // network retry cannot charge twice.
+      if (!idempotencyKeyRef.current) {
+        idempotencyKeyRef.current = typeof window !== 'undefined' && window.crypto?.randomUUID
+          ? window.crypto.randomUUID()
+          : `fmm-entry-${matchId}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+
+      const entryResponse = await fetch(buildPublicApiUrl(`/api/fights/${matchId}/entries`), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+          'Idempotency-Key': idempotencyKeyRef.current,
+        },
         body: JSON.stringify({
-          playerId: user._id,
-          matchId,
           predictions: rounds,
           category: match.matchCategory,
         }),
       });
 
-      if (!scoreResponse.ok) {
-        const errorText = await scoreResponse.text().catch(() => '');
-        throw new Error(errorText || `Score request failed with status ${scoreResponse.status}`);
-      }
+      const entryPayload = await entryResponse.json().catch(() => ({}));
 
-      const statusResponse = await fetch(buildPublicApiUrl(`/api/matches/${matchId}/updatePredictionStatus`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user._id,
-          predictionStatus: 'submitted',
-        }),
-      });
-
-      if (!statusResponse.ok) {
-        console.warn('Prediction status sync failed after score save:', statusResponse.status);
+      if (!entryResponse.ok) {
+        if (entryPayload?.code === 'INSUFFICIENT_FUNDS') {
+          const shortfall = Number(entryPayload.shortfall || 0);
+          alert(`Not enough FM coins. You need ${shortfall} more to enter this fight.`);
+          router.push('/checkout?product=fm-coins&returnTo=' + encodeURIComponent(router.asPath));
+          return;
+        }
+        if (entryPayload?.code === 'FIGHT_LOCKED') {
+          alert('Entry for this fight has closed.');
+          setSubmitting(false);
+          setButtonText('Entry closed');
+          return;
+        }
+        if (entryPayload?.code === 'ALREADY_ENTERED' || entryPayload?.alreadyEntered) {
+          alert('You have already entered this fight.');
+          setSubmitting(false);
+          return;
+        }
+        throw new Error(entryPayload?.message || `Entry failed with status ${entryResponse.status}`);
       }
 
       const winnerVotes = rounds.reduce((counts, round) => {

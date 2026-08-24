@@ -82,7 +82,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     setIsEntering(true);
     fetch(buildPublicApiUrl('/api/deduct-tokens'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(typeof window !== 'undefined' && window.localStorage.getItem('authToken') ? { Authorization: `Bearer ${window.localStorage.getItem('authToken')}` } : {}) },
       body: JSON.stringify({ userId, matchTokens: match.matchTokens }),
     })
       .then(async (response) => ({ response, data: await response.json().catch(() => ({})) }))
@@ -127,9 +127,8 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     try {
       const response = await fetch(buildPublicApiUrl('/api/deduct-tokens'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(typeof window !== 'undefined' && window.localStorage.getItem('authToken') ? { Authorization: `Bearer ${window.localStorage.getItem('authToken')}` } : {}) },
         body: JSON.stringify({
-          userId: user._id,
           matchTokens: match.matchTokens,
         }),
       });

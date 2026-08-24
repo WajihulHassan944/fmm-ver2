@@ -76,6 +76,8 @@ const SpinWheel = () => {
         "https://fantasymmadness-game-server-three.vercel.app/admin/add-device-spin-wheel",
         {
           method: "POST",
+        // Server validates the prize against its own wheel segments and binds
+        // the credit to this account.
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deviceId }),
         }
@@ -93,7 +95,11 @@ const SpinWheel = () => {
       "https://fantasymmadness-game-server-three.vercel.app/admin/add-tokens-won-spin-wheel",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        // Server validates the prize against its own wheel segments and binds
+        // the credit to this account.
+        headers: { "Content-Type": "application/json",
+          ...(typeof window !== "undefined" && window.localStorage.getItem("authToken") ? { Authorization: `Bearer ${window.localStorage.getItem("authToken")}` } : {}),
+        },
         body: JSON.stringify({ email, deviceId, results: prizeValue }),
       }
     );

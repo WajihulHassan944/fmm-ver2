@@ -80,3 +80,61 @@ if (!event?.playable) { this.props.onOpenFight?.({ event }); return; }
 2. **JOIN FREE** (`onJoin`) does `router.push('/CreateAccount')` — it leaves the app entirely, whereas the prototype opens an in-app join modal. This one is genuinely ambiguous: real signup lives on that page, so keeping it may be intentional. I didn't want to rewire your auth flow without you deciding. If you want the in-app modal to handle signup instead, that's a real change to how accounts get created and we should talk through it first.
 
 **Worth checking on your side:** if most of your live fights are coming through with `__playable: false`, the buttons will *all* fall into the detail branch. That's a backend data question — verify your fights are being marked playable when their prediction window is open.
+
+**7. Phone screen fit + slow feature reveal — found the actual cause (CSS, not images)**
+
+The image work in #5 was real but wasn't the main problem. Two rules in `src/styles/fantasy-mobile-app-exact.css` were:
+
+*Doesn't fit the phone screen:* the app shell used `width: 100vw`, and the small-screen override forced `width: 100vw !important` on the inner shell. On mobile browsers `100vw` does **not** equal the visible width — it ignores the scrollbar gutter and safe-area insets, so the layout was wider than the screen and pushed content off the right edge. Changed both to `width: 100%`, added `max-width: 100%` and `overflow-x: hidden` guards on mobile.
+
+*Takes 5–10s to show all features:* this rule was deferring rendering of every home section:
+```css
+.fmm-prototype-view--home > div {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+```
+`content-visibility: auto` tells the browser to skip layout and paint for anything below the fold until you scroll to it. Each section was standing in as an empty 240px box and only rendering on approach — which is exactly "features appear over several seconds," and it also made the scroll height jump around as real sections replaced the estimates. It's a legitimate desktop optimisation, so I scoped it to `@media (min-width: 768px)`. Phones now render every section immediately.
+
+**8. Prediction buttons leaving the app — this one is your decision, not mine**
+
+I traced it to one line in `FantasyMobileExperience.jsx`:
+
+```js
+const submitPrediction = async ({ event, prediction } = {}) => {
+  ...
+  router.push(`/fight/${id}?play=1&pick=${selectedWinner}`);
+  return false;   // <-- cancels the in-app flow
+};
+```
+
+This is the handler behind **every** prediction CTA. It always navigates to the website `/fight/<id>` page, and the `return false` tells the app core to abandon the in-app scorecard. So on your phone, tapping a prediction button leaves the app; in the prototype it opens the scorecard inline.
+
+**I did not change this,** and I want to be straight about why. The code comment says it's deliberate — real predictions need authentication and a real backend submission, and that page is where those happen. The in-app scorecard in the prototype is a demo flow that doesn't submit money-bearing entries the same way. Rewiring this is the entry-and-payment path: if I guess wrong, users lose entries or get double-charged.
+
+So it's a genuine choice:
+- **Keep it** — predictions happen on the real page, safest for money handling, but the app hands off to the website.
+- **Move it in-app** — matches the prototype exactly, but the in-app scorecard has to be wired to the same authenticated submit endpoint first, and we'd need to confirm with your developer what that endpoint expects.
+
+Tell me which you want and I'll do it properly. I'd rather ask than silently change how entries get submitted.
+
+**9. Coin purchase — what I found, and what I could actually fix**
+
+I traced the real payment architecture. `POST /api/checkout/coin-orders` (and `/fm-plus-orders`) returns a `checkoutUrl` from a **hosted payment processor**, and the browser then does `window.location.assign(checkoutUrl)` — or auto-submits a hidden form when the response carries a `formToken`.
+
+**So the payment step cannot stay in the app, and shouldn't.** The card details are captured on the processor's own hosted page. That's the PCI-correct design and moving it in-app would be the wrong call, not a win.
+
+What I *did* find is that the app already keeps more in-app than expected: tapping a coin pack adds it to an **in-app cart** and switches to the in-app cart tab. The handoff only happens at the billing-details step.
+
+**Fixed — the return trip.** `MembershipCheckout` already supports a `returnTo` parameter and validates it's a relative path, but `goToCheckout` never passed it. So after a user successfully paid, the "continue" link sent them to the **website home page**, not back into the app. It now passes the app route they came from, so a completed purchase returns them into the app where they can spend the coins immediately. Payment logic untouched — only the destination after success.
+
+**Endpoints, for the record:**
+| Purpose | Endpoint |
+| --- | --- |
+| Coin packs | `POST /api/checkout/coin-orders` |
+| FM+ subscription | `POST /api/checkout/fm-plus-orders` |
+| Poll order result | `GET /api/checkout/orders/<id>/status` |
+
+All take `Authorization: Bearer <token>` and an `Idempotency-Key` header — that idempotency key is what protects against double-charging, so any new purchase path must send one.
+
+**Still open — the prediction flow.** This is the real funnel leak. Today a user who taps MAKE PREDICTIONS goes: app → `/fight/<matchId>` → "Enter fight" → `/auth?mode=signup` → back to `/fight/<matchId>` → prediction room. Four navigations outside the app before a single pick is made, at the exact moment they'd decided to play. `handleEnterFight` only does auth and routing — the actual prediction POST lives deeper in the prediction room, and I haven't located it yet. I'm not going to invent an endpoint for the entry path; once I find the real one, bringing this in-app is the single highest-value change left.
