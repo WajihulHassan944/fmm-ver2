@@ -1,8 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
 
-// The Terms of Use, served as a real page so the app can link to it from
-// settings and from the signup consent line. Content is kept in step with
+// The Terms of Use as a real page, so the app can link to it from settings and
+// from the signup consent line. Content is kept in step with
 // "Terms of Use.dc.html" — update both together.
 const TERMS_STYLES = `.fmm-terms h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 19pt; margin: 28pt 0 6pt; letter-spacing: .01em; break-after: avoid; }
     .fmm-terms h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 13pt; margin: 17pt 0 4pt; break-after: avoid; }
@@ -41,14 +41,14 @@ const TermsOfUse = () => (
         </Link>
 
 
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16pt; border-bottom: 1px solid #201f1d; padding-bottom: 7pt">
-        <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 12pt; letter-spacing: .1em; text-transform: uppercase">Fantasy MMAdness LLC</div>
-        <div style="font-family: 'Lora', Georgia, serif; font-size: 9pt; color: #5d5a55; font-variant-numeric: tabular-nums">Updated effective 8/25/2026 · Version 1.0</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '16pt', borderBottom: '1px solid #201f1d', paddingBottom: '7pt' }}>
+        <div style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '12pt', letterSpacing: '.1em', textTransform: 'uppercase' }}>Fantasy MMAdness LLC</div>
+        <div style={{ fontFamily: '"Lora", Georgia, serif', fontSize: '9pt', color: '#5d5a55', fontVariantNumeric: 'tabular-nums' }}>Updated effective 8/25/2026 · Version 1.0</div>
         </div>
 
-        <h1 style="font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; font-size: 34pt; line-height: 1.08; margin: 26pt 0 10pt; letter-spacing: -.01em">Terms of Use</h1>
+        <h1 style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontWeight: 400, fontSize: '34pt', lineHeight: 1.08, margin: '26pt 0 10pt', letterSpacing: '-.01em' }}>Terms of Use</h1>
 
-        <p style="font-size: 12pt; line-height: 1.55; color: #3d3a36; text-align: left; margin-bottom: 4pt">
+        <p style={{ fontSize: '12pt', lineHeight: 1.55, color: '#3d3a36', textAlign: 'left', marginBottom: '4pt' }}>
         Please read these Terms before using Fantasy MMAdness. They set out what we owe you, what you agree to,
         and the limits of both. They include a section on where paid contests are available, and a limitation of
         our liability.
@@ -110,7 +110,7 @@ const TermsOfUse = () => (
         </p>
         <table>
         <thead>
-        <tr><th style="width: 26%">Mode</th><th style="width: 30%">Where</th><th>What it means</th></tr>
+        <tr><th style={{ width: '26%' }}>Mode</th><th style={{ width: '30%' }}>Where</th><th>What it means</th></tr>
         </thead>
         <tbody>
         <tr>
@@ -194,7 +194,7 @@ const TermsOfUse = () => (
         </p>
         <table>
         <thead>
-        <tr><th style="width: 34%">Entrants</th><th>Distribution</th></tr>
+        <tr><th style={{ width: '34%' }}>Entrants</th><th>Distribution</th></tr>
         </thead>
         <tbody>
         <tr><td>Fewer than 5</td><td>Winner takes the pool</td></tr>
@@ -613,7 +613,7 @@ const TermsOfUse = () => (
         </p>
 
         <h2>25. Contact</h2>
-        <p style="margin-bottom: 4pt">
+        <p style={{ marginBottom: '4pt' }}>
         Fantasy MMAdness LLC, a Georgia limited liability company<br />
         support@fantasymmadness.com
         </p>
@@ -624,7 +624,7 @@ const TermsOfUse = () => (
         </p>
 
         <hr className="rule" />
-        <p style="font-size: 9pt; color: #5d5a55; text-align: left; margin-top: 12pt">
+        <p style={{ fontSize: '9pt', color: '#5d5a55', textAlign: 'left', marginTop: '12pt' }}>
         Updated effective 8/25/2026. Governed by Georgia law, with support handled by email. The arbitration
         terms in Section 20 and the liability cap in Section 22 were drafted as standard operator provisions and
         should be confirmed before publication. This document was written to describe how the Fantasy MMAdness
