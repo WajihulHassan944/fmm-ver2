@@ -43,7 +43,7 @@ const FALLBACK_APPAREL_ITEMS = [
     name: "BKFC Bareknuckle Boxing Tee",
     price: 34.99,
     displayPrice: "$34.99",
-    image: "/images/mobile-home/final-v35/bkfc-tee.png",
+    image: "/images/mobile-home/final-v35/bkfc-tee-opt.webp",
     tag: "Bareknuckle exclusive",
     sizes: ["S", "M", "L", "XL", "2XL"],
   },

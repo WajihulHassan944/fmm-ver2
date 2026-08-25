@@ -22,7 +22,7 @@ const SOCIAL_PROFILE_URLS = Object.freeze({
 const DESIGN_WIDTH = designTokens.viewport.designWidth;
 
 const directSlotAssets = {
-  'bold-hero': 'hero-banner-new.jpg',
+  'bold-hero': 'hero-banner-v2.jpg',
   'hero-left': 'hero-left.webp',
   'hero-right': 'hero-right.webp',
   'story-boxing': 'sport-boxing.webp',
@@ -434,6 +434,8 @@ class FantasyMobileAppCore extends React.Component {
     authMode: 'login',
     authBusy: false,
     authError: '',
+    authNotice: '',
+    showPassword: false,
     fantasyCampaigns: [],
     fantasyDraft: { boxing: null, mma: null, bareknuckle: null, kickboxing: null, wrestling: null },
     chestBurst: false,
@@ -1078,7 +1080,27 @@ class FantasyMobileAppCore extends React.Component {
   // out to /auth or /CreateAccount, and preserves what the user was trying to do
   // so they land back on it instead of an empty screen.
   setAuthField = (field, value) => this.setState(s => ({ authForm: { ...s.authForm, [field]: value }, authError: '' }));
-  setAuthMode = (mode) => this.setState({ authMode: mode, authError: '' });
+  setAuthMode = (mode) => this.setState({ authMode: mode, authError: '', authNotice: '' });
+  togglePassword = () => this.setState(st => ({ showPassword: !st.showPassword }));
+  // Password reset stays in-app: we post the email and show the outcome inline
+  // rather than sending the user out to a website page mid sign-in.
+  startPasswordReset = async () => {
+    const email = String(this.state.authForm.email || '').trim();
+    if (!email) { this.setState({ authError: 'Enter your email first, then tap this again.' }); return; }
+    this.setState({ authBusy: true, authError: '', authNotice: '' });
+    try {
+      const result = await this.props.onRequestPasswordReset?.({ email });
+      this.setState({
+        authBusy: false,
+        authNotice: result?.ok
+          ? 'Check your email for a reset link. It can take a minute to arrive.'
+          : '',
+        authError: result?.ok ? '' : (result?.message || 'Could not start a reset. Try again.'),
+      });
+    } catch (error) {
+      this.setState({ authBusy: false, authError: 'Could not reach the server.' });
+    }
+  };
   openAuth = (intent = null) => this.setState({ modal: 'auth', modalData: intent, authError: '', authMode: 'login' });
   submitAuth = async () => {
     const { authForm, authMode, authBusy } = this.state;
@@ -1914,7 +1936,7 @@ class FantasyMobileAppCore extends React.Component {
 
   renderBoldHero(s) {
     return React.createElement('div', { style: { position: 'relative', margin: '0 16px 14px', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(242,181,68,.3)', background: '#000' } },
-      React.createElement('img', { src: `${ASSET_BASE}/bold-hero-new.jpg`, alt: 'Fantasy MMAdness combat prediction game', width: 1983, height: 793, loading: 'lazy', decoding: 'async', style: { width: '100%', height: 'auto', aspectRatio: '1983 / 793', display: 'block', objectFit: 'contain' } }),
+      React.createElement('img', { src: `${ASSET_BASE}/bold-hero-new.jpg`, alt: 'Fantasy MMAdness combat prediction game', width: 1983, height: 793, loading: 'lazy', decoding: 'async', style: { width: '100%', height: 'auto', aspectRatio: '16 / 9', display: 'block', objectFit: 'contain' } }),
       React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '35%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent)', animation: 'heroGloss 3.5s ease-in-out infinite', pointerEvents: 'none' } }),
       React.createElement('div', { style: { position: 'absolute', bottom: 16, right: 16 } },
         React.createElement('div', { onClick: () => this.openModal('join'), style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544,#ffe9a8,#f2b544,#ffd873)', backgroundSize: '200% 100%', animation: 'shimmerBtn 2.5s linear infinite, joinGlow 2s ease-in-out infinite' + (s.showWelcomePulse ? ', welcomeRing 1.4s ease-out infinite' : ''), color: '#2b1b00', fontWeight: 900, fontSize: 11, cursor: 'pointer' } }, 'JOIN FREE »')
@@ -1967,7 +1989,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontSize: 10, fontWeight: 700 } }, React.createElement('span', { style: { color: '#ef4444' } }, jonesPct + '%'), ' / ', React.createElement('span', { style: { color: '#4d8dff' } }, aspinallPct + '%'))
       ),
       React.createElement('div', { style: { ...glass, position: 'relative', overflow: 'hidden', padding: 12, display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' } },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'progression-bg', shape: 'rect', placeholder: 'Boxing gloves photo', fit: 'cover', src: 'progression-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'progression-bg', shape: 'rect', placeholder: 'Boxing gloves photo', fit: 'cover', src: 'progression-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: '#f2b544' } }, `FIGHT IQ${toSafeNumber(this.props.currentUser?.fightIqLevel, this.props.currentUser?.level) ? ` · LVL ${toSafeNumber(this.props.currentUser?.fightIqLevel, this.props.currentUser?.level)}` : ''}`),
         React.createElement('div', { style: { fontSize: 16, fontWeight: 800, color: '#c084fc' } }, `${toSafeNumber(this.props.currentUser?.fightIqXp, this.props.currentUser?.xp).toLocaleString()} XP`),
@@ -2024,16 +2046,16 @@ class FantasyMobileAppCore extends React.Component {
   renderHero() {
     return React.createElement('div', { className: 'fmm-app-hero', style: { position: 'relative', width: '100%', overflow: 'hidden', background: '#000' } },
       React.createElement('picture', null,
-        React.createElement('source', { media: '(max-width: 767px)', srcSet: `${ASSET_BASE}/hero-banner-new-mobile.jpg`, width: 1983, height: 793 }),
+        React.createElement('source', { media: '(max-width: 767px)', srcSet: `${ASSET_BASE}/hero-banner-v2-mobile.jpg`, width: 900, height: 507 }),
         React.createElement('img', {
-          src: `${ASSET_BASE}/hero-banner-new.jpg`,
-          alt: 'Fantasy MMAdness combat prediction game',
-          width: 1983,
-          height: 793,
+          src: `${ASSET_BASE}/hero-banner-v2.jpg`,
+          alt: 'Fantasy MMAdness — boxing, UFC, kickboxing, bare knuckle and pro wrestling prediction game',
+          width: 1600,
+          height: 900,
           loading: 'eager',
           decoding: 'async',
           fetchPriority: 'high',
-          style: { width: '100%', height: 'auto', aspectRatio: '1983 / 793', display: 'block' },
+          style: { width: '100%', height: 'auto', aspectRatio: '16 / 9', display: 'block' },
         })
       ),
       React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '34%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent)', animation: 'heroGloss 3.8s ease-in-out infinite', pointerEvents: 'none' } }),
@@ -2132,7 +2154,7 @@ class FantasyMobileAppCore extends React.Component {
         onClick: () => this.setTab('watch'),
         style: { flex: 1, position: 'relative', overflow: 'hidden', border: '1px solid #ef4444', borderRadius: 14, padding: 14, cursor: 'pointer', boxShadow: '0 0 16px rgba(239,68,68,.4)' }
       },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'promo-watch-bg', shape: 'rect', placeholder: 'Stadium photo', fit: 'cover', src: 'watch-party-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'promo-watch-bg', shape: 'rect', placeholder: 'Stadium photo', fit: 'cover', src: 'watch-party-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'relative' } },
           React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 900, color: '#ff8a8a' } },
             React.createElement('span', { style: { width: 7, height: 7, borderRadius: '50%', background: '#ef4444', animation: 'pulseLive 1.2s infinite' } }), 'LIVE NOW'
@@ -2145,7 +2167,7 @@ class FantasyMobileAppCore extends React.Component {
         onClick: () => this.setTab('leagues'),
         style: { flex: 1, position: 'relative', overflow: 'hidden', border: '1px solid #a855f7', borderRadius: 14, padding: 14, cursor: 'pointer', boxShadow: '0 0 16px rgba(168,85,247,.4)' }
       },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'promo-leagues-bg', shape: 'rect', placeholder: 'Friends watching fight photo', fit: 'cover', src: 'leagues-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'promo-leagues-bg', shape: 'rect', placeholder: 'Friends watching fight photo', fit: 'cover', src: 'leagues-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'relative' } },
           React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#d8a8ff' } }, '⚔ COMPETE'),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, marginTop: 4, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.6)' } }, 'LEAGUES · H2H'),
@@ -2191,7 +2213,7 @@ class FantasyMobileAppCore extends React.Component {
     const mm = Math.floor(s.matchSeconds / 60), ss = String(s.matchSeconds % 60).padStart(2, '0');
     return React.createElement('div', { style: { padding: '8px 16px', position: 'relative', overflow: 'hidden' } },
       React.createElement('div', { style: { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 } },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'watch-stadium-bg', shape: 'rect', placeholder: 'Stadium crowd photo', fit: 'cover', src: 'watch-party-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'watch-stadium-bg', shape: 'rect', placeholder: 'Stadium crowd photo', fit: 'cover', src: 'watch-party-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.9),rgba(5,6,10,.98))' } }),
         React.createElement('div', { style: { position: 'absolute', left: 0, top: 0, width: '55%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 0% 20%, rgba(239,68,68,.35), transparent 65%)', animation: 'stadiumFlickerRed 1.8s ease-in-out infinite' } }),
         React.createElement('div', { style: { position: 'absolute', right: 0, top: 0, width: '55%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 100% 20%, rgba(77,141,255,.35), transparent 65%)', animation: 'stadiumFlickerBlue 1.8s ease-in-out infinite' } }),
@@ -2305,7 +2327,7 @@ class FantasyMobileAppCore extends React.Component {
       settled_won: ['✓ Auto-settled — you won', '#22c55e'], settled_lost: ['Auto-settled — you lost', 'rgba(255,255,255,.4)']
     };
     return React.createElement('div', { style: { padding: '8px 16px', position: 'relative', overflow: 'hidden' } },
-      React.createElement('div', { style: { position: 'absolute', inset: 0, pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'leagues-bg', shape: 'rect', placeholder: 'Friends watching fight photo', fit: 'cover', src: 'leagues-bg.jpg' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0, pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'leagues-bg', shape: 'rect', placeholder: 'Friends watching fight photo', fit: 'cover', src: 'leagues-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.85),rgba(5,6,10,.98))', pointerEvents: 'none' } }),
       React.createElement('div', { style: { position: 'relative' } },
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, marginBottom: 12, color: '#a855f7' } }, 'LEAGUES & HEAD-TO-HEAD'),
@@ -2490,7 +2512,7 @@ class FantasyMobileAppCore extends React.Component {
     const users = Array.isArray(this.props.leagueUsers) ? this.props.leagueUsers : [];
     const userById = new Map(users.map((user) => [String(user?._id || user?.id || ''), user]));
     return React.createElement('div', { style: { padding: '8px 16px 24px', position: 'relative', overflow: 'hidden', minHeight: '100%' } },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'leagues-live-bg', shape: 'rect', placeholder: 'Fight league arena', fit: 'cover', src: 'leagues-bg.jpg' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'leagues-live-bg', shape: 'rect', placeholder: 'Fight league arena', fit: 'cover', src: 'leagues-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.84),rgba(5,6,10,.99))' } }),
       React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 4, color: '#a855f7' } }, 'LEAGUES & HEAD-TO-HEAD'),
@@ -2933,7 +2955,7 @@ class FantasyMobileAppCore extends React.Component {
     ];
     const loop = [...items, ...items];
     return React.createElement('div', { className: 'fmm-unified-ticker', style: { overflow: 'hidden', position: 'relative', borderTop: '2px solid #f2b544', borderBottom: '2px solid #f2b544', padding: '10px 0', marginBottom: 14, boxShadow: '0 0 20px rgba(242,181,68,.35), inset 0 0 24px rgba(0,0,0,.5)' } },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'ticker-bg', shape: 'rect', placeholder: 'Arena photo', fit: 'cover', src: 'featured-arena-bg.jpg' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'ticker-bg', shape: 'rect', placeholder: 'Arena photo', fit: 'cover', src: 'featured-arena-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(26,18,6,.35),rgba(36,21,5,.25),rgba(26,18,6,.35))' } }),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,#05060a,transparent 10%,transparent 90%,#05060a)', zIndex: 2, pointerEvents: 'none' } }),
       React.createElement('div', { style: { display: 'flex', gap: 0, whiteSpace: 'nowrap', width: 'max-content', animation: 'marquee 24s linear infinite' } },
@@ -3028,7 +3050,7 @@ class FantasyMobileAppCore extends React.Component {
         border: '1px solid rgba(242,181,68,.4)', animation: 'glowPulse 3s ease-in-out infinite', cursor: 'pointer'
       }
     },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-arena-bg', shape: 'rect', placeholder: 'Arena crowd photo', fit: 'cover', src: 'featured-arena-bg.jpg' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-arena-bg', shape: 'rect', placeholder: 'Arena crowd photo', fit: 'cover', src: 'featured-arena-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'absolute', left: 0, bottom: 0, width: '20%', height: '55%' } },
         React.createElement('div', { style: { position: 'absolute', inset: '8% 12% 0 12%', background: '#000', clipPath: 'ellipse(55% 100% at 50% 100%)', overflow: 'hidden' } },
           React.createElement(MobileImageSlot, { id: 'featured-left', shape: 'rect', placeholder: 'Jones photo' , fit: 'contain', src: 'uploads/transparent-featured-left.png'})
@@ -3143,7 +3165,7 @@ class FantasyMobileAppCore extends React.Component {
 
   renderFeaturedDetailLegacy(s) {
     return React.createElement('div', { style: { margin: '0 16px 16px', position: 'relative', overflow: 'hidden', border: '1px solid #ef4444', borderRadius: 14, padding: 12, boxShadow: '0 0 18px rgba(239,68,68,.45), inset 0 0 14px rgba(239,68,68,.1)' } },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-detail-bg', shape: 'rect', placeholder: 'Arena photo', fit: 'cover', src: 'featured-arena-bg.jpg' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-detail-bg', shape: 'rect', placeholder: 'Arena photo', fit: 'cover', src: 'featured-arena-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'relative' } },
       React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#ffce54', textShadow: '0 1px 4px rgba(0,0,0,.8)', marginBottom: 6 } }, 'FEATURED FIGHT · HEAVYWEIGHT BOUT'),
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 } },
@@ -3244,7 +3266,7 @@ class FantasyMobileAppCore extends React.Component {
         )
       ),
       React.createElement('div', { style: { flex: 1, position: 'relative', overflow: 'hidden', border: '1px solid #a855f790', borderRadius: 12, padding: 10, display: 'flex', flexDirection: 'column', gap: 6, boxShadow: '0 0 14px #a855f740' } },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'progression-classic-bg', shape: 'rect', placeholder: 'Boxing gloves photo', fit: 'cover', src: 'progression-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'progression-classic-bg', shape: 'rect', placeholder: 'Boxing gloves photo', fit: 'cover', src: 'progression-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'relative', display: 'flex', flexDirection: 'column', gap: 6 } },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#a855f7' } }, 'YOUR PROGRESSION'),
         React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
@@ -3293,7 +3315,7 @@ class FantasyMobileAppCore extends React.Component {
       )
     ), React.createElement('div', { style: { display: 'flex', gap: 8, padding: '0 16px 16px' } },
       React.createElement('div', { style: { flex: 1, position: 'relative', overflow: 'hidden', border: '1px solid #f2b54490', borderRadius: 12, padding: 10, boxShadow: '0 0 14px #f2b54440' } },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'home-leaderboard-bg', shape: 'rect', placeholder: 'Ring corner photo', fit: 'cover', src: 'leaderboard-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'home-leaderboard-bg', shape: 'rect', placeholder: 'Ring corner photo', fit: 'cover', src: 'leaderboard-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(160deg,rgba(20,10,0,.55),rgba(20,10,0,.8))' } }),
         React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 6 } },
@@ -3311,7 +3333,7 @@ class FantasyMobileAppCore extends React.Component {
         )
       ),
       React.createElement('div', { style: { flex: 1, position: 'relative', overflow: 'hidden', border: '1px solid #ef444490', borderRadius: 12, padding: 10, boxShadow: '0 0 14px #ef444440' } },
-        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'streak-bonus-bg', shape: 'rect', placeholder: 'Kickboxing photo', fit: 'cover', src: 'streak-bonus-bg.jpg' })),
+        React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'streak-bonus-bg', shape: 'rect', placeholder: 'Kickboxing photo', fit: 'cover', src: 'streak-bonus-bg-opt.jpg' })),
         React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544', marginBottom: 6 } }, 'STREAK BONUS'),
         React.createElement('div', { style: { fontSize: 11, fontWeight: 800, marginBottom: 6 } }, '🔥 7 DAY STREAK'),
@@ -3446,7 +3468,7 @@ class FantasyMobileAppCore extends React.Component {
       },
         React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' } },
           React.createElement('div', { style: { width: '58%', height: '85%' } },
-            React.createElement(MobileImageSlot, { id: 'affiliate-handshake', shape: 'rect', placeholder: 'Handshake photo — partnership', fit: 'cover', src: 'affiliate-handshake.jpg' })
+            React.createElement(MobileImageSlot, { id: 'affiliate-handshake', shape: 'rect', placeholder: 'Handshake photo — partnership', fit: 'cover', src: 'affiliate-handshake-opt.jpg' })
           )
         ),
         React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 35%,rgba(5,6,10,.92))', pointerEvents: 'none' } }),
@@ -3617,7 +3639,7 @@ class FantasyMobileAppCore extends React.Component {
     const rows = tier === 'rookie' && hasTierData ? allRows.filter(row => row.tier === 'rookie') : allRows;
     const podium = rows.slice(0, 3);
     return React.createElement('div', { style: { padding: '8px 16px 24px', position: 'relative', minHeight: '100%', overflow: 'hidden' } },
-      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'leaderboard-live-bg', shape: 'rect', placeholder: 'Leaderboard arena', fit: 'cover', src: 'leaderboard-bg.jpg' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'leaderboard-live-bg', shape: 'rect', placeholder: 'Leaderboard arena', fit: 'cover', src: 'leaderboard-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.84),rgba(5,6,10,.99))' } }),
       React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 4, color: '#f2b544' } }, 'LEADERBOARD'),
@@ -3758,7 +3780,43 @@ class FantasyMobileAppCore extends React.Component {
         ),
         isSignup ? field('PLAYER NAME', 'name', 'text', 'What other players see') : null,
         field('EMAIL', 'email', 'email', 'you@example.com'),
-        field('PASSWORD', 'password', 'password', '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'),
+        React.createElement('div', { key: 'pw', style: { marginBottom: 10 } },
+          React.createElement('div', { style: { fontSize: 9.5, fontWeight: 900, color: 'rgba(255,255,255,.5)', letterSpacing: .5, marginBottom: 4 } }, 'PASSWORD'),
+          React.createElement('div', { style: { position: 'relative' } },
+            React.createElement('input', {
+              type: s.showPassword ? 'text' : 'password',
+              value: f.password || '',
+              placeholder: '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022',
+              onChange: (e) => this.setAuthField('password', e.target.value),
+              style: { width: '100%', padding: '11px 44px 11px 12px', borderRadius: 9, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', color: '#fff', fontSize: 13, fontWeight: 700, outline: 'none', boxSizing: 'border-box' }
+            }),
+            React.createElement('div', {
+              role: 'button', tabIndex: 0,
+              'aria-label': s.showPassword ? 'Hide password' : 'Show password',
+              onClick: this.togglePassword,
+              style: { position: 'absolute', right: 4, top: 0, bottom: 0, width: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: s.showPassword ? '#f2b544' : 'rgba(255,255,255,.45)' }
+            },
+              React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+                s.showPassword
+                  ? React.createElement('g', null,
+                      React.createElement('path', { d: 'M9.88 9.88a3 3 0 1 0 4.24 4.24' }),
+                      React.createElement('path', { d: 'M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68' }),
+                      React.createElement('path', { d: 'M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61' }),
+                      React.createElement('line', { x1: 2, y1: 2, x2: 22, y2: 22 })
+                    )
+                  : React.createElement('g', null,
+                      React.createElement('path', { d: 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' }),
+                      React.createElement('circle', { cx: 12, cy: 12, r: 3 })
+                    )
+              )
+            )
+          )
+        ),
+        !isSignup ? React.createElement('div', {
+          key: 'forgot', onClick: this.startPasswordReset,
+          style: { textAlign: 'right', fontSize: 10, fontWeight: 800, color: '#4d8dff', cursor: 'pointer', marginBottom: 10, marginTop: -2 }
+        }, 'Forgot your password?') : null,
+        s.authNotice ? React.createElement('div', { key: 'notice', style: { fontSize: 10.5, fontWeight: 800, color: '#a8f0c4', background: 'rgba(34,197,94,.1)', border: '1px solid rgba(34,197,94,.3)', borderRadius: 8, padding: '9px 10px', marginBottom: 10, lineHeight: 1.5 } }, s.authNotice) : null,
         s.authError ? React.createElement('div', { key: 'err', style: { fontSize: 10.5, fontWeight: 800, color: '#ff8b8b', marginBottom: 10 } }, s.authError) : null,
         React.createElement('div', {
           key: 'go', onClick: this.submitAuth,
@@ -4397,7 +4455,7 @@ class FantasyMobileAppCore extends React.Component {
     if (s.modal === 'affiliate') return overlay([
       closeBtn,
       React.createElement('div', { key: 'hero', style: { height: 110, borderRadius: 12, overflow: 'hidden', marginBottom: 10, boxShadow: '0 0 18px rgba(77,141,255,.55)' } },
-        React.createElement(MobileImageSlot, { id: 'affiliate-modal-handshake', shape: 'rect', placeholder: 'Handshake — partnership', fit: 'cover', src: 'affiliate-handshake.jpg' })
+        React.createElement(MobileImageSlot, { id: 'affiliate-modal-handshake', shape: 'rect', placeholder: 'Handshake — partnership', fit: 'cover', src: 'affiliate-handshake-opt.jpg' })
       ),
       React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#4d8dff', marginBottom: 4 } }, "YOU'RE THE PROMOTER NOW"),
       React.createElement('div', { key: 'b', style: { fontSize: 12, lineHeight: 1.6, color: 'rgba(255,255,255,.8)', marginBottom: 12 } }, 'Promote fights, build a league, and get players moving. Run it like a creator: set up your profile, launch a promotion, share the link, track activity, and request payout.'),

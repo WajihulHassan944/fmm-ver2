@@ -474,6 +474,87 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     return Boolean(response?.ok);
   };
 
+  // Password reset. Uses the existing backend endpoint, and deliberately does
+  // not reveal whether an email is registered — that would let anyone probe for
+  // valid accounts.
+  const requestPasswordResetInApp = async ({ email } = {}) => {
+    try {
+      const response = await fetch(buildPublicApiUrl('/forgotPassword-user'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (response.ok || response.status === 404) return { ok: true };
+      const payload = await response.json().catch(() => ({}));
+      return { ok: false, message: payload?.message || 'Could not start a reset.' };
+    } catch (error) {
+      return { ok: false, message: 'Could not reach the server.' };
+    }
+  };
+
+  // Paid micro-purchases. The server owns the price — we never send a cost, so
+  // a caller cannot set their own. FM+ discount is applied server-side from the
+  // real subscription state.
+  const walletSpend = async (purpose) => {
+    if (typeof window === 'undefined') return { ok: false };
+    const token = window.localStorage.getItem('authToken');
+    if (!token) return { ok: false, message: 'Sign in first.' };
+    try {
+      const response = await fetch(buildPublicApiUrl('/api/wallet/spend'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ purpose }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        // Short on coins? Send them to buy, not to a dead end.
+        if (payload?.code === 'INSUFFICIENT_FUNDS') goToCheckout({ product: 'fm-coins' });
+        return { ok: false, message: payload?.message };
+      }
+      return { ok: true, coins: payload.coins, streakExpiresIn: payload.streakExpiresIn };
+    } catch (error) {
+      return { ok: false, message: 'Could not reach the server.' };
+    }
+  };
+
+  const saveStreakInApp = () => walletSpend('streak_save');
+  const skipWaitInApp = () => walletSpend('skip_wait');
+
+  const claimDailyRewardInApp = async () => {
+    if (typeof window === 'undefined') return { ok: false };
+    const token = window.localStorage.getItem('authToken');
+    if (!token) return { ok: false, message: 'Sign in to claim your daily reward.' };
+    try {
+      const response = await fetch(buildPublicApiUrl('/api/rewards/claim-daily'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return { ok: false, message: payload?.message };
+      return { ok: true, coins: payload.coins, awarded: payload.awarded, streak: payload.streak };
+    } catch (error) {
+      return { ok: false, message: 'Could not reach the server.' };
+    }
+  };
+
+  // Persists the read timestamp so the badge stays cleared across reopens.
+  // Returns true on failure too — a network hiccup should not leave the badge
+  // stuck on a number the user has already looked at.
+  const markNotificationsReadInApp = async () => {
+    if (typeof window === 'undefined') return true;
+    const token = window.localStorage.getItem('authToken');
+    if (!token) return true;
+    try {
+      await fetch(buildPublicApiUrl('/api/users/me/notifications/read'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      // non-fatal
+    }
+    return true;
+  };
+
   const goToCheckout = ({ amount, price, product = 'fm-coins', plan = '', items = [] } = {}) => {
     const serializedCart = Array.isArray(items) && items.length
       ? items
@@ -616,10 +697,15 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       return false;
     }
     if (!leagueId || !user?._id || !user?.email) return false;
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('authToken') : '';
     const response = await fetch(buildPublicApiUrl(`/affiliate/${encodeURIComponent(leagueId)}/join`), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user._id, userEmail: user.email }),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      // userId is derived server-side from the token; only the email is sent.
+      body: JSON.stringify({ userEmail: user.email }),
     }).catch(() => null);
     return Boolean(response?.ok);
   };
@@ -675,7 +761,12 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
           router.push(id ? `/fight/${id}` : '/upcomingfights');
         }}
         onJoinLeague={joinLeague}
+        onSaveStreak={saveStreakInApp}
+        onSkipWait={skipWaitInApp}
+        onClaimReward={claimDailyRewardInApp}
+        onMarkNotificationsRead={markNotificationsReadInApp}
         onLogin={loginInApp}
+        onRequestPasswordReset={requestPasswordResetInApp}
         onSignup={signupInApp}
         onLoadAffiliate={loadAffiliateInApp}
         onRequestPayout={requestPayoutInApp}
