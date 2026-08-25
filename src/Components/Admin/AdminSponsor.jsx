@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const AdminSponsor = () => {
   const [sponsors, setSponsors] = useState([]);
@@ -56,6 +57,7 @@ const AdminSponsor = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-sponsor', {
         method: 'POST',
+        headers: adminHeaders(),
         body: sponsorData,
       });
       const data = await response.json();
@@ -91,6 +93,7 @@ const AdminSponsor = () => {
         `https://fantasymmadness-game-server-three.vercel.app/sponsor/${editingSponsorId}`,
         {
           method: 'PUT',
+          headers: adminHeaders(),
           body: sponsorData,
         }
       );
@@ -143,6 +146,7 @@ const AdminSponsor = () => {
     try {
       const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/sponsor/${id}`, {
         method: 'DELETE',
+        headers: adminHeaders(),
       });
       const data = await response.json();
 

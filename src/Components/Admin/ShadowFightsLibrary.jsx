@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
@@ -67,7 +68,7 @@ const ShadowFightsLibrary = () => {
 
   const fetchAffiliatesData = async () => {
     try {
-      const response = await fetch(`${API_BASE}/affiliates`);
+      const response = await fetch(`${API_BASE}/affiliates`, { headers: adminHeaders() });
       const data = await response.json();
       setAffiliates(Array.isArray(data) ? data : []);
     } catch (error) {

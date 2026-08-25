@@ -84,7 +84,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           wrestlingRequest('/api/admin/wrestling/payout-rules', { admin: true }),
         ]);
         const [wrestlerPayload, scoringPayload, payoutPayload] = baseRequests;
-        const affiliateResult = await wrestlingRequest('/affiliates').catch(() => []);
+        const affiliateResult = await wrestlingRequest('/affiliates', { admin: true }).catch(() => []);
         const matchPayload = isEdit
           ? await wrestlingRequest(`/api/admin/wrestling/matches/${matchId}`, { admin: true })
           : null;

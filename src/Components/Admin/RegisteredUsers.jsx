@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { adminJsonHeaders } from '@/Utils/authFetch';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
@@ -101,9 +102,7 @@ const RegisteredUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: adminJsonHeaders(),
         body: JSON.stringify({ email: selectedUser.email, profileUrl: selectedUser.profileUrl }),
       });
 

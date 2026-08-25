@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { userHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
@@ -133,7 +134,7 @@ const YourFights = () => {
     if (!user?._id) return;
     const fetchRemovedMatches = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches');
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches', { headers: userHeaders() });
         const data = await response.json();
         const userMatches = Array.isArray(data) ? data.filter((item) => sameId(item.userId, user._id)) : [];
         setRemovedMatches(userMatches[0]?.removedMatchesIds || []);

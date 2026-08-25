@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { userHeaders } from '@/Utils/authFetch';
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
@@ -756,6 +757,7 @@ const Dashboard = () => {
       try {
         const response = await fetch(
           "https://fantasymmadness-game-server-three.vercel.app/users/removed-matches",
+          { headers: userHeaders() },
         );
         const data = await response.json();
         const userMatches = Array.isArray(data)

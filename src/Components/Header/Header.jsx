@@ -232,6 +232,9 @@ const Header = () => {
 
   const handleLogoutSponsor = () => {
     if (typeof window !== 'undefined') {
+      // The token is the credential — clearing the display flag alone left a
+      // usable sponsor session on the device after "sign out".
+      localStorage.removeItem('sponsorAuthToken');
       localStorage.removeItem('isSponsorAuthenticated');
       localStorage.removeItem('sponsorData');
     }

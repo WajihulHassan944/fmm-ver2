@@ -30,13 +30,12 @@ const FightLeaderboard = ({ matchId, matchOverride = null }) => {
   const fetchLeaderboardData = async () => {
     setRefreshed(true);
     try {
-      const [scoresResponse, usersResponse] = await Promise.all([
-        fetch(buildPublicApiUrl('/api/scores', { matchId })),
-        fetch(buildPublicApiUrl('/users')),
-      ]);
-      const [scoresPayload, usersPayload] = await Promise.all([scoresResponse.json(), usersResponse.json()]);
-      setScores(Array.isArray(scoresPayload) ? scoresPayload.filter((score) => score.matchId === matchId) : []);
-      setUsers(Array.isArray(usersPayload) ? usersPayload : []);
+      // Scored server-side: raw picks are never sent to the browser, so the
+      // field cannot be read and played against before a fight locks.
+      const boardResponse = await fetch(buildPublicApiUrl(`/api/matches/${matchId}/leaderboard`));
+      const boardPayload = await boardResponse.json();
+      setScores(Array.isArray(boardPayload?.leaderboard) ? boardPayload.leaderboard : []);
+      setUsers([]);
       dispatch(fetchMatches());
     } catch (error) {
       console.error('Error fetching leaderboard data:', error);
@@ -73,67 +72,18 @@ const FightLeaderboard = ({ matchId, matchOverride = null }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId, dispatch, Boolean(match)]);
 
-  const calculatePoints = (userPrediction, fighterOneStats, fighterTwoStats) => {
-    let totalScore = 0;
+  // Server-scored and pre-ranked; the browser no longer sees raw predictions.
+  const rankedEntries = useMemo(() => scores.map((row) => ({
+    user: {
+      _id: row.userId,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      playerName: row.playerName,
+      profileUrl: row.profileUrl,
+    },
+    totalPoints: Number(row.totalPoints || 0),
+  })), [scores]);
 
-    (Array.isArray(userPrediction) ? userPrediction : []).forEach((roundPrediction, index) => {
-      const fighterOneRound = fighterOneStats?.[index];
-      const fighterTwoRound = fighterTwoStats?.[index];
-      if (!fighterOneRound || !fighterTwoRound || !roundPrediction) return;
-
-      if (match.matchCategory === 'boxing') {
-        if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.HP) totalScore += roundPrediction.hpPrediction1;
-        if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.BP) totalScore += roundPrediction.bpPrediction1;
-        if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.TP) totalScore += roundPrediction.tpPrediction1;
-        if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) totalScore += roundPrediction.rwPrediction1;
-        if (roundPrediction.koPrediction1 !== null && roundPrediction.koPrediction1 === fighterOneRound.KO) totalScore += fighterOneRound.KO;
-        if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.HP) totalScore += roundPrediction.hpPrediction2;
-        if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.BP) totalScore += roundPrediction.bpPrediction2;
-        if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.TP) totalScore += roundPrediction.tpPrediction2;
-        if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) totalScore += roundPrediction.rwPrediction2;
-        if (roundPrediction.koPrediction2 !== null && roundPrediction.koPrediction2 === fighterTwoRound.KO) totalScore += fighterTwoRound.KO;
-      } else if (match.matchCategory === 'mma') {
-        if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.ST) totalScore += roundPrediction.hpPrediction1;
-        if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.KI) totalScore += roundPrediction.bpPrediction1;
-        if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.KN) totalScore += roundPrediction.tpPrediction1;
-        if (roundPrediction.elPrediction1 !== null && roundPrediction.elPrediction1 <= fighterOneRound.EL) totalScore += roundPrediction.elPrediction1;
-        if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) totalScore += roundPrediction.rwPrediction1;
-        if (roundPrediction.koPrediction1 !== null && roundPrediction.koPrediction1 === fighterOneRound.KO) totalScore += fighterOneRound.KO;
-        if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.ST) totalScore += roundPrediction.hpPrediction2;
-        if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.KI) totalScore += roundPrediction.bpPrediction2;
-        if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.KN) totalScore += roundPrediction.tpPrediction2;
-        if (roundPrediction.elPrediction2 !== null && roundPrediction.elPrediction2 <= fighterTwoRound.EL) totalScore += roundPrediction.elPrediction2;
-        if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) totalScore += roundPrediction.rwPrediction2;
-        if (roundPrediction.koPrediction2 !== null && roundPrediction.koPrediction2 === fighterTwoRound.KO) totalScore += fighterTwoRound.KO;
-      }
-    });
-
-    return totalScore;
-  };
-
-  const rankedEntries = useMemo(() => {
-    if (!match) return [];
-    const fighterOneStats = match.matchCategory === 'boxing'
-      ? match.BoxingMatch?.fighterOneStats
-      : match.MMAMatch?.fighterOneStats;
-    const fighterTwoStats = match.matchCategory === 'boxing'
-      ? match.BoxingMatch?.fighterTwoStats
-      : match.MMAMatch?.fighterTwoStats;
-
-    return scores
-      .map((score) => {
-        const scoreUser = users.find((candidate) => candidate._id === score.playerId);
-        if (!scoreUser) return null;
-        return {
-          user: scoreUser,
-          totalPoints: calculatePoints(score.predictions, fighterOneStats || [], fighterTwoStats || []),
-        };
-      })
-      .filter(Boolean)
-      .sort((left, right) => Number(right.totalPoints || 0) - Number(left.totalPoints || 0));
-    // calculatePoints intentionally mirrors the existing scoring logic.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scores, users, match]);
 
   if (!match) {
     return <div className="player-dynamic-empty"><FaChartLine /><h2>Leaderboard unavailable</h2><p>The selected fight is not available.</p></div>;

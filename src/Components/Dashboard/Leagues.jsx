@@ -26,7 +26,7 @@ const Leagues = () => {
   useEffect(() => {
     const fetchAffiliates = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates');
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/public/affiliates');
         const data = await response.json();
         setAffiliates(Array.isArray(data) ? data : []);
       } catch (error) {

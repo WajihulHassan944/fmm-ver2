@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
@@ -40,10 +41,32 @@ const Admin = () => {
     apparelOrdersCount: 0,
   });
 
+  // Feature demand. Head-to-Head ships as a waitlist rather than a live
+  // feature, so this is the readout that decides whether it gets built.
+  const [featureDemand, setFeatureDemand] = useState({ totals: [], bands: {}, recent: [] });
+
+  useEffect(() => {
+    const fetchFeatureDemand = async () => {
+      try {
+        const response = await fetch(buildPublicApiUrl('/api/admin/waitlist'), { headers: adminHeaders() });
+        if (!response.ok) return;
+        const data = await response.json();
+        setFeatureDemand({
+          totals: Array.isArray(data?.totals) ? data.totals : [],
+          bands: data?.bands || {},
+          recent: Array.isArray(data?.recent) ? data.recent : [],
+        });
+      } catch (error) {
+        console.error('Error fetching feature demand:', error);
+      }
+    };
+    fetchFeatureDemand();
+  }, []);
+
   useEffect(() => {
     const fetchDashboardCounts = async () => {
       try {
-        const response = await fetch(buildPublicApiUrl('/dashboard-counts'));
+        const response = await fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() });
         const data = await response.json();
         setDashboardCounts(data);
       } catch (error) {
@@ -167,6 +190,46 @@ const Admin = () => {
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="admin-dashboard-panel">
+          <div className="admin-dashboard-panel-heading">
+            <h2>Feature demand</h2>
+            <span>Waitlist signups from the app</span>
+          </div>
+          {featureDemand.totals.length === 0 ? (
+            <p style={{ fontSize: 13, opacity: 0.7, margin: 0 }}>
+              No waitlist signups yet. Head-to-Head shows a “Notify me” button in the app — signups land here.
+            </p>
+          ) : (
+            <>
+              <div className="admin-data-table-scroll">
+                <table className="admin-data-table">
+                  <thead>
+                    <tr><th>Feature</th><th>Interested</th><th>Signed-in players</th></tr>
+                  </thead>
+                  <tbody>
+                    {featureDemand.totals.map((row) => (
+                      <tr key={row._id}>
+                        <td><strong>{String(row._id || '').replace(/-/g, ' ')}</strong></td>
+                        <td>{Number(row.total || 0).toLocaleString()}</td>
+                        <td>{Number(row.signedIn || 0).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {Object.keys(featureDemand.bands).length > 0 && (
+                <p style={{ fontSize: 12, opacity: 0.75, marginTop: 12 }}>
+                  Stake they say they would use:{' '}
+                  {Object.entries(featureDemand.bands)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([band, count]) => `${band} FM (${count})`)
+                    .join(' · ')}
+                </p>
+              )}
+            </>
+          )}
         </div>
 
         <SwarmStatusPanel />

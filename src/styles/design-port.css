@@ -490,3 +490,28 @@
 
 /* Final audit fixes: old administration modules normalised into the command-center shell */
 .admin-experience-main :is(.faqwrapper-admin,.newswrapper-admin,.sponsor-wrapper,.adminPredictions,.adminSideThreadsContainer,.nonRegisteredUsers,.youtubeLibrary,.adminRecords,.adminChatroomContainer,.blogsContainerAdmin,.adminAddBlog,.bot-wrapper-blogs,.bot-wrapper-social,.poster-form-wrapped){background:transparent!important;color:var(--admin-text,#f4f6fa)!important;margin:0 auto!important;max-width:1540px!important;min-height:auto!important;padding:0!important;width:100%!important}.admin-experience-main :is(.faqmain-admin,.newsmain-admin,.sponsor-grid,.adminPredictionsMain,.adminPredictionsBody,.adminSideThreadsWrapper,.youtubeArchive,.adminRecordsMain,.blogsContentActual,.adminAddBlog-form,.chat-box-blogs,.poster-form-container){display:grid;gap:18px}.admin-experience-main :is(.faqItem-admin,.newsItem-admin,.sponsor-card,.prediction-card,.adminThreadCard,.youtube-card,.adminRecordCard,.blogItem,.adminAddBlog-section){backdrop-filter:blur(14px);background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.022))!important;border:1px solid var(--admin-border,rgba(255,255,255,.1))!important;border-radius:17px!important;box-shadow:0 24px 72px rgba(0,0,0,.34)!important;color:#fff!important;overflow:hidden;padding:18px!important}.admin-experience-main :is(.faqHeader-admin,.newsHeader-admin){align-items:center;color:#fff!important;display:flex;font-family:var(--admin-display,Impact,sans-serif)!important;font-size:20px!important;font-weight:900!important;justify-content:space-between;text-transform:uppercase}.admin-experience-main :is(.faqBody-admin,.newsBody-admin){border-top:1px solid var(--admin-border,rgba(255,255,255,.1));color:var(--admin-muted,rgba(244,246,250,.62))!important;margin-top:12px!important;padding-top:14px!important}.admin-experience-main :is(.add-faq-btn,.add-news-btn,.add-sponsor-btn,.submit-sponsor-btn,.edit-sponsor-btn,.delete-sponsor-btn,.nonregistereduserslist){background:linear-gradient(135deg,#df111b,#8f0710)!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff!important}.admin-experience-main :is(.delete-btn,.delete-sponsor-btn){background:rgba(223,17,27,.18)!important;border-color:rgba(223,17,27,.45)!important}.admin-experience-main .sponsor-grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.admin-experience-main .sponsor-image{border-radius:13px;height:180px!important;object-fit:cover;width:100%}.admin-experience-main :is(.sponsor-name,.sponsor-heading){font-family:var(--admin-display,Impact,sans-serif)!important;text-transform:uppercase!important}.admin-experience-main :is(.add-sponsor-form,.popup-content,.modal-content){backdrop-filter:blur(16px);background:linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.98))!important;border:1px solid var(--admin-border,rgba(255,255,255,.1))!important;border-radius:18px!important;box-shadow:0 30px 90px rgba(0,0,0,.46)!important;color:#fff!important;padding:22px!important}
+
+
+/* --------------------------------------------------------------------------
+   Mobile app hero
+   The banner artwork is 16:9 with sport labels and the tagline baked into its
+   far edges. Shown full-width on a phone it becomes a ~390x219 strip where that
+   edge text renders around 7px tall — unreadable, and the title is tiny. So on
+   phones the image sits in a taller box and is centre-cropped: the outer thirds
+   (the unreadable labels) fall away and the crown and title fill the space.
+   Desktop keeps the full 16:9 composition.
+   -------------------------------------------------------------------------- */
+.fmm-app-hero img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+@media (max-width: 767px) {
+  .fmm-app-hero img {
+    aspect-ratio: 5 / 4;
+    object-position: 50% 46%;
+  }
+}
+@media (max-width: 400px) {
+  .fmm-app-hero img { aspect-ratio: 4 / 3; }
+}

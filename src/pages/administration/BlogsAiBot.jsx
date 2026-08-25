@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 import { IoSend } from 'react-icons/io5';
 import { useRouter } from 'next/router';
 
@@ -90,6 +91,7 @@ const postBlogToBackend = async (parsedBlog) => {
 
   const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/create-blog', {
     method: 'POST',
+    headers: adminHeaders(),
     body: formData,
   });
 

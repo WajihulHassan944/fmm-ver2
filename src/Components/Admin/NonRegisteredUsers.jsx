@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import React, { useState, useEffect } from 'react';
 
 const NonRegisteredUsers = () => {
@@ -10,7 +11,7 @@ const NonRegisteredUsers = () => {
   // Function to fetch non-registered users from the API
   const fetchUsers = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered');
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered', { headers: adminHeaders() });
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -34,9 +35,7 @@ const NonRegisteredUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: adminJsonHeaders(),
         body: JSON.stringify({ fullName: name, email }),
       });
   
@@ -64,6 +63,7 @@ const NonRegisteredUsers = () => {
     try {
       await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered/${id}`, {
         method: 'DELETE',
+        headers: adminHeaders(),
       });
 
       setUsers(users.filter((user) => user._id !== id)); // Remove the deleted user from the list

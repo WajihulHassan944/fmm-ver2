@@ -103,7 +103,11 @@ const affiliateAuthSlice = createSlice({
         if (action.payload.verified) {
             state.isAuthenticatedAffiliate = true; // Only set to true if the user is verified
         }
-        localStorage.setItem('affiliateAuthToken', action.payload.token); // Store token in local storage
+        // A read-only owner preview token must never be persisted — it would
+        // outlive the preview tab and look like a real affiliate login.
+        if (action.payload.token && action.payload.token !== (typeof window !== 'undefined' ? sessionStorage.getItem('previewToken') : null)) {
+          localStorage.setItem('affiliateAuthToken', action.payload.token);
+        }
         state.userAffiliate = action.payload.user; // Set user from action payload
     
         console.log('isAuthenticatedAffiliate:', state.isAuthenticatedAffiliate); // Console log the value

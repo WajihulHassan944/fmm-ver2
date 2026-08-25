@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { userHeaders } from '@/Utils/authFetch';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
@@ -25,7 +26,7 @@ console.log(user);
   useEffect(() => {
     const fetchRemovedMatches = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches');
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches', { headers: userHeaders() });
         const data = await response.json();
         
         // Filter the data for the current user's userId

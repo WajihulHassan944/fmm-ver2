@@ -35,7 +35,7 @@ const PromoTwo = ({ matchId, affiliateId }) => {
     const fetchAffiliates = async () => {
       setAffiliateLoading(true);
       try {
-        const response = await fetch(`${API_BASE}/affiliates`);
+        const response = await fetch(`${API_BASE}/api/public/affiliates`);
         if (!response.ok) throw new Error('Failed to fetch affiliates');
         const affiliates = await response.json();
         const matchedAffiliate = safeArray(affiliates).find((item) => String(item?._id || '') === String(affiliateId || ''));

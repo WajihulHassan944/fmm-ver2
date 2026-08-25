@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { affiliateHeaders } from '@/Utils/authFetch';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -89,6 +90,7 @@ const AffiliateProfile = () => {
     try {
       const response = await fetch(`${API_BASE}/update-profile-affiliate/${affiliateId}`, {
         method: 'PUT',
+        headers: affiliateHeaders(),
         body: formData,
       });
       const data = await response.json().catch(() => ({}));

@@ -26,12 +26,13 @@ const AffiliateFightLeaderboard = ({ matchId }) => {
     
     
     useEffect(() => {
-      fetch(buildPublicApiUrl('/api/scores', { matchId }))
-        .then(response => response.json())
-        .then(data => setScores(data.filter(score => score.matchId === matchId))) // Filter scores by matchId
+      fetch(buildPublicApiUrl(`/api/matches/${matchId}/leaderboard`))
+      .then(response => response.json())
+      // Server-scored: raw picks never reach the browser.
+      .then(data => setScores(Array.isArray(data?.leaderboard) ? data.leaderboard : [])) // Filter scores by matchId
         .catch(error => console.error('Error fetching scores:', error));
   
-      fetch(buildPublicApiUrl('/users'))
+      fetch(buildPublicApiUrl('/api/public/user-directory'))
         .then(response => response.json())
         .then(data => setUsers(data))
         .catch(error => console.error('Error fetching users:', error));
@@ -48,147 +49,18 @@ const AffiliateFightLeaderboard = ({ matchId }) => {
     
   
   
-    const calculatePoints = (userPrediction, fighterOneStats, fighterTwoStats) => {
-      let totalScore = 0;
-  
-      userPrediction.forEach((roundPrediction, index) => {
-          const fighterOneRound = fighterOneStats[index];
-          const fighterTwoRound = fighterTwoStats[index];
-  
-          if (!fighterOneRound || !fighterTwoRound || !roundPrediction) return;
-  
-          // For Boxing
-          if (match.matchCategory === 'boxing') {
-              // Fighter One Predictions
-              // Head Punches (HP)
-              if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.HP) {
-                  totalScore += roundPrediction.hpPrediction1;
-              }
-  
-              // Body Punches (BP)
-              if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.BP) {
-                  totalScore += roundPrediction.bpPrediction1;
-              }
-  
-              // Total Punches (TP)
-              if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.TP) {
-                  totalScore += roundPrediction.tpPrediction1;
-              }
-  
-              // Round Winner (RW)
-              if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) {
-                  totalScore += roundPrediction.rwPrediction1;
-              }
-  
-              // Knock Out (KO)
-              if (roundPrediction.koPrediction1 !== null && roundPrediction.koPrediction1 === fighterOneRound.KO) {
-                  totalScore += fighterOneRound.KO;
-              }
-  
-              // Fighter Two Predictions
-              // Head Punches (HP)
-              if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.HP) {
-                  totalScore += roundPrediction.hpPrediction2;
-              }
-  
-              // Body Punches (BP)
-              if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.BP) {
-                  totalScore += roundPrediction.bpPrediction2;
-              }
-  
-              // Total Punches (TP)
-              if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.TP) {
-                  totalScore += roundPrediction.tpPrediction2;
-              }
-  
-              // Round Winner (RW)
-              if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) {
-                  totalScore += roundPrediction.rwPrediction2;
-              }
-  
-              // Knock Out (KO)
-              if (roundPrediction.koPrediction2 !== null && roundPrediction.koPrediction2 === fighterTwoRound.KO) {
-                  totalScore += fighterTwoRound.KO;
-              }
-  
-          // For MMA
-          } else if (match.matchCategory === 'mma') {
-              // Fighter One Predictions
-              // Strikes (ST)
-              if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.ST) {
-                  totalScore += roundPrediction.hpPrediction1;
-              }
-  
-              // Kicks (KI)
-              if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.KI) {
-                  totalScore += roundPrediction.bpPrediction1;
-              }
-  
-              // Knockdowns (KN)
-              if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.KN) {
-                  totalScore += roundPrediction.tpPrediction1;
-              }
-  
-              // Elbow Strikes (EL)
-              if (roundPrediction.elPrediction1 !== null && roundPrediction.elPrediction1 <= fighterOneRound.EL) {
-                  totalScore += roundPrediction.elPrediction1;
-              }
-  
-              // Round Winner (RW)
-              if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) {
-                  totalScore += roundPrediction.rwPrediction1;
-              }
-  
-              // Knock Out (KO)
-              if (roundPrediction.koPrediction1 !== null && roundPrediction.koPrediction1 === fighterOneRound.KO) {
-                  totalScore += fighterOneRound.KO;
-              }
-  
-              // Fighter Two Predictions
-              // Strikes (ST)
-              if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.ST) {
-                  totalScore += roundPrediction.hpPrediction2;
-              }
-  
-              // Kicks (KI)
-              if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.KI) {
-                  totalScore += roundPrediction.bpPrediction2;
-              }
-  
-              // Knockdowns (KN)
-              if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.KN) {
-                  totalScore += roundPrediction.tpPrediction2;
-              }
-  
-              // Elbow Strikes (EL)
-              if (roundPrediction.elPrediction2 !== null && roundPrediction.elPrediction2 <= fighterTwoRound.EL) {
-                  totalScore += roundPrediction.elPrediction2;
-              }
-  
-              // Round Winner (RW)
-              if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) {
-                  totalScore += roundPrediction.rwPrediction2;
-              }
-  
-              // Knock Out (KO)
-              if (roundPrediction.koPrediction2 !== null && roundPrediction.koPrediction2 === fighterTwoRound.KO) {
-                  totalScore += fighterTwoRound.KO;
-              }
-          }
-      });
-  
-      return totalScore;
-  };
+    // Scoring happens server-side; rows arrive pre-scored and ranked.
+
   
   
   
     const renderLeaderboardItems = () => {
     
       return scores.map((score, index) => {
-        const user = users.find(u => u._id === score.playerId);
+        const user = { _id: score.userId, firstName: score.firstName, lastName: score.lastName, playerName: score.playerName, profileUrl: score.profileUrl };
         if (!user) return null;
     
-        const totalPoints = calculatePoints(score.predictions, match.BoxingMatch.fighterOneStats, match.BoxingMatch.fighterTwoStats);
+        const totalPoints = Number(score.totalPoints || 0);
     
         return (
           <div className='leaderboardItem' key={index}>

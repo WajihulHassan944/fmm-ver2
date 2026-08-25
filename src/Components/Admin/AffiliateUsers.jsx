@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 import UserDetails from './UserDetails';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
@@ -45,6 +46,7 @@ const AffiliateUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-affiliate-reward', {
         method: 'POST',
+        headers: adminHeaders(),
         body: formData,
       });
 
@@ -64,7 +66,7 @@ const AffiliateUsers = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates');
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
       const data = await response.json();
       setAffiliateUsers(data);
       setFilteredUsers(data);

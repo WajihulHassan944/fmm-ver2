@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { adminHeaders } from '@/Utils/authFetch';
 import React, { useState } from 'react';
 
 const AddNewBlog = () => {
@@ -73,6 +74,7 @@ const AddNewBlog = () => {
     try {
       const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/create-blog', {
         method: 'POST',
+        headers: adminHeaders(),
         body: formData
       });
 

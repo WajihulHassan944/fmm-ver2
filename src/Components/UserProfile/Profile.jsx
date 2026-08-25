@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { userHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
@@ -103,6 +104,7 @@ const Profile = () => {
 
         const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-profile/${user._id}`, {
           method: 'PUT',
+          headers: userHeaders(),
           body: formData,
         });
         if (!response.ok) throw new Error('Failed to update profile');

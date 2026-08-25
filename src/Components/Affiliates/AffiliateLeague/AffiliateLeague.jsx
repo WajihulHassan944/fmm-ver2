@@ -92,7 +92,7 @@ const AffiliateLeague = () => {
       setError('');
 
       try {
-        const response = await fetch(`${API_BASE}/users`);
+        const response = await fetch(`${API_BASE}/api/public/user-directory`);
         if (!response.ok) throw new Error(`Users request failed with status ${response.status}`);
         const payload = await response.json();
         const directory = Array.isArray(payload)

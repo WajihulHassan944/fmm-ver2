@@ -426,14 +426,29 @@ function AppContent({ children }) {
       return scheduleWhenIdle(callback, 1800);
     };
 
-    const userToken = localStorage.getItem("authToken");
+    // Owner "view as": a read-only preview token in sessionStorage stands in for
+    // the account being viewed, so the whole app hydrates as that person. It is
+    // never written to localStorage, so it cannot outlive the tab or displace a
+    // real login — and the server refuses any non-GET made with it.
+    let previewToken = '';
+    let previewType = '';
+    try {
+      previewToken = sessionStorage.getItem('previewToken') || '';
+      previewType = JSON.parse(sessionStorage.getItem('previewContext') || '{}')?.type || '';
+    } catch (error) { /* ignore */ }
+
+    const userToken = previewToken && previewType !== 'affiliate'
+      ? previewToken
+      : localStorage.getItem("authToken");
     if (userToken) {
       dispatch(setUser({ token: userToken }));
       const cleanup = runProfileFetch(() => dispatch(fetchUser(userToken)));
       if (cleanup) cleanupFns.push(cleanup);
     }
 
-    const affiliateToken = localStorage.getItem("affiliateAuthToken");
+    const affiliateToken = previewToken && previewType === 'affiliate'
+      ? previewToken
+      : localStorage.getItem("affiliateAuthToken");
     if (affiliateToken) {
       dispatch(setAffiliateUser({ token: affiliateToken }));
       const cleanup = runProfileFetch(() => dispatch(fetchAffiliate(affiliateToken)));

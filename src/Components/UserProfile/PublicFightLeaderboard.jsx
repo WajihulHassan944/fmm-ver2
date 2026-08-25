@@ -11,12 +11,13 @@ const PublicFightLeaderboard = ({ matchId ,name, plan, profileUrl }) => {
   const match = matches.find((m) => m._id === matchId);
 
   useEffect(() => {
-    fetch(buildPublicApiUrl('/api/scores', { matchId }))
+    fetch(buildPublicApiUrl(`/api/matches/${matchId}/leaderboard`))
       .then(response => response.json())
-      .then(data => setScores(data.filter(score => score.matchId === matchId))) // Filter scores by matchId
+      // Server-scored: raw picks never reach the browser.
+      .then(data => setScores(Array.isArray(data?.leaderboard) ? data.leaderboard : [])) // Filter scores by matchId
       .catch(error => console.error('Error fetching scores:', error));
 
-    fetch(buildPublicApiUrl('/users'))
+    fetch(buildPublicApiUrl('/api/public/user-directory'))
       .then(response => response.json())
       .then(data => setUsers(data))
       .catch(error => console.error('Error fetching users:', error));
@@ -29,87 +30,18 @@ const PublicFightLeaderboard = ({ matchId ,name, plan, profileUrl }) => {
 
 
 
-  const calculatePoints = (userPrediction, fighterOneStats, fighterTwoStats) => {
-    let totalScore = 0;
-  
-    userPrediction.forEach((roundPrediction, index) => {
-      const fighterOneRound = fighterOneStats[index];
-      const fighterTwoRound = fighterTwoStats[index];
-  
-      if (!fighterOneRound || !fighterTwoRound || !roundPrediction) return;
-  
-      // Head Punches (HP) - Fighter One
-      if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.HP) {
-        totalScore += roundPrediction.hpPrediction1;
-      }
-  
-      // Body Punches (BP) - Fighter One
-      if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.BP) {
-        totalScore += roundPrediction.bpPrediction1;
-      }
-  
-      // Total Punches (TP) - Fighter One
-      if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.TP) {
-        totalScore += roundPrediction.tpPrediction1;
-      }
-  
-      // Picking Round Winner (RW) - Fighter One
-      if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) {
-        totalScore += roundPrediction.rwPrediction1;
-      }
-  
-      // Knock Out (KO) - Fighter One
-      if (roundPrediction.koPrediction1 !== null) {
-        if (roundPrediction.koPrediction1 === fighterOneRound.KO) {
-          totalScore += fighterOneRound.KO;
-        } else {
-          totalScore += 0; // 25 points for wrong KO pick
-        }
-      }
-  
-      // Head Punches (HP) - Fighter Two
-      if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.HP) {
-        totalScore += roundPrediction.hpPrediction2;
-      }
-  
-      // Body Punches (BP) - Fighter Two
-      if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.BP) {
-        totalScore += roundPrediction.bpPrediction2;
-      }
-  
-      // Total Punches (TP) - Fighter Two
-      if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.TP) {
-        totalScore += roundPrediction.tpPrediction2;
-      }
-  
-      // Picking Round Winner (RW) - Fighter Two
-      if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) {
-        totalScore += roundPrediction.rwPrediction2;
-      }
-  
-      // Knock Out (KO) - Fighter Two
-      if (roundPrediction.koPrediction2 !== null) {
-        if (roundPrediction.koPrediction2 === fighterTwoRound.KO) {
-          totalScore += fighterTwoRound.KO;
-        } else {
-          totalScore += 0; // 25 points for wrong KO pick
-        }
-      }
-    });
-  
-    return totalScore;
-    
-  };
+  // Scoring happens server-side; rows arrive pre-scored and ranked.
+
   
 
 
   const renderLeaderboardItems = () => {
   
     return scores.map((score, index) => {
-      const user = users.find(u => u._id === score.playerId);
+      const user = { _id: score.userId, firstName: score.firstName, lastName: score.lastName, playerName: score.playerName, profileUrl: score.profileUrl };
       if (!user) return null;
   
-      const totalPoints = calculatePoints(score.predictions, match.BoxingMatch.fighterOneStats, match.BoxingMatch.fighterTwoStats);
+      const totalPoints = Number(score.totalPoints || 0);
   
       return (
         <div className='leaderboardItem' key={index}>

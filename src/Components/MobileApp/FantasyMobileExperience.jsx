@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 
@@ -43,7 +43,7 @@ const writeExperienceCache = (key, value) => {
 
 const fetchSignedInEntries = async () => {
   if (typeof window === 'undefined') return [];
-  const token = window.localStorage.getItem('authToken');
+  const token = readSessionToken();
   if (!token) return [];
   const response = await fetch(buildPublicApiUrl('/api/users/me/fight-entries?limit=150'), {
     headers: { Authorization: `Bearer ${token}` },
@@ -76,6 +76,29 @@ const toNumber = (...values) => {
   return null;
 };
 
+
+
+// Owner "view as" preview. The preview token is kept in sessionStorage — it
+// expires with the tab and never overwrites a real player's saved login. Every
+// authenticated read prefers it, and the server refuses to let it write.
+const readSessionToken = () => {
+  if (typeof window === 'undefined') return '';
+  try {
+    return window.sessionStorage.getItem('previewToken') || window.localStorage.getItem('authToken') || '';
+  } catch (error) {
+    return '';
+  }
+};
+
+const readPreviewContext = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.sessionStorage.getItem('previewContext');
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+};
 
 const composeExperienceData = ({
   playableRows = [],
@@ -184,6 +207,42 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState(EMPTY_DATA);
   const [isLoading, setIsLoading] = useState(true);
+  const [preview, setPreview] = useState(null);
+
+  // Owner "view as" hand-off: the token arrives once in the URL, is moved into
+  // sessionStorage, and is stripped from the address bar so it is not left in
+  // history or copied into a shared link.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const incoming = params.get('preview');
+    if (incoming) {
+      try {
+        const context = {
+          name: params.get('as') || 'this account',
+          type: params.get('asType') || 'player',
+        };
+        window.sessionStorage.setItem('previewToken', incoming);
+        window.sessionStorage.setItem('previewContext', JSON.stringify(context));
+        setPreview(context);
+      } catch (error) { /* ignore */ }
+      params.delete('preview'); params.delete('as'); params.delete('asType');
+      const query = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : ''));
+      return;
+    }
+    setPreview(readPreviewContext());
+  }, []);
+
+  const exitPreview = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.removeItem('previewToken');
+      window.sessionStorage.removeItem('previewContext');
+    } catch (error) { /* ignore */ }
+    setPreview(null);
+    window.location.href = '/owner';
+  };
 
   useEffect(() => {
     const media = window.matchMedia(MOBILE_QUERY);
@@ -204,65 +263,59 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       setIsLoading(true);
     }
 
-    // Keep the initial product view fast. The hero is static and paints immediately;
-    // only the small fight/summary payload is required before live sections unlock.
-    const criticalPromise = Promise.allSettled([
-      fetchPublicPredictionFights({ limit: 80, hydrateImages: false }),
-      fetchPromotedHomeFights({ limit: 12 }),
-      fetchPublicHomeSummary({ fightLimit: 12, leaderboardLimit: 12 }),
-      userId ? fetchSignedInEntries() : Promise.resolve([]),
-    ]);
-
-    // Secondary collections are intentionally parallel but are not allowed to block
-    // the first useful render. This removes the old "wait for the slowest of 10 APIs" behavior.
-    const secondaryPromise = Promise.allSettled([
-      fetchPublicFights({ limit: 100, hydrateImages: false }),
-      fetchPublicLeaderboard({ limit: 24 }),
-      fetchPublicBlogs({ limit: 6 }),
-      safeFetchJson('/api/public/apparel-products', { limit: 8 }),
-      safeFetchJson('/api/public/leagues', { limit: 12 }),
-      userId ? fetchSignedInNotifications(userId) : Promise.resolve([]),
-    ]);
-
-    criticalPromise.then(([playableResult, promotedResult, summaryResult, entriesResult]) => {
+    // Progressive load. The previous version batched four "critical" calls with
+    // Promise.allSettled, which meant first paint waited for the SLOWEST of the
+    // four — one sluggish endpoint held the whole screen blank. Now every
+    // request paints the moment IT lands: results accumulate in a ref and the
+    // view re-composes on each arrival, so the app fills in progressively
+    // instead of appearing all at once after the last response.
+    const inputs = {};
+    const paint = () => {
       if (!active) return;
-      const partial = composeExperienceData({
-        playableRows: playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [],
-        promotedRows: promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [],
-        summary: summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {},
-        entryRows: entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [],
-      }, cached || EMPTY_DATA);
-      setData(partial);
+      setData(composeExperienceData(inputs, cached || EMPTY_DATA));
       setIsLoading(false);
-    }).catch(() => {
-      if (active) setIsLoading(false);
-    });
+    };
 
-    Promise.all([criticalPromise, secondaryPromise]).then(([criticalResults, secondaryResults]) => {
-      if (!active) return;
-      const [playableResult, promotedResult, summaryResult, entriesResult] = criticalResults;
-      const [publicResult, leaderboardResult, blogsResult, apparelResult, leaguesResult, notificationsResult] = secondaryResults;
-      const nextData = composeExperienceData({
-        playableRows: playableResult.status === 'fulfilled' && Array.isArray(playableResult.value) ? playableResult.value : [],
-        publicRows: publicResult.status === 'fulfilled' && Array.isArray(publicResult.value) ? publicResult.value : [],
-        promotedRows: promotedResult.status === 'fulfilled' && Array.isArray(promotedResult.value) ? promotedResult.value : [],
-        summary: summaryResult.status === 'fulfilled' ? summaryResult.value || {} : {},
-        leaderboardPayload: leaderboardResult.status === 'fulfilled' ? leaderboardResult.value || {} : {},
-        blogPayload: blogsResult.status === 'fulfilled' ? blogsResult.value || {} : {},
-        apparelPayload: apparelResult.status === 'fulfilled' ? apparelResult.value || {} : {},
-        leaguePayload: leaguesResult.status === 'fulfilled' ? leaguesResult.value || {} : {},
-        entryRows: entriesResult.status === 'fulfilled' && Array.isArray(entriesResult.value) ? entriesResult.value : [],
-        notificationRows: notificationsResult.status === 'fulfilled' && Array.isArray(notificationsResult.value) ? notificationsResult.value : [],
-      }, cached || EMPTY_DATA);
-      setData(nextData);
-      writeExperienceCache(cacheKey, nextData);
-      setIsLoading(false);
-    }).catch(() => {
-      if (active) setIsLoading(false);
-    });
+    const feed = (key, promise, transform = (value) => value) => promise
+      .then((value) => {
+        if (!active) return;
+        inputs[key] = transform(value);
+        paint();
+      })
+      .catch(() => { /* one failed section must not blank the screen */ });
+
+    // A small first page of fights is enough to render the home screen; the
+    // full list arrives underneath it.
+    feed('playableRows', fetchPublicPredictionFights({ limit: 20, hydrateImages: false }), (v) => (Array.isArray(v) ? v : []));
+    feed('promotedRows', fetchPromotedHomeFights({ limit: 12 }), (v) => (Array.isArray(v) ? v : []));
+    feed('summary', fetchPublicHomeSummary({ fightLimit: 12, leaderboardLimit: 12 }), (v) => v || {});
+    if (userId) feed('entryRows', fetchSignedInEntries(), (v) => (Array.isArray(v) ? v : []));
+
+    feed('publicRows', fetchPublicFights({ limit: 100, hydrateImages: false }), (v) => (Array.isArray(v) ? v : []));
+    feed('leaderboardPayload', fetchPublicLeaderboard({ limit: 24 }), (v) => v || {});
+    feed('blogPayload', fetchPublicBlogs({ limit: 6 }), (v) => v || {});
+    feed('apparelPayload', safeFetchJson('/api/public/apparel-products', { limit: 8 }), (v) => v || {});
+    feed('leaguePayload', safeFetchJson('/api/public/leagues', { limit: 12 }), (v) => v || {});
+    if (userId) feed('notificationRows', fetchSignedInNotifications(userId), (v) => (Array.isArray(v) ? v : []));
+
+    // Full prediction list last, replacing the first page once it lands.
+    feed('playableRows', fetchPublicPredictionFights({ limit: 80, hydrateImages: false }), (v) => (Array.isArray(v) ? v : []));
+
+    // Never leave a spinner up on a slow network: show the shell with whatever
+    // has arrived after 2.5s and let the rest fill in.
+    const revealTimer = setTimeout(() => { if (active) setIsLoading(false); }, 2500);
+
+    // Cache once the heavy sections have had time to land, so the next open is instant.
+    const cacheTimer = setTimeout(() => {
+      if (active && Object.keys(inputs).length) {
+        writeExperienceCache(cacheKey, composeExperienceData(inputs, cached || EMPTY_DATA));
+      }
+    }, 6000);
 
     return () => {
       active = false;
+      clearTimeout(revealTimer);
+      clearTimeout(cacheTimer);
     };
   }, [cacheKey, forceRender, isMobile, userId]);
 
@@ -335,7 +388,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   // Affiliate dashboard data, loaded in-app.
   const loadAffiliateInApp = async () => {
     if (typeof window === 'undefined') return { ok: false, message: 'Unavailable.' };
-    const token = window.localStorage.getItem('authToken');
+    const token = readSessionToken();
     if (!token) return { ok: false, message: 'Sign in to view your affiliate dashboard.' };
     try {
       const profileResponse = await fetch(buildPublicApiUrl('/profileAffiliate'), {
@@ -369,7 +422,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
 
   const requestPayoutInApp = async ({ amount } = {}) => {
     if (typeof window === 'undefined') return { ok: false };
-    const token = window.localStorage.getItem('authToken');
+    const token = readSessionToken();
     if (!token) return { ok: false, message: 'Sign in first.' };
     try {
       const profileResponse = await fetch(buildPublicApiUrl('/profileAffiliate'), {
@@ -396,7 +449,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   // moment they try to enter a fight.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const token = window.localStorage.getItem('authToken');
+    const token = readSessionToken();
     if (!token) return;
     fetch(buildPublicApiUrl('/api/auth/refresh'), {
       method: 'POST',
@@ -497,7 +550,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
   // real subscription state.
   const walletSpend = async (purpose) => {
     if (typeof window === 'undefined') return { ok: false };
-    const token = window.localStorage.getItem('authToken');
+    const token = readSessionToken();
     if (!token) return { ok: false, message: 'Sign in first.' };
     try {
       const response = await fetch(buildPublicApiUrl('/api/wallet/spend'), {
@@ -522,7 +575,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
 
   const claimDailyRewardInApp = async () => {
     if (typeof window === 'undefined') return { ok: false };
-    const token = window.localStorage.getItem('authToken');
+    const token = readSessionToken();
     if (!token) return { ok: false, message: 'Sign in to claim your daily reward.' };
     try {
       const response = await fetch(buildPublicApiUrl('/api/rewards/claim-daily'), {
@@ -537,12 +590,172 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     }
   };
 
+  // Head-to-Head. Ships dark: the server decides whether the app shows the live
+  // challenge flow or the waitlist card, so enabling it is an env change, not a
+  // new build.
+  const [features, setFeatures] = useState({ headToHead: { enabled: false, minStake: 10, maxStake: 5000 } });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(buildPublicApiUrl('/api/public/features'));
+        const payload = await response.json().catch(() => ({}));
+        if (!cancelled && payload?.features) setFeatures(payload.features);
+      } catch (error) {
+        // Leave the default (disabled) — the waitlist card is the safe fallback.
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const challengeRequest = async (path, options = {}) => {
+    if (typeof window === 'undefined') return { ok: false };
+    const token = readSessionToken();
+    if (!token) return { ok: false, message: 'Sign in to use challenges.' };
+    try {
+      const response = await fetch(buildPublicApiUrl(path), {
+        ...options,
+        headers: {
+          ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return { ok: false, message: payload?.message, code: payload?.code };
+      return { ok: true, ...payload };
+    } catch (error) {
+      return { ok: false, message: 'Could not reach the server.' };
+    }
+  };
+
+  // Team Cards — five fighters from one event. The flagship contest, so it loads
+  // on mount rather than on demand.
+  const loadTeamContestsInApp = async () => {
+    if (typeof window === 'undefined') return { contests: [], callCategories: {}, callBonusCap: 50 };
+    try {
+      const response = await fetch(buildPublicApiUrl('/api/team-contests/open'));
+      if (!response.ok) return { contests: [], callCategories: {}, callBonusCap: 50 };
+      const payload = await response.json().catch(() => ({}));
+      return {
+        contests: Array.isArray(payload?.contests) ? payload.contests : [],
+        callCategories: payload?.callCategories || {},
+        callBonusCap: Number(payload?.callBonusCap) || 50,
+      };
+    } catch (error) {
+      return { contests: [], callCategories: {}, callBonusCap: 50 };
+    }
+  };
+
+  const loadMyTeamsInApp = async () => {
+    const result = await challengeRequest('/api/team-contests/me');
+    return Array.isArray(result?.teams) ? result.teams : [];
+  };
+
+  const submitTeamEntryInApp = ({ contestId, picks } = {}) => challengeRequest(
+    `/api/team-contests/${encodeURIComponent(contestId)}/enter`,
+    { method: 'POST', body: JSON.stringify({ picks }) },
+  );
+
+  // Season Cards. Drafting is a paid entry, so it goes through the authenticated
+  // request path and the server charges it inside a transaction.
+  const loadSeasonsInApp = async () => {
+    if (typeof window === 'undefined') return { seasons: [], slots: [], callCategories: {} };
+    try {
+      const response = await fetch(buildPublicApiUrl('/api/seasons/open'));
+      if (!response.ok) return { seasons: [], slots: [], callCategories: {} };
+      const payload = await response.json().catch(() => ({}));
+      return {
+        seasons: Array.isArray(payload?.seasons) ? payload.seasons : [],
+        slots: Array.isArray(payload?.slots) ? payload.slots : [],
+        callCategories: payload?.callCategories || {},
+        callBonusCap: Number(payload?.callBonusCap) || 100,
+        slotMax: Number(payload?.slotMax) || 100,
+      };
+    } catch (error) {
+      return { seasons: [], slots: [], callCategories: {} };
+    }
+  };
+
+  const loadMySeasonCardsInApp = async () => {
+    const result = await challengeRequest('/api/seasons/me');
+    return Array.isArray(result?.cards) ? result.cards : [];
+  };
+
+  const submitSeasonDraftInApp = ({ seasonId, picks } = {}) => challengeRequest(
+    `/api/seasons/${encodeURIComponent(seasonId)}/draft`,
+    { method: 'POST', body: JSON.stringify({ picks }) },
+  );
+
+  // Trophy case. Badges and titles are instant; merch and sponsor goods carry a
+  // fulfilment state so a winner can see where their prize is.
+  const loadAwardsInApp = async () => {
+    const result = await challengeRequest('/api/users/me/awards');
+    return {
+      awards: Array.isArray(result?.awards) ? result.awards : [],
+      badges: Number(result?.badges) || 0,
+      titles: Array.isArray(result?.titles) ? result.titles : [],
+    };
+  };
+
+  const loadChallengesInApp = async () => {
+    const result = await challengeRequest('/api/challenges/me');
+    return Array.isArray(result?.challenges) ? result.challenges : [];
+  };
+
+  const createChallengeInApp = ({ fightId, opponent, stake } = {}) => challengeRequest('/api/challenges', {
+    method: 'POST',
+    body: JSON.stringify({ fightId, opponent, stake }),
+  });
+
+  const respondToChallengeInApp = ({ id, accept } = {}) => challengeRequest(
+    `/api/challenges/${encodeURIComponent(id)}/${accept ? 'accept' : 'decline'}`,
+    { method: 'POST' },
+  );
+
+  // Feature waitlist — Head-to-Head is not built yet, so the app records
+  // interest instead of pretending the feature exists. Guests can join with an
+  // email; signed-in players are matched on their account address.
+  const joinWaitlistInApp = async ({ feature = 'head-to-head', email = '', name = '', wagerBand = '', note = '' } = {}) => {
+    if (typeof window === 'undefined') return { ok: false };
+    const token = readSessionToken();
+    try {
+      const response = await fetch(buildPublicApiUrl(`/api/waitlist/${encodeURIComponent(feature)}`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ email, name, wagerBand, note }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return { ok: false, message: payload?.message || 'Could not join the waitlist.' };
+      return { ok: true, total: payload.total, message: payload.message };
+    } catch (error) {
+      return { ok: false, message: 'Could not reach the server.' };
+    }
+  };
+
+  const loadWaitlistStatusInApp = async (feature = 'head-to-head') => {
+    if (typeof window === 'undefined') return { joined: false, total: 0 };
+    const token = readSessionToken();
+    try {
+      const response = await fetch(buildPublicApiUrl(`/api/waitlist/${encodeURIComponent(feature)}/me`), {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const payload = await response.json().catch(() => ({}));
+      return { joined: Boolean(payload?.joined), total: Number(payload?.total) || 0 };
+    } catch (error) {
+      return { joined: false, total: 0 };
+    }
+  };
+
   // Persists the read timestamp so the badge stays cleared across reopens.
   // Returns true on failure too — a network hiccup should not leave the badge
   // stuck on a number the user has already looked at.
   const markNotificationsReadInApp = async () => {
     if (typeof window === 'undefined') return true;
-    const token = window.localStorage.getItem('authToken');
+    const token = readSessionToken();
     if (!token) return true;
     try {
       await fetch(buildPublicApiUrl('/api/users/me/notifications/read'), {
@@ -553,6 +766,44 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       // non-fatal
     }
     return true;
+  };
+
+  // Support tickets — posted from inside the app, guests included.
+  const submitSupportInApp = async ({ category, subject, message, email } = {}) => {
+    try {
+      const token = readSessionToken();
+      const response = await fetch(buildPublicApiUrl('/api/support/tickets'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          category,
+          subject,
+          message,
+          email: email || user?.email || '',
+          name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.playerName || '',
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return { ok: false, message: payload?.message || 'Could not send that message.' };
+      return { ok: true, ticketNumber: payload.ticketNumber };
+    } catch (error) {
+      return { ok: false, message: 'Could not reach the server.' };
+    }
+  };
+
+  const logoutInApp = () => {
+    if (typeof window !== 'undefined') {
+      // Clear every session on this device. A shared phone should not keep an
+      // affiliate or sponsor session alive because the player signed out.
+      ['authToken', 'adminAuthToken', 'affiliateAuthToken', 'sponsorAuthToken',
+        'isSponsorAuthenticated', 'sponsorData'].forEach((key) => {
+        try { window.localStorage.removeItem(key); } catch (_error) { /* ignore */ }
+      });
+    }
+    router.push('/');
   };
 
   const goToCheckout = ({ amount, price, product = 'fm-coins', plan = '', items = [] } = {}) => {
@@ -638,7 +889,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     const id = String(event?.backendId || event?.id || '').trim();
     if (!id) return true;
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
+    const token = readSessionToken();
     if (!token) {
       // Guest: the app core opens its own auth modal and re-runs this submit
       // afterwards, so the picks are never lost to a page navigation.
@@ -697,7 +948,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       return false;
     }
     if (!leagueId || !user?._id || !user?.email) return false;
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('authToken') : '';
+    const token = readSessionToken();
     const response = await fetch(buildPublicApiUrl(`/affiliate/${encodeURIComponent(leagueId)}/join`), {
       method: 'POST',
       headers: {
@@ -735,6 +986,32 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
       className={`fmm-exact-mobile-portal ${forceRender ? (isMobile ? 'is-phone-shell' : 'is-desktop-shell') : 'is-responsive-shell is-phone-shell'}`}
       data-fmm-mobile-screen={initialTab}
     >
+      {preview && (
+        <div
+          role="status"
+          style={{
+            position: 'sticky', top: 0, zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+            padding: '9px 14px', background: '#f2b544', color: '#2b1b00',
+            fontFamily: "'Rajdhani', system-ui, sans-serif", fontWeight: 800, fontSize: 12.5,
+          }}
+        >
+          <span>
+            OWNER VIEW — seeing this as <strong>{preview.name}</strong> ({preview.type}). Read-only: nothing you tap can change their account.
+          </span>
+          <button
+            type="button"
+            onClick={exitPreview}
+            style={{
+              flex: '0 0 auto', border: '1px solid rgba(43,27,0,.4)', background: 'rgba(0,0,0,.08)',
+              color: '#2b1b00', borderRadius: 999, padding: '5px 12px', fontWeight: 800,
+              fontSize: 11.5, cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            Exit
+          </button>
+        </div>
+      )}
       <FantasyMobileAppCore
         initialTab={initialTab}
         initialCoins={isAuthenticated ? initialCoins ?? 0 : undefined}
@@ -765,6 +1042,21 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         onSkipWait={skipWaitInApp}
         onClaimReward={claimDailyRewardInApp}
         onMarkNotificationsRead={markNotificationsReadInApp}
+        onSubmitSupport={submitSupportInApp}
+        features={features}
+        onLoadChallenges={loadChallengesInApp}
+        onCreateChallenge={createChallengeInApp}
+        onRespondToChallenge={respondToChallengeInApp}
+        onLoadAwards={loadAwardsInApp}
+        onLoadTeamContests={loadTeamContestsInApp}
+        onLoadMyTeams={loadMyTeamsInApp}
+        onSubmitTeamEntry={submitTeamEntryInApp}
+        onLoadSeasons={loadSeasonsInApp}
+        onLoadMySeasonCards={loadMySeasonCardsInApp}
+        onSubmitSeasonDraft={submitSeasonDraftInApp}
+        onJoinWaitlist={joinWaitlistInApp}
+        onLoadWaitlistStatus={loadWaitlistStatusInApp}
+        onLogout={logoutInApp}
         onLogin={loginInApp}
         onRequestPasswordReset={requestPasswordResetInApp}
         onSignup={signupInApp}

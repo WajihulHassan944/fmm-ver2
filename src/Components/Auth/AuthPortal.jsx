@@ -197,11 +197,15 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
           navigateAfterAuth('/AffiliateDashboard');
         }
       } else {
-        const data = await apiRequest(`/sponsors/email/${encodeURIComponent(loginForm.email)}`, { token: null });
-        localStorage.setItem('isSponsorAuthenticated', 'true');
-        localStorage.setItem('sponsorData', JSON.stringify(data));
-        toast.success('Sponsor access confirmed.');
-        navigateAfterAuth('/sponsor-dashboard');
+        // Sponsor sign-in needs the emailed one-time code; an address alone is
+        // not a credential, so send them to the sponsor sign-in screen.
+        await apiRequest('/api/sponsor/login/request', {
+          method: 'POST',
+          token: null,
+          body: { email: loginForm.email },
+        });
+        toast.success('We emailed you a sponsor sign-in code.');
+        navigateAfterAuth('/sponsor-login');
       }
     } catch (error) {
       toast.error(typeof error === 'string' ? error : error?.message || 'Login failed. Please check your details.');
@@ -454,6 +458,10 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <label><input type="checkbox" name="isAgreed" checked={playerForm.isAgreed} onChange={updatePlayer} required /><span>I agree to the <Link href="/terms-of-service">terms of service</Link> and <Link href="/privacy-policy">privacy policy</Link></span></label>
                   </div>
                   <div className="xp-auth-recaptcha"><ReCAPTCHA key={`${mode}-${role}`} sitekey={RECAPTCHA_SITE_KEY} onChange={setRecaptchaToken} theme="dark" /></div>
+                  <p className="xp-auth-consent" style={{ fontSize: '11.5px', lineHeight: 1.55, opacity: .75, margin: '4px 0 10px' }}>
+                    By creating an account you agree to our{' '}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#f2b544', textDecoration: 'underline' }}>Terms of Use</a>.
+                  </p>
                   <button type="submit" className="theme-btn theme-btn-primary xp-auth-submit" disabled={isSubmitting}>{isSubmitting ? 'Creating account...' : 'Create player account'} <FaArrowRight /></button>
                   <div className="xp-auth-google"><span>or create with Google</span><GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google authentication was cancelled.')} theme="filled_black" shape="rectangular" width="100%" /></div>
                 </form>
@@ -480,6 +488,10 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <label><input type="checkbox" name="isAgreed" checked={affiliateForm.isAgreed} onChange={updateAffiliate} required /><span>I agree to the <Link href="/terms-of-service">terms of service</Link> and <Link href="/privacy-policy">privacy policy</Link></span></label>
                   </div>
                   <div className="xp-auth-recaptcha"><ReCAPTCHA key={`${mode}-${role}`} sitekey={RECAPTCHA_SITE_KEY} onChange={setRecaptchaToken} theme="dark" /></div>
+                  <p className="xp-auth-consent" style={{ fontSize: '11.5px', lineHeight: 1.55, opacity: .75, margin: '4px 0 10px' }}>
+                    By applying you agree to our{' '}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#f2b544', textDecoration: 'underline' }}>Terms of Use</a>.
+                  </p>
                   <button type="submit" className="theme-btn theme-btn-primary xp-auth-submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting application...' : 'Apply as an affiliate'} <FaArrowRight /></button>
                   <div className="xp-auth-google"><span>or apply with Google</span><GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google authentication was cancelled.')} theme="filled_black" shape="rectangular" width="100%" /></div>
                 </form>

@@ -45,13 +45,13 @@ const SpinWheel = () => {
   }, [deviceId]);
   const checkDevice = async () => {
     try {
+      // Scoped check: the old call downloaded every device row (with player
+      // emails) just to test this one device.
       const response = await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/admin/device-info-spin-wheel"
+        `https://fantasymmadness-game-server-three.vercel.app/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}`
       );
       const data = await response.json();
-     
-      const isMatched = data.some((item) => item.deviceId === deviceId);
-      console.log(isMatched);
+      const isMatched = Boolean(data?.alreadySpun);
       if (isMatched) {
         document.getElementById("spin-button").style.display = "none";
         document.getElementById("played").style.display = "block";

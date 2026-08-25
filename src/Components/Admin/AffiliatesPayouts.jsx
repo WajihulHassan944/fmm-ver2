@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 import UserDetails from './UserDetails';
 import PaymentPopup from './PaymentPopup';
 import { toast } from 'react-toastify';
@@ -16,7 +17,7 @@ const AffiliatesPayouts = () => {
     const router = useRouter();    
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates');
+            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
             const data = await response.json();
             setAffiliateUsers(data);
             setFilteredUsers(data); // Initially set filtered users to all data

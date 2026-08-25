@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 
@@ -7,7 +8,7 @@ const SuspendedAccounts = () => {
     const router = useRouter();
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers');
+            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', { headers: adminHeaders() });
             const data = await response.json();
             setUsers(data.data); // Access the 'data' key from the response
         } catch (error) {
@@ -24,6 +25,7 @@ const SuspendedAccounts = () => {
             try {
                 const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/redusers/${email}`, {
                     method: 'DELETE',
+                    headers: adminHeaders(),
                 });
 
                 if (response.ok) {
