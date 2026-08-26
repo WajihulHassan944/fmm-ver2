@@ -2062,11 +2062,40 @@ class FantasyMobileAppCore extends React.Component {
       this.renderMyEntries(allEvents, s),
       this.renderWatchLeaguesPromo(),
       React.createElement('div', {
-        onClick: () => this.setTab('demo'),
-        style: { margin: '0 16px 16px', textAlign: 'center', padding: '16px 0 12px', borderRadius: 10, background: '#16a34a', border: '2px solid #22c55e', color: '#fff', fontWeight: 900, fontSize: 12, cursor: 'pointer', boxShadow: '0 0 22px rgba(34,197,94,.7)', position: 'relative' }
+        style: { margin: '0 16px 16px', textAlign: 'center', padding: '16px 14px 14px', borderRadius: 10, background: '#16a34a', border: '2px solid #22c55e', color: '#fff', fontWeight: 900, fontSize: 12, boxShadow: '0 0 22px rgba(34,197,94,.7)', position: 'relative' }
       },
         React.createElement('div', { style: { position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 900, padding: '3px 10px', borderRadius: 999, animation: 'pulseLive 1s infinite', boxShadow: '0 0 10px rgba(239,68,68,.8)', whiteSpace: 'nowrap' } }, 'NEW HERE?'),
-        React.createElement('div', { style: { color: '#eaffef', marginTop: 4 } }, 'TRY A FREE DEMO FIGHT — NO COINS NEEDED')
+        React.createElement('div', { style: { color: '#eaffef', marginTop: 4, marginBottom: 12 } }, 'NO COINS NEEDED — TRY IT OR JOIN FREE'),
+        // Two explicit buttons. Both are 46px+ tap targets so neither depends on
+        // the panel being tappable, and nothing is discoverable only by guessing.
+        React.createElement('div', { style: { display: 'flex', gap: 9 } },
+          React.createElement('div', {
+            onClick: () => this.setTab('demo'),
+            role: 'button', tabIndex: 0,
+            'aria-label': 'Try a free demo fight',
+            onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') this.setTab('demo'); },
+            style: {
+              flex: 1, minHeight: 46, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 12px', borderRadius: 999, cursor: 'pointer',
+              background: 'rgba(255,255,255,.16)', border: '1.5px solid rgba(255,255,255,.55)',
+              color: '#fff', fontFamily: "'Anton',sans-serif", fontSize: 13, letterSpacing: .4,
+              whiteSpace: 'nowrap',
+            },
+          }, 'TRY DEMO'),
+          React.createElement('div', {
+            onClick: () => this.openModal('join'),
+            role: 'button', tabIndex: 0,
+            'aria-label': 'Join Fantasy MMAdness free',
+            onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') this.openModal('join'); },
+            style: {
+              flex: 1, minHeight: 46, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 12px', borderRadius: 999, cursor: 'pointer',
+              background: 'linear-gradient(90deg,#f2b544,#df111b)', color: '#fff',
+              fontFamily: "'Anton',sans-serif", fontSize: 13, letterSpacing: .4,
+              boxShadow: '0 5px 18px rgba(223,17,27,.45)', whiteSpace: 'nowrap',
+            },
+          }, 'PLAY FREE')
+        )
       ),
       s.layout === 'classic' && allEvents.length > 0 && this.renderCommunityAndProgress(allEvents, xpPct, s),
       this.renderRewardsRow(streakDays, s),
@@ -2336,22 +2365,8 @@ class FantasyMobileAppCore extends React.Component {
         })
       ),
       React.createElement('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '34%', background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent)', animation: 'heroGloss 3.8s ease-in-out infinite', pointerEvents: 'none' } }),
-      // Was an invisible tap target over blank canvas — no affordance, so no one
-      // could know it was there. Now a real, visible, 44px-plus button.
-      React.createElement('div', {
-        onClick: () => this.openModal('join'),
-        role: 'button', tabIndex: 0,
-        'aria-label': 'Join Fantasy MMAdness free',
-        onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') this.openModal('join'); },
-        style: {
-          position: 'absolute', left: '50%', bottom: 14, transform: 'translateX(-50%)',
-          minWidth: 210, minHeight: 46, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '0 26px', borderRadius: 999, cursor: 'pointer',
-          background: 'linear-gradient(90deg,#f2b544,#df111b)', color: '#fff',
-          fontFamily: "'Anton',sans-serif", fontSize: 15, letterSpacing: .6,
-          boxShadow: '0 6px 22px rgba(223,17,27,.5)', whiteSpace: 'nowrap',
-        },
-      }, 'PLAY FREE')
+      // PLAY FREE used to sit ON the artwork, covering the bottom of the banner.
+      // It now lives directly beneath it — same prominence, nothing obscured.
     );
   }
 

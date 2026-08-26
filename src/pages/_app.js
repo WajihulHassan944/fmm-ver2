@@ -47,21 +47,18 @@ import "@/styles/referralLeaderboard.css";
 import "@/styles/homeleaderboardtwo.css";
 import "@/styles/mockpredictionsgame.css";
 import "@/styles/new-theme.css";
-import "@/styles/experience-theme.css";
 import "@/styles/route-experience.css";
 import "@/styles/admin-experience.css";
 import "@/styles/frontend-final.css";
 import "@/styles/design-port.css";
 import "@/styles/final-route-polish.css";
 import "@/styles/admin-targeted-finish.css";
-import "@/styles/affiliate-experience-final.css";
 import "@/styles/final-campaign-community-pass.css";
 import "@/styles/final-fantasy-readability-mock.css";
 import "@/styles/premium-backgrounds-phase-two.css";
 import "@/styles/user-dashboard-premium-final.css";
 import "@/styles/client-feedback-final.css";
 import "@/styles/targeted-dashboard-checkout-logo-fix.css";
-import "@/styles/pro-wrestling.css";
 import "@/styles/pro-wrestling-client-corrections.css";
 import "@/styles/adminswarm.css";
 import "@/styles/admin-growth-data-quality.css";
@@ -71,7 +68,6 @@ import "@/styles/public-fight-detail.css";
 import "@/styles/home-mobile-design-phone.css";
 import "@/styles/user-dashboard-mobile-phone.css";
 import "@/styles/phone-app-theme-all-pages.css";
-import "@/styles/featured-fight-stage-final.css";
 import "@/styles/home-design-reference-lock.css";
 import "@/styles/homepage-final-premium-polish.css";
 import "@/styles/home-mobile-game-concept.css";
@@ -120,8 +116,13 @@ import "@fontsource/rajdhani/600.css";
 import "@fontsource/rajdhani/700.css";
 import "@/styles/fantasy-mobile-app-exact.css";
 import "@/styles/fmm-client-v62-unified-theme-performance.css";
+// LAST: single source of truth for the hero banner geometry. Must stay last —
+// it exists to outrank the eight earlier sheets that each set their own
+// .fmm-app-hero size and cropping with !important.
+import "@/styles/fmm-hero-fit-final.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import { Provider } from "react-redux";
 import { wrapper } from "../Redux/store"; // Updated for next-redux-wrapper
 import { useRouter } from "next/router";
@@ -161,11 +162,30 @@ const FantasyMobileExperience = dynamic(
   () => import("@/Components/MobileApp/FantasyMobileExperience"),
   {
     ssr: false,
+    // THIS is what flashed the old header. While the app chunk downloads, this
+    // placeholder paints — and it pointed at the OLD banner files
+    // (hero-banner-crop-v62 / hero-banner-new) while the real hero renders
+    // hero-banner-v2. The swap was visible as a jump to a different image.
+    //
+    // It now loads the SAME files, at the same 16:9 box, so the placeholder and
+    // the real hero are pixel-identical: there is nothing to see change.
     loading: () => (
       <div className="fmm-app-route-loading" aria-label="Loading Fantasy MMAdness">
         <picture>
-          <source media="(max-width: 767px)" srcSet="/images/mobile-home/final-v35/hero-banner-crop-v62.webp" />
-          <img src="/images/mobile-home/final-v35/hero-banner-new.jpg" alt="Fantasy MMAdness" fetchPriority="high" />
+          <source
+            media="(max-width: 767px)"
+            srcSet="/images/mobile-home/final-v35/hero-banner-v2-mobile.jpg"
+            width={900}
+            height={507}
+          />
+          <img
+            src="/images/mobile-home/final-v35/hero-banner-v2.jpg"
+            alt="Fantasy MMAdness"
+            width={1600}
+            height={900}
+            fetchPriority="high"
+            decoding="async"
+          />
         </picture>
         <div className="fmm-app-route-loading-bar" />
       </div>
@@ -510,6 +530,40 @@ function AppContent({ children }) {
 
   return (
     <>
+      <Head>
+        {/* Legacy-only stylesheets: 570 KB that styles website pages the app
+            never renders. Verified class-scoped (no body/html/:root/@font-face),
+            so the app cannot depend on them. Originals kept in
+            src/styles/_backup-legacy-css/ — to revert, move a file back and
+            re-add its import above. */}
+        {renderLegacyExperience && (
+          <>
+            <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />
+            <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />
+            <link rel="stylesheet" href="/legacy-css/experience-theme.css" />
+            <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />
+          </>
+        )}
+
+        {/* Start the banner download in the document head rather than waiting for
+            the placeholder to render. Both sizes are declared with the same media
+            queries the <picture> uses, so the browser fetches exactly one. */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/mobile-home/final-v35/hero-banner-v2-mobile.jpg"
+          media="(max-width: 767px)"
+          fetchpriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/images/mobile-home/final-v35/hero-banner-v2.jpg"
+          media="(min-width: 768px)"
+          fetchpriority="high"
+        />
+      </Head>
+
       <div style={{ zIndex: "99999999999" }}>
         <ToastContainer />
       </div>
