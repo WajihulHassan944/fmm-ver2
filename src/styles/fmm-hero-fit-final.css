@@ -1,30 +1,31 @@
 /* --------------------------------------------------------------------------
-   HERO BANNER — single source of truth. Loaded LAST so it wins.
+   HERO BANNER — single source of truth.
 
-   The problem this file solves: .fmm-app-hero is declared in at least eight
-   stylesheets, most with !important —
+   Why this file looks over-specified: .fmm-app-hero is sized in eleven
+   stylesheets, and the winner was NOT the last one loaded. Specificity beats
+   source order when both carry !important, and
+   fmm-client-v62-unified-theme-performance.css uses
 
-     design-port.css                        aspect-ratio 16/9, mobile 5/4, 4/3
-     home-mobile-app-fixed-v11.css          min-height 300px
-     fmm-client-v28-phone-reference-sync    width/height !important
-     fmm-client-v31-home-reference-corr     aspect-ratio 853/700 !important
-                                            height clamp(300px,32vw,386px) !important
-     fmm-client-v32-reference-code-home     img height 100% + object-fit cover !important
-     fmm-client-feedback-quality-v15        object-fit cover !important
-     fantasy-mobile-app-exact.css           width/display
+     .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero
+        { aspect-ratio: 853 / 700 !important }        <- 0,3,0
 
-   Net effect: the CONTAINER is forced to a nearly-square box while the IMAGE is
-   a 16:9 photograph, and cover crops the sides off. Both hero files are 16:9
-   (1600x900 and 900x507), so ANY container ratio other than 16:9 must crop.
+   which outranked a plain .fmm-app-hero (0,1,0) no matter how late it loaded.
+   That is why the banner stayed cropped after the first attempt: the rule was
+   correct and simply never applied.
 
-   Fix: the container takes the image's own ratio and the image is contained, so
-   the whole banner is visible on every screen. Nothing is cut off.
+   Every selector below is therefore written to exceed 0,3,0. The banner files
+   are 16:9 (1600x900 desktop, 900x507 mobile), so the container takes 16/9 and
+   the image is CONTAINED — the whole picture shows, nothing is cut off.
+
+   To change the banner geometry later, change it HERE and nowhere else.
    -------------------------------------------------------------------------- */
 
-.fmm-app-hero {
+html body .fmm-app-hero.fmm-app-hero,
+html body .fmm-exact-mobile-portal .fmm-prototype-view .fmm-app-hero.fmm-app-hero,
+html body .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero,
+html body .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero {
   position: relative !important;
   width: 100% !important;
-  /* Match the artwork. Overrides 853/700 and the clamp() height above. */
   aspect-ratio: 16 / 9 !important;
   height: auto !important;
   min-height: 0 !important;
@@ -33,75 +34,92 @@
   background: #000 !important;
 }
 
-.fmm-app-hero picture {
+html body .fmm-app-hero.fmm-app-hero picture,
+html body .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero picture {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
 }
 
-.fmm-app-hero > img,
-.fmm-app-hero picture > img {
+html body .fmm-app-hero.fmm-app-hero > img,
+html body .fmm-app-hero.fmm-app-hero picture > img,
+html body .fmm-exact-mobile-portal .fmm-prototype-view .fmm-app-hero.fmm-app-hero > img,
+html body .fmm-exact-mobile-portal .fmm-prototype-view .fmm-app-hero.fmm-app-hero picture > img,
+html body .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero > img,
+html body .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero picture > img {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  /* contain, not cover: show the whole banner rather than a crop of it. */
   object-fit: contain !important;
   object-position: center center !important;
   aspect-ratio: auto !important;
   min-height: 0 !important;
   max-height: none !important;
+  transform: none !important;
+  scale: none !important;
 }
 
-/* Phones get the same ratio — the mobile asset is also 16:9, so a taller box
-   could only letterbox or crop. If a genuinely taller mobile crop is supplied
-   later, change the ratio here and here only. */
+/* Phones: same ratio. The mobile asset is also 16:9, so any taller box could
+   only letterbox or crop. Supply taller mobile artwork and change this one
+   value if a taller hero is wanted. */
 @media (max-width: 767px) {
-  .fmm-app-hero {
+  html body .fmm-app-hero.fmm-app-hero,
+  html body .fmm-exact-mobile-portal .fmm-prototype-view .fmm-app-hero.fmm-app-hero,
+  html body .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero,
+  html body .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero {
     aspect-ratio: 16 / 9 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
   }
-  .fmm-app-hero > img,
-  .fmm-app-hero picture > img {
+  html body .fmm-app-hero.fmm-app-hero > img,
+  html body .fmm-app-hero.fmm-app-hero picture > img,
+  html body .fmm-exact-mobile-portal .fmm-prototype-view--home .fmm-app-hero.fmm-app-hero picture > img {
     object-fit: contain !important;
     object-position: center center !important;
   }
 }
 
-@media (max-width: 400px) {
-  .fmm-app-hero { aspect-ratio: 16 / 9 !important; }
-}
-
-/* Decorative glows must never sit over the artwork or eat taps. */
-.fmm-app-hero::before,
-.fmm-app-hero::after,
-.fmm-app-hero-glow,
-.fmm-app-hero-particles,
-.fmm-app-hero-bulbs,
-.fmm-app-crown-sparkles {
+/* Decorative glows, particles and sparkles were positioned for the old cropped
+   box. On phones they now land over the artwork, so they are hidden there —
+   desktop keeps them. They are never tap targets anywhere. */
+html body .fmm-app-hero-glow,
+html body .fmm-app-hero-particles,
+html body .fmm-app-hero-bulbs,
+html body .fmm-app-crown-sparkles,
+html body .fmm-app-hero.fmm-app-hero::before,
+html body .fmm-app-hero.fmm-app-hero::after {
   pointer-events: none !important;
 }
 
-/* --------------------------------------------------------------------------
-   LOADING PLACEHOLDER — must be geometrically identical to the real hero.
+@media (max-width: 767px) {
+  html body .fmm-app-hero-glow,
+  html body .fmm-app-hero-particles,
+  html body .fmm-app-hero-bulbs,
+  html body .fmm-app-crown-sparkles {
+    display: none !important;
+  }
+}
 
-   While the app chunk downloads, _app.js paints .fmm-app-route-loading with the
-   same banner file. If its box differs from .fmm-app-hero the page jumps when
-   the real app mounts, which reads as a flash even though the image is the same.
+/* --------------------------------------------------------------------------
+   LOADING PLACEHOLDER — geometrically identical to the real hero, or the page
+   jumps when the app mounts and that jump reads as a flash.
    -------------------------------------------------------------------------- */
-.fmm-app-route-loading {
+html body .fmm-app-route-loading {
   position: relative !important;
   width: 100% !important;
   background: #05060a !important;
 }
 
-.fmm-app-route-loading picture {
+html body .fmm-app-route-loading picture {
   display: block !important;
   width: 100% !important;
   aspect-ratio: 16 / 9 !important;
 }
 
-.fmm-app-route-loading img {
+html body .fmm-app-route-loading img {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
