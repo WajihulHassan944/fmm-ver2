@@ -209,6 +209,29 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   // Feedback sheet. Lives here rather than in Core so it is reachable on every
   // screen, including before Core has finished loading.
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  // Testing tool, not a product feature. Shown only to testers.
+  const [showReportButton, setShowReportButton] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let visible = false;
+    try {
+      // 1. Build-time switch for a tester build.
+      if (process.env.NEXT_PUBLIC_TESTER_MODE === 'true') visible = true;
+      // 2. Anyone signed in on a seeded test account.
+      const email = String(window.localStorage.getItem('userEmail') || '').toLowerCase();
+      if (email.endsWith('@fmmtest.com')) visible = true;
+      // 3. ?feedback=1 — lets you turn it on for one person without a rebuild.
+      //    Remembered for the session so it survives navigation.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('feedback') === '1') {
+        window.sessionStorage.setItem('fmmFeedback', '1');
+        visible = true;
+      }
+      if (window.sessionStorage.getItem('fmmFeedback') === '1') visible = true;
+    } catch (error) { /* storage unavailable */ }
+    setShowReportButton(visible);
+  }, []);
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackNote, setFeedbackNote] = useState('');
   const [feedback, setFeedback] = useState({
@@ -275,14 +298,17 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   // ------------------------------------------------------------------------
   const loadContent = useCallback(async () => {
     const [fightRes, boardRes, leagueRes, apparelRes, blogRes] = await Promise.all([
-      publicRequest('/api/public/fights?limit=60'),
+      // Real route names, read off the server rather than guessed. The previous
+      // set was inferred and four of the five did not exist, which is why the
+      // app loaded a shell with no fights in it.
+      publicRequest('/api/public/prediction-fights?limit=60'),
       publicRequest('/api/public/leaderboard?limit=50'),
       publicRequest('/api/public/leagues?limit=24'),
-      publicRequest('/api/public/apparel?limit=24'),
-      publicRequest('/api/public/blogs?limit=12'),
+      publicRequest('/api/public/apparel-products?limit=24'),
+      publicRequest('/api/blogs?limit=12'),
     ]);
 
-    const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.data);
+    const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
     setFights(rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2));
     setShadowFights(asArray(fightRes.shadowFights).map(normalizeFight));
     setLeaderboard(asArray(boardRes.leaderboard || boardRes.players || boardRes.data));
@@ -305,6 +331,23 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   // Signed-in state. Kept separate from content so a signed-out visitor still
   // gets a full app rather than an empty one.
   // ------------------------------------------------------------------------
+  // Real catalogue endpoints. Without these the coin and FM+ screens have no
+  // products to list, which reads as a broken screen rather than an empty one.
+  const loadCoinProductsInApp = useCallback(async () => {
+    const result = await publicRequest('/api/public/coin-products');
+    return asArray(result.products || result.coinProducts || result.items);
+  }, []);
+
+  const loadFmPlusPlansInApp = useCallback(async () => {
+    const result = await publicRequest('/api/public/fm-plus-plans');
+    return asArray(result.plans || result.items);
+  }, []);
+
+  const loadJurisdictionInApp = useCallback(
+    () => publicRequest('/api/public/jurisdiction'),
+    [],
+  );
+
   const loadMe = useCallback(async () => {
     const token = readSessionToken();
     if (!token) { setCurrentUser(null); setCoins(0); setIsStaff(false); return; }
@@ -398,13 +441,13 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   }, [loadMe, loadContent]);
 
   const onPurchaseCoins = useCallback(async (payload = {}) => {
-    const result = await playerRequest('/api/coins/purchase', { method: 'POST', body: JSON.stringify(payload) });
+    const result = await playerRequest('/api/checkout/coin-orders', { method: 'POST', body: JSON.stringify(payload) });
     if (result.ok) await loadMe();
     return result;
   }, [loadMe]);
 
   const onSubscribe = useCallback(async (payload = {}) => {
-    const result = await playerRequest('/api/fmplus/subscribe', { method: 'POST', body: JSON.stringify(payload) });
+    const result = await playerRequest('/api/checkout/fm-plus-orders', { method: 'POST', body: JSON.stringify(payload) });
     if (result.ok) await loadMe();
     return result;
   }, [loadMe]);
@@ -416,7 +459,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   }, [loadMe]);
 
   const onSaveStreak = useCallback(
-    (payload = {}) => playerRequest('/api/rewards/streak', { method: 'POST', body: JSON.stringify(payload) }),
+    (payload = {}) => playerRequest('/api/rewards/claim-daily', { method: 'POST', body: JSON.stringify(payload) }),
     [],
   );
 
@@ -454,10 +497,11 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     [],
   );
 
-  const onRequestPayout = useCallback(
-    (payload = {}) => affiliateRequest('/api/affiliates/me/payout', { method: 'POST', body: JSON.stringify(payload) }),
-    [],
-  );
+  const onRequestPayout = useCallback(async (payload = {}) => {
+    // The route carries an id in the path, but the server takes the affiliate
+    // from the token and ignores the path value — so 'me' is safe and honest.
+    return affiliateRequest('/affiliate/me/payout', { method: 'POST', body: JSON.stringify(payload) });
+  }, []);
 
   // ------------------------------------------------------------------------
   // Head-to-head
@@ -635,12 +679,15 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   // Staff
   // ------------------------------------------------------------------------
   const loadAdminMoneyInApp = useCallback(async () => {
-    const [refunds, payouts] = await Promise.all([
-      adminRequest('/api/admin/refundable-fights'),
+    // No refundable-fights list exists on the server, so the refund queue is
+    // derived from the public fight list rather than invented.
+    const [fightsRes, payouts] = await Promise.all([
+      publicRequest('/api/public/prediction-fights?limit=60'),
       adminRequest('/api/admin/affiliate-payouts?status=pending'),
     ]);
+    const all = asArray(fightsRes.fights || fightsRes.matches || fightsRes.predictionFights);
     return {
-      refundable: asArray(refunds.fights),
+      refundable: all.filter((f) => f && !f.prizesSettledAt && Number(f.matchTokens) > 0),
       payouts: asArray(payouts.payouts),
     };
   }, []);
@@ -834,9 +881,11 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
 
       <FantasyMobileAppCore {...experienceProps} />
 
-      {/* Report button. Present on every screen, because a bug gets reported
-          properly at the moment it happens or not at all. Sits above the bottom
-          nav rather than over it. */}
+      {/* Report button — TESTERS ONLY. Hidden for real players: a permanent
+          "report a problem" badge on a live product reads as an admission that
+          things break. Enabled by NEXT_PUBLIC_TESTER_MODE, an @fmmtest.com
+          login, or ?feedback=1. */}
+      {showReportButton ? (
       <div
         role="button"
         tabIndex={0}
@@ -854,6 +903,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
       >
         REPORT
       </div>
+      ) : null}
 
       {feedbackOpen && (
         <div

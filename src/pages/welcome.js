@@ -46,6 +46,15 @@ const SITE_STYLES = `
     [data-fmm="body-grid"] { grid-template-columns: minmax(0,1fr) !important; }
     [data-fmm="sidebar"] { position: static !important; }
   }
+  @media (max-width: 1080px) {
+    [data-fmm="hero-img"] { height: 220px !important; }
+  }
+  @media (max-width: 760px) {
+    [data-fmm="hero-img"] { height: 170px !important; }
+  }
+  @media (max-width: 480px) {
+    [data-fmm="hero-img"] { height: 140px !important; }
+  }
   @media (max-width: 960px) {
     [data-fmm="three-grid"] { grid-template-columns: 1fr 1fr !important; }
     [data-fmm="leagues-grid"] { grid-template-columns: minmax(0,1fr) !important; }
@@ -127,8 +136,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Anton&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-        <link rel="preload" as="image" href="/site/hero-mobile.webp" media="(max-width: 760px)" />
-        <link rel="preload" as="image" href="/site/hero.webp" media="(min-width: 761px)" />
+        <link rel="preload" as="image" href="/site/hero.jpg" />
       </Head>
       <style jsx global>{SITE_STYLES}</style>
 
@@ -158,12 +166,8 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
         </div>
 
         <div id="top" style={{ background: '#05060a' }}>
-          <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
-            <picture>
-              <source media="(max-width: 760px)" srcSet="/site/hero-mobile.webp" type="image/webp" />
-              <source srcSet="/site/hero.webp" type="image/webp" />
-              <img src="/site/hero.jpg" alt="Fantasy MMAdness" width="1320" fetchPriority="high" style={{ display: 'block', width: '100%', height: 'auto', aspectRatio: '16 / 9', objectFit: 'contain', background: '#05060a' }} />
-            </picture>
+          <div data-fmm="hero-wrap" style={{ width: '100%' }}>
+        <img src="/site/hero.jpg" alt="Fantasy MMAdness" fetchPriority="high" data-fmm="hero-img" style={{ display: 'block', width: '100%', height: 260, objectFit: 'cover', objectPosition: 'center 32%' }} />
           </div>
 
           {/* The copy used to sit over the artwork behind a heavy scrim, which buried
