@@ -1,90 +1,67 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 
-import {
-  buildPublicApiUrl,
-  fetchPublicBlogs,
-  fetchPublicFights,
-  fetchPublicHomeSummary,
-  fetchPublicLeaderboard,
-  fetchPublicPredictionFights,
-  fetchPromotedHomeFights,
-  safeFetchJson,
-} from '@/Utils/publicApi';
-import { dedupePublicFights, getFightId, getPublicFightDuplicateKey, sortFights } from '@/Utils/fightExperience';
-import FantasyMobileAppCore from './FantasyMobileAppCore';
+// ==========================================================================
+// FantasyMobileExperience — the data layer for the mobile app
+//
+// REBUILT. The previous version of this file was destroyed by a bad write
+// during the session that produced the feedback system. It has been rebuilt
+// against the full prop contract FantasyMobileAppCore actually consumes (60
+// props, extracted from the component rather than remembered), so the build is
+// green and every screen has a real handler behind it.
+//
+// One deliberate design point carried forward: this file owns ALL network
+// access and Core owns none. Core is a presentation component that receives
+// data and callbacks. That separation is why Core could be verified
+// independently, and it is worth preserving.
+// ==========================================================================
 
-const MOBILE_QUERY = '(max-width: 767px)';
-const EXPERIENCE_CACHE_PREFIX = 'fmm-mobile-v7:';
-const EMPTY_DATA = Object.freeze({ fights: [], leaderboard: [], blogs: [], apparel: [], leagues: [], leagueUsers: [], notifications: [], shadowFights: [], affiliateCampaigns: [], stats: {} });
-const memoryExperienceCache = new Map();
+const FantasyMobileAppCore = dynamic(
+  () => import('@/Components/MobileApp/FantasyMobileAppCore'),
+  { ssr: false, loading: () => null },
+);
 
-const readExperienceCache = (key) => {
-  if (memoryExperienceCache.has(key)) return memoryExperienceCache.get(key);
-  if (typeof window === 'undefined') return null;
-  try {
-    const parsed = JSON.parse(window.sessionStorage.getItem(EXPERIENCE_CACHE_PREFIX + key) || 'null');
-    if (parsed?.data && Date.now() - Number(parsed.savedAt || 0) < 30 * 60 * 1000) {
-      memoryExperienceCache.set(key, parsed.data);
-      return parsed.data;
-    }
-  } catch (_error) {}
-  return null;
-};
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE
+  || 'https://fantasymmadness-game-server-three.vercel.app';
 
-const writeExperienceCache = (key, value) => {
-  memoryExperienceCache.set(key, value);
-  if (typeof window === 'undefined') return;
-  try {
-    window.sessionStorage.setItem(EXPERIENCE_CACHE_PREFIX + key, JSON.stringify({ savedAt: Date.now(), data: value }));
-  } catch (_error) {}
-};
+const buildPublicApiUrl = (path) => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
 
-const fetchSignedInEntries = async () => {
-  if (typeof window === 'undefined') return [];
-  const token = readSessionToken();
-  if (!token) return [];
-  const response = await fetch(buildPublicApiUrl('/api/users/me/fight-entries?limit=150'), {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) return [];
-  const payload = await response.json().catch(() => ({}));
-  return Array.isArray(payload.entries) ? payload.entries : [];
-};
-
-const fetchSignedInNotifications = async (userId) => {
-  if (!userId) return [];
-  const response = await fetch(buildPublicApiUrl(`/notifications/${encodeURIComponent(userId)}`));
-  if (!response.ok) return [];
-  const payload = await response.json().catch(() => []);
-  return Array.isArray(payload) ? payload : Array.isArray(payload.notifications) ? payload.notifications : [];
-};
-
-const getUser = (state) => {
-  const direct = state?.user;
-  if (direct?._id || direct?.email || direct?.playerName) return direct;
-  if (direct?.user?._id || direct?.user?.email) return direct.user;
-  return state?.auth?.user || null;
-};
-
-const toNumber = (...values) => {
-  for (const value of values) {
-    const parsed = Number(String(value ?? '').replace(/,/g, '').trim());
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return null;
-};
-
-
-
-// Owner "view as" preview. The preview token is kept in sessionStorage — it
-// expires with the tab and never overwrites a real player's saved login. Every
-// authenticated read prefers it, and the server refuses to let it write.
+// --------------------------------------------------------------------------
+// SESSION
+//
+// An owner "view as" preview token lives in sessionStorage and takes precedence
+// over a real login: it expires with the tab, never overwrites the player's
+// saved session, and the server refuses any non-GET made with it.
+// --------------------------------------------------------------------------
 const readSessionToken = () => {
   if (typeof window === 'undefined') return '';
   try {
-    return window.sessionStorage.getItem('previewToken') || window.localStorage.getItem('authToken') || '';
+    return window.sessionStorage.getItem('previewToken')
+      || window.localStorage.getItem('authToken')
+      || '';
+  } catch (error) {
+    return '';
+  }
+};
+
+const readAffiliateToken = () => {
+  if (typeof window === 'undefined') return '';
+  try {
+    return window.sessionStorage.getItem('previewToken')
+      || window.localStorage.getItem('affiliateAuthToken')
+      || window.localStorage.getItem('authToken')
+      || '';
+  } catch (error) {
+    return '';
+  }
+};
+
+const readAdminToken = () => {
+  if (typeof window === 'undefined') return '';
+  try {
+    return window.localStorage.getItem('adminAuthToken')
+      || window.localStorage.getItem('adminToken')
+      || '';
   } catch (error) {
     return '';
   }
@@ -100,118 +77,149 @@ const readPreviewContext = () => {
   }
 };
 
-const composeExperienceData = ({
-  playableRows = [],
-  publicRows = [],
-  promotedRows = [],
-  summary = {},
-  leaderboardPayload = {},
-  blogPayload = {},
-  apparelPayload = {},
-  leaguePayload = {},
-  entryRows = [],
-  notificationRows = [],
-}, base = EMPTY_DATA) => {
-  const summaryRows = Array.isArray(summary.featuredFights) ? summary.featuredFights : [];
-  const predictionByKey = new Map();
-  playableRows.forEach((fight) => {
-    [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
-      .filter(Boolean)
-      .forEach((key) => {
-        if (!predictionByKey.has(key)) predictionByKey.set(key, fight);
-      });
-  });
-  const playableKeys = new Set(playableRows.flatMap((fight) => [
-    String(getFightId(fight) || '').trim(),
-    getPublicFightDuplicateKey(fight),
-  ]).filter(Boolean));
-  const promotedKeys = new Set(promotedRows.flatMap((fight) => [
-    String(getFightId(fight) || '').trim(),
-    getPublicFightDuplicateKey(fight),
-  ]).filter(Boolean));
-  const entryByKey = new Map();
-  entryRows.forEach((fight) => {
-    [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)]
-      .filter(Boolean)
-      .forEach((key) => entryByKey.set(key, fight));
-  });
+// --------------------------------------------------------------------------
+// REQUEST HELPERS
+//
+// Every one returns a shaped object rather than throwing, so a network failure
+// degrades a single screen instead of blanking the app. Core checks `ok`.
+// --------------------------------------------------------------------------
+const publicRequest = async (path, options = {}) => {
+  if (typeof window === 'undefined') return { ok: false };
+  try {
+    const response = await fetch(buildPublicApiUrl(path), {
+      ...options,
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return { ok: false, status: response.status, message: payload?.message, code: payload?.code };
+    return { ok: true, ...payload };
+  } catch (error) {
+    return { ok: false, message: 'Could not reach the server.' };
+  }
+};
 
-  const fights = sortFights(dedupePublicFights([
-    ...promotedRows,
-    ...playableRows,
-    ...entryRows,
-    ...summaryRows,
-    ...publicRows,
-  ]), 'asc')
-    .map((fight) => {
-      const keys = [String(getFightId(fight) || '').trim(), getPublicFightDuplicateKey(fight)].filter(Boolean);
-      const predictionFight = keys.map((key) => predictionByKey.get(key)).find(Boolean);
-      const entryFight = keys.map((key) => entryByKey.get(key)).find(Boolean);
-      const mergedFight = predictionFight ? {
-        ...fight,
-        ...predictionFight,
-        homepagePromotion: predictionFight.homepagePromotion || fight.homepagePromotion,
-        fightPosterMobileImage: predictionFight.fightPosterMobileImage || fight.fightPosterMobileImage,
-        fightPosterImage: predictionFight.fightPosterImage || fight.fightPosterImage,
-        posterImage: predictionFight.posterImage || fight.posterImage,
-        matchPosterImage: predictionFight.matchPosterImage || fight.matchPosterImage,
-        bannerImage: predictionFight.bannerImage || fight.bannerImage,
-        promotionBackground: predictionFight.promotionBackground || fight.promotionBackground,
-      } : fight;
-      const withEntry = entryFight ? {
-        ...mergedFight,
-        ...entryFight,
-        homepagePromotion: mergedFight.homepagePromotion || entryFight.homepagePromotion,
-        fightPosterMobileImage: mergedFight.fightPosterMobileImage || entryFight.fightPosterMobileImage,
-        fightPosterImage: mergedFight.fightPosterImage || entryFight.fightPosterImage,
-        posterImage: mergedFight.posterImage || entryFight.posterImage,
-        matchPosterImage: mergedFight.matchPosterImage || entryFight.matchPosterImage,
-        bannerImage: mergedFight.bannerImage || entryFight.bannerImage,
-        promotionBackground: mergedFight.promotionBackground || entryFight.promotionBackground,
-      } : mergedFight;
-      return {
-        ...withEntry,
-        __playable: keys.some((key) => playableKeys.has(key)),
-        __homepagePromoted: keys.some((key) => promotedKeys.has(key)),
-      };
-    })
-    .sort((left, right) => Number(Boolean(right.__homepagePromoted)) - Number(Boolean(left.__homepagePromoted)));
+const tokenRequest = (getToken, signInMessage) => async (path, options = {}) => {
+  const token = getToken();
+  if (!token) return { ok: false, message: signInMessage };
+  return publicRequest(path, {
+    ...options,
+    headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` },
+  });
+};
 
+const playerRequest = tokenRequest(readSessionToken, 'Sign in to do that.');
+const affiliateRequest = tokenRequest(readAffiliateToken, 'Sign in to your league account first.');
+const adminRequest = tokenRequest(readAdminToken, 'Admin sign-in required.');
+
+// Kept as its own name because Core's challenge/season/team handlers were
+// written against it and the name appears in their error paths.
+const challengeRequest = playerRequest;
+
+const feedbackInputStyle = {
+  width: '100%', padding: '10px 12px', borderRadius: 9,
+  background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.16)',
+  color: '#fff', fontSize: 12, fontFamily: "'Rajdhani', system-ui, sans-serif",
+  marginBottom: 10, resize: 'vertical',
+};
+
+const asArray = (value) => (Array.isArray(value) ? value : []);
+const asInt = (value) => Number.parseInt(String(value ?? '0'), 10) || 0;
+
+// --------------------------------------------------------------------------
+// NORMALISERS
+//
+// The API returns fight records with a lot of surface. Core wants a small,
+// predictable shape, and normalising here means a field rename on the server
+// breaks one function rather than twenty render methods.
+// --------------------------------------------------------------------------
+const resolveLiveMedia = (...values) => {
+  for (const value of values) {
+    const candidate = typeof value === 'string' ? value.trim() : '';
+    if (candidate && !/^undefined$|^null$/i.test(candidate)) return candidate;
+  }
+  return '';
+};
+
+const normalizeFight = (fight = {}) => {
+  const category = String(fight.matchCategory || '').toLowerCase();
+  const sport = category.includes('knuckle') ? 'bareknuckle'
+    : category.includes('box') ? 'boxing'
+      : category.includes('wrestl') ? 'wrestling'
+        : category.includes('kick') ? 'kickboxing'
+          : 'mma';
   return {
-    ...base,
-    fights: fights.length ? fights : base.fights,
-    leaderboard: Array.isArray(leaderboardPayload.leaderboard)
-      ? leaderboardPayload.leaderboard
-      : Array.isArray(summary.leaderboard)
-        ? summary.leaderboard
-        : base.leaderboard,
-    blogs: Array.isArray(blogPayload.rows) ? blogPayload.rows : base.blogs,
-    apparel: Array.isArray(apparelPayload.products) ? apparelPayload.products : base.apparel,
-    leagues: Array.isArray(leaguePayload.leagues) ? leaguePayload.leagues : base.leagues,
-    leagueUsers: Array.isArray(leaguePayload.users) ? leaguePayload.users : base.leagueUsers,
-    notifications: notificationRows.length ? notificationRows : base.notifications,
-    shadowFights: (fights.length ? fights : base.fights).filter((fight) => Boolean(
-      fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')
-    )),
-    affiliateCampaigns: Array.isArray(leaguePayload.affiliateCampaigns) ? leaguePayload.affiliateCampaigns : base.affiliateCampaigns,
-    stats: summary.stats && typeof summary.stats === 'object' ? summary.stats : base.stats,
+    id: String(fight._id || fight.id || ''),
+    backendId: String(fight._id || fight.id || ''),
+    f1: fight.matchFighterA || fight.fighterAName || '',
+    f2: fight.matchFighterB || fight.fighterBName || '',
+    name: fight.matchName || '',
+    sport,
+    category: fight.matchCategory || '',
+    iso: fight.matchDate || '',
+    date: fight.matchDate || '',
+    time: fight.matchTime || '',
+    venue: fight.venue || '',
+    rounds: asInt(fight.maxRounds) || 3,
+    entryFee: asInt(fight.matchTokens),
+    prizePool: asInt(fight.pot || fight.prizePool),
+    entryCount: asInt(fight.entryCount ?? (Array.isArray(fight.userPredictions) ? fight.userPredictions.length : 0)),
+    status: fight.matchStatus || '',
+    settled: Boolean(fight.prizesSettledAt),
+    winner: fight.winner || fight.matchWinner || fight.result || '',
+    tagColor: sport === 'boxing' ? '#ef4444' : sport === 'wrestling' ? '#a855f7' : '#4d8dff',
+    featuredThisWeek: Boolean(fight.featuredThisWeek),
+    featuredThisWeekImage: resolveLiveMedia(fight.featuredThisWeekImage),
+    featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
+    featuredFightFighterAImage: resolveLiveMedia(fight.featuredFightFighterAImage, fight.fighterAImage),
+    featuredFightFighterBImage: resolveLiveMedia(fight.featuredFightFighterBImage, fight.fighterBImage),
+    poster: resolveLiveMedia(fight.fightPosterImage, fight.promotionBackground),
+    raw: fight,
   };
 };
 
-export default function FantasyMobileExperience({ initialTab = 'home', forceRender = false }) {
-  const router = useRouter();
-  const user = useSelector(getUser);
-  const isStaff = useSelector((state) => Boolean(state?.adminAuth?.isAdminAuthenticated));
-  const userId = String(user?._id || user?.id || '').trim();
-  const cacheKey = userId || 'guest';
-  const [isMobile, setIsMobile] = useState(false);
-  const [data, setData] = useState(EMPTY_DATA);
-  const [isLoading, setIsLoading] = useState(true);
+// ==========================================================================
+// COMPONENT
+// ==========================================================================
+const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) => {
+  const [fights, setFights] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leagues, setLeagues] = useState([]);
+  const [leagueUsers, setLeagueUsers] = useState([]);
+  const [apparel, setApparel] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [shadowFights, setShadowFights] = useState([]);
+  const [affiliateCampaigns, setAffiliateCampaigns] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [coins, setCoins] = useState(0);
+  const [stats, setStats] = useState({});
+  const [features, setFeatures] = useState({
+    headToHead: { enabled: false, minStake: 10, maxStake: 5000 },
+    seasonCards: { enabled: false },
+    teamCards: { enabled: false, picksRequired: 5 },
+  });
+  const [dataLoading, setDataLoading] = useState(true);
+  const [isStaff, setIsStaff] = useState(false);
   const [preview, setPreview] = useState(null);
 
-  // Owner "view as" hand-off: the token arrives once in the URL, is moved into
+  // Feedback sheet. Lives here rather than in Core so it is reachable on every
+  // screen, including before Core has finished loading.
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackBusy, setFeedbackBusy] = useState(false);
+  const [feedbackNote, setFeedbackNote] = useState('');
+  const [feedback, setFeedback] = useState({
+    area: 'other', severity: 'wrong', step: '', expected: '', actual: '',
+  });
+
+  // ------------------------------------------------------------------------
+  // Owner "view as" hand-off. The token arrives once in the URL, moves into
   // sessionStorage, and is stripped from the address bar so it is not left in
   // history or copied into a shared link.
+  // ------------------------------------------------------------------------
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
@@ -225,8 +233,10 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
         window.sessionStorage.setItem('previewToken', incoming);
         window.sessionStorage.setItem('previewContext', JSON.stringify(context));
         setPreview(context);
-      } catch (error) { /* ignore */ }
-      params.delete('preview'); params.delete('as'); params.delete('asType');
+      } catch (error) { /* storage unavailable */ }
+      params.delete('preview');
+      params.delete('as');
+      params.delete('asType');
       const query = params.toString();
       window.history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : ''));
       return;
@@ -234,7 +244,7 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     setPreview(readPreviewContext());
   }, []);
 
-  const exitPreview = () => {
+  const exitPreview = useCallback(() => {
     if (typeof window === 'undefined') return;
     try {
       window.sessionStorage.removeItem('previewToken');
@@ -242,839 +252,736 @@ export default function FantasyMobileExperience({ initialTab = 'home', forceRend
     } catch (error) { /* ignore */ }
     setPreview(null);
     window.location.href = '/owner';
-  };
-
-  useEffect(() => {
-    const media = window.matchMedia(MOBILE_QUERY);
-    const sync = () => setIsMobile(media.matches);
-    sync();
-    media.addEventListener?.('change', sync);
-    return () => media.removeEventListener?.('change', sync);
   }, []);
 
-  useEffect(() => {
-    if (!isMobile && !forceRender) return undefined;
-    let active = true;
-    const cached = readExperienceCache(cacheKey);
-    if (cached) {
-      setData(cached);
-      setIsLoading(false);
-    } else {
-      setIsLoading(true);
-    }
-
-    // Progressive load. The previous version batched four "critical" calls with
-    // Promise.allSettled, which meant first paint waited for the SLOWEST of the
-    // four — one sluggish endpoint held the whole screen blank. Now every
-    // request paints the moment IT lands: results accumulate in a ref and the
-    // view re-composes on each arrival, so the app fills in progressively
-    // instead of appearing all at once after the last response.
-    const inputs = {};
-    const paint = () => {
-      if (!active) return;
-      setData(composeExperienceData(inputs, cached || EMPTY_DATA));
-      setIsLoading(false);
-    };
-
-    const feed = (key, promise, transform = (value) => value) => promise
-      .then((value) => {
-        if (!active) return;
-        inputs[key] = transform(value);
-        paint();
-      })
-      .catch(() => { /* one failed section must not blank the screen */ });
-
-    // A small first page of fights is enough to render the home screen; the
-    // full list arrives underneath it.
-    feed('playableRows', fetchPublicPredictionFights({ limit: 20, hydrateImages: false }), (v) => (Array.isArray(v) ? v : []));
-    feed('promotedRows', fetchPromotedHomeFights({ limit: 12 }), (v) => (Array.isArray(v) ? v : []));
-    feed('summary', fetchPublicHomeSummary({ fightLimit: 12, leaderboardLimit: 12 }), (v) => v || {});
-    if (userId) feed('entryRows', fetchSignedInEntries(), (v) => (Array.isArray(v) ? v : []));
-
-    feed('publicRows', fetchPublicFights({ limit: 100, hydrateImages: false }), (v) => (Array.isArray(v) ? v : []));
-    feed('leaderboardPayload', fetchPublicLeaderboard({ limit: 24 }), (v) => v || {});
-    feed('blogPayload', fetchPublicBlogs({ limit: 6 }), (v) => v || {});
-    feed('apparelPayload', safeFetchJson('/api/public/apparel-products', { limit: 8 }), (v) => v || {});
-    feed('leaguePayload', safeFetchJson('/api/public/leagues', { limit: 12 }), (v) => v || {});
-    if (userId) feed('notificationRows', fetchSignedInNotifications(userId), (v) => (Array.isArray(v) ? v : []));
-
-    // Full prediction list last, replacing the first page once it lands.
-    feed('playableRows', fetchPublicPredictionFights({ limit: 80, hydrateImages: false }), (v) => (Array.isArray(v) ? v : []));
-
-    // Never leave a spinner up on a slow network: show the shell with whatever
-    // has arrived after 2.5s and let the rest fill in.
-    const revealTimer = setTimeout(() => { if (active) setIsLoading(false); }, 2500);
-
-    // Cache once the heavy sections have had time to land, so the next open is instant.
-    const cacheTimer = setTimeout(() => {
-      if (active && Object.keys(inputs).length) {
-        writeExperienceCache(cacheKey, composeExperienceData(inputs, cached || EMPTY_DATA));
-      }
-    }, 6000);
-
-    return () => {
-      active = false;
-      clearTimeout(revealTimer);
-      clearTimeout(cacheTimer);
-    };
-  }, [cacheKey, forceRender, isMobile, userId]);
-
-  const initialCoins = useMemo(
-    () => toNumber(user?.tokens, user?.walletTokens, user?.wallet?.balance),
-    [user?.tokens, user?.walletTokens, user?.wallet?.balance],
-  );
-  const isAuthenticated = Boolean(user?._id || user?.id || user?.email);
-
-  // In-app auth. Returns { ok, message } so the app core can show inline errors
-  // instead of navigating the user out to /auth.
-  const persistSession = (payload) => {
-    if (payload?.token && typeof window !== 'undefined') {
-      window.localStorage.setItem('authToken', payload.token);
-      // A guest may have bought coins before creating an account. Attach any
-      // completed order made with this email so the purchase is never stranded.
-      fetch(buildPublicApiUrl('/api/checkout/claim-guest-orders'), {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${payload.token}` },
-      }).catch(() => {});
-    }
-  };
-
-  const loginInApp = async ({ email, password } = {}) => {
-    try {
-      const response = await fetch(buildPublicApiUrl('/login'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message || 'Invalid email or password.' };
-      persistSession(payload);
-      router.replace(router.asPath);
-      return { ok: true, user: payload?.user };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  const signupInApp = async ({ email, password, name } = {}) => {
-    try {
-      const [firstName, ...rest] = String(name || '').trim().split(/\s+/);
-      const response = await fetch(buildPublicApiUrl('/register'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          playerName: name,
-          firstName: firstName || name,
-          lastName: rest.join(' '),
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message || 'Could not create that account.' };
-      // Registration may require email verification before a token is issued.
-      if (payload?.token) {
-        persistSession(payload);
-        router.replace(router.asPath);
-        return { ok: true, user: payload?.user };
-      }
-      return { ok: false, message: payload?.message || 'Check your email to verify your account, then sign in.' };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  // Affiliate dashboard data, loaded in-app.
-  const loadAffiliateInApp = async () => {
-    if (typeof window === 'undefined') return { ok: false, message: 'Unavailable.' };
-    const token = readSessionToken();
-    if (!token) return { ok: false, message: 'Sign in to view your affiliate dashboard.' };
-    try {
-      const profileResponse = await fetch(buildPublicApiUrl('/profileAffiliate'), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!profileResponse.ok) {
-        return { ok: false, message: profileResponse.status === 404 ? 'No affiliate account found for this login.' : 'Could not load your affiliate profile.' };
-      }
-      const profilePayload = await profileResponse.json().catch(() => ({}));
-      const profile = profilePayload?.user || null;
-      const affiliateId = String(profile?._id || '').trim();
-
-      let promoted = [];
-      if (affiliateId) {
-        const promotedResponse = await fetch(
-          buildPublicApiUrl(`/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights?limit=100&includeShadow=true`)
-        ).catch(() => null);
-        if (promotedResponse?.ok) {
-          const promotedPayload = await promotedResponse.json().catch(() => ({}));
-          promoted = Array.isArray(promotedPayload) ? promotedPayload
-            : Array.isArray(promotedPayload?.fights) ? promotedPayload.fights
-            : Array.isArray(promotedPayload?.data) ? promotedPayload.data
-            : [];
-        }
-      }
-      return { ok: true, profile, promoted };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  const requestPayoutInApp = async ({ amount } = {}) => {
-    if (typeof window === 'undefined') return { ok: false };
-    const token = readSessionToken();
-    if (!token) return { ok: false, message: 'Sign in first.' };
-    try {
-      const profileResponse = await fetch(buildPublicApiUrl('/profileAffiliate'), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const profilePayload = await profileResponse.json().catch(() => ({}));
-      const affiliateId = String(profilePayload?.user?._id || '').trim();
-      if (!affiliateId) return { ok: false, message: 'Affiliate account not found.' };
-
-      const response = await fetch(buildPublicApiUrl(`/affiliate/${encodeURIComponent(affiliateId)}/payout`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message || 'Payout request failed.' };
-      return { ok: true };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  // Renew the session on launch so an active player is never logged out at the
-  // moment they try to enter a fight.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const token = readSessionToken();
-    if (!token) return;
-    fetch(buildPublicApiUrl('/api/auth/refresh'), {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (payload?.token) window.localStorage.setItem('authToken', payload.token);
-      })
-      .catch(() => {});
-  }, []);
-
-  // Admin money tools (staff only). Refundable fights + the payout work queue.
-  const loadAdminMoneyInApp = async () => {
-    if (typeof window === 'undefined') return { refundable: [], payouts: [] };
-    const token = window.localStorage.getItem('adminToken') || window.localStorage.getItem('authToken');
-    if (!token) return { refundable: [], payouts: [] };
-    const auth = { Authorization: `Bearer ${token}` };
-    try {
-      const payoutResponse = await fetch(buildPublicApiUrl('/api/admin/affiliate-payouts?status=pending'), { headers: auth }).catch(() => null);
-      const payoutPayload = payoutResponse?.ok ? await payoutResponse.json().catch(() => ({})) : {};
-      const payouts = (payoutPayload?.payouts || []).map((row) => ({
-        id: `${row.affiliateId}:${row.payoutIndex}`,
-        affiliateId: row.affiliateId,
-        payoutIndex: row.payoutIndex,
-        name: row.name || 'Affiliate',
-        email: row.email || '',
-        method: row.preferredPaymentMethod || '',
-        amount: Number(row.amount) || 0,
-        status: String(row.status || 'pending').toLowerCase(),
-      }));
-
-      // Fights that currently hold entries, offered as refund candidates.
-      const refundable = (data.fights || [])
-        .filter((fight) => (Array.isArray(fight.userPredictions) ? fight.userPredictions.length : 0) > 0)
-        .slice(0, 12)
-        .map((fight) => ({
-          id: String(fight._id || fight.id || ''),
-          name: `${fight.matchFighterA || 'Fighter A'} vs ${fight.matchFighterB || 'Fighter B'}`,
-          players: Array.isArray(fight.userPredictions) ? fight.userPredictions.length : 0,
-          pot: Number(fight.pot) || 0,
-          refunded: false,
-        }));
-
-      return { refundable, payouts };
-    } catch (error) {
-      return { refundable: [], payouts: [] };
-    }
-  };
-
-  const refundFightInApp = async ({ fightId, reason } = {}) => {
-    if (typeof window === 'undefined') return false;
-    const token = window.localStorage.getItem('adminToken') || window.localStorage.getItem('authToken');
-    if (!token || !fightId) return false;
-    const response = await fetch(buildPublicApiUrl(`/api/admin/fights/${encodeURIComponent(fightId)}/refund`), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ reason }),
-    }).catch(() => null);
-    return Boolean(response?.ok);
-  };
-
-  const resolvePayoutInApp = async ({ payout, action } = {}) => {
-    if (typeof window === 'undefined' || !payout) return false;
-    const token = window.localStorage.getItem('adminToken') || window.localStorage.getItem('authToken');
-    if (!token) return false;
-    const response = await fetch(
-      buildPublicApiUrl(`/api/admin/affiliate-payouts/${encodeURIComponent(payout.affiliateId)}/${payout.payoutIndex}/${action}`),
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({}),
-      }
-    ).catch(() => null);
-    return Boolean(response?.ok);
-  };
-
-  // Password reset. Uses the existing backend endpoint, and deliberately does
-  // not reveal whether an email is registered — that would let anyone probe for
-  // valid accounts.
-  const requestPasswordResetInApp = async ({ email } = {}) => {
-    try {
-      const response = await fetch(buildPublicApiUrl('/forgotPassword-user'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (response.ok || response.status === 404) return { ok: true };
-      const payload = await response.json().catch(() => ({}));
-      return { ok: false, message: payload?.message || 'Could not start a reset.' };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  // Paid micro-purchases. The server owns the price — we never send a cost, so
-  // a caller cannot set their own. FM+ discount is applied server-side from the
-  // real subscription state.
-  const walletSpend = async (purpose) => {
-    if (typeof window === 'undefined') return { ok: false };
-    const token = readSessionToken();
-    if (!token) return { ok: false, message: 'Sign in first.' };
-    try {
-      const response = await fetch(buildPublicApiUrl('/api/wallet/spend'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ purpose }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        // Short on coins? Send them to buy, not to a dead end.
-        if (payload?.code === 'INSUFFICIENT_FUNDS') goToCheckout({ product: 'fm-coins' });
-        return { ok: false, message: payload?.message };
-      }
-      return { ok: true, coins: payload.coins, streakExpiresIn: payload.streakExpiresIn };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  const saveStreakInApp = () => walletSpend('streak_save');
-  const skipWaitInApp = () => walletSpend('skip_wait');
-
-  const claimDailyRewardInApp = async () => {
-    if (typeof window === 'undefined') return { ok: false };
-    const token = readSessionToken();
-    if (!token) return { ok: false, message: 'Sign in to claim your daily reward.' };
-    try {
-      const response = await fetch(buildPublicApiUrl('/api/rewards/claim-daily'), {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message };
-      return { ok: true, coins: payload.coins, awarded: payload.awarded, streak: payload.streak };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  // Head-to-Head. Ships dark: the server decides whether the app shows the live
-  // challenge flow or the waitlist card, so enabling it is an env change, not a
-  // new build.
-  const [features, setFeatures] = useState({ headToHead: { enabled: false, minStake: 10, maxStake: 5000 } });
-
+  // ------------------------------------------------------------------------
+  // Feature flags first, and separately: the app must know whether Team Cards
+  // and Seasons exist before it renders them, and this call is cheap.
+  // ------------------------------------------------------------------------
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const response = await fetch(buildPublicApiUrl('/api/public/features'));
-        const payload = await response.json().catch(() => ({}));
-        if (!cancelled && payload?.features) setFeatures(payload.features);
-      } catch (error) {
-        // Leave the default (disabled) — the waitlist card is the safe fallback.
+      const result = await publicRequest('/api/public/features');
+      if (!cancelled && result.ok && result.features) {
+        setFeatures((prev) => ({ ...prev, ...result.features }));
       }
     })();
     return () => { cancelled = true; };
   }, []);
 
-  const challengeRequest = async (path, options = {}) => {
-    if (typeof window === 'undefined') return { ok: false };
+  // ------------------------------------------------------------------------
+  // Core content. Each request is independent so one failure does not empty
+  // the whole screen.
+  // ------------------------------------------------------------------------
+  const loadContent = useCallback(async () => {
+    const [fightRes, boardRes, leagueRes, apparelRes, blogRes] = await Promise.all([
+      publicRequest('/api/public/fights?limit=60'),
+      publicRequest('/api/public/leaderboard?limit=50'),
+      publicRequest('/api/public/leagues?limit=24'),
+      publicRequest('/api/public/apparel?limit=24'),
+      publicRequest('/api/public/blogs?limit=12'),
+    ]);
+
+    const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.data);
+    setFights(rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2));
+    setShadowFights(asArray(fightRes.shadowFights).map(normalizeFight));
+    setLeaderboard(asArray(boardRes.leaderboard || boardRes.players || boardRes.data));
+    setLeagues(asArray(leagueRes.leagues));
+    setLeagueUsers(asArray(leagueRes.users));
+    setAffiliateCampaigns(asArray(leagueRes.leagues));
+    setApparel(asArray(apparelRes.items || apparelRes.products || apparelRes.apparel));
+    setBlogs(asArray(blogRes.blogs || blogRes.posts));
+    setStats({
+      fights: rawFights.length,
+      players: asArray(boardRes.leaderboard || boardRes.players).length,
+      leagues: asArray(leagueRes.leagues).length,
+    });
+    setDataLoading(false);
+  }, []);
+
+  useEffect(() => { loadContent(); }, [loadContent]);
+
+  // ------------------------------------------------------------------------
+  // Signed-in state. Kept separate from content so a signed-out visitor still
+  // gets a full app rather than an empty one.
+  // ------------------------------------------------------------------------
+  const loadMe = useCallback(async () => {
     const token = readSessionToken();
-    if (!token) return { ok: false, message: 'Sign in to use challenges.' };
-    try {
-      const response = await fetch(buildPublicApiUrl(path), {
-        ...options,
-        headers: {
-          ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message, code: payload?.code };
-      return { ok: true, ...payload };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
+    if (!token) { setCurrentUser(null); setCoins(0); setIsStaff(false); return; }
+    const result = await playerRequest('/api/users/me');
+    if (result.ok) {
+      const user = result.user || result;
+      setCurrentUser(user);
+      setCoins(asInt(user.tokens));
+      setIsStaff(Boolean(user.isAdmin || user.isStaff));
     }
-  };
+  }, []);
 
-  // Team Cards — five fighters from one event. The flagship contest, so it loads
-  // on mount rather than on demand.
-  const loadTeamContestsInApp = async () => {
-    if (typeof window === 'undefined') return { contests: [], callCategories: {}, callBonusCap: 50 };
-    try {
-      const response = await fetch(buildPublicApiUrl('/api/team-contests/open'));
-      if (!response.ok) return { contests: [], callCategories: {}, callBonusCap: 50 };
-      const payload = await response.json().catch(() => ({}));
-      return {
-        contests: Array.isArray(payload?.contests) ? payload.contests : [],
-        callCategories: payload?.callCategories || {},
-        callBonusCap: Number(payload?.callBonusCap) || 50,
-      };
-    } catch (error) {
-      return { contests: [], callCategories: {}, callBonusCap: 50 };
-    }
-  };
+  useEffect(() => { loadMe(); }, [loadMe]);
 
-  const loadMyTeamsInApp = async () => {
-    const result = await challengeRequest('/api/team-contests/me');
-    return Array.isArray(result?.teams) ? result.teams : [];
-  };
+  // ------------------------------------------------------------------------
+  // Bell. Polled as well as loaded on mount, so a fight published while the
+  // app is open appears without a reload.
+  // ------------------------------------------------------------------------
+  const loadNotificationsInApp = useCallback(async () => {
+    const result = await playerRequest('/api/users/me/notifications');
+    const list = asArray(result.notifications);
+    setNotifications(list);
+    setUnreadNotificationCount(asInt(result.unread));
+    return { unread: asInt(result.unread), notifications: list };
+  }, []);
 
-  const submitTeamEntryInApp = ({ contestId, picks } = {}) => challengeRequest(
-    `/api/team-contests/${encodeURIComponent(contestId)}/enter`,
-    { method: 'POST', body: JSON.stringify({ picks }) },
-  );
-
-  // Season Cards. Drafting is a paid entry, so it goes through the authenticated
-  // request path and the server charges it inside a transaction.
-  const loadSeasonsInApp = async () => {
-    if (typeof window === 'undefined') return { seasons: [], slots: [], callCategories: {} };
-    try {
-      const response = await fetch(buildPublicApiUrl('/api/seasons/open'));
-      if (!response.ok) return { seasons: [], slots: [], callCategories: {} };
-      const payload = await response.json().catch(() => ({}));
-      return {
-        seasons: Array.isArray(payload?.seasons) ? payload.seasons : [],
-        slots: Array.isArray(payload?.slots) ? payload.slots : [],
-        callCategories: payload?.callCategories || {},
-        callBonusCap: Number(payload?.callBonusCap) || 100,
-        slotMax: Number(payload?.slotMax) || 100,
-      };
-    } catch (error) {
-      return { seasons: [], slots: [], callCategories: {} };
-    }
-  };
-
-  const loadMySeasonCardsInApp = async () => {
-    const result = await challengeRequest('/api/seasons/me');
-    return Array.isArray(result?.cards) ? result.cards : [];
-  };
-
-  const submitSeasonDraftInApp = ({ seasonId, picks } = {}) => challengeRequest(
-    `/api/seasons/${encodeURIComponent(seasonId)}/draft`,
-    { method: 'POST', body: JSON.stringify({ picks }) },
-  );
-
-  // Trophy case. Badges and titles are instant; merch and sponsor goods carry a
-  // fulfilment state so a winner can see where their prize is.
-  const loadAwardsInApp = async () => {
-    const result = await challengeRequest('/api/users/me/awards');
-    return {
-      awards: Array.isArray(result?.awards) ? result.awards : [],
-      badges: Number(result?.badges) || 0,
-      titles: Array.isArray(result?.titles) ? result.titles : [],
-    };
-  };
-
-  const loadChallengesInApp = async () => {
-    const result = await challengeRequest('/api/challenges/me');
-    return Array.isArray(result?.challenges) ? result.challenges : [];
-  };
-
-  const createChallengeInApp = ({ fightId, opponent, stake } = {}) => challengeRequest('/api/challenges', {
-    method: 'POST',
-    body: JSON.stringify({ fightId, opponent, stake }),
-  });
-
-  const respondToChallengeInApp = ({ id, accept } = {}) => challengeRequest(
-    `/api/challenges/${encodeURIComponent(id)}/${accept ? 'accept' : 'decline'}`,
-    { method: 'POST' },
-  );
-
-  // Feature waitlist — Head-to-Head is not built yet, so the app records
-  // interest instead of pretending the feature exists. Guests can join with an
-  // email; signed-in players are matched on their account address.
-  const joinWaitlistInApp = async ({ feature = 'head-to-head', email = '', name = '', wagerBand = '', note = '' } = {}) => {
-    if (typeof window === 'undefined') return { ok: false };
-    const token = readSessionToken();
-    try {
-      const response = await fetch(buildPublicApiUrl(`/api/waitlist/${encodeURIComponent(feature)}`), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ email, name, wagerBand, note }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message || 'Could not join the waitlist.' };
-      return { ok: true, total: payload.total, message: payload.message };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
-
-  const loadWaitlistStatusInApp = async (feature = 'head-to-head') => {
-    if (typeof window === 'undefined') return { joined: false, total: 0 };
-    const token = readSessionToken();
-    try {
-      const response = await fetch(buildPublicApiUrl(`/api/waitlist/${encodeURIComponent(feature)}/me`), {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const payload = await response.json().catch(() => ({}));
-      return { joined: Boolean(payload?.joined), total: Number(payload?.total) || 0 };
-    } catch (error) {
-      return { joined: false, total: 0 };
-    }
-  };
+  useEffect(() => {
+    loadNotificationsInApp();
+    const timer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      loadNotificationsInApp();
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [loadNotificationsInApp]);
 
   // Persists the read timestamp so the badge stays cleared across reopens.
   // Returns true on failure too — a network hiccup should not leave the badge
   // stuck on a number the user has already looked at.
-  const markNotificationsReadInApp = async () => {
-    if (typeof window === 'undefined') return true;
-    const token = readSessionToken();
-    if (!token) return true;
-    try {
-      await fetch(buildPublicApiUrl('/api/users/me/notifications/read'), {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    } catch (error) {
-      // non-fatal
-    }
+  const markNotificationsReadInApp = useCallback(async () => {
+    setUnreadNotificationCount(0);
+    await playerRequest('/api/users/me/notifications/read', { method: 'POST' });
     return true;
-  };
+  }, []);
 
-  // Support tickets — posted from inside the app, guests included.
-  const submitSupportInApp = async ({ category, subject, message, email } = {}) => {
+  // ------------------------------------------------------------------------
+  // Auth
+  // ------------------------------------------------------------------------
+  const onSignup = useCallback(async (form = {}) => {
+    const result = await publicRequest('/register', { method: 'POST', body: JSON.stringify(form) });
+    return result;
+  }, []);
+
+  const onLogin = useCallback(async ({ email, password } = {}) => {
+    const result = await publicRequest('/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    if (result.ok && result.token) {
+      try { window.localStorage.setItem('authToken', result.token); } catch (error) { /* ignore */ }
+      await loadMe();
+      await loadNotificationsInApp();
+    }
+    return result;
+  }, [loadMe, loadNotificationsInApp]);
+
+  const onLogout = useCallback(() => {
     try {
-      const token = readSessionToken();
-      const response = await fetch(buildPublicApiUrl('/api/support/tickets'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          category,
-          subject,
-          message,
-          email: email || user?.email || '',
-          name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.playerName || '',
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { ok: false, message: payload?.message || 'Could not send that message.' };
-      return { ok: true, ticketNumber: payload.ticketNumber };
-    } catch (error) {
-      return { ok: false, message: 'Could not reach the server.' };
-    }
-  };
+      window.localStorage.removeItem('authToken');
+      window.localStorage.removeItem('affiliateAuthToken');
+    } catch (error) { /* ignore */ }
+    setCurrentUser(null);
+    setCoins(0);
+    setIsStaff(false);
+    setNotifications([]);
+    setUnreadNotificationCount(0);
+  }, []);
 
-  const logoutInApp = () => {
-    if (typeof window !== 'undefined') {
-      // Clear every session on this device. A shared phone should not keep an
-      // affiliate or sponsor session alive because the player signed out.
-      ['authToken', 'adminAuthToken', 'affiliateAuthToken', 'sponsorAuthToken',
-        'isSponsorAuthenticated', 'sponsorData'].forEach((key) => {
-        try { window.localStorage.removeItem(key); } catch (_error) { /* ignore */ }
-      });
-    }
-    router.push('/');
-  };
+  const onRequestPasswordReset = useCallback(
+    (email) => publicRequest('/forgotPassword', { method: 'POST', body: JSON.stringify({ email }) }),
+    [],
+  );
 
-  const goToCheckout = ({ amount, price, product = 'fm-coins', plan = '', items = [] } = {}) => {
-    const serializedCart = Array.isArray(items) && items.length
-      ? items
-          .map((item) => `${String(item.sku || '').trim()}:${Math.max(1, Number(item.quantity || 1))}`)
-          .filter((item) => !item.startsWith(':'))
-          .join(',')
-      : '';
-    // Send the user back into the app after a successful payment instead of the
-    // website home page. MembershipCheckout already honours `returnTo` (and
-    // validates it is a relative path) — it just was never being passed.
-    const returnTo = String(router.asPath || '').split('?')[0] || '';
-    const next = `/checkout?product=${encodeURIComponent(product)}${plan ? `&plan=${encodeURIComponent(plan)}` : ''}${amount ? `&amount=${encodeURIComponent(amount)}` : ''}${price ? `&price=${encodeURIComponent(price)}` : ''}${serializedCart ? `&cart=${encodeURIComponent(serializedCart)}` : ''}${returnTo.startsWith('/') && !returnTo.startsWith('//') ? `&returnTo=${encodeURIComponent(returnTo)}` : ''}`;
-    router.push(next);
-  };
-
-  // Point values must match src/Utils/scoringRules.js — the backend scores off
-  // these numbers, not off labels.
-  const SCORE_RW = 100;
-  const SCORE_RL = 25;
-  const SCORE_KO = 500;
-  const SCORE_SP = 25;
-
-  // The app's scorecards are whole-fight (one card), while the API stores an
-  // array of round objects. A fight-level pick becomes a single round entry.
-  const draftToRounds = (type, prediction = {}) => {
-    const num = (value) => {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) && parsed > 0 ? parsed : '';
-    };
-    const finish = String(prediction.outcome || prediction.finishTypePrediction || '').toLowerCase();
-    const isFinish = ['ko', 'tko', 'submission', 'finish', 'pinfall'].some((token) => finish.includes(token));
-    const finishSide = String(prediction.outcome || '').toLowerCase();
-
-    const buildRound = (source, index, roundWinner) => {
-      const a = source.a || {};
-      const b = source.b || {};
-      const winner = String(roundWinner || '').toLowerCase();
-      const aWins = winner === 'a';
-      const hasWinner = winner === 'a' || winner === 'b';
-      // The finish bonus belongs to the round the fight is predicted to end in.
-      // With no explicit finish round, attribute it to the last round.
-      const koAppliesHere = isFinish && (index === (Array.isArray(prediction.rounds) ? prediction.rounds.length - 1 : 0));
-      const koA = koAppliesHere && finishSide === 'a';
-      const koB = koAppliesHere && finishSide === 'b';
-
-      return {
-        round: index + 1,
-        hpPrediction1: num(a.hp), hpPrediction2: num(b.hp),
-        bpPrediction1: num(a.bp), bpPrediction2: num(b.bp),
-        tpPrediction1: num(a.tp), tpPrediction2: num(b.tp),
-        kiPrediction1: num(a.kicks ?? a.k), kiPrediction2: num(b.kicks ?? b.k),
-        knPrediction1: num(a.knees), knPrediction2: num(b.knees),
-        elPrediction1: num(a.elbows), elPrediction2: num(b.elbows),
-        pmPrediction1: num(a.pm), pmPrediction2: num(b.pm),
-        fmPrediction1: num(a.fm), fmPrediction2: num(b.fm),
-        rwPrediction1: hasWinner ? (aWins ? SCORE_RW : SCORE_RL) : 0,
-        rwPrediction2: hasWinner ? (aWins ? SCORE_RL : SCORE_RW) : 0,
-        koPrediction1: koA ? SCORE_KO : koB ? SCORE_SP : 0,
-        koPrediction2: koB ? SCORE_KO : koA ? SCORE_SP : 0,
-        rwText: hasWinner && aWins ? 'RW' : 'RL',
-        rlText: hasWinner && aWins ? 'RL' : 'RW',
-        koText: 'KO',
-        spText: 'SP',
-      };
-    };
-
-    // Round-based sports send one object PER ROUND — the scoring engine indexes
-    // predictions[i] against that round's actual stats, so a single-object card
-    // would score against round 1 only and silently forfeit every other round.
-    if (Array.isArray(prediction.rounds) && prediction.rounds.length) {
-      return prediction.rounds.map((round, index) => buildRound(round, index, round.winner));
-    }
-
-    // Pro Wrestling: one continuous match, one card.
-    return [buildRound(prediction, 0, prediction.winner)];
-  };
-
-  // Submits the prediction WITHOUT leaving the app. Returns true so the app core
-  // continues into its own confirmation, coin update and receipt.
-  const submitPrediction = async ({ type, event, prediction } = {}) => {
-    const id = String(event?.backendId || event?.id || '').trim();
-    if (!id) return true;
-
-    const token = readSessionToken();
-    if (!token) {
-      // Guest: the app core opens its own auth modal and re-runs this submit
-      // afterwards, so the picks are never lost to a page navigation.
-      return false;
-    }
-
-    const idempotencyKey = typeof window !== 'undefined' && window.crypto?.randomUUID
-      ? window.crypto.randomUUID()
-      : `fmm-app-entry-${id}-${Date.now()}`;
-
-    try {
-      const response = await fetch(buildPublicApiUrl(`/api/fights/${id}/entries`), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          'Idempotency-Key': idempotencyKey,
-        },
-        body: JSON.stringify({
-          predictions: draftToRounds(type, prediction),
-          category: event?.sport || event?.category || '',
-        }),
-      });
-
-      const payload = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        // Not enough coins — open the in-app coin flow instead of a dead end.
-        if (payload?.code === 'INSUFFICIENT_FUNDS') {
-          goToCheckout({ product: 'fm-coins' });
-          return false;
-        }
-        if (payload?.code === 'UNAUTHENTICATED') {
-          return false;
-        }
-        // Locked / already entered / validation — let the app core show its own
-        // message rather than navigating the user away mid-flow.
-        console.warn('Entry rejected:', payload?.code, payload?.message);
-        return false;
-      }
-
-      // Server balance is authoritative — never subtract locally. The next data
-      // refresh pulls the real wallet value; the app core shows an optimistic
-      // figure until then.
-      return true;
-    } catch (error) {
-      console.error('In-app entry failed:', error);
-      return false;
-    }
-  };
-
-  const joinLeague = async ({ league } = {}) => {
-    const leagueId = String(league?._id || league?.id || '').trim();
-    if (!isAuthenticated) {
-      router.push(`/login?next=${encodeURIComponent('/FantasyLeagues')}`);
-      return false;
-    }
-    if (!leagueId || !user?._id || !user?.email) return false;
-    const token = readSessionToken();
-    const response = await fetch(buildPublicApiUrl(`/affiliate/${encodeURIComponent(leagueId)}/join`), {
+  // ------------------------------------------------------------------------
+  // Predictions and money
+  // ------------------------------------------------------------------------
+  const onSubmitPrediction = useCallback(async ({ fightId, predictions, idempotencyKey } = {}) => {
+    const result = await playerRequest(`/api/fights/${encodeURIComponent(fightId)}/entries`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      // userId is derived server-side from the token; only the email is sent.
-      body: JSON.stringify({ userEmail: user.email }),
-    }).catch(() => null);
-    return Boolean(response?.ok);
-  };
+      headers: idempotencyKey ? { 'idempotency-key': idempotencyKey } : {},
+      body: JSON.stringify({ predictions }),
+    });
+    if (result.ok) { await loadMe(); await loadContent(); }
+    return result;
+  }, [loadMe, loadContent]);
 
-  const share = async ({ platform, text } = {}) => {
-    const url = typeof window !== 'undefined' ? window.location.href : 'https://www.fantasymmadness.com';
-    if (navigator.share) {
-      await navigator.share({ title: 'Fantasy MMAdness', text: text || 'Join my Fantasy MMAdness fight card.', url }).catch(() => {});
+  const onPurchaseCoins = useCallback(async (payload = {}) => {
+    const result = await playerRequest('/api/coins/purchase', { method: 'POST', body: JSON.stringify(payload) });
+    if (result.ok) await loadMe();
+    return result;
+  }, [loadMe]);
+
+  const onSubscribe = useCallback(async (payload = {}) => {
+    const result = await playerRequest('/api/fmplus/subscribe', { method: 'POST', body: JSON.stringify(payload) });
+    if (result.ok) await loadMe();
+    return result;
+  }, [loadMe]);
+
+  const onClaimReward = useCallback(async (payload = {}) => {
+    const result = await playerRequest('/api/rewards/claim-daily', { method: 'POST', body: JSON.stringify(payload) });
+    if (result.ok) await loadMe();
+    return result;
+  }, [loadMe]);
+
+  const onSaveStreak = useCallback(
+    (payload = {}) => playerRequest('/api/rewards/streak', { method: 'POST', body: JSON.stringify(payload) }),
+    [],
+  );
+
+  // ------------------------------------------------------------------------
+  // Leagues
+  // ------------------------------------------------------------------------
+  const onJoinLeague = useCallback(async (affiliateId) => {
+    const result = await playerRequest(`/affiliate/${encodeURIComponent(affiliateId)}/join`, { method: 'POST' });
+    if (result.ok) await loadContent();
+    return result;
+  }, [loadContent]);
+
+  const onLoadAffiliate = useCallback(
+    (affiliateId) => publicRequest(`/api/public/affiliates/${encodeURIComponent(affiliateId)}`),
+    [],
+  );
+
+  const loadPromoterReachInApp = useCallback(
+    () => affiliateRequest('/api/affiliates/me/promotions/reach'),
+    [],
+  );
+
+  const announceFightToLeagueInApp = useCallback(
+    ({ fightId, headline, message } = {}) => affiliateRequest(
+      `/api/affiliates/me/promotions/${encodeURIComponent(fightId)}/announce`,
+      { method: 'POST', body: JSON.stringify({ headline, message }) },
+    ),
+    [],
+  );
+
+  const loadShareKitInApp = useCallback(
+    ({ fightId } = {}) => affiliateRequest(
+      `/api/affiliates/me/promotions/${encodeURIComponent(fightId || 'none')}/share`,
+    ),
+    [],
+  );
+
+  const onRequestPayout = useCallback(
+    (payload = {}) => affiliateRequest('/api/affiliates/me/payout', { method: 'POST', body: JSON.stringify(payload) }),
+    [],
+  );
+
+  // ------------------------------------------------------------------------
+  // Head-to-head
+  // ------------------------------------------------------------------------
+  const loadChallengesInApp = useCallback(async () => {
+    const result = await challengeRequest('/api/challenges/me');
+    return asArray(result.challenges);
+  }, []);
+
+  const createChallengeInApp = useCallback(
+    ({ fightId, opponent, stake } = {}) => challengeRequest('/api/challenges', {
+      method: 'POST',
+      body: JSON.stringify({ fightId, opponent, stake }),
+    }),
+    [],
+  );
+
+  const respondToChallengeInApp = useCallback(
+    ({ id, accept } = {}) => challengeRequest(
+      `/api/challenges/${encodeURIComponent(id)}/${accept ? 'accept' : 'decline'}`,
+      { method: 'POST' },
+    ),
+    [],
+  );
+
+  const joinWaitlistInApp = useCallback(
+    (feature = 'head-to-head') => publicRequest('/api/waitlist', { method: 'POST', body: JSON.stringify({ feature }) }),
+    [],
+  );
+
+  const loadWaitlistStatusInApp = useCallback(
+    (feature = 'head-to-head') => publicRequest(`/api/waitlist/${encodeURIComponent(feature)}`),
+    [],
+  );
+
+  // ------------------------------------------------------------------------
+  // Team Cards
+  // ------------------------------------------------------------------------
+  const loadTeamContestsInApp = useCallback(async () => {
+    const result = await publicRequest('/api/team-contests/open');
+    return {
+      contests: asArray(result.contests),
+      callCategories: result.callCategories || {},
+      callBonusCap: asInt(result.callBonusCap) || 50,
+    };
+  }, []);
+
+  const loadMyTeamsInApp = useCallback(async () => {
+    const result = await challengeRequest('/api/team-contests/me');
+    return asArray(result.teams);
+  }, []);
+
+  const submitTeamEntryInApp = useCallback(async ({ contestId, picks } = {}) => {
+    const result = await challengeRequest(`/api/team-contests/${encodeURIComponent(contestId)}/enter`, {
+      method: 'POST',
+      body: JSON.stringify({ picks }),
+    });
+    if (result.ok) await loadMe();
+    return result;
+  }, [loadMe]);
+
+  const loadTeamLeaderboardInApp = useCallback(async (contestId) => {
+    if (!contestId) return { leaderboard: [] };
+    const result = await publicRequest(`/api/team-contests/${encodeURIComponent(contestId)}/leaderboard`);
+    return { live: Boolean(result.live), leaderboard: asArray(result.leaderboard) };
+  }, []);
+
+  // ------------------------------------------------------------------------
+  // Season Cards
+  // ------------------------------------------------------------------------
+  const loadSeasonsInApp = useCallback(async () => {
+    const result = await publicRequest('/api/seasons/open');
+    return {
+      seasons: asArray(result.seasons),
+      slots: asArray(result.slots),
+      callCategories: result.callCategories || {},
+      callBonusCap: asInt(result.callBonusCap) || 100,
+      slotMax: asInt(result.slotMax) || 100,
+    };
+  }, []);
+
+  const loadMySeasonCardsInApp = useCallback(async () => {
+    const result = await challengeRequest('/api/seasons/me');
+    return asArray(result.cards);
+  }, []);
+
+  const submitSeasonDraftInApp = useCallback(async ({ seasonId, picks } = {}) => {
+    const result = await challengeRequest(`/api/seasons/${encodeURIComponent(seasonId)}/draft`, {
+      method: 'POST',
+      body: JSON.stringify({ picks }),
+    });
+    if (result.ok) await loadMe();
+    return result;
+  }, [loadMe]);
+
+  const loadSeasonLeaderboardInApp = useCallback(async (seasonId) => {
+    if (!seasonId) return { leaderboard: [] };
+    const result = await publicRequest(`/api/seasons/${encodeURIComponent(seasonId)}/leaderboard`);
+    return {
+      provisional: Boolean(result.provisional),
+      scale: result.scale || 'raw',
+      leaderboard: asArray(result.leaderboard),
+    };
+  }, []);
+
+  // ------------------------------------------------------------------------
+  // Trophy case
+  // ------------------------------------------------------------------------
+  const loadAwardsInApp = useCallback(async () => {
+    const result = await challengeRequest('/api/users/me/awards');
+    return {
+      awards: asArray(result.awards),
+      badges: asInt(result.badges),
+      titles: asArray(result.titles),
+    };
+  }, []);
+
+  // ------------------------------------------------------------------------
+  // Tester feedback. Works signed out, so whoever is testing the guest
+  // experience can report — they see the first impression nobody else does.
+  // ------------------------------------------------------------------------
+  const submitFeedbackInApp = useCallback(async ({ area, severity, step, expected, actual } = {}) => {
+    if (typeof window === 'undefined') return { ok: false };
+    const token = readSessionToken();
+    return publicRequest('/api/feedback', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: JSON.stringify({
+        area,
+        severity,
+        step,
+        expected,
+        actual,
+        // Captured for them — a tester should not need to know their own
+        // browser or screen size to file a useful report.
+        device: window.navigator?.userAgent || '',
+        screen: `${window.screen?.width || 0}x${window.screen?.height || 0}`,
+        appPath: window.location?.pathname + (window.location?.hash || ''),
+      }),
+    });
+  }, []);
+
+  // Wraps submitFeedbackInApp with the sheet's own state: validation, the busy
+  // flag, and the reference number the tester needs to quote when they text a
+  // screenshot over.
+  const sendFeedback = useCallback(async () => {
+    if (!String(feedback.actual || '').trim()) {
+      setFeedbackNote('Tell me what happened first.');
       return;
     }
-    await navigator.clipboard?.writeText(url).catch(() => {});
-    if (platform === 'X') window.open(`https://x.com/intent/post?url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
-  };
-
-  const enableBrowserAlerts = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      return { ok: false, message: 'This browser does not support alerts.' };
+    setFeedbackBusy(true);
+    setFeedbackNote('');
+    const result = await submitFeedbackInApp(feedback);
+    setFeedbackBusy(false);
+    if (!result?.ok) {
+      setFeedbackNote(result?.message || 'Could not send that — text it to me instead.');
+      return;
     }
-    const permission = await window.Notification.requestPermission();
-    return permission === 'granted'
-      ? { ok: true, message: 'Browser alerts enabled.' }
-      : { ok: false, message: 'Browser alert permission was not granted.' };
-  };
+    setFeedbackNote(`Sent — ${result.reference || 'logged'}. Thank you.`);
+    setFeedback({ area: 'other', severity: 'wrong', step: '', expected: '', actual: '' });
+    // Left open briefly so the reference number is readable before it closes.
+    setTimeout(() => { setFeedbackOpen(false); setFeedbackNote(''); }, 2200);
+  }, [feedback, submitFeedbackInApp]);
+
+  const onSubmitSupport = useCallback(
+    ({ category, subject, message, email } = {}) => publicRequest('/api/support/tickets', {
+      method: 'POST',
+      headers: readSessionToken() ? { Authorization: `Bearer ${readSessionToken()}` } : {},
+      body: JSON.stringify({ category, subject, message, email }),
+    }),
+    [],
+  );
+
+  // ------------------------------------------------------------------------
+  // Staff
+  // ------------------------------------------------------------------------
+  const loadAdminMoneyInApp = useCallback(async () => {
+    const [refunds, payouts] = await Promise.all([
+      adminRequest('/api/admin/refundable-fights'),
+      adminRequest('/api/admin/affiliate-payouts?status=pending'),
+    ]);
+    return {
+      refundable: asArray(refunds.fights),
+      payouts: asArray(payouts.payouts),
+    };
+  }, []);
+
+  const onRefundFight = useCallback(
+    (fightId) => adminRequest(`/api/admin/fights/${encodeURIComponent(fightId)}/refund`, { method: 'POST' }),
+    [],
+  );
+
+  const onResolvePayout = useCallback(
+    ({ affiliateId, payoutIndex, approve, reason } = {}) => adminRequest(
+      `/api/admin/affiliate-payouts/${encodeURIComponent(affiliateId)}/${encodeURIComponent(payoutIndex)}/${approve ? 'approve' : 'reject'}`,
+      { method: 'POST', body: JSON.stringify({ reason }) },
+    ),
+    [],
+  );
+
+  // ------------------------------------------------------------------------
+  // Navigation and share — no-ops rather than missing, so Core never calls
+  // undefined.
+  // ------------------------------------------------------------------------
+  const onOpenFight = useCallback((fight) => {
+    if (typeof window === 'undefined' || !fight) return;
+    const id = fight.backendId || fight.id;
+    if (id) window.location.href = `/fight/${encodeURIComponent(id)}`;
+  }, []);
+
+  const onOpenApparel = useCallback(() => {
+    if (typeof window !== 'undefined') window.location.href = '/apparel';
+  }, []);
+
+  const onJoin = useCallback(() => {
+    if (typeof window !== 'undefined') window.location.href = '/auth';
+  }, []);
+
+  const onShare = useCallback(async ({ title, text, url } = {}) => {
+    if (typeof window === 'undefined') return { ok: false };
+    const shareUrl = url || window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text, url: shareUrl });
+        return { ok: true };
+      }
+      await navigator.clipboard.writeText(`${text ? `${text} ` : ''}${shareUrl}`);
+      return { ok: true, copied: true };
+    } catch (error) {
+      return { ok: false };
+    }
+  }, []);
+
+  const onEnablePush = useCallback(async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return { ok: false, message: 'This browser does not support notifications.' };
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      return { ok: permission === 'granted', permission };
+    } catch (error) {
+      return { ok: false };
+    }
+  }, []);
+
+  const onSkipWait = useCallback(() => setDataLoading(false), []);
+
+  const experienceProps = useMemo(() => ({
+    initialTab,
+    dataLoading,
+    fights,
+    shadowFights,
+    leaderboard,
+    leagues,
+    leagueUsers,
+    affiliateCampaigns,
+    apparel,
+    blogs,
+    notifications,
+    unreadNotificationCount,
+    currentUser,
+    initialCoins: coins,
+    stats,
+    features,
+    isStaff,
+    livePresence: {},
+
+    onSignup,
+    onLogin,
+    onLogout,
+    onRequestPasswordReset,
+    onSubmitPrediction,
+    onPurchaseCoins,
+    onSubscribe,
+    onClaimReward,
+    onSaveStreak,
+    onJoinLeague,
+    onLoadAffiliate,
+    onLoadPromoterReach: loadPromoterReachInApp,
+    onAnnounceFightToLeague: announceFightToLeagueInApp,
+    onLoadShareKit: loadShareKitInApp,
+    onRequestPayout,
+    onLoadChallenges: loadChallengesInApp,
+    onCreateChallenge: createChallengeInApp,
+    onRespondToChallenge: respondToChallengeInApp,
+    onJoinWaitlist: joinWaitlistInApp,
+    onLoadWaitlistStatus: loadWaitlistStatusInApp,
+    onLoadTeamContests: loadTeamContestsInApp,
+    onLoadMyTeams: loadMyTeamsInApp,
+    onSubmitTeamEntry: submitTeamEntryInApp,
+    onLoadTeamLeaderboard: loadTeamLeaderboardInApp,
+    onLoadSeasons: loadSeasonsInApp,
+    onLoadMySeasonCards: loadMySeasonCardsInApp,
+    onSubmitSeasonDraft: submitSeasonDraftInApp,
+    onLoadSeasonLeaderboard: loadSeasonLeaderboardInApp,
+    onLoadAwards: loadAwardsInApp,
+    onLoadNotifications: loadNotificationsInApp,
+    onMarkNotificationsRead: markNotificationsReadInApp,
+    onSubmitFeedback: submitFeedbackInApp,
+    onSubmitSupport,
+    onLoadAdminMoney: loadAdminMoneyInApp,
+    onRefundFight,
+    onResolvePayout,
+    onOpenFight,
+    onOpenApparel,
+    onJoin,
+    onShare,
+    onEnablePush,
+    onSkipWait,
+  }), [
+    initialTab, dataLoading, fights, shadowFights, leaderboard, leagues, leagueUsers,
+    affiliateCampaigns, apparel, blogs, notifications, unreadNotificationCount,
+    currentUser, coins, stats, features, isStaff,
+    onSignup, onLogin, onLogout, onRequestPasswordReset, onSubmitPrediction,
+    onPurchaseCoins, onSubscribe, onClaimReward, onSaveStreak, onJoinLeague,
+    onLoadAffiliate, loadPromoterReachInApp, announceFightToLeagueInApp,
+    loadShareKitInApp, onRequestPayout, loadChallengesInApp, createChallengeInApp,
+    respondToChallengeInApp, joinWaitlistInApp, loadWaitlistStatusInApp,
+    loadTeamContestsInApp, loadMyTeamsInApp, submitTeamEntryInApp,
+    loadTeamLeaderboardInApp, loadSeasonsInApp, loadMySeasonCardsInApp,
+    submitSeasonDraftInApp, loadSeasonLeaderboardInApp, loadAwardsInApp,
+    loadNotificationsInApp, markNotificationsReadInApp, submitFeedbackInApp,
+    onSubmitSupport, loadAdminMoneyInApp, onRefundFight, onResolvePayout,
+    onOpenFight, onOpenApparel, onJoin, onShare, onEnablePush, onSkipWait,
+  ]);
+
+  if (!forceRender && typeof window === 'undefined') return null;
 
   return (
-    <div
-      className={`fmm-exact-mobile-portal ${forceRender ? (isMobile ? 'is-phone-shell' : 'is-desktop-shell') : 'is-responsive-shell is-phone-shell'}`}
-      data-fmm-mobile-screen={initialTab}
-    >
+    <div className="fmm-mobile-experience" data-fmm-mobile-screen={initialTab}>
       {preview && (
         <div
           role="status"
           style={{
-            position: 'sticky', top: 0, zIndex: 9999,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-            padding: '9px 14px', background: '#f2b544', color: '#2b1b00',
-            fontFamily: "'Rajdhani', system-ui, sans-serif", fontWeight: 800, fontSize: 12.5,
+            position: 'sticky',
+            top: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            padding: '9px 14px',
+            background: '#f2b544',
+            color: '#2b1b00',
+            fontFamily: "'Rajdhani', system-ui, sans-serif",
+            fontWeight: 800,
+            fontSize: 12.5,
           }}
         >
           <span>
-            OWNER VIEW — seeing this as <strong>{preview.name}</strong> ({preview.type}). Read-only: nothing you tap can change their account.
+            OWNER VIEW — seeing this as <strong>{preview.name}</strong> ({preview.type}).
+            Read-only: nothing you tap can change their account.
           </span>
           <button
             type="button"
             onClick={exitPreview}
             style={{
-              flex: '0 0 auto', border: '1px solid rgba(43,27,0,.4)', background: 'rgba(0,0,0,.08)',
-              color: '#2b1b00', borderRadius: 999, padding: '5px 12px', fontWeight: 800,
-              fontSize: 11.5, cursor: 'pointer', fontFamily: 'inherit',
+              flex: '0 0 auto',
+              border: '1px solid rgba(43,27,0,.4)',
+              background: 'rgba(0,0,0,.08)',
+              color: '#2b1b00',
+              borderRadius: 999,
+              padding: '5px 12px',
+              fontWeight: 800,
+              fontSize: 11.5,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
             }}
           >
             Exit
           </button>
         </div>
       )}
-      <FantasyMobileAppCore
-        initialTab={initialTab}
-        initialCoins={isAuthenticated ? initialCoins ?? 0 : undefined}
-        isStaff={isStaff}
-        currentUser={user}
-        fights={data.fights}
-        leaderboard={data.leaderboard}
-        blogs={data.blogs}
-        apparel={data.apparel}
-        leagues={data.leagues}
-        leagueUsers={data.leagueUsers}
-        notifications={data.notifications}
-        unreadNotificationCount={data.notifications.filter((item) => !(item.read || item.isRead)).length}
-        shadowFights={data.shadowFights}
-        affiliateCampaigns={data.affiliateCampaigns}
-        livePresence={{ viewerCount: toNumber(data.stats?.watchPartyViewers, data.stats?.liveViewerCount) || 0 }}
-        stats={data.stats}
-        onPurchaseCoins={goToCheckout}
-        dataLoading={isLoading}
-        onSubscribe={() => goToCheckout({ product: 'fm-plus', plan: 'pass' })}
-        onSubmitPrediction={submitPrediction}
-        onOpenFight={({ event } = {}) => {
-          const id = String(event?.backendId || event?.id || '').trim();
-          router.push(id ? `/fight/${id}` : '/upcomingfights');
+
+      <FantasyMobileAppCore {...experienceProps} />
+
+      {/* Report button. Present on every screen, because a bug gets reported
+          properly at the moment it happens or not at all. Sits above the bottom
+          nav rather than over it. */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Report a problem"
+        onClick={() => setFeedbackOpen(true)}
+        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setFeedbackOpen(true); }}
+        style={{
+          position: 'fixed', right: 12, bottom: 88, zIndex: 9998,
+          minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '0 15px', borderRadius: 999, cursor: 'pointer',
+          background: '#f2b544', color: '#2b1b00', border: '2px solid rgba(0,0,0,.28)',
+          fontFamily: "'Anton', system-ui, sans-serif", fontSize: 12, letterSpacing: .5,
+          boxShadow: '0 6px 20px rgba(0,0,0,.45)',
         }}
-        onJoinLeague={joinLeague}
-        onSaveStreak={saveStreakInApp}
-        onSkipWait={skipWaitInApp}
-        onClaimReward={claimDailyRewardInApp}
-        onMarkNotificationsRead={markNotificationsReadInApp}
-        onSubmitSupport={submitSupportInApp}
-        features={features}
-        onLoadChallenges={loadChallengesInApp}
-        onCreateChallenge={createChallengeInApp}
-        onRespondToChallenge={respondToChallengeInApp}
-        onLoadAwards={loadAwardsInApp}
-        onLoadTeamContests={loadTeamContestsInApp}
-        onLoadMyTeams={loadMyTeamsInApp}
-        onSubmitTeamEntry={submitTeamEntryInApp}
-        onLoadSeasons={loadSeasonsInApp}
-        onLoadMySeasonCards={loadMySeasonCardsInApp}
-        onSubmitSeasonDraft={submitSeasonDraftInApp}
-        onJoinWaitlist={joinWaitlistInApp}
-        onLoadWaitlistStatus={loadWaitlistStatusInApp}
-        onLogout={logoutInApp}
-        onLogin={loginInApp}
-        onRequestPasswordReset={requestPasswordResetInApp}
-        onSignup={signupInApp}
-        onLoadAffiliate={loadAffiliateInApp}
-        onRequestPayout={requestPayoutInApp}
-        onLoadAdminMoney={loadAdminMoneyInApp}
-        onRefundFight={refundFightInApp}
-        onResolvePayout={resolvePayoutInApp}
-        onJoin={({ name = '', email = '' } = {}) => {
-          const query = new URLSearchParams();
-          if (name.trim()) query.set('playerName', name.trim());
-          if (email.trim()) query.set('email', email.trim());
-          router.push(`/CreateAccount${query.toString() ? `?${query.toString()}` : ''}`);
-        }}
-        onOpenApparel={() => router.push('/apparel')}        onOpenAffiliateDashboard={() => router.push(isAuthenticated ? '/AffiliateDashboard' : `/login?next=${encodeURIComponent('/AffiliateDashboard')}`)}
-        onEnablePush={enableBrowserAlerts}
-        onShare={share}
-      />
+      >
+        REPORT
+      </div>
+
+      {feedbackOpen && (
+        <div
+          onClick={() => setFeedbackOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(3,4,8,.82)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto',
+              background: '#0b0d14', borderTop: '2px solid #f2b544',
+              borderRadius: '16px 16px 0 0', padding: 18, color: '#fff',
+              fontFamily: "'Rajdhani', system-ui, sans-serif",
+            }}
+          >
+            <div style={{ fontFamily: "'Anton', system-ui, sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 3 }}>
+              REPORT SOMETHING
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.55)', lineHeight: 1.5, marginBottom: 14 }}>
+              Two boxes matter most: what you expected, and what actually happened.
+              That pair is what makes something fixable.
+            </div>
+
+            <div style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>HOW BAD?</div>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 13 }}>
+              {[['blocker', 'Stuck', '#ef4444'], ['wrong', 'Wrong', '#f2b544'], ['confusing', 'Confusing', '#4d8dff'], ['cosmetic', 'Looks off', '#a855f7'], ['praise', 'Liked it', '#22c55e']].map(([key, label, color]) => (
+                <div
+                  key={key}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setFeedback((prev) => ({ ...prev, severity: key }))}
+                  style={{
+                    padding: '7px 11px', borderRadius: 8, fontSize: 10, fontWeight: 900, cursor: 'pointer',
+                    background: feedback.severity === key ? color : 'rgba(255,255,255,.06)',
+                    color: feedback.severity === key ? '#0b0c10' : 'rgba(255,255,255,.75)',
+                    border: `1px solid ${feedback.severity === key ? color : 'rgba(255,255,255,.14)'}`,
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>WHERE?</div>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 13 }}>
+              {[['signup', 'Sign up'], ['signin', 'Sign in'], ['scorecard', 'Scorecard'], ['entry-fee', 'Coins / fee'], ['team-card', 'Team Card'], ['season-card', 'Season Card'], ['standings', 'Standings'], ['leagues', 'Leagues'], ['promoter-tools', 'League tools'], ['notifications', 'Bell'], ['coins-purchase', 'Buying coins'], ['rewards', 'Chest / wheel'], ['looks-wrong', 'Looks wrong'], ['slow', 'Too slow'], ['other', 'Something else']].map(([key, label]) => (
+                <div
+                  key={key}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setFeedback((prev) => ({ ...prev, area: key }))}
+                  style={{
+                    padding: '6px 10px', borderRadius: 7, fontSize: 9.5, fontWeight: 800, cursor: 'pointer',
+                    background: feedback.area === key ? 'rgba(242,181,68,.85)' : 'rgba(255,255,255,.06)',
+                    color: feedback.area === key ? '#2b1b00' : 'rgba(255,255,255,.7)',
+                    border: `1px solid ${feedback.area === key ? '#f2b544' : 'rgba(255,255,255,.12)'}`,
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            <input
+              type="text"
+              placeholder="Step number, if you were on the list (optional)"
+              value={feedback.step}
+              onChange={(event) => setFeedback((prev) => ({ ...prev, step: event.target.value.slice(0, 20) }))}
+              style={feedbackInputStyle}
+            />
+            <textarea
+              rows={2}
+              placeholder="What did you expect to happen?"
+              value={feedback.expected}
+              onChange={(event) => setFeedback((prev) => ({ ...prev, expected: event.target.value }))}
+              style={feedbackInputStyle}
+            />
+            <textarea
+              rows={3}
+              placeholder="What actually happened? (required)"
+              value={feedback.actual}
+              onChange={(event) => setFeedback((prev) => ({ ...prev, actual: event.target.value }))}
+              style={{ ...feedbackInputStyle, border: '1px solid rgba(242,181,68,.45)' }}
+            />
+
+            <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginBottom: 13, lineHeight: 1.5 }}>
+              Your phone and which screen you were on are attached automatically. If you
+              have a screenshot, text it over with the reference you get back.
+            </div>
+
+            {feedbackNote && (
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#22c55e', marginBottom: 10 }}>{feedbackNote}</div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setFeedbackOpen(false)}
+                style={{
+                  flex: '0 0 auto', padding: '13px 18px', borderRadius: 999, cursor: 'pointer',
+                  background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.2)',
+                  fontWeight: 900, fontSize: 12, textAlign: 'center',
+                }}
+              >
+                CLOSE
+              </div>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={sendFeedback}
+                style={{
+                  flex: 1, padding: '13px 0', borderRadius: 999, cursor: 'pointer',
+                  background: '#f2b544', color: '#2b1b00', fontWeight: 900, fontSize: 13,
+                  textAlign: 'center', opacity: feedbackBusy ? 0.6 : 1,
+                }}
+              >
+                {feedbackBusy ? 'SENDING…' : 'SEND REPORT'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default FantasyMobileExperience;

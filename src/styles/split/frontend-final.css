@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Fantasy MMAdness — frontend final integration layer
+   Loaded last. It normalizes readability, async states, account surfaces,
+   editorial pages, affiliate standings, and consolidated administration UX.
+   ========================================================================== */
+
+:root {
+  --ff-panel: rgba(10, 16, 24, 0.92);
+  --ff-panel-strong: rgba(13, 20, 29, 0.98);
+  --ff-panel-soft: rgba(255, 255, 255, 0.045);
+  --ff-border: rgba(255, 255, 255, 0.12);
+  --ff-border-strong: rgba(255, 255, 255, 0.2);
+  --ff-text: #f5f7fb;
+  --ff-muted: rgba(245, 247, 251, 0.66);
+  --ff-red: #df111b;
+  --ff-red-bright: #ff2a35;
+  --ff-blue: #168fe6;
+  --ff-green: #35d45d;
+  --ff-gold: #f7b51b;
+  --ff-display: var(--fmm-font-display, 'UFCSans', 'Arial Narrow', Impact, sans-serif);
+  --ff-body: var(--fmm-font-body, 'UfcSansRegular', Inter, Arial, sans-serif);
+}
+
+@keyframes ffSpin { to { transform: rotate(360deg); } }
+
+@keyframes ffSkeleton { to { opacity: 0.36; } }
+
+.xp-faq-intro > * { position:relative; z-index:1; }
+
+.admin-create-fight-page > * { position:relative; z-index:1; }
+@keyframes xpSpin{to{transform:rotate(360deg)}}

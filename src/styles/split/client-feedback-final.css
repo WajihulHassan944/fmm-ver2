@@ -1,0 +1,19 @@
+/* ========================================================================
+   Client feedback completion pass
+   Player command center, nested fight views, profile/settings, rewards
+   ======================================================================== */
+
+:root {
+  --player-red: #ed1f31;
+  --player-red-dark: #970711;
+  --player-blue: #168fe6;
+  --player-gold: #ffbd43;
+  --player-green: #48df75;
+  --player-panel: rgba(8, 13, 20, 0.94);
+  --player-panel-soft: rgba(13, 20, 29, 0.86);
+  --player-border: rgba(255, 255, 255, 0.11);
+  --player-muted: rgba(255, 255, 255, 0.62);
+  --player-shadow: 0 30px 75px rgba(0, 0, 0, 0.42);
+}
+
+.player-command-fight-night-strip > * { position: relative; z-index: 1; }

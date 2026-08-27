@@ -126,3 +126,177 @@ html body .fmm-app-route-loading img {
   object-fit: contain !important;
   object-position: center center !important;
 }
+
+/* --------------------------------------------------------------------------
+   FIGHTER PORTRAITS — show the face, not the chest.
+
+   object-fit: cover centres by default, which crops the top off a standing
+   fighter and cut the heads out of the round frames. Faces sit in the upper
+   third of these images, so the crop is anchored near the top.
+   -------------------------------------------------------------------------- */
+html body .fmm-unified-featured-fight img[id^="detail-a-"],
+html body .fmm-unified-featured-fight img[id^="detail-b-"],
+html body img[id^="story-"],
+html body img[id^="fd-"] {
+  object-position: center 22% !important;
+}
+
+/* The left/right cut-outs on the featured card are full-body art — anchor them
+   to the bottom so the figure stands on the card edge and the head stays in. */
+html body .fmm-unified-featured-fighter img {
+  object-fit: contain !important;
+  object-position: bottom center !important;
+}
+
+/* --------------------------------------------------------------------------
+   DISCIPLINE CIRCLE CROSS-FADE
+   The React key changes every 4s, remounting the frame; this fades the new
+   fighter in so the header does not blink.
+   -------------------------------------------------------------------------- */
+@keyframes fmmSportCycleIn {
+  from { opacity: 0; transform: scale(1.06); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+html body .fmm-sport-cycle-frame {
+  animation: fmmSportCycleIn .55s ease-out both;
+}
+
+/* Respect the OS setting — a user who asked for less motion gets a plain cut. */
+@media (prefers-reduced-motion: reduce) {
+  html body .fmm-sport-cycle-frame { animation: none !important; }
+}
+
+/* --------------------------------------------------------------------------
+   BUTTON GLAZE + PRESS LIGHT
+
+   Applied by attribute and role rather than by chasing every inline-styled
+   button in the app: anything that is semantically a button gets the treatment,
+   including the React elements built with role="button".
+
+   The glaze is a top-down highlight laid over whatever background the button
+   already has, so gradients and brand colours are preserved — it lightens, it
+   does not repaint.
+   -------------------------------------------------------------------------- */
+html body button,
+html body [role="button"],
+html body .theme-btn,
+html body .btn-grad {
+  position: relative;
+  /* A press must feel instant; anything slower than this reads as lag. */
+  transition: filter .12s ease, transform .08s ease, box-shadow .16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The glaze. inset:0 with the parent's own radius, so pills stay pills. */
+html body button::after,
+html body [role="button"]::after,
+html body .theme-btn::after,
+html body .btn-grad::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.26) 0%, rgba(255,255,255,.08) 42%, rgba(255,255,255,0) 52%),
+    linear-gradient(180deg, rgba(0,0,0,0) 72%, rgba(0,0,0,.12) 100%);
+  opacity: .9;
+  transition: opacity .16s ease;
+}
+
+/* Lights up on press. filter brightens whatever colour the button already is,
+   so one rule works on the gold, the red gradient and the outlined variants. */
+html body button:active,
+html body [role="button"]:active,
+html body .theme-btn:active,
+html body .btn-grad:active {
+  filter: brightness(1.35) saturate(1.1);
+  transform: translateY(1px) scale(.985);
+  box-shadow: 0 0 0 2px rgba(242,181,68,.55), 0 0 18px rgba(242,181,68,.45);
+}
+
+html body button:active::after,
+html body [role="button"]:active::after,
+html body .theme-btn:active::after,
+html body .btn-grad:active::after {
+  /* Highlight strengthens under the thumb — reads as the surface catching light. */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.16) 46%, rgba(255,255,255,.04) 60%),
+    linear-gradient(180deg, rgba(0,0,0,0) 70%, rgba(0,0,0,.16) 100%);
+  opacity: 1;
+}
+
+/* Keyboard focus stays visible and themed, never the browser default. */
+html body button:focus-visible,
+html body [role="button"]:focus-visible {
+  outline: 2px solid #f2b544;
+  outline-offset: 2px;
+}
+
+/* Opt-outs: things that are role="button" for accessibility but are not
+   buttons visually — cards, list rows, tiles, image tiles, nav items. A glaze
+   on a photograph looks like a bug. */
+html body [role="button"][data-no-glaze]::after,
+html body .fmm-prototype-bottombar [role="button"]::after,
+html body .fmm-app-hero [role="button"]::after,
+html body [role="button"][class*="card"]::after,
+html body [role="button"][class*="tile"]::after {
+  display: none !important;
+}
+
+html body .fmm-prototype-bottombar [role="button"]:active,
+html body [role="button"][data-no-glaze]:active {
+  filter: brightness(1.2);
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body button:active,
+  html body [role="button"]:active {
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   NEWS BAR
+
+   The activity ticker used to sit part-way down the home scroll, so it was gone
+   the moment you scrolled. Stuck to the bottom of the scrolling area it reads as
+   a news bar — results, leaderboard moves and pots stay in view.
+
+   Sticky rather than fixed: it stays inside the phone frame on desktop and
+   cannot end up floating over the whole browser window.
+   -------------------------------------------------------------------------- */
+html body .fmm-news-bar {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 40 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+  /* Opaque behind the marquee — content scrolling underneath must not show through. */
+  background: #05060a !important;
+  padding: 7px 0 !important;
+  box-shadow: 0 -8px 22px rgba(0,0,0,.55) !important;
+}
+
+html body .fmm-news-bar span {
+  font-size: 10.5px !important;
+}
+
+/* Leaves room so the last card is not hidden behind the bar. */
+html body .fmm-prototype-scroll {
+  scroll-padding-bottom: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* A permanently moving bar is the worst case for motion sensitivity — hold it
+     still and let it scroll horizontally by hand instead. */
+  html body .fmm-news-bar > div[style*="marquee"] {
+    animation: none !important;
+    overflow-x: auto !important;
+  }
+}

@@ -1,4 +1,4 @@
-import "@/styles/globals.css";
+import "@/styles/split/globals.css";
 import "@/styles/upcomingfightsuser.css";
 import "@/styles/pastfights.css";
 import "@/styles/addtokenstowallet.css";
@@ -46,10 +46,10 @@ import "@/styles/FighterTracker.css";
 import "@/styles/referralLeaderboard.css";
 import "@/styles/homeleaderboardtwo.css";
 import "@/styles/mockpredictionsgame.css";
-import "@/styles/new-theme.css";
+import "@/styles/split/new-theme.css";
 import "@/styles/route-experience.css";
 import "@/styles/admin-experience.css";
-import "@/styles/frontend-final.css";
+import "@/styles/split/frontend-final.css";
 import "@/styles/design-port.css";
 import "@/styles/final-route-polish.css";
 import "@/styles/admin-targeted-finish.css";
@@ -57,7 +57,7 @@ import "@/styles/final-campaign-community-pass.css";
 import "@/styles/final-fantasy-readability-mock.css";
 import "@/styles/premium-backgrounds-phase-two.css";
 import "@/styles/user-dashboard-premium-final.css";
-import "@/styles/client-feedback-final.css";
+import "@/styles/split/client-feedback-final.css";
 import "@/styles/targeted-dashboard-checkout-logo-fix.css";
 import "@/styles/pro-wrestling-client-corrections.css";
 import "@/styles/adminswarm.css";
@@ -542,6 +542,13 @@ function AppContent({ children }) {
             <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />
             <link rel="stylesheet" href="/legacy-css/experience-theme.css" />
             <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />
+            {/* Legacy halves of the four split sheets — 492 KB the app route no
+                longer parses. Ordered as they were bundled, so the cascade
+                between them is preserved. */}
+            <link rel="stylesheet" href="/legacy-css/globals.css" />
+            <link rel="stylesheet" href="/legacy-css/frontend-final.css" />
+            <link rel="stylesheet" href="/legacy-css/new-theme.css" />
+            <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />
           </>
         )}
 

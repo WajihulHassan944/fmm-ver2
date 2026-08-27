@@ -48,7 +48,9 @@ const SpinWheel = () => {
       // Scoped check: the old call downloaded every device row (with player
       // emails) just to test this one device.
       const response = await fetch(
-        `https://fantasymmadness-game-server-three.vercel.app/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}`
+        // Email included so a player who already spun on another phone is not
+        // shown a wheel that will refuse them.
+        `https://fantasymmadness-game-server-three.vercel.app/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`
       );
       const data = await response.json();
       const isMatched = Boolean(data?.alreadySpun);

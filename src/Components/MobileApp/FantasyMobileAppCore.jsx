@@ -13,11 +13,14 @@ const EVENT_POSTER_FILES = [
   'event-poster-6.webp',
 ];
 const EVENT_POSTER_COUNT = EVENT_POSTER_FILES.length;
+// The real accounts. TikTok and Facebook were guessed handles that 404'd —
+// the Facebook one is a share link, which is what Facebook issues for a page
+// without a vanity URL, so it is used verbatim rather than "tidied".
 const SOCIAL_PROFILE_URLS = Object.freeze({
   X: 'https://x.com/FMmadness2024',
   Instagram: 'https://www.instagram.com/fantasymmadness',
-  Facebook: 'https://www.facebook.com/fantasymmadness',
-  TikTok: 'https://www.tiktok.com/@fantasymmadness',
+  Facebook: 'https://www.facebook.com/share/1DZ9RqkMJd/',
+  TikTok: 'https://www.tiktok.com/@fantasy.mmadness',
 });
 const DESIGN_WIDTH = designTokens.viewport.designWidth;
 
@@ -130,6 +133,25 @@ const getMediaCandidate = (value) => {
     value.src,
     value.path,
   );
+};
+
+// Turn a stored Cloudinary URL into a transparent-background version.
+// Controlled by env so the transform can be changed, or the whole thing turned
+// off, without a deploy.
+const CUTOUT_TRANSFORM = String(process.env.NEXT_PUBLIC_CLOUDINARY_CUTOUT_TRANSFORM || 'e_background_removal').trim();
+const CUTOUTS_ENABLED = String(process.env.NEXT_PUBLIC_FIGHTER_CUTOUTS || 'true').toLowerCase() !== 'false';
+
+const cloudinaryCutout = (url = '') => {
+  const value = String(url || '').trim();
+  if (!CUTOUTS_ENABLED || !CUTOUT_TRANSFORM) return '';
+  // Only Cloudinary delivery URLs, and never one that already carries the
+  // transform (double-applying it wastes a credit and can fail).
+  if (!/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(value)) return '';
+  if (value.includes(CUTOUT_TRANSFORM)) return value;
+  // PNG so the alpha channel survives — a JPEG cutout would come back white.
+  return value
+    .replace('/image/upload/', `/image/upload/${CUTOUT_TRANSFORM}/f_png/`)
+    .replace(/\.(jpe?g|webp|avif)(\?|$)/i, '.png$2');
 };
 
 const resolveLiveMedia = (...values) => {
@@ -248,6 +270,11 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
     featuredFightFighterAImage: resolveLiveMedia(fight.featuredFightFighterAImage),
     featuredFightFighterBImage: resolveLiveMedia(fight.featuredFightFighterBImage),
+    // Transparent-background versions, derived from the same Cloudinary URLs.
+    // Screens use these as src and the plain ones as fallbackSrc, so a missing
+    // transform degrades to the original photo instead of a broken image.
+    fighterACutout: cloudinaryCutout(resolveLiveMedia(fight.featuredFightFighterAImage)),
+    fighterBCutout: cloudinaryCutout(resolveLiveMedia(fight.featuredFightFighterBImage)),
     division: cleanText(fight.division, fight.weightClass),
     sport,
     tag: cleanText(fight.eventName, fight.matchName, fight.promotion, sportLabel[sport]),
@@ -453,6 +480,19 @@ class FantasyMobileAppCore extends React.Component {
     // A pick is { fighterName, calledCategory, calledValue } — the called number
     // is what keeps this the platform's game rather than generic fantasy sports.
     fantasyDraft: {},
+    // Advances every 4s; drives the cross-fade in the discipline circles.
+    sportCycle: 0,
+    notifFeed: [],
+    // Promoter distribution panel. Only loaded for a signed-in league account.
+    promoterReach: null,
+    // Contest standings, loaded per contest when the player opens them.
+    standings: null,
+    // Feedback sheet. Reachable from every screen, because a bug is reported
+    // properly at the moment it happens or not at all.
+    feedback: { area: 'other', severity: 'wrong', step: '', expected: '', actual: '' },
+    feedbackBusy: false,
+    shareKit: null,
+    promoterBusy: false,
     seasonMeta: { slots: [], callCategories: {}, callBonusCap: 100, slotMax: 100 },
     mySeasonCards: [],
     seasonBusy: false,
@@ -508,6 +548,31 @@ class FantasyMobileAppCore extends React.Component {
   };
 
   componentDidMount() {
+    // One-shot audio unlock on the first gesture anywhere in the app. Registered
+    // as a capture-phase listener so it runs before the button's own handler and
+    // that first tap makes a sound too.
+    if (typeof window !== 'undefined') {
+      this._audioUnlock = () => {
+        this.unlockAudio();
+        ['touchstart', 'pointerdown', 'click'].forEach((evt) =>
+          window.removeEventListener(evt, this._audioUnlock, true));
+      };
+
+      // One listener gives every button a press sound, instead of threading
+      // playTap() through several hundred call sites. Capture phase so it fires
+      // before the button's own handler navigates away.
+      this._pressSound = (nativeEvent) => {
+        const target = nativeEvent.target;
+        if (!target || typeof target.closest !== 'function') return;
+        const pressable = target.closest('button,[role="button"],.theme-btn,.btn-grad');
+        if (!pressable || pressable.getAttribute('aria-disabled') === 'true' || pressable.disabled) return;
+        this.playTap();
+      };
+      window.addEventListener('pointerdown', this._pressSound, { capture: true, passive: true });
+      ['touchstart', 'pointerdown', 'click'].forEach((evt) =>
+        window.addEventListener(evt, this._audioUnlock, { capture: true, passive: true }));
+    }
+
     clearInterval(this._communityInterval); clearInterval(this._sportPhotoInterval); clearInterval(this._streakInterval); clearInterval(this._shadowInterval); clearInterval(this._friendInterval); clearInterval(this._watchInterval); clearInterval(this._filledPollInterval); clearInterval(this._coinTween);
     this._xpTimer = setTimeout(() => this.setState({ xpMounted: true }), 200);
     this._welcomeTimer = setTimeout(() => this.setState({ showWelcomePulse: false }), 6000);
@@ -538,6 +603,14 @@ class FantasyMobileAppCore extends React.Component {
     this.loadAwards();
     if (this.props.features?.seasonCards?.enabled) this.loadSeasons();
     if (this.props.features?.teamCards?.enabled) this.loadTeamContests();
+    this.startSportCycle();
+    this.loadNotificationFeed();
+    // 60s: fast enough that a published fight appears while the app is open,
+    // slow enough not to be chatty.
+    this._notifPoll = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      this.loadNotificationFeed();
+    }, 60000);
   }
 
   componentDidUpdate(previousProps, previousState) {
@@ -625,6 +698,39 @@ class FantasyMobileAppCore extends React.Component {
     clearTimeout(this._confettiTimeout);
     this._confettiTimeout = setTimeout(() => this.setState({ confetti: null }), 1600);
   };
+
+  // iOS starts every AudioContext suspended and only lets a genuine user gesture
+  // resume it. Without this the first tap is silent, and on some versions every
+  // later tap is too.
+  unlockAudio = () => {
+    try {
+      const ctx = this.getCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      // A zero-gain blip is what actually flips iOS out of the suspended state.
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.01);
+    } catch (e) { /* no audio available */ }
+  };
+
+  // Short, dry click for ordinary buttons — playBell is a 1.1s chime and too
+  // much for a plain tap.
+  playTap() {
+    if (!this.state.settings.sound) return;
+    try {
+      const ctx = this.getCtx(); const now = ctx.currentTime;
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(280, now + 0.07);
+      gain.gain.setValueAtTime(0.13, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.1);
+    } catch (e) {}
+  }
 
   getCtx() {
     if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -721,6 +827,9 @@ class FantasyMobileAppCore extends React.Component {
     if (tab !== 'watch' && this.state.activeTab === 'watch') this.stopWatchTicker();
     // Staff opening Settings pulls the live refund/payout queues.
     if (tab === 'settings' && this.props.isStaff) this.loadAdminMoney();
+    // Promoter tools need an affiliate session, so they load on demand rather
+    // than firing a guaranteed 401 on every app start.
+    if (tab === 'leagues' && !this.state.promoterReach) this.loadPromoterReach();
     this.setState({ activeTab: tab, modal: null });
   };
   startWatchTicker() {
@@ -765,7 +874,136 @@ class FantasyMobileAppCore extends React.Component {
       return { matchSeconds: secs, triggeredMoments: justHit ? [...s.triggeredMoments, justHit[0]] : s.triggeredMoments };
     });
   }
+  setFeedbackField = (field, value) => this.setState(s => ({ feedback: { ...s.feedback, [field]: value } }));
+
+  submitFeedback = async () => {
+    const f = this.state.feedback;
+    if (!String(f.actual || '').trim()) { this.showToast('Tell me what happened'); return; }
+    this.safeSetState({ feedbackBusy: true });
+    const result = await this.props.onSubmitFeedback(f);
+    this.safeSetState({ feedbackBusy: false });
+    if (!result?.ok) { this.showToast(result?.message || 'Could not send that'); return; }
+    this.playTap();
+    this.safeSetState({
+      modal: null,
+      feedback: { area: 'other', severity: 'wrong', step: '', expected: '', actual: '' },
+    });
+    this.showToast('Sent — ' + (result.reference || 'logged') + '. Thank you.');
+  };
+
+  openTeamStandings = async (contest) => {
+    this.playTap();
+    this.safeSetState({ standings: { loading: true, title: contest.contestName || contest.name || 'Standings' } });
+    this.openModal('standings');
+    const result = await this.props.onLoadTeamLeaderboard(contest.contestId || contest.id);
+    this.safeSetState({
+      standings: {
+        title: contest.contestName || contest.name || 'Standings',
+        subtitle: result.live ? 'Live — updates as each bout is scored' : 'Final',
+        rows: result.leaderboard || [],
+        unit: 'PTS',
+      },
+    });
+  };
+
+  openSeasonStandings = async (card) => {
+    this.playTap();
+    this.safeSetState({ standings: { loading: true, title: card.seasonName || 'Season standings' } });
+    this.openModal('standings');
+    const result = await this.props.onLoadSeasonLeaderboard(card.seasonId);
+    this.safeSetState({
+      standings: {
+        title: card.seasonName || 'Season standings',
+        // Mid-season the ranking is on raw output, because the out-of-100
+        // conversion is not final until every slot has been scored. Saying so
+        // is better than publishing a number that later moves.
+        subtitle: result.provisional ? 'Provisional — ranked on raw points until the season settles' : 'Final',
+        rows: result.leaderboard || [],
+        unit: result.scale === 'normalized' ? '/500' : 'PTS',
+      },
+    });
+  };
+
+  loadPromoterReach = async () => {
+    if (typeof this.props.onLoadPromoterReach !== 'function') return;
+    const result = await this.props.onLoadPromoterReach();
+    if (result?.ok) this.safeSetState({ promoterReach: result });
+  };
+
+  announceToLeague = async (fightId) => {
+    if (!fightId) { this.showToast('Pick which fight to announce'); return; }
+    this.safeSetState({ promoterBusy: true });
+    const result = await this.props.onAnnounceFightToLeague({ fightId });
+    this.safeSetState({ promoterBusy: false });
+    if (!result?.ok) { this.showToast(result?.message || 'Could not send that notice'); return; }
+    this.playBell();
+    // Say plainly what happened, including when email was held back — a promoter
+    // needs to know whether their league was actually emailed.
+    this.showToast(result.emailSkippedReason ? result.message + ' ' + result.emailSkippedReason : result.message);
+    this.loadPromoterReach();
+  };
+
+  openShareKit = async (fightId) => {
+    this.playTap();
+    const result = await this.props.onLoadShareKit({ fightId });
+    if (!result?.ok) { this.showToast(result?.message || 'Could not build a share link'); return; }
+    this.safeSetState({ shareKit: result });
+    this.openModal('shareKit');
+  };
+
+  copyText = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.showToast((label || 'Copied') + ' — paste it anywhere');
+    } catch (error) {
+      this.showToast('Could not copy — long-press the text to select it');
+    }
+  };
+
+  loadNotificationFeed = async () => {
+    if (typeof this.props.onLoadNotifications !== 'function') return;
+    const result = await this.props.onLoadNotifications();
+    if (!result) return;
+    this.safeSetState({
+      notifFeed: result.notifications || [],
+      // Server-derived, so the badge survives a reopen instead of resetting.
+      notifCount: Number(result.unread) || 0,
+    });
+  };
+
+  openNotifications = () => {
+    this.playTap();
+    this.openModal('notifications');
+    // Clearing on open is the honest moment — they have now seen them.
+    if (typeof this.props.onMarkNotificationsRead === 'function') {
+      this.props.onMarkNotificationsRead();
+      this.safeSetState({ notifCount: 0 });
+    }
+  };
+
+  startSportCycle() {
+    // A single interval for all five circles. 4s is slow enough to read a face
+    // and not turn the header into a slideshow.
+    if (this._sportCycle) return;
+    this._sportCycle = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return; // don't churn in the background
+      this.safeSetState((prev) => ({ sportCycle: (prev.sportCycle + 1) % 600 }));
+    }, 4000);
+  }
+
   componentWillUnmount() {
+    clearInterval(this._sportCycle);
+    this._sportCycle = null;
+    clearInterval(this._notifPoll);
+    this._notifPoll = null;
+    if (typeof window !== 'undefined' && this._audioUnlock) {
+      ['touchstart', 'pointerdown', 'click'].forEach((evt) =>
+        window.removeEventListener(evt, this._audioUnlock, true));
+    }
+    if (typeof window !== 'undefined' && this._pressSound) {
+      window.removeEventListener('pointerdown', this._pressSound, true);
+    }
+
     this._unmounted = true;
     this.stopWatchTicker();
     [this._communityInterval, this._sportPhotoInterval, this._shadowInterval, this._streakInterval, this._demoInterval, this._filledPollInterval, this._aiDemoInterval, this._coinTween].forEach(clearInterval);
@@ -1247,7 +1485,8 @@ class FantasyMobileAppCore extends React.Component {
   };
   chestClick = () => {
     if (this.state.chestBurst) return;
-    this.playBell(); this.playCheer();
+    // Tap first so there is an immediate response, then the reward chime.
+    this.playTap(); this.playBell(); this.playCheer();
     this.setState({ chestBurst: Date.now() });
     setTimeout(() => this.setState({ chestBurst: false }), 550);
     setTimeout(() => this.openModal('addcoins'), 500);
@@ -1773,7 +2012,41 @@ class FantasyMobileAppCore extends React.Component {
       };
     });
     sports.forEach((sport) => {
-      sport.count = String(events.filter((event) => event.sport === sport.id).length);
+      const inSport = events.filter((event) => event.sport === sport.id);
+      sport.count = String(inSport.length);
+
+      // Soonest first, undated last — the next fight in the discipline is the one
+      // worth showing, and it changes every time a nearer fight is added.
+      const next = [...inSport].sort((a, b) => {
+        if (!a.iso) return 1;
+        if (!b.iso) return -1;
+        return String(a.iso).localeCompare(String(b.iso));
+      })[0];
+
+      // Only real uploaded imagery. Anything empty falls through to the static
+      // discipline art inside MobileImageSlot, so a fight with no picture never
+      // leaves an empty circle.
+      // Every fighter picture uploaded to this discipline, soonest fight first.
+      // Both corners count, so a card of five bouts offers up to ten faces.
+      const gallery = [];
+      [...inSport].sort((a, b) => {
+        if (!a.iso) return 1;
+        if (!b.iso) return -1;
+        return String(a.iso).localeCompare(String(b.iso));
+      }).forEach((event) => {
+        [[event.featuredFightFighterAImage, event.f1],
+         [event.featuredFightFighterBImage, event.f2],
+         [event.featuredThisWeekImage, event.f1]].forEach(([photo, name]) => {
+          if (photo && !gallery.some((entry) => entry.photo === photo)) gallery.push({ photo, name });
+        });
+      });
+
+      sport.gallery = gallery;
+      // The cycle index is one shared counter, so all five circles advance in
+      // step and each wraps within its own gallery length.
+      const frame = gallery.length ? gallery[s.sportCycle % gallery.length] : null;
+      sport.photo = frame ? frame.photo : '';
+      sport.nextFighter = frame ? frame.name : (next ? next.f1 : '');
     });
     const filteredEvents = s.activeSport === 'all' ? events : events.filter(e => e.sport === s.activeSport);
 
@@ -1993,7 +2266,7 @@ class FantasyMobileAppCore extends React.Component {
           this.state.cart.length > 0 && React.createElement('div', { style: { position: 'absolute', top: -4, right: -4, background: '#f2b544', color: '#2b1b00', fontSize: 10, fontWeight: 900, borderRadius: '50%', width: 17, height: 17, display: 'flex', alignItems: 'center', justifyContent: 'center' } }, this.state.cart.reduce((total, item) => total + item.quantity, 0))
         ),
         React.createElement('div', {
-          onClick: () => this.openModal('notif'),
+          onClick: this.openNotifications,
           style: { position: 'relative', width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }
         },
           React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: '#fff', strokeWidth: 2 },
@@ -2264,7 +2537,25 @@ class FantasyMobileAppCore extends React.Component {
           }
         },
           React.createElement('div', { style: { width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: '2px solid #05060a', background: '#000' } },
-            React.createElement(MobileImageSlot, { id: 'story-' + sp.id, shape: 'circle', placeholder: sp.name, fit: 'cover' })
+            React.createElement('div', {
+              // Keying on the photo remounts on every change, which is what
+              // makes the fade-in fire. Class carries the animation.
+              key: sp.photo || sp.id,
+              className: 'fmm-sport-cycle-frame',
+              style: { width: '100%', height: '100%' },
+            },
+              React.createElement(MobileImageSlot, {
+                id: 'story-' + sp.id,
+                // Cutout first so the fighter reads as a figure, not a
+                // photograph in a circle; the original is the fallback if the
+                // transform is unavailable.
+                src: (sp.photo && cloudinaryCutout(sp.photo)) || sp.photo || undefined,
+                fallbackSrc: sp.photo || undefined,
+                shape: 'circle',
+                placeholder: sp.nextFighter || sp.name,
+                fit: 'cover',
+              })
+            )
           )
         ),
         React.createElement('div', { style: { fontSize: 8.5, fontWeight: 800, color: sp.active ? '#f2b544' : 'rgba(255,255,255,.6)', textAlign: 'center', width: 66, lineHeight: 1.15 } }, sp.name)
@@ -2722,6 +3013,80 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
+  // Promoter tools. A league owner had no way to reach the players they brought
+  // in — this is the reach number, the announce button and the share kit in one
+  // place. Renders only when the reach endpoint answered, which needs an
+  // affiliate session, so players never see it.
+  renderPromoterPanel(s, events) {
+    const reach = s.promoterReach;
+    if (!reach) return null;
+    const myFights = (Array.isArray(events) ? events : []).slice(0, 6);
+
+    return React.createElement('div', {
+      key: 'promoter',
+      style: {
+        marginBottom: 14, padding: 13, borderRadius: 13,
+        background: 'linear-gradient(160deg,rgba(168,85,247,.14),rgba(5,6,10,.55))',
+        border: '1px solid rgba(168,85,247,.45)',
+      },
+    },
+      React.createElement('div', { style: { fontSize: 9.5, fontWeight: 900, color: '#c084fc', letterSpacing: .5, marginBottom: 7 } }, 'YOUR LEAGUE · ' + String(reach.leagueName || '').toUpperCase()),
+
+      // The three numbers that tell a promoter whether their league is alive.
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 11 } },
+        [['MEMBERS', reach.members, '#fff'],
+         ['PLAYING', reach.activeMembers, '#22c55e'],
+         ['NEW · 7D', reach.joinedLast7Days, '#f2b544']].map(([label, value, color]) =>
+          React.createElement('div', { key: label, style: { textAlign: 'center', padding: '7px 4px', borderRadius: 9, background: 'rgba(0,0,0,.3)' } },
+            React.createElement('div', { style: { fontSize: 15, fontWeight: 900, color, fontVariantNumeric: 'tabular-nums' } }, Number(value || 0).toLocaleString()),
+            React.createElement('div', { style: { fontSize: 7.5, fontWeight: 800, color: 'rgba(255,255,255,.45)', marginTop: 1 } }, label)
+          ))
+      ),
+
+      myFights.length === 0
+        ? React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.5)', lineHeight: 1.5 } },
+            'Put a card up and you can announce it to your members from here.')
+        : React.createElement('div', null,
+            React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,.5)', marginBottom: 6 } }, 'TELL YOUR MEMBERS'),
+            React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } },
+              myFights.map((fight) => React.createElement('div', {
+                key: fight.id,
+                style: { padding: 9, borderRadius: 10, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.11)' },
+              },
+                React.createElement('div', { style: { fontSize: 11.5, fontWeight: 800, marginBottom: 6 } }, fight.f1 + ' vs ' + fight.f2),
+                React.createElement('div', { style: { display: 'flex', gap: 6 } },
+                  React.createElement('div', {
+                    onClick: () => { if (!s.promoterBusy) this.announceToLeague(fight.backendId || fight.id); },
+                    role: 'button', tabIndex: 0,
+                    style: {
+                      flex: 1, minHeight: 38, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 8, background: '#a855f7', color: '#fff', fontWeight: 900, fontSize: 10,
+                      cursor: 'pointer', opacity: s.promoterBusy ? .6 : 1, letterSpacing: .3,
+                    },
+                  }, s.promoterBusy ? 'SENDING…' : 'ANNOUNCE'),
+                  React.createElement('div', {
+                    onClick: () => this.openShareKit(fight.backendId || fight.id),
+                    role: 'button', tabIndex: 0,
+                    style: {
+                      flex: 1, minHeight: 38, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.3)',
+                      color: '#fff', fontWeight: 900, fontSize: 10, cursor: 'pointer', letterSpacing: .3,
+                    },
+                  }, 'SHARE')
+                )
+              ))
+            ),
+            // Say plainly whether email is available — a promoter should not have
+            // to guess why their last notice did not hit inboxes.
+            React.createElement('div', { style: { marginTop: 9, fontSize: 9, fontWeight: 700, color: reach.emailAvailable ? '#22c55e' : '#f2b544', lineHeight: 1.5 } },
+              reach.emailAvailable
+                ? 'Announce reaches every member\u2019s notifications and their inbox.'
+                : 'Email used recently \u2014 the next announce reaches notifications only, then email unlocks again in under ' + (reach.emailCooldownHours || 24) + 'h.'
+            )
+          )
+    );
+  }
+
   renderLeagues(s, events) {
     const leagues = Array.isArray(this.props.leagues) ? this.props.leagues : [];
     const users = Array.isArray(this.props.leagueUsers) ? this.props.leagueUsers : [];
@@ -2731,6 +3096,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(5,6,10,.84),rgba(5,6,10,.99))' } }),
       React.createElement('div', { style: { position: 'relative' } },
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 4, color: '#a855f7' } }, 'LEAGUES & HEAD-TO-HEAD'),
+        this.renderPromoterPanel(s, events),
         React.createElement('p', { style: { margin: '0 0 14px', color: 'rgba(255,255,255,.6)', fontSize: 11, fontWeight: 700 } }, 'Real creator leagues from the Fantasy MMAdness community.'),
         events.length > 0 && React.createElement('div', { style: { marginBottom: 14, padding: 10, borderRadius: 10, background: 'rgba(77,141,255,.1)', border: '1px solid rgba(77,141,255,.35)' } },
           React.createElement('strong', { style: { color: '#4d8dff', fontSize: 10 } }, 'NEW FIGHT ALERT'),
@@ -3150,20 +3516,72 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderTicker() {
-    const fightCount = Array.isArray(this.props.fights) ? this.props.fights.length : 0;
-    const leaderboardCount = Array.isArray(this.props.leaderboard) ? this.props.leaderboard.length : 0;
-    const items = [
-      ['🔥', fightCount ? `${fightCount} published fight card${fightCount === 1 ? '' : 's'} available` : 'New fight cards publish here automatically', '#ff6b3b'],
-      ['🥊', 'Contest dates, fees and pools come directly from the registered fight', '#f2b544'],
-      ['🏆', leaderboardCount ? `${leaderboardCount} ranked predictor${leaderboardCount === 1 ? '' : 's'} on the live board` : 'Leaderboard opens after submitted predictions are scored', '#22c55e'],
-      ['⚡', 'Live fight status refreshes from the production feed', '#4d8dff'],
-    ];
-    const loop = [...items, ...items];
-    return React.createElement('div', { className: 'fmm-unified-ticker', style: { overflow: 'hidden', position: 'relative', borderTop: '2px solid #f2b544', borderBottom: '2px solid #f2b544', padding: '10px 0', marginBottom: 14, boxShadow: '0 0 20px rgba(242,181,68,.35), inset 0 0 24px rgba(0,0,0,.5)' } },
+    const fights = Array.isArray(this.props.fights) ? this.props.fights : [];
+    const board = Array.isArray(this.props.leaderboard) ? this.props.leaderboard : [];
+    const items = [];
+
+    // 1. Who is winning. The single most interesting line on the board.
+    board.slice(0, 3).forEach((row, index) => {
+      const name = cleanText(row.displayName, row.playerName, row.username, row.name);
+      const pts = Number(row.totalPoints ?? row.points ?? row.score ?? 0);
+      if (!name) return;
+      items.push([
+        index === 0 ? '👑' : '🏆',
+        index === 0
+          ? `${name} leads the board with ${pts.toLocaleString()} pts`
+          : `#${index + 1} ${name} — ${pts.toLocaleString()} pts`,
+        index === 0 ? '#f2b544' : '#22c55e',
+      ]);
+    });
+
+    // 2. Results, newest first. "Who won" is what was actually being asked for.
+    fights
+      .filter((fight) => fight?.winner || fight?.matchWinner || fight?.result)
+      .slice(0, 4)
+      .forEach((fight) => {
+        const winner = cleanText(fight.winner, fight.matchWinner, fight.result);
+        const a = cleanText(fight.matchFighterA, fight.fighterAName);
+        const b = cleanText(fight.matchFighterB, fight.fighterBName);
+        if (!winner) return;
+        items.push(['🥊', a && b ? `${winner.toUpperCase()} beat ${(winner.toUpperCase() === a.toUpperCase() ? b : a).toUpperCase()}` : `${winner.toUpperCase()} wins`, '#ff6b3b']);
+      });
+
+    // 3. Money on the table right now.
+    fights.forEach((fight) => {
+      const pot = Number(String(cleanText(fight.prizePool, fight.prize, fight.currentPot, fight.winningAmount) || '').replace(/[^0-9.]/g, ''));
+      const a = cleanText(fight.matchFighterA, fight.fighterAName);
+      const b = cleanText(fight.matchFighterB, fight.fighterBName);
+      if (pot > 0 && a && b) {
+        items.push(['💰', `${a.toUpperCase()} vs ${b.toUpperCase()} — ${pot.toLocaleString()} FM pot`, '#22c55e']);
+      }
+    });
+
+    // 4. Where the action is.
+    fights.forEach((fight) => {
+      const entries = Number(fight.entryCount ?? fight.entries ?? (Array.isArray(fight.userPredictions) ? fight.userPredictions.length : 0)) || 0;
+      const a = cleanText(fight.matchFighterA, fight.fighterAName);
+      if (entries > 0 && a) {
+        items.push(['⚡', `${entries.toLocaleString()} ${entries === 1 ? 'entry' : 'entries'} in on ${a.toUpperCase()}'s card`, '#4d8dff']);
+      }
+    });
+
+    // Only if there is genuinely nothing yet — never alongside real news, or it
+    // reads as filler next to live results.
+    if (items.length === 0) {
+      items.push(
+        ['🔥', fights.length ? `${fights.length} fight card${fights.length === 1 ? '' : 's'} open for predictions` : 'New fight cards appear here the moment they are published', '#ff6b3b'],
+        ['🏆', 'Leaderboard opens as soon as the first predictions are scored', '#22c55e'],
+      );
+    }
+
+    // Long enough to fill the strip, short enough that a repeat is not obvious.
+    const trimmed = items.slice(0, 10);
+    const loop = [...trimmed, ...trimmed];
+    return React.createElement('div', { className: 'fmm-unified-ticker fmm-news-bar', style: { overflow: 'hidden', position: 'relative', borderTop: '2px solid #f2b544', borderBottom: '2px solid #f2b544', padding: '10px 0', marginBottom: 14, boxShadow: '0 0 20px rgba(242,181,68,.35), inset 0 0 24px rgba(0,0,0,.5)' } },
       React.createElement('div', { style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'ticker-bg', shape: 'rect', placeholder: 'Arena photo', fit: 'cover', src: 'featured-arena-bg-opt.jpg' })),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(26,18,6,.35),rgba(36,21,5,.25),rgba(26,18,6,.35))' } }),
       React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,#05060a,transparent 10%,transparent 90%,#05060a)', zIndex: 2, pointerEvents: 'none' } }),
-      React.createElement('div', { style: { display: 'flex', gap: 0, whiteSpace: 'nowrap', width: 'max-content', animation: 'marquee 24s linear infinite' } },
+      React.createElement('div', { style: { display: 'flex', gap: 0, whiteSpace: 'nowrap', width: 'max-content', animation: `marquee ${Math.max(10, Math.min(34, trimmed.length * 3.4))}s linear infinite` } },
         loop.map((t, i) => React.createElement('span', { key: i, style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 900, color: '#ff2020', padding: '0 18px', borderRight: '1px solid rgba(242,181,68,.3)' } },
           React.createElement('span', {
             style: {
@@ -3298,15 +3716,15 @@ class FantasyMobileAppCore extends React.Component {
       className: 'fmm-unified-featured-week',
       'data-fmm-section': 'featured-this-week',
       onClick: () => this.openEvent(event),
-      style: { margin: '0 16px 16px', position: 'relative', borderRadius: 14, overflow: 'hidden', minHeight: 190, border: '1px solid ' + event.tagColor, boxShadow: '0 0 18px ' + event.tagColor + '55', cursor: 'pointer', background: '#080a10' }
+      style: { margin: '0 16px 16px', position: 'relative', borderRadius: 14, overflow: 'hidden', minHeight: 246, border: '1px solid ' + event.tagColor, boxShadow: '0 0 18px ' + event.tagColor + '55', cursor: 'pointer', background: '#080a10' }
     },
       React.createElement('div', { className: 'fmm-unified-arena-bg', style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-approved-arena-' + event.id, shape: 'rect', placeholder: 'Fantasy MMAdness arena', fit: 'cover', src: 'arena-approved-v62.webp' })),
-      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--left', style: { position: 'absolute', left: 0, bottom: 0, top: 22, width: '33%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
-      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--right', style: { position: 'absolute', right: 0, bottom: 0, top: 22, width: '33%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage })),
-      React.createElement('div', { className: 'fmm-unified-featured-overlay', style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(5,6,10,.82) 0%,rgba(5,6,10,.28) 34%,rgba(5,6,10,.3) 66%,rgba(5,6,10,.84) 100%),linear-gradient(180deg,rgba(5,6,10,.08),rgba(5,6,10,.72))' } }),
-      React.createElement('div', { className: 'fmm-unified-featured-content', style: { position: 'relative', minHeight: 190, padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', textAlign: 'center' } },
+      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--left', style: { position: 'absolute', left: 0, top: 0, bottom: 74, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
+      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--right', style: { position: 'absolute', right: 0, top: 0, bottom: 74, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage })),
+      React.createElement('div', { className: 'fmm-unified-featured-overlay', style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(5,6,10,.28) 0%,rgba(5,6,10,.1) 30%,rgba(5,6,10,.1) 70%,rgba(5,6,10,.3) 100%),linear-gradient(180deg,rgba(5,6,10,.08),rgba(5,6,10,.72))' } }),
+      React.createElement('div', { className: 'fmm-unified-featured-content', style: { position: 'relative', minHeight: 246, padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', textAlign: 'center', background: 'linear-gradient(180deg,transparent 34%,rgba(5,6,10,.72) 58%,rgba(5,6,10,.94) 78%)' } },
         React.createElement('span', { style: { color: '#f2b544', fontSize: 9, fontWeight: 900 } }, '★ FEATURED THIS WEEK · ' + event.date),
-        React.createElement('h2', { style: { fontFamily: "'Anton',sans-serif", fontSize: 25, margin: '5px 0' } }, event.f1, React.createElement('em', { style: { color: '#ef4444', fontStyle: 'normal' } }, ' VS '), event.f2),
+        React.createElement('h2', { style: { fontFamily: "'Anton',sans-serif", fontSize: 21, lineHeight: 1.08, margin: '4px 0', textShadow: '0 2px 10px rgba(0,0,0,.85)' } }, event.f1, React.createElement('em', { style: { color: '#ef4444', fontStyle: 'normal' } }, ' VS '), event.f2),
         React.createElement('div', { style: { display: 'flex', gap: 12, fontSize: 10, fontWeight: 900, marginBottom: 9 } },
           React.createElement('span', { style: { color: '#22c55e' } }, event.prize || 'PRIZE TERMS PENDING'),
           React.createElement('span', { style: { color: '#ffce54' } }, entry),
@@ -3315,12 +3733,12 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { display: 'flex', width: '100%', maxWidth: 330, gap: 7, alignItems: 'stretch' } },
           React.createElement('div', {
             role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${event.f1} versus ${event.f2}`,
-            onClick: (clickEvent) => { clickEvent.stopPropagation(); this.openAiScout(event); },
+            onClick: (clickEvent) => { clickEvent.stopPropagation(); this.playTap(); this.openAiScout(event); },
             style: { flex: '0 0 62px', minHeight: 38, display: 'grid', placeItems: 'center', borderRadius: 8, background: 'linear-gradient(135deg,#4d8dff,#a855f7)', color: '#fff', fontSize: 8.5, lineHeight: 1.05, whiteSpace: 'pre-line', fontWeight: 1000, letterSpacing: .4, boxShadow: '0 0 14px rgba(77,141,255,.55)', cursor: 'pointer' }
           }, 'AI\nSCOUT'),
           React.createElement('strong', {
             role: 'button', tabIndex: 0, 'aria-label': `${this.getEventActionLabel(event)} for ${event.f1} versus ${event.f2}`,
-            onClick: (clickEvent) => { clickEvent.stopPropagation(); this.openEvent(event); },
+            onClick: (clickEvent) => { clickEvent.stopPropagation(); this.playTap(); this.openEvent(event); },
             style: { flex: 1, display: 'grid', placeItems: 'center', background: '#f2b544', color: '#2b1b00', borderRadius: 8, padding: '9px 10px', fontSize: 11 }
           }, this.getEventActionLabel(event))
         ),
@@ -3412,9 +3830,9 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { className: 'fmm-unified-featured-fight-content', style: { position: 'relative' } },
         React.createElement('div', { style: { color: '#ffce54', fontSize: 10, fontWeight: 900, marginBottom: 8 } }, 'FEATURED FIGHT · ' + (event.division ? event.division.toUpperCase() : event.tag)),
         React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 } },
-          React.createElement('div', { style: { width: 70, height: 70, overflow: 'hidden', borderRadius: '50%', flex: '0 0 70px' } }, React.createElement(MobileImageSlot, { id: 'detail-a-' + event.id, shape: 'circle', placeholder: event.f1, fit: 'cover', src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
-          React.createElement('div', { style: { flex: 1, fontFamily: "'Anton',sans-serif", fontSize: 18, textAlign: 'center' } }, event.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), event.f2),
-          React.createElement('div', { style: { width: 70, height: 70, overflow: 'hidden', borderRadius: '50%', flex: '0 0 70px' } }, React.createElement(MobileImageSlot, { id: 'detail-b-' + event.id, shape: 'circle', placeholder: event.f2, fit: 'cover', src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage }))
+          React.createElement('div', { style: { width: 92, height: 92, overflow: 'hidden', borderRadius: '50%', flex: '0 0 92px', border: '2px solid rgba(255,255,255,.18)' } }, React.createElement(MobileImageSlot, { id: 'detail-a-' + event.id, shape: 'circle', placeholder: event.f1, fit: 'cover', fallbackSrc: event.featuredFightFighterAImage, src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
+          React.createElement('div', { style: { flex: 1, fontFamily: "'Anton',sans-serif", fontSize: 16, lineHeight: 1.1, textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,.8)' } }, event.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), event.f2),
+          React.createElement('div', { style: { width: 92, height: 92, overflow: 'hidden', borderRadius: '50%', flex: '0 0 92px', border: '2px solid rgba(255,255,255,.18)' } }, React.createElement(MobileImageSlot, { id: 'detail-b-' + event.id, shape: 'circle', placeholder: event.f2, fit: 'cover', fallbackSrc: event.featuredFightFighterBImage, src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage }))
         ),
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', color: 'rgba(255,255,255,.7)', fontSize: 9, fontWeight: 900, marginBottom: 9 } },
           React.createElement('span', null, event.date),
@@ -3928,10 +4346,18 @@ class FantasyMobileAppCore extends React.Component {
                 ? Number(team.totalPoints || 0).toLocaleString() + ' PTS'
                 : 'AWAITING')
           ),
-          React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.42)', marginBottom: 9 } },
-            team.settled
-              ? 'Final'
-              : (team.scoredCount ?? 0) + ' of ' + (team.picks?.length ?? 0) + ' fighters scored'),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 9 } },
+            React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.42)' } },
+              team.settled
+                ? 'Final'
+                : (team.scoredCount ?? 0) + ' of ' + (team.picks?.length ?? 0) + ' fighters scored'),
+            React.createElement('div', {
+              onClick: () => this.openTeamStandings(team),
+              role: 'button', tabIndex: 0,
+              'aria-label': 'See standings for ' + (team.contestName || 'this contest'),
+              style: { fontSize: 9.5, fontWeight: 900, color: '#4d8dff', cursor: 'pointer' },
+            }, 'STANDINGS \u203a')
+          ),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
             (team.picks || []).map((pick, index) => React.createElement('div', {
               key: index,
@@ -4003,8 +4429,15 @@ class FantasyMobileAppCore extends React.Component {
             React.createElement('div', { style: { fontSize: 12, fontWeight: 900, color: '#4d8dff', fontVariantNumeric: 'tabular-nums' } },
               card.settled ? (card.totalScore ?? 0) + ' / ' + (card.maxPossible ?? 0) : 'IN PLAY')
           ),
-          React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginBottom: 9 } },
-            card.settled ? 'Final' : 'Scoring live \u00b7 settles when the season ends'),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 9 } },
+            React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)' } },
+              card.settled ? 'Final' : 'Scoring live \u00b7 settles when the season ends'),
+            React.createElement('div', {
+              onClick: () => this.openSeasonStandings(card),
+              role: 'button', tabIndex: 0,
+              style: { fontSize: 9.5, fontWeight: 900, color: '#4d8dff', cursor: 'pointer' },
+            }, 'STANDINGS \u203a')
+          ),
 
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7 } },
             (card.picks || []).map(pick => {
@@ -4440,18 +4873,205 @@ class FantasyMobileAppCore extends React.Component {
       }, 'Terms of Use')
     ]);
 
+    if (s.modal === 'feedback') {
+      const f = s.feedback;
+      const input = {
+        width: '100%', padding: '10px 12px', borderRadius: 9, background: 'rgba(255,255,255,.06)',
+        border: '1px solid rgba(255,255,255,.16)', color: '#fff', fontSize: 12,
+        fontFamily: "'Rajdhani',sans-serif", marginBottom: 10, resize: 'vertical',
+      };
+      const sevs = [
+        ['blocker', 'Stuck', '#ef4444'],
+        ['wrong', 'Wrong', '#f2b544'],
+        ['confusing', 'Confusing', '#4d8dff'],
+        ['cosmetic', 'Looks off', '#a855f7'],
+        ['praise', 'Liked it', '#22c55e'],
+      ];
+      const areas = [
+        ['signup', 'Sign up'], ['signin', 'Sign in'], ['scorecard', 'Scorecard'],
+        ['entry-fee', 'Coins / fee'], ['team-card', 'Team Card'], ['season-card', 'Season Card'],
+        ['standings', 'Standings'], ['leagues', 'Leagues'], ['promoter-tools', 'League tools'],
+        ['notifications', 'Bell'], ['coins-purchase', 'Buying coins'], ['rewards', 'Chest / wheel'],
+        ['looks-wrong', 'Looks wrong'], ['slow', 'Too slow'], ['other', 'Something else'],
+      ];
+      return overlay([
+        closeBtn,
+        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 3 } }, 'REPORT SOMETHING'),
+        React.createElement('div', { key: 'sub', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', lineHeight: 1.5, marginBottom: 12 } },
+          'Two boxes matter most: what you expected, and what actually happened. That pair is what makes something fixable.'
+        ),
+
+        React.createElement('div', { key: 'sl', style: { fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,.5)', marginBottom: 6 } }, 'HOW BAD?'),
+        React.createElement('div', { key: 'sev', style: { display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 } },
+          sevs.map(([key, label, color]) => React.createElement('div', {
+            key,
+            onClick: () => this.setFeedbackField('severity', key),
+            role: 'button', tabIndex: 0,
+            style: {
+              padding: '7px 11px', borderRadius: 8, fontSize: 10, fontWeight: 900, cursor: 'pointer',
+              background: f.severity === key ? color : 'rgba(255,255,255,.06)',
+              color: f.severity === key ? '#0b0c10' : 'rgba(255,255,255,.75)',
+              border: '1px solid ' + (f.severity === key ? color : 'rgba(255,255,255,.14)'),
+            },
+          }, label))
+        ),
+
+        React.createElement('div', { key: 'al', style: { fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,.5)', marginBottom: 6 } }, 'WHERE?'),
+        React.createElement('div', { key: 'area', style: { display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 } },
+          areas.map(([key, label]) => React.createElement('div', {
+            key,
+            onClick: () => this.setFeedbackField('area', key),
+            role: 'button', tabIndex: 0,
+            style: {
+              padding: '6px 10px', borderRadius: 7, fontSize: 9.5, fontWeight: 800, cursor: 'pointer',
+              background: f.area === key ? 'rgba(242,181,68,.85)' : 'rgba(255,255,255,.06)',
+              color: f.area === key ? '#2b1b00' : 'rgba(255,255,255,.7)',
+              border: '1px solid ' + (f.area === key ? '#f2b544' : 'rgba(255,255,255,.12)'),
+            },
+          }, label))
+        ),
+
+        React.createElement('input', {
+          key: 'step', type: 'text', placeholder: 'Step number, if you were on the list (optional)',
+          value: f.step, onChange: (ev) => this.setFeedbackField('step', ev.target.value.slice(0, 20)),
+          style: input,
+        }),
+        React.createElement('textarea', {
+          key: 'exp', rows: 2, placeholder: 'What did you expect to happen?',
+          value: f.expected, onChange: (ev) => this.setFeedbackField('expected', ev.target.value),
+          style: input,
+        }),
+        React.createElement('textarea', {
+          key: 'act', rows: 3, placeholder: 'What actually happened? (required)',
+          value: f.actual, onChange: (ev) => this.setFeedbackField('actual', ev.target.value),
+          style: { ...input, border: '1px solid rgba(242,181,68,.45)' },
+        }),
+        React.createElement('div', { key: 'note', style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginBottom: 12, lineHeight: 1.5 } },
+          'Your phone and which screen you were on are attached automatically. If you have a screenshot, text it over with the reference you get back.'
+        ),
+        React.createElement('div', {
+          key: 'go',
+          onClick: () => { if (!s.feedbackBusy) this.submitFeedback(); },
+          role: 'button', tabIndex: 0,
+          style: {
+            textAlign: 'center', padding: '13px 0', borderRadius: 999, background: '#f2b544',
+            color: '#2b1b00', fontWeight: 900, fontSize: 13, cursor: 'pointer',
+            opacity: s.feedbackBusy ? .6 : 1,
+          },
+        }, s.feedbackBusy ? 'SENDING…' : 'SEND REPORT')
+      ]);
+    }
+
+    if (s.modal === 'standings') {
+      const st = s.standings || {};
+      const rows = Array.isArray(st.rows) ? st.rows : [];
+      const medal = ['#f2b544', '#c9ccd1', '#c9772e'];
+      return overlay([
+        closeBtn,
+        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 2 } }, 'STANDINGS'),
+        React.createElement('div', { key: 'n', style: { fontSize: 12, fontWeight: 800, marginBottom: 2 } }, st.title || ''),
+        st.subtitle && React.createElement('div', { key: 'sub', style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', marginBottom: 12 } }, st.subtitle),
+
+        st.loading
+          ? React.createElement('div', { key: 'load', style: { padding: '20px 4px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)' } }, 'Loading standings…')
+          : rows.length === 0
+            ? React.createElement('div', { key: 'empty', style: { padding: '18px 4px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', lineHeight: 1.5 } },
+                'No scores yet. Standings appear once the first fight on this card has been scored.')
+            : React.createElement('div', { key: 'rows', style: { display: 'flex', flexDirection: 'column' } },
+                rows.map((row) => React.createElement('div', {
+                  key: row.place,
+                  style: {
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0',
+                    borderBottom: '1px solid rgba(255,255,255,.07)',
+                  },
+                },
+                  React.createElement('div', {
+                    style: {
+                      width: 26, flex: '0 0 26px', textAlign: 'center', fontSize: 12, fontWeight: 900,
+                      fontVariantNumeric: 'tabular-nums',
+                      color: medal[row.place - 1] || 'rgba(255,255,255,.4)',
+                    },
+                  }, row.place),
+                  React.createElement('div', {
+                    style: {
+                      width: 30, height: 30, flex: '0 0 30px', borderRadius: '50%', overflow: 'hidden',
+                      background: 'rgba(255,255,255,.08)',
+                    },
+                  }, row.avatar
+                    ? React.createElement('img', { src: row.avatar, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover' } })
+                    : null),
+                  React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                    React.createElement('div', { style: { fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, row.name),
+                    // Team Cards report how many of a team's fighters have been
+                    // scored, which explains a low score mid-card.
+                    Number.isFinite(Number(row.fightsScored)) && React.createElement('div', { style: { fontSize: 8.5, fontWeight: 700, color: 'rgba(255,255,255,.38)' } },
+                      Number(row.fightsScored) + ' scored')
+                  ),
+                  React.createElement('div', { style: { fontSize: 12.5, fontWeight: 900, color: '#f2b544', fontVariantNumeric: 'tabular-nums' } },
+                    Number(row.score || 0).toLocaleString() + (st.unit === '/500' ? ' /500' : ''))
+                ))
+              )
+      ]);
+    }
+
+    if (s.modal === 'shareKit') {
+      const kit = s.shareKit || {};
+      const share = kit.share || {};
+      const rows = [
+        ['Facebook', share.facebook, '#4d8dff'],
+        ['TikTok', share.tiktok, '#a855f7'],
+        ['Text message', share.sms, '#22c55e'],
+        ['Short version', share.short, '#f2b544'],
+      ].filter(([, text]) => text);
+      return overlay([
+        closeBtn,
+        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 3 } }, 'SHARE THIS CARD'),
+        React.createElement('div', { key: 'sub', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.5)', lineHeight: 1.5, marginBottom: 13 } },
+          'Written for you. Tap to copy, then paste into a post — the link credits every signup to your league.'
+        ),
+        ...rows.map(([label, text, color]) => React.createElement('div', {
+          key: label,
+          onClick: () => this.copyText(text, label + ' post'),
+          style: {
+            marginBottom: 9, padding: 11, borderRadius: 11, cursor: 'pointer',
+            background: 'rgba(255,255,255,.05)', border: '1px solid ' + color + '55',
+          },
+        },
+          React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color, marginBottom: 4, letterSpacing: .4 } }, label.toUpperCase() + ' · TAP TO COPY'),
+          React.createElement('div', { style: { fontSize: 11, fontWeight: 700, lineHeight: 1.45, color: 'rgba(255,255,255,.85)' } }, text)
+        )),
+        kit.joinLink && React.createElement('div', {
+          key: 'link',
+          onClick: () => this.copyText(kit.joinLink, 'League invite link'),
+          style: {
+            marginTop: 4, padding: 11, borderRadius: 11, cursor: 'pointer',
+            background: 'rgba(242,181,68,.1)', border: '1px dashed rgba(242,181,68,.5)',
+          },
+        },
+          React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color: '#f2b544', marginBottom: 4 } }, 'LEAGUE INVITE LINK · TAP TO COPY'),
+          React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.7)', wordBreak: 'break-all' } }, kit.joinLink)
+        )
+      ]);
+    }
+
     if (s.modal === 'notif') return overlay([
       closeBtn,
       React.createElement('div', { key: 't', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 } },
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544' } }, 'NOTIFICATIONS'),
         React.createElement('div', { onClick: this.markNotifsRead, style: { fontSize: 11, color: '#4d8dff', fontWeight: 700, cursor: 'pointer' } }, 'Mark all read')
       ),
-      s.notifications.length === 0 && React.createElement('div', { key: 'empty', style: { padding: '18px 4px', color: 'rgba(255,255,255,.52)', fontSize: 11, fontWeight: 700 } }, 'No notifications yet.'),
-      ...s.notifications.map((item, index) => React.createElement('div', { key: cleanText(item._id, item.id, index), style: { display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.06)', opacity: item.read || item.isRead ? .62 : 1 } },
-        React.createElement('div', { style: { fontSize: 18 } }, cleanText(item.icon) || '🔔'),
+      // Live feed first; s.notifications is the legacy prop list and only used
+      // when the endpoint returned nothing.
+      (s.notifFeed.length ? s.notifFeed : s.notifications).length === 0 && React.createElement('div', { key: 'empty', style: { padding: '18px 4px', color: 'rgba(255,255,255,.52)', fontSize: 11, fontWeight: 700 } }, 'No notifications yet.'),
+      ...(s.notifFeed.length ? s.notifFeed : s.notifications).map((item, index) => React.createElement('div', { key: cleanText(item._id, item.id, index), style: { display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.06)', opacity: item.read || item.isRead ? .62 : 1 } },
+        React.createElement('div', { style: { fontSize: 18 } }, cleanText(item.icon)
+          || ({ NEW_FIGHT: '🥊', FIGHT_SETTLED: '🏆', COINS_IN: '💰', COINS_OUT: '🎟' })[item.type]
+          || '🔔'),
         React.createElement('div', { style: { flex: 1 } },
-          React.createElement('div', { style: { fontSize: 12, fontWeight: 700 } }, cleanText(item.message, item.text, item.title, 'Fantasy MMAdness update')),
-          cleanText(item.createdAt, item.date) && React.createElement('div', { style: { marginTop: 2, fontSize: 9, color: 'rgba(255,255,255,.35)' } }, new Date(cleanText(item.createdAt, item.date)).toLocaleString())
+          React.createElement('div', { style: { fontSize: 12, fontWeight: item.unread ? 900 : 700, color: item.unread ? '#fff' : 'rgba(255,255,255,.72)' } },
+            cleanText(item.message, item.text, item.title, 'Fantasy MMAdness update')),
+          cleanText(item.body) && React.createElement('div', { style: { marginTop: 2, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.45)' } }, item.body),
+          cleanText(item.createdAt, item.date, item.at) && React.createElement('div', { style: { marginTop: 2, fontSize: 9, color: 'rgba(255,255,255,.35)' } }, new Date(cleanText(item.createdAt, item.date)).toLocaleString())
         )
       )),
       React.createElement('button', { key: 'push', type: 'button', onClick: async () => { const result = await this.props.onEnablePush?.(); this.showToast(result?.message || (result?.ok ? 'Browser alerts enabled' : 'Browser alerts were not enabled')); }, style: { width: '100%', minHeight: 44, marginTop: 14, border: '1px solid rgba(77,141,255,.45)', borderRadius: 999, background: 'linear-gradient(90deg,rgba(77,141,255,.22),rgba(168,85,247,.22))', color: '#fff', fontFamily: designTokens.font.body, fontWeight: 900, cursor: 'pointer' } }, 'ENABLE BROWSER ALERTS')

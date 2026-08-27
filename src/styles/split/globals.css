@@ -1,0 +1,245 @@
+@font-face {
+  font-family: 'UFCSans-condensedmed';
+  src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: condensed;
+}
+
+@font-face {
+  font-family: 'UFCSansMedium';
+  src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: condensed;
+}
+
+@font-face {
+  font-family: 'UFCSansCondensedBold';
+  src: url('/Fonts/UFCSans-CondensedBold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: condensed;
+}
+
+@font-face {
+  font-family: 'Edosz';
+  src: url('/Assets/affiliateDashboard/edosz.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+    
+
+@font-face {
+  font-family: 'UfcSansRegular';
+  src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --quote-bg-color: #f7f7f7;
+  --dot-color: #bbb;
+  --dot-active-color: #333;
+}
+
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+}
+
+/* Keyframes for scrolling left */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+
+/* Keyframes for scrolling right */
+@keyframes scroll-right {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+
+
+
+
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+}
+
+
+/* Keyframes for animations */
+@keyframes fadeInPopup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+@keyframes bounceIn {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+
+
+@keyframes fadeInText {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Gradient animation */
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+/* Thread body text (limited height) */
+.thread-body {
+  font-size: 1.1rem;
+  color: #f0f0f0;
+  margin-bottom: 15px;
+  max-height: 100px; /* Limit the body text to avoid overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 7px;
+  font-family: 'UfcSansRegular', Arial, sans-serif;
+}
+
+body{
+  overflow-x: hidden !important;
+}
+
+/* Thread body text (limited height) */
+.thread-body-updated {
+font-size: 20px;
+margin-bottom: 5px;
+font-family: sans-serif;
+}
+
+@keyframes blinkText {
+0%, 100% {
+  visibility: visible;
+}
+50% {
+  visibility: hidden;
+}
+}
+
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-Bold.woff2') format('woff2');
+font-weight: bold;
+font-style: normal;
+}
+
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-CondensedBold.woff2') format('woff2');
+font-weight: bold;
+font-style: normal;
+font-stretch: condensed;
+}
+
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+font-weight: 500;
+font-style: normal;
+font-stretch: condensed;
+}
+
+
+
+
+@font-face {
+font-family: 'UfcSansRegular';
+src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+font-weight: normal;
+font-style: normal;
+}
+
+
+@font-face {
+font-family: 'UFCSans';
+src: url('/Fonts/UFCSans-RegularOblique.woff2') format('woff2');
+font-weight: normal;
+font-style: oblique;
+}
+
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes fmmSeoSkeleton {
+  100% { transform: translateX(100%); }
+}

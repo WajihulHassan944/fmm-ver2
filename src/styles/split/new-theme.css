@@ -1,0 +1,98 @@
+:root{color-scheme:dark;--theme-bg:#05080d;--theme-panel:rgba(16,24,32,.84);--theme-border:rgba(255,255,255,.1);--theme-border-strong:rgba(255,255,255,.18);--theme-text:#f5f7fb;--theme-muted:rgba(245,247,251,.68);--theme-red:#df111b;--theme-green:#22c55e;--theme-gold:#fbbf24;--theme-radius:22px;--theme-shadow:0 24px 70px rgba(0,0,0,.45);--theme-glow:0 0 28px rgba(223,17,27,.36)}
+
+html{background:var(--theme-bg);scroll-behavior:smooth}
+body{background:radial-gradient(circle at top right,rgba(223,17,27,.14),transparent 34rem),radial-gradient(circle at top left,rgba(56,189,248,.08),transparent 28rem),linear-gradient(180deg,#05080d 0%,#070b11 48%,#040609 100%)!important;color:var(--theme-text)!important;font-family:Inter,"Inter Tight",Roboto,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+body a{text-decoration:none}
+
+
+/* ===== Fantasy MMAdness premium homepage/nav/footer redesign ===== */
+@font-face {
+  font-family: 'FMMUFCCondensedBold';
+  src: url('/Fonts/UFCSans-CondensedBold.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'FMMUFCCondensedMedium';
+  src: url('/Fonts/UFCSans-CondensedMedium.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'FMMUFCRegular';
+  src: url('/Fonts/UFCSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+:root {
+  --fmm-bg: #05080d;
+  --fmm-bg-soft: #0a0f16;
+  --fmm-panel: rgba(12, 17, 24, 0.88);
+  --fmm-panel-strong: rgba(17, 23, 32, 0.94);
+  --fmm-border: rgba(255, 255, 255, 0.11);
+  --fmm-border-strong: rgba(255, 255, 255, 0.2);
+  --fmm-text: #f4f6fa;
+  --fmm-muted: rgba(244, 246, 250, 0.66);
+  --fmm-red: #df111b;
+  --fmm-red-strong: #f01824;
+  --fmm-green: #33df47;
+  --fmm-gold: #f9b416;
+  --fmm-blue: #168fe6;
+  --fmm-purple: #9d42d8;
+  --fmm-font-display: 'FMMUFCCondensedBold', 'Arial Narrow', Impact, sans-serif;
+  --fmm-font-body: 'FMMUFCRegular', Arial, Helvetica, sans-serif;
+  --fmm-font-medium: 'FMMUFCCondensedMedium', 'Arial Narrow', Arial, sans-serif;
+}
+
+
+.theme-header,
+.theme-header *,
+.theme-home,
+.theme-home *,
+.theme-footer,
+.theme-footer * {
+  box-sizing: border-box;
+}
+
+
+/* ===== Readability + scale refinement for requested homepage/nav/footer update ===== */
+@font-face {
+  font-family: 'FMMUFCBold';
+  src: url('/Fonts/UFCSans-Bold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+:root {
+  --fmm-font-body: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fmm-font-ui: 'FMMUFCBold', Inter, Roboto, Arial, sans-serif;
+}
+
+
+.fmm-fight-night-command-strip > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+@keyframes fmmPromotedSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
