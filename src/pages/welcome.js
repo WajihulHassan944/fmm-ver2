@@ -33,6 +33,10 @@ const fieldStyle = {
 };
 
 const SITE_STYLES = `
+  @keyframes fmmTick { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+  @keyframes fmmPulseDot { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+  [data-tick-rail]:hover { animation-play-state: paused; }
+
   .fmm-site a { transition: filter .14s ease, color .14s ease; }
   .fmm-site a:hover { filter: brightness(1.14); }
   .fmm-site button:hover:not(:disabled) { filter: brightness(1.12); }
@@ -133,6 +137,26 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
   // Phone nav. The desktop links are hidden below 760px, so without this menu
   // there is no route to Fight Cards, Leagues, Leaderboard or the Store.
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // The board must never look dead. Real players fill it from the top; the rest
+  // of the five slots are seeded names whose scores drift every few seconds, so
+  // a visitor always sees motion. The pill flips to "Live" only when all five
+  // rows are real people — never claim live data you do not have.
+  const [seedBoard, setSeedBoard] = useState(SEED_BOARD);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSeedBoard((prev) => prev
+        .map((row) => ({ ...row, pts: row.pts + Math.floor(Math.random() * 26) }))
+        .sort((a, b) => b.pts - a.pts));
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const realRows = board.slice(0, 5);
+  const boardRows = realRows.concat(
+    seedBoard.slice(0, Math.max(0, 5 - realRows.length)).map((row) => ({ name: row.name, points: money(row.pts) })),
+  );
+  const boardLive = realRows.length >= 5;
 
   // Advance the store track so every shirt is seen without the visitor scrolling.
   // Pauses while the tab is hidden, and stops the moment they scroll it by hand —
@@ -340,6 +364,20 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             </div>
         </div>
 
+        {ticker.length ? (
+          <div style={{ borderTop: '1px solid rgba(216,220,228,.14)', borderBottom: '1px solid rgba(216,220,228,.14)', background: 'rgba(245,166,35,.05)', overflow: 'hidden', padding: '11px 0' }}>
+            <div
+              data-tick-rail
+              style={{ display: 'flex', width: 'max-content', gap: '46px', paddingLeft: '46px', animation: 'fmmTick 34s linear infinite', whiteSpace: 'nowrap' }}
+            >
+              {/* Two identical runs: the -50% keyframe needs a duplicate to loop seamlessly. */}
+              {[0, 1].map((pass) => ticker.map((line, index) => (
+                <span key={pass + '-' + index} style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.04em', color: line.color }}>{line.text}</span>
+              )))}
+            </div>
+          </div>
+        ) : null}
+
         <div id="fights" data-fmm="body-grid" style={{ maxWidth: '1320px', margin: '0 auto', padding: '62px 32px 0', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 348px', gap: '40px', alignItems: 'start' }}>
 
           <div>
@@ -393,12 +431,25 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                 </div>
               ))}
               {fights.length > 0 ? (
-                <div style={{ border: '1px dashed rgba(245,166,35,.45)', borderRadius: 14, padding: '26px 22px', background: 'rgba(245,166,35,.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', gap: 11 }}>
-                  <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 20, lineHeight: 1.12 }}>ALL FIVE SPORTS,<br />ONE TEAM CARD</div>
-                  <p style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.7)', margin: 0 }}>
-                    Boxing, MMA, bare knuckle, kickboxing and pro wrestling all run on the same scoring engine.
-                  </p>
-                  <a href="#contests" style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: '#f5a623', color: '#17070a', fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>HOW IT WORKS</a>
+                <div data-fmm="sport-router" style={{ gridColumn: '1 / -1', border: '1px solid rgba(245,166,35,.4)', borderRadius: 14, padding: '24px 26px', background: 'linear-gradient(168deg,rgba(245,166,35,.09),rgba(11,14,24,.7))', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '20px 26px' }}>
+                  <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                    <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 21, lineHeight: 1.12, marginBottom: 6 }}>EVERY OTHER CARD LIVES IN THE APP</div>
+                    <p style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.7)', margin: 0, textWrap: 'pretty' }}>
+                      Five sports, one scoring engine. Pick a sport to open its full slate &mdash; free cards, high rollers and season cards included.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9 }}>
+                    {[['Boxing', '#e11d2e'], ['MMA', '#f5a623'], ['Bare Knuckle', '#c9772e'], ['Kickboxing', '#2b6fe8'], ['Pro Wrestling', '#c0399f']].map(([label, color]) => (
+                      <a
+                        key={label}
+                        href="/home"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, height: 44, padding: '0 17px', borderRadius: 999, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(216,220,228,.22)', color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '.04em', whiteSpace: 'nowrap' }}
+                      >
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flex: '0 0 8px' }} />
+                        {label}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -409,17 +460,18 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             <div id="board" style={{ border: '1px solid rgba(216,220,228,.18)', borderRadius: '14px', background: 'rgba(255,255,255,.03)', overflow: 'hidden' }}>
               <div style={{ padding: '15px 18px', borderBottom: '1px solid rgba(216,220,228,.14)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.04em' }}>LEADERBOARD</span>
-                <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#22c55e' }}>Live</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: boardLive ? '#22c55e' : '#f5a623' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: boardLive ? '#22c55e' : '#f5a623', animation: 'fmmPulseDot 1.6s ease-in-out infinite' }} />
+                  {boardLive ? 'Live' : 'Demo'}
+                </span>
               </div>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
                 <tbody>
-                  {board.length === 0 ? (
-                    <tr><td colSpan={3} style={{ padding: '16px 18px', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.5)' }}>The board opens once the first cards are scored.</td></tr>
-                  ) : board.map((row, index) => (
-                    <tr key={index} style={{ borderBottom: index === board.length - 1 ? 'none' : '1px solid rgba(216,220,228,.09)' }}>
+                  {boardRows.map((row, index) => (
+                    <tr key={row.name + index} style={{ borderBottom: index === boardRows.length - 1 ? 'none' : '1px solid rgba(216,220,228,.09)' }}>
                       <td style={{ padding: '11px 8px 11px 18px', width: 34, fontFamily: "'Anton', sans-serif", fontSize: 15, color: ['#f5a623', '#d8dce4', '#c9772e'][index] || 'rgba(255,255,255,.4)' }}>{index + 1}</td>
                       <td style={{ padding: '11px 8px', fontSize: 14.5, fontWeight: 700, color: index < 3 ? '#fff' : 'rgba(255,255,255,.8)' }}>{row.name}</td>
-                      <td style={{ padding: '11px 18px 11px 8px', textAlign: 'right', fontFamily: "'Anton', sans-serif", fontSize: 15, color: index === 0 ? '#f5a623' : '#fff' }}>{row.points}</td>
+                      <td style={{ padding: '11px 18px 11px 8px', textAlign: 'right', fontFamily: "'Anton', sans-serif", fontSize: 15, color: index === 0 ? '#f5a623' : '#fff', transition: 'color .3s' }}>{row.points}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -763,6 +815,16 @@ const PREVIEW_BOARD = [
   { name: 'FIGHTIQ_KING', points: '3,615' },
   { name: 'SOUTHPAW', points: '3,204' },
   { name: 'CASUALKO', points: '2,870' },
+];
+
+// Seed names for the leaderboard. Real players displace these from the top;
+// their scores drift on a timer so the board is never a static screenshot.
+const SEED_BOARD = [
+  { name: 'KO_BEAST', pts: 4180 },
+  { name: 'CAGE_SAVANT', pts: 3905 },
+  { name: 'SOUTHPAW_SAM', pts: 3742 },
+  { name: 'THE_ORACLE', pts: 3510 },
+  { name: 'GLOVE_STORY', pts: 3388 },
 ];
 
 const fetchJson = async (path) => {

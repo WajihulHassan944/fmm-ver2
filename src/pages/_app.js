@@ -577,6 +577,46 @@ function AppContent({ children }) {
         />
       </Head>
 
+      <style jsx global>{`
+        /* Phone: the app owns the whole viewport, exactly as before. */
+        .fmm-app-desktop-shell { width: 100%; }
+
+        @media (min-width: 768px) {
+          /* Desktop: stop stretching a phone layout across a monitor. The app
+             sits in a fixed phone-width column on a branded backdrop, so every
+             internal layout gets the width it was designed for. */
+          .fmm-app-desktop-shell {
+            min-height: 100vh;
+            background:
+              radial-gradient(900px 520px at 50% -8%, rgba(242,181,68,.10), transparent 62%),
+              #05060a;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0;
+          }
+          .fmm-app-desktop-column {
+            width: 100%;
+            max-width: 460px;
+            min-height: 100vh;
+            background: #05060a;
+            border-left: 1px solid rgba(255,255,255,.09);
+            border-right: 1px solid rgba(255,255,255,.09);
+            box-shadow: 0 0 70px rgba(0,0,0,.65);
+            position: relative;
+          }
+          /* The feedback button is position:fixed, which is correct — it must
+             stay pinned to the viewport while the app scrolls. Only its
+             horizontal anchor is wrong on desktop: right:12 puts it against the
+             monitor edge instead of the column. Pull it to the column's right
+             edge (half the 460px column, less the 12px inset) and leave the
+             vertical pinning alone. Deliberately scoped to this one element —
+             a blanket [style*="fixed"] rule would silently change behaviour for
+             any element that ever uses fixed positioning. */
+          .fmm-feedback-fab { right: calc(50% - 218px) !important; }
+        }
+      `}</style>
+
       <div style={{ zIndex: "99999999999" }}>
         <ToastContainer />
       </div>
@@ -588,7 +628,13 @@ function AppContent({ children }) {
       {!hideLayout && !renderPrototypeExperience && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
       {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
-      {renderPrototypeExperience && <FantasyMobileExperience initialTab={exactMobileTab} forceRender={forcePrototypeExperience} />}
+      {renderPrototypeExperience && (
+        <div className="fmm-app-desktop-shell">
+          <div className="fmm-app-desktop-column">
+            <FantasyMobileExperience initialTab={exactMobileTab} forceRender={forcePrototypeExperience} />
+          </div>
+        </div>
+      )}
 
       {renderLegacyExperience && <main className={mainClassName}>
         {useRouteExperienceFrame ? (

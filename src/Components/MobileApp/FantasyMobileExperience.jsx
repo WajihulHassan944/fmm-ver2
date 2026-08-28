@@ -1113,6 +1113,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
         aria-label="Report a problem"
         onClick={() => setFeedbackOpen(true)}
         onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setFeedbackOpen(true); }}
+        className="fmm-feedback-fab"
         style={{
           position: 'fixed', right: 12, bottom: 88, zIndex: 9998,
           minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
