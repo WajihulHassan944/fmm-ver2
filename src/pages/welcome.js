@@ -103,6 +103,12 @@ const SITE_STYLES = `
     [data-fmm="hero-band"],
     [data-fmm="body-grid"],
     [data-fmm="footer-grid"] { padding-left: 16px !important; padding-right: 16px !important; }
+    /* This grid was never given a phone column rule at all — the 348px sidebar
+       stayed fixed-width, overflowing a 375px screen and pushing the fight cards
+       off to the side instead of stacking. */
+    [data-fmm="body-grid"] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-fmm="signup-name-row"],
+    [data-fmm="signup-dob-row"] { grid-template-columns: minmax(0,1fr) !important; gap: 10px !important; }
     [data-fmm="store-track"] > a { flex: 0 0 62% !important; min-width: 0 !important; }
 
     /* 44px minimum on anything tappable. */
@@ -122,7 +128,7 @@ const SITE_STYLES = `
   [data-fmm="mobile-menu"] a:active { background: rgba(245,166,35,.14); }
 `;
 
-const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = [], apiReachable = true, usingPreview = false }) => {
+const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = [], apiReachable = true, usingPreview = false, products = [] }) => {
   const router = useRouter();
   // Phone nav. The desktop links are hidden below 760px, so without this menu
   // there is no route to Fight Cards, Leagues, Leaderboard or the Store.
@@ -527,10 +533,10 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', height: '44px', padding: '0 20px', borderRadius: '999px', background: '#f5a623', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em', whiteSpace: 'nowrap' }}>SHOP ON ETSY ↗</a>
           </div>
             <div data-fmm="store-track" style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 6, scrollbarWidth: 'thin' }}>
-              {STORE_ITEMS.map((item) => (
+              {(products.length ? products : STORE_ITEMS).map((item) => (
                 <a
                   key={item.name}
-                  href="https://www.etsy.com/shop/FANTASYMMADNESS"
+                  href={item.url || 'https://www.etsy.com/shop/FANTASYMMADNESS'}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ flex: '0 0 calc(25% - 15px)', minWidth: 190, scrollSnapAlign: 'start', display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}
@@ -564,13 +570,13 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               </div>
               <form onSubmit={handleSignup} style={{ background: 'rgba(5,6,10,.55)', border: '1px solid rgba(216,220,228,.2)', borderRadius: 14, padding: 24 }}>
                 <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 19, marginBottom: 14, letterSpacing: '.03em' }}>CREATE YOUR ACCOUNT</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div data-fmm="signup-name-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <input name="firstName" value={form.firstName} onChange={onField} placeholder="First name" autoComplete="given-name" required style={fieldStyle} />
                   <input name="lastName" value={form.lastName} onChange={onField} placeholder="Last name" autoComplete="family-name" required style={fieldStyle} />
                 </div>
                 <input name="email" type="email" value={form.email} onChange={onField} placeholder="Email" autoComplete="email" required style={fieldStyle} />
                 <input name="password" type="password" value={form.password} onChange={onField} placeholder="Password (8+ characters)" autoComplete="new-password" minLength={8} required style={fieldStyle} />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div data-fmm="signup-dob-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={onField} required aria-label="Date of birth" style={fieldStyle} />
                   <select name="residenceState" value={form.residenceState} onChange={onField} required aria-label="State of residence" style={fieldStyle}>
                     <option value="">State</option>
@@ -609,6 +615,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <div style={{ display: 'flex', gap: '12px' }}>
                 <a href="https://www.tiktok.com/@fantasy.mmadness" style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>TikTok</a>
                 <a href="https://www.facebook.com/share/1DZ9RqkMJd/" style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>Facebook</a>
+              <a href="https://www.instagram.com/fantasymmadness" style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>Instagram</a>
                 <a href="https://x.com/FMmadness2024" style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>X</a>
                 <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12.5px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>Etsy</a>
               </div>
@@ -713,29 +720,42 @@ const toFightCard = (f, index) => {
 // --------------------------------------------------------------------------
 // Everything in the shop. A static four-up grid could only ever show four, so the
 // track scrolls and advances itself — swipeable on a phone, automatic on desktop.
+// Fallback only. Six of the previous eight entries pointed at fighter and arena
+// photographs while claiming to be hoodies, caps and gloves — which is why the
+// carousel showed fighters instead of merchandise. These three are the only
+// genuine apparel photographs in the project, square-cropped so a square card
+// does not distort them. Real products replace them whenever the Etsy catalogue
+// responds.
 const STORE_ITEMS = [
-  { name: 'Ringside Tee', price: '$32', image: '/site/tee.webp' },
-  { name: 'BKFC Tee', price: '$34', image: '/site/apparel-tee.webp' },
-  { name: 'Cage Hoodie', price: '$64', image: '/site/fighter-cutout.webp' },
-  { name: 'Corner Cap', price: '$28', image: '/site/faceoff.webp' },
-  { name: 'Training Gloves', price: '$79', image: '/site/red-corner.webp' },
-  { name: 'Fight Night Tee', price: '$32', image: '/site/fight-clash.webp' },
-  { name: 'Champion Hoodie', price: '$68', image: '/site/prize-arena.webp' },
-  { name: 'Arena Poster', price: '$18', image: '/site/arena.jpg' },
+  { name: 'Ringside Tee', price: '$32', image: '/site/product-ringside-tee.jpg' },
+  { name: 'Fight Night Tee', price: '$32', image: '/site/product-fight-tee.jpg' },
+  { name: 'BKFC Tee', price: '$34', image: '/site/product-bkfc-tee.jpg' },
 ];
 
+// Real fighters from the site's own photo library (public/images/fmm-experience),
+// composited into split-frame cards at 760x428. The source photos are 420x360 —
+// dropping those straight into a 16:9 frame is what made them look stretched, so
+// each fighter is cover-cropped into their own half instead.
+//
+// Shown only while the API returns no published fights. Real fights replace these
+// one at a time as they are published.
 const PREVIEW_FIGHTS = [
-  // Written in the RAW shape the API returns, then passed through toFightCard —
-  // the same function real fights use. That is what stops the two drifting and
-  // leaving blank lines on a preview card.
-  // Images are all 760x428 landscape; the app's sport-*.webp files are 99x132
-  // thumbnails built for circular slots and smear in a 16:9 frame.
-  { matchFighterA: 'Iron Jackson', matchFighterB: 'Dexter Fold', matchCategory: 'Boxing', maxRounds: 12, matchTokens: 1500, pot: 42000, entryCount: 214, featuredThisWeekImage: '/site/fight-clash.webp', matchDate: '2026-09-05T20:00:00Z' },
-  { matchFighterA: 'Rafael Mendes', matchFighterB: 'Cole Brannigan', matchCategory: 'MMA', maxRounds: 3, matchTokens: 4000, potTarget: 96000, pot: 96000, entryCount: 118, featuredThisWeekImage: '/site/faceoff.webp', matchDate: '2026-09-06T21:00:00Z' },
-  { matchFighterA: 'Dusty Wheeler', matchFighterB: 'Marcus Vane', matchCategory: 'Bare Knuckle', maxRounds: 5, matchTokens: 500, pot: 14000, entryCount: 62, featuredThisWeekImage: '/site/red-corner.webp', matchDate: '2026-09-12T20:00:00Z' },
-  { matchFighterA: 'Somchai Petch', matchFighterB: 'Lars Eide', matchCategory: 'Kickboxing', maxRounds: 3, matchTokens: 100, pot: 3200, entryCount: 41, featuredThisWeekImage: '/site/prize-arena.webp', matchDate: '2026-09-13T19:00:00Z' },
-  { matchFighterA: 'The Architect', matchFighterB: 'Kid Dynamo', matchCategory: 'Pro Wrestling', maxRounds: 1, matchTokens: 0, pot: 0, entryCount: 87, featuredThisWeekImage: '/site/arena.jpg', matchDate: '2026-09-14T23:00:00Z' },
-].map((row, index) => ({ ...toFightCard(row, index), id: 'preview-' + index, isPreview: true }));
+  { f1: 'CHRIS EUBANK JR', f2: 'CONOR BENN', badge: 'MAIN EVENT', badgeColor: '#c8102e', sport: 'BOXING', rounds: 12, fee: 1500, pot: 42000, image: '/site/card-eubank-benn.jpg' },
+  { f1: 'DAVID BENAVIDEZ', f2: 'ANTHONY YARDE', badge: 'CO-MAIN', badgeColor: '#f5a623', sport: 'BOXING', rounds: 12, fee: 1000, pot: 28000, image: '/site/card-benavidez-yarde.jpg' },
+  { f1: 'JADDEN ADDISON', f2: 'ZAVEER DAVIS', badge: 'FEATURED', badgeColor: '#2b6fe8', sport: 'MMA', rounds: 3, fee: 500, pot: 14000, image: '/site/card-addison-davis.jpg' },
+  // Was a 167x208 and a 106x132 icon stretched into a 16:9 card — that upscale is
+  // what read as "distorted". Replaced with the same split-frame composite build
+  // as the three fights above, at native 760x428.
+  { f1: 'RED CORNER', f2: 'BLUE CORNER', badge: '', badgeColor: '', sport: 'BARE KNUCKLE', rounds: 5, fee: 250, pot: 6400, image: '/site/card-bareknuckle-preview.jpg' },
+  { f1: 'STRIKER A', f2: 'STRIKER B', badge: '', badgeColor: '', sport: 'KICKBOXING', rounds: 3, fee: 100, pot: 3200, image: '/site/card-kickboxing-preview.jpg' },
+].map((row, index) => ({
+  id: 'preview-' + index,
+  ...row,
+  when: '',
+  entries: 0,
+  guaranteed: row.pot,
+  isPreview: true,
+}));
 
 const PREVIEW_BOARD = [
   { name: 'KO_BEAST', points: '4,180' },
@@ -762,10 +782,13 @@ export async function getServerSideProps({ res }) {
   if (res) {
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
   }
-  const [fightData, boardData] = await Promise.all([
+  const [fightData, boardData, apparelData] = await Promise.all([
     // prediction-fights, not fights — the latter does not exist and 404'd silently.
     fetchJson('/api/public/prediction-fights?limit=24'),
     fetchJson('/api/public/leaderboard?limit=5'),
+    // The live Etsy catalogue. Falls through to STORE_ITEMS when the shop is
+    // unreachable or the Etsy keys are not configured.
+    fetchJson('/api/public/apparel-products?limit=12'),
   ]);
 
   const rawFights = Array.isArray(fightData?.fights) ? fightData.fights
@@ -819,6 +842,20 @@ export async function getServerSideProps({ res }) {
   // apiReachable tells the page whether the server answered at all. Without it an
   // unreachable backend is indistinguishable from an empty one, and the visitor
   // sees a polite "coming soon" while the real problem is a dead server.
+  // Map the shop's products into the shape the carousel renders. Only entries
+  // with a real image are kept — a product card with no photograph looks broken.
+  const products = (Array.isArray(apparelData?.products) ? apparelData.products : [])
+    .filter((p) => p && p.name && p.image)
+    .slice(0, 12)
+    .map((p) => ({
+      name: String(p.name).slice(0, 48),
+      price: typeof p.price === 'number'
+        ? '$' + p.price.toFixed(p.price % 1 === 0 ? 0 : 2)
+        : String(p.price || ''),
+      image: String(p.image),
+      url: String(p.url || p.listingUrl || ''),
+    }));
+
   const apiReachable = Boolean(fightData || boardData);
 
   // Never ship an empty fight section. A visitor cannot tell "no fights published"
@@ -832,6 +869,7 @@ export async function getServerSideProps({ res }) {
       upcoming: upcoming.length ? upcoming : PREVIEW_FIGHTS.slice(0, 3).map((f) => ({ name: f.f1 + ' vs ' + f.f2, when: 'TBA' })),
       apiReachable,
       usingPreview,
+      products,
     },
   };
 }

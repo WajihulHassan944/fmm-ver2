@@ -581,7 +581,11 @@ function AppContent({ children }) {
         <ToastContainer />
       </div>
 
-      {!hideLayout && (!renderPrototypeExperience || !isExactMobile) && <Header />}
+      {/* Never show the legacy site header while the app is rendering — it has
+          its own topbar. This used to key off isExactMobile, so viewing the app
+          at anything wider than the phone breakpoint (a laptop, a resized
+          window) stacked the old site header above the app's real one. */}
+      {!hideLayout && !renderPrototypeExperience && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
       {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
       {renderPrototypeExperience && <FantasyMobileExperience initialTab={exactMobileTab} forceRender={forcePrototypeExperience} />}

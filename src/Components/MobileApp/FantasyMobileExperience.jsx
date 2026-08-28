@@ -143,6 +143,23 @@ const resolveLiveMedia = (...values) => {
   return '';
 };
 
+// Back-office uploads are ordinary photographs. Cloudinary strips the
+// background on delivery so the featured-fight zones get a true cut-out
+// without anyone having to prepare a transparent PNG by hand. Env-controlled
+// so it can be retuned or switched off without a deploy.
+const CUTOUT_TRANSFORM = String(process.env.NEXT_PUBLIC_CLOUDINARY_CUTOUT_TRANSFORM || 'e_background_removal').trim();
+const CUTOUTS_ENABLED = String(process.env.NEXT_PUBLIC_FIGHTER_CUTOUTS || 'true').toLowerCase() !== 'false';
+const cloudinaryCutout = (url = '') => {
+  const value = String(url || '').trim();
+  if (!CUTOUTS_ENABLED || !CUTOUT_TRANSFORM) return '';
+  if (!/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(value)) return '';
+  if (value.includes(CUTOUT_TRANSFORM)) return value;
+  // PNG so the alpha channel survives — a JPEG cut-out would come back white.
+  return value
+    .replace('/image/upload/', `/image/upload/${CUTOUT_TRANSFORM}/f_png,q_auto:best,c_limit,w_900/`)
+    .replace(/\.(jpe?g|webp|avif)(\?|$)/i, '.png$2');
+};
+
 const normalizeFight = (fight = {}) => {
   const category = String(fight.matchCategory || '').toLowerCase();
   const sport = category.includes('knuckle') ? 'bareknuckle'
@@ -175,6 +192,8 @@ const normalizeFight = (fight = {}) => {
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
     featuredFightFighterAImage: resolveLiveMedia(fight.featuredFightFighterAImage, fight.fighterAImage),
     featuredFightFighterBImage: resolveLiveMedia(fight.featuredFightFighterBImage, fight.fighterBImage),
+    fighterACutout: cloudinaryCutout(resolveLiveMedia(fight.featuredFightFighterAImage, fight.fighterAImage)),
+    fighterBCutout: cloudinaryCutout(resolveLiveMedia(fight.featuredFightFighterBImage, fight.fighterBImage)),
     poster: resolveLiveMedia(fight.fightPosterImage, fight.promotionBackground),
     raw: fight,
   };
@@ -367,16 +386,51 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
       }
     };
 
-    const [fightRes, boardRes, leagueRes, apparelRes, blogRes] = await Promise.all([
-      // Real route names, read off the server rather than guessed. The previous
-      // set was inferred and four of the five did not exist, which is why the
-      // app loaded a shell with no fights in it.
-      track('fights', publicRequest('/api/public/prediction-fights?limit=60')),
-      track('leaderboard', publicRequest('/api/public/leaderboard?limit=50')),
-      track('leagues', publicRequest('/api/public/leagues?limit=24')),
-      track('apparel', publicRequest('/api/public/apparel-products?limit=24')),
-      track('blogs', publicRequest('/api/blogs?limit=12')),
-    ]);
+    // Two waves, not one Promise.all. The old version made every field wait on
+    // the SLOWEST of five requests — including apparel, which the server fills
+    // from the Etsy API, and blogs. Neither appears on the first screen, so the
+    // fight fields sat empty for seconds waiting on a shop catalogue.
+    //
+    // Wave 1 is only what the opening screen actually renders. Each result is
+    // applied the instant it lands rather than at the end of the batch, and the
+    // loading flag clears as soon as fights are in.
+    const fightsPromise = track('fights', publicRequest('/api/public/prediction-fights?limit=60'))
+      .then((fightRes) => {
+        const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
+        const realFights = rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2);
+        // Real fights always win. The preview card only fills an empty screen.
+        setFights(realFights.length ? realFights : buildSampleFights());
+        setUsingSampleCard(realFights.length === 0);
+        setShadowFights(asArray(fightRes.shadowFights).map(normalizeFight));
+        setDataLoading(false);
+        return rawFights;
+      });
+
+    const boardPromise = track('leaderboard', publicRequest('/api/public/leaderboard?limit=50'))
+      .then((boardRes) => {
+        const rows = asArray(boardRes.leaderboard || boardRes.players || boardRes.data);
+        setLeaderboard(rows);
+        return rows;
+      });
+
+    const leaguePromise = track('leagues', publicRequest('/api/public/leagues?limit=24'))
+      .then((leagueRes) => {
+        setLeagues(asArray(leagueRes.leagues));
+        setLeagueUsers(asArray(leagueRes.users));
+        setAffiliateCampaigns(asArray(leagueRes.leagues));
+        return asArray(leagueRes.leagues);
+      });
+
+    // Wave 2 is deferred entirely. The store and blog tabs are not the landing
+    // screen, so these must never hold up first paint.
+    track('apparel', publicRequest('/api/public/apparel-products?limit=24'))
+      .then((apparelRes) => setApparel(asArray(apparelRes.items || apparelRes.products || apparelRes.apparel)));
+    track('blogs', publicRequest('/api/blogs?limit=12'))
+      .then((blogRes) => setBlogs(asArray(blogRes.blogs || blogRes.posts)));
+
+    const [rawFights, boardRows, leagueRows] = await Promise.all([fightsPromise, boardPromise, leaguePromise]);
+
+    setStats({ fights: rawFights.length, players: boardRows.length, leagues: leagueRows.length });
 
     // If EVERY request came back empty the backend is unreachable, not empty —
     // one dead server looks exactly like a database with no content, and telling
@@ -384,23 +438,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     const allEmpty = report.every((r) => !r.ok || r.empty);
     setLoadReport({ at: Date.now(), rows: report, allEmpty });
 
-    const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
-    const realFights = rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2);
-    // Real fights always win. The preview card only fills an empty screen.
-    setFights(realFights.length ? realFights : buildSampleFights());
-    setUsingSampleCard(realFights.length === 0);
-    setShadowFights(asArray(fightRes.shadowFights).map(normalizeFight));
-    setLeaderboard(asArray(boardRes.leaderboard || boardRes.players || boardRes.data));
-    setLeagues(asArray(leagueRes.leagues));
-    setLeagueUsers(asArray(leagueRes.users));
-    setAffiliateCampaigns(asArray(leagueRes.leagues));
-    setApparel(asArray(apparelRes.items || apparelRes.products || apparelRes.apparel));
-    setBlogs(asArray(blogRes.blogs || blogRes.posts));
-    setStats({
-      fights: rawFights.length,
-      players: asArray(boardRes.leaderboard || boardRes.players).length,
-      leagues: asArray(leagueRes.leagues).length,
-    });
+    // Whatever happened above, the app must never be stuck on a spinner.
     setDataLoading(false);
   }, []);
 
