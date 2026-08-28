@@ -982,7 +982,9 @@ class FantasyMobileAppCore extends React.Component {
 
   openNotifications = () => {
     this.playTap();
-    this.openModal('notifications');
+    // Sheet is registered as 'notif' — opening 'notifications' matched no branch,
+    // so the bell cleared the badge and showed nothing.
+    this.openModal('notif');
     // Clearing on open is the honest moment — they have now seen them.
     if (typeof this.props.onMarkNotificationsRead === 'function') {
       this.props.onMarkNotificationsRead();

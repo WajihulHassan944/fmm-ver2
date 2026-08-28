@@ -42,6 +42,17 @@ const SITE_STYLES = `
   .fmm-site select option { background: #0b0e18; color: #fff; }
   @keyframes fmmTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
   @keyframes fmmPulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+  /* Nothing in the header may wrap — five uppercase links plus Sign in plus Join
+     broke onto two lines between 760 and 1000px, which is the ragged bar. */
+  [data-fmm="nav-row"] a { white-space: nowrap; }
+
+  /* Collapse to the phone menu at 1000px, not 760px: that band is exactly where
+     the row runs out of space. */
+  @media (max-width: 1000px) {
+    [data-fmm="nav-links"] { display: none !important; }
+    [data-fmm="nav-burger"] { display: inline-flex !important; }
+  }
+
   @media (max-width: 1080px) {
     [data-fmm="body-grid"] { grid-template-columns: minmax(0,1fr) !important; }
     [data-fmm="sidebar"] { position: static !important; }

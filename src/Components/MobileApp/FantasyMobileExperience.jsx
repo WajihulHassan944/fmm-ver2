@@ -918,6 +918,10 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     onSubmitPrediction,
     onPurchaseCoins,
     onSaveProfile,
+    // Without these two the bell opens an empty panel: the app's
+    // loadNotificationFeed bails when the prop is missing.
+    onLoadNotifications: loadNotificationsInApp,
+    onMarkNotificationsRead: markNotificationsReadInApp,
     usingSampleCard,
     // Used to mark the signed-in player as "You" in standings.
     playerName: currentUser?.playerName
@@ -965,7 +969,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     affiliateCampaigns, apparel, blogs, notifications, unreadNotificationCount,
     currentUser, coins, stats, features, isStaff,
     onSignup, onLogin, onLogout, onRequestPasswordReset, onSubmitPrediction,
-    onPurchaseCoins, onSaveProfile, onSubscribe, onClaimReward, onSaveStreak, onJoinLeague,
+    onPurchaseCoins, onSaveProfile, loadNotificationsInApp, markNotificationsReadInApp, onSubscribe, onClaimReward, onSaveStreak, onJoinLeague,
     onLoadAffiliate, loadPromoterReachInApp, announceFightToLeagueInApp,
     loadShareKitInApp, onRequestPayout, loadChallengesInApp, createChallengeInApp,
     respondToChallengeInApp, joinWaitlistInApp, loadWaitlistStatusInApp,

@@ -150,6 +150,34 @@ const defined = new Set([...core.matchAll(/^\s{2}(render[A-Z]\w*)\s*(?:\(|=)/gm)
 const undefRender = called.filter((n) => !defined.has(n));
 check('render methods defined', undefRender.length === 0, called.length + ' called' + (undefRender.length ? ' — missing: ' + undefRender.join(', ') : ''));
 
+// -- 13: app buttons actually do something ----------------------------------
+// Added after the bell opened modal 'notifications' while the sheet was
+// registered as 'notif' — the badge cleared and nothing appeared.
+log('\n=== APP BUTTONS ===');
+{
+  const opened = [...new Set([...core.matchAll(/openModal\('(\w+)'/g)].map((m) => m[1]))];
+  const rendered = new Set([...core.matchAll(/s\.modal === '(\w+)'/g)].map((m) => m[1]));
+  const deadModals = opened.filter((m) => !rendered.has(m));
+  check('every modal opened has a sheet', deadModals.length === 0, opened.length + ' modals' + (deadModals.length ? ' — dead: ' + deadModals.join(', ') : ''));
+
+  const tabs = [...new Set([...core.matchAll(/setTab\('(\w+)'\)/g)].map((m) => m[1]))];
+  const tabRendered = new Set([...core.matchAll(/s\.activeTab === '(\w+)'/g)].map((m) => m[1]));
+  const deadTabs = tabs.filter((x) => !tabRendered.has(x));
+  check('every tab target renders', deadTabs.length === 0, tabs.length + ' tabs' + (deadTabs.length ? ' — dead: ' + deadTabs.join(', ') : ''));
+
+  const coreDeclared = new Set([
+    ...[...core.matchAll(/^\s{2}(\w+)\s*=/gm)].map((m) => m[1]),
+    ...[...core.matchAll(/^\s{2}(\w+)\s*\(/gm)].map((m) => m[1]),
+  ]);
+  const handlers = [...new Set([...core.matchAll(/onClick:\s*this\.(\w+)/g)].map((m) => m[1]))];
+  const deadHandlers = handlers.filter((h) => !coreDeclared.has(h));
+  check('every onClick handler exists', deadHandlers.length === 0, handlers.length + ' handlers' + (deadHandlers.length ? ' — dead: ' + deadHandlers.join(', ') : ''));
+
+  const propCalls = [...new Set([...core.matchAll(/this\.props\.(on\w+)/g)].map((m) => m[1]))];
+  const missingCb = propCalls.filter((p) => !new RegExp('(^|[\\s,{])' + p + '([\\s,:}]|$)', 'm').test(shell));
+  check('every callback prop provided', missingCb.length === 0, propCalls.length + ' callbacks' + (missingCb.length ? ' — missing: ' + missingCb.join(', ') : ''));
+}
+
 // -- 5, 7: images exist and fit their container -----------------------------
 log('\n=== IMAGES ===');
 const site = await ls('fmm-frontend/public/site');
