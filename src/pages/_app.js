@@ -228,10 +228,7 @@ const routeMatchesPrefix = (pathname = "", prefixes = []) =>
   prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 const MOBILE_APP_ROUTE_TABS = {
-  // "/" is deliberately NOT here. It used to map to the app, which made _app.js
-  // render the phone experience on the homepage — stretched across a laptop, with
-  // the real website underneath it. The homepage is the website; the app lives at
-  // /home and the routes below.
+  "/": "home",
   "/home": "home",
   "/fights": "contests",
   "/upcomingfights": "contests",
@@ -327,10 +324,7 @@ function AppContent({ children }) {
   // Keep the global site header hidden for admin and the standalone demo app.
   // The homepage still needs the normal desktop/laptop navbar, while CSS hides
   // it on phone so the standalone mobile app topbar remains clean.
-  // The new homepage (pages/welcome.js, reused by pages/index.js) brings its own
-  // nav and footer, so the legacy site chrome must not be layered on top of it.
-  const hideLayout = isAdministrationRoute || isStandaloneDemoRoute
-    || router.pathname === "/" || router.pathname === "/welcome";
+  const hideLayout = isAdministrationRoute || isStandaloneDemoRoute;
   const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(

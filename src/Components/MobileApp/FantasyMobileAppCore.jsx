@@ -493,14 +493,6 @@ class FantasyMobileAppCore extends React.Component {
     feedbackBusy: false,
     shareKit: null,
     promoterBusy: false,
-    // Billing address for the gateway's address-verification check. No card
-    // fields here by design — those live on Authorize.net's hosted page, so card
-    // numbers never touch our servers.
-    billing: { firstName: '', lastName: '', address: '', city: '', state: '', zipCode: '', country: 'US' },
-    checkoutBusy: false,
-    // Edit-profile draft, seeded from the signed-in player when the sheet opens.
-    profileDraft: { playerName: '', firstName: '', lastName: '', phone: '' },
-    profileBusy: false,
     seasonMeta: { slots: [], callCategories: {}, callBonusCap: 100, slotMax: 100 },
     mySeasonCards: [],
     seasonBusy: false,
@@ -834,8 +826,7 @@ class FantasyMobileAppCore extends React.Component {
     if (tab === 'watch' && this.state.activeTab !== 'watch') this.startWatchTicker();
     if (tab !== 'watch' && this.state.activeTab === 'watch') this.stopWatchTicker();
     // Staff opening Settings pulls the live refund/payout queues.
-    // Admin queues moved to the back office, so Settings no longer fetches them.
-    // This used to fire an admin request whenever a player opened Settings.
+    if (tab === 'settings' && this.props.isStaff) this.loadAdminMoney();
     // Promoter tools need an affiliate session, so they load on demand rather
     // than firing a guaranteed 401 on every app start.
     if (tab === 'leagues' && !this.state.promoterReach) this.loadPromoterReach();
@@ -1073,12 +1064,6 @@ class FantasyMobileAppCore extends React.Component {
   };
   openAiScout = (event) => this.openModal('aiScout', event);
   openEvent = (event) => {
-    // A preview fight is not a real contest — never let one reach a money path.
-    // NB: arrow function, so no `arguments` object — use the parameter.
-    if (event && event.isSample) {
-      this.showToast('This is a preview fight — publish a real card to play it');
-      return;
-    }
     if (!event?.playable) {
       // Keep the user inside the app: show the in-app fight detail instead of
       // routing out to the website /fight/<id> page.
@@ -1943,87 +1928,15 @@ class FantasyMobileAppCore extends React.Component {
     cart: state.cart.filter((item) => item.sku !== sku),
   }));
 
-  setBillingField = (field, value) => this.setState((state) => ({
-    billing: { ...state.billing, [field]: value },
-  }));
-
-  setProfileField = (field, value) => this.setState((state) => ({
-    profileDraft: { ...state.profileDraft, [field]: value },
-  }));
-
-  // Seed the draft from the live player before showing the sheet, so the fields
-  // are pre-filled rather than blank.
-  openEditProfile = () => {
-    this.playTap();
-    const p = this.props.player || {};
-    this.safeSetState({
-      profileDraft: {
-        playerName: p.playerName || this.props.playerName || '',
-        firstName: p.firstName || '',
-        lastName: p.lastName || '',
-        phone: p.phone || '',
-      },
-    });
-    this.openEditProfile();
-  };
-
-  saveProfile = async () => {
-    const d = this.state.profileDraft;
-    if (!String(d.playerName || '').trim()) { this.showToast('Pick a display name'); return; }
-    this.safeSetState({ profileBusy: true });
-    const result = typeof this.props.onSaveProfile === 'function'
-      ? await this.props.onSaveProfile({
-        playerName: d.playerName.trim(),
-        firstName: String(d.firstName || '').trim(),
-        lastName: String(d.lastName || '').trim(),
-        phone: String(d.phone || '').trim(),
-      })
-      : { ok: false, message: 'Profile saving is not available right now.' };
-    this.safeSetState({ profileBusy: false });
-    if (result?.ok === false) { this.showToast(result.message || 'Could not save your profile'); return; }
-    this.closeModal();
-    this.showToast('\u2713 Profile updated');
-  };
-
   continueCartCheckout = () => {
     if (!this.state.cart.length) {
       this.openModal('addcoins');
       return;
     }
-    // Collect the billing address before handing off to the gateway. Skipping it
-    // is how a card gets declined on address verification with no explanation.
-    this.playTap();
-    this.openModal('billing');
-  };
-
-  submitCheckout = async () => {
-    const b = this.state.billing;
-    const required = [['firstName', 'First name'], ['lastName', 'Last name'],
-      ['address', 'Street address'], ['city', 'City'], ['state', 'State'], ['zipCode', 'ZIP code']];
-    const missing = required.filter(([key]) => !String(b[key] || '').trim()).map(([, label]) => label);
-    if (missing.length) { this.showToast('Still needed: ' + missing.join(', ')); return; }
-
-    this.safeSetState({ checkoutBusy: true });
-    const result = await this.props.onPurchaseCoins?.({
+    this.props.onPurchaseCoins?.({
       product: 'fm-coins',
       items: this.state.cart.map(({ sku, quantity }) => ({ sku, quantity })),
-      billing: {
-        firstName: b.firstName.trim(),
-        lastName: b.lastName.trim(),
-        address: b.address.trim(),
-        city: b.city.trim(),
-        state: b.state.trim().toUpperCase(),
-        zipCode: b.zipCode.trim(),
-        country: b.country || 'US',
-      },
     });
-    this.safeSetState({ checkoutBusy: false });
-
-    // On success the browser is already navigating to the payment page, so there
-    // is nothing to show. Only a failure needs a message.
-    if (result && result.ok === false) {
-      this.showToast(result.message || 'Could not start checkout');
-    }
   };
 
   vote = (fighter) => {
@@ -3481,27 +3394,113 @@ class FantasyMobileAppCore extends React.Component {
     );
     return React.createElement('div', { style: { padding: '8px 16px' } },
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, marginBottom: 4, color: '#f2b544' } }, 'SCORING & SETTINGS'),
-      this.props.isStaff && React.createElement('div', {
-        key: 'backoffice-link',
-        style: {
-          marginBottom: 16, padding: 13, borderRadius: 12,
-          background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.4)',
+      this.props.isStaff && React.createElement(React.Fragment, null,
+      React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, color: '#ef4444', letterSpacing: 1, marginBottom: 4 } }, '🔒 ADMIN / BACK-OFFICE ONLY — NOT VISIBLE TO USERS'),
+      React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 16 } }, 'Tune how Fight IQ scoring and payouts work for you'),
+      React.createElement('div', { key: 'payouts', style: { background: 'rgba(34,197,94,.07)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 12, padding: 14, marginBottom: 16 } },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 } },
+          React.createElement('span', { style: { fontSize: 16 } }, '\ud83d\udcb8'),
+          React.createElement('div', { style: { fontWeight: 900, fontSize: 13 } }, 'Affiliate Payouts'),
+          React.createElement('div', { style: { fontSize: 7.5, fontWeight: 900, color: '#ef4444', background: 'rgba(239,68,68,.15)', padding: '1px 6px', borderRadius: 999, marginLeft: 4 } }, 'MONEY')
+        ),
+        React.createElement('div', { style: { fontSize: 10, color: 'rgba(255,255,255,.6)', fontWeight: 700, marginBottom: 10 } }, 'Approve once you\u2019ve actually sent the money. Rejecting returns the balance to them \u2014 requesting already took it out of their wallet.'),
+        !s.payoutQueue.length
+          ? React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', padding: '8px 0' } }, s.adminBusy ? 'Loading\u2026' : 'No payout requests waiting.')
+          : null,
+        s.payoutQueue.map(p => React.createElement('div', {
+          key: p.id, style: { padding: 10, marginBottom: 6, borderRadius: 9, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.09)' }
         },
-      },
-        React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, color: '#ef4444', letterSpacing: 1, marginBottom: 4 } }, '\ud83d\udd12 STAFF'),
-        React.createElement('div', { style: { fontSize: 12.5, fontWeight: 900, marginBottom: 4 } }, 'Back office'),
-        React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', lineHeight: 1.5, marginBottom: 10 } },
-          'Payouts, refunds, fight setup and house settings live in the back office \u2014 not in the player app.'),
-        React.createElement('div', {
-          onClick: () => { this.playTap(); if (typeof window !== 'undefined') window.open('/administration', '_blank', 'noopener'); },
-          role: 'button', tabIndex: 0,
-          style: {
-            textAlign: 'center', padding: '10px 0', borderRadius: 999,
-            background: 'rgba(239,68,68,.85)', color: '#fff', fontWeight: 900,
-            fontSize: 11.5, cursor: 'pointer', letterSpacing: .3,
-          },
-        }, 'OPEN BACK OFFICE \u2197')
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 } },
+            React.createElement('div', { style: { minWidth: 0 } },
+              React.createElement('div', { style: { fontSize: 11.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, p.name),
+              React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.45)', marginTop: 1 } }, (p.method || 'Payment method not set') + ' \u00b7 ' + (p.email || ''))
+            ),
+            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16, color: '#22c55e', flex: '0 0 auto' } }, Number(p.amount || 0).toLocaleString() + ' FM')
+          ),
+          p.status === 'pending'
+            ? React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 9 } },
+                React.createElement('div', {
+                  onClick: () => this.resolvePayout(p, 'approve'),
+                  style: { flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 7, fontSize: 10, fontWeight: 900, cursor: 'pointer', background: s.payoutBusy === p.id ? 'rgba(34,197,94,.3)' : '#22c55e', color: '#06210f' }
+                }, s.payoutBusy === p.id ? '\u2026' : 'MARK PAID'),
+                React.createElement('div', {
+                  onClick: () => this.resolvePayout(p, 'reject'),
+                  style: { flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 7, fontSize: 10, fontWeight: 900, cursor: 'pointer', background: 'rgba(255,255,255,.07)', border: '1px solid rgba(239,68,68,.4)', color: '#ff8b8b' }
+                }, 'REJECT & RETURN')
+              )
+            : React.createElement('div', { style: { fontSize: 9.5, fontWeight: 900, marginTop: 8, color: p.status === 'paid' ? '#22c55e' : '#ff8b8b' } },
+                p.status === 'paid' ? '\u2713 PAID' : '\u21a9 REJECTED \u2014 BALANCE RETURNED')
+        ))
       ),
+      React.createElement('div', { key: 'refunds', style: { background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.45)', borderRadius: 12, padding: 14, marginBottom: 16 } },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 } },
+          React.createElement('span', { style: { fontSize: 16 } }, '\u21a9'),
+          React.createElement('div', { style: { fontWeight: 900, fontSize: 13 } }, 'Refund a Fight'),
+          React.createElement('div', { style: { fontSize: 7.5, fontWeight: 900, color: '#ef4444', background: 'rgba(239,68,68,.15)', padding: '1px 6px', borderRadius: 999, marginLeft: 4 } }, 'MONEY')
+        ),
+        React.createElement('div', { style: { fontSize: 10, color: 'rgba(255,255,255,.6)', fontWeight: 700, marginBottom: 10 } }, 'Cancelled fight? Return every entry fee. Each player gets back exactly what they were charged, the pot is reduced, and running it twice never pays twice.'),
+        !s.refundFights.length
+          ? React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', padding: '8px 0' } }, s.adminBusy ? 'Loading\u2026' : 'No fights with refundable entries.')
+          : null,
+        s.refundFights.map(f => React.createElement('div', {
+          key: f.id, style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', marginBottom: 4, borderRadius: 8, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)' }
+        },
+          React.createElement('div', { style: { minWidth: 0 } },
+            React.createElement('div', { style: { fontSize: 11, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, f.name),
+            React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginTop: 1 } }, (f.players || 0) + ' entries \u00b7 ' + Number(f.pot || 0).toLocaleString() + ' FM pot')
+          ),
+          f.refunded
+            ? React.createElement('div', { style: { fontSize: 9.5, fontWeight: 900, color: '#22c55e', flex: '0 0 auto', marginLeft: 8 } }, '\u2713 REFUNDED')
+            : React.createElement('div', {
+                onClick: () => this.confirmRefund(f),
+                style: { fontSize: 10, fontWeight: 900, color: '#fff', background: '#ef4444', padding: '6px 12px', borderRadius: 7, cursor: 'pointer', flex: '0 0 auto', marginLeft: 8 }
+              }, 'REFUND ALL')
+        ))
+      ),
+      React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#22c55e', letterSpacing: 1, marginBottom: 8 } }, '⚡ AUTOMATION — LESS FOR YOU TO MANAGE'),
+      toggle('Auto-Accept League Requests', 'Public leagues admit new members instantly, no approval queue', 'autoAcceptLeague'),
+      toggle('Auto-Payout Winnings', 'Coins credit the instant a fight settles', 'autoPayout'),
+      toggle('AI Auto-Score Completed Fights', 'AI reviews finished fights and finalizes scorecards & leaderboards instantly — no manual grading', 'aiAutoScore'),
+      React.createElement('div', { style: { background: 'linear-gradient(135deg,rgba(34,197,94,.12),rgba(77,141,255,.08))', border: '1px solid rgba(34,197,94,.4)', borderRadius: 12, padding: 14, marginBottom: 16, boxShadow: '0 0 16px rgba(34,197,94,.25)' } },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 } },
+          React.createElement('span', { style: { fontSize: 16 } }, '🤖'),
+          React.createElement('div', { style: { fontWeight: 900, fontSize: 13 } }, 'AI Scoring Assistant')
+        ),
+        React.createElement('div', { style: { fontSize: 10, color: 'rgba(255,255,255,.6)', fontWeight: 700, marginBottom: 10 } }, 'Runs in the background to grade old/completed fights, catch missed results, and keep every leaderboard current — like having a full ops team.'),
+        React.createElement('div', {
+          onClick: this.runAiScoring,
+          style: { textAlign: 'center', padding: '10px 0', borderRadius: 8, fontSize: 11, fontWeight: 900, cursor: 'pointer', background: s.aiScoring ? 'rgba(34,197,94,.15)' : '#22c55e', color: s.aiScoring ? '#22c55e' : '#06210f', animation: s.aiScoring ? 'pulseLive 1s infinite' : 'none' }
+        }, s.aiScoring ? '🤖 SCORING IN PROGRESS…' : 'RUN AI SCORING NOW')
+      ),
+      React.createElement('div', { style: { background: 'rgba(77,141,255,.08)', border: '1px solid rgba(77,141,255,.4)', borderRadius: 12, padding: 14, marginBottom: 16 } },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 } },
+          React.createElement('span', { style: { fontSize: 16 } }, '👥'),
+          React.createElement('div', { style: { fontWeight: 900, fontSize: 13 } }, 'Live Scoring Team'),
+          React.createElement('div', { style: { fontSize: 7.5, fontWeight: 900, color: '#ef4444', background: 'rgba(239,68,68,.15)', padding: '1px 6px', borderRadius: 999, marginLeft: 4 } }, 'STAFF ONLY')
+        ),
+        React.createElement('div', { style: { fontSize: 10, color: 'rgba(255,255,255,.6)', fontWeight: 700, marginBottom: 10 } }, 'Assign each hire to one corner — they only see and score that fighter. AI suggests live strike/power-move counts from the feed; the scorer just confirms or adjusts, so you can run multiple simultaneous events without doing it all yourself.'),
+        React.createElement('div', {
+          onClick: () => { this.openModal('aiScoringDemo'); this.startAiDemo(); },
+          style: { textAlign: 'center', padding: '9px 0', borderRadius: 8, fontSize: 11, fontWeight: 900, cursor: 'pointer', background: '#a855f7', color: '#fff', marginBottom: 10 }
+        }, '▶ SEE AI-ASSISTED SCORING IN ACTION'),
+        ['UFC 323', 'BKFC 71', 'GLORY 92'].map(ev => React.createElement('div', { key: ev, style: { marginBottom: 10 } },
+          React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#f2c869', marginBottom: 4 } }, ev),
+          s.scorerTeam.filter(r => r.event === ev).map(row => React.createElement('div', {
+            key: row.id, style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', marginBottom: 3, borderRadius: 6, background: row.side === 'red' ? 'rgba(239,68,68,.08)' : 'rgba(77,141,255,.08)', borderLeft: '3px solid ' + (row.side === 'red' ? '#ef4444' : '#4d8dff') }
+          },
+            React.createElement('div', null,
+              React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color: row.side === 'red' ? '#ef4444' : '#4d8dff' } }, (row.side === 'red' ? 'RED CORNER' : 'BLUE CORNER') + ' · ' + row.corner),
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 5, marginTop: 1 } },
+                React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: row.status === 'live' ? '#22c55e' : 'rgba(255,255,255,.5)' } }, row.name),
+                row.status === 'live' && React.createElement('div', { style: { fontSize: 7.5, fontWeight: 900, color: '#a855f7', background: 'rgba(168,85,247,.15)', padding: '1px 5px', borderRadius: 999 } }, '🤖 AI-ASSISTED')
+              )
+            ),
+            row.status === 'live'
+              ? React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color: '#22c55e', display: 'flex', alignItems: 'center', gap: 4 } }, React.createElement('span', { style: { width: 6, height: 6, borderRadius: '50%', background: '#22c55e', animation: 'pulseLive 1.2s infinite' } }), 'SCORING')
+              : React.createElement('div', { onClick: () => this.assignScorer(row.id), style: { fontSize: 10, fontWeight: 900, color: '#4d8dff', cursor: 'pointer' } }, 'ASSIGN →')
+          ))
+        ))
+      )),
       React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: 'rgba(255,255,255,.5)', letterSpacing: 1, margin: '18px 0 8px' } }, 'SCORING & ALERTS'),
       toggle('Round-by-Round Scoring', 'Score picks live each round during Watch Party, not just the fight winner', 'roundByRound'),
       toggle('Sound Effects', 'Bell rings & crowd cheers on wins, entries and claims', 'sound'),
@@ -5017,198 +5016,6 @@ class FantasyMobileAppCore extends React.Component {
                     Number(row.score || 0).toLocaleString() + (st.unit === '/500' ? ' /500' : ''))
                 ))
               )
-      ]);
-    }
-
-    // POT STANDINGS — who is winning THIS contest, not the global board. The
-    // mockup had sample rows; this reads the real leaderboard the app already
-    // holds and marks the signed-in player.
-    if (s.modal === 'leagueBoard') {
-      const sf = s.modalData || {};
-      const rows = (Array.isArray(this.props.leaderboard) ? this.props.leaderboard : []).slice(0, 12);
-      const myName = String(this.props.playerName || '').toLowerCase();
-      return overlay([
-        closeBtn,
-        React.createElement('div', { key: 'k', style: { fontSize: 9.5, fontWeight: 900, letterSpacing: .8, color: '#f2b544', marginBottom: 3 } },
-          (sf.tag || 'LEAGUE') + ' \u00b7 POT STANDINGS'),
-        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 19, marginBottom: 4 } }, 'THIS POT\u2019S STANDINGS'),
-        React.createElement('div', { key: 's', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', marginBottom: 14, lineHeight: 1.5 } },
-          sf.pot > 0
-            ? Number(sf.pot).toLocaleString() + ' FM in the pot \u00b7 only entrants in this contest count'
-            : 'Only players in this contest count towards these standings.'),
-        rows.length === 0
-          ? React.createElement('div', { key: 'empty', style: { padding: 16, borderRadius: 11, background: 'rgba(255,255,255,.04)', border: '1px dashed rgba(255,255,255,.15)', fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.5)', lineHeight: 1.5 } },
-              'Standings appear once the first scorecards are scored.')
-          : React.createElement('div', { key: 'list', style: { display: 'flex', flexDirection: 'column', gap: 6 } },
-              rows.map((row, index) => {
-                const name = String(row.playerName || row.displayName || row.username || row.name || 'Player');
-                const isYou = myName && name.toLowerCase() === myName;
-                return React.createElement('div', {
-                  key: name + index,
-                  style: {
-                    display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10,
-                    background: isYou ? 'rgba(242,181,68,.14)' : 'rgba(255,255,255,.04)',
-                    border: '1px solid ' + (isYou ? 'rgba(242,181,68,.5)' : 'rgba(255,255,255,.08)'),
-                  },
-                },
-                  React.createElement('div', { style: { width: 20, textAlign: 'center', fontWeight: 900, fontSize: 12, color: index < 3 ? '#f2b544' : 'rgba(255,255,255,.5)' } }, index + 1),
-                  React.createElement('div', { style: { flex: 1, fontWeight: 800, fontSize: 11.5, color: isYou ? '#f2b544' : '#fff' } }, isYou ? 'You' : name),
-                  React.createElement('div', { style: { fontWeight: 900, fontSize: 11.5, color: 'rgba(255,255,255,.7)', fontVariantNumeric: 'tabular-nums' } },
-                    Number(row.totalPoints ?? row.points ?? row.score ?? 0).toLocaleString() + ' pts')
-                );
-              })
-            )
-      ]);
-    }
-
-    // ENTERED — the confirmation after paying an entry fee. This is where a player
-    // sees the money actually left their wallet, so it shows the real balance.
-    if (s.modal === 'entered') {
-      const d = s.modalData || {};
-      const low = s.coins < 100;
-      return overlay([
-        React.createElement('div', { key: 'i', style: { textAlign: 'center', fontSize: 40, marginBottom: 6 } }, '\ud83e\udd4a'),
-        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 21, color: '#22c55e', textAlign: 'center', marginBottom: 4 } }, 'YOU\u2019RE IN'),
-        React.createElement('div', { key: 's', style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', textAlign: 'center', marginBottom: 14 } },
-          (d.f1 && d.f2 ? d.f1 + ' vs ' + d.f2 : (d.tag || 'Contest'))
-          + ' \u00b7 ' + Number(d.fee || 0).toLocaleString() + ' FM entered'),
-        React.createElement('div', {
-          key: 'bal',
-          style: {
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '11px 13px', borderRadius: 10, background: 'rgba(255,255,255,.05)',
-            border: '1px solid rgba(255,255,255,.12)', marginBottom: 12,
-          },
-        },
-          React.createElement('span', { style: { fontSize: 10.5, fontWeight: 800, color: 'rgba(255,255,255,.55)' } }, 'WALLET BALANCE'),
-          React.createElement('span', { style: { fontSize: 13, fontWeight: 900, color: low ? '#ef4444' : '#f2b544' } }, Number(s.coins || 0).toLocaleString() + ' FM')
-        ),
-        low
-          ? React.createElement('div', {
-              key: 'top',
-              onClick: () => this.openModal('addcoins'),
-              role: 'button', tabIndex: 0,
-              style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#f2b544,#df111b)', color: '#fff', fontFamily: "'Anton',sans-serif", fontSize: 13, cursor: 'pointer', marginBottom: 9 },
-            }, 'TOP UP MY WALLET')
-          : React.createElement('div', {
-              key: 'more',
-              onClick: () => { this.closeModal(); this.setTab('contests'); },
-              role: 'button', tabIndex: 0,
-              style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', color: '#fff', fontFamily: "'Anton',sans-serif", fontSize: 13, cursor: 'pointer', marginBottom: 9 },
-            }, 'ENTER ANOTHER CONTEST'),
-        React.createElement('div', {
-          key: 'lb',
-          onClick: () => { this.closeModal(); this.setTab('leaderboard'); },
-          role: 'button', tabIndex: 0,
-          style: { textAlign: 'center', padding: '11px 0', borderRadius: 999, border: '1px solid rgba(255,255,255,.3)', color: '#fff', fontWeight: 900, fontSize: 11.5, cursor: 'pointer', marginBottom: 10 },
-        }, 'SEE WHERE I RANK'),
-        React.createElement('div', { key: 'n', style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', textAlign: 'center', lineHeight: 1.5 } },
-          'Live scoring starts when the fight does. You can edit your card until then.')
-      ]);
-    }
-
-    // EDIT PROFILE — saves to the server. The mockup version only showed a toast.
-    if (s.modal === 'editProfile') {
-      const p = s.profileDraft;
-      const row = (key, label, placeholder, extra = {}) => React.createElement('div', { key, style: { marginBottom: 10 } },
-        React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 4 } }, label),
-        React.createElement('input', {
-          value: p[key] || '',
-          onChange: (ev) => this.setProfileField(key, ev.target.value),
-          placeholder,
-          maxLength: extra.maxLength,
-          style: {
-            width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.06)',
-            border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: '10px 12px',
-            color: '#fff', fontSize: 12.5, fontWeight: 700, fontFamily: "'Rajdhani',sans-serif",
-          },
-        })
-      );
-      return overlay([
-        closeBtn,
-        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, marginBottom: 12, color: '#f2b544' } }, 'EDIT PROFILE'),
-        row('playerName', 'Display name', 'How other players see you', { maxLength: 24 }),
-        row('firstName', 'First name', ''),
-        row('lastName', 'Last name', ''),
-        row('phone', 'Phone', 'Optional'),
-        React.createElement('div', { key: 'note', style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', lineHeight: 1.5, marginBottom: 4 } },
-          'Your email is used to sign in and cannot be changed here \u2014 contact support if you need it moved.'),
-        React.createElement('div', {
-          key: 'save',
-          onClick: () => { if (!s.profileBusy) this.saveProfile(); },
-          role: 'button', tabIndex: 0,
-          style: {
-            marginTop: 12, textAlign: 'center', padding: '12px 0', borderRadius: 999,
-            background: 'linear-gradient(90deg,#4d8dff,#a855f7)', color: '#fff',
-            fontWeight: 900, fontSize: 13, cursor: 'pointer', opacity: s.profileBusy ? .6 : 1,
-          },
-        }, s.profileBusy ? 'SAVING\u2026' : 'SAVE CHANGES')
-      ]);
-    }
-
-    if (s.modal === 'billing') {
-      const b = s.billing;
-      const total = (s.cart || []).reduce((sum, item) => sum + (Number(item.priceCents || 0) * Number(item.quantity || 1)), 0);
-      const field = (key, label, extra = {}) => React.createElement('div', { key, style: { marginBottom: 9 } },
-        React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 4, letterSpacing: .3 } }, label.toUpperCase()),
-        React.createElement('input', {
-          value: b[key] || '',
-          onChange: (ev) => this.setBillingField(key, ev.target.value),
-          autoComplete: extra.autoComplete,
-          inputMode: extra.inputMode,
-          maxLength: extra.maxLength,
-          placeholder: extra.placeholder || '',
-          style: {
-            width: '100%', padding: '11px 12px', borderRadius: 9,
-            background: 'rgba(0,0,0,.3)', border: '1px solid rgba(255,255,255,.18)',
-            color: '#fff', fontSize: 12.5, fontWeight: 700, fontFamily: "'Rajdhani',sans-serif",
-          },
-        })
-      );
-
-      return overlay([
-        closeBtn,
-        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 3 } }, 'BILLING DETAILS'),
-        React.createElement('div', { key: 'why', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', lineHeight: 1.5, marginBottom: 13 } },
-          'Your bank checks this address against your card. You enter your card on the next screen — on our payment provider\u2019s secure page, never here.'
-        ),
-        total > 0 && React.createElement('div', {
-          key: 'total',
-          style: {
-            marginBottom: 13, padding: '9px 11px', borderRadius: 9,
-            background: 'rgba(242,181,68,.1)', border: '1px solid rgba(242,181,68,.35)',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-          },
-        },
-          React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.6)' } }, 'TOTAL'),
-          React.createElement('div', { style: { fontSize: 15, fontWeight: 900, color: '#f2b544' } }, '$' + (total / 100).toFixed(2))
-        ),
-
-        React.createElement('div', { key: 'names', style: { display: 'flex', gap: 8 } },
-          React.createElement('div', { style: { flex: 1 } }, field('firstName', 'First name', { autoComplete: 'given-name' })),
-          React.createElement('div', { style: { flex: 1 } }, field('lastName', 'Last name', { autoComplete: 'family-name' }))
-        ),
-        field('address', 'Street address', { autoComplete: 'street-address', placeholder: '123 Main St' }),
-        React.createElement('div', { key: 'csz', style: { display: 'flex', gap: 8 } },
-          React.createElement('div', { style: { flex: 2 } }, field('city', 'City', { autoComplete: 'address-level2' })),
-          React.createElement('div', { style: { flex: 1 } }, field('state', 'State', { autoComplete: 'address-level1', maxLength: 2, placeholder: 'GA' })),
-          React.createElement('div', { style: { flex: 1 } }, field('zipCode', 'ZIP', { autoComplete: 'postal-code', inputMode: 'numeric', maxLength: 10 }))
-        ),
-
-        React.createElement('div', {
-          key: 'go',
-          onClick: () => { if (!s.checkoutBusy) this.submitCheckout(); },
-          role: 'button', tabIndex: 0,
-          style: {
-            marginTop: 6, textAlign: 'center', padding: '13px 0', borderRadius: 999,
-            background: 'linear-gradient(90deg,#f2b544,#df111b)', color: '#fff',
-            fontFamily: "'Anton',sans-serif", fontSize: 13.5, cursor: 'pointer',
-            opacity: s.checkoutBusy ? .6 : 1, letterSpacing: .4,
-          },
-        }, s.checkoutBusy ? 'OPENING SECURE CHECKOUT\u2026' : 'CONTINUE TO PAYMENT'),
-        React.createElement('div', { key: 'safe', style: { marginTop: 9, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)', textAlign: 'center', lineHeight: 1.5 } },
-          '\ud83d\udd12 Card details are handled by our payment provider. We never see or store your card number.'
-        )
       ]);
     }
 

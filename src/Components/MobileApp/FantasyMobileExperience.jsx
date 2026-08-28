@@ -180,57 +180,6 @@ const normalizeFight = (fight = {}) => {
   };
 };
 
-// --------------------------------------------------------------------------
-// PREVIEW CARD
-// Shown ONLY when the API returns zero fights. Without it the home screen is
-// blank in exactly the way that cannot be told apart from a broken app: the
-// featured sections return null with no events, so the page collapses.
-//
-// Every row carries isSample: true. The app refuses to enter a sample fight, so
-// no money path can ever touch one, and they vanish the moment one real fight
-// exists.
-// --------------------------------------------------------------------------
-// Same five fights as the website preview and the design document, so the app and
-// the site show one consistent example card.
-// Verified present in public/images/mobile-home/final-v35 — do not swap for a
-// guessed filename; a missing cut-out leaves the featured frames empty.
-const CUTOUT = '/images/mobile-home/final-v35/pick-winner-fighter-opt.webp';
-const SAMPLE_CARD = [
-  { cat: 'MMA', a: 'RAFAEL MENDES', b: 'COLE BRANNIGAN', rounds: 3, fee: 4000, pot: 96000, week: true, a1: CUTOUT, b1: CUTOUT },
-  { cat: 'Boxing', a: 'IRON JACKSON', b: 'DEXTER FOLD', rounds: 12, fee: 1500, pot: 42000, feature: true, a1: CUTOUT, b1: CUTOUT },
-  { cat: 'Bare Knuckle', a: 'DUSTY WHEELER', b: 'MARCUS VANE', rounds: 5, fee: 500, pot: 14000, a1: CUTOUT, b1: CUTOUT },
-  { cat: 'Kickboxing', a: 'SOMCHAI PETCH', b: 'LARS EIDE', rounds: 3, fee: 100, pot: 3200, a1: CUTOUT, b1: CUTOUT },
-  { cat: 'Pro Wrestling', a: 'THE ARCHITECT', b: 'KID DYNAMO', rounds: 1, fee: 0, pot: 0, a1: CUTOUT, b1: CUTOUT },
-];
-
-const buildSampleFights = () => SAMPLE_CARD.map((row, index) => {
-  const when = new Date(Date.now() + (index + 2) * 36 * 3600 * 1000);
-  return normalizeFight({
-    _id: 'sample-' + index,
-    matchFighterA: row.a,
-    matchFighterB: row.b,
-    matchName: row.cat.toUpperCase() + ' PREVIEW',
-    matchCategory: row.cat,
-    matchDate: when.toISOString(),
-    maxRounds: row.rounds,
-    matchTokens: row.fee,
-    pot: row.pot,
-    entryCount: 0,
-    matchStatus: 'upcoming',
-    featuredThisWeek: Boolean(row.week),
-    featuredFight: Boolean(row.feature),
-    // Placeholder cut-outs so the featured sections are not empty frames. The
-    // arena background is a fixed asset; only these change when a real fight is
-    // published with its own fighter images.
-    featuredFightFighterAImage: row.a1,
-    featuredFightFighterBImage: row.b1,
-    featuredThisWeekImage: row.a1,
-  });
-// playable MUST be true or renderStartHere and the event carousel skip these and
-// the home screen collapses again. Entry is blocked in openEvent via isSample, so
-// a preview fight still cannot reach a money path.
-}).map((fight) => ({ ...fight, isSample: true, playable: true }));
-
 // ==========================================================================
 // COMPONENT
 // ==========================================================================
@@ -254,11 +203,6 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     teamCards: { enabled: false, picksRequired: 5 },
   });
   const [dataLoading, setDataLoading] = useState(true);
-  // What the last data load actually did. Surfaced in the app so a failure is
-  // visible instead of looking like an empty database.
-  const [loadReport, setLoadReport] = useState(null);
-  // True while the preview card is standing in for real fights.
-  const [usingSampleCard, setUsingSampleCard] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [preview, setPreview] = useState(null);
 
@@ -353,42 +297,19 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   // the whole screen.
   // ------------------------------------------------------------------------
   const loadContent = useCallback(async () => {
-    // Record what each request actually did, so a failure is reported instead of
-    // silently rendering an empty screen.
-    const report = [];
-    const track = async (label, promise) => {
-      try {
-        const value = await promise;
-        report.push({ label, ok: value !== null && value !== undefined, empty: !value || Object.keys(value).length === 0 });
-        return value || {};
-      } catch (error) {
-        report.push({ label, ok: false, error: String(error?.message || error).slice(0, 120) });
-        return {};
-      }
-    };
-
     const [fightRes, boardRes, leagueRes, apparelRes, blogRes] = await Promise.all([
       // Real route names, read off the server rather than guessed. The previous
       // set was inferred and four of the five did not exist, which is why the
       // app loaded a shell with no fights in it.
-      track('fights', publicRequest('/api/public/prediction-fights?limit=60')),
-      track('leaderboard', publicRequest('/api/public/leaderboard?limit=50')),
-      track('leagues', publicRequest('/api/public/leagues?limit=24')),
-      track('apparel', publicRequest('/api/public/apparel-products?limit=24')),
-      track('blogs', publicRequest('/api/blogs?limit=12')),
+      publicRequest('/api/public/prediction-fights?limit=60'),
+      publicRequest('/api/public/leaderboard?limit=50'),
+      publicRequest('/api/public/leagues?limit=24'),
+      publicRequest('/api/public/apparel-products?limit=24'),
+      publicRequest('/api/blogs?limit=12'),
     ]);
 
-    // If EVERY request came back empty the backend is unreachable, not empty —
-    // one dead server looks exactly like a database with no content, and telling
-    // them apart is the difference between a five-minute fix and a long guess.
-    const allEmpty = report.every((r) => !r.ok || r.empty);
-    setLoadReport({ at: Date.now(), rows: report, allEmpty });
-
     const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
-    const realFights = rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2);
-    // Real fights always win. The preview card only fills an empty screen.
-    setFights(realFights.length ? realFights : buildSampleFights());
-    setUsingSampleCard(realFights.length === 0);
+    setFights(rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2));
     setShadowFights(asArray(fightRes.shadowFights).map(normalizeFight));
     setLeaderboard(asArray(boardRes.leaderboard || boardRes.players || boardRes.data));
     setLeagues(asArray(leagueRes.leagues));
@@ -430,9 +351,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   const loadMe = useCallback(async () => {
     const token = readSessionToken();
     if (!token) { setCurrentUser(null); setCoins(0); setIsStaff(false); return; }
-    // GET /profile, not /api/users/me — the latter does not exist. This loads the
-    // signed-in player, so a 404 here empties the whole app.
-    const result = await playerRequest('/profile');
+    const result = await playerRequest('/api/users/me');
     if (result.ok) {
       const user = result.user || result;
       setCurrentUser(user);
@@ -521,58 +440,8 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     return result;
   }, [loadMe, loadContent]);
 
-  // Saves the player's own profile. PUT /api/users/me/profile is the real route.
-  const onSaveProfile = useCallback(async (payload = {}) => {
-    const result = await playerRequest('/api/users/me/profile', {
-      method: 'PUT',
-      body: JSON.stringify(payload),
-    });
-    if (result?.ok === false || result?.message && !result?.ok) {
-      return { ok: false, message: result?.message || 'Could not save your profile.' };
-    }
-    return { ok: true };
-  }, [playerRequest]);
-
   const onPurchaseCoins = useCallback(async (payload = {}) => {
-    // Required by the route — without it the request is rejected before it starts.
-    // Derived from the cart so a double-tap reuses the same order rather than
-    // creating a second one.
-    const idempotencyKey = payload.idempotencyKey || (() => {
-      const cart = (payload.items || []).map((i) => `${i.sku}x${i.quantity}`).join('|');
-      return `coins-${cart}-${Math.floor(Date.now() / 60000)}`.slice(0, 150);
-    })();
-
-    const result = await playerRequest('/api/checkout/coin-orders', {
-      method: 'POST',
-      headers: { 'idempotency-key': idempotencyKey },
-      body: JSON.stringify({ ...payload, idempotencyKey }),
-    });
-
-    // The gateway is not configured yet — say so plainly instead of failing quietly.
-    if (result?.code === 'AUTHORIZE_NET_NOT_CONFIGURED') {
-      return { ok: false, message: 'Card payments are not switched on yet. Ask an admin to add coins to your wallet for now.' };
-    }
-    if (result?.code === 'SIGN_IN_REQUIRED') {
-      return { ok: false, message: 'That email already has an account — sign in before buying coins.' };
-    }
-
-    // Hand off to Authorize.net. The token must be POSTed as a form field, so a
-    // form is built and submitted; a redirect would lose the token.
-    if (result?.ok && result.formToken && result.checkoutUrl) {
-      if (typeof document !== 'undefined') {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = result.checkoutUrl;
-        const field = document.createElement('input');
-        field.type = 'hidden';
-        field.name = 'token';
-        field.value = result.formToken;
-        form.appendChild(field);
-        document.body.appendChild(form);
-        form.submit();
-      }
-      return { ok: true, redirecting: true, orderNumber: result.orderNumber };
-    }
+    const result = await playerRequest('/api/checkout/coin-orders', { method: 'POST', body: JSON.stringify(payload) });
     if (result.ok) await loadMe();
     return result;
   }, [loadMe]);
@@ -604,14 +473,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   }, [loadContent]);
 
   const onLoadAffiliate = useCallback(
-    // No per-id public route exists. The list carries the same public projection,
-    // so pull the one league out of it rather than calling a 404.
-    async (affiliateId) => {
-      const result = await publicRequest('/api/public/affiliates');
-      const rows = Array.isArray(result) ? result : (result?.affiliates || []);
-      const found = rows.find((row) => String(row?._id || row?.id) === String(affiliateId));
-      return found || null;
-    },
+    (affiliateId) => publicRequest(`/api/public/affiliates/${encodeURIComponent(affiliateId)}`),
     [],
   );
 
@@ -666,13 +528,12 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   );
 
   const joinWaitlistInApp = useCallback(
-    // The feature is a path segment: POST /api/waitlist/:feature.
-    (feature = 'head-to-head') => publicRequest(`/api/waitlist/${encodeURIComponent(feature)}`, { method: 'POST' }),
+    (feature = 'head-to-head') => publicRequest('/api/waitlist', { method: 'POST', body: JSON.stringify({ feature }) }),
     [],
   );
 
   const loadWaitlistStatusInApp = useCallback(
-    (feature = 'head-to-head') => publicRequest(`/api/waitlist/${encodeURIComponent(feature)}/me`),
+    (feature = 'head-to-head') => publicRequest(`/api/waitlist/${encodeURIComponent(feature)}`),
     [],
   );
 
@@ -917,13 +778,6 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     onRequestPasswordReset,
     onSubmitPrediction,
     onPurchaseCoins,
-    onSaveProfile,
-    usingSampleCard,
-    // Used to mark the signed-in player as "You" in standings.
-    playerName: currentUser?.playerName
-      || [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(' ')
-      || '',
-    player: currentUser || null,
     onSubscribe,
     onClaimReward,
     onSaveStreak,
@@ -965,7 +819,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     affiliateCampaigns, apparel, blogs, notifications, unreadNotificationCount,
     currentUser, coins, stats, features, isStaff,
     onSignup, onLogin, onLogout, onRequestPasswordReset, onSubmitPrediction,
-    onPurchaseCoins, onSaveProfile, onSubscribe, onClaimReward, onSaveStreak, onJoinLeague,
+    onPurchaseCoins, onSubscribe, onClaimReward, onSaveStreak, onJoinLeague,
     onLoadAffiliate, loadPromoterReachInApp, announceFightToLeagueInApp,
     loadShareKitInApp, onRequestPayout, loadChallengesInApp, createChallengeInApp,
     respondToChallengeInApp, joinWaitlistInApp, loadWaitlistStatusInApp,
@@ -1031,39 +885,6 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
           "report a problem" badge on a live product reads as an admission that
           things break. Enabled by NEXT_PUBLIC_TESTER_MODE, an @fmmtest.com
           login, or ?feedback=1. */}
-      {usingSampleCard && !dataLoading ? (
-        <div
-          role="status"
-          style={{
-            position: 'sticky', top: 0, zIndex: 9997, padding: '8px 14px',
-            background: '#1e3a5f', color: '#dbeafe',
-            fontFamily: "'Rajdhani', system-ui, sans-serif", fontWeight: 800,
-            fontSize: 11.5, lineHeight: 1.4, textAlign: 'center',
-          }}
-        >
-          PREVIEW CARD &mdash; these are example fights so you can see every screen.
-          Publish a fight and it replaces them.
-        </div>
-      ) : null}
-
-      {loadReport && loadReport.allEmpty && !dataLoading ? (
-        <div
-          role="alert"
-          style={{
-            position: 'sticky', top: 0, zIndex: 9998, padding: '10px 14px',
-            background: '#7f1d1d', color: '#fff', fontFamily: "'Rajdhani', system-ui, sans-serif",
-            fontWeight: 800, fontSize: 12, lineHeight: 1.45,
-          }}
-        >
-          Can&rsquo;t reach the server, so nothing has loaded. Tried{' '}
-          <span style={{ opacity: .85, wordBreak: 'break-all' }}>{API_BASE}</span>.
-          <div style={{ marginTop: 4, fontWeight: 700, fontSize: 11, opacity: .8 }}>
-            Usually this means the backend is not deployed, crashed at boot, or is
-            blocking this site&rsquo;s origin.
-          </div>
-        </div>
-      ) : null}
-
       {showReportButton ? (
       <div
         role="button"
