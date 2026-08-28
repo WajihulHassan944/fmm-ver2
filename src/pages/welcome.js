@@ -46,15 +46,8 @@ const SITE_STYLES = `
     [data-fmm="body-grid"] { grid-template-columns: minmax(0,1fr) !important; }
     [data-fmm="sidebar"] { position: static !important; }
   }
-  @media (max-width: 1080px) {
-    [data-fmm="hero-img"] { height: 220px !important; }
-  }
-  @media (max-width: 760px) {
-    [data-fmm="hero-img"] { height: 170px !important; }
-  }
-  @media (max-width: 480px) {
-    [data-fmm="hero-img"] { height: 140px !important; }
-  }
+  /* No height overrides: below the 780px cap the whole photo scales with the
+     screen, so nothing is ever cropped. */
   @media (max-width: 960px) {
     [data-fmm="three-grid"] { grid-template-columns: 1fr 1fr !important; }
     [data-fmm="leagues-grid"] { grid-template-columns: minmax(0,1fr) !important; }
@@ -166,8 +159,8 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
         </div>
 
         <div id="top" style={{ background: '#05060a' }}>
-          <div data-fmm="hero-wrap" style={{ width: '100%' }}>
-        <img src="/site/hero.jpg" alt="Fantasy MMAdness" fetchPriority="high" data-fmm="hero-img" style={{ display: 'block', width: '100%', height: 260, objectFit: 'cover', objectPosition: 'center 32%' }} />
+          <div data-fmm="hero-wrap" style={{ width: '100%', background: '#05060a' }}>
+        <img src="/site/hero.jpg" alt="Fantasy MMAdness" fetchPriority="high" data-fmm="hero-img" style={{ display: 'block', width: '100%', maxWidth: 780, height: 'auto', margin: '0 auto', objectFit: 'contain' }} />
           </div>
 
           {/* The copy used to sit over the artwork behind a heavy scrim, which buried

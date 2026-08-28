@@ -1485,6 +1485,11 @@ class FantasyMobileAppCore extends React.Component {
   };
   chestClick = () => {
     if (this.state.chestBurst) return;
+    // Unlock on this very gesture. iOS keeps an AudioContext suspended until a
+    // real user gesture resumes it, and if the global first-touch listener was
+    // missed the context stays silent for the rest of the session — so the
+    // chest was tapping with no sound even though the calls were all here.
+    this.unlockAudio();
     // Tap first so there is an immediate response, then the reward chime.
     this.playTap(); this.playBell(); this.playCheer();
     this.setState({ chestBurst: Date.now() });
@@ -4097,7 +4102,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 35%,rgba(5,6,10,.92))', pointerEvents: 'none' } }),
         React.createElement('div', { style: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12 } },
           React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color: '#ff9d2f', letterSpacing: 1, marginBottom: 2, textShadow: '0 1px 4px rgba(0,0,0,.9)' } }, '🤝 AFFILIATES & CREATORS'),
-          React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#ffe93b', marginBottom: 2, textShadow: '0 0 14px rgba(255,233,59,.8), 0 2px 4px rgba(0,0,0,.9)' } }, "YOU'RE THE PROMOTER NOW"),
+          React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#ffe93b', marginBottom: 2, textShadow: '0 0 14px rgba(255,233,59,.8), 0 2px 4px rgba(0,0,0,.9)' } }, 'RUN YOUR OWN LEAGUE'),
           React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#ffe93b', marginBottom: 8, textShadow: '0 1px 4px rgba(0,0,0,.9)' } }, 'Promote fights. Build a league. Get players moving.'),
           React.createElement('div', { onClick: () => this.openModal('affiliate'), style: { display: 'inline-block', padding: '9px 18px', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontSize: 11, fontWeight: 900, cursor: 'pointer', boxShadow: '0 0 14px rgba(77,141,255,.7)' } }, 'BECOME A PARTNER →')
         )
@@ -5845,7 +5850,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { key: 'hero', style: { height: 110, borderRadius: 12, overflow: 'hidden', marginBottom: 10, boxShadow: '0 0 18px rgba(77,141,255,.55)' } },
         React.createElement(MobileImageSlot, { id: 'affiliate-modal-handshake', shape: 'rect', placeholder: 'Handshake — partnership', fit: 'cover', src: 'affiliate-handshake-opt.jpg' })
       ),
-      React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#4d8dff', marginBottom: 4 } }, "YOU'RE THE PROMOTER NOW"),
+      React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#4d8dff', marginBottom: 4 } }, 'RUN YOUR OWN LEAGUE'),
       React.createElement('div', { key: 'b', style: { fontSize: 12, lineHeight: 1.6, color: 'rgba(255,255,255,.8)', marginBottom: 12 } }, 'Promote fights, build a league, and get players moving. Run it like a creator: set up your profile, launch a promotion, share the link, track activity, and request payout.'),
       React.createElement('div', { key: 'steps', style: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 } },
         ['Set up your affiliate profile', 'Create or promote a fight', 'Share the campaign link + QR', 'Track signups & performance', 'Request your payout'].map((step, i) => React.createElement('div', {
