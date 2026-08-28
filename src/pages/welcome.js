@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -92,7 +92,7 @@ const SITE_STYLES = `
     [data-fmm="hero-band"],
     [data-fmm="body-grid"],
     [data-fmm="footer-grid"] { padding-left: 16px !important; padding-right: 16px !important; }
-    [data-fmm="store-grid"] { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+    [data-fmm="store-track"] > a { flex: 0 0 62% !important; min-width: 0 !important; }
 
     /* 44px minimum on anything tappable. */
     .fmm-site a[href^="#"], .fmm-site a[href^="/"] { -webkit-tap-highlight-color: rgba(245,166,35,.25); }
@@ -116,6 +116,31 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
   // Phone nav. The desktop links are hidden below 760px, so without this menu
   // there is no route to Fight Cards, Leagues, Leaderboard or the Store.
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Advance the store track so every shirt is seen without the visitor scrolling.
+  // Pauses while the tab is hidden, and stops the moment they scroll it by hand —
+  // fighting a user's own swipe is worse than not animating at all.
+  useEffect(() => {
+    const track = document.querySelector('[data-fmm="store-track"]');
+    if (!track) return undefined;
+    let touched = false;
+    const stop = () => { touched = true; };
+    track.addEventListener('pointerdown', stop, { passive: true });
+    track.addEventListener('wheel', stop, { passive: true });
+    const timer = setInterval(() => {
+      if (touched || document.hidden) return;
+      const card = track.firstElementChild;
+      if (!card) return;
+      const step = card.getBoundingClientRect().width + 20;
+      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+      track.scrollTo({ left: atEnd ? 0 : track.scrollLeft + step, behavior: 'smooth' });
+    }, 5000);
+    return () => {
+      clearInterval(timer);
+      track.removeEventListener('pointerdown', stop);
+      track.removeEventListener('wheel', stop);
+    };
+  }, []);
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', password: '', dateOfBirth: '', residenceState: '',
   });
@@ -382,7 +407,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   ))}
                 </tbody>
               </table>
-              <a href="#board" style={{ display: 'block', padding: '13px 18px', borderTop: '1px solid rgba(216,220,228,.14)', fontSize: '12px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#f5a623' }}>Full standings →</a>
+              <a href="/home" style={{ display: 'block', padding: '13px 18px', borderTop: '1px solid rgba(216,220,228,.14)', fontSize: '12px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#f5a623' }}>Full standings →</a>
             </div>
 
             <div id="season" style={{ border: '1px solid rgba(192,57,159,.4)', borderRadius: '14px', padding: '18px', background: 'linear-gradient(168deg,rgba(192,57,159,.12),rgba(11,14,24,.6))' }}>
@@ -391,7 +416,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <p style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.72)', margin: '0 0 15px' }}>
                 Draft one fighter from boxing, MMA, bare knuckle, kickboxing and pro wrestling. They compete on their own schedules all season — every round they throw lands on your card.
               </p>
-              <a href="#season" style={{ display: 'inline-flex', alignItems: 'center', height: '42px', padding: '0 20px', borderRadius: '999px', background: '#c0399f', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em' }}>DRAFT FREE</a>
+              <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: '42px', padding: '0 20px', borderRadius: '999px', background: '#c0399f', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em' }}>DRAFT FREE</a>
             </div>
 
             <div style={{ border: '1px solid rgba(216,220,228,.18)', borderRadius: '14px', padding: '18px', background: 'rgba(255,255,255,.03)' }}>
@@ -474,7 +499,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)' }}>To announce a card</div>
                 </div>
               </div>
-              <a href="#apply" style={{ display: 'inline-flex', alignItems: 'center', height: '50px', padding: '0 28px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '15px', letterSpacing: '.06em', boxShadow: '0 8px 24px rgba(225,29,46,.36)' }}>APPLY AS AN AFFILIATE</a>
+                <a href="/affiliate-create-account" style={{ display: 'inline-flex', alignItems: 'center', height: '50px', padding: '0 28px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '15px', letterSpacing: '.04em' }}>APPLY AS AN AFFILIATE</a>
             </div>
             <div style={{ position: 'relative', minHeight: '380px', background: '#0b0e18' }}>
               <img loading="lazy" decoding="async" src="/site/leagues.jpg" alt="League owners" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -490,47 +515,27 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             </div>
             <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', height: '44px', padding: '0 20px', borderRadius: '999px', background: '#f5a623', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em', whiteSpace: 'nowrap' }}>SHOP ON ETSY ↗</a>
           </div>
-            <div data-fmm="store-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '20px' }}>
-              <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}>
-                <div style={{ aspectRatio: 1, background: '#0b0e18' }}><img loading="lazy" decoding="async" src="/site/tee.webp" alt="Ringside Tee" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ padding: '14px 15px 16px' }}>
-                  <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>Ringside Tee</div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '17px', color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>$32</span>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY \u2197</span>
+            <div data-fmm="store-track" style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 6, scrollbarWidth: 'thin' }}>
+              {STORE_ITEMS.map((item) => (
+                <a
+                  key={item.name}
+                  href="https://www.etsy.com/shop/FANTASYMMADNESS"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ flex: '0 0 calc(25% - 15px)', minWidth: 190, scrollSnapAlign: 'start', display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}
+                >
+                  <div style={{ aspectRatio: 1, background: '#0b0e18' }}>
+                    <img loading="lazy" decoding="async" src={item.image} alt={item.name} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                </div>
-              </a>
-              <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}>
-                <div style={{ aspectRatio: 1, background: '#0b0e18' }}><img loading="lazy" decoding="async" src="/site/fighter-cutout.webp" alt="Cage Hoodie" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ padding: '14px 15px 16px' }}>
-                  <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>Cage Hoodie</div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '17px', color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>$64</span>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY \u2197</span>
+                  <div style={{ padding: '14px 15px 16px' }}>
+                    <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>{item.name}</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+                      <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '17px', color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>{item.price}</span>
+                      <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY &#8599;</span>
+                    </div>
                   </div>
-                </div>
-              </a>
-              <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}>
-                <div style={{ aspectRatio: 1, background: '#0b0e18' }}><img loading="lazy" decoding="async" src="/site/faceoff.webp" alt="Corner Cap" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ padding: '14px 15px 16px' }}>
-                  <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>Corner Cap</div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '17px', color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>$28</span>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY \u2197</span>
-                  </div>
-                </div>
-              </a>
-              <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}>
-                <div style={{ aspectRatio: 1, background: '#0b0e18' }}><img loading="lazy" decoding="async" src="/site/red-corner.webp" alt="Training Gloves" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ padding: '14px 15px 16px' }}>
-                  <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>Training Gloves</div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '17px', color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>$79</span>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY \u2197</span>
-                  </div>
-                </div>
-              </a>
+                </a>
+              ))}
             </div>
         </div>
 
@@ -609,7 +614,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             <div>
               <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '13px' }}>Leagues</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
-                <a href="#leagues" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
+                <a href="/affiliate-create-account" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
                 <a href="#apply" style={{ color: 'rgba(255,255,255,.72)' }}>Affiliate payouts</a>
                 <a href="#store" style={{ color: 'rgba(255,255,255,.72)' }}>Store</a>
                 <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.72)' }}>Etsy shop ↗</a>
@@ -651,6 +656,42 @@ const IMAGES = ['/site/fight-clash.webp', '/site/faceoff.webp', '/site/red-corne
 const money = (n) => Number(n || 0).toLocaleString('en-US');
 
 // --------------------------------------------------------------------------
+// ONE CARD SHAPE
+// The fight card reads meta, badgeText, potLabel, potColor, potNote, cta, ctaBg,
+// ctaBorder and ctaColor. Anything that skips this function renders a card with
+// blank lines — which is exactly what the preview fights used to do.
+// --------------------------------------------------------------------------
+const toFightCard = (f, index) => {
+    const fee = Math.max(0, Math.round(Number(f.matchTokens) || 0));
+    const guaranteed = Math.max(0, Math.round(Number(f.potTarget) || 0));
+    const pot = Math.max(guaranteed, Math.round(Number(f.pot) || 0));
+    const entries = Number(f.entryCount ?? (Array.isArray(f.userPredictions) ? f.userPredictions.length : 0)) || 0;
+    const when = f.matchDate
+      ? new Date(f.matchDate).toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' })
+      : '';
+    const category = String(f.matchCategory || '').toUpperCase();
+    return {
+      id: String(f._id || index),
+      f1: String(f.matchFighterA).toUpperCase(),
+      f2: String(f.matchFighterB).toUpperCase(),
+      image: f.featuredThisWeekImage || f.fightPosterImage || IMAGES[index % IMAGES.length],
+      meta: [category, f.maxRounds ? `${f.maxRounds} rounds` : '', when].filter(Boolean).join(' \u00b7 '),
+      badge: guaranteed > 0 ? 'Guaranteed pot' : fee === 0 ? 'Free entry' : index === 0 ? 'Main event' : '',
+      badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : fee === 0 ? 'rgba(34,197,94,.94)' : 'rgba(225,29,46,.94)',
+      badgeText: fee === 0 ? '#052e14' : '#fff',
+      potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM' : money(fee) + ' FM',
+      potColor: fee === 0 ? '#22c55e' : guaranteed > 0 ? '#22c55e' : '#fff',
+      potNote: fee === 0 ? 'Titles & sponsor prizes'
+        : guaranteed > 0 ? 'Guaranteed pot'
+          : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
+      cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee),
+      ctaBg: fee === 0 ? '#22c55e' : index === 0 ? '#f5a623' : 'rgba(255,255,255,.08)',
+      ctaBorder: fee === 0 || index === 0 ? '0' : '1.5px solid rgba(216,220,228,.4)',
+      ctaColor: fee === 0 ? '#052e14' : index === 0 ? '#17070a' : '#fff',
+    };
+};
+
+// --------------------------------------------------------------------------
 // PREVIEW CARD
 // The exact five fights from the design document. Shown ONLY when the API returns
 // no published fights, so the site never has an empty fight section — that empty
@@ -659,22 +700,31 @@ const money = (n) => Number(n || 0).toLocaleString('en-US');
 // Every row carries isPreview: true, so the page can label them and never present
 // them as live contests to enter.
 // --------------------------------------------------------------------------
+// Everything in the shop. A static four-up grid could only ever show four, so the
+// track scrolls and advances itself — swipeable on a phone, automatic on desktop.
+const STORE_ITEMS = [
+  { name: 'Ringside Tee', price: '$32', image: '/site/tee.webp' },
+  { name: 'BKFC Tee', price: '$34', image: '/site/apparel-tee.webp' },
+  { name: 'Cage Hoodie', price: '$64', image: '/site/fighter-cutout.webp' },
+  { name: 'Corner Cap', price: '$28', image: '/site/faceoff.webp' },
+  { name: 'Training Gloves', price: '$79', image: '/site/red-corner.webp' },
+  { name: 'Fight Night Tee', price: '$32', image: '/site/fight-clash.webp' },
+  { name: 'Champion Hoodie', price: '$68', image: '/site/prize-arena.webp' },
+  { name: 'Arena Poster', price: '$18', image: '/site/arena.jpg' },
+];
+
 const PREVIEW_FIGHTS = [
-  // Imagery is the app's own discipline artwork, copied into /site — so a boxing
-  // card shows boxing and the site matches the app rather than using stock frames.
-  { f1: 'IRON JACKSON', f2: 'DEXTER FOLD', badge: 'MAIN EVENT', badgeColor: '#c8102e', sport: 'BOXING', rounds: 12, fee: 1500, pot: 42000, image: '/site/sport-boxing.webp' },
-  { f1: 'RAFAEL MENDES', f2: 'COLE BRANNIGAN', badge: 'CO-MAIN', badgeColor: '#f5a623', sport: 'MMA', rounds: 3, fee: 4000, pot: 96000, image: '/site/sport-mma.webp' },
-  { f1: 'DUSTY WHEELER', f2: 'MARCUS VANE', badge: 'FEATURED', badgeColor: '#2b6fe8', sport: 'BARE KNUCKLE', rounds: 5, fee: 500, pot: 14000, image: '/site/sport-bareknuckle.webp' },
-  { f1: 'SOMCHAI PETCH', f2: 'LARS EIDE', badge: '', badgeColor: '', sport: 'KICKBOXING', rounds: 3, fee: 100, pot: 3200, image: '/site/sport-kickboxing.webp' },
-  { f1: 'THE ARCHITECT', f2: 'KID DYNAMO', badge: '', badgeColor: '', sport: 'PRO WRESTLING', rounds: 1, fee: 0, pot: 0, image: '/site/sport-wrestling.webp' },
-].map((row, index) => ({
-  id: 'preview-' + index,
-  ...row,
-  when: '',
-  entries: 0,
-  guaranteed: row.pot,
-  isPreview: true,
-}));
+  // Written in the RAW shape the API returns, then passed through toFightCard —
+  // the same function real fights use. That is what stops the two drifting and
+  // leaving blank lines on a preview card.
+  // Images are all 760x428 landscape; the app's sport-*.webp files are 99x132
+  // thumbnails built for circular slots and smear in a 16:9 frame.
+  { matchFighterA: 'Iron Jackson', matchFighterB: 'Dexter Fold', matchCategory: 'Boxing', maxRounds: 12, matchTokens: 1500, pot: 42000, entryCount: 214, featuredThisWeekImage: '/site/fight-clash.webp', matchDate: '2026-09-05T20:00:00Z' },
+  { matchFighterA: 'Rafael Mendes', matchFighterB: 'Cole Brannigan', matchCategory: 'MMA', maxRounds: 3, matchTokens: 4000, potTarget: 96000, pot: 96000, entryCount: 118, featuredThisWeekImage: '/site/faceoff.webp', matchDate: '2026-09-06T21:00:00Z' },
+  { matchFighterA: 'Dusty Wheeler', matchFighterB: 'Marcus Vane', matchCategory: 'Bare Knuckle', maxRounds: 5, matchTokens: 500, pot: 14000, entryCount: 62, featuredThisWeekImage: '/site/red-corner.webp', matchDate: '2026-09-12T20:00:00Z' },
+  { matchFighterA: 'Somchai Petch', matchFighterB: 'Lars Eide', matchCategory: 'Kickboxing', maxRounds: 3, matchTokens: 100, pot: 3200, entryCount: 41, featuredThisWeekImage: '/site/prize-arena.webp', matchDate: '2026-09-13T19:00:00Z' },
+  { matchFighterA: 'The Architect', matchFighterB: 'Kid Dynamo', matchCategory: 'Pro Wrestling', maxRounds: 1, matchTokens: 0, pot: 0, entryCount: 87, featuredThisWeekImage: '/site/arena.jpg', matchDate: '2026-09-14T23:00:00Z' },
+].map((row, index) => ({ ...toFightCard(row, index), id: 'preview-' + index, isPreview: true }));
 
 const PREVIEW_BOARD = [
   { name: 'KO_BEAST', points: '4,180' },
@@ -719,35 +769,7 @@ export async function getServerSideProps({ res }) {
     .sort((a, b) => new Date(a.matchDate || 0) - new Date(b.matchDate || 0))
     .slice(0, 5);
 
-  const fights = open.map((f, index) => {
-    const fee = Math.max(0, Math.round(Number(f.matchTokens) || 0));
-    const guaranteed = Math.max(0, Math.round(Number(f.potTarget) || 0));
-    const pot = Math.max(guaranteed, Math.round(Number(f.pot) || 0));
-    const entries = Number(f.entryCount ?? (Array.isArray(f.userPredictions) ? f.userPredictions.length : 0)) || 0;
-    const when = f.matchDate
-      ? new Date(f.matchDate).toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' })
-      : '';
-    const category = String(f.matchCategory || '').toUpperCase();
-    return {
-      id: String(f._id || index),
-      f1: String(f.matchFighterA).toUpperCase(),
-      f2: String(f.matchFighterB).toUpperCase(),
-      image: f.featuredThisWeekImage || f.fightPosterImage || IMAGES[index % IMAGES.length],
-      meta: [category, f.maxRounds ? `${f.maxRounds} rounds` : '', when].filter(Boolean).join(' \u00b7 '),
-      badge: guaranteed > 0 ? 'Guaranteed pot' : fee === 0 ? 'Free entry' : index === 0 ? 'Main event' : '',
-      badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : fee === 0 ? 'rgba(34,197,94,.94)' : 'rgba(225,29,46,.94)',
-      badgeText: fee === 0 ? '#052e14' : '#fff',
-      potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM' : money(fee) + ' FM',
-      potColor: fee === 0 ? '#22c55e' : guaranteed > 0 ? '#22c55e' : '#fff',
-      potNote: fee === 0 ? 'Titles & sponsor prizes'
-        : guaranteed > 0 ? 'Guaranteed pot'
-          : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
-      cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee),
-      ctaBg: fee === 0 ? '#22c55e' : index === 0 ? '#f5a623' : 'rgba(255,255,255,.08)',
-      ctaBorder: fee === 0 || index === 0 ? '0' : '1.5px solid rgba(216,220,228,.4)',
-      ctaColor: fee === 0 ? '#052e14' : index === 0 ? '#17070a' : '#fff',
-    };
-  });
+  const fights = open.map(toFightCard);
 
   const rawBoard = Array.isArray(boardData?.leaderboard) ? boardData.leaderboard
     : Array.isArray(boardData?.players) ? boardData.players
