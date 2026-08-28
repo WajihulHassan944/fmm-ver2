@@ -111,7 +111,7 @@ const SITE_STYLES = `
   [data-fmm="mobile-menu"] a:active { background: rgba(245,166,35,.14); }
 `;
 
-const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = [] }) => {
+const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = [], apiReachable = true, usingPreview = false }) => {
   const router = useRouter();
   // Phone nav. The desktop links are hidden below 760px, so without this menu
   // there is no route to Fight Cards, Leagues, Leaderboard or the Store.
@@ -244,6 +244,21 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
           ) : null}
         </div>
 
+        {!apiReachable ? (
+          <div
+            role="alert"
+            style={{
+              padding: '11px 18px', background: '#7f1d1d', color: '#fff',
+              fontWeight: 800, fontSize: 13, lineHeight: 1.45, textAlign: 'center',
+            }}
+          >
+            Live fight data is not loading &mdash; the API did not respond.
+            <span style={{ opacity: .8, fontWeight: 700 }}>
+              {' '}Check that the backend is deployed and reachable from this site.
+            </span>
+          </div>
+        ) : null}
+
         <div id="top" style={{ background: '#05060a' }}>
           <div data-fmm="hero-wrap" style={{ width: '100%', background: '#05060a' }}>
         <img src="/site/hero.jpg" alt="Fantasy MMAdness" fetchPriority="high" data-fmm="hero-img" style={{ display: 'block', width: '100%', maxWidth: 780, height: 'auto', margin: '0 auto', objectFit: 'contain' }} />
@@ -288,6 +303,11 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
           <div>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: '1px solid rgba(216,220,228,.16)', paddingBottom: '14px', marginBottom: '26px' }}>
               <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '34px', margin: 0, letterSpacing: '.01em' }}>OPEN FIGHT CARDS</h2>
+              {usingPreview ? (
+                <span style={{ marginLeft: 12, padding: '5px 11px', borderRadius: 999, background: 'rgba(43,111,232,.18)', border: '1px solid #2b6fe8', color: '#9dc0ff', fontSize: 10.5, fontWeight: 800, letterSpacing: '.06em', whiteSpace: 'nowrap' }}>
+                  EXAMPLE CARD
+                </span>
+              ) : null}
               <div style={{ display: 'flex', gap: '7px' }}>
                 <span style={{ padding: '7px 13px', borderRadius: '999px', background: 'rgba(245,166,35,.16)', border: '1px solid #f5a623', color: '#f5a623', fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>All</span>
                 <span style={{ padding: '7px 13px', borderRadius: '999px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(216,220,228,.18)', color: 'rgba(255,255,255,.7)', fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Boxing</span>
@@ -297,6 +317,8 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             </div>
 
             <div data-fmm="fights-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              {/* Unreachable in practice: fights always falls back to PREVIEW_FIGHTS.
+                  Kept as a safety net in case the preview list is ever emptied. */}
               {fights.length === 0 ? (
                 <div style={{ gridColumn: '1 / -1', border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, padding: '38px 26px', textAlign: 'center', background: 'rgba(255,255,255,.03)' }}>
                   <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 22, marginBottom: 8 }}>NEXT CARD BEING ANNOUNCED</div>
@@ -618,10 +640,11 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
 // --------------------------------------------------------------------------
 // DATA
 //
-// Static generation with a 60-second revalidate: the page is served from cache
-// so it stays fast, and refreshes itself a minute after a fight is published.
-// SSR on every request would undo the load-time work; a fully static build would
-// go stale.
+// Server-rendered per request, with a 60-second edge cache. This was
+// getStaticProps, which bakes data in at BUILD time — so a fresh deploy shipped
+// with an empty fight list and never recovered, which is why the page showed
+// "NEXT CARD BEING ANNOUNCED" no matter what was seeded. The cache header keeps
+// repeat visits as fast as static without that failure mode.
 // --------------------------------------------------------------------------
 const IMAGES = ['/site/fight-clash.webp', '/site/faceoff.webp', '/site/red-corner.webp', '/site/prize-arena.webp', '/site/arena.jpg', '/site/leagues.jpg'];
 
@@ -671,9 +694,16 @@ const fetchJson = async (path) => {
   }
 };
 
-export async function getStaticProps() {
+// getServerSideProps, not getStaticProps: static props are baked at build time, so
+// the page shipped frozen with whatever existed at compile — nothing, on a fresh
+// deploy — and never updated when fights were added. This runs per request.
+export async function getServerSideProps({ res }) {
+  if (res) {
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+  }
   const [fightData, boardData] = await Promise.all([
-    fetchJson('/api/public/fights?limit=24'),
+    // prediction-fights, not fights — the latter does not exist and 404'd silently.
+    fetchJson('/api/public/prediction-fights?limit=24'),
     fetchJson('/api/public/leaderboard?limit=5'),
   ]);
 
@@ -750,7 +780,27 @@ export async function getStaticProps() {
     );
   }
 
-  return { props: { fights, board, ticker, upcoming }, revalidate: 60 };
+  // No revalidate key here — that one is getStaticProps-only and throws in SSR.
+  // The same 60-second caching is set as a response header instead, so the page
+  // stays fast without ever serving data baked in at build time.
+  // apiReachable tells the page whether the server answered at all. Without it an
+  // unreachable backend is indistinguishable from an empty one, and the visitor
+  // sees a polite "coming soon" while the real problem is a dead server.
+  const apiReachable = Boolean(fightData || boardData);
+
+  // Never ship an empty fight section. A visitor cannot tell "no fights published"
+  // from "this site is broken", and the second reading costs a signup.
+  const usingPreview = fights.length === 0;
+  return {
+    props: {
+      fights: usingPreview ? PREVIEW_FIGHTS : fights,
+      board: board.length ? board : PREVIEW_BOARD,
+      ticker,
+      upcoming: upcoming.length ? upcoming : PREVIEW_FIGHTS.slice(0, 3).map((f) => ({ name: f.f1 + ' vs ' + f.f2, when: 'TBA' })),
+      apiReachable,
+      usingPreview,
+    },
+  };
 }
 
 export default FantasyMMAdnessSite;
