@@ -953,7 +953,15 @@ export async function getServerSideProps({ res }) {
     .filter((f) => f && f.matchFighterA && f.matchFighterB)
     // Only fights still ahead of us. This is the whole point of wiring real data.
     .filter((f) => !f.prizesSettledAt && (!f.matchDate || new Date(f.matchDate).getTime() > now))
-    .sort((a, b) => new Date(a.matchDate || 0) - new Date(b.matchDate || 0))
+    // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
+    // must actually surface here — they used to only flip a flag nothing read,
+    // so a promoted fight and green success toast never changed the site.
+    // Promoted/featured fights sort first (most-promoted first), then by date.
+    .sort((a, b) => {
+      const weight = (f) => (f.homepagePromoted ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
+      const diff = weight(b) - weight(a);
+      return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
+    })
     .slice(0, 5);
 
   const fights = open.map(toFightCard);
