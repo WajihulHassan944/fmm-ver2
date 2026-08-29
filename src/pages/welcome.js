@@ -1010,7 +1010,13 @@ export async function getServerSideProps({ res }) {
   // sees a polite "coming soon" while the real problem is a dead server.
   // Map the shop's products into the shape the carousel renders. Only entries
   // with a real image are kept — a product card with no photograph looks broken.
-  const products = (Array.isArray(apparelData?.products) ? apparelData.products : [])
+  // apparelData.source is 'fallback' when Etsy sync isn't configured — that
+  // fallback catalogue points at image paths that were never shipped in this
+  // frontend's public/ folder, so every tile 404s and the whole window reads
+  // as empty. Only take products from a REAL Etsy sync; otherwise fall through
+  // to STORE_ITEMS, whose images are verified to exist.
+  const rawApparel = apparelData?.source === 'fallback' ? [] : (Array.isArray(apparelData?.products) ? apparelData.products : []);
+  const products = rawApparel
     .filter((p) => p && p.name && p.image)
     .slice(0, 12)
     .map((p) => ({

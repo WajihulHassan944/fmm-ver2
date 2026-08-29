@@ -21,7 +21,7 @@ const FantasyMobileAppCore = dynamic(
   { ssr: false, loading: () => null },
 );
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE
   || 'https://fantasymmadness-game-server-three.vercel.app';
 
 const buildPublicApiUrl = (path) => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
@@ -396,7 +396,9 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     // loading flag clears as soon as fights are in.
     const fightsPromise = track('fights', publicRequest('/api/public/prediction-fights?limit=60'))
       .then((fightRes) => {
-        const rawFights = asArray(fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
+        // The endpoint responds with { items: [...] } — fights/matches/predictionFights/data
+        // never matched anything, so this always fell through to the single sample fight.
+        const rawFights = asArray(fightRes.items || fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
         const realFights = rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2);
         // Real fights always win. The preview card only fills an empty screen.
         setFights(realFights.length ? realFights : buildSampleFights());
@@ -424,7 +426,9 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     // Wave 2 is deferred entirely. The store and blog tabs are not the landing
     // screen, so these must never hold up first paint.
     track('apparel', publicRequest('/api/public/apparel-products?limit=24'))
-      .then((apparelRes) => setApparel(asArray(apparelRes.items || apparelRes.products || apparelRes.apparel)));
+      // source:'fallback' means Etsy sync isn't configured — that catalogue
+      // points at images never shipped to this app, so every tile 404s.
+      .then((apparelRes) => setApparel(apparelRes.source === 'fallback' ? [] : asArray(apparelRes.items || apparelRes.products || apparelRes.apparel)));
     track('blogs', publicRequest('/api/blogs?limit=12'))
       .then((blogRes) => setBlogs(asArray(blogRes.blogs || blogRes.posts)));
 
@@ -862,7 +866,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
       publicRequest('/api/public/prediction-fights?limit=60'),
       adminRequest('/api/admin/affiliate-payouts?status=pending'),
     ]);
-    const all = asArray(fightsRes.fights || fightsRes.matches || fightsRes.predictionFights);
+    const all = asArray(fightsRes.items || fightsRes.fights || fightsRes.matches || fightsRes.predictionFights);
     return {
       refundable: all.filter((f) => f && !f.prizesSettledAt && Number(f.matchTokens) > 0),
       payouts: asArray(payouts.payouts),
