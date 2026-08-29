@@ -296,6 +296,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     aiScoutingReport: fight.aiScoutingReport && typeof fight.aiScoutingReport === 'object' ? fight.aiScoutingReport : null,
     viewerCount: toSafeNumber(fight.viewerCount, fight.liveViewerCount, fight.watchPartyViewers),
     isLive: Boolean(fight.isLive || fight.live || String(fight.status || '').toLowerCase() === 'live'),
+    matchStatus: cleanText(fight.matchStatus, fight.status),
+    settled: Boolean(fight.prizesSettledAt),
     isShadow: Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')),
     serverEntered: Boolean(userEntry || fight.predictionSubmitted || fight.userPredictionSubmitted),
     fallbackImage: getEventFallbackImage(sport),
@@ -2092,7 +2094,10 @@ class FantasyMobileAppCore extends React.Component {
     const now = new Date();
     const MS_DAY = 86400000;
     const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    const eventsUpcoming = eventsRaw.filter(ev => !ev.iso || dateOnlyToLocalDate(ev.iso, '23:59') >= now);
+    // Was date-only (dropped a fight from the whole home screen — including
+    // both featured slots — the instant its scheduled start time passed, even
+    // while still marked Ongoing). Only a settled/finished fight is actually done.
+    const eventsUpcoming = eventsRaw.filter(ev => !ev.settled && String(ev.matchStatus || '').toLowerCase() !== 'finished');
     const events = eventsUpcoming.map(ev => {
       const d = dateOnlyToLocalDate(ev.iso, ev.matchTime || '23:59');
       const diffMs = d ? d - now : 0;

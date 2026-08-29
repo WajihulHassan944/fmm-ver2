@@ -956,8 +956,11 @@ export async function getServerSideProps({ res }) {
   const now = Date.now();
   const open = rawFights
     .filter((f) => f && f.matchFighterA && f.matchFighterB)
-    // Only fights still ahead of us. This is the whole point of wiring real data.
-    .filter((f) => !f.prizesSettledAt && (!f.matchDate || new Date(f.matchDate).getTime() > now))
+    // Was matchDate > now, which dropped a fight off the site the instant its
+    // scheduled start time passed — even while the admin still had it marked
+    // Ongoing and open for predictions. Only prizesSettledAt/Finished actually
+    // means "done"; a same-day fight that already started is still live.
+    .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished')
     // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
     // must actually surface here — they used to only flip a flag nothing read,
     // so a promoted fight and green success toast never changed the site.

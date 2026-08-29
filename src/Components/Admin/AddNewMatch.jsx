@@ -8,7 +8,7 @@ import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normal
 import { adminHeaders } from '@/Utils/authFetch';
 
 const EMPTY = {
-  matchCategory: 'boxing',
+  matchCategory: '',
   matchCategoryTwo: '',
   matchName: '',
   matchFighterA: '',
@@ -75,7 +75,7 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
 
 export default function AddNewMatch() {
   const [form, setForm] = useState(EMPTY);
-  const [displayCategory, setDisplayCategory] = useState('boxing');
+  const [displayCategory, setDisplayCategory] = useState('');
   const [selectedFighterA, setSelectedFighterA] = useState(null);
   const [selectedFighterB, setSelectedFighterB] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -128,7 +128,7 @@ export default function AddNewMatch() {
 
   const resetAfterCreate = () => {
     setForm(EMPTY);
-    setDisplayCategory('boxing');
+    setDisplayCategory('');
     setSelectedFighterA(null);
     setSelectedFighterB(null);
   };
@@ -141,6 +141,7 @@ export default function AddNewMatch() {
     setShowShadowPredictionChoice(false);
 
     try {
+      if (!displayCategory) throw new Error('Choose a combat sport for this fight.');
       if (!form.matchName.trim()) throw new Error('Fight/card name is required.');
       if (!form.fighterAId || !form.fighterBId) throw new Error('Select both fighters from the fighter library.');
       if (form.fighterAId === form.fighterBId) throw new Error('Fighter A and Fighter B must be different fighters.');
@@ -162,7 +163,14 @@ export default function AddNewMatch() {
         if (!shadowResponse.ok) console.warn('Failed to add fight to shadow templates.');
       }
 
-      setCreated({ id: matchId, type: form.matchType, name: form.matchName });
+      setCreated({
+        id: matchId,
+        type: form.matchType,
+        name: form.matchName,
+        category: displayCategory,
+        fighterA: form.matchFighterA,
+        fighterB: form.matchFighterB,
+      });
       if (form.matchType === 'SHADOW' && matchId) {
         setCreatedShadowId(matchId);
         setShowShadowPredictionChoice(true);
@@ -197,7 +205,7 @@ export default function AddNewMatch() {
 
       {created && (
         <section ref={createdNoticeRef} className="admin-success-panel">
-          <div><span>Fight created</span><strong>{created.name}</strong><p>The fight is available to the appropriate registry and scoring workflow.</p></div>
+          <div><span>Fight created</span><strong>{created.name}</strong><p>{created.fighterA} vs {created.fighterB} &middot; {created.category?.toUpperCase()}. The fight is available to the appropriate registry and scoring workflow.</p></div>
           <div>
             {created.id && <Link href={`/administration/upcomingFights?matchId=${created.id}`}>Open score centre</Link>}
             <Link href="/administration/fights">View all fights</Link>
@@ -221,7 +229,7 @@ export default function AddNewMatch() {
             <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and choose two saved fighters with images.</p></div></header>
             <div className="admin-form-grid">
               <label><span>Fight type</span><select name="matchType" value={form.matchType} onChange={change}><option value="LIVE">Live production fight</option><option value="SHADOW">Shadow template</option></select></label>
-              <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
+              <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
               <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
               <div className="admin-fighter-select-grid is-wide">
                 <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('A', fighter)} required />
