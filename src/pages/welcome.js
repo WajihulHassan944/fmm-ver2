@@ -384,7 +384,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
           <div>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: '1px solid rgba(216,220,228,.16)', paddingBottom: '14px', marginBottom: '26px' }}>
               <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '34px', margin: 0, letterSpacing: '.01em' }}>OPEN FIGHT CARDS</h2>
-              {usingPreview ? (
+              {false ? (
                 <span style={{ marginLeft: 12, padding: '5px 11px', borderRadius: 999, background: 'rgba(43,111,232,.18)', border: '1px solid #2b6fe8', color: '#9dc0ff', fontSize: 10.5, fontWeight: 800, letterSpacing: '.06em', whiteSpace: 'nowrap' }}>
                   EXAMPLE CARD
                 </span>
@@ -782,7 +782,6 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
           </div>
         </div>
 
-      </div>
       </div>
     </>
   );
