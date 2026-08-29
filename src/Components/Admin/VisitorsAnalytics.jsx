@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { adminHeaders } from '@/Utils/authFetch';
 import {
   FaChartLine,
   FaEye,
@@ -43,7 +44,7 @@ const VisitorsAnalytics = () => {
 
       try {
         const response = await fetch(
-          buildPublicApiUrl('/get-total-clicks', { domain: selectedDomain }),
+          buildPublicApiUrl('/get-total-clicks', { headers: adminHeaders(), domain: selectedDomain }),
         );
         if (!response.ok) throw new Error(`Analytics request failed with status ${response.status}`);
 
@@ -106,7 +107,7 @@ const VisitorsAnalytics = () => {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ domain: selectedDomain }),
       });
       const data = await response.json();

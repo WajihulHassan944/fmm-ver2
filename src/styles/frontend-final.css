@@ -2216,3 +2216,487 @@ input[type='submit'],
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+/* ==========================================================================
+   SCORER DESK  (/score/[token], /score/login)
+   A delegated scorer works on a phone at an arena: big targets, no chrome,
+   nothing on screen that is not the fight in front of them.
+   ========================================================================== */
+.scorer-shell {
+  min-height: 100vh;
+  background: #05060a;
+  color: #f5f7fb;
+  font-family: 'Rajdhani', system-ui, sans-serif;
+  padding: 18px 14px 40px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+.scorer-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; text-align: center; min-height: 70vh; font-size: 16px; font-weight: 700;
+}
+.scorer-state svg { font-size: 30px; color: var(--ff-red, #df111b); }
+.scorer-state p { color: rgba(245,247,251,.6); font-weight: 600; margin: 0; }
+.scorer-state .is-spinning { animation: scorerSpin 1s linear infinite; color: #f2b544; }
+@keyframes scorerSpin { to { transform: rotate(360deg); } }
+
+.scorer-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px; margin: 0 0 6px;
+  font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+  color: #f2b544;
+}
+.scorer-header h1 {
+  font-family: 'UFCSans', 'Anton', sans-serif; font-size: 28px; line-height: 1.04;
+  margin: 0 0 6px; letter-spacing: .01em;
+}
+.scorer-header h1 span { color: rgba(245,247,251,.45); font-size: 18px; }
+.scorer-sub { margin: 0; font-size: 12.5px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: rgba(245,247,251,.55); }
+.scorer-authority {
+  display: flex; align-items: flex-start; gap: 9px; margin-top: 14px; padding: 11px 13px;
+  border: 1px solid rgba(242,181,68,.32); border-radius: 10px;
+  background: rgba(242,181,68,.07); font-size: 12.5px; font-weight: 600; line-height: 1.45;
+  color: rgba(245,247,251,.8);
+}
+.scorer-authority svg { color: #f2b544; flex: 0 0 auto; margin-top: 2px; }
+
+.scorer-rounds { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 16px; }
+.scorer-rounds button {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 0 15px; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
+  color: rgba(245,247,251,.72); font-family: inherit; font-size: 14px; font-weight: 800;
+  letter-spacing: .04em; cursor: pointer; transition: all .14s ease;
+}
+.scorer-rounds button:hover { border-color: rgba(242,181,68,.5); color: #fff; }
+.scorer-rounds button.is-scored { border-color: rgba(53,212,93,.42); color: #6ee89a; }
+.scorer-rounds button.is-active {
+  background: rgba(223,17,27,.16); border-color: var(--ff-red, #df111b); color: #fff;
+}
+
+.scorer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .scorer-grid { grid-template-columns: 1fr; } }
+.scorer-corner {
+  border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+  background: rgba(255,255,255,.03); padding: 14px 13px;
+}
+.scorer-corner.is-a { border-top: 3px solid var(--ff-red, #df111b); }
+.scorer-corner.is-b { border-top: 3px solid #168fe6; }
+.scorer-corner h2 {
+  margin: 0 0 12px; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 16px;
+  letter-spacing: .03em; text-transform: uppercase;
+}
+.scorer-stat { margin-bottom: 12px; }
+.scorer-stat label {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 6px; font-size: 12px; font-weight: 700; color: rgba(245,247,251,.66);
+}
+.scorer-stat label em {
+  font-style: normal; font-size: 10px; font-weight: 900; letter-spacing: .1em;
+  color: rgba(245,247,251,.36);
+}
+.scorer-stat > div { display: flex; align-items: center; gap: 8px; }
+.scorer-stat button {
+  width: 44px; height: 44px; flex: 0 0 44px; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05);
+  color: #f5f7fb; display: grid; place-items: center; cursor: pointer;
+  transition: background .14s ease, border-color .14s ease;
+}
+.scorer-stat button:hover { background: rgba(242,181,68,.16); border-color: rgba(242,181,68,.5); }
+.scorer-stat input {
+  flex: 1 1 auto; min-width: 0; height: 44px; text-align: center; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.35);
+  color: #fff; font-family: inherit; font-size: 19px; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorer-outcome {
+  margin-top: 18px; padding: 15px 14px; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+}
+.scorer-outcome > p {
+  margin: 0 0 11px; font-size: 12px; font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; color: rgba(245,247,251,.6);
+}
+.scorer-winner { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.scorer-winner button {
+  min-height: 52px; padding: 0 12px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.04);
+  color: rgba(245,247,251,.78); font-family: 'UFCSans', 'Anton', sans-serif;
+  font-size: 15px; letter-spacing: .03em; text-transform: uppercase; cursor: pointer;
+  transition: all .14s ease;
+}
+.scorer-winner button:hover { border-color: rgba(242,181,68,.5); color: #fff; }
+.scorer-winner button.is-picked {
+  background: rgba(53,212,93,.14); border-color: #35d45d; color: #fff;
+}
+.scorer-finish {
+  display: flex; align-items: center; gap: 10px; margin-top: 13px;
+  font-size: 13px; font-weight: 600; color: rgba(245,247,251,.78); cursor: pointer;
+}
+.scorer-finish input { width: 20px; height: 20px; accent-color: #f2b544; }
+
+.scorer-error {
+  display: flex; align-items: center; gap: 8px; margin: 14px 0 0;
+  color: #ff8a8a; font-size: 13px; font-weight: 700;
+}
+.scorer-actions {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 20px;
+}
+.scorer-submit {
+  flex: 1 1 220px; min-height: 54px; border-radius: 11px; border: none;
+  background: var(--ff-red, #df111b); color: #fff;
+  font-family: 'UFCSans', 'Anton', sans-serif; font-size: 17px; letter-spacing: .05em;
+  text-transform: uppercase; cursor: pointer; transition: filter .14s ease;
+}
+.scorer-submit:hover { filter: brightness(1.12); }
+.scorer-submit:disabled { opacity: .5; cursor: not-allowed; }
+.scorer-saved {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 700; color: #6ee89a;
+}
+
+.scorer-login { max-width: 420px; padding-top: 60px; }
+.scorer-login h1 { font-family: 'UFCSans', 'Anton', sans-serif; font-size: 30px; margin: 0 0 22px; }
+.scorer-login form { display: flex; flex-direction: column; gap: 7px; }
+.scorer-login label { font-size: 12px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(245,247,251,.6); margin-top: 10px; }
+.scorer-login input {
+  height: 48px; padding: 0 13px; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.35);
+  color: #fff; font-family: inherit; font-size: 15px;
+}
+.scorer-login .scorer-submit { margin-top: 18px; }
+.scorer-fight-list { list-style: none; margin: 18px 0 0; padding: 0;
+  display: flex; flex-direction: column; gap: 10px; }
+.scorer-fight-list button {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; min-height: 60px; padding: 0 16px; border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
+  color: #fff; font-family: inherit; cursor: pointer; text-align: left;
+  transition: border-color .14s ease;
+}
+.scorer-fight-list button:hover { border-color: var(--ff-red, #df111b); }
+.scorer-fight-list strong { font-size: 15px; font-weight: 800; }
+.scorer-fight-list span { font-size: 11.5px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: #f2b544; }
+
+/* ==========================================================================
+   BACK OFFICE — send to scorer
+   ========================================================================== */
+.admin-round-presets { display: inline-flex; gap: 6px; margin-top: 7px; }
+.admin-round-presets button {
+  min-width: 40px; height: 32px; border-radius: 7px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.04);
+  color: rgba(245,247,251,.7); font-family: inherit; font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: all .14s ease;
+}
+.admin-round-presets button:hover { border-color: rgba(223,17,27,.55); color: #fff; }
+.admin-round-presets button.is-active {
+  background: rgba(223,17,27,.16); border-color: var(--ff-red, #df111b); color: #fff;
+}
+
+.admin-scorer-backdrop {
+  position: fixed; inset: 0; z-index: 900; display: grid; place-items: center;
+  padding: 20px; background: rgba(3,4,8,.78); backdrop-filter: blur(4px);
+}
+.admin-scorer-panel {
+  width: min(520px, 100%); max-height: 90vh; overflow-y: auto;
+  border: 1px solid rgba(255,255,255,.14); border-radius: 14px;
+  background: #0d1017; padding: 20px; color: #f5f7fb;
+}
+.admin-scorer-panel header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  margin-bottom: 12px;
+}
+.admin-scorer-panel header p {
+  margin: 0 0 4px; font-size: 11px; font-weight: 800; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ff-red, #df111b);
+}
+.admin-scorer-panel header h3 {
+  margin: 0; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 21px; letter-spacing: .01em;
+}
+.admin-scorer-panel header button {
+  width: 36px; height: 36px; flex: 0 0 36px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.14); background: transparent;
+  color: rgba(245,247,251,.6); display: grid; place-items: center; cursor: pointer;
+}
+.admin-scorer-note {
+  margin: 0 0 16px; padding: 11px 13px; border-radius: 9px;
+  border: 1px solid rgba(242,181,68,.3); background: rgba(242,181,68,.06);
+  font-size: 12.5px; line-height: 1.5; color: rgba(245,247,251,.8);
+}
+.admin-scorer-panel > label { display: block; margin-bottom: 12px; }
+.admin-scorer-panel > label span {
+  display: block; margin-bottom: 5px; font-size: 11.5px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: rgba(245,247,251,.58);
+}
+.admin-scorer-panel > label input {
+  width: 100%; height: 44px; padding: 0 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.32);
+  color: #fff; font-family: inherit; font-size: 14.5px;
+}
+.admin-scorer-create {
+  width: 100%; min-height: 48px; border-radius: 9px; border: none;
+  background: var(--ff-red, #df111b); color: #fff;
+  font-family: 'UFCSans', 'Anton', sans-serif; font-size: 15px; letter-spacing: .05em;
+  text-transform: uppercase; cursor: pointer;
+}
+.admin-scorer-create:disabled { opacity: .55; cursor: not-allowed; }
+.admin-scorer-link {
+  margin-top: 14px; padding: 12px; border-radius: 9px;
+  border: 1px dashed rgba(53,212,93,.45); background: rgba(53,212,93,.07);
+  display: grid; gap: 9px;
+}
+.admin-scorer-link code {
+  font-size: 12px; word-break: break-all; color: #9fe9b6; font-family: ui-monospace, monospace;
+}
+.admin-scorer-link button {
+  justify-self: start; display: inline-flex; align-items: center; gap: 7px;
+  min-height: 38px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid rgba(53,212,93,.5); background: transparent; color: #9fe9b6;
+  font-family: inherit; font-weight: 700; cursor: pointer;
+}
+.admin-scorer-link small { font-size: 11.5px; color: rgba(245,247,251,.55); }
+.admin-scorer-history { margin-top: 18px; }
+.admin-scorer-history > p {
+  margin: 0 0 9px; font-size: 11px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(245,247,251,.5);
+}
+.admin-scorer-history ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.admin-scorer-history li {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03);
+}
+.admin-scorer-history li.is-revoked { opacity: .5; }
+.admin-scorer-history strong { display: block; font-size: 13.5px; }
+.admin-scorer-history small { font-size: 11.5px; color: rgba(245,247,251,.5); }
+.admin-scorer-history li button {
+  border: 1px solid rgba(223,17,27,.5); background: transparent; color: #ff8a8a;
+  border-radius: 7px; min-height: 34px; padding: 0 12px; font-family: inherit;
+  font-weight: 700; cursor: pointer;
+}
+.admin-scorer-history li em { font-style: normal; font-size: 11.5px; color: rgba(245,247,251,.45); }
+
+/* ==========================================================================
+   AFFILIATE MONEY PAGE
+   ========================================================================== */
+.affiliate-money-hero { padding: 46px 0 34px; }
+.affiliate-money-hero h1 {
+  font-family: 'UFCSans', 'Anton', sans-serif; font-size: 44px; line-height: 1;
+  margin: 0 0 12px;
+}
+.affiliate-money-hero h1 span { color: #f2b544; }
+.affiliate-money-lede {
+  max-width: 46em; font-size: 16px; line-height: 1.55; color: rgba(245,247,251,.7);
+  margin: 0; text-wrap: pretty;
+}
+.affiliate-money-notice {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 15px; border-radius: 10px; margin-bottom: 20px;
+  border: 1px solid rgba(223,17,27,.5); background: rgba(223,17,27,.1);
+  font-weight: 700; font-size: 13.5px;
+}
+.affiliate-money-notice button {
+  margin-left: auto; border: 1px solid rgba(255,255,255,.25); background: transparent;
+  color: #fff; border-radius: 7px; min-height: 34px; padding: 0 13px;
+  font-family: inherit; font-weight: 700; cursor: pointer;
+}
+.affiliate-money-summary {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px; margin: 26px 0 8px;
+}
+.affiliate-money-summary article {
+  padding: 17px 18px; border-radius: 13px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+}
+.affiliate-money-summary article.is-primary {
+  border-color: rgba(242,181,68,.42); background: rgba(242,181,68,.08);
+}
+.affiliate-money-summary span {
+  display: block; font-size: 11px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(245,247,251,.55); margin-bottom: 7px;
+}
+.affiliate-money-summary strong {
+  display: block; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 32px;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.affiliate-money-summary small {
+  display: block; margin-top: 7px; font-size: 12px; color: rgba(245,247,251,.55);
+}
+.affiliate-money-payout {
+  display: grid; grid-template-columns: minmax(0,1.2fr) minmax(280px,.8fr);
+  gap: 26px; align-items: start;
+}
+@media (max-width: 860px) { .affiliate-money-payout { grid-template-columns: 1fr; } }
+.affiliate-money-payout form {
+  display: grid; gap: 8px; padding: 18px; border-radius: 13px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+}
+.affiliate-money-payout label {
+  font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(245,247,251,.55);
+}
+.affiliate-money-payout input {
+  height: 48px; padding: 0 13px; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.34);
+  color: #fff; font-family: inherit; font-size: 18px; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.affiliate-money-inline-note { margin: 4px 0 0; font-size: 12.5px; color: #f2b544; }
+.affiliate-money-section-note {
+  max-width: 54em; font-size: 14.5px; line-height: 1.55;
+  color: rgba(245,247,251,.66); text-wrap: pretty;
+}
+.affiliate-money-table-wrap { overflow-x: auto; }
+.affiliate-money-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.affiliate-money-table th {
+  text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: rgba(245,247,251,.5);
+  border-bottom: 1px solid rgba(255,255,255,.14);
+}
+.affiliate-money-table td {
+  padding: 13px 12px; border-bottom: 1px solid rgba(255,255,255,.07);
+  font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.affiliate-money-table td strong { display: block; font-size: 14.5px; }
+.affiliate-money-table td small { font-size: 11.5px; color: rgba(245,247,251,.45); }
+.affiliate-money-table td.is-total { color: #6ee89a; font-weight: 800; }
+.affiliate-money-highlight {
+  display: flex; align-items: center; gap: 9px; margin-top: 16px;
+  font-size: 13.5px; color: rgba(245,247,251,.72);
+}
+.affiliate-money-highlight svg { color: #f2b544; }
+.affiliate-money-empty {
+  display: grid; justify-items: center; gap: 8px; text-align: center;
+  padding: 34px 20px; border-radius: 13px;
+  border: 1px dashed rgba(255,255,255,.16); background: rgba(255,255,255,.02);
+}
+.affiliate-money-empty svg { font-size: 26px; color: rgba(242,181,68,.7); }
+.affiliate-money-empty strong { font-size: 15.5px; }
+.affiliate-money-empty span { font-size: 13px; color: rgba(245,247,251,.55); }
+.affiliate-stake-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 14px;
+}
+.affiliate-stake-grid article {
+  padding: 17px; border-radius: 13px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+}
+.affiliate-stake-grid article.is-profit { border-color: rgba(53,212,93,.45); }
+.affiliate-stake-grid header {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin-bottom: 12px;
+}
+.affiliate-stake-grid header strong { font-size: 15px; }
+.affiliate-stake-grid header span {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(245,247,251,.5);
+}
+.affiliate-stake-grid article.is-profit header span { color: #6ee89a; }
+.affiliate-stake-gauge {
+  height: 9px; border-radius: 999px; overflow: hidden; margin-bottom: 14px;
+  background: rgba(255,255,255,.08);
+}
+.affiliate-stake-gauge i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, #df111b, #f2b544);
+}
+.affiliate-stake-grid article.is-profit .affiliate-stake-gauge i {
+  background: linear-gradient(90deg, #f2b544, #35d45d);
+}
+.affiliate-stake-grid dl { margin: 0; display: grid; gap: 8px; }
+.affiliate-stake-grid dl > div {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.affiliate-stake-grid dt { font-size: 12.5px; color: rgba(245,247,251,.55); }
+.affiliate-stake-grid dd {
+  margin: 0; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.affiliate-stake-grid dd.is-total { color: #6ee89a; }
+.affiliate-payout-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.affiliate-payout-list li {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  border-radius: 11px; border: 1px solid rgba(255,255,255,.11);
+  background: rgba(255,255,255,.03);
+}
+.affiliate-payout-list li > svg { font-size: 19px; color: rgba(245,247,251,.45); }
+.affiliate-payout-list li.is-paid > svg { color: #35d45d; }
+.affiliate-payout-list li.is-rejected > svg { color: #ff6b6b; }
+.affiliate-payout-list li.is-pending > svg { color: #f2b544; }
+.affiliate-payout-list div { flex: 1 1 auto; min-width: 0; }
+.affiliate-payout-list strong { display: block; font-size: 17px; font-variant-numeric: tabular-nums; }
+.affiliate-payout-list small { display: block; font-size: 12px; color: rgba(245,247,251,.5); }
+.affiliate-payout-list em { font-style: normal; font-size: 12px; color: rgba(245,247,251,.62); }
+.affiliate-payout-list li > span {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(245,247,251,.5);
+}
+
+
+/* ==========================================================================
+   AFFILIATE PROMOTION DESK — prize mode, stake, guidance
+   ========================================================================== */
+.affiliate-prize-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+@media (max-width: 640px) { .affiliate-prize-mode { grid-template-columns: 1fr; } }
+.affiliate-prize-mode button {
+  text-align: left; padding: 14px 16px; border-radius: 11px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.03);
+  color: #f5f7fb; font-family: inherit; transition: all .14s ease;
+}
+.affiliate-prize-mode button:hover { border-color: rgba(242,181,68,.5); }
+.affiliate-prize-mode button.is-active {
+  border-color: var(--ff-red, #df111b); background: rgba(223,17,27,.1);
+}
+.affiliate-prize-mode strong {
+  display: block; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 16px;
+  letter-spacing: .02em; text-transform: uppercase; margin-bottom: 4px;
+}
+.affiliate-prize-mode small { display: block; font-size: 12.5px; color: rgba(245,247,251,.58); line-height: 1.4; }
+
+.affiliate-create-field-grid label.is-short input { border-color: rgba(247,181,27,.6); }
+
+.affiliate-stake-panel {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px;
+  padding: 18px 20px; border-radius: 13px; margin-top: 6px;
+  border: 1px solid rgba(247,181,27,.4); background: rgba(247,181,27,.06);
+}
+.affiliate-stake-panel.is-covered { border-color: rgba(53,212,93,.42); background: rgba(53,212,93,.05); }
+@media (max-width: 640px) { .affiliate-stake-panel { grid-template-columns: 1fr; } }
+.affiliate-stake-panel > div > span {
+  display: block; font-size: 11px; font-weight: 800; letter-spacing: .13em;
+  text-transform: uppercase; color: rgba(245,247,251,.55); margin-bottom: 6px;
+}
+.affiliate-stake-panel > div > strong {
+  display: block; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 42px;
+  line-height: .9; font-variant-numeric: tabular-nums; color: #f2b544;
+}
+.affiliate-stake-panel.is-covered > div > strong { color: #6ee89a; }
+.affiliate-stake-panel > div > small {
+  display: block; margin-top: 8px; font-size: 12.5px; line-height: 1.45;
+  color: rgba(245,247,251,.6); text-wrap: pretty;
+}
+.affiliate-stake-panel > p {
+  grid-column: 1 / -1; margin: 0; padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  font-size: 13.5px; line-height: 1.5; color: rgba(245,247,251,.78); text-wrap: pretty;
+}
+
+.affiliate-coach {
+  display: block; margin-top: 16px; padding: 15px 17px; border-radius: 11px;
+  border-left: none; border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.03);
+}
+.affiliate-coach.is-ok { border-color: rgba(53,212,93,.4); background: rgba(53,212,93,.05); }
+.affiliate-coach.is-caution { border-color: rgba(247,181,27,.45); background: rgba(247,181,27,.06); }
+.affiliate-coach.is-warn { border-color: rgba(223,17,27,.5); background: rgba(223,17,27,.07); }
+.affiliate-coach strong {
+  display: block; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 15px;
+  letter-spacing: .02em; text-transform: uppercase; margin-bottom: 6px; color: #fff;
+}
+.affiliate-coach p {
+  margin: 0; font-size: 13.5px; line-height: 1.55;
+  color: rgba(245,247,251,.75); text-wrap: pretty;
+}

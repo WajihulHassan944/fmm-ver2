@@ -54,7 +54,7 @@ const ShadowFightsLibrary = () => {
     } catch (adminApiError) {
       console.warn('Admin shadow library endpoint unavailable, falling back to legacy shadow feed:', adminApiError.message);
       try {
-        const response = await fetch(`${API_BASE}/shadow`);
+        const response = await fetch(`${API_BASE}/shadow`, { headers: adminHeaders() });
         const data = await response.json();
         setMatches(orderFightsForDisplay(Array.isArray(data) ? data : []));
       } catch (error) {
@@ -144,7 +144,7 @@ const ShadowFightsLibrary = () => {
 
     const deleteShadowFightPromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`${API_BASE}/shadowfighttodelete/${matchId}`, { method: 'DELETE' });
+        const response = await fetch(`${API_BASE}/shadowfighttodelete/${matchId}`, { headers: adminHeaders(), method: 'DELETE' });
         if (response.ok) {
           await response.json().catch(() => ({}));
           setShowFightPopup(false);

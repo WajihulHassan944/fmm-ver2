@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
+import { adminHeaders } from '@/Utils/authFetch';
 
 const AdminFaqs = () => {
   const [faqs, setFaqs] = useState([]);
@@ -11,7 +12,7 @@ const AdminFaqs = () => {
   useEffect(() => {
     const fetchFaqs = async () => {
       try {
-        const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/faqs");
+        const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/faqs", { headers: adminHeaders() });
         const data = await response.json();
         setFaqs(data.data);
       } catch (error) {
@@ -37,7 +38,7 @@ const AdminFaqs = () => {
     try {
       const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/faqs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newFaq),
       });
       const data = await response.json();
@@ -54,7 +55,7 @@ const AdminFaqs = () => {
     try {
       const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/faqs/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(updatedData),
       });
       const data = await response.json();
@@ -68,7 +69,7 @@ const AdminFaqs = () => {
   // Delete FAQ
   const deleteFaq = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/faqs/${id}`, { method: "DELETE" });
+      await fetch(`https://fantasymmadness-game-server-three.vercel.app/faqs/${id}`, { headers: adminHeaders(), method: "DELETE" });
       setFaqs(faqs.filter((faq) => faq._id !== id));
     } catch (error) {
       console.error("Error deleting FAQ:", error);

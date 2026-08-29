@@ -14,6 +14,7 @@ const ReactMediaRecorder = dynamic(
 import { toast } from 'react-toastify';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import UsersPlayed from './UsersPlayed/UsersPlayed';
+import { affiliateHeaders } from '@/Utils/authFetch';
 import {
   FaArrowLeft,
   FaBullhorn,
@@ -339,6 +340,7 @@ const actualProfit = extraActualProfit / 2;
     try {
       const response = await fetch(`${API_BASE}/api/matches/${id}?affiliateId=${affiliateId}`, {
         method: 'DELETE',
+        headers: affiliateHeaders(),
       });
   
       if (response.ok) {
@@ -461,9 +463,9 @@ const handleSave = async (blobUrl) => {
   const saveVideoUrlToDatabase = (videoUrl) => {
     fetch(`${API_BASE}/api/matches/${campaignMatchId}/promotional-video`, {
       method: 'POST', // Change to POST
-      headers: {
+      headers: affiliateHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
       body: JSON.stringify({ promotionalVideoUrl: videoUrl }),
     })
       .then((response) => response.json())
@@ -482,9 +484,9 @@ const handleSave = async (blobUrl) => {
     try {
       const response = await fetch(`${API_BASE}/activate-match/${id}`, {
         method: "POST",
-        headers: {
+        headers: affiliateHeaders({
           "Content-Type": "application/json",
-        },
+        }),
       });
   
       const data = await response.json();
@@ -507,9 +509,9 @@ const handleSave = async (blobUrl) => {
     try {
       const response = await fetch(`${API_BASE}/update-match-status-shadow/${matchId}`, {
         method: "POST",
-        headers: {
+        headers: affiliateHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify({ status: newStatus }),
       });
   

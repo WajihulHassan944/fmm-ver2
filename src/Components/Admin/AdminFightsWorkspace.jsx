@@ -17,6 +17,9 @@ import {
   FaVideo,
   FaBullhorn,
   FaRobot,
+  FaUserClock,
+  FaCopy,
+  FaTimes,
 } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
 import { fightDataQualityApi } from '@/Utils/fightDataQualityApi';
@@ -26,6 +29,7 @@ import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 import FightDataQualityCenter from './FightDataQualityCenter';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
+import { adminHeaders } from '@/Utils/authFetch';
 import {
   getFighterImage,
   getFighterName,
@@ -118,7 +122,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   const loadLegacyMatchFeed = async () => {
     const response = await fetch(`${API_BASE}/match?limit=200&includeDrafts=true`, {
-      headers: { Accept: 'application/json' },
+      headers: adminHeaders({ Accept: 'application/json' }),
     });
     if (!response.ok) throw new Error(`Legacy match feed failed with ${response.status}`);
     const data = await response.json();
@@ -253,7 +257,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     try {
       const response = await fetch(`${API_BASE}/api/admin/fights/bulk-delete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           updateWallet: false,
           items: rows.map((fight) => ({ id: getId(fight), sourceType: getSourceType(fight) })),
@@ -358,6 +362,67 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const deleteFight = async (fight) => {
     if (!getId(fight)) return;
     return bulkDeleteFights([fight]);
+  };
+
+  // --- delegating a fight to a scorer -------------------------------------
+  // Multiple live cards in a night means somebody else has to punch rounds in.
+  // A scorer gets a fight-scoped session: they submit rounds live, and they
+  // cannot finalize or pay out — that stays here.
+  const [scorerFight, setScorerFight] = useState(null);
+  const [scorerName, setScorerName] = useState('');
+  const [scorerEmail, setScorerEmail] = useState('');
+  const [scorerLink, setScorerLink] = useState('');
+  const [scorerBusy, setScorerBusy] = useState(false);
+  const [scorerAssignments, setScorerAssignments] = useState([]);
+
+  const openScorerPanel = async (fight) => {
+    setScorerFight(fight);
+    setScorerLink('');
+    setScorerName('');
+    setScorerEmail('');
+    setScorerAssignments([]);
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(getId(fight))}/scorers`, {
+        headers: adminHeaders({ Accept: 'application/json' }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (response.ok) setScorerAssignments(payload.assignments || []);
+    } catch (_error) { /* the panel still works without the history */ }
+  };
+
+  const sendToScorer = async () => {
+    if (!scorerFight) return;
+    setScorerBusy(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(getId(scorerFight))}/scorers`, {
+        method: 'POST',
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ mode: 'link', scorerName, scorerEmail }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Could not create the scoring link.');
+      setScorerLink(payload.link || '');
+      toast.success(scorerEmail ? `Scoring link emailed to ${scorerEmail}` : 'Scoring link created.');
+      openScorerPanel(scorerFight);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setScorerBusy(false);
+    }
+  };
+
+  const revokeAssignment = async (assignmentId) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/scorer-assignments/${encodeURIComponent(assignmentId)}`, {
+        method: 'DELETE',
+        headers: adminHeaders({ Accept: 'application/json' }),
+      });
+      if (!response.ok) throw new Error('Could not revoke that assignment.');
+      toast.success('Scoring access revoked.');
+      if (scorerFight) openScorerPanel(scorerFight);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
 
@@ -522,6 +587,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                           <FaRobot /> {scoutingUpdatingId === String(id) ? 'Generating...' : fight.aiScoutingReport ? 'Refresh AI report' : 'Generate AI report'}
                         </button>
                         <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
+                        <button type="button" onClick={() => openScorerPanel(fight)}><FaUserClock /> Send to scorer</button>
                         <Link href={`/administration/DeleteUpdateMatches?matchId=${id}`}><FaEdit /> Edit fight</Link>
                         <button type="button" className="is-danger" onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>
                       </div>
@@ -533,6 +599,73 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           </table>
         </div>
       </section>
+
+      {scorerFight && (
+        <div className="admin-scorer-backdrop" role="dialog" aria-modal="true" aria-label="Send fight to a scorer">
+          <div className="admin-scorer-panel">
+            <header>
+              <div>
+                <p>Send to scorer</p>
+                <h3>{getTitle(scorerFight) || 'Fight'}</h3>
+              </div>
+              <button type="button" onClick={() => setScorerFight(null)} aria-label="Close"><FaTimes /></button>
+            </header>
+
+            <p className="admin-scorer-note">
+              They get this one fight and nothing else &mdash; no pot, no entry fees, no entrant list,
+              no other cards. Rounds go live as they submit them. Only you can finalize and pay out.
+            </p>
+
+            <label>
+              <span>Their name</span>
+              <input value={scorerName} onChange={(event) => setScorerName(event.target.value)} placeholder="Who is scoring" />
+            </label>
+            <label>
+              <span>Email the link (optional)</span>
+              <input type="email" value={scorerEmail} onChange={(event) => setScorerEmail(event.target.value)} placeholder="scorer@example.com" />
+            </label>
+
+            <button type="button" className="admin-scorer-create" onClick={sendToScorer} disabled={scorerBusy}>
+              {scorerBusy ? 'Creating…' : 'Create scoring link'}
+            </button>
+
+            {scorerLink && (
+              <div className="admin-scorer-link">
+                <code>{scorerLink}</code>
+                <button
+                  type="button"
+                  onClick={() => { navigator.clipboard?.writeText(scorerLink); toast.success('Link copied.'); }}
+                >
+                  <FaCopy /> Copy
+                </button>
+                <small>Works once, expires in 24 hours. Shown here only now.</small>
+              </div>
+            )}
+
+            {scorerAssignments.length > 0 && (
+              <div className="admin-scorer-history">
+                <p>Already assigned</p>
+                <ul>
+                  {scorerAssignments.map((assignment) => (
+                    <li key={assignment._id} className={assignment.revokedAt ? 'is-revoked' : ''}>
+                      <span>
+                        <strong>{assignment.scorerName || assignment.scorerEmail || 'Scorer'}</strong>
+                        <small>
+                          {assignment.mode === 'account' ? 'Staff account' : 'One-time link'}
+                          {assignment.roundsSubmitted ? ` · ${assignment.roundsSubmitted} rounds submitted` : ' · not used yet'}
+                        </small>
+                      </span>
+                      {assignment.revokedAt
+                        ? <em>Revoked</em>
+                        : <button type="button" onClick={() => revokeAssignment(assignment._id)}>Revoke</button>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

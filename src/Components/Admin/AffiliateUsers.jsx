@@ -113,7 +113,7 @@ const AffiliateUsers = () => {
     const deleteUserPromise = new Promise(async (resolve, reject) => {
       try {
         setDeleteText('Deleting...');
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliatetodelete/${id}`, {
+        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliatetodelete/${id}`, { headers: adminHeaders(),
           method: 'DELETE',
         });
 
@@ -146,7 +146,7 @@ const AffiliateUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-affiliate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(data),
       });
 

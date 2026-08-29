@@ -56,9 +56,9 @@ const AffiliatesPayouts = () => {
             try {
                 const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/confirm-payment-affiliate`, {
                     method: 'POST',
-                    headers: {
+                    headers: adminHeaders({
                         'Content-Type': 'application/json',
-                    },
+                    }),
                     body: JSON.stringify({
                         affiliateId: selectedUser._id, // Send affiliate ID
                         amount: selectedPayout.amount, // Send the payout amount

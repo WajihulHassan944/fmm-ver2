@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -45,6 +45,12 @@ const SITE_STYLES = `
   .fmm-site input::placeholder { color: rgba(255,255,255,.42); }
   .fmm-site select option { background: #0b0e18; color: #fff; }
   @keyframes fmmTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  /* The store no longer moves — its frames stay put and their contents fade. */
+  @keyframes fmmShopFade { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+  @keyframes fmmBoardIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes fmmCrownGlow { 0%,100% { box-shadow: 0 0 0 rgba(245,166,35,0); } 50% { box-shadow: 0 0 18px rgba(245,166,35,.45); } }
+  @media (max-width: 900px) { [data-fmm="store-wall"] { grid-template-columns: repeat(2, minmax(0,1fr)) !important; } }
+  @media (max-width: 520px) { [data-fmm="store-wall"] { grid-template-columns: 1fr !important; } }
   @keyframes fmmPulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
   /* Nothing in the header may wrap — five uppercase links plus Sign in plus Join
      broke onto two lines between 760 and 1000px, which is the ragged bar. */
@@ -113,7 +119,6 @@ const SITE_STYLES = `
     [data-fmm="body-grid"] { grid-template-columns: minmax(0,1fr) !important; }
     [data-fmm="signup-name-row"],
     [data-fmm="signup-dob-row"] { grid-template-columns: minmax(0,1fr) !important; gap: 10px !important; }
-    [data-fmm="store-track"] > a { flex: 0 0 62% !important; min-width: 0 !important; }
 
     /* 44px minimum on anything tappable. */
     .fmm-site a[href^="#"], .fmm-site a[href^="/"] { -webkit-tap-highlight-color: rgba(245,166,35,.25); }
@@ -152,36 +157,46 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
     return () => clearInterval(timer);
   }, []);
 
-  const realRows = board.slice(0, 5);
+  const BOARD_SIZE = 8;
+  const realRows = board.slice(0, BOARD_SIZE);
   const boardRows = realRows.concat(
-    seedBoard.slice(0, Math.max(0, 5 - realRows.length)).map((row) => ({ name: row.name, points: money(row.pts) })),
+    seedBoard.slice(0, Math.max(0, BOARD_SIZE - realRows.length)).map((row) => ({ name: row.name, points: money(row.pts) })),
   );
-  const boardLive = realRows.length >= 5;
+  // "Live" only once the board is genuinely full of real players — a seeded
+  // row wearing a live badge is the kind of thing people notice.
+  const boardLive = realRows.length >= BOARD_SIZE;
 
-  // Advance the store track so every shirt is seen without the visitor scrolling.
-  // Pauses while the tab is hidden, and stops the moment they scroll it by hand —
-  // fighting a user's own swipe is worse than not animating at all.
+  // The store used to be one long rail that scrolled sideways on a timer, which
+  // is why it read as "jumping all over the place": the whole row moved, so
+  // nothing on screen ever held still long enough to look at.
+  //
+  // Now the WINDOWS are stationary and only their CONTENTS change — the same
+  // thing the app does. Four fixed frames, each holding its own slice of the
+  // catalogue, cross-fading one at a time on a stagger so the wall never blinks
+  // all at once. Products with no photograph are dropped entirely rather than
+  // shown as an empty grey square.
+  const shopItems = useMemo(() => {
+    const source = (products && products.length ? products : STORE_ITEMS)
+      .filter((item) => item && item.image);
+    return source.length ? source : [];
+  }, [products]);
+
+  const WINDOW_COUNT = 4;
+  const shopWindows = useMemo(() => {
+    if (!shopItems.length) return [];
+    return Array.from({ length: Math.min(WINDOW_COUNT, shopItems.length) }, (_, slot) =>
+      shopItems.filter((_item, index) => index % Math.min(WINDOW_COUNT, shopItems.length) === slot));
+  }, [shopItems]);
+
+  const [shopStep, setShopStep] = useState(0);
   useEffect(() => {
-    const track = document.querySelector('[data-fmm="store-track"]');
-    if (!track) return undefined;
-    let touched = false;
-    const stop = () => { touched = true; };
-    track.addEventListener('pointerdown', stop, { passive: true });
-    track.addEventListener('wheel', stop, { passive: true });
+    if (!shopWindows.length) return undefined;
     const timer = setInterval(() => {
-      if (touched || document.hidden) return;
-      const card = track.firstElementChild;
-      if (!card) return;
-      const step = card.getBoundingClientRect().width + 20;
-      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
-      track.scrollTo({ left: atEnd ? 0 : track.scrollLeft + step, behavior: 'smooth' });
-    }, 5000);
-    return () => {
-      clearInterval(timer);
-      track.removeEventListener('pointerdown', stop);
-      track.removeEventListener('wheel', stop);
-    };
-  }, []);
+      if (document.hidden) return;
+      setShopStep((n) => n + 1);
+    }, 3200);
+    return () => clearInterval(timer);
+  }, [shopWindows.length]);
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', password: '', dateOfBirth: '', residenceState: '',
   });
@@ -357,26 +372,12 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
         </div>
 
         <div style={{ background: '#0b0e18', borderTop: '2px solid #f5a623', borderBottom: '2px solid #f5a623', overflow: 'hidden', padding: '11px 0' }}>
-            <div style={{ display: 'flex', gap: 46, width: 'max-content', animation: 'fmmTicker 34s linear infinite', fontSize: 13.5, fontWeight: 700, letterSpacing: '.03em', whiteSpace: 'nowrap' }}>
+            <div data-tick-rail style={{ display: 'flex', gap: 46, paddingLeft: 46, width: 'max-content', animation: 'fmmTicker 34s linear infinite', fontSize: 13.5, fontWeight: 700, letterSpacing: '.03em', whiteSpace: 'nowrap' }}>
               {[...ticker, ...ticker].map((item, index) => (
                 <span key={index} style={{ color: item.color }}>{item.text}</span>
               ))}
             </div>
         </div>
-
-        {ticker.length ? (
-          <div style={{ borderTop: '1px solid rgba(216,220,228,.14)', borderBottom: '1px solid rgba(216,220,228,.14)', background: 'rgba(245,166,35,.05)', overflow: 'hidden', padding: '11px 0' }}>
-            <div
-              data-tick-rail
-              style={{ display: 'flex', width: 'max-content', gap: '46px', paddingLeft: '46px', animation: 'fmmTick 34s linear infinite', whiteSpace: 'nowrap' }}
-            >
-              {/* Two identical runs: the -50% keyframe needs a duplicate to loop seamlessly. */}
-              {[0, 1].map((pass) => ticker.map((line, index) => (
-                <span key={pass + '-' + index} style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.04em', color: line.color }}>{line.text}</span>
-              )))}
-            </div>
-          </div>
-        ) : null}
 
         <div id="fights" data-fmm="body-grid" style={{ maxWidth: '1320px', margin: '0 auto', padding: '62px 32px 0', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 348px', gap: '40px', alignItems: 'start' }}>
 
@@ -465,17 +466,71 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   {boardLive ? 'Live' : 'Demo'}
                 </span>
               </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
-                <tbody>
-                  {boardRows.map((row, index) => (
-                    <tr key={row.name + index} style={{ borderBottom: index === boardRows.length - 1 ? 'none' : '1px solid rgba(216,220,228,.09)' }}>
-                      <td style={{ padding: '11px 8px 11px 18px', width: 34, fontFamily: "'Anton', sans-serif", fontSize: 15, color: ['#f5a623', '#d8dce4', '#c9772e'][index] || 'rgba(255,255,255,.4)' }}>{index + 1}</td>
-                      <td style={{ padding: '11px 8px', fontSize: 14.5, fontWeight: 700, color: index < 3 ? '#fff' : 'rgba(255,255,255,.8)' }}>{row.name}</td>
-                      <td style={{ padding: '11px 18px 11px 8px', textAlign: 'right', fontFamily: "'Anton', sans-serif", fontSize: 15, color: index === 0 ? '#f5a623' : '#fff', transition: 'color .3s' }}>{row.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Matches the app's board rather than a plain table: a three-up
+                  podium in medal colours, then the chasing pack as rows. Gold,
+                  silver and bronze are the same values the app uses so a player
+                  moving between the two surfaces sees one ranking language. */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8, padding: '16px 14px 4px' }}>
+                {boardRows.slice(0, 3).map((row, index) => {
+                  const medal = ['#f5a623', '#d8dce4', '#c9772e'][index];
+                  const lead = index === 0;
+                  return (
+                    <div
+                      key={'podium-' + row.name + index}
+                      style={{
+                        borderRadius: 11,
+                        border: '1px solid ' + medal + (lead ? '' : '55'),
+                        background: lead
+                          ? 'linear-gradient(168deg, rgba(245,166,35,.18), rgba(11,14,24,.5))'
+                          : 'rgba(255,255,255,.035)',
+                        padding: '12px 8px 11px',
+                        textAlign: 'center',
+                        animation: lead ? 'fmmCrownGlow 2.8s ease-in-out infinite' : undefined,
+                        // The leader's card sits slightly proud of the other two.
+                        marginTop: lead ? 0 : 8,
+                      }}
+                    >
+                      <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 12, color: medal, letterSpacing: '.06em' }}>#{index + 1}</div>
+                      <div style={{
+                        width: 34, height: 34, borderRadius: '50%', margin: '7px auto 6px',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.04))',
+                        border: '1px solid ' + medal + '66',
+                        display: 'grid', placeItems: 'center',
+                        fontFamily: "'Anton', sans-serif", fontSize: 14, color: medal,
+                      }}>{String(row.name || '?').charAt(0)}</div>
+                      <div style={{ fontSize: 11.5, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</div>
+                      <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 13, color: medal, marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{row.points}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 14px 14px' }}>
+                {boardRows.slice(3).map((row, index) => (
+                  <div
+                    key={'board-' + row.name + index}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 11px', borderRadius: 9,
+                      background: 'rgba(255,255,255,.03)',
+                      border: '1px solid rgba(216,220,228,.1)',
+                      animation: 'fmmBoardIn .4s ease both',
+                      animationDelay: (index * 60) + 'ms',
+                    }}
+                  >
+                    <span style={{ width: 22, textAlign: 'center', fontFamily: "'Anton', sans-serif", fontSize: 13, color: 'rgba(255,255,255,.45)', fontVariantNumeric: 'tabular-nums' }}>{index + 4}</span>
+                    <span style={{
+                      width: 26, height: 26, borderRadius: '50%', flex: '0 0 26px',
+                      background: 'linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03))',
+                      border: '1px solid rgba(216,220,228,.18)',
+                      display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.7)',
+                    }}>{String(row.name || '?').charAt(0)}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</span>
+                    <span style={{ fontFamily: "'Anton', sans-serif", fontSize: 14, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>{row.points}</span>
+                  </div>
+                ))}
+              </div>
+
               <a href="/home" style={{ display: 'block', padding: '13px 18px', borderTop: '1px solid rgba(216,220,228,.14)', fontSize: '12px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#f5a623' }}>Full standings →</a>
             </div>
 
@@ -584,27 +639,48 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             </div>
             <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', height: '44px', padding: '0 20px', borderRadius: '999px', background: '#f5a623', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em', whiteSpace: 'nowrap' }}>SHOP ON ETSY ↗</a>
           </div>
-            <div data-fmm="store-track" style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 6, scrollbarWidth: 'thin' }}>
-              {(products.length ? products : STORE_ITEMS).map((item) => (
-                <a
-                  key={item.name}
-                  href={item.url || 'https://www.etsy.com/shop/FANTASYMMADNESS'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ flex: '0 0 calc(25% - 15px)', minWidth: 190, scrollSnapAlign: 'start', display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: '13px', overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}
-                >
-                  <div style={{ aspectRatio: 1, background: '#0b0e18' }}>
-                    <img loading="lazy" decoding="async" src={item.image} alt={item.name} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div style={{ padding: '14px 15px 16px' }}>
-                    <div style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '4px' }}>{item.name}</div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                      <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '17px', color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>{item.price}</span>
-                      <span style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY &#8599;</span>
-                    </div>
-                  </div>
-                </a>
-              ))}
+            {shopWindows.length === 0 ? (
+              <div style={{ padding: '38px 20px', textAlign: 'center', border: '1px dashed rgba(216,220,228,.2)', borderRadius: 13, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,.5)' }}>
+                The shop is loading its latest drops.
+              </div>
+            ) : (
+              <div data-fmm="store-wall" style={{ display: 'grid', gridTemplateColumns: `repeat(${shopWindows.length}, minmax(0,1fr))`, gap: 20 }}>
+                {shopWindows.map((slotItems, slot) => {
+                  // Each window advances on its own offset, so the four frames
+                  // never change at the same instant.
+                  const item = slotItems[(shopStep + slot) % slotItems.length];
+                  return (
+                    <a
+                      key={'shop-window-' + slot}
+                      href={item.url || 'https://www.etsy.com/shop/FANTASYMMADNESS'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'block', border: '1px solid rgba(216,220,228,.16)', borderRadius: 13, overflow: 'hidden', background: 'rgba(255,255,255,.03)', color: 'inherit', textDecoration: 'none' }}
+                    >
+                      <div style={{ aspectRatio: 1, background: '#0b0e18', position: 'relative', overflow: 'hidden' }}>
+                        {/* Keyed on the image so React swaps the node and the
+                            fade-in keyframe replays on every change. */}
+                        <img
+                          key={item.image}
+                          loading="lazy"
+                          decoding="async"
+                          src={item.image}
+                          alt={item.name}
+                          style={{ position: 'absolute', inset: 0, display: 'block', width: '100%', height: '100%', objectFit: 'cover', animation: 'fmmShopFade .6s ease' }}
+                        />
+                      </div>
+                      <div style={{ padding: '14px 15px 16px' }}>
+                        <div key={item.name} style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 4, minHeight: '2.6em', animation: 'fmmShopFade .6s ease' }}>{item.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+                          <span style={{ fontFamily: '"Anton", sans-serif', fontSize: 17, color: '#f5a623', fontVariantNumeric: 'tabular-nums' }}>{item.price}</span>
+                          <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', color: 'rgba(255,255,255,.45)' }}>ETSY &#8599;</span>
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            )}
             </div>
         </div>
 
@@ -778,10 +854,13 @@ const toFightCard = (f, index) => {
 // genuine apparel photographs in the project, square-cropped so a square card
 // does not distort them. Real products replace them whenever the Etsy catalogue
 // responds.
+const SHOP = 'https://www.etsy.com/shop/FANTASYMMADNESS';
 const STORE_ITEMS = [
-  { name: 'Ringside Tee', price: '$32', image: '/site/product-ringside-tee.jpg' },
-  { name: 'Fight Night Tee', price: '$32', image: '/site/product-fight-tee.jpg' },
-  { name: 'BKFC Tee', price: '$34', image: '/site/product-bkfc-tee.jpg' },
+  { name: 'Ringside Tee', price: '$32', image: '/site/product-ringside-tee.jpg', url: 'https://www.etsy.com/listing/4552218538/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'Fight Night Tee', price: '$32', image: '/site/product-fight-tee.jpg', url: 'https://www.etsy.com/listing/4552212559/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'BKFC Tee', price: '$34', image: '/site/product-bkfc-tee.jpg', url: 'https://www.etsy.com/listing/4552225010/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'Combat Sports Tee', price: '$32', image: '/site/apparel-tee.webp', url: 'https://www.etsy.com/listing/4549330994/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'Built For The Fight Tee', price: '$34', image: '/site/tee.webp', url: 'https://www.etsy.com/listing/4541697432/inspired-by-champions-built-for-the' },
 ];
 
 // Real fighters from the site's own photo library (public/images/fmm-experience),
@@ -825,11 +904,17 @@ const SEED_BOARD = [
   { name: 'SOUTHPAW_SAM', pts: 3742 },
   { name: 'THE_ORACLE', pts: 3510 },
   { name: 'GLOVE_STORY', pts: 3388 },
+  { name: 'ROUND_TWELVE', pts: 3204 },
+  { name: 'CLINCHWORK', pts: 3061 },
+  { name: 'PAPER_CUTS', pts: 2887 },
 ];
 
 const fetchJson = async (path) => {
   try {
-    const response = await fetch(`${API_BASE}${path}`);
+    // no-store on the server-to-server hop too: without it these responses sit
+    // in the platform's fetch cache and the page renders fresh HTML around
+    // stale fight data, which looks exactly like the bug it is.
+    const response = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -842,12 +927,19 @@ const fetchJson = async (path) => {
 // deploy — and never updated when fights were added. This runs per request.
 export async function getServerSideProps({ res }) {
   if (res) {
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    // NO CDN cache on the homepage. This was s-maxage=60 with a 5-minute
+    // stale-while-revalidate, which meant a fight created in the back office
+    // could take a minute to appear and a stale copy could be served for five
+    // — the server-side cache invalidation cannot reach an edge cache, so the
+    // only way for "publish and it is there" to be true is to not cache the
+    // page at all. It is server-rendered per request and the API behind it is
+    // still cached, so the cost is small.
+    res.setHeader('Cache-Control', 'no-store, must-revalidate');
   }
   const [fightData, boardData, apparelData] = await Promise.all([
     // prediction-fights, not fights — the latter does not exist and 404'd silently.
     fetchJson('/api/public/prediction-fights?limit=24'),
-    fetchJson('/api/public/leaderboard?limit=5'),
+    fetchJson('/api/public/leaderboard?limit=8'),
     // The live Etsy catalogue. Falls through to STORE_ITEMS when the shop is
     // unreachable or the Etsy keys are not configured.
     fetchJson('/api/public/apparel-products?limit=12'),
@@ -871,7 +963,7 @@ export async function getServerSideProps({ res }) {
     : Array.isArray(boardData?.players) ? boardData.players
       : Array.isArray(boardData) ? boardData : [];
 
-  const board = rawBoard.slice(0, 5).map((row) => ({
+  const board = rawBoard.slice(0, 8).map((row) => ({
     name: String(row.playerName || row.displayName || row.username || row.name || 'Player').toUpperCase(),
     points: money(row.totalPoints ?? row.points ?? row.score ?? 0),
   }));

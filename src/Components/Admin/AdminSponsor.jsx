@@ -18,7 +18,7 @@ const AdminSponsor = () => {
   // Fetch sponsors from the backend
   const fetchSponsors = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/sponsors');
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/sponsors', { headers: adminHeaders() });
       const data = await response.json();
       if (data.success) {
         setSponsors(data.data);

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchMatches } from '../../Redux/matchSlice';
 import AffiliateFightLeaderboard from './AffiliateFightLeaderboard';
+import { userHeaders } from '@/Utils/authFetch';
 
 const Promo = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -113,9 +114,9 @@ const Promo = () => {
     try {
       const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/join`, {
         method: 'POST',
-        headers: {
+        headers: userHeaders({
           'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify({ userId, userEmail }),
       });
 

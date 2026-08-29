@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { adminHeaders } from '@/Utils/authFetch';
 const EmailTemplate = () => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -10,7 +11,7 @@ const EmailTemplate = () => {
   const [message, setMessage] = useState(`Dear Fighters,\n\nImagine a world where you not only fight in the ring but also manage your own league, engage directly with your followers, and earn a significant 50% share of the profits. Welcome to Fantasy MMAdness, where we believe you are the lifeblood of the fight game.\n\nWhy Fantasy MMAdness?\n\n1. Profit Sharing: You deserve to reap the rewards of your hard work. With Fantasy MMAdness, you'll earn a substantial 50% share of the league's profits.\n\n2. Manage Your Own League: Take charge of your destiny by creating and managing matchups that excite fans and showcase your skills. You control the action.\n\n3. Interact with Your Followers: Build a loyal fan base and connect with your supporters on a personal level. Engage directly with those who admire your dedication and talent.\n\n4. Become Your Own Boss: This is more than just a league; it's an opportunity for independence and growth. Shape your career and future in the fight game on your terms.\n\n5. Belief in Your Potential: At Fantasy MMAdness, we believe in your abilities and the passion you bring to combat sports. This league is designed to empower fighters like you to thrive.\n\nHow to Get Started:\n\n- Register Today: Secure your place in Fantasy MMAdness and begin your journey as a league manager.\n- Customize Your League: Tailor your league to reflect your vision and strategy for success.\n- Promote and Engage: Use your platform to attract fans and drive engagement. The more you connect, the greater your potential for success and earnings.\n\nJoin us in revolutionizing the fight game with Fantasy MMAdness. Together, we'll create a league that celebrates your skills and commitment.\n\nFor more details or to register, visit [League Website] or contact us directly at [Contact Information].\n\nLet's make your dreams a reality with Fantasy MMAdness!\n\nWarm regards,\n\nKelly Davis\nLeague Organizer/Representative`);
 
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+    fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminHeaders() })
       .then(response => response.json())
       .then(data => setUsers(data))
       .catch(error => console.error('Error fetching users:', error));
@@ -52,9 +53,9 @@ const EmailTemplate = () => {
            
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-emails-to-all-users', {
         method: 'POST',
-        headers: {
+        headers: adminHeaders({
           'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify(emailData),
       });
 

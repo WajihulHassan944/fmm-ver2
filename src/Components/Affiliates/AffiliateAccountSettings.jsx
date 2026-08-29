@@ -16,6 +16,7 @@ import {
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
+import { affiliateHeaders } from '@/Utils/authFetch';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 const PAYMENT_METHODS = [
@@ -62,7 +63,7 @@ const AffiliateAccountSettings = () => {
     try {
       const response = await fetch(`${API_BASE}/affiliate/updatePayment/${affiliate._id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: affiliateHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           preferredPaymentMethod: selectedPaymentMethod,
           preferredPaymentMethodValue: paymentValue,
@@ -96,7 +97,7 @@ const AffiliateAccountSettings = () => {
     try {
       const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/payout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: affiliateHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ amount }),
       });
       const payload = await response.json().catch(() => ({}));

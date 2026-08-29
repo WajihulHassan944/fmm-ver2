@@ -330,8 +330,9 @@ function AppContent({ children }) {
   // The new homepage (pages/welcome.js, reused by pages/index.js) brings its own
   // nav and footer, so the legacy site chrome must not be layered on top of it.
   const hideLayout = isAdministrationRoute || isStandaloneDemoRoute
+    || router.pathname.startsWith("/score")
     || router.pathname === "/" || router.pathname === "/welcome";
-  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || IMMERSIVE_ROUTES.has(router.pathname);
+  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,

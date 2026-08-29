@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { FaEdit, FaPlus, FaSearch, FaSyncAlt, FaTrashAlt } from 'react-icons/fa';
 import { fetchMatches } from '@/Redux/matchSlice';
 import EditMatch from './EditMatch';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
@@ -54,7 +55,7 @@ const DeleteFights = () => {
       try {
         let url = `${API_BASE}/api/matches/${selectedMatchId}?updateWallet=${returnTokens}`;
         if (selectedAffiliateId) url += `&affiliateId=${selectedAffiliateId}`;
-        const response = await fetch(url, { method: 'DELETE' });
+        const response = await fetch(url, { headers: adminHeaders(), method: 'DELETE' });
         if (response.ok) {
           dispatch(fetchMatches({ includeDrafts: true }));
           resolve();

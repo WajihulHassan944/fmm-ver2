@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
@@ -12,7 +13,7 @@ const UserDetails = ({ user }) => {
   const [userDetails, setUserDetails] = useState([]);
 
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+    fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminHeaders() })
       .then((response) => response.json())
       .then((data) => {
         const matchedUsers = (user.usersJoined || []).map((affiliateUser) => {
@@ -37,9 +38,9 @@ const UserDetails = ({ user }) => {
     try {
       const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliates/${user._id}/verify`, {
         method: 'POST',
-        headers: {
+        headers: adminHeaders({
           'Content-Type': 'application/json',
-        },
+        }),
       });
 
       if (response.ok) {
@@ -67,9 +68,9 @@ const UserDetails = ({ user }) => {
       setButtonText('Sending!');
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
         method: 'POST',
-        headers: {
+        headers: adminHeaders({
           'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify(emailData),
       });
 

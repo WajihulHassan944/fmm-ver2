@@ -39,7 +39,7 @@ const METRICS = {
   MMA: [
     { prefix: 'stPrediction', code: 'ST', label: 'Strikes' },
     { prefix: 'kiPrediction', code: 'KI', label: 'Kicks' },
-    { prefix: 'knPrediction', code: 'KN', label: 'Knockdowns' },
+    { prefix: 'knPrediction', code: 'KN', label: 'Knees' },
     { prefix: 'elPrediction', code: 'EL', label: 'Elbows' },
   ],
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './AdminNotifications.module.css';
 import { MdNotifications, MdCheckCircle, MdDone } from 'react-icons/md';
 import { BsThreeDotsVertical } from 'react-icons/bs';
+import { adminHeaders } from '@/Utils/authFetch';
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -26,7 +27,7 @@ const isMobile = useIsMobile();
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/notifications');
+      const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/notifications', { headers: adminHeaders() });
       const data = await res.json();
       setNotifications(data);
     } catch (err) {
@@ -36,7 +37,7 @@ const isMobile = useIsMobile();
 
   const markAsRead = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}/read`, {
+      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}/read`, { headers: adminHeaders(),
         method: 'PATCH',
       });
       setNotifications((prev) =>
@@ -49,7 +50,7 @@ const isMobile = useIsMobile();
 
   const deleteNotification = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}`, {
+      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}`, { headers: adminHeaders(),
         method: 'DELETE',
       });
       setNotifications((prev) => prev.filter((n) => n._id !== id));

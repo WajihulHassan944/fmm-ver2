@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { FaArrowLeft, FaCheckCircle, FaFilm, FaPlus, FaSave, FaTrophy } from 'react-icons/fa';
 import { getWinnerDetails } from '../../CustomFunctions/winnerUtils';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
@@ -17,7 +18,7 @@ const FIELD_LABELS = {
   SP: 'Scoring points',
   ST: 'Strikes',
   KI: 'Kicks',
-  KN: 'Knockdowns',
+  KN: 'Knees',
   EL: 'Elbows',
 };
 
@@ -50,7 +51,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     if (filter !== 'normal') {
       const fetchShadowMatch = async () => {
         try {
-          const response = await fetch(`${API_BASE}/shadow`);
+          const response = await fetch(`${API_BASE}/shadow`, { headers: adminHeaders() });
           const shadowData = await response.json();
           setShadowMatches(Array.isArray(shadowData) ? shadowData : []);
         } catch (error) {
@@ -122,7 +123,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
         const response = await fetch(apiUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: adminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(payload),
         });
 
@@ -198,7 +199,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
     const finishFightPromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(endpoint, { method: 'POST' });
+        const response = await fetch(endpoint, { headers: adminHeaders(), method: 'POST' });
         const result = await response.json();
         if (response.ok) {
           console.log('Match status updated to Finished:', result.match);
@@ -225,7 +226,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           if (winnerDetails && matchTokens) {
             const rewardResponse = await fetch(`${API_BASE}/api/reward-tokens/${winnerDetails.userId}`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: adminHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify({ tokens: matchTokens, matchId }),
             });
             const rewardData = await rewardResponse.json();
@@ -250,7 +251,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         const apiUrl = filter === 'normal' ? `${API_BASE}/updateMatchVideo` : `${API_BASE}/updateShadowVideo`;
         const response = await fetch(apiUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: adminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ matchId, matchVideoUrl: videoUrl }),
         });
         const result = await response.json();

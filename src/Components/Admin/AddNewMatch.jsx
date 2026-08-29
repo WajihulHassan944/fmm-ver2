@@ -5,6 +5,7 @@ import AdminPredictions from './AdminPredictions';
 import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const EMPTY = {
   matchCategory: 'boxing',
@@ -37,6 +38,11 @@ const normaliseCategory = (value) => {
   if (value === 'Bare-knuckle') return { matchCategory: 'boxing', matchCategoryTwo: 'Bare-knuckle' };
   return { matchCategory: value, matchCategoryTwo: '' };
 };
+
+// Starting round counts only — the field stays editable. Boxing runs twelve;
+// MMA, kickboxing and bare knuckle all run five.
+const DEFAULT_ROUNDS = { boxing: '12', 'Bare-knuckle': '5', mma: '5', kickboxing: '5' };
+const ROUND_PRESETS = ['3', '5', '10', '12'];
 
 const appendLegacyFight = (data, form, { shadow = false } = {}) => {
   data.append('matchCategory', form.matchCategory);
@@ -98,7 +104,11 @@ export default function AddNewMatch() {
     const { name, type, checked, value, files } = event.target;
     if (name === 'matchCategory') {
       setDisplayCategory(value);
-      setForm((current) => ({ ...current, ...normaliseCategory(value) }));
+      setForm((current) => ({
+        ...current,
+        ...normaliseCategory(value),
+        maxRounds: DEFAULT_ROUNDS[value] || current.maxRounds,
+      }));
       return;
     }
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : type === 'file' ? files?.[0] || null : value }));
@@ -139,7 +149,7 @@ export default function AddNewMatch() {
       const data = new FormData();
       appendLegacyFight(data, form);
       const endpoint = form.matchType === 'SHADOW' ? `${API_BASE}/addShadow` : `${API_BASE}/addMatch`;
-      const response = await fetch(endpoint, { method: 'POST', body: data });
+      const response = await fetch(endpoint, { headers: adminHeaders(), method: 'POST', body: data });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Failed to add match.');
 
@@ -148,7 +158,7 @@ export default function AddNewMatch() {
       if (form.matchType === 'LIVE' && form.addToShadowTemplates) {
         const shadow = new FormData();
         appendLegacyFight(shadow, form, { shadow: true });
-        const shadowResponse = await fetch(`${API_BASE}/addShadow`, { method: 'POST', body: shadow });
+        const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadow });
         if (!shadowResponse.ok) console.warn('Failed to add fight to shadow templates.');
       }
 
@@ -217,7 +227,22 @@ export default function AddNewMatch() {
                 <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('A', fighter)} required />
                 <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('B', fighter)} required />
               </div>
-              <label><span>Maximum rounds</span><input type="number" min="1" max="30" name="maxRounds" value={form.maxRounds} onChange={change} /></label>
+              <label>
+                <span>Maximum rounds</span>
+                <input type="number" min="1" max="30" name="maxRounds" value={form.maxRounds} onChange={change} />
+                <span className="admin-round-presets">
+                  {ROUND_PRESETS.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      className={form.maxRounds === preset ? 'is-active' : ''}
+                      onClick={() => setForm((current) => ({ ...current, maxRounds: preset }))}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </span>
+              </label>
               <label><span>Video URL</span><input type="url" name="matchVideoUrl" value={form.matchVideoUrl} onChange={change} placeholder="https://…" /></label>
               <label className="is-wide"><span>Description</span><textarea name="matchDescription" value={form.matchDescription} onChange={change} rows="5" placeholder="Give players the context they need before predicting." /></label>
             </div>

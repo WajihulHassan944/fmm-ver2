@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { affiliateHeaders } from '@/Utils/authFetch';
 import {
   FaBullhorn,
   FaCalendarAlt,
@@ -7,6 +8,7 @@ import {
   FaDollarSign,
   FaInfoCircle,
   FaSave,
+  FaShieldAlt,
   FaUsers,
 } from 'react-icons/fa';
 import {
@@ -26,8 +28,10 @@ const AffiliateAddNewMatch = ({ matchId }) => {
   const [buttonText, setButtonText] = useState('Publish fight promotion');
   const [formData, setFormData] = useState({
     shadowFightId: '',
+    prizeMode: 'paid',
     matchTokens: '',
     affiliateId: '',
+    promoterStake: '',
     pot: '',
     profit: '',
     amountOverPotBudget: '',
@@ -84,12 +88,82 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     }));
   }, [promoDetails]);
 
-  const requiredUsers = useMemo(() => {
-    const pot = Number(formData.pot);
-    const buyIn = Number(formData.matchTokens);
-    if (!Number.isFinite(pot) || !Number.isFinite(buyIn) || pot <= 0 || buyIn <= 0) return 0;
-    return Math.ceil(pot / buyIn);
-  }, [formData.matchTokens, formData.pot]);
+  // The default deal costs the promoter nothing: if the card fills it runs, and
+  // if it does not it voids at lock and every entry is refunded. Nobody is ever
+  // short — not the players, not the platform, not them.
+  //
+  // Staking is the optional upgrade. Put the pot up front and the card is
+  // GUARANTEED: it runs however few turn up, and the shortfall comes out of the
+  // stake instead of voiding. A free card has no fees, so there is nothing to
+  // fill and nothing to guarantee.
+  const economics = useMemo(() => {
+    const free = formData.prizeMode === 'free';
+    const pot = Number(formData.pot) || 0;
+    const buyIn = free ? 0 : Number(formData.matchTokens) || 0;
+    const stake = Number(formData.promoterStake) || 0;
+    const breakEven = free || buyIn <= 0 || pot <= 0 ? 0 : Math.ceil(pot / buyIn);
+    // Everything past break-even is surplus, split 50/50 with the platform.
+    const atDouble = breakEven ? Math.floor((breakEven * buyIn) / 2) : 0;
+    return {
+      free,
+      pot,
+      buyIn,
+      stake,
+      breakEven,
+      guaranteed: !free && pot > 0 && stake >= pot,
+      partialStake: !free && stake > 0 && stake < pot,
+      shortfall: free ? 0 : Math.max(0, pot - stake),
+      profitAtDouble: atDouble,
+    };
+  }, [formData.matchTokens, formData.pot, formData.promoterStake, formData.prizeMode]);
+
+  const requiredUsers = economics.breakEven;
+  const leagueSize = safeArray(affiliate?.usersJoined).length;
+
+  // Advice sized to THIS card and THIS league, not a generic tips box. A short
+  // card no longer costs the promoter money — it just voids — but it still costs
+  // them the thing that is harder to get back: a league that turned up and got
+  // nothing. So the guidance is about protecting their audience, and it gets out
+  // of the way once the numbers work.
+  const coach = useMemo(() => {
+    if (economics.free) {
+      return {
+        tone: 'ok',
+        title: 'Good card to start on',
+        body: 'Free cards cost you nothing but the award, so run these while you are still building. Every player who enters one joins your league and can be invited to a paid card later.',
+      };
+    }
+    if (!requiredUsers) return null;
+    if (!leagueSize) {
+      return {
+        tone: 'warn',
+        title: 'No league members yet',
+        body: `This card needs ${requiredUsers.toLocaleString()} entries to run, and nobody has joined your league yet. It will simply void and refund — no cost to you — but that is a wasted card. Run a free one first, build the list, then put money in the pot.`,
+      };
+    }
+    // Rule of thumb from the entry data: a promoter converts a fraction of
+    // their league on any single card, so break-even above the whole league is
+    // a stake they will not get back.
+    if (requiredUsers > leagueSize) {
+      return {
+        tone: 'warn',
+        title: 'Bigger than your league',
+        body: `You need ${requiredUsers.toLocaleString()} entries but your league is ${leagueSize.toLocaleString()}. Even a full turnout leaves it short, so it will void. Drop the pot or raise the buy-in until the fill number sits comfortably under your following.`,
+      };
+    }
+    if (requiredUsers > Math.ceil(leagueSize / 2)) {
+      return {
+        tone: 'caution',
+        title: 'Tight, but reachable',
+        body: `It fills at ${requiredUsers.toLocaleString()} of your ${leagueSize.toLocaleString()} members — more than half have to turn up. Doable, but a card that voids twice teaches your league not to bother. Start smaller, win the room, then scale the prize.`,
+      };
+    }
+    return {
+      tone: 'ok',
+      title: 'Sized right',
+      body: `${requiredUsers.toLocaleString()} entries out of ${leagueSize.toLocaleString()} members and it runs, with everything past that split with the platform as profit. This is the shape you want before you go bigger.`,
+    };
+  }, [economics.free, leagueSize, requiredUsers]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -111,8 +185,20 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
     const matchDate = formData.matchDate.split('T')[0];
 
+    // A part-stake is the one combination that helps nobody: it does not
+    // guarantee the card, and the money is tied up anyway. Make them choose.
+    if (economics.partialStake) {
+      const proceed = window.confirm(
+        `${economics.stake.toLocaleString()} does not cover the ${economics.pot.toLocaleString()} pot, so the card is NOT guaranteed — `
+        + 'it still voids and refunds if it comes up short. Stake the full pot to guarantee it, or leave the stake at 0. Publish anyway?'
+      );
+      if (!proceed) { setButtonText('Publish fight promotion'); return; }
+    }
+
     const data = new FormData();
-    data.append('matchTokens', formData.matchTokens);
+    data.append('matchTokens', economics.free ? 0 : formData.matchTokens);
+    data.append('promoterStake', economics.free ? 0 : economics.stake);
+    data.append('potTarget', economics.free ? 0 : economics.pot);
     data.append('shadowFightId', matchDetails._id);
     data.append('affiliateId', affiliate._id);
     data.append('pot', formData.pot);
@@ -145,6 +231,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
+        headers: affiliateHeaders(),
         body: data,
       });
 
@@ -217,15 +304,43 @@ const AffiliateAddNewMatch = ({ matchId }) => {
           <span><FaInfoCircle /> Configure the prize pool, entry cost, schedule, and commercial values before publishing the campaign.</span>
         </div>
 
+        <div className="affiliate-prize-mode" role="group" aria-label="Prize type">
+          {[
+            ['paid', 'Paid entry', 'Players buy in. Entries fund the prize.'],
+            ['free', 'Free to play', 'No buy-in. Winners take apparel, crowns or awards.'],
+          ].map(([value, label, hint]) => (
+            <button
+              key={value}
+              type="button"
+              className={formData.prizeMode === value ? 'is-active' : ''}
+              onClick={() => setFormData((current) => ({ ...current, prizeMode: value }))}
+            >
+              <strong>{label}</strong>
+              <small>{hint}</small>
+            </button>
+          ))}
+        </div>
+
         <div className="affiliate-create-field-grid">
           <label>
-            <span><FaDollarSign /> Prize pot <small>Winner award</small></span>
+            <span><FaDollarSign /> Prize pot <small>{economics.free ? 'Value of the apparel or award' : 'Winner award'}</small></span>
             <input type="number" name="pot" min="1" step="1" value={formData.pot} onChange={handleChange} required />
           </label>
-          <label>
-            <span><FaCoins /> Player buy-in <small>Tokens per entry</small></span>
-            <input type="number" name="matchTokens" min="1" step="1" value={formData.matchTokens} onChange={handleChange} required />
-          </label>
+          {!economics.free && (
+            <label>
+              <span><FaCoins /> Player buy-in <small>Tokens per entry</small></span>
+              <input type="number" name="matchTokens" min="1" step="1" value={formData.matchTokens} onChange={handleChange} required />
+            </label>
+          )}
+          {!economics.free && (
+            <label className={economics.partialStake ? 'is-short' : ''}>
+              <span>
+                <FaShieldAlt /> Guarantee the prize
+                <small>{economics.guaranteed ? 'Card runs no matter what' : 'Optional — leave at 0'}</small>
+              </span>
+              <input type="number" name="promoterStake" min="0" step="1" value={formData.promoterStake} onChange={handleChange} />
+            </label>
+          )}
           <label>
             <span><FaCalendarAlt /> Promotion date <small>Local calendar date</small></span>
             <input type="date" name="matchDate" value={formData.matchDate} onChange={handleChange} required />
@@ -244,17 +359,49 @@ const AffiliateAddNewMatch = ({ matchId }) => {
           </label>
         </div>
 
-        <div className="affiliate-create-capacity-note">
-          <FaUsers />
-          <span>
-            <strong>{requiredUsers || '—'} players required</strong>
-            <small>
-              {requiredUsers
-                ? `At least ${requiredUsers} paid entries are needed for the buy-ins to cover the configured prize pot.`
-                : 'Enter the prize pot and buy-in to preview the minimum campaign capacity.'}
-            </small>
-          </span>
-        </div>
+        {economics.free ? (
+          <div className="affiliate-create-capacity-note">
+            <FaUsers />
+            <span>
+              <strong>Free card &mdash; nothing to cover</strong>
+              <small>
+                No buy-in, so entries never fund the prize and there is no shortfall to guard against.
+                The apparel or award is a fixed cost you are choosing to carry.
+              </small>
+            </span>
+          </div>
+        ) : (
+          <div className={`affiliate-stake-panel${economics.guaranteed ? ' is-covered' : ''}`}>
+            <div>
+              <span>{economics.guaranteed ? 'Your stake back at' : 'This card fills at'}</span>
+              <strong>{requiredUsers || '—'}</strong>
+              <small>
+                {requiredUsers
+                  ? `entries at ${economics.buyIn.toLocaleString()} each. Every entry past that is surplus, split 50/50 with the platform.`
+                  : 'Enter the prize pot and buy-in to see where the card fills.'}
+              </small>
+            </div>
+            <div>
+              <span>You clear at double</span>
+              <strong>{economics.profitAtDouble ? economics.profitAtDouble.toLocaleString() : '—'}</strong>
+              <small>
+                Your half of the surplus if {requiredUsers ? (requiredUsers * 2).toLocaleString() : 'twice break-even'} enter.
+              </small>
+            </div>
+            <p>
+              {economics.guaranteed
+                ? `Guaranteed card. It runs however few turn up, and any shortfall comes out of your ${economics.stake.toLocaleString()} — never out of the players' prize.`
+                : `Costs you nothing to run. If it fills, it goes ahead; if it comes up short it voids at lock and every entry is refunded automatically. Stake ${economics.pot.toLocaleString()} to guarantee it runs either way.`}
+            </p>
+          </div>
+        )}
+
+        {coach && (
+          <aside className={`affiliate-coach is-${coach.tone}`}>
+            <strong>{coach.title}</strong>
+            <p>{coach.body}</p>
+          </aside>
+        )}
 
         <button type="submit" className="theme-btn theme-btn-primary affiliate-create-submit" disabled={buttonText !== 'Publish fight promotion'}>
           <FaSave /> {buttonText}

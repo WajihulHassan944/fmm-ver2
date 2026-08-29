@@ -18,6 +18,7 @@ import { fetchMatches } from '@/Redux/matchSlice';
 import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
@@ -115,13 +116,13 @@ const EditMatch = ({ matchId, isShadow }) => {
       const fetchShadowMatches = async () => {
         try {
           let specificMatch = null;
-          const singleResponse = await fetch(`${API_BASE}/api/shadow/${matchId}`);
+          const singleResponse = await fetch(`${API_BASE}/api/shadow/${matchId}`, { headers: adminHeaders() });
           if (singleResponse.ok) {
             const singleData = await singleResponse.json();
             specificMatch = singleData?.match || singleData;
           }
           if (!specificMatch) {
-            const response = await fetch(`${API_BASE}/shadow`);
+            const response = await fetch(`${API_BASE}/shadow`, { headers: adminHeaders() });
             const data = await response.json();
             specificMatch = (Array.isArray(data) ? data : []).find((item) => String(item?._id || item?.id) === String(matchId));
           }
@@ -267,7 +268,7 @@ const EditMatch = ({ matchId, isShadow }) => {
     setButtonText('Updating, please wait...');
 
     try {
-      const response = await fetch(url, { method: 'POST', body: data });
+      const response = await fetch(url, { headers: adminHeaders(), method: 'POST', body: data });
 
       if (response.ok) {
         const result = await response.json();
@@ -297,7 +298,7 @@ const EditMatch = ({ matchId, isShadow }) => {
           shadowData.append('MMAMatch', JSON.stringify(match.MMAMatch));
           shadowData.append('notify', true);
 
-          const shadowResponse = await fetch(`${API_BASE}/addShadow`, { method: 'POST', body: shadowData });
+          const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadowData });
 
           if (shadowResponse.ok) alert('Fight added to shadow templates successfully.');
           else console.warn('Failed to add fight to shadow templates.');

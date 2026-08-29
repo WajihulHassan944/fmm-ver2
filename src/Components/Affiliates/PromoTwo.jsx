@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
+import { userHeaders } from '@/Utils/authFetch';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
@@ -70,7 +71,7 @@ const PromoTwo = ({ matchId, affiliateId }) => {
     try {
       const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: userHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ userId, userEmail }),
       });
 

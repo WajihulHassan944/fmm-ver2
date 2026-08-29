@@ -81,7 +81,7 @@ const Admin = () => {
 
   const handleResetStats = async () => {
     try {
-      const response = await fetch(buildPublicApiUrl('/reset-stats'), {
+      const response = await fetch(buildPublicApiUrl('/reset-stats'), { headers: adminHeaders(),
         method: 'POST',
       });
       if (response.ok) {

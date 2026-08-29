@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { FaChartBar, FaCheckCircle, FaFistRaised, FaTrophy } from 'react-icons/fa';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
@@ -19,7 +20,7 @@ const BOXING_FIELDS = [
 const MMA_FIELDS = [
   { key: 'ST', label: 'Strikes' },
   { key: 'KI', label: 'Kicks' },
-  { key: 'KN', label: 'Knockdowns' },
+  { key: 'KN', label: 'Knees' },
   { key: 'EL', label: 'Elbows' },
   { key: 'RW', label: 'Rounds won' },
   { key: 'RL', label: 'Rounds lost' },
@@ -44,7 +45,7 @@ const ShowScores = ({ matchId, filter }) => {
     const fetchShadowMatch = async () => {
       setShadowLoading(true);
       try {
-        const response = await fetch(`${API_BASE}/shadow`);
+        const response = await fetch(`${API_BASE}/shadow`, { headers: adminHeaders() });
         const shadowData = await response.json();
         if (active) setShadowMatches(Array.isArray(shadowData) ? shadowData : []);
       } catch (error) {
