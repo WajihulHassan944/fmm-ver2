@@ -2,8 +2,13 @@ import { dedupePublicFights } from "@/Utils/fightExperience";
 export const DEFAULT_PUBLIC_API_BASE_URL =
   "https://fantasymmadness-game-server-three.vercel.app";
 
+// Two different env var names existed for the same setting (this file read
+// NEXT_PUBLIC_API_BASE_URL, welcome.js read NEXT_PUBLIC_API_BASE) — whichever
+// one was NOT set in Vercel silently fell back to the hardcoded default above,
+// which could point the app at a different backend than the one being edited.
+// Accept either name so one Vercel env var configures both.
 export const PUBLIC_API_BASE_URL = String(
-  process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_PUBLIC_API_BASE_URL,
+  process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || DEFAULT_PUBLIC_API_BASE_URL,
 ).replace(/\/$/, "");
 
 // Public API records sometimes contain backend-relative media paths (for

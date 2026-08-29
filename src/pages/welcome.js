@@ -15,7 +15,7 @@ import { useRouter } from 'next/router';
 // honest empty state rather than invented fights.
 // ==========================================================================
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE
   || 'https://fantasymmadness-game-server-three.vercel.app';
 
 const US_STATES = [
@@ -944,9 +944,14 @@ export async function getServerSideProps({ res }) {
     fetchJson('/api/public/apparel-products?limit=12'),
   ]);
 
-  const rawFights = Array.isArray(fightData?.fights) ? fightData.fights
-    : Array.isArray(fightData?.matches) ? fightData.matches
-      : Array.isArray(fightData) ? fightData : [];
+  // /api/public/prediction-fights responds with { items: [...] }, not
+  // { fights } or { matches } — those two never matched anything, so this
+  // page has been showing PREVIEW_FIGHTS unconditionally regardless of what
+  // was actually published in the back office.
+  const rawFights = Array.isArray(fightData?.items) ? fightData.items
+    : Array.isArray(fightData?.fights) ? fightData.fights
+      : Array.isArray(fightData?.matches) ? fightData.matches
+        : Array.isArray(fightData) ? fightData : [];
 
   const now = Date.now();
   const open = rawFights
