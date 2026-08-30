@@ -202,6 +202,13 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
   });
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
+  // "OPEN FIGHT CARDS" sport pills. Previously plain <span> labels with no
+  // onClick/state — they looked clickable but did nothing and the grid never
+  // filtered, which read as "the cards are static."
+  const [sportFilter, setSportFilter] = useState('ALL');
+  const visibleFights = sportFilter === 'ALL'
+    ? fights
+    : fights.filter((f) => String(f.sport || f.meta || '').toUpperCase().includes(sportFilter));
 
   const onField = (event) => {
     const { name, value } = event.target;
@@ -389,17 +396,30 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   EXAMPLE CARD
                 </span>
               ) : null}
-              <div style={{ display: 'flex', gap: '7px' }}>
-                <span style={{ padding: '7px 13px', borderRadius: '999px', background: 'rgba(245,166,35,.16)', border: '1px solid #f5a623', color: '#f5a623', fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>All</span>
-                <span style={{ padding: '7px 13px', borderRadius: '999px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(216,220,228,.18)', color: 'rgba(255,255,255,.7)', fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Boxing</span>
-                <span style={{ padding: '7px 13px', borderRadius: '999px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(216,220,228,.18)', color: 'rgba(255,255,255,.7)', fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>MMA</span>
-                <span style={{ padding: '7px 13px', borderRadius: '999px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(216,220,228,.18)', color: 'rgba(255,255,255,.7)', fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Wrestling</span>
+              <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap' }}>
+                {['ALL', 'BOXING', 'MMA', 'WRESTLING'].map((label) => {
+                  const active = sportFilter === label;
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setSportFilter(label)}
+                      style={{
+                        padding: '7px 13px', borderRadius: '999px', cursor: 'pointer',
+                        background: active ? 'rgba(245,166,35,.16)' : 'rgba(255,255,255,.05)',
+                        border: '1px solid ' + (active ? '#f5a623' : 'rgba(216,220,228,.18)'),
+                        color: active ? '#f5a623' : 'rgba(255,255,255,.7)',
+                        fontSize: '11.5px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
+                      }}
+                    >
+                      {label === 'ALL' ? 'All' : label.charAt(0) + label.slice(1).toLowerCase()}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             <div data-fmm="fights-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-              {/* Unreachable in practice: fights always falls back to PREVIEW_FIGHTS.
-                  Kept as a safety net in case the preview list is ever emptied. */}
               {fights.length === 0 ? (
                 <div style={{ gridColumn: '1 / -1', border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, padding: '38px 26px', textAlign: 'center', background: 'rgba(255,255,255,.03)' }}>
                   <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 22, marginBottom: 8 }}>NEXT CARD BEING ANNOUNCED</div>
@@ -408,7 +428,11 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   </p>
                   <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: 46, padding: '0 24px', borderRadius: 999, background: '#f5a623', color: '#17070a', fontFamily: "'Anton', sans-serif", fontSize: 14, letterSpacing: '.05em' }}>GET NOTIFIED</a>
                 </div>
-              ) : fights.map((fight, index) => (
+              ) : visibleFights.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, padding: '30px 26px', textAlign: 'center', background: 'rgba(255,255,255,.03)', color: 'rgba(255,255,255,.6)', fontWeight: 600, fontSize: 14.5 }}>
+                  No open {sportFilter.charAt(0) + sportFilter.slice(1).toLowerCase()} cards right now &mdash; check the app for the full slate.
+                </div>
+              ) : visibleFights.map((fight, index) => (
                 <div key={fight.id} style={{ border: '1px solid ' + (index === 0 ? 'rgba(245,166,35,.4)' : 'rgba(216,220,228,.18)'), borderRadius: 14, overflow: 'hidden', background: index === 0 ? 'linear-gradient(168deg,rgba(245,166,35,.1),rgba(11,14,24,.7))' : 'rgba(255,255,255,.03)' }}>
                   <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#0b0e18' }}>
                     <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.image} alt={fight.f1 + ' vs ' + fight.f2} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%' }} />
