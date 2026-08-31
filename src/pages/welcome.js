@@ -197,11 +197,6 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
     }, 3200);
     return () => clearInterval(timer);
   }, [shopWindows.length]);
-  const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', password: '', dateOfBirth: '', residenceState: '',
-  });
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState(null);
   // "OPEN FIGHT CARDS" sport pills. Previously plain <span> labels with no
   // onClick/state — they looked clickable but did nothing and the grid never
   // filtered, which read as "the cards are static."
@@ -210,58 +205,6 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
     ? fights
     : fights.filter((f) => String(f.sport || f.meta || '').toUpperCase().includes(sportFilter));
 
-  const onField = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSignup = async (event) => {
-    event.preventDefault();
-    setNotice(null);
-
-    // Checked here as well as on the server, so an under-age visitor gets an
-    // answer instead of filling the whole form to be refused.
-    const born = new Date(form.dateOfBirth);
-    const age = Number.isNaN(born.getTime()) ? 0 : Math.floor((Date.now() - born.getTime()) / 31557600000);
-    if (age < 18) {
-      setNotice({ ok: false, text: 'You must be at least 18 to create an account.' });
-      return;
-    }
-
-    setBusy(true);
-    try {
-      const response = await fetch(`${API_BASE}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, isUSCitizen: true }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setNotice({ ok: false, text: payload?.message || 'Could not create that account.' });
-        return;
-      }
-      // Straight into the app if a session came back — asking someone to sign in
-      // again immediately after signing up is where signups leak.
-      if (payload?.token) {
-        try {
-          window.localStorage.setItem('authToken', payload.token);
-          // The app reads these on boot; without them it starts signed-out and the
-          // new player is bounced to a login screen seconds after registering.
-          if (payload?.user?.email) window.localStorage.setItem('userEmail', payload.user.email);
-          if (payload?.user?._id) window.localStorage.setItem('userId', String(payload.user._id));
-        } catch (error) { /* storage unavailable */ }
-        // /home is the app. '/' is this website — pushing there dropped the new
-        // player back on the signup page they had just completed.
-        router.push('/home');
-        return;
-      }
-      setNotice({ ok: true, text: payload?.message || 'Account created. Check your email to verify it, then sign in.' });
-    } catch (error) {
-      setNotice({ ok: false, text: 'Could not reach the server. Please try again.' });
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <>
@@ -720,36 +663,25 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                 </p>
                 <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.45)' }}>18+ &middot; 21+ in some states &middot; Play responsibly</div>
               </div>
-              <form onSubmit={handleSignup} style={{ background: 'rgba(5,6,10,.55)', border: '1px solid rgba(216,220,228,.2)', borderRadius: 14, padding: 24 }}>
-                <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 19, marginBottom: 14, letterSpacing: '.03em' }}>CREATE YOUR ACCOUNT</div>
-                <div data-fmm="signup-name-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <input name="firstName" value={form.firstName} onChange={onField} placeholder="First name" autoComplete="given-name" required style={fieldStyle} />
-                  <input name="lastName" value={form.lastName} onChange={onField} placeholder="Last name" autoComplete="family-name" required style={fieldStyle} />
-                </div>
-                <input name="email" type="email" value={form.email} onChange={onField} placeholder="Email" autoComplete="email" required style={fieldStyle} />
-                <input name="password" type="password" value={form.password} onChange={onField} placeholder="Password (8+ characters)" autoComplete="new-password" minLength={8} required style={fieldStyle} />
-                <div data-fmm="signup-dob-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={onField} required aria-label="Date of birth" style={fieldStyle} />
-                  <select name="residenceState" value={form.residenceState} onChange={onField} required aria-label="State of residence" style={fieldStyle}>
-                    <option value="">State</option>
-                    {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <p style={{ fontSize: 11.5, fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.5)', margin: '2px 0 14px' }}>
+              {/* Same signup flow as /auth (AuthPortal) — no duplicate registration
+                  form here, so this can never drift out of sync with it again. */}
+              <div style={{ background: 'rgba(5,6,10,.55)', border: '1px solid rgba(216,220,228,.2)', borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 19, letterSpacing: '.03em' }}>CREATE YOUR ACCOUNT</div>
+                <p style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.6)', margin: 0 }}>
+                  Free to join, 18+. Sign up in under a minute and jump straight into your dashboard.
+                </p>
+                <Link href="/auth?mode=signup&role=player" style={{ display: 'block', textAlign: 'center', width: '100%', height: 52, lineHeight: '52px', borderRadius: 999, background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: "'Anton', sans-serif", fontSize: 16, letterSpacing: '.06em', textDecoration: 'none' }}>
+                  CREATE MY ACCOUNT
+                </Link>
+                <p style={{ fontSize: 11.5, fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.5)', margin: 0 }}>
                   By creating an account you agree to our{' '}
                   <Link href="/terms" style={{ color: '#f5a623' }}>Terms of Use</Link> and{' '}
                   <Link href="/privacy" style={{ color: '#f5a623' }}>Privacy Policy</Link>.
                 </p>
-                {notice ? (
-                  <div role="status" style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 9, fontSize: 12.5, fontWeight: 700, background: notice.ok ? 'rgba(34,197,94,.14)' : 'rgba(225,29,46,.14)', border: '1px solid ' + (notice.ok ? 'rgba(34,197,94,.5)' : 'rgba(225,29,46,.5)'), color: notice.ok ? '#7ee2a4' : '#ff9aa4' }}>{notice.text}</div>
-                ) : null}
-                <button type="submit" disabled={busy} style={{ width: '100%', height: 52, borderRadius: 999, border: 0, cursor: 'pointer', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: "'Anton', sans-serif", fontSize: 16, letterSpacing: '.06em', opacity: busy ? 0.6 : 1 }}>
-                  {busy ? 'CREATING...' : 'CREATE MY ACCOUNT'}
-                </button>
-                <div style={{ marginTop: 13, textAlign: 'center', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.55)' }}>
-                  Already have an account? <Link href="/auth?next=/home" style={{ color: '#f5a623' }}>Sign in</Link>
+                <div style={{ textAlign: 'center', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.55)' }}>
+                  Already have an account? <Link href="/auth" style={{ color: '#f5a623' }}>Sign in</Link>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
@@ -843,7 +775,7 @@ const toFightCard = (f, index) => {
       id: String(f._id || index),
       f1: String(f.matchFighterA).toUpperCase(),
       f2: String(f.matchFighterB).toUpperCase(),
-      image: f.featuredThisWeekImage || f.fightPosterImage || IMAGES[index % IMAGES.length],
+      image: f.featuredThisWeekImage || f.fightPosterImage || f.fighterAImage || f.fighterBImage || IMAGES[index % IMAGES.length],
       meta: [category, f.maxRounds ? `${f.maxRounds} rounds` : '', when].filter(Boolean).join(' \u00b7 '),
       badge: guaranteed > 0 ? 'Guaranteed pot' : fee === 0 ? 'Free entry' : index === 0 ? 'Main event' : '',
       badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : fee === 0 ? 'rgba(34,197,94,.94)' : 'rgba(225,29,46,.94)',

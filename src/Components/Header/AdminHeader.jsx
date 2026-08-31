@@ -237,7 +237,7 @@ const AdminHeader = () => {
         </nav>
 
         <div className="admin-command-footer">
-          <Link href="/home" target="_blank" rel="noreferrer"><FaExternalLinkAlt /><span>View website</span></Link>
+          <Link href="/" target="_blank" rel="noreferrer"><FaExternalLinkAlt /><span>View website</span></Link>
           <button type="button" onClick={handleLogout}><FaSignOutAlt /><span>Logout</span></button>
         </div>
       </aside>
@@ -264,7 +264,7 @@ const AdminHeader = () => {
         </div>
         <div className="admin-command-topbar-actions">
           <Link href={isWrestlingRoute ? '/administration/pro-wrestling/new' : '/administration/AddNewMatch'} className="admin-topbar-primary"><FaPlus /> {isWrestlingRoute ? 'New wrestling card' : 'New match'}</Link>
-          <Link href="/home" target="_blank" rel="noreferrer" className="admin-topbar-secondary"><FaExternalLinkAlt /> View site</Link>
+          <Link href="/" target="_blank" rel="noreferrer" className="admin-topbar-secondary"><FaExternalLinkAlt /> View site</Link>
           <button type="button" onClick={handleLogout} className="admin-topbar-icon" aria-label="Logout"><FaSignOutAlt /></button>
         </div>
       </header>

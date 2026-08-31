@@ -204,7 +204,7 @@ const Header = () => {
     if (isAuthenticatedAffiliate) return '/AffiliateDashboard';
     if (authStatusSponsor) return '/sponsor-dashboard';
     if (isAuthenticated) return '/UserDashboard';
-    return '/home';
+    return '/';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
   const mobileAccountHref = useMemo(() => {
