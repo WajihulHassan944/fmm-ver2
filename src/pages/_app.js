@@ -360,16 +360,6 @@ function AppContent({ children }) {
     return () => media.removeEventListener?.("change", sync);
   }, []);
 
-  // /home is the mobile app shell — it has no reason to exist on desktop
-  // (the real desktop homepage is "/"). Anyone landing on /home from a
-  // laptop-width viewport (old link, bookmark, admin "view site") gets
-  // bounced straight to "/" instead of seeing the phone column.
-  useEffect(() => {
-    if (router.pathname !== "/home") return;
-    const media = window.matchMedia(EXACT_MOBILE_QUERY);
-    if (!media.matches) router.replace("/");
-  }, [router.pathname]);
-
   useEffect(() => {
     if (!router.isReady) return undefined;
 

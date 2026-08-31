@@ -223,6 +223,24 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   const isHomepagePromoted = (fight) => Boolean(fight?.homepagePromoted || fight?.homepagePromotion?.isPromoted);
 
+  // Mirrors the exact filter/sort/slice(0,5) the public homepage (pages/welcome.js)
+  // uses to pick its 5 fight-card windows, so this table shows precisely which
+  // slot (if any) each fight currently occupies there — not a guess.
+  const homepageSlotById = useMemo(() => {
+    const map = {};
+    allRows
+      .filter((f) => f && f.matchFighterA && f.matchFighterB)
+      .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished')
+      .sort((a, b) => {
+        const weight = (f) => (isHomepagePromoted(f) ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
+        const diff = weight(b) - weight(a);
+        return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
+      })
+      .slice(0, 5)
+      .forEach((f, index) => { map[String(getId(f))] = index + 1; });
+    return map;
+  }, [allRows]);
+
   const selectedFights = useMemo(() => (
     allRows.filter((fight) => selectedFightIds.includes(String(getId(fight))))
   ), [allRows, selectedFightIds]);
@@ -528,7 +546,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <div className="admin-data-table-scroll">
           <table className="admin-data-table admin-fights-table">
             <thead>
-              <tr><th>Select</th><th>Fight</th><th>Sport</th><th>Schedule</th><th>Status</th><th>Entry</th><th>Prize</th><th>Actions</th></tr>
+              <tr><th>Select</th><th>Fight</th><th>Sport</th><th>Website</th><th>Schedule</th><th>Status</th><th>Entry</th><th>Prize</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {filteredRows.length ? filteredRows.map((fight, index) => {
@@ -550,6 +568,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                       </div>
                     </td>
                     <td>{getSport(fight)}</td>
+                    <td>
+                      {homepageSlotById[String(id)]
+                        ? <span className="admin-status-badge is-warning" title="Position in the website homepage's 5 fight-card windows">Slot {homepageSlotById[String(id)]} of 5</span>
+                        : <span className="admin-status-badge" title="Not currently in the homepage's 5 fight-card windows">Not shown</span>}
+                    </td>
                     <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
                     <td><span className={`admin-status-badge ${isFinished ? 'is-success' : status === 'Ongoing' ? 'is-warning' : ''}`}>{status}</span></td>
                     <td>{`${Number(fight.matchTokens || 0).toLocaleString()} tokens`}</td>
@@ -594,7 +617,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                   </tr>
                 );
-              }) : <tr><td colSpan="8"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term, clear filters, or click Refresh to reload the /match registry.</span></div></td></tr>}
+              }) : <tr><td colSpan="9"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term, clear filters, or click Refresh to reload the /match registry.</span></div></td></tr>}
             </tbody>
           </table>
         </div>

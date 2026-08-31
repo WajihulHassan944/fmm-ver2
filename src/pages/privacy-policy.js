@@ -1,15 +1,8 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
-
-const PrivacyPolicy = dynamic(
-  () => import('@/Components/LegalDocuments/PrivacyPolicy'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <PrivacyPolicy />
+// Redirects to the real, current Privacy Policy at /privacy instead of the
+// old stale template that used to live on this route.
+export async function getServerSideProps() {
+  return { redirect: { destination: '/privacy', permanent: true } };
 }
 
-export default index
+const PrivacyPolicyRedirect = () => null;
+export default PrivacyPolicyRedirect;

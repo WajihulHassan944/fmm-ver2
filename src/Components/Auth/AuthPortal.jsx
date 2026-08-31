@@ -184,7 +184,9 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
           setMembershipEmail(loggedInUser.email || loginForm.email);
         } else {
           toast.success('Welcome back to the fight room.');
-          navigateAfterAuth('/UserDashboard');
+          // Send players straight into the app experience, not the legacy
+          // dashboard page — the website's whole job is to funnel signups here.
+          navigateAfterAuth('/home');
         }
       } else if (role === 'affiliate') {
         const result = await dispatch(loginAffiliate(loginForm)).unwrap();
@@ -331,7 +333,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         localStorage.setItem('authToken', accessToken);
         const account = await dispatch(fetchUser(accessToken)).unwrap();
         if (account?.currentPlan === 'None') setMembershipEmail(account.email);
-        else navigateAfterAuth('/UserDashboard');
+        else navigateAfterAuth('/home');
       }
     } catch (error) {
       toast.error(error.message || 'Google authentication failed.');
@@ -455,7 +457,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <label><input type="checkbox" name="isNotificationsEnabled" checked={playerForm.isNotificationsEnabled} onChange={updatePlayer} /><span>Send activity notifications by SMS</span></label>
                     <label><input type="checkbox" name="isSubscribed" checked={playerForm.isSubscribed} onChange={updatePlayer} /><span>Subscribe to fight updates and promotions</span></label>
                     <label><input type="checkbox" name="isUSCitizen" checked={playerForm.isUSCitizen} onChange={updatePlayer} /><span>I am a US citizen residing in the United States</span></label>
-                    <label><input type="checkbox" name="isAgreed" checked={playerForm.isAgreed} onChange={updatePlayer} required /><span>I agree to the <Link href="/terms-of-service">terms of service</Link> and <Link href="/privacy-policy">privacy policy</Link></span></label>
+                    <label><input type="checkbox" name="isAgreed" checked={playerForm.isAgreed} onChange={updatePlayer} required /><span>I agree to the <Link href="/terms">Terms of Use</Link> and <Link href="/privacy">privacy policy</Link></span></label>
                   </div>
                   <div className="xp-auth-recaptcha"><ReCAPTCHA key={`${mode}-${role}`} sitekey={RECAPTCHA_SITE_KEY} onChange={setRecaptchaToken} theme="dark" /></div>
                   <p className="xp-auth-consent" style={{ fontSize: '11.5px', lineHeight: 1.55, opacity: .75, margin: '4px 0 10px' }}>
@@ -485,7 +487,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <label><input type="checkbox" name="isNotificationsEnabled" checked={affiliateForm.isNotificationsEnabled} onChange={updateAffiliate} /><span>Send activity notifications by SMS</span></label>
                     <label><input type="checkbox" name="isSubscribed" checked={affiliateForm.isSubscribed} onChange={updateAffiliate} /><span>Subscribe to platform and promotion updates</span></label>
                     <label><input type="checkbox" name="isUSCitizen" checked={affiliateForm.isUSCitizen} onChange={updateAffiliate} /><span>I am a US citizen residing in the United States</span></label>
-                    <label><input type="checkbox" name="isAgreed" checked={affiliateForm.isAgreed} onChange={updateAffiliate} required /><span>I agree to the <Link href="/terms-of-service">terms of service</Link> and <Link href="/privacy-policy">privacy policy</Link></span></label>
+                    <label><input type="checkbox" name="isAgreed" checked={affiliateForm.isAgreed} onChange={updateAffiliate} required /><span>I agree to the <Link href="/terms">Terms of Use</Link> and <Link href="/privacy">privacy policy</Link></span></label>
                   </div>
                   <div className="xp-auth-recaptcha"><ReCAPTCHA key={`${mode}-${role}`} sitekey={RECAPTCHA_SITE_KEY} onChange={setRecaptchaToken} theme="dark" /></div>
                   <p className="xp-auth-consent" style={{ fontSize: '11.5px', lineHeight: 1.55, opacity: .75, margin: '4px 0 10px' }}>

@@ -29,3 +29,90 @@
 
 .admin-create-fight-page > * { position:relative; z-index:1; }
 @keyframes xpSpin{to{transform:rotate(360deg)}}
+
+/* Scorer assignment modal (AdminFightsWorkspace "Send to scorer"). Was only
+   defined in the old unsplit frontend-final.css, which nothing imports —
+   the modal rendered unstyled (no fixed overlay/z-index), so it appeared to
+   do nothing and, if scrolled past, was invisible. */
+.admin-scorer-backdrop {
+  position: fixed; inset: 0; z-index: 9500; display: grid; place-items: center;
+  padding: 20px; background: rgba(3,4,8,.78); backdrop-filter: blur(4px);
+}
+.admin-scorer-panel {
+  width: min(520px, 100%); max-height: 90vh; overflow-y: auto;
+  border: 1px solid rgba(255,255,255,.14); border-radius: 14px;
+  background: #0d1017; padding: 20px; color: #f5f7fb;
+}
+.admin-scorer-panel header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  margin-bottom: 12px;
+}
+.admin-scorer-panel header p {
+  margin: 0 0 4px; font-size: 11px; font-weight: 800; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ff-red, #df111b);
+}
+.admin-scorer-panel header h3 {
+  margin: 0; font-family: 'UFCSans', 'Anton', sans-serif; font-size: 21px; letter-spacing: .01em;
+}
+.admin-scorer-panel header button {
+  width: 36px; height: 36px; flex: 0 0 36px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.14); background: transparent;
+  color: rgba(245,247,251,.6); display: grid; place-items: center; cursor: pointer;
+}
+.admin-scorer-note {
+  margin: 0 0 16px; padding: 11px 13px; border-radius: 9px;
+  border: 1px solid rgba(242,181,68,.3); background: rgba(242,181,68,.06);
+  font-size: 12.5px; line-height: 1.5; color: rgba(245,247,251,.8);
+}
+.admin-scorer-panel > label { display: block; margin-bottom: 12px; }
+.admin-scorer-panel > label span {
+  display: block; margin-bottom: 5px; font-size: 11.5px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: rgba(245,247,251,.58);
+}
+.admin-scorer-panel > label input {
+  width: 100%; height: 44px; padding: 0 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.32);
+  color: #fff; font-family: inherit; font-size: 14.5px;
+}
+.admin-scorer-create {
+  width: 100%; min-height: 48px; border-radius: 9px; border: none;
+  background: var(--ff-red, #df111b); color: #fff;
+  font-family: 'UFCSans', 'Anton', sans-serif; font-size: 15px; letter-spacing: .05em;
+  text-transform: uppercase; cursor: pointer;
+}
+.admin-scorer-create:disabled { opacity: .55; cursor: not-allowed; }
+.admin-scorer-link {
+  margin-top: 14px; padding: 12px; border-radius: 9px;
+  border: 1px dashed rgba(53,212,93,.45); background: rgba(53,212,93,.07);
+  display: grid; gap: 9px;
+}
+.admin-scorer-link code {
+  font-size: 12px; word-break: break-all; color: #9fe9b6; font-family: ui-monospace, monospace;
+}
+.admin-scorer-link button {
+  justify-self: start; display: inline-flex; align-items: center; gap: 7px;
+  min-height: 38px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid rgba(53,212,93,.5); background: transparent; color: #9fe9b6;
+  font-family: inherit; font-weight: 700; cursor: pointer;
+}
+.admin-scorer-link small { font-size: 11.5px; color: rgba(245,247,251,.55); }
+.admin-scorer-history { margin-top: 18px; }
+.admin-scorer-history > p {
+  margin: 0 0 9px; font-size: 11px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(245,247,251,.5);
+}
+.admin-scorer-history ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.admin-scorer-history li {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03);
+}
+.admin-scorer-history li.is-revoked { opacity: .5; }
+.admin-scorer-history strong { display: block; font-size: 13.5px; }
+.admin-scorer-history small { font-size: 11.5px; color: rgba(245,247,251,.5); }
+.admin-scorer-history li button {
+  border: 1px solid rgba(223,17,27,.5); background: transparent; color: #ff8a8a;
+  border-radius: 7px; min-height: 34px; padding: 0 12px; font-family: inherit;
+  font-weight: 700; cursor: pointer;
+}
+.admin-scorer-history li em { font-style: normal; font-size: 11.5px; color: rgba(245,247,251,.45); }

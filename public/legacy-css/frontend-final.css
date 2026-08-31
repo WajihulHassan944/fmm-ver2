@@ -3477,3 +3477,35 @@ input[type='submit'],
   white-space: nowrap;
 }
 
+
+
+/* Round-tabs + one-click winner/finish pickers (AdminPredictions redesign) */
+.admin-score-round-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: -6px 0 4px; }
+.admin-score-round-tab {
+  min-width: 44px; height: 40px; padding: 0 8px; border-radius: 9px;
+  border: 1px solid var(--ff-border,var(--admin-border)); background: rgba(255,255,255,.04);
+  color: var(--ff-muted,var(--admin-muted)); font-family: var(--ff-display); font-size: 15px;
+  font-weight: 900; cursor: pointer;
+}
+.admin-score-round-tab.is-saved { border-color: rgba(53,212,93,.5); color: #9fe9b6; }
+.admin-score-round-tab.is-active { background: rgba(223,17,27,.16); border-color: var(--ff-red,#df111b); color: #fff; }
+.admin-score-winner-panel {
+  background: linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99));
+  border: 1px solid var(--ff-border,var(--admin-border)); border-radius: 16px; padding: 16px;
+}
+.admin-score-winner-panel > header { margin-bottom: 12px; }
+.admin-score-winner-panel > header span { display: block; font-family: var(--ff-display); font-size: 13px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+.admin-score-winner-panel > header p { margin: 4px 0 0; color: var(--ff-muted,var(--admin-muted)); font-size: 12.5px; }
+.admin-score-winner-choices { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.admin-score-winner-choices button {
+  min-height: 52px; border-radius: 10px; cursor: pointer; padding: 0 14px;
+  font-family: var(--ff-display); font-size: 15px; font-weight: 900; text-transform: uppercase;
+  background: rgba(255,255,255,.04); color: var(--ff-muted,var(--admin-muted));
+}
+.admin-score-winner-choices button.is-a { border: 1px solid rgba(223,17,27,.4); }
+.admin-score-winner-choices button.is-b { border: 1px solid rgba(22,143,230,.4); }
+.admin-score-winner-choices button.is-a.is-active { background: rgba(223,17,27,.18); border-color: var(--ff-red,#df111b); color: #fff; }
+.admin-score-winner-choices button.is-b.is-active { background: rgba(22,143,230,.18); border-color: #168fe6; color: #fff; }
+@media (max-width: 640px) {
+  .admin-score-winner-choices { grid-template-columns: 1fr; }
+}

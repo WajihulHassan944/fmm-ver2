@@ -290,7 +290,7 @@ export default function MembershipCheckout() {
                 <label><span>COUNTRY *</span><input name="country" required value={form.country} onChange={update} autoComplete="country" /></label>
               </div>
               <label className="fm-cart-check"><input type="checkbox" name="ageConfirmed" checked={form.ageConfirmed} onChange={update} /><span>I confirm that I am 18 or older and eligible to purchase.</span></label>
-              <label className="fm-cart-check"><input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={update} /><span>I accept the <Link href="/terms-of-service">terms</Link> and <Link href="/privacy-policy">privacy policy</Link>.</span></label>
+              <label className="fm-cart-check"><input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={update} /><span>I accept the <Link href="/terms">terms</Link> and <Link href="/privacy-policy">privacy policy</Link>.</span></label>
               <button className="fm-pay-button" type="submit" disabled={submitting || (!isFmPlus && !items.length)}>{submitting ? 'CREATING SECURE CHECKOUT…' : `PAY ${money(subtotalCents)} · ${isFmPlus ? `START ${selectedPlan.label.toUpperCase()}` : `GET ${creditedCoins.toLocaleString()} FM`}`}</button>
               <small className="fm-security-note"><FaShieldAlt /> Card details are entered on the secure payment page. Fantasy MMAdness never sees or stores your card number.</small>
               {status ? <p className="fm-cart-status" role="alert">{status}</p> : null}

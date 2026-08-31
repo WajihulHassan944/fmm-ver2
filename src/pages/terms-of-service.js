@@ -1,15 +1,9 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
-
-const Termsofservice = dynamic(
-  () => import('@/Components/LegalDocuments/Termsofservice'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <Termsofservice />
+// This page used to show an old, stale terms template that disagreed with the
+// real Terms of Use at /terms (different contact email, no state/coin/prize
+// detail). Redirect here instead of showing conflicting legal text.
+export async function getServerSideProps() {
+  return { redirect: { destination: '/terms', permanent: true } };
 }
 
-export default index
+const TermsOfServiceRedirect = () => null;
+export default TermsOfServiceRedirect;

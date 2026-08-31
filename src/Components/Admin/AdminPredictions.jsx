@@ -24,6 +24,10 @@ const FIELD_LABELS = {
 
 const BOXING_FIELDS = ['HP', 'BP', 'TP', 'RW', 'RL', 'KO', 'SP'];
 const MMA_FIELDS = ['ST', 'KI', 'KN', 'EL', 'RW', 'RL', 'KO', 'SP'];
+// RW/RL/KO/SP are set automatically by the Round winner / Finish pickers below —
+// showing them as manual +1 fields too is the old, confusing flow the redesign
+// replaces. Only the fighter's real raw stats stay in the manual grid.
+const AUTO_FIELDS = ['RW', 'RL', 'KO', 'SP'];
 const emptyStats = (category) => Object.fromEntries((category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS).map((key) => [key, '']));
 const normalizeNumber = (value) => {
   if (value === '' || value === null || value === undefined) return 0;
@@ -69,6 +73,11 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   const category = match?.matchCategory === 'boxing' ? 'boxing' : 'mma';
   const statFields = category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS;
+  const manualStatFields = statFields.filter((field) => !AUTO_FIELDS.includes(field));
+  const roundWinnerIsA = normalizeNumber(fighterOneStats.RW) === SCORE_POINTS.RW;
+  const roundWinnerIsB = normalizeNumber(fighterTwoStats.RW) === SCORE_POINTS.RW;
+  const finisherIsA = normalizeNumber(fighterOneStats.KO) === SCORE_POINTS.KO;
+  const finisherIsB = normalizeNumber(fighterTwoStats.KO) === SCORE_POINTS.KO;
 
   useEffect(() => {
     if (match) {
@@ -160,6 +169,21 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
       success: `Your prediction for Round ${round} has been submitted 👌`,
       error: { render({ data }) { return data.message || 'Failed to save round results'; } },
     });
+  };
+
+  const jumpToRound = (targetRound) => {
+    const maxRounds = Number(match?.maxRounds || 1);
+    if (targetRound < 1 || targetRound > maxRounds || targetRound === round) return;
+    const existing = roundScores[targetRound - 1];
+    if (existing) {
+      setFighterOneStats(existing.fighterOneStats);
+      setFighterTwoStats(existing.fighterTwoStats);
+    } else {
+      const fresh = emptyStats(category);
+      setFighterOneStats(fresh);
+      setFighterTwoStats(fresh);
+    }
+    setRound(targetRound);
   };
 
   const handlePrev = () => {
@@ -349,17 +373,46 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         <article><img src={match.fighterBImage} alt={match.matchFighterB} /><strong>{match.matchFighterB}</strong><span>Blue corner</span></article>
       </section>
 
+      <section className="admin-score-round-tabs">
+        {Array.from({ length: Number(match.maxRounds || 1) }, (_, i) => i + 1).map((r) => (
+          <button
+            key={r}
+            type="button"
+            className={`admin-score-round-tab ${r === round ? 'is-active' : ''} ${roundScores[r - 1] ? 'is-saved' : ''}`}
+            onClick={() => jumpToRound(r)}
+          >
+            {r}
+          </button>
+        ))}
+      </section>
+
+      <section className="admin-score-winner-panel">
+        <header><span>Round winner</span><p>Pick a corner — the other corner's paired credit is applied automatically.</p></header>
+        <div className="admin-score-winner-choices">
+          <button type="button" className={`is-a ${roundWinnerIsA ? 'is-active' : ''}`} onClick={() => handleRWSelect(SCORE_POINTS.RW)}>{match.matchFighterA}</button>
+          <button type="button" className={`is-b ${roundWinnerIsB ? 'is-active' : ''}`} onClick={() => handleRWSelect(SCORE_POINTS.RL)}>{match.matchFighterB}</button>
+        </div>
+      </section>
+
+      <section className="admin-score-winner-panel">
+        <header><span>Finish this round?</span><p>Only set this on the actual finish round (KO, TKO, or submission).</p></header>
+        <div className="admin-score-winner-choices">
+          <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.KO)}>{match.matchFighterA} finishes</button>
+          <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.SP)}>{match.matchFighterB} finishes</button>
+        </div>
+      </section>
+
       <Popup isVisible={showRWPopup} onClose={() => setShowRWPopup(false)} onSelect={handleRWSelect} stat="RW" />
       <Popup isVisible={showKOPopup} onClose={() => setShowKOPopup(false)} onSelect={handleKOSelect} stat="KO" />
 
       <section className="admin-score-entry-grid">
         <div className="admin-score-fighter-panel is-red">
-          <header><span>Fighter A</span><h3>{match.matchFighterA}</h3><p>All official scoring fields are visible and editable.</p></header>
-          <div>{statFields.map((stat) => renderMetric('one', stat))}</div>
+          <header><span>Fighter A</span><h3>{match.matchFighterA}</h3><p>Raw stats only — round winner and finish are set above.</p></header>
+          <div>{manualStatFields.map((stat) => renderMetric('one', stat))}</div>
         </div>
         <div className="admin-score-fighter-panel is-blue">
-          <header><span>Fighter B</span><h3>{match.matchFighterB}</h3><p>Every value is available for manual input before saving.</p></header>
-          <div>{statFields.map((stat) => renderMetric('two', stat))}</div>
+          <header><span>Fighter B</span><h3>{match.matchFighterB}</h3><p>Raw stats only — round winner and finish are set above.</p></header>
+          <div>{manualStatFields.map((stat) => renderMetric('two', stat))}</div>
         </div>
       </section>
 

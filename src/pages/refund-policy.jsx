@@ -159,8 +159,8 @@ export default function RefundPolicy() {
           </p>
 
           <div className="fmm-legal-links">
-            <Link href="/terms-of-service">Terms of Service</Link>
-            <Link href="/privacy-policy">Privacy Policy</Link>
+            <Link href="/terms">Terms of Use</Link>
+            <Link href="/privacy">Privacy Policy</Link>
             <Link href="/contact">Contact support</Link>
           </div>
         </div>

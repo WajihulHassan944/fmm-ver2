@@ -176,9 +176,15 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
   // all at once. Products with no photograph are dropped entirely rather than
   // shown as an empty grey square.
   const shopItems = useMemo(() => {
-    const source = (products && products.length ? products : STORE_ITEMS)
-      .filter((item) => item && item.image);
-    return source.length ? source : [];
+    const live = (products && products.length ? products : []).filter((item) => item && item.image);
+    // A live Etsy catalogue with fewer than 4 listed items used to show as a
+    // partial, lopsided row instead of the intended 4-across wall. Backfill
+    // any missing slots with the verified fallback photos so the shop always
+    // reads as a full display, while still preferring real products first.
+    if (live.length >= 4) return live;
+    const usedNames = new Set(live.map((item) => item.name));
+    const backfill = STORE_ITEMS.filter((item) => item && item.image && !usedNames.has(item.name));
+    return live.concat(backfill).slice(0, Math.max(4, live.length));
   }, [products]);
 
   const WINDOW_COUNT = 4;
@@ -378,7 +384,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               ) : visibleFights.map((fight, index) => (
                 <div key={fight.id} style={{ border: '1px solid ' + (index === 0 ? 'rgba(245,166,35,.4)' : 'rgba(216,220,228,.18)'), borderRadius: 14, overflow: 'hidden', background: index === 0 ? 'linear-gradient(168deg,rgba(245,166,35,.1),rgba(11,14,24,.7))' : 'rgba(255,255,255,.03)' }}>
                   <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#0b0e18' }}>
-                    <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.image} alt={fight.f1 + ' vs ' + fight.f2} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%' }} />
+                    <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.image} alt={fight.f1 + ' vs ' + fight.f2} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: fight.imagePosition || 'center 32%' }} />
                     {fight.badge ? (
                       <div style={{ position: 'absolute', top: 11, left: 11, padding: '5px 11px', borderRadius: 6, background: fight.badgeColor, color: fight.badgeText, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>{fight.badge}</div>
                     ) : null}
@@ -776,6 +782,10 @@ const toFightCard = (f, index) => {
       f1: String(f.matchFighterA).toUpperCase(),
       f2: String(f.matchFighterB).toUpperCase(),
       image: f.featuredThisWeekImage || f.fightPosterImage || f.fighterAImage || f.fighterBImage || IMAGES[index % IMAGES.length],
+      // Fighter-library headshots are near-square portraits, not designed for a
+      // 16:9 crop — bias the crop to the top so the fighter's head stays in frame.
+      // Poster/featured art is already composed for 16:9, so it keeps a gentler bias.
+      imagePosition: (!f.featuredThisWeekImage && !f.fightPosterImage && (f.fighterAImage || f.fighterBImage)) ? 'center top' : 'center 32%',
       meta: [category, f.maxRounds ? `${f.maxRounds} rounds` : '', when].filter(Boolean).join(' \u00b7 '),
       badge: guaranteed > 0 ? 'Guaranteed pot' : fee === 0 ? 'Free entry' : index === 0 ? 'Main event' : '',
       badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : fee === 0 ? 'rgba(34,197,94,.94)' : 'rgba(225,29,46,.94)',

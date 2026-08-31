@@ -203,7 +203,7 @@ const Header = () => {
   const dashboardHomeHref = useMemo(() => {
     if (isAuthenticatedAffiliate) return '/AffiliateDashboard';
     if (authStatusSponsor) return '/sponsor-dashboard';
-    if (isAuthenticated) return '/UserDashboard';
+    if (isAuthenticated) return '/home';
     return '/';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
