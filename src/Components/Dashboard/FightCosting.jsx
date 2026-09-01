@@ -14,7 +14,7 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import MakePredictions from '../MakePredictions/MakePredictions';
-import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
+import { getFightCategory, getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const isSameId = (left, right) => String(left || '') === String(right || '');
@@ -217,13 +217,13 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
 
         <section className="player-fight-entry-card">
           <article className="is-blue">
-            <div className="player-fight-entry-fighter-art"><img src={fighterAImage} alt={match.matchFighterA || 'Fighter A'} /></div>
-            <div><small>Blue corner</small><h2>{match.matchFighterA || 'Fighter A'}</h2></div>
+            <div className="player-fight-entry-fighter-art"><img src={fighterAImage} alt={getFighterName(match, 'A')} /></div>
+            <div><small>Blue corner</small><h2>{getFighterName(match, 'A')}</h2></div>
           </article>
           <div className="player-fight-entry-vs"><span>VS</span><small>{match.maxRounds || '—'} rounds</small></div>
           <article className="is-red">
-            <div className="player-fight-entry-fighter-art"><img src={fighterBImage} alt={match.matchFighterB || 'Fighter B'} /></div>
-            <div><small>Red corner</small><h2>{match.matchFighterB || 'Fighter B'}</h2></div>
+            <div className="player-fight-entry-fighter-art"><img src={fighterBImage} alt={getFighterName(match, 'B')} /></div>
+            <div><small>Red corner</small><h2>{getFighterName(match, 'B')}</h2></div>
           </article>
         </section>
 

@@ -10,7 +10,7 @@ import {
   FaShieldAlt,
 } from 'react-icons/fa';
 import AddTokensToWallet from '../UserProfile/AddTokensToWallet';
-import { getFighterImage } from '@/Utils/fightExperience';
+import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
 
 const PurchaseTokensIntimation = ({ matchId }) => {
   const router = useRouter();
@@ -59,9 +59,9 @@ const PurchaseTokensIntimation = ({ matchId }) => {
         </header>
 
         <section className="player-wallet-gate-fight">
-          <article><img src={getFighterImage(match, 'A', 0)} alt={match.matchFighterA} /><strong>{match.matchFighterA}</strong></article>
+          <article><img src={getFighterImage(match, 'A', 0)} alt={getFighterName(match, 'A')} /><strong>{getFighterName(match, 'A')}</strong></article>
           <div><b>VS</b><span><FaClock /> {timeRemaining.hasStarted ? 'Fight has started' : `${timeRemaining.diffHrs}h ${timeRemaining.diffMins}m ${timeRemaining.diffSecs}s`}</span></div>
-          <article><img src={getFighterImage(match, 'B', 1)} alt={match.matchFighterB} /><strong>{match.matchFighterB}</strong></article>
+          <article><img src={getFighterImage(match, 'B', 1)} alt={getFighterName(match, 'B')} /><strong>{getFighterName(match, 'B')}</strong></article>
         </section>
 
         <section className="player-wallet-gate-summary">

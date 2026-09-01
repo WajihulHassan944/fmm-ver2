@@ -160,6 +160,19 @@ const cloudinaryCutout = (url = '') => {
     .replace(/\.(jpe?g|webp|avif)(\?|$)/i, '.png$2');
 };
 
+// A fight without matchFighterA/B text (no linked fighter records) used to be
+// dropped entirely here — filtered out for having no name — rather than falling
+// back to the names in its own matchName ("Jones vs Smith"), so real cards fell
+// through to the sample fights and looked like the app had no names.
+const resolveMobileFighterName = (fight = {}, side = 'A') => {
+  const isA = side === 'A';
+  const direct = isA ? (fight.matchFighterA || fight.fighterAName) : (fight.matchFighterB || fight.fighterBName);
+  if (direct && String(direct).trim()) return String(direct).trim();
+  const parts = String(fight.matchName || '').split(/\s+vs\.?\s+/i);
+  const fromName = isA ? parts[0] : parts[1];
+  return fromName && fromName.trim() ? fromName.trim() : '';
+};
+
 const normalizeFight = (fight = {}) => {
   const category = String(fight.matchCategory || '').toLowerCase();
   const sport = category.includes('knuckle') ? 'bareknuckle'
@@ -170,8 +183,8 @@ const normalizeFight = (fight = {}) => {
   return {
     id: String(fight._id || fight.id || ''),
     backendId: String(fight._id || fight.id || ''),
-    f1: fight.matchFighterA || fight.fighterAName || '',
-    f2: fight.matchFighterB || fight.fighterBName || '',
+    f1: resolveMobileFighterName(fight, 'A'),
+    f2: resolveMobileFighterName(fight, 'B'),
     name: fight.matchName || '',
     sport,
     category: fight.matchCategory || '',

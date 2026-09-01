@@ -1336,20 +1336,20 @@ const Dashboard = () => {
                     <figure>
                       <img
                         src={getFighterImage(nextMission, "A", 0)}
-                        alt={nextMission.matchFighterA || "Fighter A"}
+                        alt={getFighterName(nextMission, "A")}
                       />
                     </figure>
                     <b>VS</b>
                     <figure>
                       <img
                         src={getFighterImage(nextMission, "B", 1)}
-                        alt={nextMission.matchFighterB || "Fighter B"}
+                        alt={getFighterName(nextMission, "B")}
                       />
                     </figure>
                   </div>
                   <h2>
-                    {nextMission.matchFighterA} <span>vs</span>{" "}
-                    {nextMission.matchFighterB}
+                    {getFighterName(nextMission, "A")} <span>vs</span>{" "}
+                    {getFighterName(nextMission, "B")}
                   </h2>
                   <button
                     type="button"
