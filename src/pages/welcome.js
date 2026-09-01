@@ -765,6 +765,20 @@ const IMAGES = ['/site/fight-clash.webp', '/site/faceoff.webp', '/site/red-corne
 
 const money = (n) => Number(n || 0).toLocaleString('en-US');
 
+// matchDate is date-only; the real scheduled time lives in the separate
+// matchTime field ("20:00"). Using matchDate alone always parsed to midnight,
+// so every fight showed the same fixed local time no matter what was set.
+const pad2 = (v) => String(v).padStart(2, '0');
+const formatFightWhen = (f = {}, options = {}) => {
+  const rawDate = String(f.matchDate || '').split('T')[0];
+  if (!rawDate) return options.fallback || '';
+  const timeMatch = String(f.matchTime || '').trim().match(/^(\d{1,2}):(\d{2})/);
+  const time = timeMatch ? `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}` : '00:00';
+  const date = new Date(`${rawDate}T${time}:00`);
+  if (Number.isNaN(date.getTime())) return options.fallback || '';
+  return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+};
+
 // A promoted fight without linked fighter records had no matchFighterA/B text,
 // so it was dropped from the homepage entirely instead of showing the names
 // pulled from its own matchName ("Jones vs Smith") — the site had 5 promoted
@@ -789,9 +803,7 @@ const toFightCard = (f, index) => {
     const guaranteed = Math.max(0, Math.round(Number(f.potTarget) || 0));
     const pot = Math.max(guaranteed, Math.round(Number(f.pot) || 0));
     const entries = Number(f.entryCount ?? (Array.isArray(f.userPredictions) ? f.userPredictions.length : 0)) || 0;
-    const when = f.matchDate
-      ? new Date(f.matchDate).toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' })
-      : '';
+    const when = formatFightWhen(f);
     const category = String(f.matchCategory || '').toUpperCase();
     return {
       id: String(f._id || index),
@@ -989,9 +1001,7 @@ export async function getServerSideProps({ res }) {
 
   const upcoming = open.slice(0, 3).map((f) => ({
     name: `${resolveFightName(f, 'A')} vs ${resolveFightName(f, 'B')}`,
-    when: f.matchDate
-      ? new Date(f.matchDate).toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' })
-      : 'TBA',
+    when: formatFightWhen(f, { fallback: 'TBA' }),
   }));
 
   // The ticker is built from whatever is real. Generic lines appear only when
