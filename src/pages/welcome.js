@@ -385,9 +385,14 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                 <div key={fight.id} style={{ border: '1px solid ' + (index === 0 ? 'rgba(245,166,35,.4)' : 'rgba(216,220,228,.18)'), borderRadius: 14, overflow: 'hidden', background: index === 0 ? 'linear-gradient(168deg,rgba(245,166,35,.1),rgba(11,14,24,.7))' : 'rgba(255,255,255,.03)' }}>
                   <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#0b0e18' }}>
                     <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.image} alt={fight.f1 + ' vs ' + fight.f2} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: fight.imagePosition || 'center 32%' }} />
+                    <div style={{ position: 'absolute', top: 11, right: 11, width: 26, height: 26, borderRadius: '50%', background: 'rgba(11,14,24,.82)', border: '1px solid rgba(255,255,255,.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff' }} title={'Homepage slot ' + fight.slot}>{fight.slot}</div>
                     {fight.badge ? (
                       <div style={{ position: 'absolute', top: 11, left: 11, padding: '5px 11px', borderRadius: 6, background: fight.badgeColor, color: fight.badgeText, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>{fight.badge}</div>
                     ) : null}
+                    <div style={{ position: 'absolute', bottom: 11, left: 11, display: 'flex', alignItems: 'flex-end', gap: -8 }}>
+                      <img loading="lazy" decoding="async" src={fight.fighterAFace || '/site/red-corner.webp'} alt={fight.f1} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '2px solid rgba(11,14,24,.9)', boxShadow: '0 2px 6px rgba(0,0,0,.4)' }} />
+                      <img loading="lazy" decoding="async" src={fight.fighterBFace || '/site/faceoff.webp'} alt={fight.f2} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '2px solid rgba(11,14,24,.9)', boxShadow: '0 2px 6px rgba(0,0,0,.4)', marginLeft: -14 }} />
+                    </div>
                   </div>
                   <div style={{ padding: '17px 18px 18px' }}>
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.48)', marginBottom: 6 }}>{fight.meta}</div>
@@ -779,8 +784,11 @@ const toFightCard = (f, index) => {
     const category = String(f.matchCategory || '').toUpperCase();
     return {
       id: String(f._id || index),
+      slot: index + 1,
       f1: String(f.matchFighterA).toUpperCase(),
       f2: String(f.matchFighterB).toUpperCase(),
+      fighterAFace: f.fighterAImage || f.fighterAPrimaryImage || '',
+      fighterBFace: f.fighterBImage || f.fighterBPrimaryImage || '',
       image: f.featuredThisWeekImage || f.fightPosterImage || f.fighterAImage || f.fighterBImage || IMAGES[index % IMAGES.length],
       // Fighter-library headshots are near-square portraits, not designed for a
       // 16:9 crop — bias the crop to the top so the fighter's head stays in frame.
@@ -932,6 +940,8 @@ export async function getServerSideProps({ res }) {
     // so a promoted fight and green success toast never changed the site.
     // Promoted/featured fights sort first (most-promoted first), then by date.
     .sort((a, b) => {
+      const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
+      if (rankDiff) return rankDiff;
       const weight = (f) => (f.homepagePromoted ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
       const diff = weight(b) - weight(a);
       return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);

@@ -29,7 +29,7 @@ const AffiliateUsers = () => {
   const [distinctionAffiliateId, setDistinctionAffiliateId] = useState(null);
   const [rewardTitle, setRewardTitle] = useState('');
   const [rewardImage, setRewardImage] = useState(null);
-  const [deleteText, setDeleteText] = useState('Delete');
+  const [deletingId, setDeletingId] = useState(null);
   const router = useRouter();
 
   const uploadDistinction = async () => {
@@ -110,9 +110,10 @@ const AffiliateUsers = () => {
   };
 
   const handleDeleteUser = async (id) => {
+    if (!window.confirm('Delete this affiliate? This cannot be undone.')) return;
     const deleteUserPromise = new Promise(async (resolve, reject) => {
       try {
-        setDeleteText('Deleting...');
+        setDeletingId(id);
         const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliatetodelete/${id}`, { headers: adminHeaders(),
           method: 'DELETE',
         });
@@ -138,7 +139,7 @@ const AffiliateUsers = () => {
         },
       },
     }).finally(() => {
-      setDeleteText('Delete');
+      setDeletingId(null);
     });
   };
 
@@ -268,7 +269,7 @@ const AffiliateUsers = () => {
                   </td>
                   <td>
                     <div className="admin-row-actions">
-                      <button type="button" className="is-danger" title="Delete affiliate" onClick={() => handleDeleteUser(user._id)}><FaTrash /> <span>{deleteText}</span></button>
+                      <button type="button" className="is-danger" title="Delete affiliate" disabled={deletingId === user._id} onClick={() => handleDeleteUser(user._id)}><FaTrash /> <span>{deletingId === user._id ? 'Deleting...' : 'Delete'}</span></button>
                     </div>
                   </td>
                 </tr>

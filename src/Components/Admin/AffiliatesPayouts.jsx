@@ -146,7 +146,7 @@ const AffiliatesPayouts = () => {
             return fullName.includes(searchQuery.toLowerCase());
         })
         .flatMap(user =>
-            user.payouts
+            (user.payouts || [])
                 .filter(payout => {
                     // Apply filter for pending/completed based on filterStatus
                     if (filterStatus === 'pending') {

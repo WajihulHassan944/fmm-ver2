@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
+  FaBell,
   FaCalendarAlt,
   FaDatabase,
   FaChartBar,
@@ -107,6 +108,16 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [placementUpdatingKey, setPlacementUpdatingKey] = useState('');
   const [scoutingUpdatingId, setScoutingUpdatingId] = useState('');
   const [showDataQuality, setShowDataQuality] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${API_BASE}/dashboard-counts`, { headers: adminHeaders({ Accept: 'application/json' }) })
+      .then((response) => response.json())
+      .then((data) => { if (active) setUnreadNotifications(Number(data?.unreadNotificationsCount || 0)); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const normalizeMatchFeedRows = (payload) => (
     Array.isArray(payload)
@@ -232,6 +243,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       .filter((f) => f && f.matchFighterA && f.matchFighterB)
       .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished')
       .sort((a, b) => {
+        const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
+        if (rankDiff) return rankDiff;
         const weight = (f) => (isHomepagePromoted(f) ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
         const diff = weight(b) - weight(a);
         return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
@@ -240,6 +253,35 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       .forEach((f, index) => { map[String(getId(f))] = index + 1; });
     return map;
   }, [allRows]);
+
+  const moveHomepagePosition = async (fight, direction) => {
+    const id = getId(fight);
+    const key = `${id}:move-${direction}`;
+    if (!id || placementUpdatingKey) return;
+    const ranks = allRows.map((f) => Number(f.homepagePromotionRank || 0));
+    const nextRank = direction === 'front' ? Math.max(0, ...ranks) + 1 : Math.min(0, ...ranks) - 1;
+    setPlacementUpdatingKey(key);
+    try {
+      const token = getAdminToken();
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(id)}/homepage-promotion`, {
+        method: 'PATCH',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          homepagePromoted: isHomepagePromoted(fight),
+          homepagePromotionRank: nextRank,
+          sourceType: getSourceType(fight),
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to reorder fight.');
+      toast.success(`${getTitle(fight)} moved to the ${direction === 'front' ? 'front' : 'bottom'} of the homepage order.`);
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message || 'Failed to reorder fight.');
+    } finally {
+      setPlacementUpdatingKey('');
+    }
+  };
 
   const selectedFights = useMemo(() => (
     allRows.filter((fight) => selectedFightIds.includes(String(getId(fight))))
@@ -493,6 +535,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   return (
     <div className="admin-workspace admin-fights-workspace">
+      <Link href="/administration/notifications" className="admin-sticky-notify">
+        <FaBell /> Notifications{unreadNotifications > 0 ? <b>{unreadNotifications}</b> : null}
+      </Link>
       <section className="admin-page-heading">
         <div>
           <span>Fight operations</span>
@@ -570,7 +615,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     <td>{getSport(fight)}</td>
                     <td>
                       {homepageSlotById[String(id)]
-                        ? <span className="admin-status-badge is-warning" title="Position in the website homepage's 5 fight-card windows">Slot {homepageSlotById[String(id)]} of 5</span>
+                        ? <span className="admin-status-badge is-warning" title="Position in the website homepage's 5 fight-card windows">Homepage {homepageSlotById[String(id)]}</span>
                         : <span className="admin-status-badge" title="Not currently in the homepage's 5 fight-card windows">Not shown</span>}
                     </td>
                     <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
@@ -605,6 +650,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                           onClick={() => toggleHomepagePlacement(fight, 'featured-fight')}
                         >
                           <FaFistRaised /> {placementUpdatingKey === `${id}:featured-fight` ? 'Updating...' : fight.featuredFight ? 'Remove feature' : 'Featured fight'}
+                        </button>
+                        <button type="button" disabled={Boolean(placementUpdatingKey)} onClick={() => moveHomepagePosition(fight, 'front')}>
+                          {placementUpdatingKey === `${id}:move-front` ? 'Moving...' : 'Move to front'}
+                        </button>
+                        <button type="button" disabled={Boolean(placementUpdatingKey)} onClick={() => moveHomepagePosition(fight, 'bottom')}>
+                          {placementUpdatingKey === `${id}:move-bottom` ? 'Moving...' : 'Move to bottom'}
                         </button>
                         <button type="button" disabled={scoutingUpdatingId === String(id)} onClick={() => generateScoutingReport(fight)}>
                           <FaRobot /> {scoutingUpdatingId === String(id) ? 'Generating...' : fight.aiScoutingReport ? 'Refresh AI report' : 'Generate AI report'}

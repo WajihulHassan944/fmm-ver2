@@ -635,6 +635,38 @@ label,
 
 /* Consolidated administration ------------------------------------------- */
 .admin-workspace { display: grid; gap: 20px; max-width: 1660px; width: 100%; }
+.admin-sticky-notify {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-end;
+  background: #14151a;
+  border: 1px solid rgba(223,17,27,.4);
+  border-radius: 999px;
+  color: #fff;
+  font-family: var(--ff-display, var(--admin-display));
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  padding: 8px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  box-shadow: 0 8px 20px rgba(0,0,0,.35);
+}
+.admin-sticky-notify svg { color: var(--ff-red,#df111b); }
+.admin-sticky-notify b {
+  background: var(--ff-red,#df111b);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  min-width: 18px;
+  padding: 3px 6px;
+  text-align: center;
+}
 .admin-page-heading > div > span {
   color: var(--ff-red);
   display: block;

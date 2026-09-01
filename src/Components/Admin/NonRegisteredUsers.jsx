@@ -60,6 +60,7 @@ const NonRegisteredUsers = () => {
   
   // Function to delete a user
   const handleDelete = async (id) => {
+    if (!window.confirm('Delete this entry? This cannot be undone.')) return;
     try {
       await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered/${id}`, {
         method: 'DELETE',

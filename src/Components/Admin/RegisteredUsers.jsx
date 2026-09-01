@@ -26,7 +26,7 @@ const RegisteredUsers = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminHeaders() });
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminJsonHeaders() });
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -46,9 +46,7 @@ const RegisteredUsers = () => {
     try {
       const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/reward-tokens-only-forcibly/${userId}`, {
         method: 'POST',
-        headers: adminHeaders({
-          'Content-Type': 'application/json',
-        }),
+        headers: adminJsonHeaders(),
         body: JSON.stringify({
           tokens: tokensToGive,
         }),
@@ -70,9 +68,10 @@ const RegisteredUsers = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Delete this user? This cannot be undone.')) return;
     const deletePromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/usertodelete/${id}`, { headers: adminHeaders(),
+        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/usertodelete/${id}`, { headers: adminJsonHeaders(),
           method: 'DELETE',
         });
 
@@ -122,7 +121,7 @@ const RegisteredUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-user', {
         method: 'POST',
-        headers: adminHeaders({ 'Content-Type': 'application/json' }),
+        headers: adminJsonHeaders(),
         body: JSON.stringify(data),
       });
 

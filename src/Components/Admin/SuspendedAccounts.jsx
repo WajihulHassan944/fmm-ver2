@@ -21,6 +21,7 @@ const SuspendedAccounts = () => {
     }, []);
 
     const handleDelete = async (email) => {
+        if (!window.confirm('Unsuspend this account? They will be able to log in again.')) return;
         const deletePromise = new Promise(async (resolve, reject) => {
             try {
                 const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/redusers/${email}`, {
@@ -40,9 +41,9 @@ const SuspendedAccounts = () => {
         });
 
         toast.promise(deletePromise, {
-            pending: 'Deleting user...',
-            success: 'User deleted successfully 👌',
-            error: 'Failed to delete user 🤯',
+            pending: 'Unsuspending user...',
+            success: 'User unsuspended successfully 👌',
+            error: 'Failed to unsuspend user 🤯',
         });
     };
 
@@ -67,7 +68,7 @@ const SuspendedAccounts = () => {
                                     <img src={user.profileUrl || "https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743589918/home/rb0ajzfkodtx4da3jyiq.png"} alt="User Profile" />
                                 </div>
                                 <h1>{user.email}</h1>
-                                <button onClick={() => handleDelete(user.email)} className='deleteButton'>Delete</button>
+                                <button onClick={() => handleDelete(user.email)} className='deleteButton'>Unsuspend</button>
                             </div>
                         ))
                     )}

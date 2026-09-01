@@ -402,6 +402,10 @@ const getHomeFighterName = (match = {}, side = "A") => {
     isA ? match?.fighterOneName : match?.fighterTwoName,
     isA ? match?.matchFighterA : match?.matchFighterB,
     fallback,
+    (() => {
+      const parts = String(match?.matchName || "").split(/\s+vs\.?\s+/i);
+      return isA ? parts[0] : parts[1];
+    })(),
     isA ? "Fighter A" : "Fighter B",
   );
 };
@@ -2217,7 +2221,7 @@ const HomeAnother = () => {
               status: "upcoming",
               hydrateImages: false,
             }),
-            fetchPromotedHomeFights({ limit: 45 }),
+            fetchPromotedHomeFights({ limit: 10 }),
           ]);
         const summary =
           summaryResult.status === "fulfilled" ? summaryResult.value || {} : {};

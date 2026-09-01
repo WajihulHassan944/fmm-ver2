@@ -37,7 +37,11 @@ export const getFighterName = (match, side = 'A') => {
     ? [fighter?.displayName, fighter?.name, ref?.displayName, ref?.name, match?.fighterAName, match?.fighterOneName, match?.matchFighterA]
     : [fighter?.displayName, fighter?.name, ref?.displayName, ref?.name, match?.fighterBName, match?.fighterTwoName, match?.matchFighterB];
   const direct = candidates.find((value) => typeof value === 'string' && value.trim() && value.trim().toLowerCase() !== 'null');
-  return direct || (isA ? 'Fighter A' : 'Fighter B');
+  if (direct) return direct;
+  const nameParts = String(match?.matchName || '').split(/\s+vs\.?\s+/i);
+  const fromMatchName = isA ? nameParts[0] : nameParts[1];
+  if (fromMatchName && fromMatchName.trim()) return fromMatchName.trim();
+  return isA ? 'Fighter A' : 'Fighter B';
 };
 
 export const getFightName = (match) => {
