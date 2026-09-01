@@ -237,20 +237,33 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   // Mirrors the exact filter/sort/slice(0,5) the public homepage (pages/welcome.js)
   // uses to pick its 5 fight-card windows, so this table shows precisely which
   // slot (if any) each fight currently occupies there — not a guess.
+  // Prefer the admin's explicit homepageSlot when set; fights without one fall
+  // back to the computed weight/date order to fill any remaining windows.
   const homepageSlotById = useMemo(() => {
     const map = {};
-    allRows
+    const eligible = allRows
       .filter((f) => f && getFighterName(f, 'A') && getFighterName(f, 'B'))
-      .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished')
+      .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished');
+    const explicit = eligible.filter((f) => isHomepagePromoted(f) && Number(f.homepageSlot) >= 1 && Number(f.homepageSlot) <= 5);
+    explicit.forEach((f) => { map[String(getId(f))] = Number(f.homepageSlot); });
+    const takenSlots = new Set(Object.values(map));
+    const remaining = eligible
+      .filter((f) => !map[String(getId(f))])
       .sort((a, b) => {
         const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
         if (rankDiff) return rankDiff;
         const weight = (f) => (isHomepagePromoted(f) ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
         const diff = weight(b) - weight(a);
         return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
-      })
-      .slice(0, 5)
-      .forEach((f, index) => { map[String(getId(f))] = index + 1; });
+      });
+    let nextSlot = 1;
+    remaining.forEach((f) => {
+      while (takenSlots.has(nextSlot) && nextSlot <= 5) nextSlot += 1;
+      if (nextSlot > 5) return;
+      map[String(getId(f))] = nextSlot;
+      takenSlots.add(nextSlot);
+      nextSlot += 1;
+    });
     return map;
   }, [allRows]);
 
@@ -286,6 +299,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   // Slots are 1 (most prominent) through 5. Assigning a slot number directly
   // sets a fixed, well-separated rank per slot so the fight lands in exactly
   // that homepage window instead of just nudging front/back one step at a time.
+  // Slots are 1 (most prominent) through 5, and are the literal number the
+  // admin picked — stored directly as homepageSlot, not derived from rank
+  // ordering, so the website places the fight in exactly that window.
   const setHomepageSlot = async (fight, slot) => {
     const id = getId(fight);
     if (!id || placementUpdatingKey) return;
@@ -297,7 +313,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           homepagePromoted: slot > 0,
-          homepagePromotionRank: slot > 0 ? (6 - slot) * 100 : 0,
+          homepageSlot: slot,
           sourceType: getSourceType(fight),
           homepagePromotionTitle: fight.matchName || getTitle(fight),
           homepagePromotionSubtitle: `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`,
@@ -703,7 +719,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                         </button>
                         <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
                         <button type="button" onClick={() => openScorerPanel(fight)}><FaUserClock /> Send to scorer</button>
-                        <Link href={`/administration/DeleteUpdateMatches?matchId=${id}`}><FaEdit /> Edit fight</Link>
+                        <Link href={`/administration/DeleteUpdateMatches?matchId=${id}&sourceType=${getSourceType(fight)}`}><FaEdit /> Edit fight</Link>
                         <button type="button" className="is-danger" onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>
                       </div>
                     </td>

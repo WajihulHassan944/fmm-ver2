@@ -27,12 +27,19 @@ const DeleteFights = () => {
 
   useEffect(() => { if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true })); }, [matchStatus, dispatch]);
 
+  // A fight opened from the unified registry can be either a live Match or a
+  // Shadow record. Without this, every "Edit fight" link into this page hard
+  // assumed Match, so opening a shadow-sourced fight found nothing in the live
+  // matches list and the form silently reset to blank instead of loading it.
+  const [editingIsShadow, setEditingIsShadow] = useState(false);
+
   useEffect(() => {
     if (router.isReady && router.query?.matchId) {
       setSelectedMatchId(String(router.query.matchId));
+      setEditingIsShadow(String(router.query?.sourceType || '').toLowerCase() === 'shadow');
       setIsEditing(true);
     }
-  }, [router.isReady, router.query?.matchId]);
+  }, [router.isReady, router.query?.matchId, router.query?.sourceType]);
 
   const filteredMatches = useMemo(() => {
     const all = Array.isArray(matches) ? matches : [];
@@ -80,9 +87,9 @@ const DeleteFights = () => {
       <div className="admin-workspace">
         <section className="admin-page-heading admin-page-heading-compact">
           <div><span>Fight operations</span><h2>Edit fight</h2><p>Update the selected fight through the existing edit match component and endpoints.</p></div>
-          <button type="button" className="admin-action-secondary" onClick={() => { setIsEditing(false); setSelectedMatchId(null); }}>Back to table</button>
+          <button type="button" className="admin-action-secondary" onClick={() => { setIsEditing(false); setSelectedMatchId(null); setEditingIsShadow(false); }}>Back to table</button>
         </section>
-        <EditMatch matchId={selectedMatchId} isShadow={false} />
+        <EditMatch matchId={selectedMatchId} isShadow={editingIsShadow} />
       </div>
     );
   }
@@ -110,7 +117,7 @@ const DeleteFights = () => {
                   <td><span className="admin-cell-stack"><strong>{match.matchDate?.split('T')[0] || 'Date pending'}</strong><small>{match.matchTime || 'Time pending'}</small></span></td>
                   <td><span className={`admin-status-badge ${match.matchStatus === 'Finished' ? 'is-success' : 'is-warning'}`}>{match.matchStatus || 'Draft'}</span></td>
                   <td>{Number(match.pot || 0) ? `$${Number(match.pot).toLocaleString()}` : '—'}</td>
-                  <td><div className="admin-row-actions"><button type="button" onClick={() => { setSelectedMatchId(match._id); setIsEditing(true); }}><FaEdit /> Edit</button><button type="button" className="is-danger" onClick={() => handleDeleteClick(match._id, match.affiliateId)}><FaTrashAlt /> Delete</button></div></td>
+                  <td><div className="admin-row-actions"><button type="button" onClick={() => { setSelectedMatchId(match._id); setEditingIsShadow(false); setIsEditing(true); }}><FaEdit /> Edit</button><button type="button" className="is-danger" onClick={() => handleDeleteClick(match._id, match.affiliateId)}><FaTrashAlt /> Delete</button></div></td>
                 </tr>
               )) : <tr><td colSpan="6"><div className="admin-empty-table">No matches found.</div></td></tr>}
             </tbody>

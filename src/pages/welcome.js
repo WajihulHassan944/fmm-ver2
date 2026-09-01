@@ -939,25 +939,42 @@ export async function getServerSideProps({ res }) {
         : Array.isArray(fightData) ? fightData : [];
 
   const now = Date.now();
-  const open = rawFights
+  const eligible = rawFights
     .filter((f) => f && resolveFightName(f, 'A') && resolveFightName(f, 'B'))
     // Was matchDate > now, which dropped a fight off the site the instant its
     // scheduled start time passed — even while the admin still had it marked
     // Ongoing and open for predictions. Only prizesSettledAt/Finished actually
     // means "done"; a same-day fight that already started is still live.
-    .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished')
-    // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
-    // must actually surface here — they used to only flip a flag nothing read,
-    // so a promoted fight and green success toast never changed the site.
-    // Promoted/featured fights sort first (most-promoted first), then by date.
+    .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished');
+
+  // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
+  // must actually surface here — they used to only flip a flag nothing read,
+  // so a promoted fight and green success toast never changed the site.
+  //
+  // A fight the admin explicitly slotted (1-5, via homepageSlot) MUST land in
+  // that exact window — not wherever rank/weight/date ordering would put it.
+  // Fights with no explicit slot fill whatever windows are left, in the old
+  // rank/weight/date order.
+  const slots = new Array(5).fill(null);
+  eligible.forEach((f) => {
+    const slot = Number(f.homepageSlot);
+    if (f.homepagePromoted && slot >= 1 && slot <= 5 && !slots[slot - 1]) slots[slot - 1] = f;
+  });
+  const placedIds = new Set(slots.filter(Boolean).map((f) => f._id || f.id));
+  const remaining = eligible
+    .filter((f) => !placedIds.has(f._id || f.id))
     .sort((a, b) => {
       const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
       if (rankDiff) return rankDiff;
       const weight = (f) => (f.homepagePromoted ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
       const diff = weight(b) - weight(a);
       return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
-    })
-    .slice(0, 5);
+    });
+  let ri = 0;
+  for (let i = 0; i < 5 && ri < remaining.length; i++) {
+    if (!slots[i]) { slots[i] = remaining[ri]; ri += 1; }
+  }
+  const open = slots.filter(Boolean);
 
   const fights = open.map(toFightCard);
 
