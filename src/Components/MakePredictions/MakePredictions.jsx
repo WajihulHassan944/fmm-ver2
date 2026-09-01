@@ -9,7 +9,7 @@ import {
   FaShieldAlt,
   FaTrophy,
 } from 'react-icons/fa';
-import { FMM_ASSET_BASE, getFighterImage } from '@/Utils/fightExperience';
+import { FMM_ASSET_BASE, getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 
@@ -270,7 +270,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         return counts;
       }, { A: 0, B: 0 });
       setConfirmation({
-        pickName: winnerVotes.B > winnerVotes.A ? match.matchFighterB : winnerVotes.A > winnerVotes.B ? match.matchFighterA : 'Round-by-round card submitted',
+        pickName: winnerVotes.B > winnerVotes.A ? getFighterName(match, 'B') : winnerVotes.A > winnerVotes.B ? getFighterName(match, 'A') : 'Round-by-round card submitted',
       });
     } catch (error) {
       console.error('Error saving predictions:', error);
@@ -304,7 +304,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         <div style={{ width: 'min(480px,100%)', boxSizing: 'border-box', padding: '24px 18px', borderRadius: 22, border: '1px solid rgba(34,197,94,.45)', background: 'linear-gradient(160deg,rgba(34,197,94,.12),rgba(255,255,255,.035))', boxShadow: '0 0 32px rgba(34,197,94,.16)', textAlign: 'center' }}>
           <div style={{ fontSize: 42 }}>🥊</div>
           <h1 style={{ margin: '4px 0', fontFamily: 'Anton,sans-serif', fontSize: 30, color: '#22c55e' }}>YOU’RE IN</h1>
-          <p style={{ margin: '0 0 16px', color: 'rgba(255,255,255,.65)', fontWeight: 700 }}>{match.matchFighterA} vs {match.matchFighterB}</p>
+          <p style={{ margin: '0 0 16px', color: 'rgba(255,255,255,.65)', fontWeight: 700 }}>{getFighterName(match, 'A')} vs {getFighterName(match, 'B')}</p>
           <div style={{ padding: 13, borderRadius: 12, background: 'rgba(255,255,255,.055)', border: '1px solid rgba(255,255,255,.12)', textAlign: 'left', marginBottom: 13 }}>
             <small style={{ display: 'block', color: 'rgba(255,255,255,.45)', fontWeight: 900, letterSpacing: '.08em' }}>YOUR CARD</small>
             <strong style={{ display: 'block', marginTop: 3, color: '#f2b544', overflowWrap: 'anywhere' }}>{confirmation.pickName}</strong>
@@ -328,7 +328,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         <div className="xp-prediction-hero">
           <div className="xp-prediction-hero-copy">
             <span><FaFistRaised /> Prediction scorecard</span>
-            <h1>{match.matchFighterA} <em>vs</em> {match.matchFighterB}</h1>
+            <h1>{getFighterName(match, 'A')} <em>vs</em> {getFighterName(match, 'B')}</h1>
           <p>{match.matchCategoryTwo || match.matchCategory} · {match.matchType}{isWrestling ? ' · full-match scorecard' : ` · ${roundCount} rounds`}</p>
             <div className="xp-prediction-countdown"><FaClock /> {timeRemaining.hasStarted ? 'Fight has started' : `${timeRemaining.diffHrs}h ${timeRemaining.diffMins}m ${timeRemaining.diffSecs}s until lock`}</div>
           </div>
@@ -340,17 +340,17 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           </button>
         </div>
 
-        {featuredWinner ? <div style={{ margin: '0 auto 14px', width: 'min(780px,calc(100% - 28px))', padding: '11px 14px', borderRadius: 12, border: '1px solid rgba(242,181,68,.45)', background: 'rgba(242,181,68,.09)', color: '#f2b544', fontWeight: 900, textAlign: 'center' }}>YOUR FEATURED PICK: {featuredWinner === 'b' ? match.matchFighterB : match.matchFighterA}. Complete the {sport === 'bareknuckle' ? 'Bare Knuckle' : sport === 'kickboxing' ? 'Kickboxing' : sport === 'wrestling' ? 'Pro Wrestling' : sport === 'boxing' ? 'Boxing' : 'MMA'} scorecard below.</div> : null}
+        {featuredWinner ? <div style={{ margin: '0 auto 14px', width: 'min(780px,calc(100% - 28px))', padding: '11px 14px', borderRadius: 12, border: '1px solid rgba(242,181,68,.45)', background: 'rgba(242,181,68,.09)', color: '#f2b544', fontWeight: 900, textAlign: 'center' }}>YOUR FEATURED PICK: {featuredWinner === 'b' ? getFighterName(match, 'B') : getFighterName(match, 'A')}. Complete the {sport === 'bareknuckle' ? 'Bare Knuckle' : sport === 'kickboxing' ? 'Kickboxing' : sport === 'wrestling' ? 'Pro Wrestling' : sport === 'boxing' ? 'Boxing' : 'MMA'} scorecard below.</div> : null}
 
         <div className="xp-prediction-fighters">
           <article>
-            <img src={fighterAImage} alt={match.matchFighterA} />
-            <div><span>Blue corner</span><strong>{match.matchFighterA}</strong></div>
+            <img src={fighterAImage} alt={getFighterName(match, 'A')} />
+            <div><span>Blue corner</span><strong>{getFighterName(match, 'A')}</strong></div>
           </article>
           <div className="xp-prediction-vs">VS</div>
           <article>
-            <img src={fighterBImage} alt={match.matchFighterB} />
-            <div><span>Red corner</span><strong>{match.matchFighterB}</strong></div>
+            <img src={fighterBImage} alt={getFighterName(match, 'B')} />
+            <div><span>Red corner</span><strong>{getFighterName(match, 'B')}</strong></div>
           </article>
         </div>
 
@@ -378,8 +378,8 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
               <article className="player-round-card-v2" key={round.round}>
                 <header className="player-round-card-v2-header">
                   <div className="player-round-corner is-a">
-                    <img src={fighterAImage} alt={match.matchFighterA} />
-                    <span><small>Blue corner</small><strong>{match.matchFighterA}</strong></span>
+                    <img src={fighterAImage} alt={getFighterName(match, 'A')} />
+                    <span><small>Blue corner</small><strong>{getFighterName(match, 'A')}</strong></span>
                   </div>
                   <div className="player-round-number">
                     <small>Prediction card</small>
@@ -387,16 +387,16 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                     <span>{isWrestling ? 'Pro Wrestling' : isBoxing ? (sport === 'bareknuckle' ? 'Bare Knuckle' : 'Boxing') : (sport === 'kickboxing' ? 'Kickboxing' : 'MMA')} scoring</span>
                   </div>
                   <div className="player-round-corner is-b">
-                    <span><small>Red corner</small><strong>{match.matchFighterB}</strong></span>
-                    <img src={fighterBImage} alt={match.matchFighterB} />
+                    <span><small>Red corner</small><strong>{getFighterName(match, 'B')}</strong></span>
+                    <img src={fighterBImage} alt={getFighterName(match, 'B')} />
                   </div>
                 </header>
 
                 <div className="player-round-score-table">
                   <div className="player-round-score-head">
-                    <span>{match.matchFighterA}</span>
+                    <span>{getFighterName(match, 'A')}</span>
                     <strong>Predicted action</strong>
-                    <span>{match.matchFighterB}</span>
+                    <span>{getFighterName(match, 'B')}</span>
                   </div>
                   {metricLabels.map((metric) => (
                     <div className={`player-round-score-row ${metric.featured ? 'is-featured' : ''}`} key={`${round.round}-${metric.code}`}>
@@ -407,9 +407,9 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                           inputMode="numeric"
                           value={round[metric.left]}
                           onChange={(event) => handlePredictionChange(event, roundIndex, metric.left)}
-                          aria-label={`${metric.title} for ${match.matchFighterA}`}
+                          aria-label={`${metric.title} for ${getFighterName(match, 'A')}`}
                         />
-                        <small>{match.matchFighterA}</small>
+                        <small>{getFighterName(match, 'A')}</small>
                       </label>
                       <div>
                         <img src={metricIcon} alt="" aria-hidden="true" />
@@ -422,9 +422,9 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                           inputMode="numeric"
                           value={round[metric.right]}
                           onChange={(event) => handlePredictionChange(event, roundIndex, metric.right)}
-                          aria-label={`${metric.title} for ${match.matchFighterB}`}
+                          aria-label={`${metric.title} for ${getFighterName(match, 'B')}`}
                         />
-                        <small>{match.matchFighterB}</small>
+                        <small>{getFighterName(match, 'B')}</small>
                       </label>
                     </div>
                   ))}
@@ -441,7 +441,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         aria-pressed={winnerSide === 'A'}
                       >
                         <img src={fighterAImage} alt="" />
-                        <span><small>{match.matchFighterA}</small><strong>{winnerSide === 'B' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'A' ? (isWrestling ? 'Match winner' : 'Round winner') : winnerSide === 'B' ? (isWrestling ? 'Match loss' : 'Round loss') : 'Select corner'}</em></span>
+                        <span><small>{getFighterName(match, 'A')}</small><strong>{winnerSide === 'B' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'A' ? (isWrestling ? 'Match winner' : 'Round winner') : winnerSide === 'B' ? (isWrestling ? 'Match loss' : 'Round loss') : 'Select corner'}</em></span>
                         {winnerSide === 'A' && <FaCheck />}
                       </button>
                       <button
@@ -451,7 +451,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         aria-pressed={winnerSide === 'B'}
                       >
                         <img src={fighterBImage} alt="" />
-                        <span><small>{match.matchFighterB}</small><strong>{winnerSide === 'A' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'B' ? (isWrestling ? 'Match winner' : 'Round winner') : winnerSide === 'A' ? (isWrestling ? 'Match loss' : 'Round loss') : 'Select corner'}</em></span>
+                        <span><small>{getFighterName(match, 'B')}</small><strong>{winnerSide === 'A' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'B' ? (isWrestling ? 'Match winner' : 'Round winner') : winnerSide === 'A' ? (isWrestling ? 'Match loss' : 'Round loss') : 'Select corner'}</em></span>
                         {winnerSide === 'B' && <FaCheck />}
                       </button>
                     </div>
@@ -467,7 +467,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         aria-pressed={finishSide === 'A'}
                       >
                         <img src={fighterAImage} alt="" />
-                        <span><small>{match.matchFighterA}</small><strong>{finishSide === 'B' ? 'SP' : 'KO'}</strong><em>{finishSide === 'A' ? 'Knockout pick' : finishSide === 'B' ? 'Score path' : 'Select corner'}</em></span>
+                        <span><small>{getFighterName(match, 'A')}</small><strong>{finishSide === 'B' ? 'SP' : 'KO'}</strong><em>{finishSide === 'A' ? 'Knockout pick' : finishSide === 'B' ? 'Score path' : 'Select corner'}</em></span>
                         {finishSide === 'A' && <FaCheck />}
                       </button>
                       <button
@@ -477,7 +477,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         aria-pressed={finishSide === 'B'}
                       >
                         <img src={fighterBImage} alt="" />
-                        <span><small>{match.matchFighterB}</small><strong>{finishSide === 'A' ? 'SP' : 'KO'}</strong><em>{finishSide === 'B' ? 'Knockout pick' : finishSide === 'A' ? 'Score path' : 'Select corner'}</em></span>
+                        <span><small>{getFighterName(match, 'B')}</small><strong>{finishSide === 'A' ? 'SP' : 'KO'}</strong><em>{finishSide === 'B' ? 'Knockout pick' : finishSide === 'A' ? 'Score path' : 'Select corner'}</em></span>
                         {finishSide === 'B' && <FaCheck />}
                       </button>
                     </div>

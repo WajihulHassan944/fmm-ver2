@@ -240,7 +240,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const homepageSlotById = useMemo(() => {
     const map = {};
     allRows
-      .filter((f) => f && f.matchFighterA && f.matchFighterB)
+      .filter((f) => f && getFighterName(f, 'A') && getFighterName(f, 'B'))
       .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished')
       .sort((a, b) => {
         const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
@@ -278,6 +278,37 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       refreshFightRows();
     } catch (error) {
       toast.error(error.message || 'Failed to reorder fight.');
+    } finally {
+      setPlacementUpdatingKey('');
+    }
+  };
+
+  // Slots are 1 (most prominent) through 5. Assigning a slot number directly
+  // sets a fixed, well-separated rank per slot so the fight lands in exactly
+  // that homepage window instead of just nudging front/back one step at a time.
+  const setHomepageSlot = async (fight, slot) => {
+    const id = getId(fight);
+    if (!id || placementUpdatingKey) return;
+    setPlacementUpdatingKey(`${id}:slot-${slot}`);
+    try {
+      const token = getAdminToken();
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(id)}/homepage-promotion`, {
+        method: 'PATCH',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          homepagePromoted: slot > 0,
+          homepagePromotionRank: slot > 0 ? (6 - slot) * 100 : 0,
+          sourceType: getSourceType(fight),
+          homepagePromotionTitle: fight.matchName || getTitle(fight),
+          homepagePromotionSubtitle: `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload?.message || 'Failed to update homepage slot.');
+      toast.success(slot > 0 ? `${getTitle(fight)} set to homepage slot ${slot}.` : `${getTitle(fight)} removed from the homepage.`);
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update homepage slot.');
     } finally {
       setPlacementUpdatingKey('');
     }
@@ -614,9 +645,19 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>{getSport(fight)}</td>
                     <td>
-                      {homepageSlotById[String(id)]
-                        ? <span className="admin-status-badge is-warning" title="Position in the website homepage's 5 fight-card windows">Homepage {homepageSlotById[String(id)]}</span>
-                        : <span className="admin-status-badge" title="Not currently in the homepage's 5 fight-card windows">Not shown</span>}
+                      <select
+                        className={`admin-status-badge ${homepageSlotById[String(id)] ? 'is-warning' : ''}`}
+                        style={{ cursor: 'pointer' }}
+                        title="Click to choose which of the homepage's 5 fight-card windows this fight occupies"
+                        disabled={Boolean(placementUpdatingKey)}
+                        value={homepageSlotById[String(id)] || 0}
+                        onChange={(e) => setHomepageSlot(fight, Number(e.target.value))}
+                      >
+                        <option value={0}>Not shown</option>
+                        {[1, 2, 3, 4, 5].map((slot) => (
+                          <option key={slot} value={slot}>Homepage {slot}</option>
+                        ))}
+                      </select>
                     </td>
                     <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
                     <td><span className={`admin-status-badge ${isFinished ? 'is-success' : status === 'Ongoing' ? 'is-warning' : ''}`}>{status}</span></td>
