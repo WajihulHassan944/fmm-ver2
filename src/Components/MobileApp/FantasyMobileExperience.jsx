@@ -237,8 +237,16 @@ const SAMPLE_CARD = [
 
 const buildSampleFights = () => SAMPLE_CARD.map((row, index) => {
   const when = new Date(Date.now() + (index + 2) * 36 * 3600 * 1000);
-  return normalizeFight({
+  // Raw shape — the same shape a real fight document has (matchFighterA,
+  // matchCategory, etc.) — NOT run through this file's own normalizeFight.
+  // FantasyMobileAppCore does its own normalization from raw fields; passing it
+  // an already-transformed object left every field it looks for (matchFighterA,
+  // fightPosterImage, homepagePromotion...) undefined, which is why real fights
+  // showed generic per-sport stock photos and, after removing the old literal
+  // name fallback, could vanish from every carousel entirely.
+  return {
     _id: 'sample-' + index,
+    isSample: true,
     matchFighterA: row.a,
     matchFighterB: row.b,
     matchName: row.cat.toUpperCase() + ' PREVIEW',
@@ -251,17 +259,11 @@ const buildSampleFights = () => SAMPLE_CARD.map((row, index) => {
     matchStatus: 'upcoming',
     featuredThisWeek: Boolean(row.week),
     featuredFight: Boolean(row.feature),
-    // Placeholder cut-outs so the featured sections are not empty frames. The
-    // arena background is a fixed asset; only these change when a real fight is
-    // published with its own fighter images.
     featuredFightFighterAImage: row.a1,
     featuredFightFighterBImage: row.b1,
     featuredThisWeekImage: row.a1,
-  });
-// playable MUST be true or renderStartHere and the event carousel skip these and
-// the home screen collapses again. Entry is blocked in openEvent via isSample, so
-// a preview fight still cannot reach a money path.
-}).map((fight) => ({ ...fight, isSample: true, playable: true }));
+  };
+});
 
 // ==========================================================================
 // COMPONENT
@@ -412,11 +414,20 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
         // The endpoint responds with { items: [...] } — fights/matches/predictionFights/data
         // never matched anything, so this always fell through to the single sample fight.
         const rawFights = asArray(fightRes.items || fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
-        const realFights = rawFights.map(normalizeFight).filter((f) => f.f1 && f.f2);
+        // Pass RAW fight documents straight through. FantasyMobileAppCore has its
+        // own complete normalizer (matchFighterA, fightPosterImage, homepagePromotion,
+        // etc.) — running this file's normalizeFight first stripped those fields
+        // down to a different shape (f1/f2/sport/poster) that AppCore's normalizer
+        // doesn't recognize, so real posters/images fell back to generic stock art
+        // and, after the literal-fallback removal, fights could disappear outright.
+        const nameable = rawFights.filter((f) => f && (
+          f.matchFighterA || f.fighterAName || f.fighterA?.displayName
+          || /\s+vs\.?\s+/i.test(String(f.matchName || ''))
+        ));
         // Real fights always win. The preview card only fills an empty screen.
-        setFights(realFights.length ? realFights : buildSampleFights());
-        setUsingSampleCard(realFights.length === 0);
-        setShadowFights(asArray(fightRes.shadowFights).map(normalizeFight));
+        setFights(nameable.length ? rawFights : buildSampleFights());
+        setUsingSampleCard(nameable.length === 0);
+        setShadowFights(asArray(fightRes.shadowFights));
         setDataLoading(false);
         return rawFights;
       });

@@ -191,7 +191,7 @@ const AffiliateUsers = () => {
           <p>Review creator accounts, approval state, reward distinctions, and affiliate operations without changing the existing workflow.</p>
         </div>
         <div className="admin-page-actions">
-          <button type="button" className="admin-action-secondary" onClick={() => router.push(-1)}><FaArrowLeft /> Back</button>
+          <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={handleNavigation}><FaUsers /> Admin records</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/payouts')}><FaWallet /> Payouts</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddAffiliatePopup(true)}><FaPlus /> Add affiliate</button>

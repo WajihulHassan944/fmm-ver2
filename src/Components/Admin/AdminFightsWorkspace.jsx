@@ -509,7 +509,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Could not create the scoring link.');
       setScorerLink(payload.link || '');
-      toast.success(scorerEmail ? `Scoring link emailed to ${scorerEmail}` : 'Scoring link created.');
+      if (scorerEmail && !payload.emailSent) {
+        toast.error(`Link created, but the email to ${scorerEmail} failed to send${payload.emailError ? `: ${payload.emailError}` : ''}. Copy the link below and send it manually.`);
+      } else {
+        toast.success(scorerEmail ? `Scoring link emailed to ${scorerEmail}` : 'Scoring link created.');
+      }
       openScorerPanel(scorerFight);
     } catch (error) {
       toast.error(error.message);

@@ -776,7 +776,7 @@ const formatFightWhen = (f = {}, options = {}) => {
   const time = timeMatch ? `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}` : '00:00';
   const date = new Date(`${rawDate}T${time}:00`);
   if (Number.isNaN(date.getTime())) return options.fallback || '';
-  return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 };
 
 // A promoted fight without linked fighter records had no matchFighterA/B text,
@@ -818,9 +818,9 @@ const toFightCard = (f, index) => {
       // Poster/featured art is already composed for 16:9, so it keeps a gentler bias.
       imagePosition: (!f.featuredThisWeekImage && !f.fightPosterImage && (f.fighterAImage || f.fighterBImage)) ? 'center top' : 'center 32%',
       meta: [category, f.maxRounds ? `${f.maxRounds} rounds` : '', when].filter(Boolean).join(' \u00b7 '),
-      badge: guaranteed > 0 ? 'Guaranteed pot' : fee === 0 ? 'Free entry' : index === 0 ? 'Main event' : '',
-      badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : fee === 0 ? 'rgba(34,197,94,.94)' : 'rgba(225,29,46,.94)',
-      badgeText: fee === 0 ? '#052e14' : '#fff',
+      badge: guaranteed > 0 ? 'Guaranteed pot' : index === 0 ? 'Main event' : '',
+      badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : 'rgba(225,29,46,.94)',
+      badgeText: '#fff',
       potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM' : money(fee) + ' FM',
       potColor: fee === 0 ? '#22c55e' : guaranteed > 0 ? '#22c55e' : '#fff',
       potNote: fee === 0 ? 'Titles & sponsor prizes'

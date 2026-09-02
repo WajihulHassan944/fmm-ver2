@@ -95,7 +95,7 @@ const AffiliatesPayouts = () => {
          <i
         className="fa fa-arrow-circle-left"
         aria-hidden="true"
-        onClick={() => router.push(-1)} // Go back to the previous page
+        onClick={() => router.back()} // Go back to the previous page
         style={{ position: 'absolute', top: '16px', left: '17%', cursor: 'pointer', fontSize: '24px', color: '#007bff', zIndex: '99999' }}
       ></i>
   

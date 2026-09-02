@@ -1702,6 +1702,30 @@ const MobilePhoneHome = ({
   const blogRows = blogs.length ? blogs : blogFallbacks;
 
   const appAssetBase = APP_FIXED_ASSET_BASE;
+  // Classic-side sport pills showed a fixed category icon with no photo
+  // cycling, unlike the Bold/app side. Building the same live-fighter-photo
+  // gallery per sport here so both sides behave the same way.
+  const sportPhotoGalleries = useMemo(() => {
+    const galleries = {};
+    mobileSections.forEach((section) => {
+      const photos = [];
+      (section.fights || []).forEach((fight) => {
+        [
+          getHomeFighterImage(fight, "A", 0, { allowFallback: false }),
+          getHomeFighterImage(fight, "B", 1, { allowFallback: false }),
+        ].forEach((photo) => { if (photo && !photos.includes(photo)) photos.push(photo); });
+      });
+      galleries[section.key] = photos;
+    });
+    return galleries;
+  }, [mobileSections]);
+  const [sportPhotoCycle, setSportPhotoCycle] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (!document.hidden) setSportPhotoCycle((n) => (n + 1) % 600);
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, []);
   const appStaticStats = [
     { Icon: FaUsers, big: "128,000+", small: "PREDICTORS", sub: "+842 today", tone: "purple", href: "/leaderboard" },
     { Icon: FaTrophy, big: "$250,000+", small: "IN PRIZES", sub: "$12,450 today", tone: "gold", href: "/fights-rewards" },
@@ -1865,6 +1889,8 @@ const MobilePhoneHome = ({
       <section className="fmm-app-sports" aria-label="Combat sports selector">
         {appSportCards.map((sport) => {
           const active = activeFightSport === sport.key;
+          const gallery = sportPhotoGalleries[sport.key] || [];
+          const cyclingPhoto = gallery.length ? gallery[sportPhotoCycle % gallery.length] : "";
           return (
             <button
               type="button"
@@ -1880,7 +1906,7 @@ const MobilePhoneHome = ({
                 if (typeof window !== "undefined") window.location.assign(sport.href || categoryHref(sport.key));
               }}
             >
-              <img src={sport.image} alt="" loading="eager" decoding="async" />
+              <img src={cyclingPhoto || sport.image} alt="" loading="eager" decoding="async" />
               <strong>{sport.name}</strong>
               <small><i />{active ? "SELECTED" : "LIVE"}</small>
             </button>

@@ -3845,17 +3845,21 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { color: '#ffce54', fontSize: 10, fontWeight: 900, marginBottom: 8 } }, 'FEATURED FIGHT · ' + (event.division ? event.division.toUpperCase() : event.tag)),
         React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 8 } },
           React.createElement('div', { style: { width: 116, height: 150, flex: '0 0 116px', background: 'transparent', filter: 'brightness(1.22) contrast(1.05) drop-shadow(0 6px 10px rgba(0,0,0,.55))' } }, React.createElement(MobileImageSlot, { id: 'detail-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', position: 'bottom center', src: event.fighterACutout || event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.featuredFightFighterAImage || event.fighterAImage || event.fallbackImage })),
-          React.createElement('div', { style: { flex: 1, minWidth: 0, fontFamily: "'Anton',sans-serif", fontSize: 15, lineHeight: 1.12, textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,.8)' } }, event.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), event.f2),
+          React.createElement('div', { style: { flex: 1, minWidth: 0, fontFamily: "'Anton',sans-serif", textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,.85)' } },
+            React.createElement('div', { style: { fontSize: 15, lineHeight: 1.15, wordBreak: 'break-word' } }, event.f1),
+            React.createElement('div', { style: { color: '#ef4444', fontSize: 12, margin: '2px 0' } }, 'VS'),
+            React.createElement('div', { style: { fontSize: 15, lineHeight: 1.15, wordBreak: 'break-word' } }, event.f2)
+          ),
           React.createElement('div', { style: { width: 116, height: 150, flex: '0 0 116px', background: 'transparent', filter: 'brightness(1.22) contrast(1.05) drop-shadow(0 6px 10px rgba(0,0,0,.55))' } }, React.createElement(MobileImageSlot, { id: 'detail-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', position: 'bottom center', src: event.fighterBCutout || event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.featuredFightFighterBImage || event.fighterBImage || event.fallbackImage }))
         ),
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', color: 'rgba(255,255,255,.7)', fontSize: 9, fontWeight: 900, marginBottom: 9 } },
-          React.createElement('span', null, event.date),
-          React.createElement('span', null, event.matchTime || 'TIME TBA'),
-          React.createElement('span', null, event.venue || 'VENUE TBA')
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', gap: 6, marginBottom: 9 } },
+          [event.date, event.matchTime || 'TIME TBA', event.venue || 'VENUE TBA'].map((text, i) => React.createElement('span', {
+            key: i, style: { fontSize: 9.5, fontWeight: 900, color: '#fff', background: 'rgba(0,0,0,.55)', border: '1px solid rgba(255,255,255,.18)', borderRadius: 6, padding: '3px 8px', textShadow: '0 1px 3px rgba(0,0,0,.9)' }
+          }, text))
         ),
-        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 10 } }, values.map(([label, value, color]) => React.createElement('div', { key: label, style: { textAlign: 'center', padding: 7, borderRadius: 8, background: 'rgba(255,255,255,.05)' } },
-          React.createElement('small', { style: { display: 'block', color: 'rgba(255,255,255,.55)', fontSize: 7, fontWeight: 900 } }, label),
-          React.createElement('strong', { style: { display: 'block', color, fontSize: 11, marginTop: 3 } }, value)
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 10 } }, values.map(([label, value, color]) => React.createElement('div', { key: label, style: { textAlign: 'center', padding: 7, borderRadius: 8, background: 'rgba(0,0,0,.55)', border: '1px solid ' + color + '55', boxShadow: 'inset 0 0 10px ' + color + '22' } },
+          React.createElement('small', { style: { display: 'block', color: 'rgba(255,255,255,.75)', fontSize: 7.5, fontWeight: 900, letterSpacing: .4 } }, label),
+          React.createElement('strong', { style: { display: 'block', color, fontSize: 13, marginTop: 3, textShadow: '0 0 8px ' + color + '80' } }, value)
         ))),
         React.createElement('div', {
           role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${event.f1} versus ${event.f2}`,

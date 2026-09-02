@@ -157,7 +157,7 @@ const RegisteredUsers = () => {
           <p>Review player accounts, plans, verification details, wallet balances, and moderation actions.</p>
         </div>
         <div className="admin-page-actions">
-          <button type="button" className="admin-action-secondary" onClick={() => router.push(-1)}><FaArrowLeft /> Back</button>
+          <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/suspended-accounts')}><FaBan /> Suspended accounts</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddUserPopup(true)}><FaPlus /> Add user</button>
         </div>
