@@ -2416,6 +2416,7 @@ class FantasyMobileAppCore extends React.Component {
           this.renderBoldHero(s),
           this.renderStorySports(sports),
           this.renderBento(jonesPct, aspinallPct, dashOffset, xpPct, s, bannerEvent),
+          this.renderFeaturedDetail(s, bannerEvent),
           this.renderEventCarousel(filteredEvents, s)
         )
       : React.createElement(React.Fragment, null,
@@ -2720,6 +2721,9 @@ class FantasyMobileAppCore extends React.Component {
     return React.createElement('div', { style: { padding: '0 16px 4px' } },
       React.createElement('div', { style: { fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: 'rgba(255,255,255,.7)', marginBottom: 8 } }, 'UPCOMING EVENTS'),
       React.createElement('div', { style: { background: 'linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02))', border: '1px solid ' + ev.tagColor + '66', borderRadius: 18, padding: 16 } },
+        React.createElement('div', { style: { height: 140, position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 10, background: '#000' } },
+          React.createElement(MobileImageSlot, { id: 'bold-event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage })
+        ),
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: ev.tagColor, marginBottom: 4 } }, ev.tag),
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 6 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
         React.createElement('div', { style: { display: 'flex', gap: 14, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 10 } },
@@ -3663,11 +3667,11 @@ class FantasyMobileAppCore extends React.Component {
             boxShadow: sp.active ? '0 0 16px ' + sp.color + '99, inset 0 0 12px ' + sp.color + '30' : '0 0 8px ' + sp.color + '55'
           }
         },
-          (() => { const ids = [0, 1, 2, 3, 4].map(i => 'sport-' + sp.id + '-' + i); const activeId = this.pickCycleId(ids, s);
-            return ids.map((id, i) => React.createElement('div', {
-              key: id, style: { position: 'absolute', inset: 0, opacity: id === activeId ? 1 : 0, transition: 'opacity 1s ease', pointerEvents: id === activeId ? 'auto' : 'none' }
-            }, React.createElement(MobileImageSlot, { id, shape: 'rect', placeholder: sp.name + ' — fighter ' + (i + 1), fit: 'cover' })));
-          })(),
+          (sp.gallery && sp.gallery.length
+            ? React.createElement('div', {
+                key: sp.photo || sp.id, className: 'fmm-sport-cycle-frame', style: { position: 'absolute', inset: 0 }
+              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: sp.photo || undefined, shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'cover' }))
+            : React.createElement(MobileImageSlot, { id: 'sport-' + sp.id + '-0', shape: 'rect', placeholder: sp.name + ' — fighter photo', fit: 'cover' })),
           React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 5, pointerEvents: 'none' } },
             React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, letterSpacing: .2, lineHeight: 1.1, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, sp.name),
             React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 3, fontSize: 7, fontWeight: 700, color: sp.color } },

@@ -11,13 +11,14 @@ const QUICK_PROMPTS = [
 
 const starterMessage = {
   role: 'assistant',
-  content: 'Jarvis online. I can analyze the current read-only operations snapshot and help with fight workflows, promotions, content, data quality, and Swarm. I will not mutate or publish anything.',
+  content: 'Jarvis online. Ask me to analyze fight operations, or to score, publish, delete, or pay something out — I will show you exactly what I am about to do and wait for your approval before anything actually runs.',
 };
 
 function JarvisWorkspace() {
   const [messages, setMessages] = useState([starterMessage]);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
+  const [actionBusyId, setActionBusyId] = useState(null);
   const bottomRef = useRef(null);
 
   const requestHistory = useMemo(
@@ -46,7 +47,11 @@ function JarvisWorkspace() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || `Jarvis request failed (${response.status})`);
-      setMessages((current) => [...current, { role: 'assistant', content: payload.reply || 'No response returned.' }]);
+      setMessages((current) => [...current, {
+        role: 'assistant',
+        content: payload.reply || 'No response returned.',
+        proposedAction: payload.proposedAction || null,
+      }]);
     } catch (error) {
       setMessages((current) => [...current, {
         role: 'assistant',
@@ -64,6 +69,33 @@ function JarvisWorkspace() {
       event.preventDefault();
       send();
     }
+  };
+
+  const runAction = async (messageIndex, action) => {
+    setActionBusyId(messageIndex);
+    try {
+      const token = window.localStorage.getItem('adminAuthToken') || '';
+      const response = await fetch('/api/jarvis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ execute: true, action }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || `Action failed (${response.status})`);
+      setMessages((current) => current.map((item, index) => (index === messageIndex
+        ? { ...item, proposedAction: { ...item.proposedAction, resolved: 'done' } }
+        : item)).concat([{ role: 'assistant', content: `Done — ${action.label}. ${payload.result?.message || ''}`.trim() }]));
+    } catch (error) {
+      setMessages((current) => current.concat([{ role: 'assistant', error: true, content: error.message || 'The action failed.' }]));
+    } finally {
+      setActionBusyId(null);
+    }
+  };
+
+  const dismissAction = (messageIndex) => {
+    setMessages((current) => current.map((item, index) => (index === messageIndex
+      ? { ...item, proposedAction: { ...item.proposedAction, resolved: 'rejected' } }
+      : item)));
   };
 
   return (
@@ -90,7 +122,7 @@ function JarvisWorkspace() {
             <FaShieldAlt />
             <div>
               <strong>Approval-safe</strong>
-              <span>Jarvis does not score fights, publish content, delete records, issue payouts, or run automation by itself.</span>
+              <span>Jarvis can score, publish, delete, and pay out — but every action shows you exactly what it will do first, and only runs after you click Approve.</span>
             </div>
           </div>
           <button type="button" className="jarvis-clear" onClick={() => setMessages([starterMessage])}>
@@ -109,6 +141,20 @@ function JarvisWorkspace() {
                 <div className={`jarvis-message${item.error ? ' is-error' : ''}`}>
                   <div className="jarvis-message-role">{item.role === 'assistant' ? 'JARVIS' : 'YOU'}</div>
                   <div className="jarvis-message-content">{item.content}</div>
+                  {item.proposedAction && !item.proposedAction.resolved && (
+                    <div className="jarvis-action-card">
+                      <div className="jarvis-action-title">{item.proposedAction.label}</div>
+                      <div className="jarvis-action-desc">{item.proposedAction.description}</div>
+                      <div className="jarvis-action-buttons">
+                        <button type="button" className="jarvis-approve" disabled={actionBusyId === index} onClick={() => runAction(index, item.proposedAction)}>
+                          {actionBusyId === index ? 'Running…' : 'Approve & run'}
+                        </button>
+                        <button type="button" className="jarvis-reject" disabled={actionBusyId === index} onClick={() => dismissAction(index)}>Reject</button>
+                      </div>
+                    </div>
+                  )}
+                  {item.proposedAction?.resolved === 'rejected' && <div className="jarvis-action-resolved">Rejected — not run.</div>}
+                  {item.proposedAction?.resolved === 'done' && <div className="jarvis-action-resolved is-done">Approved and run.</div>}
                 </div>
               </div>
             ))}
@@ -137,6 +183,15 @@ function JarvisWorkspace() {
 
       <style jsx>{`
         .jarvis-shell { display: grid; gap: 18px; color: #f7f8fb; }
+        .jarvis-action-card { margin-top: 10px; padding: 12px 14px; border: 1px solid rgba(242,181,68,.4); border-radius: 14px; background: rgba(242,181,68,.08); }
+        .jarvis-action-title { font-size: 12.5px; font-weight: 900; color: #f2b544; letter-spacing: .04em; margin-bottom: 4px; }
+        .jarvis-action-desc { font-size: 13px; color: rgba(255,255,255,.82); line-height: 1.5; margin-bottom: 10px; }
+        .jarvis-action-buttons { display: flex; gap: 8px; }
+        .jarvis-approve { background: #22c55e; color: #052e14; border: 0; border-radius: 999px; padding: 8px 16px; font-weight: 800; font-size: 12.5px; cursor: pointer; }
+        .jarvis-approve:disabled { opacity: .6; cursor: default; }
+        .jarvis-reject { background: transparent; color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+        .jarvis-action-resolved { margin-top: 8px; font-size: 12px; font-weight: 700; color: rgba(255,255,255,.5); }
+        .jarvis-action-resolved.is-done { color: #6ee7b7; }
         .jarvis-status-card { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid rgba(104, 149, 255, .24); border-radius: 22px; background: radial-gradient(circle at 8% 0%, rgba(77,141,255,.2), transparent 38%), linear-gradient(145deg, rgba(19,24,38,.98), rgba(7,9,15,.98)); box-shadow: 0 22px 70px rgba(0,0,0,.28); }
         .jarvis-orb { width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center; border-radius: 18px; font-size: 25px; background: linear-gradient(135deg,#4d8dff,#9b5cff); box-shadow: 0 0 28px rgba(77,141,255,.38); }
         .jarvis-status-copy { min-width: 0; flex: 1; }

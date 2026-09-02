@@ -388,11 +388,11 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                     <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.fighterBFace || fight.image} alt={fight.f2} style={{ display: 'block', width: '50%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }} />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 60%,rgba(11,14,24,.55))', pointerEvents: 'none' }} />
                     <div style={{ position: 'absolute', top: 11, right: 11, width: 26, height: 26, borderRadius: '50%', background: 'rgba(11,14,24,.82)', border: '1px solid rgba(255,255,255,.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff' }} title={'Homepage slot ' + fight.slot}>{fight.slot}</div>
-                    {fight.badge ? (
-                      <div style={{ position: 'absolute', top: 11, left: 11, padding: '5px 11px', borderRadius: 6, background: fight.badgeColor, color: fight.badgeText, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>{fight.badge}</div>
-                    ) : null}
                   </div>
                   <div style={{ padding: '17px 18px 18px' }}>
+                    {fight.badge ? (
+                      <div style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: 6, background: fight.badgeColor, color: fight.badgeText, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8 }}>{fight.badge}</div>
+                    ) : null}
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.48)', marginBottom: 6 }}>{fight.meta}</div>
                     <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 23, lineHeight: 1.1, marginBottom: 14 }}>
                       {fight.f1} <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 15 }}>vs</span> {fight.f2}
@@ -599,7 +599,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)' }}>To announce a card</div>
                 </div>
               </div>
-                <a href="/affiliate-create-account" style={{ display: 'inline-flex', alignItems: 'center', height: '50px', padding: '0 28px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '15px', letterSpacing: '.04em' }}>APPLY AS AN AFFILIATE</a>
+                <a href="/auth?mode=signup&role=affiliate" style={{ display: 'inline-flex', alignItems: 'center', height: '50px', padding: '0 28px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '15px', letterSpacing: '.04em' }}>APPLY AS AN AFFILIATE</a>
             </div>
             <div style={{ position: 'relative', minHeight: '380px', background: '#0b0e18' }}>
               <img loading="lazy" decoding="async" src="/site/leagues.jpg" alt="League owners" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -725,7 +725,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             <div>
               <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '13px' }}>Leagues</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
-                <a href="/affiliate-create-account" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
+                <a href="/auth?mode=signup&role=affiliate" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
                 <a href="#apply" style={{ color: 'rgba(255,255,255,.72)' }}>Affiliate payouts</a>
                 <a href="#store" style={{ color: 'rgba(255,255,255,.72)' }}>Store</a>
                 <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.72)' }}>Etsy shop ↗</a>
@@ -822,14 +822,14 @@ const toFightCard = (f, index) => {
       badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : 'rgba(225,29,46,.94)',
       badgeText: '#fff',
       potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM' : money(fee) + ' FM',
-      potColor: fee === 0 ? '#22c55e' : guaranteed > 0 ? '#22c55e' : '#fff',
+      potColor: '#22c55e',
       potNote: fee === 0 ? 'Titles & sponsor prizes'
         : guaranteed > 0 ? 'Guaranteed pot'
           : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
       cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee),
-      ctaBg: fee === 0 ? '#22c55e' : index === 0 ? '#f5a623' : 'rgba(255,255,255,.08)',
-      ctaBorder: fee === 0 || index === 0 ? '0' : '1.5px solid rgba(216,220,228,.4)',
-      ctaColor: fee === 0 ? '#052e14' : index === 0 ? '#17070a' : '#fff',
+      ctaBg: '#22c55e',
+      ctaBorder: '0',
+      ctaColor: '#052e14',
     };
 };
 

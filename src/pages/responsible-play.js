@@ -4,8 +4,9 @@ import Link from 'next/link';
 // One of three legal pages (/terms, /privacy, /responsible-play). They share a
 // visual shell deliberately: a visitor who lands on one should recognise the
 // others as the same set of documents.
-const LEGAL_STYLES = `.fmm-legal h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 19pt; margin: 28pt 0 6pt; letter-spacing: .01em; }
-    .fmm-legal h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 13pt; margin: 17pt 0 4pt; }
+const LEGAL_STYLES = `.fmm-legal, .fmm-legal p, .fmm-legal li, .fmm-legal td, .fmm-legal th { color: #201f1d !important; }
+    .fmm-legal h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 19pt; margin: 28pt 0 6pt; letter-spacing: .01em; color: #201f1d !important; }
+    .fmm-legal h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 13pt; margin: 17pt 0 4pt; color: #201f1d !important; }
     .fmm-legal p, .fmm-legal li { font-family: 'Lora', Georgia, serif; font-size: 10.5pt; line-height: 1.62; text-align: justify; text-wrap: pretty; }
     .fmm-legal li { margin-bottom: 5pt; }
     .fmm-legal ul { padding-left: 18pt; margin: 8pt 0 12pt; }

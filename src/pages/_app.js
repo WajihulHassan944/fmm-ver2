@@ -618,8 +618,8 @@ function AppContent({ children }) {
         }
       `}</style>
 
-      <div style={{ zIndex: "99999999999" }}>
-        <ToastContainer />
+      <div style={{ position: "fixed", inset: 0, zIndex: 2147483647, pointerEvents: "none" }}>
+        <ToastContainer position="top-center" autoClose={3500} style={{ pointerEvents: "auto" }} />
       </div>
 
       {/* Never show the legacy site header while the app is rendering — it has

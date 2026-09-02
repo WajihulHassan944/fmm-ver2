@@ -424,8 +424,18 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
           f.matchFighterA || f.fighterAName || f.fighterA?.displayName
           || /\s+vs\.?\s+/i.test(String(f.matchName || ''))
         ));
+        // Same match can come back twice from the API (re-saved card, paginated
+        // overlap) — collapse by id so it never renders as two identical cards.
+        const seenIds = new Set();
+        const dedupedFights = rawFights.filter((f) => {
+          const key = f?._id || f?.id || f?.matchId;
+          if (!key) return true;
+          if (seenIds.has(key)) return false;
+          seenIds.add(key);
+          return true;
+        });
         // Real fights always win. The preview card only fills an empty screen.
-        setFights(nameable.length ? rawFights : buildSampleFights());
+        setFights(nameable.length ? dedupedFights : buildSampleFights());
         setUsingSampleCard(nameable.length === 0);
         setShadowFights(asArray(fightRes.shadowFights));
         setDataLoading(false);

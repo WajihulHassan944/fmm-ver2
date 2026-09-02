@@ -4,8 +4,9 @@ import Link from 'next/link';
 // The Terms of Use as a real page, so the app can link to it from settings and
 // from the signup consent line. Content is kept in step with
 // "Terms of Use.dc.html" — update both together.
-const TERMS_STYLES = `.fmm-terms h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 19pt; margin: 28pt 0 6pt; letter-spacing: .01em; break-after: avoid; }
-    .fmm-terms h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 13pt; margin: 17pt 0 4pt; break-after: avoid; }
+const TERMS_STYLES = `.fmm-terms, .fmm-terms p, .fmm-terms li, .fmm-terms td, .fmm-terms th { color: #201f1d !important; }
+    .fmm-terms h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 19pt; margin: 28pt 0 6pt; letter-spacing: .01em; break-after: avoid; color: #201f1d !important; }
+    .fmm-terms h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 13pt; margin: 17pt 0 4pt; break-after: avoid; color: #201f1d !important; }
     .fmm-terms p, .fmm-terms li { font-family: 'Lora', Georgia, serif; font-size: 10.5pt; line-height: 1.62; text-align: justify; text-wrap: pretty; orphans: 3; widows: 3; }
     .fmm-terms li { margin-bottom: 5pt; }
     .fmm-terms ul, .fmm-terms ol { padding-left: 18pt; margin: 8pt 0 12pt; }
