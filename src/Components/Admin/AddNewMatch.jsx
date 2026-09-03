@@ -133,8 +133,14 @@ export default function AddNewMatch() {
     setSelectedFighterB(null);
   };
 
+  const submitLockRef = useRef(false);
+
   const submit = async (event) => {
     event.preventDefault();
+    // Synchronous lock — blocks a second click that lands before React
+    // re-renders the disabled button (the cause of duplicate fight cards).
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setSaving(true);
     setError('');
     setCreated(null);
@@ -178,9 +184,17 @@ export default function AddNewMatch() {
         resetAfterCreate();
       }
     } catch (requestError) {
-      setError(requestError.message || 'Unable to create the fight card.');
+      // A network drop (no HTTP response reached the browser) can happen
+      // AFTER the backend already saved the fight — resubmitting blind is
+      // what created duplicates before. Say so explicitly instead of just
+      // "failed", so the reflex is to check the registry, not click again.
+      const isNetworkDrop = requestError instanceof TypeError;
+      setError(isNetworkDrop
+        ? 'Lost connection while publishing. The fight may have already been created — check Fight registry before publishing again.'
+        : (requestError.message || 'Unable to create the fight card.'));
     } finally {
       setSaving(false);
+      submitLockRef.current = false;
     }
   };
 

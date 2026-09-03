@@ -171,6 +171,8 @@ export default function CombatFightersAdmin() {
         search,
         status: statusFilter,
         category: categoryFilter,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
       });
       setPage(nextPage);
       setFightersPayload(payload);
@@ -259,6 +261,18 @@ export default function CombatFightersAdmin() {
       await loadFighters();
     } catch (error) {
       toast.error(error.message || 'Could not deactivate fighter.');
+    }
+  };
+
+  const permanentlyDeleteFighter = async (fighter) => {
+    const name = getCombatFighterName(fighter);
+    if (!window.confirm(`Permanently delete ${name}? This cannot be undone — they'll be removed from the library entirely, not just deactivated.`)) return;
+    try {
+      await combatFightersApi.removePermanently(getCombatFighterId(fighter));
+      toast.success(`${name} permanently removed.`);
+      await loadFighters();
+    } catch (error) {
+      toast.error(error.message || 'Could not permanently delete fighter.');
     }
   };
 
@@ -524,7 +538,7 @@ export default function CombatFightersAdmin() {
                       <td>{fighter.primaryImage ? <a href={fighter.primaryImage} target="_blank" rel="noreferrer"><FaImage /> Open</a> : 'Needs image'}</td>
                       <td><span className={`admin-status-badge ${inactive ? 'is-danger' : fighter.status === 'needs_review' ? 'is-warning' : 'is-success'}`}>{fighter.status || 'active'}</span></td>
                       <td>{formatDate(fighter.updatedAt)}</td>
-                      <td><div className="admin-row-actions admin-fighter-row-actions"><button type="button" title="Edit fighter" onClick={() => startEdit(fighter)}><FaEdit /><span>Edit</span></button>{inactive ? <button type="button" title="Restore fighter" onClick={() => restoreFighter(fighter)}><FaUndo /><span>Restore</span></button> : <button type="button" title="Deactivate fighter" className="is-danger" onClick={() => softDeleteFighter(fighter)}><FaTrashAlt /><span>Delete</span></button>}</div></td>
+                      <td><div className="admin-row-actions admin-fighter-row-actions"><button type="button" title="Edit fighter" onClick={() => startEdit(fighter)}><FaEdit /><span>Edit</span></button>{inactive ? <button type="button" title="Restore fighter" onClick={() => restoreFighter(fighter)}><FaUndo /><span>Restore</span></button> : <button type="button" title="Deactivate fighter" className="is-danger" onClick={() => softDeleteFighter(fighter)}><FaTrashAlt /><span>Delete</span></button>}<button type="button" title="Permanently delete fighter" className="is-danger" onClick={() => permanentlyDeleteFighter(fighter)}><FaTrashAlt /><span>Delete permanently</span></button></div></td>
                     </tr>
                   );
                 }) : <tr><td colSpan="6"><div className="admin-empty-table"><FaFistRaised /><strong>No fighters found</strong><span>Run automatic import or create a fighter manually.</span></div></td></tr>}

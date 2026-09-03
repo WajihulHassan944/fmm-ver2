@@ -1582,7 +1582,16 @@ class FantasyMobileAppCore extends React.Component {
       this.setState({ authBusy: false, authError: 'Could not reach the server.' });
     }
   };
-  openAuth = (intent = null) => this.setState({ modal: 'auth', modalData: intent, authError: '', authMode: 'login' });
+  // Sends the user to the one real sign-up/login experience (/auth — Google
+  // sign-in included) instead of this app's own older email/password-only
+  // modal, which never got Google wired in. `next` brings them back to
+  // exactly where they tapped Sign up from.
+  openAuth = (intent = null) => {
+    if (typeof window === 'undefined') return;
+    const mode = intent ? 'signup' : 'login';
+    const next = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.assign(`/auth?mode=${mode}&role=player&next=${next}`);
+  };
   submitAuth = async () => {
     const { authForm, authMode, authBusy } = this.state;
     if (authBusy) return;

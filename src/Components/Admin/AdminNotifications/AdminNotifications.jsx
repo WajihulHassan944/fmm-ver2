@@ -3,6 +3,8 @@ import styles from './AdminNotifications.module.css';
 import { MdNotifications, MdCheckCircle, MdDone } from 'react-icons/md';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { adminHeaders } from '@/Utils/authFetch';
+import { swarmRequest } from '@/Utils/swarmApi';
+import { toast } from 'react-toastify';
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -62,6 +64,22 @@ const isMobile = useIsMobile();
   return (
     <div className={styles.notificationContainer}>
       <h2 className={styles.heading}>Admin Notifications</h2>
+      <button
+        type="button"
+        style={{ marginBottom: 16, padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(223,17,27,.4)', background: 'transparent', color: '#df111b', fontWeight: 700, cursor: 'pointer' }}
+        onClick={async () => {
+          try {
+            const result = await swarmRequest('/api/admin/push/test', { method: 'POST' });
+            if (result?.skipped) toast.warning('Push not configured yet on the server (VAPID keys missing).');
+            else if (!result?.sent) toast.warning('No installed devices are subscribed yet — open this admin app on your phone and allow notifications.');
+            else toast.success(`Test push sent to ${result.sent} device(s).`);
+          } catch (error) {
+            toast.error(error.message || 'Could not send test push.');
+          }
+        }}
+      >
+        Send test push to my phone
+      </button>
       <ul className={styles.notificationList}>
         {notifications.map((notification) => (
           <li key={notification._id} className={styles.notificationItem}>

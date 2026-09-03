@@ -6,6 +6,7 @@ export const combatFightersApi = {
   create: (body = {}) => swarmRequest('/api/admin/combat-fighters', { method: 'POST', body }),
   update: (id, body = {}) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}`, { method: 'PATCH', body }),
   remove: (id) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  removePermanently: (id) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}/permanent`, { method: 'DELETE' }),
   restore: (id) => swarmRequest(`/api/admin/combat-fighters/${encodeURIComponent(id)}/restore`, { method: 'POST' }),
   suggestFromMatches: (body = {}) => swarmRequest('/api/admin/combat-fighters/suggest-from-matches', { method: 'POST', body }),
   importFromFights: (body = {}) => swarmRequest('/api/admin/combat-fighters/import-from-fights', { method: 'POST', body }),
