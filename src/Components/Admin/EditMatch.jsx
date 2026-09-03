@@ -110,7 +110,11 @@ const EditMatch = ({ matchId, isShadow }) => {
   };
 
   useEffect(() => {
-    if (!isShadow && matchStatus === 'idle') {
+    // Refetch whenever this fight isn't in the cached Redux list yet — not just
+    // on first load. Without this, a fight created earlier in the same admin
+    // session (list already loaded once, status !== 'idle') opens Edit with a
+    // blank/default form, and submitting overwrites the real record with blanks.
+    if (!isShadow && !match && matchStatus !== 'loading') {
       dispatch(fetchMatches({ includeDrafts: true }));
     } else if (isShadow) {
       const fetchShadowMatches = async () => {
@@ -318,6 +322,20 @@ const EditMatch = ({ matchId, isShadow }) => {
 
   const fighterAPreview = getCombatFighterImage(selectedFighterA) || previewSource(formData.fighterAImage, FALLBACK_A);
   const fighterBPreview = getCombatFighterImage(selectedFighterB) || previewSource(formData.fighterBImage, FALLBACK_B);
+
+  // Never let the form render as if it's a real record until we've actually
+  // matched matchId to a fight — that blank/default state is what silently
+  // wiped edits on newly created fights (see fetch-guard fix above).
+  if (!isShadow && !match) {
+    return (
+      <div className="admin-edit-fight-workspace">
+        <section className="admin-edit-fight-banner">
+          <div><span>Production fight</span><h3>{matchStatus === 'loading' || matchStatus === 'idle' ? 'Loading fight…' : 'Fight not found'}</h3>
+          <p>{matchStatus === 'loading' || matchStatus === 'idle' ? 'Fetching the latest fight registry.' : `No fight with id ${matchId} was found. It may still be indexing — try reopening this page.`}</p></div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-edit-fight-workspace">

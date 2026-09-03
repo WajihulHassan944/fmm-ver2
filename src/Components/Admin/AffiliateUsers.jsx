@@ -6,7 +6,9 @@ import { useRouter } from 'next/router';
 import {
   FaArrowLeft,
   FaAward,
+  FaCopy,
   FaEye,
+  FaLink,
   FaPlus,
   FaSearch,
   FaTrash,
@@ -30,7 +32,38 @@ const AffiliateUsers = () => {
   const [rewardTitle, setRewardTitle] = useState('');
   const [rewardImage, setRewardImage] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [inviteBusy, setInviteBusy] = useState(false);
+  const [inviteLink, setInviteLink] = useState('');
+  const [showInvitePopup, setShowInvitePopup] = useState(false);
   const router = useRouter();
+
+  const generateInstantApprovalLink = async () => {
+    setInviteBusy(true);
+    try {
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-invites', {
+        method: 'POST',
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ expiresInDays: 14 }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.message || 'Could not create the invite link.');
+      setInviteLink(data.url);
+      setShowInvitePopup(true);
+    } catch (error) {
+      toast.error(error.message || 'Could not create the invite link.');
+    } finally {
+      setInviteBusy(false);
+    }
+  };
+
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      toast.success('Instant-approval link copied.');
+    } catch {
+      toast.error('Could not copy — select and copy the link manually.');
+    }
+  };
 
   const uploadDistinction = async () => {
     if (!distinctionAffiliateId || !rewardTitle || !rewardImage) {
@@ -194,6 +227,7 @@ const AffiliateUsers = () => {
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={handleNavigation}><FaUsers /> Admin records</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/payouts')}><FaWallet /> Payouts</button>
+          <button type="button" className="admin-action-secondary" disabled={inviteBusy} onClick={generateInstantApprovalLink}><FaLink /> {inviteBusy ? 'Generating…' : 'Instant-approval link'}</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddAffiliatePopup(true)}><FaPlus /> Add affiliate</button>
         </div>
       </section>
@@ -301,6 +335,28 @@ const AffiliateUsers = () => {
             <footer>
               <button type="button" className="admin-action-primary" onClick={uploadDistinction}>Submit distinction</button>
               <button type="button" className="admin-action-secondary" onClick={() => setShowDistinctionPopup(false)}>Cancel</button>
+            </footer>
+          </section>
+        </div>
+      )}
+
+      {showInvitePopup && (
+        <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowInvitePopup(false); }}>
+          <section className="admin-inspector-modal admin-distinction-modal">
+            <header>
+              <div><span>Fast-track a fighter or influencer</span><h3>Instant-approval link</h3></div>
+              <button type="button" onClick={() => setShowInvitePopup(false)} aria-label="Close invite link">×</button>
+            </header>
+            <div className="admin-modal-form-body admin-stacked-form">
+              <p style={{ margin: 0, fontSize: 13, opacity: .8 }}>Send this to someone you already trust. When they sign up through it, their affiliate account is approved automatically — no wait, no admin action needed. One-time use, expires in 14 days.</p>
+              <label>
+                Link
+                <input type="text" value={inviteLink} readOnly onFocus={(event) => event.target.select()} />
+              </label>
+            </div>
+            <footer>
+              <button type="button" className="admin-action-primary" onClick={copyInviteLink}><FaCopy /> Copy link</button>
+              <button type="button" className="admin-action-secondary" onClick={() => setShowInvitePopup(false)}>Close</button>
             </footer>
           </section>
         </div>

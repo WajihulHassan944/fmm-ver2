@@ -1586,11 +1586,11 @@ class FantasyMobileAppCore extends React.Component {
   // sign-in included) instead of this app's own older email/password-only
   // modal, which never got Google wired in. `next` brings them back to
   // exactly where they tapped Sign up from.
-  openAuth = (intent = null) => {
+  openAuth = (intent = null, role = 'player') => {
     if (typeof window === 'undefined') return;
     const mode = intent ? 'signup' : 'login';
     const next = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.assign(`/auth?mode=${mode}&role=player&next=${next}`);
+    window.location.assign(`/auth?mode=${mode}&role=${role}&next=${next}`);
   };
   submitAuth = async () => {
     const { authForm, authMode, authBusy } = this.state;
@@ -6075,7 +6075,30 @@ class FantasyMobileAppCore extends React.Component {
       }, 'DRAFT THIS FIGHT CARD \u2014 ' + (s.modalData ? s.modalData.entryFee : 150) + ' FM')
     ]);
 
-    if (s.modal === 'affiliate') return overlay([
+    if (s.modal === 'affiliate') {
+      // The modal used to assume every viewer was already an approved
+      // affiliate (referral link, dashboard button) — there was no way to
+      // actually apply from the app, which is the "not working on phone"
+      // report. Gate on real affiliate signal; show a signup CTA otherwise.
+      const isAffiliateUser = Boolean(this.props.currentUser?.affiliateId || this.props.currentUser?.isAffiliateVerified || this.props.currentUser?.affiliateReferralUrl);
+      if (!isAffiliateUser) return overlay([
+        closeBtn,
+        React.createElement('div', { key: 'hero', style: { height: 110, borderRadius: 12, overflow: 'hidden', marginBottom: 10, boxShadow: '0 0 18px rgba(77,141,255,.55)' } },
+          React.createElement(MobileImageSlot, { id: 'affiliate-modal-handshake', shape: 'rect', placeholder: 'Handshake — partnership', fit: 'cover', src: 'affiliate-handshake-opt.jpg' })
+        ),
+        React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#4d8dff', marginBottom: 4 } }, "BECOME AN AFFILIATE"),
+        React.createElement('div', { key: 'b', style: { fontSize: 12, lineHeight: 1.6, color: 'rgba(255,255,255,.8)', marginBottom: 14 } }, 'Promote fights, build a league, and get players moving. Apply in under a minute — set up your profile, then share your link the moment you\u2019re approved.'),
+        React.createElement('div', { key: 'steps', style: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 } },
+          ['Apply with your name, email & how you promote', 'We review and approve — usually fast', 'Set up your affiliate profile', 'Create or promote a fight & share your link'].map((step, i) => React.createElement('div', {
+            key: i, style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.85)' }
+          },
+            React.createElement('span', { style: { width: 18, height: 18, borderRadius: '50%', background: '#4d8dff', color: '#fff', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto' } }, i + 1),
+            step
+          ))
+        ),
+        React.createElement('div', { key: 'btn', onClick: () => this.openAuth('affiliate', 'affiliate'), style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(77,141,255,.6)' } }, 'APPLY TO BECOME AN AFFILIATE')
+      ]);
+      return overlay([
       closeBtn,
       React.createElement('div', { key: 'hero', style: { height: 110, borderRadius: 12, overflow: 'hidden', marginBottom: 10, boxShadow: '0 0 18px rgba(77,141,255,.55)' } },
         React.createElement(MobileImageSlot, { id: 'affiliate-modal-handshake', shape: 'rect', placeholder: 'Handshake — partnership', fit: 'cover', src: 'affiliate-handshake-opt.jpg' })
@@ -6100,7 +6123,8 @@ class FantasyMobileAppCore extends React.Component {
           style: { flex: 1, textAlign: 'center', padding: '10px 4px', borderRadius: 10, background: color, fontWeight: 900, fontSize: 10, cursor: 'pointer', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,.4)' }
         }, name))
       )
-    ]);
+      ]);
+    }
 
     return null;
   }

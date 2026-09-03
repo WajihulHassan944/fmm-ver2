@@ -102,6 +102,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const [forgotEmail, setForgotEmail] = useState('');
   const [playerRegistration, setPlayerRegistration] = useState({ state: 'idle', email: '' });
   const [affiliateRegistered, setAffiliateRegistered] = useState(false);
+  const [affiliateInstantApproved, setAffiliateInstantApproved] = useState(false);
   const [sponsorSubmitted, setSponsorSubmitted] = useState(false);
   const [membershipEmail, setMembershipEmail] = useState('');
   const [affiliateImagePreview, setAffiliateImagePreview] = useState('');
@@ -275,10 +276,13 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         if (key !== 'affiliateImage') payload.append(key, value);
       });
       if (affiliateForm.affiliateImage) payload.append('image', affiliateForm.affiliateImage);
+      const inviteCode = queryValue(router.query.invite);
+      if (inviteCode) payload.append('inviteCode', inviteCode);
 
-      await apiRequest('/registerAffiliate', { method: 'POST', token: null, body: payload });
+      const result = await apiRequest('/registerAffiliate', { method: 'POST', token: null, body: payload });
       setAffiliateRegistered(true);
-      toast.success('Affiliate application submitted.');
+      setAffiliateInstantApproved(Boolean(result?.instantApproved));
+      toast.success(result?.instantApproved ? 'You\'re approved! Sign in to get started.' : 'Affiliate application submitted.');
     } catch (error) {
       toast.error(error.message || 'Unable to submit the affiliate application.');
     } finally {
@@ -368,7 +372,9 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const completionCard = (() => {
     if (playerRegistration.state === 'polling') return { title: 'Verify your email', copy: `We sent a verification link to ${playerRegistration.email}. This page will continue automatically after verification.`, icon: FaEnvelope };
     if (playerRegistration.state === 'timed-out') return { title: 'Verification window ended', copy: 'The account was created, but verification was not detected within two minutes. Open the email link, then sign in.', icon: FaShieldAlt };
-    if (affiliateRegistered) return { title: 'Application received', copy: 'Your affiliate account is pending administrator review. You can sign in after the account is approved.', icon: FaUserFriends };
+    if (affiliateRegistered) return affiliateInstantApproved
+      ? { title: 'You\'re approved!', copy: 'Your affiliate account is live — sign in now to set up your profile and start promoting.', icon: FaUserFriends }
+      : { title: 'Application received', copy: 'Your affiliate account is pending administrator review. You can sign in after the account is approved.', icon: FaUserFriends };
     if (sponsorSubmitted) return { title: 'Your enquiry is in the corner', copy: 'The partnerships team will review your goals and follow up using the email address provided.', icon: FaHandshake };
     return null;
   })();
@@ -421,7 +427,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                   <h3>{completionCard.title}</h3>
                   <p>{completionCard.copy}</p>
                   {playerRegistration.state === 'polling' && <div className="xp-auth-pulse"><i /><span>Waiting for verification</span></div>}
-                  <button type="button" className="theme-btn theme-btn-secondary" onClick={() => { setPlayerRegistration({ state: 'idle', email: '' }); setAffiliateRegistered(false); setSponsorSubmitted(false); updateRouteState('login'); }}>Back to login</button>
+                  <button type="button" className="theme-btn theme-btn-secondary" onClick={() => { setPlayerRegistration({ state: 'idle', email: '' }); setAffiliateRegistered(false); setAffiliateInstantApproved(false); setSponsorSubmitted(false); updateRouteState('login'); }}>Back to login</button>
                 </div>
               ) : forgotPassword ? (
                 <form className="xp-auth-form" onSubmit={handleForgotPassword}>
