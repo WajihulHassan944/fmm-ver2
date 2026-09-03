@@ -46,8 +46,8 @@ const UpcomingFights = () => {
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const router = useRouter();
 
-  const handleFightClick = () => {
-    router.push('/login');
+  const handleFightClick = (matchId) => {
+    router.push(`/administration/upcomingFights?matchId=${matchId}`);
   };
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const UpcomingFights = () => {
             upcomingMatches.map((match) => {
               
               return (
-                <div className='fightItem' key={match._id} onClick={handleFightClick}>
+                <div className='fightItem' key={match._id} onClick={() => handleFightClick(match._id)}>
                   <div className={`fightersImages ${match.blurred ? 'blurred' : ''}`}>
                     <div className='fighterOne'>
                       <img src={match.fighterAImage} alt={match.matchFighterA} />

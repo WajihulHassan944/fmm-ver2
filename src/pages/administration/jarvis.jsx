@@ -1,6 +1,14 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { FaPaperPlane, FaRobot, FaShieldAlt, FaTrashAlt } from 'react-icons/fa';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { FaMicrophone, FaPaperPlane, FaRobot, FaShieldAlt, FaTrashAlt, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
+
+const speak = (text) => {
+  if (typeof window === 'undefined' || !window.speechSynthesis || !text) return;
+  window.speechSynthesis.cancel();
+  const utterance = new window.SpeechSynthesisUtterance(String(text).replace(/[*_#]/g, ''));
+  utterance.rate = 1.02;
+  window.speechSynthesis.speak(utterance);
+};
 
 const QUICK_PROMPTS = [
   'Summarize the current fight operations state.',
@@ -19,7 +27,44 @@ function JarvisWorkspace() {
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
   const [actionBusyId, setActionBusyId] = useState(null);
+  const [listening, setListening] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const bottomRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    recognition.onresult = (event) => {
+      const heard = event.results?.[0]?.[0]?.transcript || '';
+      if (heard.trim()) send(heard.trim());
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+    setVoiceSupported(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+    if (listening) {
+      recognitionRef.current.stop();
+      setListening(false);
+      return;
+    }
+    window.speechSynthesis?.cancel();
+    try {
+      recognitionRef.current.start();
+      setListening(true);
+    } catch (_error) { /* already started */ }
+  };
 
   const requestHistory = useMemo(
     () => messages.filter((item, index) => index > 0 && (item.role === 'user' || item.role === 'assistant')).slice(-12),
@@ -47,11 +92,13 @@ function JarvisWorkspace() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || `Jarvis request failed (${response.status})`);
+      const reply = payload.reply || 'No response returned.';
       setMessages((current) => [...current, {
         role: 'assistant',
-        content: payload.reply || 'No response returned.',
+        content: reply,
         proposedAction: payload.proposedAction || null,
       }]);
+      if (voiceOn) speak(payload.proposedAction ? `${reply} Review the proposed action and approve or reject it.` : reply);
     } catch (error) {
       setMessages((current) => [...current, {
         role: 'assistant',
@@ -82,9 +129,11 @@ function JarvisWorkspace() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || `Action failed (${response.status})`);
+      const doneMessage = `Done — ${action.label}. ${payload.result?.message || ''}`.trim();
       setMessages((current) => current.map((item, index) => (index === messageIndex
         ? { ...item, proposedAction: { ...item.proposedAction, resolved: 'done' } }
-        : item)).concat([{ role: 'assistant', content: `Done — ${action.label}. ${payload.result?.message || ''}`.trim() }]));
+        : item)).concat([{ role: 'assistant', content: doneMessage }]));
+      if (voiceOn) speak(doneMessage);
     } catch (error) {
       setMessages((current) => current.concat([{ role: 'assistant', error: true, content: error.message || 'The action failed.' }]));
     } finally {
@@ -108,6 +157,9 @@ function JarvisWorkspace() {
           <p>Read-only AI assistance grounded in the authenticated back-office health and Swarm dashboard snapshot.</p>
         </div>
         <div className="jarvis-safe"><FaShieldAlt /> READ ONLY</div>
+        <button type="button" className="jarvis-voice-toggle" onClick={() => { setVoiceOn((v) => !v); window.speechSynthesis?.cancel(); }} aria-label="Toggle spoken replies">
+          {voiceOn ? <FaVolumeUp /> : <FaVolumeMute />} {voiceOn ? 'Voice on' : 'Voice off'}
+        </button>
       </section>
 
       <section className="jarvis-grid">
@@ -174,6 +226,11 @@ function JarvisWorkspace() {
               rows={3}
               maxLength={4000}
             />
+            {voiceSupported && (
+              <button type="button" className={`jarvis-mic${listening ? ' is-live' : ''}`} onClick={toggleListening} aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}>
+                <FaMicrophone />
+              </button>
+            )}
             <button type="button" onClick={() => send()} disabled={loading || !draft.trim()} aria-label="Send to Jarvis">
               <FaPaperPlane />
             </button>
@@ -183,6 +240,10 @@ function JarvisWorkspace() {
 
       <style jsx>{`
         .jarvis-shell { display: grid; gap: 18px; color: #f7f8fb; }
+        .jarvis-voice-toggle { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.8); border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .jarvis-mic { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; cursor: pointer; }
+        .jarvis-mic.is-live { background: #ef4444; border-color: #ef4444; animation: jarvisMicPulse 1.2s ease-in-out infinite; }
+        @keyframes jarvisMicPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
         .jarvis-action-card { margin-top: 10px; padding: 12px 14px; border: 1px solid rgba(242,181,68,.4); border-radius: 14px; background: rgba(242,181,68,.08); }
         .jarvis-action-title { font-size: 12.5px; font-weight: 900; color: #f2b544; letter-spacing: .04em; margin-bottom: 4px; }
         .jarvis-action-desc { font-size: 13px; color: rgba(255,255,255,.82); line-height: 1.5; margin-bottom: 10px; }

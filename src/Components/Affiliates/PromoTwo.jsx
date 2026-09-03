@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
 import {
   FaArrowRight,
   FaCheckCircle,
@@ -18,6 +19,7 @@ const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
 const PromoTwo = ({ matchId, affiliateId }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [affiliate, setAffiliate] = useState(null);
   const [affiliateLoading, setAffiliateLoading] = useState(true);
   const matches = useSelector((state) => state.matches.data);
@@ -61,7 +63,7 @@ const PromoTwo = ({ matchId, affiliateId }) => {
 
   const handleJoinLeague = async () => {
     if (!isAuthenticated) {
-      window.open('/login', '_blank');
+      router.push(`/auth?mode=signup&role=player&next=${encodeURIComponent(router.asPath)}&referrer=${encodeURIComponent(affiliateId || '')}`);
       return;
     }
 

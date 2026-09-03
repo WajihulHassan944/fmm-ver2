@@ -2135,10 +2135,22 @@ class FantasyMobileAppCore extends React.Component {
         return String(a.iso).localeCompare(String(b.iso));
       }).forEach((event) => {
         [[event.featuredFightFighterAImage, event.f1],
-         [event.featuredFightFighterBImage, event.f2],
-         [event.featuredThisWeekImage, event.f1]].forEach(([photo, name]) => {
+         [event.featuredFightFighterBImage, event.f2]].forEach(([photo, name]) => {
           if (photo && !gallery.some((entry) => entry.photo === photo)) gallery.push({ photo, name });
         });
+      });
+
+      // Every registered fighter in this discipline, not just ones on a
+      // scheduled fight — so the pill keeps cycling new faces the moment a
+      // fighter is added to the library, and a genre with no upcoming card
+      // still has faces to show.
+      const librarySportIds = sport.id === 'bareknuckle' ? ['bare-knuckle', 'bareknuckle'] : [sport.id];
+      (Array.isArray(this.props.fighterLibrary) ? this.props.fighterLibrary : []).forEach((fighter) => {
+        const fighterCategory = String(fighter?.category || '').trim().toLowerCase();
+        if (!librarySportIds.includes(fighterCategory)) return;
+        const photo = fighter?.primaryImage || fighter?.image;
+        const name = fighter?.displayName || fighter?.name;
+        if (photo && name && !gallery.some((entry) => entry.photo === photo)) gallery.push({ photo, name });
       });
 
       sport.gallery = gallery;

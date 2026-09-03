@@ -211,7 +211,7 @@ const Header = () => {
     if (isAuthenticatedAffiliate) return '/AffiliateProfile';
     if (authStatusSponsor) return '/sponsor-dashboard';
     if (isAuthenticated) return '/profile';
-    return '/CreateAccount';
+    return '/auth?mode=signup&role=player';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
   const mobileAccountLabel = isAuthenticated || isAuthenticatedAffiliate || authStatusSponsor
@@ -328,8 +328,8 @@ const Header = () => {
 
     return (
       <>
-        <Link href="/login" className="theme-btn theme-btn-secondary">Login</Link>
-        <Link href="/CreateAccount" className="theme-btn theme-btn-primary">Sign Up Free</Link>
+        <Link href="/auth" className="theme-btn theme-btn-secondary">Login</Link>
+        <Link href="/auth?mode=signup&role=player" className="theme-btn theme-btn-primary">Sign Up Free</Link>
       </>
     );
   };
@@ -439,8 +439,8 @@ const Header = () => {
           })}
           {!isAuthenticated && !isAuthenticatedAffiliate && !authStatusSponsor && (
             <div className="theme-mobile-auth">
-              <Link href="/login">Login</Link>
-              <Link href="/CreateAccount">Sign Up Free</Link>
+              <Link href="/auth">Login</Link>
+              <Link href="/auth?mode=signup&role=player">Sign Up Free</Link>
             </div>
           )}
           {isAuthenticated && <button type="button" onClick={handleLogout}>Logout</button>}

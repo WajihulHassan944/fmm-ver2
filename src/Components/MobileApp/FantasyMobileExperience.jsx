@@ -270,6 +270,7 @@ const buildSampleFights = () => SAMPLE_CARD.map((row, index) => {
 // ==========================================================================
 const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) => {
   const [fights, setFights] = useState([]);
+  const [fighterLibrary, setFighterLibrary] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [leagues, setLeagues] = useState([]);
   const [leagueUsers, setLeagueUsers] = useState([]);
@@ -456,6 +457,12 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
         setAffiliateCampaigns(asArray(leagueRes.leagues));
         return asArray(leagueRes.leagues);
       });
+
+    // Whole-library fighter photos for the genre pills — every registered
+    // fighter, not just ones on a scheduled fight, so a discipline with no
+    // upcoming card still cycles real faces and new signups show up right away.
+    track('fighterLibrary', publicRequest('/api/public/combat-fighters?limit=300&status=active'))
+      .then((libRes) => setFighterLibrary(asArray(libRes.items || libRes.fighters || libRes.data)));
 
     // Wave 2 is deferred entirely. The store and blog tabs are not the landing
     // screen, so these must never hold up first paint.
@@ -971,6 +978,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     initialTab,
     dataLoading,
     fights,
+    fighterLibrary,
     shadowFights,
     leaderboard,
     leagues,
@@ -1041,7 +1049,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     onEnablePush,
     onSkipWait,
   }), [
-    initialTab, dataLoading, fights, shadowFights, leaderboard, leagues, leagueUsers,
+    initialTab, dataLoading, fights, fighterLibrary, shadowFights, leaderboard, leagues, leagueUsers,
     affiliateCampaigns, apparel, blogs, notifications, unreadNotificationCount,
     currentUser, coins, stats, features, isStaff,
     onSignup, onLogin, onLogout, onRequestPasswordReset, onSubmitPrediction,

@@ -1,15 +1,6 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
-
-const AffiliateCreateAccount = dynamic(
-  () => import('@/Components/Affiliates/AffiliateCreateAccount'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <AffiliateCreateAccount />
+// Old, disconnected affiliate signup page. Redirect into the unified /auth
+// flow, same as /affiliate-create-account.
+export async function getServerSideProps() {
+  return { redirect: { destination: '/auth?mode=signup&role=affiliate', permanent: false } };
 }
-
-export default index
+export default function AffiliateCreateAccountRedirect() { return null; }

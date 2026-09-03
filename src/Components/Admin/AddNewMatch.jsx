@@ -232,8 +232,8 @@ export default function AddNewMatch() {
               <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
               <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
               <div className="admin-fighter-select-grid is-wide">
-                <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('A', fighter)} required />
-                <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={normalizeCombatCategory(form.matchCategory)} onChange={(fighter) => chooseFighter('B', fighter)} required />
+                <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('A', fighter)} required />
+                <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('B', fighter)} required />
               </div>
               <label>
                 <span>Maximum rounds</span>
@@ -291,7 +291,7 @@ export default function AddNewMatch() {
           <section className="admin-upload-stack">
             <label><FaCloudUploadAlt /><span><strong>Fight background</strong><small>{form.promotionBackground?.name || 'Select a high-resolution promotion image'}</small></span><input hidden type="file" accept="image/*" name="promotionBackground" onChange={change} /></label>
           </section>
-          <div className="admin-inline-notice"><strong>Fighter images now come from Fighter Library.</strong> Add or update fighter photos from the Fighter Library screen instead of uploading per fight.</div>
+          <div className="admin-inline-notice"><strong>Fighter images come from the Fighter Library.</strong> No need to leave this page — open the Fighter A/B dropdown above, type a new name, attach a photo from your computer or phone, and hit Add: it creates the fighter and adds them to the library automatically. Use the Fighter Library screen only if you want to manage fighters in bulk.</div>
           <button className="admin-primary-action admin-create-submit" type="submit" disabled={saving}><FaSave /> {saving ? 'Publishing fight…' : <><FaPlus /> Publish fight card</>}</button>
         </aside>
       </form>

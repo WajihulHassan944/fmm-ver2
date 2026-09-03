@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaChevronDown, FaSearch, FaSyncAlt, FaUserPlus } from 'react-icons/fa';
+import { FaChevronDown, FaCloudUploadAlt as FaCloudUploadAltIcon, FaPlus, FaSearch, FaSyncAlt, FaUserPlus } from 'react-icons/fa';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { combatFightersApi, getCombatFighterId, getCombatFighterImage, getCombatFighterName } from '@/Utils/combatFightersApi';
 
@@ -40,6 +40,8 @@ export default function CombatFighterSelect({
   const [loadingMore, setLoadingMore] = useState(false);
   const [fighters, setFighters] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, hasNextPage: false, nextPage: null, total: 0 });
+  const [creating, setCreating] = useState(false);
+  const [newImage, setNewImage] = useState(null);
   const rootRef = useRef(null);
   const listRef = useRef(null);
   const requestRef = useRef(0);
@@ -116,6 +118,28 @@ export default function CombatFighterSelect({
   const selectFighter = (fighter) => {
     onChange?.(fighter);
     setOpen(false);
+  };
+
+  const createFighter = async () => {
+    const name = search.trim();
+    if (!name || !category) return;
+    setCreating(true);
+    try {
+      const data = new FormData();
+      data.append('displayName', name);
+      data.append('category', category);
+      data.append('status', 'active');
+      if (newImage) data.append('image', newImage);
+      const fighter = await combatFightersApi.create(data);
+      const created = fighter?.fighter || fighter?.data || fighter;
+      setFighters((current) => mergeById(current, [created]));
+      setNewImage(null);
+      selectFighter(created);
+    } catch (error) {
+      console.warn('Unable to create fighter:', error.message);
+    } finally {
+      setCreating(false);
+    }
   };
 
   const empty = !loading && fighters.length === 0;
@@ -198,7 +222,20 @@ export default function CombatFighterSelect({
               <div className="admin-fighter-select-empty">
                 <FaUserPlus />
                 <strong>No fighter found</strong>
-                <small>Create/import this fighter in Fighter Library first.</small>
+                <small>{search.trim() ? `Create "${search.trim()}" and add them to the library now.` : 'Type a fighter name to search or create one.'}</small>
+              </div>
+            )}
+
+            {search.trim() && category && (
+              <div className="admin-fighter-select-quick-create">
+                <label>
+                  <FaCloudUploadAltIcon />
+                  <span>{newImage?.name || 'Optional photo'}</span>
+                  <input hidden type="file" accept="image/*" onChange={(event) => setNewImage(event.target.files?.[0] || null)} />
+                </label>
+                <button type="button" disabled={creating} onClick={createFighter}>
+                  <FaPlus /> {creating ? 'Adding…' : `Add "${search.trim()}" to library & select`}
+                </button>
               </div>
             )}
           </div>
