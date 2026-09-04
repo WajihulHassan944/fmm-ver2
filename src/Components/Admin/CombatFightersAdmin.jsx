@@ -499,7 +499,7 @@ export default function CombatFightersAdmin() {
           <header><div><span>{editing ? 'Edit fighter' : 'Create fighter'}</span><h2>{editing ? getCombatFighterName(editing) : 'New combat fighter'}</h2></div>{editing && <button type="button" className="admin-action-secondary" onClick={resetForm}>Cancel edit</button>}</header>
           <div className="admin-form-grid">
             <label><span>Fighter name</span><input value={form.displayName} onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))} placeholder="Gervonta Davis" required /></label>
-            <label><span>Category</span><select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}><option value="boxing">Boxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="combat">Combat</option></select></label>
+            <label><span>Category</span><select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="wrestling">Pro wrestling</option><option value="combat">Combat</option></select></label>
             <label><span>Status</span><select value={form.status} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}><option value="active">Active</option><option value="needs_review">Needs review</option><option value="inactive">Inactive</option></select></label>
             <label className="is-wide"><span>Aliases</span><input value={form.aliases} onChange={(event) => setForm((current) => ({ ...current, aliases: event.target.value }))} placeholder="Tank, G Davis" /></label>
             <label className="is-wide admin-fighter-file-field">
@@ -520,9 +520,16 @@ export default function CombatFightersAdmin() {
           <header><div><span>Reusable fighters</span><h2>{totalFighters} fighters</h2><small>Page {page} of {totalPages}</small></div></header>
           <div className="admin-table-toolbar admin-fighter-library-toolbar">
             <label className="admin-table-search"><FaSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') loadFighters(1); }} placeholder="Search fighter name or alias" /></label>
-            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option value="">All categories</option><option value="boxing">Boxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="combat">Combat</option></select>
+            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option value="">All categories</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="bare-knuckle">Bare-knuckle</option><option value="wrestling">Pro wrestling</option><option value="combat">Combat</option></select>
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option><option value="active">Active</option><option value="needs_review">Needs review</option><option value="inactive">Inactive</option></select>
             <button type="button" className="admin-action-secondary" onClick={() => loadFighters(1)}><FaSearch /> Apply</button>
+            <button type="button" className="admin-action-secondary" onClick={async () => {
+              try {
+                const res = await combatFightersApi.repairCategories();
+                toast.success(`Checked ${res.checked}, fixed ${res.fixed} fighter categor${res.fixed === 1 ? 'y' : 'ies'}.`);
+                loadFighters(page);
+              } catch (error) { toast.error(error.message || 'Could not repair fighter categories.'); }
+            }}>Repair categories</button>
           </div>
           <div className="admin-data-table-scroll">
             <table className="admin-data-table admin-quality-table admin-combat-fighter-table">

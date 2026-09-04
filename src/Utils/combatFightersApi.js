@@ -1,6 +1,7 @@
 import { swarmRequest } from './swarmApi';
 
 export const combatFightersApi = {
+  repairCategories: () => swarmRequest('/api/admin/combat-fighters/repair-categories', { method: 'POST' }),
   list: (query = {}) => swarmRequest('/api/admin/combat-fighters', { query }),
   publicList: (query = {}) => swarmRequest('/api/public/combat-fighters', { query }),
   create: (body = {}) => swarmRequest('/api/admin/combat-fighters', { method: 'POST', body }),
