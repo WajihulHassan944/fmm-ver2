@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
@@ -98,6 +98,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [playerRegistration, setPlayerRegistration] = useState({ state: 'idle', email: '' });
@@ -243,14 +244,19 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       toast.error('Please agree to the terms and conditions.');
       return;
     }
-
+    // Synchronous lock: isSubmitting only disables the button after a
+    // re-render, so a slow tap/double-tap on a weak connection could fire two
+    // signup requests before the button disabled — the first succeeded, the
+    // second then correctly (but confusingly) said "already registered".
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       const referrerId = queryValue(router.query.referrer);
       await apiRequest('/register', {
         method: 'POST',
         token: null,
-        body: { ...playerForm, ...(referrerId ? { referrerId } : {}) },
+        body: { ...playerForm, ...(referrerId ? { referrerId } : {}), recaptchaToken },
       });
       setPlayerRegistration({ state: 'polling', email: playerForm.email });
       toast.success('Account created. Check your email to verify it.');
@@ -258,6 +264,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       toast.error(error.message || 'Unable to create the account.');
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 

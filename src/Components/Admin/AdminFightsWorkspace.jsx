@@ -175,9 +175,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   };
 
   useEffect(() => {
-    if (matchStatus === 'idle') dispatch(fetchMatches({ includeDrafts: true }));
+    // Always refetch on mount instead of only when status is 'idle' — Redux
+    // status stays 'succeeded' for the rest of the session once loaded once,
+    // so a fight created after that point never showed up here otherwise.
+    dispatch(fetchMatches({ includeDrafts: true }));
     loadNormalMatches();
-  }, [dispatch, matchStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   const allRows = useMemo(() => normalizeRows(matches), [matches]);
 

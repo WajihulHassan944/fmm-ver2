@@ -17,6 +17,8 @@ const EMPTY = {
   fighterBId: '',
   matchDescription: '',
   matchVideoUrl: '',
+  fighterAImage: null,
+  fighterBImage: null,
   matchDate: '',
   matchTime: '',
   matchTokens: '0',
@@ -52,6 +54,10 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
   data.append('matchFighterB', form.matchFighterB);
   data.append('fighterAId', form.fighterAId);
   data.append('fighterBId', form.fighterBId);
+  // Direct upload path: no library id yet, but a name + photo is enough —
+  // the backend auto-registers this into the fighter library on save.
+  if (!form.fighterAId && form.fighterAImage) data.append('fighterAImage', form.fighterAImage);
+  if (!form.fighterBId && form.fighterBImage) data.append('fighterBImage', form.fighterBImage);
   data.append('matchDescription', form.matchDescription);
   data.append('matchVideoUrl', form.matchVideoUrl);
   data.append('maxRounds', form.maxRounds);
@@ -95,10 +101,10 @@ export default function AddNewMatch() {
   }, [created]);
 
   const previews = useMemo(() => ({
-    fighterAImage: getCombatFighterImage(selectedFighterA) || FALLBACK_A,
-    fighterBImage: getCombatFighterImage(selectedFighterB) || FALLBACK_B,
+    fighterAImage: getCombatFighterImage(selectedFighterA) || (form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : FALLBACK_A),
+    fighterBImage: getCombatFighterImage(selectedFighterB) || (form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : FALLBACK_B),
     promotionBackground: form.promotionBackground ? URL.createObjectURL(form.promotionBackground) : FALLBACK_PROMOTION,
-  }), [form.promotionBackground, selectedFighterA, selectedFighterB]);
+  }), [form.promotionBackground, form.fighterAImage, form.fighterBImage, selectedFighterA, selectedFighterB]);
 
   const change = (event) => {
     const { name, type, checked, value, files } = event.target;
@@ -149,8 +155,10 @@ export default function AddNewMatch() {
     try {
       if (!displayCategory) throw new Error('Choose a combat sport for this fight.');
       if (!form.matchName.trim()) throw new Error('Fight/card name is required.');
-      if (!form.fighterAId || !form.fighterBId) throw new Error('Select both fighters from the fighter library.');
-      if (form.fighterAId === form.fighterBId) throw new Error('Fighter A and Fighter B must be different fighters.');
+      const hasFighterA = form.fighterAId || (form.matchFighterA.trim() && form.fighterAImage);
+      const hasFighterB = form.fighterBId || (form.matchFighterB.trim() && form.fighterBImage);
+      if (!hasFighterA || !hasFighterB) throw new Error('Pick both fighters from the library, or type a name and attach a photo directly for each.');
+      if (form.fighterAId && form.fighterBId && form.fighterAId === form.fighterBId) throw new Error('Fighter A and Fighter B must be different fighters.');
       if (form.matchType === 'LIVE' && (!form.matchDate || !form.matchTime)) throw new Error('Date and time are required for a live fight card.');
 
       const data = new FormData();
@@ -163,10 +171,16 @@ export default function AddNewMatch() {
       const matchId = payload?.matchId || payload?.data?._id || payload?._id || payload?.match?._id;
 
       if (form.matchType === 'LIVE' && form.addToShadowTemplates) {
-        const shadow = new FormData();
-        appendLegacyFight(shadow, form, { shadow: true });
-        const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadow });
-        if (!shadowResponse.ok) console.warn('Failed to add fight to shadow templates.');
+        // Isolated: a drop here must never mislabel the primary create above
+        // as failed/lost — the fight already saved by this point.
+        try {
+          const shadow = new FormData();
+          appendLegacyFight(shadow, form, { shadow: true });
+          const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadow });
+          if (!shadowResponse.ok) console.warn('Failed to add fight to shadow templates.');
+        } catch (shadowError) {
+          console.warn('Shadow-template sync after create failed (fight itself already saved):', shadowError);
+        }
       }
 
       setCreated({
@@ -246,9 +260,23 @@ export default function AddNewMatch() {
               <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
               <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
               <div className="admin-fighter-select-grid is-wide">
-                <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('A', fighter)} required />
-                <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('B', fighter)} required />
+                <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('A', fighter)} required={!form.fighterAImage} />
+                <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('B', fighter)} required={!form.fighterBImage} />
               </div>
+              {!form.fighterAId && (
+                <label className="is-wide admin-fighter-file-field"><span>Or: Fighter A name + photo, no library lookup</span>
+                  <input type="text" placeholder="Fighter A name" value={form.matchFighterA} onChange={(event) => setForm((current) => ({ ...current, matchFighterA: event.target.value }))} style={{ marginBottom: 8 }} />
+                  <input type="file" accept="image/*" onChange={(event) => setForm((current) => ({ ...current, fighterAImage: event.target.files?.[0] || null }))} />
+                  <small>Auto-added to the fighter library on save.</small>
+                </label>
+              )}
+              {!form.fighterBId && (
+                <label className="is-wide admin-fighter-file-field"><span>Or: Fighter B name + photo, no library lookup</span>
+                  <input type="text" placeholder="Fighter B name" value={form.matchFighterB} onChange={(event) => setForm((current) => ({ ...current, matchFighterB: event.target.value }))} style={{ marginBottom: 8 }} />
+                  <input type="file" accept="image/*" onChange={(event) => setForm((current) => ({ ...current, fighterBImage: event.target.files?.[0] || null }))} />
+                  <small>Auto-added to the fighter library on save.</small>
+                </label>
+              )}
               <label>
                 <span>Maximum rounds</span>
                 <input type="number" min="1" max="30" name="maxRounds" value={form.maxRounds} onChange={change} />
@@ -305,7 +333,7 @@ export default function AddNewMatch() {
           <section className="admin-upload-stack">
             <label><FaCloudUploadAlt /><span><strong>Fight background</strong><small>{form.promotionBackground?.name || 'Select a high-resolution promotion image'}</small></span><input hidden type="file" accept="image/*" name="promotionBackground" onChange={change} /></label>
           </section>
-          <div className="admin-inline-notice"><strong>Fighter images come from the Fighter Library.</strong> No need to leave this page — open the Fighter A/B dropdown above, type a new name, attach a photo from your computer or phone, and hit Add: it creates the fighter and adds them to the library automatically. Use the Fighter Library screen only if you want to manage fighters in bulk.</div>
+          <div className="admin-inline-notice"><strong>No need to visit the Fighter Library first.</strong> Pick a saved fighter from the Fighter A/B dropdown, or use the "name + photo, no library lookup" fields right below it to upload straight from your computer or phone — either way the fighter is saved to the library automatically when you publish.</div>
           <button className="admin-primary-action admin-create-submit" type="submit" disabled={saving}><FaSave /> {saving ? 'Publishing fight…' : <><FaPlus /> Publish fight card</>}</button>
         </aside>
       </form>

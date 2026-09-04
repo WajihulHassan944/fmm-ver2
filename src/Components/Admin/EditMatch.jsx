@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   FaCalendarAlt,
   FaCheck,
@@ -14,7 +13,6 @@ import {
   FaTrophy,
   FaUsers,
 } from 'react-icons/fa';
-import { fetchMatches } from '@/Redux/matchSlice';
 import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
@@ -48,10 +46,24 @@ const parseScoreConfig = (label, value) => {
 const getFighterNameSafe = (fighter) => fighter ? getCombatFighterName(fighter) : '';
 
 const EditMatch = ({ matchId, isShadow }) => {
-  const dispatch = useDispatch();
-  const matches = useSelector((state) => state.matches.data);
-  const matchStatus = useSelector((state) => state.matches.status);
-  const match = (Array.isArray(matches) ? matches : []).find((item) => String(item?._id || item?.id) === String(matchId));
+  const [match, setMatch] = useState(null);
+  const [matchStatus, setMatchStatus] = useState('idle');
+
+  useEffect(() => {
+    if (isShadow) return;
+    let active = true;
+    setMatchStatus('loading');
+    fetch(`${API_BASE}/api/admin/matches/${matchId}`, { headers: adminHeaders() })
+      .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+      .then(({ ok, data }) => {
+        if (!active) return;
+        if (!ok) throw new Error(data?.message || 'Fight not found.');
+        setMatch(data.match);
+        setMatchStatus('succeeded');
+      })
+      .catch(() => { if (active) setMatchStatus('failed'); });
+    return () => { active = false; };
+  }, [matchId, isShadow]);
 
   const [formData, setFormData] = useState({
     matchCategory: 'boxing',
@@ -110,14 +122,43 @@ const EditMatch = ({ matchId, isShadow }) => {
   };
 
   useEffect(() => {
-    // Refetch whenever this fight isn't in the cached Redux list yet — not just
-    // on first load. Without this, a fight created earlier in the same admin
-    // session (list already loaded once, status !== 'idle') opens Edit with a
-    // blank/default form, and submitting overwrites the real record with blanks.
-    if (!isShadow && !match && matchStatus !== 'loading') {
-      dispatch(fetchMatches({ includeDrafts: true }));
-    } else if (isShadow) {
-      const fetchShadowMatches = async () => {
+    if (isShadow) return;
+    if (!match) return;
+    setFormData((current) => ({
+      ...current,
+      matchCategory: match.matchCategory || 'boxing',
+      matchName: match.matchName || '',
+      matchFighterA: match.matchFighterA || getFighterNameSafe(getFighterRef(match, 'A')) || '',
+      matchFighterB: match.matchFighterB || getFighterNameSafe(getFighterRef(match, 'B')) || '',
+      fighterAId: getFighterRefId(match, 'A'),
+      fighterBId: getFighterRefId(match, 'B'),
+      matchDescription: match.matchDescription || '',
+      matchVideoUrl: match.matchVideoUrl || '',
+      matchPromotionalVideoUrl: match.matchPromotionalVideoUrl || match.promotionalVideoUrl || '',
+      matchStatus: match.matchStatus || '',
+      matchShadowStatus: match.matchShadowStatus || '',
+      matchShadowOpenStatus: match.matchShadowOpenStatus || '',
+      matchDate: match.matchDate ? String(match.matchDate).slice(0, 10) : current.matchDate,
+      matchTime: match.matchTime || current.matchTime,
+      matchTokens: match.matchTokens ?? current.matchTokens,
+      pot: match.pot ?? current.pot,
+      fighterAImage: match.fighterAImage || null,
+      fighterBImage: match.fighterBImage || null,
+      promotionBackground: match.promotionBackground || null,
+      maxRounds: match.maxRounds || '',
+      matchCategoryTwo: match.matchCategoryTwo || '',
+      BoxingMatch: stringifyScoreConfig(match.BoxingMatch),
+      MMAMatch: stringifyScoreConfig(match.MMAMatch),
+      addToShadowTemplates: false,
+    }));
+    setSelectedFighterA(getFighterRef(match, 'A'));
+    setSelectedFighterB(getFighterRef(match, 'B'));
+    setDisplayCategory(resolveDisplayCategory(match.matchCategory, match.matchCategoryTwo));
+  }, [match, isShadow]);
+
+  useEffect(() => {
+    if (!isShadow) return;
+    const fetchShadowMatches = async () => {
         try {
           let specificMatch = null;
           const singleResponse = await fetch(`${API_BASE}/api/shadow/${matchId}`, { headers: adminHeaders() });
@@ -163,40 +204,7 @@ const EditMatch = ({ matchId, isShadow }) => {
         }
       };
       fetchShadowMatches();
-    }
-
-    if (match && !isShadow) {
-      setFormData({
-        matchCategory: match.matchCategory || 'boxing',
-        matchName: match.matchName || '',
-        matchFighterA: match.matchFighterA || getFighterNameSafe(getFighterRef(match, 'A')) || '',
-        matchFighterB: match.matchFighterB || getFighterNameSafe(getFighterRef(match, 'B')) || '',
-        fighterAId: getFighterRefId(match, 'A'),
-        fighterBId: getFighterRefId(match, 'B'),
-        matchDescription: match.matchDescription || '',
-        matchVideoUrl: match.matchVideoUrl || '',
-        matchPromotionalVideoUrl: match.matchPromotionalVideoUrl || match.promotionalVideoUrl || '',
-        matchStatus: match.matchStatus || '',
-        matchShadowStatus: match.matchShadowStatus || '',
-        matchShadowOpenStatus: match.matchShadowOpenStatus || '',
-        matchDate: match.matchDate ? new Date(match.matchDate).toISOString().split('T')[0] : '',
-        promotionBackground: match.promotionBackground || null,
-        matchTime: match.matchTime || '',
-        matchTokens: match.matchTokens || '',
-        pot: match.pot || '',
-        fighterAImage: match.fighterAImage || null,
-        fighterBImage: match.fighterBImage || null,
-        maxRounds: match.maxRounds || '',
-        matchCategoryTwo: match.matchCategoryTwo || '',
-        BoxingMatch: stringifyScoreConfig(match.BoxingMatch),
-        MMAMatch: stringifyScoreConfig(match.MMAMatch),
-        addToShadowTemplates: match.shadowTemplatesAdditionStatus || false,
-      });
-      setSelectedFighterA(getFighterRef(match, 'A'));
-      setSelectedFighterB(getFighterRef(match, 'B'));
-      setDisplayCategory(resolveDisplayCategory(match.matchCategory, match.matchCategoryTwo));
-    }
-  }, [match, matchStatus, isShadow, dispatch, matchId]);
+  }, [isShadow, matchId]);
 
   const handleChange = (event) => {
     const { name, value, files } = event.target;
@@ -279,33 +287,42 @@ const EditMatch = ({ matchId, isShadow }) => {
         console.log('Response received:', result);
         alert('Match updated successfully!');
 
-        if (formData.addToShadowTemplates && match?.shadowTemplatesAdditionStatus === false) {
-          const shadowData = new FormData();
-          shadowData.append('matchCategory', formData.matchCategory);
-          shadowData.append('matchCategoryTwo', formData.matchCategoryTwo);
-          shadowData.append('matchName', formData.matchName);
-          shadowData.append('matchFighterA', formData.matchFighterA);
-          shadowData.append('matchFighterB', formData.matchFighterB);
-          shadowData.append('fighterAId', formData.fighterAId || '');
-          shadowData.append('fighterBId', formData.fighterBId || '');
-          shadowData.append('matchDescription', formData.matchDescription);
-          shadowData.append('matchVideoUrl', formData.matchVideoUrl);
-          shadowData.append('maxRounds', formData.maxRounds);
-          shadowData.append('matchType', 'SHADOW');
-          shadowData.append('fighterAImageUrl', formData.fighterAImage ? formData.fighterAImage : match?.fighterAImage);
-          shadowData.append('fighterBImageUrl', formData.fighterBImage ? formData.fighterBImage : match?.fighterBImage);
-          shadowData.append('fighterAImageDeleteUrlFromReq', match.fighterAImageDeleteUrl);
-          shadowData.append('fighterBImageDeleteUrlFromReq', match.fighterBImageDeleteUrl);
-          shadowData.append('promotionBackgroundUrl', match.promotionBackground);
-          shadowData.append('promotionBackgroundDeleteUrlFromReq', formData.promotionBackground ? formData.promotionBackground : match.promotionBackgroundDeleteUrl);
-          shadowData.append('BoxingMatch', JSON.stringify(match.BoxingMatch));
-          shadowData.append('MMAMatch', JSON.stringify(match.MMAMatch));
-          shadowData.append('notify', true);
+        // Everything below only fires more requests / reloads the page after
+        // the edit is already confirmed saved — none of it should be able to
+        // trigger the "lost connection" catch above it. A reload mid-flight
+        // can abort an in-progress shadow-sync fetch and throw, which used to
+        // land in that catch and falsely tell you the edit itself failed.
+        try {
+          if (formData.addToShadowTemplates && match?.shadowTemplatesAdditionStatus === false) {
+            const shadowData = new FormData();
+            shadowData.append('matchCategory', formData.matchCategory);
+            shadowData.append('matchCategoryTwo', formData.matchCategoryTwo);
+            shadowData.append('matchName', formData.matchName);
+            shadowData.append('matchFighterA', formData.matchFighterA);
+            shadowData.append('matchFighterB', formData.matchFighterB);
+            shadowData.append('fighterAId', formData.fighterAId || '');
+            shadowData.append('fighterBId', formData.fighterBId || '');
+            shadowData.append('matchDescription', formData.matchDescription);
+            shadowData.append('matchVideoUrl', formData.matchVideoUrl);
+            shadowData.append('maxRounds', formData.maxRounds);
+            shadowData.append('matchType', 'SHADOW');
+            shadowData.append('fighterAImageUrl', formData.fighterAImage ? formData.fighterAImage : match?.fighterAImage);
+            shadowData.append('fighterBImageUrl', formData.fighterBImage ? formData.fighterBImage : match?.fighterBImage);
+            shadowData.append('fighterAImageDeleteUrlFromReq', match.fighterAImageDeleteUrl);
+            shadowData.append('fighterBImageDeleteUrlFromReq', match.fighterBImageDeleteUrl);
+            shadowData.append('promotionBackgroundUrl', match.promotionBackground);
+            shadowData.append('promotionBackgroundDeleteUrlFromReq', formData.promotionBackground ? formData.promotionBackground : match.promotionBackgroundDeleteUrl);
+            shadowData.append('BoxingMatch', JSON.stringify(match.BoxingMatch));
+            shadowData.append('MMAMatch', JSON.stringify(match.MMAMatch));
+            shadowData.append('notify', true);
 
-          const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadowData });
+            const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadowData });
 
-          if (shadowResponse.ok) alert('Fight added to shadow templates successfully.');
-          else console.warn('Failed to add fight to shadow templates.');
+            if (shadowResponse.ok) alert('Fight added to shadow templates successfully.');
+            else console.warn('Failed to add fight to shadow templates.');
+          }
+        } catch (shadowError) {
+          console.warn('Shadow-template sync after edit failed (edit itself already saved):', shadowError);
         }
 
         window.location.reload();
@@ -314,7 +331,7 @@ const EditMatch = ({ matchId, isShadow }) => {
       }
     } catch (error) {
       console.error('Error updating match:', error);
-      alert('An error occurred while updating the match.');
+      alert('Lost connection while saving this edit. Check the Fight Registry to see whether it went through before editing again.');
     } finally {
       setButtonText('Edit Match');
     }
