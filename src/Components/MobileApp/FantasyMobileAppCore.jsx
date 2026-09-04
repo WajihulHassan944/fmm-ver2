@@ -4348,9 +4348,17 @@ class FantasyMobileAppCore extends React.Component {
           key: ev.id, style: { background: 'rgba(255,255,255,.05)', border: '1px solid ' + ev.tagColor, borderRadius: 12, padding: 12, boxShadow: '0 0 14px ' + ev.tagColor + '55' }
         },
           React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: ev.tagColor, marginBottom: 6 } }, ev.tag, ' · ', ev.date),
-          React.createElement('div', { style: { background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '6px 8px', marginBottom: 8 } },
-            React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16, color: '#fff', marginBottom: 4 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
-            React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.7)', lineHeight: 1.5 } }, `${ev.venue || 'Venue TBA'} · ${ev.maxRounds > 0 ? `${ev.maxRounds} rounds` : 'Rounds TBA'} · ${ev.prize || 'Prize terms pending'} · ${this.getEventEntryLabel(ev)}`)
+          React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '8px 8px', marginBottom: 8 } },
+            React.createElement('div', { style: { width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flex: '0 0 auto', border: '2px solid rgba(255,255,255,.18)' } },
+              React.createElement(MobileImageSlot, { id: 'predict-fighter-a-' + ev.id, src: ev.featuredFightFighterAImage, shape: 'circle', fit: 'cover', position: 'center top', placeholder: ev.f1 || 'Fighter A' })
+            ),
+            React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+              React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16, color: '#fff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis' } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
+              React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.7)', lineHeight: 1.5 } }, `${ev.venue || 'Venue TBA'} · ${ev.maxRounds > 0 ? `${ev.maxRounds} rounds` : 'Rounds TBA'} · ${ev.prize || 'Prize terms pending'} · ${this.getEventEntryLabel(ev)}`)
+            ),
+            React.createElement('div', { style: { width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flex: '0 0 auto', border: '2px solid rgba(255,255,255,.18)' } },
+              React.createElement(MobileImageSlot, { id: 'predict-fighter-b-' + ev.id, src: ev.featuredFightFighterBImage, shape: 'circle', fit: 'cover', position: 'center top', placeholder: ev.f2 || 'Fighter B' })
+            )
           ),
           React.createElement('div', {
             role: 'button', tabIndex: 0,
@@ -5452,12 +5460,12 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 's', style: { fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 12 } }, 'Predict full-match totals — not round by round'),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.featuredFightFighterAImage || ev.fighterAImage, fallbackSrc: ev.image || ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.featuredFightFighterBImage || ev.fighterBImage, fallbackSrc: ev.image || ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
@@ -5526,12 +5534,12 @@ class FantasyMobileAppCore extends React.Component {
         ),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.featuredFightFighterAImage || ev.fighterAImage, fallbackSrc: ev.image || ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.featuredFightFighterBImage || ev.fighterBImage, fallbackSrc: ev.image || ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
@@ -5601,12 +5609,12 @@ class FantasyMobileAppCore extends React.Component {
         ),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.featuredFightFighterAImage || ev.fighterAImage, fallbackSrc: ev.image || ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 30, height: 30 } }, React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.featuredFightFighterBImage || ev.fighterBImage, fallbackSrc: ev.image || ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),

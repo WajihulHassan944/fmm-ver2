@@ -82,10 +82,11 @@ const SITE_STYLES = `
     [data-fmm="fights-grid"] { grid-template-columns: minmax(0,1fr) !important; }
     [data-fmm="three-grid"] { grid-template-columns: minmax(0,1fr) !important; }
     [data-fmm="store-grid"] { grid-template-columns: 1fr 1fr !important; }
-    [data-fmm="footer-grid"] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-fmm="footer-grid"] { grid-template-columns: minmax(0,1fr) 1fr 1fr !important; column-gap: 14px !important; row-gap: 4px !important; }
     [data-fmm="nav-links"] { display: none !important; }
     [data-fmm="hero-title"] { font-size: 32px !important; }
-    .fmm-site [data-fmm="footer-grid"] a { padding: 7px 0; }
+    [data-fmm="footer-grid"] > div:first-child { grid-column: 1 / -1; margin-bottom: 6px; }
+    .fmm-site [data-fmm="footer-grid"] a { padding: 0; min-height: 32px; line-height: 32px; }
   }
 
   /* ---------------------------------------------------------------------
@@ -122,7 +123,9 @@ const SITE_STYLES = `
 
     /* 44px minimum on anything tappable. */
     .fmm-site a[href^="#"], .fmm-site a[href^="/"] { -webkit-tap-highlight-color: rgba(245,166,35,.25); }
-    [data-fmm="footer-grid"] a { display: inline-block; min-height: 44px; line-height: 44px !important; padding: 0 !important; }
+    [data-fmm="footer-grid"] { grid-template-columns: minmax(0,1fr) 1fr 1fr !important; column-gap: 14px !important; row-gap: 0 !important; }
+    [data-fmm="footer-grid"] a { display: inline-block; min-height: 36px; line-height: 36px !important; padding: 0 !important; }
+    [data-fmm="footer-grid"] > div:first-child { grid-column: 1 / -1; margin-bottom: 6px; }
   }
 
   @media (max-width: 480px) {
@@ -696,13 +699,13 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
         </div>
 
         <div style={{ borderTop: '1px solid rgba(216,220,228,.14)', marginTop: '74px', background: '#05060a' }}>
-          <div data-fmm="footer-grid" style={{ maxWidth: '1320px', margin: '0 auto', padding: '46px 32px 30px', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: '34px' }}>
+          <div data-fmm="footer-grid" style={{ maxWidth: '1320px', margin: '0 auto', padding: '30px 32px 20px', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '28px' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '10px' }}>
                 <img src="/site/logo.jpg" alt="" width="42" height="42" style={{ display: 'block', width: '42px', height: '42px', borderRadius: '8px', border: '1px solid rgba(216,220,228,.28)', objectFit: 'cover' }} />
                 <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.04em' }}>FANTASY<span style={{ color: '#e11d2e' }}>MMADNESS</span></span>
               </div>
-              <p style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.55, color: 'rgba(255,255,255,.5)', margin: '0 0 14px', maxWidth: '30em' }}>
+              <p style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.55, color: 'rgba(255,255,255,.5)', margin: '0 0 10px', maxWidth: '30em' }}>
                 A fantasy sports operator. Not a sportsbook — we do not take wagers and we do not offer odds. Contests are scored against official round statistics.
               </p>
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -714,34 +717,23 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '13px' }}>Play</div>
+              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '11px' }}>Play</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
                 <a href="#fights" style={{ color: 'rgba(255,255,255,.72)' }}>Fight cards</a>
-                <a href="#contests" style={{ color: 'rgba(255,255,255,.72)' }}>How scoring works</a>
-                <a href="#season" style={{ color: 'rgba(255,255,255,.72)' }}>Season Cards</a>
                 <a href="#board" style={{ color: 'rgba(255,255,255,.72)' }}>Leaderboard</a>
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '13px' }}>Leagues</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
                 <a href="/auth?mode=signup&role=affiliate" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
-                <a href="#apply" style={{ color: 'rgba(255,255,255,.72)' }}>Affiliate payouts</a>
-                <a href="#store" style={{ color: 'rgba(255,255,255,.72)' }}>Store</a>
-                <a href="https://www.etsy.com/shop/FANTASYMMADNESS" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.72)' }}>Etsy shop ↗</a>
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '13px' }}>Legal</div>
+              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '11px' }}>Legal</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
                 <a href="/terms" style={{ color: 'rgba(255,255,255,.72)' }}>Terms of Use</a>
                 <a href="/privacy" style={{ color: 'rgba(255,255,255,.72)' }}>Privacy</a>
-                <a href="/responsible-play" style={{ color: 'rgba(255,255,255,.72)' }}>Responsible play</a>
                 <a href="mailto:support@fantasymmadness.com" style={{ color: 'rgba(255,255,255,.72)' }}>Support</a>
               </div>
             </div>
           </div>
-          <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '18px 32px 34px', borderTop: '1px solid rgba(216,220,228,.09)', display: 'flex', justifyContent: 'space-between', gap: '20px', fontSize: '12.5px', fontWeight: 600, color: 'rgba(255,255,255,.38)' }}>
+          <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '14px 32px 26px', borderTop: '1px solid rgba(216,220,228,.09)', display: 'flex', justifyContent: 'space-between', gap: '20px', fontSize: '12.5px', fontWeight: 600, color: 'rgba(255,255,255,.38)' }}>
             <span>© 2026 Fantasy MMAdness LLC · Georgia, USA</span>
             <span>Gambling problem? Call 1-800-522-4700 · ncpgambling.org</span>
           </div>

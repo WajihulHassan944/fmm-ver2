@@ -176,6 +176,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const handleLogin = async (event) => {
     event.preventDefault();
     if (!requireRecaptcha()) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -215,6 +217,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       toast.error(typeof error === 'string' ? error : error?.message || 'Login failed. Please check your details.');
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 
@@ -275,7 +278,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       toast.error('Please agree to the terms and conditions.');
       return;
     }
-
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       const payload = new FormData();
@@ -294,12 +298,15 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       toast.error(error.message || 'Unable to submit the affiliate application.');
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 
   const handleSponsorSignup = async (event) => {
     event.preventDefault();
     if (!requireRecaptcha()) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       await apiRequest('/contact-us-fantasymmadness', {
@@ -318,6 +325,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       toast.error(error.message || 'Unable to send your enquiry.');
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 

@@ -35,7 +35,16 @@ const AffiliateUsers = () => {
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const [showInvitePopup, setShowInvitePopup] = useState(false);
+  const [recentInvites, setRecentInvites] = useState([]);
   const router = useRouter();
+
+  const loadRecentInvites = async () => {
+    try {
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-invites', { headers: adminHeaders() });
+      const data = await response.json();
+      if (response.ok) setRecentInvites(data.invites || []);
+    } catch { /* non-blocking */ }
+  };
 
   const generateInstantApprovalLink = async () => {
     setInviteBusy(true);
@@ -49,6 +58,7 @@ const AffiliateUsers = () => {
       if (!response.ok) throw new Error(data?.message || 'Could not create the invite link.');
       setInviteLink(data.url);
       setShowInvitePopup(true);
+      loadRecentInvites();
     } catch (error) {
       toast.error(error.message || 'Could not create the invite link.');
     } finally {
@@ -227,7 +237,7 @@ const AffiliateUsers = () => {
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={handleNavigation}><FaUsers /> Admin records</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/payouts')}><FaWallet /> Payouts</button>
-          <button type="button" className="admin-action-secondary" disabled={inviteBusy} onClick={generateInstantApprovalLink}><FaLink /> {inviteBusy ? 'Generating…' : 'Instant-approval link'}</button>
+          <button type="button" className="admin-action-secondary" disabled={inviteBusy} onClick={() => { generateInstantApprovalLink(); }}><FaLink /> {inviteBusy ? 'Generating…' : 'Instant-approval link'}</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddAffiliatePopup(true)}><FaPlus /> Add affiliate</button>
         </div>
       </section>
@@ -353,6 +363,23 @@ const AffiliateUsers = () => {
                 Link
                 <input type="text" value={inviteLink} readOnly onFocus={(event) => event.target.select()} />
               </label>
+              {recentInvites.length > 0 && (
+                <div>
+                  <span style={{ fontSize: 12, fontWeight: 700, opacity: .7, display: 'block', marginBottom: 6 }}>Recent invites</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 160, overflowY: 'auto' }}>
+                    {recentInvites.map((invite) => {
+                      const expired = new Date(invite.expiresAt) < new Date();
+                      const status = invite.usedAt ? `Used${invite.usedByAffiliateId ? ` by ${invite.usedByAffiliateId.firstName || ''} ${invite.usedByAffiliateId.lastName || ''}`.trim() : ''}` : expired ? 'Expired' : 'Active';
+                      return (
+                        <div key={invite._id || invite.code} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, padding: '5px 0', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+                          <span style={{ opacity: .8 }}>{invite.code}</span>
+                          <span style={{ fontWeight: 700, color: invite.usedAt ? '#34d399' : expired ? '#f87171' : '#fbbf24' }}>{status}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <footer>
               <button type="button" className="admin-action-primary" onClick={copyInviteLink}><FaCopy /> Copy link</button>
