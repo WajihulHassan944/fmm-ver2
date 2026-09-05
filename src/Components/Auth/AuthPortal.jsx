@@ -442,6 +442,14 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                   <h3>{completionCard.title}</h3>
                   <p>{completionCard.copy}</p>
                   {playerRegistration.state === 'polling' && <div className="xp-auth-pulse"><i /><span>Waiting for verification</span></div>}
+                  {(playerRegistration.state === 'polling' || playerRegistration.state === 'timed-out') && (
+                    <button type="button" className="xp-auth-inline-action" onClick={async () => {
+                      try {
+                        await apiRequest('/resend-verification', { method: 'POST', token: null, body: { email: playerRegistration.email } });
+                        toast.success('Verification email resent — check your inbox (and spam folder).');
+                      } catch (error) { toast.error(error.message || 'Could not resend the email.'); }
+                    }}>Resend verification email</button>
+                  )}
                   <button type="button" className="theme-btn theme-btn-secondary" onClick={() => { setPlayerRegistration({ state: 'idle', email: '' }); setAffiliateRegistered(false); setAffiliateInstantApproved(false); setSponsorSubmitted(false); updateRouteState('login'); }}>Back to login</button>
                 </div>
               ) : forgotPassword ? (
