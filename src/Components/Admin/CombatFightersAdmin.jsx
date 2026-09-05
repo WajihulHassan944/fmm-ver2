@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { toast } from 'react-toastify';
 import {
   FaEdit,
+  FaDownload,
   FaFistRaised,
   FaImage,
   FaMagic,
@@ -152,6 +153,7 @@ export default function CombatFightersAdmin() {
   const [cleanupPreview, setCleanupPreview] = useState(null);
   const [cleanupProgress, setCleanupProgress] = useState(null);
   const [cleaningLegacyFields, setCleaningLegacyFields] = useState(false);
+  const [downloadingImages, setDownloadingImages] = useState(false);
 
   const fighters = useMemo(() => getRows(fightersPayload), [fightersPayload]);
   const pagination = useMemo(() => getPagination(fightersPayload), [fightersPayload]);
@@ -530,6 +532,36 @@ export default function CombatFightersAdmin() {
                 loadFighters(page);
               } catch (error) { toast.error(error.message || 'Could not repair fighter categories.'); }
             }}>Repair categories</button>
+            <button type="button" className="admin-action-secondary" disabled={downloadingImages} onClick={async () => {
+              setDownloadingImages(true);
+              try {
+                const all = await combatFightersApi.list({ limit: 1000, includeInactive: true });
+                const list = (all.items || all.fighters || []).filter((f) => getCombatFighterImage(f));
+                if (!list.length) { toast.error('No fighter images to download.'); return; }
+                for (const fighter of list) {
+                  const src = getCombatFighterImage(fighter);
+                  try {
+                    const blob = await (await fetch(src, { mode: 'cors' })).blob();
+                    const ext = (src.split('.').pop() || 'jpg').split('?')[0].slice(0, 4);
+                    const safeName = (getCombatFighterName(fighter) || 'fighter').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${safeName}.${ext}`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(url);
+                    await new Promise((resolve) => setTimeout(resolve, 250));
+                  } catch { /* skip fighters whose image can't be fetched (CORS-blocked host) */ }
+                }
+                toast.success(`Downloaded ${list.length} fighter image${list.length === 1 ? '' : 's'}.`);
+              } catch (error) {
+                toast.error(error.message || 'Could not download fighter images.');
+              } finally {
+                setDownloadingImages(false);
+              }
+            }}><FaDownload /> {downloadingImages ? 'Downloading…' : 'Download fighter images'}</button>
           </div>
           <div className="admin-data-table-scroll">
             <table className="admin-data-table admin-quality-table admin-combat-fighter-table">
