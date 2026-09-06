@@ -176,6 +176,12 @@ export const normalizePublicFightRow = (fight = {}) => {
     resolvedFighterBImage: fighterBImage || fight.resolvedFighterBImage || "",
     fighterAImage: fighterAImage || fight.fighterAImage,
     fighterBImage: fighterBImage || fight.fighterBImage,
+    // Make Predictions (and other screens sharing this event shape) read
+    // these two names specifically — they were only ever set for the literal
+    // homepage "featured fight", so every ordinary fight's uploaded photo
+    // never reached this screen even though the upload itself worked fine.
+    featuredFightFighterAImage: fight.featuredFightFighterAImage || fighterAImage || fight.fighterAImage || fight.resolvedFighterAImage || fight.fighterAPrimaryImage || "",
+    featuredFightFighterBImage: fight.featuredFightFighterBImage || fighterBImage || fight.fighterBImage || fight.resolvedFighterBImage || fight.fighterBPrimaryImage || "",
     effectiveCategory,
     effectiveCategorySlug: effectiveSlug,
     displayCategory: effectiveCategory,
@@ -410,6 +416,8 @@ const mergeRowsWithMatchFeedFighterImages = async (rows = [], query = {}, includ
         resolvedFighterBImage: fighterBImage || row.resolvedFighterBImage || matched.resolvedFighterBImage || "",
         fighterAImage: fighterAImage || row.fighterAImage || matched.fighterAImage,
         fighterBImage: fighterBImage || row.fighterBImage || matched.fighterBImage,
+        featuredFightFighterAImage: row.featuredFightFighterAImage || matched.featuredFightFighterAImage || fighterAImage || row.fighterAImage || matched.fighterAImage || "",
+        featuredFightFighterBImage: row.featuredFightFighterBImage || matched.featuredFightFighterBImage || fighterBImage || row.fighterBImage || matched.fighterBImage || "",
       };
     });
   } catch (error) {
