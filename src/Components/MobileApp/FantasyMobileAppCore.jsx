@@ -2155,8 +2155,14 @@ class FantasyMobileAppCore extends React.Component {
       // still has faces to show.
       const librarySportIds = sport.id === 'bareknuckle' ? ['bare-knuckle', 'bareknuckle'] : [sport.id];
       (Array.isArray(this.props.fighterLibrary) ? this.props.fighterLibrary : []).forEach((fighter) => {
-        const fighterCategory = String(fighter?.category || '').trim().toLowerCase();
-        if (!librarySportIds.includes(fighterCategory)) return;
+      // Match loosely on the stored category text itself (not just the two
+      // known-good spellings) so a fighter saved under any older or
+      // differently-punctuated bare-knuckle value still shows up here
+      // immediately — no separate repair step required before it cycles in.
+      const fighterCategory = String(fighter?.category || '').trim().toLowerCase();
+      const normalizedFighterCategory = fighterCategory.includes('bare') || fighterCategory.includes('bkfc') ? 'bare-knuckle'
+        : (fighterCategory.includes('wrestl') ? 'wrestling' : fighterCategory);
+      if (!librarySportIds.includes(normalizedFighterCategory)) return;
         const photo = fighter?.primaryImage || fighter?.image;
         const name = fighter?.displayName || fighter?.name;
         if (photo && name && !gallery.some((entry) => entry.photo === photo)) gallery.push({ photo, name });
@@ -4339,6 +4345,10 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderPredict(events, s) {
+    const libraryPhoto = (name) => {
+      const match = (Array.isArray(this.props.fighterLibrary) ? this.props.fighterLibrary : []).find((f) => String(f?.displayName || f?.name || '').trim().toUpperCase() === String(name || '').trim().toUpperCase());
+      return match?.primaryImage || match?.image || '';
+    };
     return React.createElement('div', { style: { padding: '8px 16px' } },
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, marginBottom: 4, color: '#f2b544' } }, 'MAKE PREDICTIONS'),
       React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 12 } }, 'Open the registered fight’s real scorecard. Values start at zero until you enter them.'),
@@ -4350,14 +4360,14 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: ev.tagColor, marginBottom: 6 } }, ev.tag, ' · ', ev.date),
           React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '8px 8px', marginBottom: 8 } },
             React.createElement('div', { style: { width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flex: '0 0 auto', border: '2px solid rgba(255,255,255,.18)' } },
-              React.createElement(MobileImageSlot, { id: 'predict-fighter-a-' + ev.id, src: ev.featuredFightFighterAImage, shape: 'circle', fit: 'cover', position: 'center top', placeholder: ev.f1 || 'Fighter A' })
+              React.createElement(MobileImageSlot, { id: 'predict-fighter-a-' + ev.id, src: ev.featuredFightFighterAImage || libraryPhoto(ev.f1), shape: 'circle', fit: 'cover', position: 'center top', placeholder: ev.f1 || 'Fighter A' })
             ),
             React.createElement('div', { style: { flex: 1, minWidth: 0 } },
               React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 16, color: '#fff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis' } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
               React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.7)', lineHeight: 1.5 } }, `${ev.venue || 'Venue TBA'} · ${ev.maxRounds > 0 ? `${ev.maxRounds} rounds` : 'Rounds TBA'} · ${ev.prize || 'Prize terms pending'} · ${this.getEventEntryLabel(ev)}`)
             ),
             React.createElement('div', { style: { width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flex: '0 0 auto', border: '2px solid rgba(255,255,255,.18)' } },
-              React.createElement(MobileImageSlot, { id: 'predict-fighter-b-' + ev.id, src: ev.featuredFightFighterBImage, shape: 'circle', fit: 'cover', position: 'center top', placeholder: ev.f2 || 'Fighter B' })
+              React.createElement(MobileImageSlot, { id: 'predict-fighter-b-' + ev.id, src: ev.featuredFightFighterBImage || libraryPhoto(ev.f2), shape: 'circle', fit: 'cover', position: 'center top', placeholder: ev.f2 || 'Fighter B' })
             )
           ),
           React.createElement('div', {
