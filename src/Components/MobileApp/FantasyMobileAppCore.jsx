@@ -4362,6 +4362,11 @@ class FantasyMobileAppCore extends React.Component {
           ),
           React.createElement('div', {
             role: 'button', tabIndex: 0,
+            onClick: () => this.openAiScout(ev),
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, textAlign: 'center', padding: '9px 0', borderRadius: 10, marginBottom: 8, background: 'linear-gradient(90deg,rgba(77,141,255,.22),rgba(168,85,247,.22))', border: '1px solid rgba(77,141,255,.4)', fontSize: 10, fontWeight: 900, color: '#9bbcff', cursor: 'pointer' }
+          }, ev.aiScoutingReport ? '🤖 AI SCOUTING REPORT' : '🤖 AI SCOUT · CHECK REPORT'),
+          React.createElement('div', {
+            role: 'button', tabIndex: 0,
             onClick: () => this.openEvent(ev),
             style: { textAlign: 'center', padding: '12px 0', borderRadius: 10, fontWeight: 900, fontSize: 13, cursor: 'pointer', background: ev.tagColor, color: '#fff' }
           }, this.getEventActionLabel(ev, ev.playable))

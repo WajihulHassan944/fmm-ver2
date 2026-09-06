@@ -108,6 +108,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [placementUpdatingKey, setPlacementUpdatingKey] = useState('');
   const [scoutingUpdatingId, setScoutingUpdatingId] = useState('');
   const [showDataQuality, setShowDataQuality] = useState(false);
+  const [retiringShadow, setRetiringShadow] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
@@ -603,6 +604,17 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <Link href="/administration/AddNewMatch" className="admin-primary-action"><FaPlus /> Create fight</Link>
           {mode === 'homepage' && <Link href="/administration/ShadowFightsLibrary" className="admin-action-secondary"><FaVideo /> Shadow fight videos</Link>}
           <button type="button" className="admin-action-secondary" onClick={() => setShowDataQuality(true)}><FaDatabase /> Data quality</button>
+          <button type="button" className="admin-action-secondary" disabled={retiringShadow} onClick={async () => {
+            setRetiringShadow(true);
+            try {
+              const res = await fetch(`${API_BASE}/api/admin/retention/retire-shadow-fight`, { method: 'POST', headers: adminHeaders() });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data?.message || 'Could not remove the mystery fight.');
+              toast.success(data.message || 'Mystery fight removed.');
+              refreshFightRows();
+            } catch (error) { toast.error(error.message || 'Could not remove the mystery fight.'); }
+            finally { setRetiringShadow(false); }
+          }}>{retiringShadow ? 'Removing…' : 'Remove mystery fight'}</button>
           <button type="button" className="admin-action-secondary" onClick={refreshFightRows}><FaSyncAlt className={matchStatus === 'loading' || matchRowsLoading ? 'xp-spin' : ''} /> Refresh</button>
         </div>
       </section>
