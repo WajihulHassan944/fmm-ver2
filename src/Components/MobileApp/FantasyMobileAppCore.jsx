@@ -269,13 +269,13 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     featuredFight: Boolean(fight.featuredFight),
     featuredThisWeekImage: resolveLiveMedia(fight.featuredThisWeekImage),
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
-    featuredFightFighterAImage: resolveLiveMedia(fight.featuredFightFighterAImage),
-    featuredFightFighterBImage: resolveLiveMedia(fight.featuredFightFighterBImage),
+    featuredFightFighterAImage: resolveLiveMedia(cleanText(fight.featuredFightFighterAImage, fight.fighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterA?.primaryImage, fight.fighterA?.image)),
+    featuredFightFighterBImage: resolveLiveMedia(cleanText(fight.featuredFightFighterBImage, fight.fighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterB?.primaryImage, fight.fighterB?.image)),
     // Transparent-background versions, derived from the same Cloudinary URLs.
     // Screens use these as src and the plain ones as fallbackSrc, so a missing
     // transform degrades to the original photo instead of a broken image.
-    fighterACutout: cloudinaryCutout(resolveLiveMedia(fight.featuredFightFighterAImage)),
-    fighterBCutout: cloudinaryCutout(resolveLiveMedia(fight.featuredFightFighterBImage)),
+    fighterACutout: cloudinaryCutout(resolveLiveMedia(cleanText(fight.featuredFightFighterAImage, fight.fighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterA?.primaryImage, fight.fighterA?.image))),
+    fighterBCutout: cloudinaryCutout(resolveLiveMedia(cleanText(fight.featuredFightFighterBImage, fight.fighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterB?.primaryImage, fight.fighterB?.image))),
     division: cleanText(fight.division, fight.weightClass),
     sport,
     tag: cleanText(fight.eventName, fight.matchName, fight.name, fight.promotion, sportLabel[sport]),
