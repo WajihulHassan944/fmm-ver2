@@ -844,11 +844,11 @@ const toFightCard = (f, index) => {
 // responds.
 const SHOP = 'https://www.etsy.com/shop/FANTASYMMADNESS';
 const STORE_ITEMS = [
-  { name: 'Ringside Tee', price: '$32', image: '/site/product-ringside-tee.jpg', url: 'https://www.etsy.com/listing/4552218538/fantasy-mmadness-combat-sports-t-shirt' },
-  { name: 'Fight Night Tee', price: '$32', image: '/site/product-fight-tee.jpg', url: 'https://www.etsy.com/listing/4552212559/fantasy-mmadness-combat-sports-t-shirt' },
-  { name: 'BKFC Tee', price: '$34', image: '/site/product-bkfc-tee.jpg', url: 'https://www.etsy.com/listing/4552225010/fantasy-mmadness-combat-sports-t-shirt' },
-  { name: 'Combat Sports Tee', price: '$32', image: '/site/apparel-tee.webp', url: 'https://www.etsy.com/listing/4549330994/fantasy-mmadness-combat-sports-t-shirt' },
-  { name: 'Built For The Fight Tee', price: '$34', image: '/site/tee.webp', url: 'https://www.etsy.com/listing/4541697432/inspired-by-champions-built-for-the' },
+  { name: 'Every Fight Has A Formula', price: '$49.95', image: '/site/product-ringside-tee.jpg', url: 'https://www.etsy.com/listing/4552218538/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'Fighting Is In The Bones', price: '$49.95', image: '/site/product-fight-tee.jpg', url: 'https://www.etsy.com/listing/4552212559/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'The Fight Factory', price: '$49.95', image: '/site/product-bkfc-tee.jpg', url: 'https://www.etsy.com/listing/4552225010/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'Raw Dawg', price: '$49.95', image: '/site/apparel-tee.webp', url: 'https://www.etsy.com/listing/4549330994/fantasy-mmadness-combat-sports-t-shirt' },
+  { name: 'The Darkness Walks', price: '$49.95', image: '/site/tee.webp', url: 'https://www.etsy.com/listing/4541697432/inspired-by-champions-built-for-the' },
 ];
 
 // Real fighters from the site's own photo library (public/images/fmm-experience),
