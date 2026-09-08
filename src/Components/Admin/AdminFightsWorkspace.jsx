@@ -47,6 +47,44 @@ const getTitle = (fight) => fight?.matchName || `${fight?.matchFighterA || 'Figh
 const formatDate = (fight) => fight?.matchDate?.split?.('T')?.[0] || 'Date pending';
 const formatTime = (fight) => fight?.matchTime || 'Time pending';
 
+// Fight-operations economics, mirroring the break-even guard the server
+// enforces at settlement (declaredPot / entryFee, minimumEntrants falling
+// back to that break-even figure). Lets the desk show risk at a glance
+// instead of only after settlement fails.
+const renderEntrantsCell = (fight) => {
+  if (fight?.sourceType === 'shadow' || fight?.entrants == null) {
+    return <span className="admin-cell-stack"><small>Shadow template</small></span>;
+  }
+  const entryFee = Number(fight.matchTokens) || 0;
+  const entrants = Number(fight.entrants) || 0;
+  const free = entryFee <= 0;
+  if (free) {
+    return <span className="admin-cell-stack"><strong>{entrants}</strong><small>Free contest</small></span>;
+  }
+  const breakEven = Number(fight.breakEvenEntrants) || 0;
+  const minimumEntrants = Number(fight.minimumEntrants) || breakEven;
+  const guarded = fight.autoRefundIfShort !== false;
+  let badgeClass = '';
+  let label;
+  if (!guarded) {
+    badgeClass = 'is-warning';
+    label = 'Unguarded';
+  } else if (entrants >= minimumEntrants) {
+    badgeClass = 'is-success';
+    label = 'Covered';
+  } else {
+    badgeClass = 'is-warning';
+    label = 'Short';
+  }
+  return (
+    <span className="admin-cell-stack">
+      <strong>{entrants} / {minimumEntrants}</strong>
+      <small>Break-even {breakEven}</small>
+      <span className={`admin-status-badge ${badgeClass}`}>{label}</span>
+    </span>
+  );
+};
+
 const TAB_COPY = [
   { key: 'all', label: 'All fights' },
   { key: 'ongoing', label: 'Active scoring' },
@@ -658,7 +696,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <div className="admin-data-table-scroll">
           <table className="admin-data-table admin-fights-table">
             <thead>
-              <tr><th>Select</th><th>Fight</th><th>Sport</th><th>Website</th><th>Schedule</th><th>Status</th><th>Entry</th><th>Prize</th><th>Actions</th></tr>
+              <tr><th>Select</th><th>Fight</th><th>Sport</th><th>Website</th><th>Schedule</th><th>Status</th><th>Entry</th><th>Prize</th><th>Entrants</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {filteredRows.length ? filteredRows.map((fight, index) => {
@@ -699,6 +737,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     <td><span className={`admin-status-badge ${isFinished ? 'is-success' : status === 'Ongoing' ? 'is-warning' : ''}`}>{status}</span></td>
                     <td>{`${Number(fight.matchTokens || 0).toLocaleString()} tokens`}</td>
                     <td>{Number(fight.pot || 0) ? `$${Number(fight.pot).toLocaleString()}` : '—'}</td>
+                    <td>{renderEntrantsCell(fight)}</td>
                     <td>
                       <div className="admin-row-actions admin-table-actions">
                         {isFinished ? <button type="button" onClick={() => openScores(fight)}><FaEye /> Scores</button> : <button type="button" onClick={() => openScoring(fight)}><FaTrophy /> Score</button>}
