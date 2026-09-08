@@ -140,6 +140,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedScore, setSelectedScore] = useState(null);
   const [selectedScoresView, setSelectedScoresView] = useState(null);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
+  const [selectedEconomics, setSelectedEconomics] = useState(null);
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [promotionUpdatingId, setPromotionUpdatingId] = useState('');
@@ -430,6 +431,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const openScoring = (fight) => setSelectedScore({ id: getId(fight), filter: 'normal' });
   const openScores = (fight) => setSelectedScoresView({ id: getId(fight), filter: 'normal' });
   const openPromotion = (fight) => setSelectedPromotion(fight);
+  const openEconomics = (fight) => setSelectedEconomics(fight);
 
   const toggleHomepagePromotion = async (fight) => {
     const id = getId(fight);
@@ -615,6 +617,32 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     );
   }
 
+  if (selectedEconomics) {
+    const f = selectedEconomics;
+    const entryFee = Number(f.matchTokens) || 0;
+    const pot = Number(f.pot) || 0;
+    const breakEven = Number(f.breakEvenEntrants) || 0;
+    const minimumEntrants = Number(f.minimumEntrants) || breakEven;
+    const entrants = Number(f.entrants) || 0;
+    const guarded = f.autoRefundIfShort !== false;
+    return (
+      <div className="admin-workspace">
+        <section className="admin-page-heading admin-page-heading-compact">
+          <div><span>Fight operations</span><h2>{getTitle(f)}</h2><p>Pot, entry fee, break-even and live entrants for this fight.</p></div>
+          <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
+        </section>
+        <div className="admin-cell-stack" style={{ gap: 14, padding: 20, border: '1px solid var(--ff-border, var(--admin-border))', borderRadius: 14, maxWidth: 480 }}>
+          <div><strong>Entry fee:</strong> {entryFee.toLocaleString()} tokens</div>
+          <div><strong>Declared pot:</strong> {pot ? `$${pot.toLocaleString()}` : 'Free contest'}</div>
+          <div><strong>Break-even entrants:</strong> {breakEven || '—'}</div>
+          <div><strong>Minimum entrants required:</strong> {minimumEntrants || '—'}</div>
+          <div><strong>Live entrants right now:</strong> {f.sourceType === 'shadow' ? 'Shadow template — no entries' : entrants}</div>
+          <div><strong>Auto-refund guard:</strong> {guarded ? 'On — voids and refunds if short' : 'Off — unguarded'}</div>
+        </div>
+      </div>
+    );
+  }
+
   if (selectedPromotion) {
     return (
       <div className="admin-workspace">
@@ -740,6 +768,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     <td>{renderEntrantsCell(fight)}</td>
                     <td>
                       <div className="admin-row-actions admin-table-actions">
+                        <button type="button" onClick={() => openEconomics(fight)}><FaFistRaised /> Economics</button>
                         {isFinished ? <button type="button" onClick={() => openScores(fight)}><FaEye /> Scores</button> : <button type="button" onClick={() => openScoring(fight)}><FaTrophy /> Score</button>}
                         {isFinished && <button type="button" onClick={() => openScoring(fight)}><FaEdit /> Edit scores</button>}
                         {isLive && <button type="button" onClick={() => openPromotion(fight)}><FaVideo /> Promote</button>}
@@ -784,7 +813,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                   </tr>
                 );
-              }) : <tr><td colSpan="9"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term, clear filters, or click Refresh to reload the /match registry.</span></div></td></tr>}
+              }) : <tr><td colSpan="10"><div className="admin-empty-table"><FaFistRaised /><strong>No fights found</strong><span>Try another search term, clear filters, or click Refresh to reload the /match registry.</span></div></td></tr>}
             </tbody>
           </table>
         </div>
