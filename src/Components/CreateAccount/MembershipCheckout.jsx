@@ -56,6 +56,8 @@ export default function MembershipCheckout() {
   const [submitting, setSubmitting] = useState(false);
   const [paymentResult, setPaymentResult] = useState(null);
   const [returnCountdown, setReturnCountdown] = useState(null);
+  const [card, setCard] = useState({ number: '', month: '', year: '', code: '' });
+  const [acceptConfig, setAcceptConfig] = useState(null);
   const idempotencyKey = useRef('');
   const returnOrder = String(router.query.order || '').trim();
   const checkoutReturnStatus = String(router.query.status || '').trim().toLowerCase();
@@ -124,6 +126,51 @@ export default function MembershipCheckout() {
   const bonusCoins = firstPurchaseEligible ? baseCoins : 0;
   const creditedCoins = isFmPlus ? 1000 : baseCoins + bonusCoins;
 
+  useEffect(() => {
+    let cancelled = false;
+    // Accept.js tokenizes the card in the browser and hands back an opaque
+    // token — the raw card number never reaches our server, so this stays out
+    // of PCI scope while keeping the fields on this page instead of a redirect.
+    (async () => {
+      try {
+        const response = await fetch(buildPublicApiUrl('/api/checkout/accept-js-config'));
+        const payload = await response.json().catch(() => ({}));
+        if (cancelled || !response.ok || !payload.ok) return;
+        if (!document.querySelector(`script[src="${payload.jsUrl}"]`)) {
+          const script = document.createElement('script');
+          script.src = payload.jsUrl;
+          script.async = true;
+          document.head.appendChild(script);
+        }
+        setAcceptConfig(payload);
+      } catch (_error) { /* falls back to the status message on submit */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const updateCard = (event) => {
+    const { name, value } = event.target;
+    if (name === 'number') return setCard((current) => ({ ...current, number: value.replace(/[^0-9]/g, '').slice(0, 19) }));
+    if (name === 'code') return setCard((current) => ({ ...current, code: value.replace(/[^0-9]/g, '').slice(0, 4) }));
+    if (name === 'expiry') {
+      const digits = value.replace(/[^0-9]/g, '').slice(0, 4);
+      return setCard((current) => ({ ...current, month: digits.slice(0, 2), year: digits.slice(2, 4) }));
+    }
+  };
+
+  const tokenizeCard = () => new Promise((resolve, reject) => {
+    if (!window.Accept || !acceptConfig) return reject(new Error('Secure card entry is still loading. Wait a moment and try again.'));
+    const authData = { clientKey: acceptConfig.clientKey, apiLoginID: acceptConfig.apiLoginID };
+    const cardData = { cardNumber: card.number, month: card.month, year: card.year, cardCode: card.code };
+    window.Accept.dispatchData({ authData, cardData }, (response) => {
+      if (response.messages?.resultCode === 'Error') {
+        reject(new Error(response.messages?.message?.[0]?.text || 'The card could not be validated.'));
+        return;
+      }
+      resolve({ dataDescriptor: response.opaqueData.dataDescriptor, dataValue: response.opaqueData.dataValue });
+    });
+  });
+
   const changeQuantity = (sku, delta) => {
     idempotencyKey.current = '';
     setCart((current) => ({ ...current, [sku]: Math.min(10, Math.max(0, Number(current[sku] || 0) + delta)) }));
@@ -164,9 +211,11 @@ export default function MembershipCheckout() {
     if (!form.ageConfirmed || !form.termsAccepted) return setStatus('Confirm age eligibility and accept the terms to continue.');
     const name = splitName(form.name);
     if (!user?.email && (!name.firstName || !name.lastName)) return setStatus('Enter the first and last name shown on the payment card.');
+    if (!card.number || !card.month || !card.year || !card.code) return setStatus('Enter your card number, expiration and security code.');
     setSubmitting(true);
     setStatus('');
     try {
+      const opaqueData = await tokenizeCard();
       const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
       if (!idempotencyKey.current) {
         idempotencyKey.current = typeof window !== 'undefined' && window.crypto?.randomUUID
@@ -180,11 +229,16 @@ export default function MembershipCheckout() {
           ...(isFmPlus ? { plan: fmPlusPlan } : { items: items.map(({ sku, quantity }) => ({ sku, quantity })) }),
           email: form.email,
           billing: { ...form, ...name },
+          opaqueData,
           returnUrl: `${window.location.origin}/checkout?product=${isFmPlus ? 'fm-plus' : 'fm-coins'}&status=return${safeReturnTo !== '/' ? `&returnTo=${encodeURIComponent(safeReturnTo)}` : ''}`,
         }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || 'Secure checkout could not be created.');
+      if (payload.charged) {
+        setPaymentResult({ state: 'success', orderNumber: payload.orderNumber, creditedCoins: payload.creditedCoins });
+        return;
+      }
       if (!payload.checkoutUrl) throw new Error('Secure payment is not configured yet.');
       if (payload.checkoutMethod === 'POST' && payload.formToken) {
         const hostedForm = document.createElement('form');
@@ -226,7 +280,7 @@ export default function MembershipCheckout() {
 
           {checkoutReturnStatus === 'cancelled' ? <section className="fm-checkout-card fm-payment-result is-cancelled">
             <FaArrowLeft /><h2>PAYMENT CANCELLED</h2><p>No payment was charged or credited. Your selection is still available if you want to try again.</p><Link href={`/checkout?product=${isFmPlus ? 'fm-plus&plan=pass' : 'fm-coins'}`}>RETURN TO CHECKOUT</Link>
-          </section> : checkoutReturnStatus === 'return' ? <section className={`fm-checkout-card fm-payment-result is-${paymentResult?.state || 'checking'}`}>
+          </section> : (checkoutReturnStatus === 'return' || paymentResult?.state === 'success') ? <section className={`fm-checkout-card fm-payment-result is-${paymentResult?.state || 'checking'}`}>
             {paymentResult?.state === 'success' ? <FaCheck /> : <FaShieldAlt />}
             <h2>{paymentResult?.state === 'success' ? 'PAYMENT CONFIRMED' : paymentResult?.state === 'failed' ? 'PAYMENT NEEDS ATTENTION' : paymentResult?.state === 'pending' ? 'PAYMENT IS PROCESSING' : 'VERIFYING PAYMENT'}</h2>
             <p>{paymentResult?.state === 'success'
@@ -234,7 +288,7 @@ export default function MembershipCheckout() {
               : paymentResult?.state === 'failed'
                 ? paymentResult.message || 'The payment could not be confirmed. Please contact support with the order reference.'
                 : 'The secure processor is confirming the transaction. Coins are credited only after approval.'}</p>
-            <small>ORDER: {returnOrder || 'PENDING'}</small>
+            <small>ORDER: {paymentResult?.orderNumber || returnOrder || 'PENDING'}</small>
             {paymentResult?.state === 'success' && returnCountdown !== null && returnCountdown > 0 ? (
               <small className="fm-checkout-autoreturn">Taking you back in {returnCountdown}…</small>
             ) : null}
@@ -289,10 +343,16 @@ export default function MembershipCheckout() {
                 <label><span>ZIP / POSTAL *</span><input name="zipCode" required value={form.zipCode} onChange={update} autoComplete="postal-code" /></label>
                 <label><span>COUNTRY *</span><input name="country" required value={form.country} onChange={update} autoComplete="country" /></label>
               </div>
+              <div className="fm-card-title"><span>{isFmPlus ? '3' : '2'}</span><div><h2>CARD DETAILS</h2><p>Encrypted directly to the payment processor — never stored on our servers.</p></div></div>
+              <div className="fm-cart-fields">
+                <label className="is-wide"><span>CARD NUMBER *</span><input inputMode="numeric" autoComplete="cc-number" placeholder="1234 5678 9012 3456" name="number" value={card.number} onChange={updateCard} required /></label>
+                <label><span>EXPIRATION (MM/YY) *</span><input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" name="expiry" value={card.month || card.year ? `${card.month}${card.year ? '/' + card.year : ''}` : ''} onChange={updateCard} required /></label>
+                <label><span>SECURITY CODE *</span><input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" name="code" value={card.code} onChange={updateCard} required /></label>
+              </div>
               <label className="fm-cart-check"><input type="checkbox" name="ageConfirmed" checked={form.ageConfirmed} onChange={update} /><span>I confirm that I am 18 or older and eligible to purchase.</span></label>
               <label className="fm-cart-check"><input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={update} /><span>I accept the <Link href="/terms">terms</Link> and <Link href="/privacy-policy">privacy policy</Link>.</span></label>
               <button className="fm-pay-button" type="submit" disabled={submitting || (!isFmPlus && !items.length)}>{submitting ? 'CREATING SECURE CHECKOUT…' : `PAY ${money(subtotalCents)} · ${isFmPlus ? `START ${selectedPlan.label.toUpperCase()}` : `GET ${creditedCoins.toLocaleString()} FM`}`}</button>
-              <small className="fm-security-note"><FaShieldAlt /> Card details are entered on the secure payment page. Fantasy MMAdness never sees or stores your card number.</small>
+              <small className="fm-security-note"><FaShieldAlt /> Card details are encrypted and sent directly to our payment processor. Fantasy MMAdness never sees or stores your card number.</small>
               {status ? <p className="fm-cart-status" role="alert">{status}</p> : null}
             </section>
           </form>}

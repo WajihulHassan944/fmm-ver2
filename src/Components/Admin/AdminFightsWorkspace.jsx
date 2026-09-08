@@ -625,20 +625,38 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const minimumEntrants = Number(f.minimumEntrants) || breakEven;
     const entrants = Number(f.entrants) || 0;
     const guarded = f.autoRefundIfShort !== false;
+    const covered = f.sourceType !== 'shadow' && guarded && entrants >= minimumEntrants;
+    const metrics = [
+      { label: 'Entry fee', value: `${entryFee.toLocaleString()} tokens`, accent: '#f7b51b' },
+      { label: 'Declared pot', value: pot ? `$${pot.toLocaleString()}` : 'Free contest', accent: '#35d45d' },
+      { label: 'Break-even entrants', value: breakEven || '\u2014', accent: '#168fe6' },
+      { label: 'Minimum entrants required', value: minimumEntrants || '\u2014', accent: '#168fe6' },
+      { label: 'Live entrants right now', value: f.sourceType === 'shadow' ? 'Shadow template' : entrants, accent: covered ? '#35d45d' : '#f7b51b' },
+    ];
     return (
-      <div className="admin-workspace">
-        <section className="admin-page-heading admin-page-heading-compact">
-          <div><span>Fight operations</span><h2>{getTitle(f)}</h2><p>Pot, entry fee, break-even and live entrants for this fight.</p></div>
+      <div className="admin-workspace" style={{ background: '#05080d', minHeight: '100%', padding: 24, borderRadius: 16 }}>
+        <section style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#ff2a35', marginBottom: 7 }}>Fight operations</div>
+            <h1 style={{ fontFamily: 'var(--ff-display, Impact, sans-serif)', fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>{getTitle(f)}</h1>
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(245,247,251,.66)', margin: '8px 0 0', maxWidth: 620, lineHeight: 1.45 }}>Pot, entry fee, break-even and live entrants for this fight.</p>
+          </div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
-        <div className="admin-cell-stack" style={{ gap: 14, padding: 20, border: '1px solid var(--ff-border, var(--admin-border))', borderRadius: 14, maxWidth: 480 }}>
-          <div><strong>Entry fee:</strong> {entryFee.toLocaleString()} tokens</div>
-          <div><strong>Declared pot:</strong> {pot ? `$${pot.toLocaleString()}` : 'Free contest'}</div>
-          <div><strong>Break-even entrants:</strong> {breakEven || '—'}</div>
-          <div><strong>Minimum entrants required:</strong> {minimumEntrants || '—'}</div>
-          <div><strong>Live entrants right now:</strong> {f.sourceType === 'shadow' ? 'Shadow template — no entries' : entrants}</div>
-          <div><strong>Auto-refund guard:</strong> {guarded ? 'On — voids and refunds if short' : 'Off — unguarded'}</div>
-        </div>
+        <section style={{ background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: '1px solid rgba(255,255,255,.12)', borderRadius: 16, padding: 20 }}>
+          <div style={{ display: 'grid', gap: 13, gridTemplateColumns: 'repeat(auto-fit, minmax(200px,1fr))', marginBottom: 18 }}>
+            {metrics.map((m) => (
+              <div key={m.label} style={{ borderRadius: 11, border: '1px solid rgba(255,255,255,.12)', background: 'rgba(255,255,255,.03)', padding: 16 }}>
+                <div style={{ fontFamily: 'var(--ff-display, Impact, sans-serif)', fontSize: 12, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)', marginBottom: 8 }}>{m.label}</div>
+                <div style={{ fontFamily: 'var(--ff-display, Impact, sans-serif)', fontSize: 30, fontWeight: 900, color: m.accent, fontVariantNumeric: 'tabular-nums' }}>{m.value}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderRadius: 11, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--ff-display, Impact, sans-serif)', fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
+            <span style={{ fontFamily: 'var(--ff-display, Impact, sans-serif)', fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short' : 'Off \u2014 unguarded'}</span>
+          </div>
+        </section>
       </div>
     );
   }
