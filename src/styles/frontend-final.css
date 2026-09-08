@@ -710,7 +710,7 @@ label,
 .admin-cell-stack { display: grid; gap: 3px; }
 .admin-cell-stack small,
 .admin-cell-note { color: var(--ff-muted); display: block; font-size: 11px; margin-top: 3px; }
-.admin-fight-cell { align-items: center; display: grid; gap: 10px; grid-template-columns: 48px minmax(0,1fr) 48px; min-width: 250px; }
+.admin-fight-cell { align-items: center; display: grid; gap: 8px; grid-template-columns: 36px minmax(0,1fr); min-width: 0; max-width: 190px; }
 .admin-fight-cell img { background: rgba(255,255,255,.04); border: 1px solid var(--ff-border); border-radius: 9px; height: 48px; object-fit: cover; width: 48px; }
 .admin-fight-cell > div { display: grid; gap: 3px; }
 .admin-fight-cell strong { line-height: 1.2; }

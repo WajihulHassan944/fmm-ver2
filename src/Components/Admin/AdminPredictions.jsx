@@ -28,6 +28,9 @@ const MMA_FIELDS = ['ST', 'KI', 'KN', 'EL', 'RW', 'RL', 'KO', 'SP'];
 // showing them as manual +1 fields too is the old, confusing flow the redesign
 // replaces. Only the fighter's real raw stats stay in the manual grid.
 const AUTO_FIELDS = ['RW', 'RL', 'KO', 'SP'];
+// TP is calculated from HP + BP in the back office, never hand-entered
+// (players' free-guess TP prediction is separate and unrelated to this).
+const COMPUTED_FIELDS = ['TP'];
 const emptyStats = (category) => Object.fromEntries((category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS).map((key) => [key, '']));
 const normalizeNumber = (value) => {
   if (value === '' || value === null || value === undefined) return 0;
@@ -73,7 +76,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   const category = match?.matchCategory === 'boxing' ? 'boxing' : 'mma';
   const statFields = category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS;
-  const manualStatFields = statFields.filter((field) => !AUTO_FIELDS.includes(field));
+  const manualStatFields = statFields.filter((field) => !AUTO_FIELDS.includes(field) && !COMPUTED_FIELDS.includes(field));
   const roundWinnerIsA = normalizeNumber(fighterOneStats.RW) === SCORE_POINTS.RW;
   const roundWinnerIsB = normalizeNumber(fighterTwoStats.RW) === SCORE_POINTS.RW;
   const finisherIsA = normalizeNumber(fighterOneStats.KO) === SCORE_POINTS.KO;
@@ -104,18 +107,20 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   const handleMetricInput = (fighter, stat, value) => {
     const setter = fighter === 'one' ? setFighterOneStats : setFighterTwoStats;
-    setter((stats) => ({
-      ...stats,
-      // Total punches is intentionally manual. HP/BP never auto-update TP.
-      [stat]: value === '' ? '' : String(Math.max(0, normalizeNumber(value))),
-    }));
+    setter((stats) => {
+      const next = { ...stats, [stat]: value === '' ? '' : String(Math.max(0, normalizeNumber(value))) };
+      if (category === 'boxing' && (stat === 'HP' || stat === 'BP')) {
+        next.TP = String(normalizeNumber(next.HP) + normalizeNumber(next.BP));
+      }
+      return next;
+    });
   };
 
-  const handleButtonClick = (fighter, stat) => {
+  const handleButtonClick = (fighter, stat, delta = 1) => {
     if (fighter === 'one' && stat === 'RW') { setShowRWPopup(true); return; }
     if (fighter === 'one' && stat === 'KO') { setShowKOPopup(true); return; }
     const current = fighter === 'one' ? fighterOneStats : fighterTwoStats;
-    handleMetricInput(fighter, stat, normalizeNumber(current[stat]) + 1);
+    handleMetricInput(fighter, stat, normalizeNumber(current[stat]) + delta);
   };
 
   const handleSave = async () => {
@@ -314,11 +319,15 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     const tone = fighter === 'one' ? 'red' : 'blue';
     return (
       <article className={`admin-score-metric is-${tone}`} key={`${fighter}-${stat}`}>
-        <button type="button" className="admin-score-increment" onClick={() => handleButtonClick(fighter, stat)}>
-          <strong>{FIELD_LABELS[stat]}</strong>
-          <span>{stat}</span>
-          <small>Tap to add +1</small>
-        </button>
+        <div className="admin-score-increment admin-score-stepper">
+          <button type="button" className="admin-score-stepper-btn" aria-label={`Subtract one ${FIELD_LABELS[stat]}`} onClick={() => handleButtonClick(fighter, stat, -1)}>−</button>
+          <div className="admin-score-stepper-label">
+            <strong>{FIELD_LABELS[stat]}</strong>
+            <span>{stat}</span>
+            <small>Tap +/−, or type the count</small>
+          </div>
+          <button type="button" className="admin-score-stepper-btn" aria-label={`Add one ${FIELD_LABELS[stat]}`} onClick={() => handleButtonClick(fighter, stat, 1)}>+</button>
+        </div>
         <label>
           <span>{stat} value</span>
           <input
@@ -409,10 +418,22 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         <div className="admin-score-fighter-panel is-red">
           <header><span>Fighter A</span><h3>{match.matchFighterA}</h3><p>Raw stats only — round winner and finish are set above.</p></header>
           <div>{manualStatFields.map((stat) => renderMetric('one', stat))}</div>
+          {category === 'boxing' && (
+            <article className="admin-score-metric admin-score-metric-computed is-red">
+              <div className="admin-score-computed-label"><strong>{FIELD_LABELS.TP}</strong><span>TP</span><small>Auto-totaled from HP + BP</small></div>
+              <div className="admin-score-computed-value">{normalizeNumber(fighterOneStats.TP)}</div>
+            </article>
+          )}
         </div>
         <div className="admin-score-fighter-panel is-blue">
           <header><span>Fighter B</span><h3>{match.matchFighterB}</h3><p>Raw stats only — round winner and finish are set above.</p></header>
           <div>{manualStatFields.map((stat) => renderMetric('two', stat))}</div>
+          {category === 'boxing' && (
+            <article className="admin-score-metric admin-score-metric-computed is-blue">
+              <div className="admin-score-computed-label"><strong>{FIELD_LABELS.TP}</strong><span>TP</span><small>Auto-totaled from HP + BP</small></div>
+              <div className="admin-score-computed-value">{normalizeNumber(fighterOneStats.TP)}</div>
+            </article>
+          )}
         </div>
       </section>
 
