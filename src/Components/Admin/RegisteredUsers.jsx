@@ -28,7 +28,14 @@ const RegisteredUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminJsonHeaders() });
       const data = await response.json();
-      setUsers(data);
+      // Was unsorted (server order + no client sort) — a brand-new signup
+      // could land anywhere in the list instead of at the top, which is
+      // exactly why it didn't visibly appear as "new" even though the push
+      // notification fired correctly.
+      const sorted = Array.isArray(data)
+        ? [...data].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        : data;
+      setUsers(sorted);
     } catch (error) {
       console.error('Error fetching users:', error);
     }

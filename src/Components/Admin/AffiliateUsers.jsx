@@ -111,8 +111,11 @@ const AffiliateUsers = () => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
       const data = await response.json();
-      setAffiliateUsers(data);
-      setFilteredUsers(data);
+      const sorted = Array.isArray(data)
+        ? [...data].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        : data;
+      setAffiliateUsers(sorted);
+      setFilteredUsers(sorted);
     } catch (error) {
       console.error('Error fetching affiliate users:', error);
     }
