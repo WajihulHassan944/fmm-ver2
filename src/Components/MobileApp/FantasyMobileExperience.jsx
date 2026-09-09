@@ -661,7 +661,12 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   }, [loadMe]);
 
   const onSubscribe = useCallback(async (payload = {}) => {
-    const result = await playerRequest('/api/checkout/fm-plus-orders', { method: 'POST', body: JSON.stringify(payload) });
+    const idempotencyKey = payload.idempotencyKey || `plus-${payload.plan || 'default'}-${Math.floor(Date.now() / 60000)}`.slice(0, 150);
+    const result = await playerRequest('/api/checkout/fm-plus-orders', {
+      method: 'POST',
+      headers: { 'idempotency-key': idempotencyKey },
+      body: JSON.stringify({ ...payload, idempotencyKey }),
+    });
     if (result.ok) await loadMe();
     return result;
   }, [loadMe]);
