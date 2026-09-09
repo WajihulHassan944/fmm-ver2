@@ -117,13 +117,13 @@ const ResponsiblePlay = () => (
         <p>
           If you are worried about a family member or a friend, the same helpline will talk to you.
           You cannot self-exclude on someone else's behalf — the account holder has to do that — but
-          you can tell us at support@fantasymmadness.com if you believe an account belongs to someone
+          you can tell us at contact@fantasymmadness.com if you believe an account belongs to someone
           under age, or to someone who has already excluded themselves elsewhere.
         </p>
 
         <h2>Getting hold of us</h2>
         <p style={{ marginBottom: 4 }}>
-          support@fantasymmadness.com — monitored every business day.
+          contact@fantasymmadness.com — monitored every business day.
         </p>
         <p>
           If you write to us about limits or exclusion, we will act on it before we ask you anything

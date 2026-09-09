@@ -118,7 +118,7 @@ const PrivacyPolicy = () => (
         <p>
           The service is not for anyone under 18, and we do not knowingly collect information from
           children. If you believe a minor has created an account, tell us at
-          support@fantasymmadness.com and we will close it and delete the data.
+          contact@fantasymmadness.com and we will close it and delete the data.
         </p>
 
         <h2>7. Security</h2>
@@ -138,7 +138,7 @@ const PrivacyPolicy = () => (
         <h2>9. Contact</h2>
         <p style={{ marginBottom: 4 }}>
           Fantasy MMAdness LLC, a Georgia limited liability company<br />
-          support@fantasymmadness.com
+          contact@fantasymmadness.com
         </p>
         <p>
           Email is our channel for privacy requests and we monitor it every business day. Where a law

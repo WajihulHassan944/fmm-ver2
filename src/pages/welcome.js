@@ -729,7 +729,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
                 <a href="/terms" style={{ color: 'rgba(255,255,255,.72)' }}>Terms of Use</a>
                 <a href="/privacy" style={{ color: 'rgba(255,255,255,.72)' }}>Privacy</a>
-                <a href="mailto:support@fantasymmadness.com" style={{ color: 'rgba(255,255,255,.72)' }}>Support</a>
+                <a href="mailto:contact@fantasymmadness.com" style={{ color: 'rgba(255,255,255,.72)' }}>Support</a>
               </div>
             </div>
           </div>

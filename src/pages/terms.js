@@ -90,7 +90,7 @@ const TermsOfUse = () => (
         <p>
         You are responsible for everything that happens under your account, including keeping your password
         confidential. Do not let anyone else use your account. If you believe someone has accessed it without
-        your permission, contact us immediately at support@fantasymmadness.com.
+        your permission, contact us immediately at contact@fantasymmadness.com.
         </p>
 
         <h3>Who may not enter a paid contest</h3>
@@ -501,7 +501,7 @@ const TermsOfUse = () => (
 
         <h2>20. Complaints and disputes</h2>
         <p>
-        If something goes wrong, contact us first at support@fantasymmadness.com. We will acknowledge your
+        If something goes wrong, contact us first at contact@fantasymmadness.com. We will acknowledge your
         complaint within 5 business days and aim to resolve it within 30 days, and in any event within 90 days.
         If we decline what you have asked for, we will tell you why.
         </p>
@@ -512,7 +512,7 @@ const TermsOfUse = () => (
         <h3>Informal resolution first</h3>
         <p>
         Before starting a formal proceeding, you agree to give us 30 days to resolve the matter informally.
-        Send a written notice of your claim to support@fantasymmadness.com describing what happened and what you
+        Send a written notice of your claim to contact@fantasymmadness.com describing what happened and what you
         want. We will do the same before bringing a claim against you. This step is a requirement, and either
         party may ask a court or arbitrator to enforce it.
         </p>
@@ -543,7 +543,7 @@ const TermsOfUse = () => (
 
         <h3>Your right to opt out</h3>
         <p>
-        You may reject this arbitration agreement by emailing support@fantasymmadness.com with your account
+        You may reject this arbitration agreement by emailing contact@fantasymmadness.com with your account
         email and the words "arbitration opt-out" <strong>within 30 days of first accepting these Terms</strong>.
         Opting out does not affect anything else in these Terms, and we will not close your account or treat you
         differently for doing so. If we later change this Section in a way that materially affects you, you will
@@ -616,7 +616,7 @@ const TermsOfUse = () => (
         <h2>25. Contact</h2>
         <p style={{ marginBottom: '4pt' }}>
         Fantasy MMAdness LLC, a Georgia limited liability company<br />
-        support@fantasymmadness.com
+        contact@fantasymmadness.com
         </p>
         <p>
         Email is our channel for all account, contest, payment and complaint matters, and we monitor it every
