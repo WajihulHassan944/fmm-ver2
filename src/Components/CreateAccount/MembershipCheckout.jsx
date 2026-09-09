@@ -167,6 +167,10 @@ export default function MembershipCheckout() {
         reject(new Error(response.messages?.message?.[0]?.text || 'The card could not be validated.'));
         return;
       }
+      if (!response.opaqueData?.dataValue) {
+        reject(new Error('The card processor did not return a payment token. Please re-check the card details and try again.'));
+        return;
+      }
       resolve({ dataDescriptor: response.opaqueData.dataDescriptor, dataValue: response.opaqueData.dataValue });
     });
   });
