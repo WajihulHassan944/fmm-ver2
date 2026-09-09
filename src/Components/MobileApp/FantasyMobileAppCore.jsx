@@ -2015,28 +2015,45 @@ class FantasyMobileAppCore extends React.Component {
     const required = [['firstName', 'First name'], ['lastName', 'Last name'],
       ['address', 'Street address'], ['city', 'City'], ['state', 'State'], ['zipCode', 'ZIP code']];
     const missing = required.filter(([key]) => !String(b[key] || '').trim()).map(([, label]) => label);
-    if (missing.length) { this.showToast('Still needed: ' + missing.join(', ')); return; }
+    if (missing.length) {
+      this.setState({ billingError: 'Still needed: ' + missing.join(', ') });
+      this.showToast('Still needed: ' + missing.join(', '));
+      return;
+    }
+    this.setState({ billingError: null });
 
     this.safeSetState({ checkoutBusy: true });
-    const result = await this.props.onPurchaseCoins?.({
-      product: 'fm-coins',
-      items: this.state.cart.map(({ sku, quantity }) => ({ sku, quantity })),
-      billing: {
-        firstName: b.firstName.trim(),
-        lastName: b.lastName.trim(),
-        address: b.address.trim(),
-        city: b.city.trim(),
-        state: b.state.trim().toUpperCase(),
-        zipCode: b.zipCode.trim(),
-        country: b.country || 'US',
-      },
-    });
+    let result;
+    try {
+      result = await this.props.onPurchaseCoins?.({
+        product: 'fm-coins',
+        items: this.state.cart.map(({ sku, quantity }) => ({ sku, quantity })),
+        billing: {
+          firstName: b.firstName.trim(),
+          lastName: b.lastName.trim(),
+          address: b.address.trim(),
+          city: b.city.trim(),
+          state: b.state.trim().toUpperCase(),
+          zipCode: b.zipCode.trim(),
+          country: b.country || 'US',
+        },
+      });
+    } catch (err) {
+      result = { ok: false, message: err?.message || 'Request failed', caught: true };
+    }
     this.safeSetState({ checkoutBusy: false });
 
-    // On success the browser is already navigating to the payment page, so there
-    // is nothing to show. Only a failure needs a message.
-    if (result && result.ok === false) {
-      this.showToast(result.message || 'Could not start checkout');
+    // TEMPORARY: dump the raw response on screen (selectable/copyable) so a
+    // customer hitting a checkout problem can paste it back to us verbatim —
+    // remove this block once the payment issue is confirmed fixed.
+    if (result && result.ok !== true) {
+      this.setState({ billingError: 'Still needed: ' + (result.message || 'unknown error'), checkoutDebugDump: JSON.stringify(result, null, 2) });
+      return;
+    }
+    if (!result || result.redirecting !== true) {
+      // Not redirecting to the gateway and not an explicit failure either —
+      // surface whatever we got instead of leaving the customer stuck silently.
+      this.setState({ checkoutDebugDump: JSON.stringify(result || { ok: false, message: 'No response received' }, null, 2) });
     }
   };
 
@@ -5229,6 +5246,23 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 3 } }, 'BILLING DETAILS'),
         React.createElement('div', { key: 'why', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', lineHeight: 1.5, marginBottom: 13 } },
           'Your bank checks this address against your card. You enter your card on the next screen — on our payment provider\u2019s secure page, never here.'
+        ),
+        s.billingError && React.createElement('div', {
+          key: 'billing-error',
+          style: { marginBottom: 12, padding: '10px 12px', borderRadius: 9, background: 'rgba(239,68,68,.12)', border: '1px solid rgba(239,68,68,.4)', color: '#fca5a5', fontSize: 11.5, fontWeight: 700 },
+        }, s.billingError),
+        s.checkoutDebugDump && React.createElement('div', { key: 'debug-dump', style: { marginBottom: 12 } },
+          React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 4, letterSpacing: .3 } }, 'COPY THIS AND SEND IT TO SUPPORT'),
+          React.createElement('textarea', {
+            readOnly: true,
+            value: s.checkoutDebugDump,
+            onFocus: (ev) => ev.target.select(),
+            style: {
+              width: '100%', minHeight: 130, padding: 10, borderRadius: 9, boxSizing: 'border-box',
+              background: 'rgba(0,0,0,.4)', border: '1px solid rgba(255,255,255,.25)', color: '#fff',
+              fontSize: 10.5, fontFamily: 'monospace', resize: 'vertical',
+            },
+          })
         ),
         total > 0 && React.createElement('div', {
           key: 'total',
