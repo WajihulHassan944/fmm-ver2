@@ -329,18 +329,18 @@ function AppContent({ children }) {
   // it on phone so the standalone mobile app topbar remains clean.
   // The new homepage (pages/welcome.js, reused by pages/index.js) brings its own
   // nav and footer, so the legacy site chrome must not be layered on top of it.
+  const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
+  const forcePrototypeExperience = Boolean(exactMobileTab);
   const hideLayout = isAdministrationRoute || isStandaloneDemoRoute
     || router.pathname.startsWith("/score")
-    || router.pathname === "/" || router.pathname === "/welcome";
+    || router.pathname === "/" || router.pathname === "/welcome" || forcePrototypeExperience;
   const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,
   );
-  const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
   // Product routes are one responsive app now: use the approved app shell on
   // both phone and desktop instead of falling back to legacy page bodies.
-  const forcePrototypeExperience = Boolean(exactMobileTab);
   // Render the phone shell in the initial HTML for mapped routes. CSS keeps it
   // hidden on desktop, while mobile no longer waits for a post-hydration chunk
   // and media-query state update before the app appears.
