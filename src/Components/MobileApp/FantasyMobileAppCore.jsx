@@ -2010,7 +2010,7 @@ class FantasyMobileAppCore extends React.Component {
     this.openModal('billing');
   };
 
-  submitCheckout = async () => {
+  submitCheckout = () => {
     const b = this.state.billing;
     const required = [['firstName', 'First name'], ['lastName', 'Last name'],
       ['address', 'Street address'], ['city', 'City'], ['state', 'State'], ['zipCode', 'ZIP code']];
@@ -2021,42 +2021,16 @@ class FantasyMobileAppCore extends React.Component {
       return;
     }
     this.setState({ billingError: null });
-
-    this.safeSetState({ checkoutBusy: true });
-    let result;
-    try {
-      result = await this.props.onPurchaseCoins?.({
-        product: 'fm-coins',
-        items: this.state.cart.map(({ sku, quantity }) => ({ sku, quantity })),
-        billing: {
-          firstName: b.firstName.trim(),
-          lastName: b.lastName.trim(),
-          address: b.address.trim(),
-          city: b.city.trim(),
-          state: b.state.trim().toUpperCase(),
-          zipCode: b.zipCode.trim(),
-          country: b.country || 'US',
-        },
-      });
-    } catch (err) {
-      result = { ok: false, message: err?.message || 'Request failed', caught: true };
-    }
-    this.safeSetState({ checkoutBusy: false });
-
-    // TEMPORARY: dump the raw response on screen (selectable/copyable) so a
-    // customer hitting a checkout problem can paste it back to us verbatim —
-    // remove this block once the payment issue is confirmed fixed.
-    if (result && result.ok !== true) {
-      this.setState({ billingError: 'Still needed: ' + (result.message || 'unknown error'), checkoutDebugDump: JSON.stringify(result, null, 2) });
-      return;
-    }
-    if (!result || result.redirecting !== true) {
-      // Not redirecting to the gateway and not an explicit failure either —
-      // surface whatever we got instead of leaving the customer stuck silently.
-      this.setState({ checkoutDebugDump: JSON.stringify(result || { ok: false, message: 'No response received' }, null, 2) });
+    // Authorize.Net's hosted redirect page has a known account-side rendering
+    // bug (blank "Order Summary"). /checkout (MembershipCheckout.jsx) already
+    // does this correctly with Accept.js embedded card fields — no redirect,
+    // no hosted page — so send the player there instead of building the order
+    // here directly.
+    const cart = (this.state.cart || []).map(({ sku, quantity }) => `${sku}:${quantity}`).join(',');
+    if (typeof window !== 'undefined') {
+      window.location.assign(`/checkout?product=fm-coins&cart=${encodeURIComponent(cart)}`);
     }
   };
-
   vote = (fighter) => {
     if (this.state.userVote) return;
     this.setState(s => {
