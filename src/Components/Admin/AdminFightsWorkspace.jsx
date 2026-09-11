@@ -691,15 +691,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           {inputPill('Prize pool', 'pot', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: '$', disabled: isShadowFight })}
         </section>
 
-        <section style={sectionStyle}>
-          <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-            {badge('02')}
-            <div style={{ minWidth: 0 }}>
-              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entrants &amp; guard</h3>
-              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
-            </div>
-          </header>
-          {(() => { const pill = (label, unit, value, accent, bg) => (
+        {(() => {
+          const pill = (label, unit, value, accent, bg) => (
             <div style={{ marginBottom: 18 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
                 <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>{label}</span>
@@ -709,7 +702,17 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                 <div style={{ fontFamily: display, fontSize: 27, fontWeight: 900, color: accent, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
               </div>
             </div>
-          ); return pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }); })()}
+          );
+          return (
+        <section style={sectionStyle}>
+          <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
+            {badge('02')}
+            <div style={{ minWidth: 0 }}>
+              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entrants &amp; guard</h3>
+              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
+            </div>
+          </header>
+          {pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
           {inputPill('Minimum entrants required', 'minimumEntrants', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
           {pill('Live entrants right now', 'entrants', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
           <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
@@ -717,6 +720,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
           </div>
         </section>
+          );
+        })()}
 
         {dirty && (
           <div style={{ position: 'sticky', bottom: 16, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: '1px solid rgba(223,17,27,.5)', borderRadius: 16, padding: '16px 20px', marginBottom: 16 }}>
