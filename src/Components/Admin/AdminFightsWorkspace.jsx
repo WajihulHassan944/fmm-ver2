@@ -141,6 +141,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedScoresView, setSelectedScoresView] = useState(null);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [selectedEconomics, setSelectedEconomics] = useState(null);
+  const [economicsEdits, setEconomicsEdits] = useState(null);
+  const [economicsSaving, setEconomicsSaving] = useState(false);
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [promotionUpdatingId, setPromotionUpdatingId] = useState('');
@@ -619,25 +621,50 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   if (selectedEconomics) {
     const f = selectedEconomics;
-    const entryFee = Number(f.matchTokens) || 0;
-    const pot = Number(f.pot) || 0;
-    const breakEven = Number(f.breakEvenEntrants) || 0;
-    const minimumEntrants = Number(f.minimumEntrants) || breakEven;
+    const edits = economicsEdits || { matchTokens: String(f.matchTokens ?? 0), pot: String(f.pot ?? 0), minimumEntrants: String(f.minimumEntrants ?? ''), autoRefundIfShort: f.autoRefundIfShort !== false };
+    const entryFee = Number(edits.matchTokens) || 0;
+    const pot = Number(edits.pot) || 0;
+    const breakEven = entryFee > 0 ? Math.ceil(pot / entryFee) : 0;
+    const minimumEntrants = Number(edits.minimumEntrants) || breakEven;
     const entrants = Number(f.entrants) || 0;
-    const guarded = f.autoRefundIfShort !== false;
+    const guarded = Boolean(edits.autoRefundIfShort);
+    const isShadowFight = f.sourceType === 'shadow';
+    const editField = (key) => (ev) => setEconomicsEdits({ ...edits, [key]: ev.target.value });
+    const dirty = Boolean(economicsEdits);
+    const saveEconomics = async () => {
+      setEconomicsSaving(true);
+      try {
+        const guardRes = await fetch(`${API_BASE}/api/admin/fights/${getId(f)}/prize-guard`, {
+          method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ minimumEntrants: edits.minimumEntrants, autoRefundIfShort: edits.autoRefundIfShort, matchTokens: edits.matchTokens, pot: edits.pot }),
+        });
+        const guardData = await guardRes.json();
+        if (!guardRes.ok || !guardData.ok) throw new Error(guardData.message || 'Could not save economics.');
+        toast.success('Fight economics updated.');
+        setSelectedEconomics({ ...f, matchTokens: guardData.matchTokens, pot: guardData.pot, minimumEntrants: guardData.minimumEntrants, breakEvenEntrants: guardData.breakEvenEntrants, autoRefundIfShort: guardData.autoRefundIfShort });
+        setEconomicsEdits(null);
+        dispatch(fetchMatches());
+      } catch (error) {
+        toast.error(error.message || 'Could not save economics.');
+      } finally {
+        setEconomicsSaving(false);
+      }
+    };
     const covered = f.sourceType !== 'shadow' && guarded && entrants >= minimumEntrants;
     const display = 'var(--ff-display, Impact, sans-serif)';
     const border = 'rgba(255,255,255,.12)';
     const sectionStyle = { background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: `1px solid ${border}`, borderRadius: 16, padding: 20, marginBottom: 16 };
     const badge = (n) => <span style={{ alignItems: 'center', background: 'rgba(223,17,27,.13)', border: '1px solid rgba(223,17,27,.4)', borderRadius: 9, color: '#fff', display: 'flex', fontFamily: display, fontWeight: 900, height: 38, justifyContent: 'center', width: 38, flex: '0 0 38px' }}>{n}</span>;
-    const pill = (label, unit, value, accent, bg) => (
+    const inputPill = (label, unit, value, onChange, accent, bg, opts = {}) => (
       <div style={{ marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
           <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>{label}</span>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(245,247,251,.34)' }}>{unit}</span>
         </div>
-        <div style={{ borderRadius: 9, border: `1px solid ${bg.border}`, background: bg.fill, padding: '11px 13px' }}>
-          <div style={{ fontFamily: display, fontSize: 27, fontWeight: 900, color: accent, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+        <div style={{ borderRadius: 9, border: `1px solid ${bg.border}`, background: bg.fill, padding: '4px 13px', display: 'flex', alignItems: 'center' }}>
+          <input type="number" min="0" value={value} onChange={onChange} disabled={opts.disabled}
+            style={{ flex: 1, minWidth: 0, background: 'transparent', border: 0, outline: 'none', color: accent, fontFamily: display, fontSize: 27, fontWeight: 900, padding: '11px 0', fontVariantNumeric: 'tabular-nums' }} />
+          {opts.suffix && <span style={{ fontSize: 13, fontWeight: 700, color: accent }}>{opts.suffix}</span>}
         </div>
       </div>
     );
@@ -647,7 +674,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#ff2a35', marginBottom: 7 }}>Fight operations</div>
             <h1 style={{ fontFamily: display, fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>{getTitle(f)}</h1>
-            <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(245,247,251,.66)', margin: '8px 0 0', maxWidth: 620, lineHeight: 1.45 }}>Every number shown here is what players and settlement already see \u2014 nothing on this screen is editable.</p>
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(245,247,251,.66)', margin: '8px 0 0', maxWidth: 620, lineHeight: 1.45 }}>Edit entry fee, prize pool, minimum entrants and the auto-refund guard — changes save straight to this fight.</p>
           </div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
@@ -660,8 +687,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>What players pay to enter, and what the fight advertises as the prize.</p>
             </div>
           </header>
-          {pill('Entry tokens', 'matchTokens', `${entryFee.toLocaleString()} tokens`, '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
-          {pill('Prize pool', 'pot', pot ? `$${pot.toLocaleString()}` : 'Free contest', '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' })}
+          {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
+          {inputPill('Prize pool', 'pot', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: '$', disabled: isShadowFight })}
         </section>
 
         <section style={sectionStyle}>
@@ -672,14 +699,34 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
             </div>
           </header>
-          {pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-          {pill('Minimum entrants required', 'minimumEntrants', minimumEntrants || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-          {pill('Live entrants right now', 'entrants', f.sourceType === 'shadow' ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
-          <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          {(() => { const pill = (label, unit, value, accent, bg) => (
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>{label}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(245,247,251,.34)' }}>{unit}</span>
+              </div>
+              <div style={{ borderRadius: 9, border: `1px solid ${bg.border}`, background: bg.fill, padding: '11px 13px' }}>
+                <div style={{ fontFamily: display, fontSize: 27, fontWeight: 900, color: accent, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+              </div>
+            </div>
+          ); return pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }); })()}
+          {inputPill('Minimum entrants required', 'minimumEntrants', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
+          {pill('Live entrants right now', 'entrants', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
+          <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
             <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
-            <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short' : 'Off \u2014 unguarded'}</span>
+            <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
           </div>
         </section>
+
+        {dirty && (
+          <div style={{ position: 'sticky', bottom: 16, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: '1px solid rgba(223,17,27,.5)', borderRadius: 16, padding: '16px 20px', marginBottom: 16 }}>
+            <span style={{ fontFamily: display, fontSize: 14, fontWeight: 900, textTransform: 'uppercase', color: '#f7b51b' }}>Unsaved changes to this fight's economics</span>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button" className="admin-action-secondary" onClick={() => setEconomicsEdits(null)} disabled={economicsSaving}>Revert</button>
+              <button type="button" className="admin-action-primary" onClick={saveEconomics} disabled={economicsSaving}>{economicsSaving ? 'Saving\u2026' : 'Save changes'}</button>
+            </div>
+          </div>
+        )}
 
         {(() => {
           const free = entryFee <= 0;
