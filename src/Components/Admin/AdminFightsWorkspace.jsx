@@ -143,6 +143,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedEconomics, setSelectedEconomics] = useState(null);
   const [economicsEdits, setEconomicsEdits] = useState(null);
   const [economicsSaving, setEconomicsSaving] = useState(false);
+  const [openActionsRowId, setOpenActionsRowId] = useState(null);
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [promotionUpdatingId, setPromotionUpdatingId] = useState('');
@@ -621,7 +622,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   if (selectedEconomics) {
     const f = selectedEconomics;
-    const edits = economicsEdits || { matchTokens: String(f.matchTokens ?? 0), pot: String(f.pot ?? 0), minimumEntrants: String(f.minimumEntrants ?? ''), autoRefundIfShort: f.autoRefundIfShort !== false };
+    const edits = economicsEdits || {
+      matchTokens: String(f.matchTokens ?? 0), pot: String(f.pot ?? 0), minimumEntrants: String(f.minimumEntrants ?? ''),
+      autoRefundIfShort: f.autoRefundIfShort !== false, maxRounds: String(f.maxRounds ?? 12),
+      matchDate: (f.matchDate || '').slice(0, 10), matchTime: f.matchTime || '',
+      notify: Boolean(f.notify), addToShadow: Boolean(f.addToShadow),
+      homepagePromoted: Boolean(f.homepagePromoted), featuredThisWeek: Boolean(f.featuredThisWeek), featuredFight: Boolean(f.featuredFight),
+    };
     const entryFee = Number(edits.matchTokens) || 0;
     const pot = Number(edits.pot) || 0;
     const breakEven = entryFee > 0 ? Math.ceil(pot / entryFee) : 0;
@@ -636,12 +643,16 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       try {
         const guardRes = await fetch(`${API_BASE}/api/admin/fights/${getId(f)}/prize-guard`, {
           method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify({ minimumEntrants: edits.minimumEntrants, autoRefundIfShort: edits.autoRefundIfShort, matchTokens: edits.matchTokens, pot: edits.pot }),
+          body: JSON.stringify({
+            minimumEntrants: edits.minimumEntrants, autoRefundIfShort: edits.autoRefundIfShort, matchTokens: edits.matchTokens, pot: edits.pot,
+            maxRounds: edits.maxRounds, matchDate: edits.matchDate, matchTime: edits.matchTime,
+            notify: edits.notify, addToShadow: edits.addToShadow, homepagePromoted: edits.homepagePromoted, featuredThisWeek: edits.featuredThisWeek, featuredFight: edits.featuredFight,
+          }),
         });
         const guardData = await guardRes.json();
         if (!guardRes.ok || !guardData.ok) throw new Error(guardData.message || 'Could not save economics.');
         toast.success('Fight economics updated.');
-        setSelectedEconomics({ ...f, matchTokens: guardData.matchTokens, pot: guardData.pot, minimumEntrants: guardData.minimumEntrants, breakEvenEntrants: guardData.breakEvenEntrants, autoRefundIfShort: guardData.autoRefundIfShort });
+        setSelectedEconomics({ ...f, ...guardData });
         setEconomicsEdits(null);
         dispatch(fetchMatches());
       } catch (error) {
@@ -651,6 +662,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       }
     };
     const covered = f.sourceType !== 'shadow' && guarded && entrants >= minimumEntrants;
+    const free = entryFee <= 0;
+    let riskLabel, riskColor, riskBorder, riskBg, riskChipBg;
+    if (free) { riskLabel = 'Free contest'; riskColor = '#168fe6'; riskBorder = 'rgba(22,143,230,.45)'; riskBg = 'rgba(22,143,230,.06)'; riskChipBg = 'rgba(22,143,230,.16)'; }
+    else if (!guarded) { riskLabel = 'Unguarded'; riskColor = '#ff2a35'; riskBorder = 'rgba(223,17,27,.5)'; riskBg = 'rgba(223,17,27,.06)'; riskChipBg = 'rgba(223,17,27,.18)'; }
+    else if (minimumEntrants >= breakEven) { riskLabel = 'Covered'; riskColor = '#35d45d'; riskBorder = 'rgba(53,212,93,.45)'; riskBg = 'rgba(53,212,93,.05)'; riskChipBg = 'rgba(53,212,93,.16)'; }
+    else { riskLabel = 'Short'; riskColor = '#f7b51b'; riskBorder = 'rgba(247,181,27,.5)'; riskBg = 'rgba(247,181,27,.05)'; riskChipBg = 'rgba(247,181,27,.16)'; }
     const display = 'var(--ff-display, Impact, sans-serif)';
     const border = 'rgba(255,255,255,.12)';
     const sectionStyle = { background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: `1px solid ${border}`, borderRadius: 16, padding: 20, marginBottom: 16 };
@@ -679,6 +696,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
 
+        <div style={{ display: 'grid', gap: 18, gridTemplateColumns: 'minmax(0,1.35fr) minmax(300px,.65fr)', alignItems: 'start' }}>
+        <div style={{ minWidth: 0 }}>
+
         <section style={sectionStyle}>
           <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
             {badge('01')}
@@ -688,6 +708,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           </header>
           {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
+          {!isShadowFight && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
+              {[0, 100, 500, 1500, 4000].map((v) => (
+                <div key={v} onClick={() => setEconomicsEdits({ ...edits, matchTokens: String(v) })} style={{ cursor: 'pointer', padding: '6px 11px', borderRadius: 7, border: `1px solid ${v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.14)'}`, background: v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.04)', fontSize: 12, fontWeight: 900, color: v === entryFee ? '#17070a' : 'rgba(245,247,251,.72)' }}>{v === 0 ? 'FREE' : v.toLocaleString()}</div>
+              ))}
+            </div>
+          )}
           {inputPill('Prize pool', 'pot', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: '$', disabled: isShadowFight })}
         </section>
 
@@ -704,37 +731,26 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           );
           return (
-        <section style={sectionStyle}>
-          <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-            {badge('02')}
-            <div style={{ minWidth: 0 }}>
-              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entrants &amp; guard</h3>
-              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
-            </div>
-          </header>
-          {pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-          {inputPill('Minimum entrants required', 'minimumEntrants', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-          {pill('Live entrants right now', 'entrants', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
-          <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
-            <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
-            <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
-          </div>
-        </section>
+            <section style={sectionStyle}>
+              <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
+                {badge('02')}
+                <div style={{ minWidth: 0 }}>
+                  <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entrants &amp; guard</h3>
+                  <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
+                </div>
+              </header>
+              {pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
+              {inputPill('Minimum entrants required', 'minimumEntrants', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
+              {pill('Live entrants right now', 'entrants', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
+              <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
+                <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
+              </div>
+            </section>
           );
         })()}
 
-        {dirty && (
-          <div style={{ position: 'sticky', bottom: 16, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: '1px solid rgba(223,17,27,.5)', borderRadius: 16, padding: '16px 20px', marginBottom: 16 }}>
-            <span style={{ fontFamily: display, fontSize: 14, fontWeight: 900, textTransform: 'uppercase', color: '#f7b51b' }}>Unsaved changes to this fight's economics</span>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" className="admin-action-secondary" onClick={() => setEconomicsEdits(null)} disabled={economicsSaving}>Revert</button>
-              <button type="button" className="admin-action-primary" onClick={saveEconomics} disabled={economicsSaving}>{economicsSaving ? 'Saving\u2026' : 'Save changes'}</button>
-            </div>
-          </div>
-        )}
-
         {(() => {
-          const free = entryFee <= 0;
           const signed = (n) => (n === 0 ? '$0' : (n > 0 ? '+$' : '\u2212$') + Math.abs(n).toLocaleString());
           const voidValue = guarded ? 0 : -pot;
           const atMinValue = free ? -pot : minimumEntrants * entryFee - pot;
@@ -758,7 +774,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                 <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
                   {badge('03')}
                   <div style={{ minWidth: 0 }}>
-                    <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Risk & payout scenarios</h3>
+                    <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Risk &amp; payout scenarios</h3>
                     <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>What settles if the fight voids, at your minimum, and on each entry past that.</p>
                   </div>
                 </header>
@@ -800,6 +816,126 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </>
           );
         })()}
+
+        {!isShadowFight && (
+          <section style={sectionStyle}>
+            <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
+              {badge('04')}
+              <div style={{ minWidth: 0 }}>
+                <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Schedule</h3>
+                <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>When this fight happens and how many rounds it runs.</p>
+              </div>
+            </header>
+            <div style={{ display: 'grid', gap: 13, gridTemplateColumns: 'repeat(2, minmax(0,1fr))', marginBottom: 13 }}>
+              <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight date</span>
+                <input type="date" value={edits.matchDate} onChange={editField('matchDate')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontSize: 15, minWidth: 0, width: '100%', padding: 12, outline: 'none' }} />
+              </label>
+              <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight time</span>
+                <input type="time" value={edits.matchTime} onChange={editField('matchTime')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontSize: 15, minWidth: 0, width: '100%', padding: 12, outline: 'none' }} />
+              </label>
+            </div>
+            <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
+              <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
+            </label>
+          </section>
+        )}
+
+        <section style={sectionStyle}>
+          <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
+            {badge(isShadowFight ? '05' : '05')}
+            <div style={{ minWidth: 0 }}>
+              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Publishing controls</h3>
+              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Who gets told, and where this card appears.</p>
+            </div>
+          </header>
+          <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
+            {[
+              { key: 'notify', label: 'Notify members', hint: 'Platform announcement on publish' },
+              { key: 'addToShadow', label: 'Create shadow copy', hint: 'Same card available to affiliate creators' },
+              { key: 'homepagePromoted', label: 'Homepage banner', hint: 'Top of the website' },
+              { key: 'featuredThisWeek', label: 'Featured this week', hint: 'App home rail' },
+              { key: 'featuredFight', label: 'Featured fight', hint: 'The big card, both surfaces' },
+            ].map((t2) => { const on = Boolean(edits[t2.key]); return (
+              <div key={t2.key} onClick={() => setEconomicsEdits({ ...edits, [t2.key]: !on })} style={{ cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 11, padding: 14, borderRadius: 11, border: `1px solid ${on ? 'rgba(223,17,27,.4)' : 'rgba(255,255,255,.12)'}`, background: on ? 'rgba(223,17,27,.09)' : 'rgba(255,255,255,.035)', minWidth: 0 }}>
+                <span style={{ width: 38, height: 21, flex: '0 0 38px', borderRadius: 999, background: on ? '#35d45d' : 'rgba(255,255,255,.17)', position: 'relative', display: 'block', marginTop: 1 }}>
+                  <span style={{ position: 'absolute', top: 2.5, left: on ? 19 : 2.5, width: 16, height: 16, borderRadius: '50%', background: '#fff' }} />
+                </span>
+                <span style={{ display: 'grid', gap: 4, minWidth: 0 }}>
+                  <strong style={{ color: '#fff', fontSize: 14 }}>{t2.label}</strong>
+                  <small style={{ color: 'rgba(245,247,251,.66)', lineHeight: 1.45, fontSize: 12 }}>{t2.hint}</small>
+                </span>
+              </div>
+            ); })}
+          </div>
+        </section>
+
+        </div>
+
+        <div style={{ position: 'sticky', top: 16, display: 'grid', gap: 16, minWidth: 0 }}>
+          <section style={{ border: `1px solid ${riskBorder}`, borderRadius: 16, background: riskBg, padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+              <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.66)' }}>Break-even</span>
+              <span style={{ padding: '5px 10px', borderRadius: 999, background: riskChipBg, fontSize: 10.5, fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase', color: riskColor }}>{riskLabel}</span>
+            </div>
+            <div style={{ fontFamily: display, fontSize: 52, lineHeight: 0.88, fontWeight: 900, color: riskColor, fontVariantNumeric: 'tabular-nums' }}>{free ? '\u2014' : breakEven.toLocaleString()}</div>
+            {!isShadowFight && (
+              <div onClick={() => setEconomicsEdits({ ...edits, minimumEntrants: String(breakEven) })} style={{ cursor: 'pointer', marginTop: 14, textAlign: 'center', padding: 10, borderRadius: 9, border: '1px solid rgba(223,17,27,.45)', background: 'rgba(223,17,27,.12)', fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>Set minimum to break-even</div>
+            )}
+          </section>
+
+          <section style={sectionStyle}>
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.66)', marginBottom: 13 }}>What players will see</div>
+            <div style={{ display: 'grid', gap: 13 }}>
+              <div style={{ border: '1px solid rgba(247,181,27,.35)', borderRadius: 12, overflow: 'hidden', background: 'linear-gradient(168deg,rgba(247,181,27,.1),rgba(11,14,24,.7))' }}>
+                <div style={{ padding: '7px 12px', background: 'rgba(0,0,0,.3)', fontSize: 9.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.5)' }}>Website card</div>
+                <div style={{ padding: '13px 14px 15px' }}>
+                  <div style={{ fontFamily: display, fontSize: 16, fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', marginBottom: 12, color: '#fff' }}>{getTitle(f)}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', paddingTop: 11, borderTop: '1px solid rgba(255,255,255,.13)' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: display, fontSize: 17, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `$${pot.toLocaleString()}`}</div>
+                      <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', whiteSpace: 'nowrap' }}>Guaranteed pot</div>
+                    </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 13px', borderRadius: 999, background: '#f7b51b', color: '#17070a', fontFamily: display, fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{free ? 'ENTER FREE' : `ENTER \u00b7 $${entryFee.toLocaleString()}`}</div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ border: `1px solid ${border}`, borderRadius: 12, overflow: 'hidden', background: 'rgba(5,6,10,.6)' }}>
+                <div style={{ padding: '7px 12px', background: 'rgba(0,0,0,.3)', fontSize: 9.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.5)' }}>App fight card</div>
+                <div style={{ padding: '13px 14px 15px' }}>
+                  <div style={{ fontFamily: display, fontSize: 15, fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', marginBottom: 12, color: '#fff' }}>{getTitle(f)}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 9, fontWeight: 900, color: '#ff2a35', whiteSpace: 'nowrap' }}>PRIZE POOL</div>
+                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `$${pot.toLocaleString()}`}</div>
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 9, fontWeight: 900, color: '#ff2a35', whiteSpace: 'nowrap' }}>ENTRY FEE</div>
+                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#f7b51b', whiteSpace: 'nowrap' }}>{free ? 'FREE' : entryFee.toLocaleString()}</div>
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 9, fontWeight: 900, color: '#ff2a35', whiteSpace: 'nowrap' }}>ROUNDS</div>
+                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#168fe6' }}>{edits.maxRounds}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {dirty && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: '1px solid rgba(223,17,27,.5)', borderRadius: 16, padding: '16px 18px' }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: '#f7b51b' }}>Unsaved changes</span>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button type="button" className="admin-action-secondary" onClick={() => setEconomicsEdits(null)} disabled={economicsSaving}>Revert</button>
+                <button type="button" className="admin-action-primary" onClick={saveEconomics} disabled={economicsSaving}>{economicsSaving ? 'Saving\u2026' : 'Save changes'}</button>
+              </div>
+            </div>
+          )}
+        </div>
+        </div>
       </div>
     );
   }
@@ -931,45 +1067,52 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                       <div className="admin-row-actions admin-table-actions">
                         <button type="button" onClick={() => openEconomics(fight)}><FaFistRaised /> Economics</button>
                         {isFinished ? <button type="button" onClick={() => openScores(fight)}><FaEye /> Scores</button> : <button type="button" onClick={() => openScoring(fight)}><FaTrophy /> Score</button>}
-                        {isFinished && <button type="button" onClick={() => openScoring(fight)}><FaEdit /> Edit scores</button>}
-                        {isLive && <button type="button" onClick={() => openPromotion(fight)}><FaVideo /> Promote</button>}
-                        <button
-                          type="button"
-                          className={isHomepagePromoted(fight) ? 'is-warning' : ''}
-                          disabled={promotionUpdatingId === String(id)}
-                          onClick={() => toggleHomepagePromotion(fight)}
-                        >
-                          <FaBullhorn /> {promotionUpdatingId === String(id) ? 'Updating...' : isHomepagePromoted(fight) ? 'Remove banner' : 'Homepage banner'}
-                        </button>
-                        <button
-                          type="button"
-                          className={fight.featuredThisWeek ? 'is-warning' : ''}
-                          disabled={Boolean(placementUpdatingKey)}
-                          onClick={() => toggleHomepagePlacement(fight, 'featured-this-week')}
-                        >
-                          <FaBullhorn /> {placementUpdatingKey === `${id}:featured-this-week` ? 'Updating...' : fight.featuredThisWeek ? 'Remove weekly' : 'Featured this week'}
-                        </button>
-                        <button
-                          type="button"
-                          className={fight.featuredFight ? 'is-warning' : ''}
-                          disabled={Boolean(placementUpdatingKey)}
-                          onClick={() => toggleHomepagePlacement(fight, 'featured-fight')}
-                        >
-                          <FaFistRaised /> {placementUpdatingKey === `${id}:featured-fight` ? 'Updating...' : fight.featuredFight ? 'Remove feature' : 'Featured fight'}
-                        </button>
-                        <button type="button" disabled={Boolean(placementUpdatingKey)} onClick={() => moveHomepagePosition(fight, 'front')}>
-                          {placementUpdatingKey === `${id}:move-front` ? 'Moving...' : 'Move to front'}
-                        </button>
-                        <button type="button" disabled={Boolean(placementUpdatingKey)} onClick={() => moveHomepagePosition(fight, 'bottom')}>
-                          {placementUpdatingKey === `${id}:move-bottom` ? 'Moving...' : 'Move to bottom'}
-                        </button>
-                        <button type="button" disabled={scoutingUpdatingId === String(id)} onClick={() => generateScoutingReport(fight)}>
-                          <FaRobot /> {scoutingUpdatingId === String(id) ? 'Generating...' : fight.aiScoutingReport ? 'Refresh AI report' : 'Generate AI report'}
-                        </button>
-                        <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
-                        <button type="button" onClick={() => openScorerPanel(fight)}><FaUserClock /> Send to scorer</button>
-                        <Link href={`/administration/DeleteUpdateMatches?matchId=${id}&sourceType=${getSourceType(fight)}`}><FaEdit /> Edit fight</Link>
-                        <button type="button" className="is-danger" onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>
+                        <div style={{ position: 'relative' }}>
+                          <button type="button" onClick={() => setOpenActionsRowId(openActionsRowId === String(id) ? null : String(id))}>More \u25be</button>
+                          {openActionsRowId === String(id) && (
+                            <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: 20, marginTop: 4, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 190, padding: 8, borderRadius: 10, border: '1px solid rgba(255,255,255,.14)', background: '#0b0f16', boxShadow: '0 12px 28px rgba(0,0,0,.5)' }}>
+                              {isFinished && <button type="button" onClick={() => { openScoring(fight); setOpenActionsRowId(null); }}><FaEdit /> Edit scores</button>}
+                              {isLive && <button type="button" onClick={() => { openPromotion(fight); setOpenActionsRowId(null); }}><FaVideo /> Promote</button>}
+                              <button
+                                type="button"
+                                className={isHomepagePromoted(fight) ? 'is-warning' : ''}
+                                disabled={promotionUpdatingId === String(id)}
+                                onClick={() => { toggleHomepagePromotion(fight); setOpenActionsRowId(null); }}
+                              >
+                                <FaBullhorn /> {promotionUpdatingId === String(id) ? 'Updating...' : isHomepagePromoted(fight) ? 'Remove banner' : 'Homepage banner'}
+                              </button>
+                              <button
+                                type="button"
+                                className={fight.featuredThisWeek ? 'is-warning' : ''}
+                                disabled={Boolean(placementUpdatingKey)}
+                                onClick={() => { toggleHomepagePlacement(fight, 'featured-this-week'); setOpenActionsRowId(null); }}
+                              >
+                                <FaBullhorn /> {placementUpdatingKey === `${id}:featured-this-week` ? 'Updating...' : fight.featuredThisWeek ? 'Remove weekly' : 'Featured this week'}
+                              </button>
+                              <button
+                                type="button"
+                                className={fight.featuredFight ? 'is-warning' : ''}
+                                disabled={Boolean(placementUpdatingKey)}
+                                onClick={() => { toggleHomepagePlacement(fight, 'featured-fight'); setOpenActionsRowId(null); }}
+                              >
+                                <FaFistRaised /> {placementUpdatingKey === `${id}:featured-fight` ? 'Updating...' : fight.featuredFight ? 'Remove feature' : 'Featured fight'}
+                              </button>
+                              <button type="button" disabled={Boolean(placementUpdatingKey)} onClick={() => { moveHomepagePosition(fight, 'front'); setOpenActionsRowId(null); }}>
+                                {placementUpdatingKey === `${id}:move-front` ? 'Moving...' : 'Move to front'}
+                              </button>
+                              <button type="button" disabled={Boolean(placementUpdatingKey)} onClick={() => { moveHomepagePosition(fight, 'bottom'); setOpenActionsRowId(null); }}>
+                                {placementUpdatingKey === `${id}:move-bottom` ? 'Moving...' : 'Move to bottom'}
+                              </button>
+                              <button type="button" disabled={scoutingUpdatingId === String(id)} onClick={() => { generateScoutingReport(fight); setOpenActionsRowId(null); }}>
+                                <FaRobot /> {scoutingUpdatingId === String(id) ? 'Generating...' : fight.aiScoutingReport ? 'Refresh AI report' : 'Generate AI report'}
+                              </button>
+                              <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
+                              <button type="button" onClick={() => { openScorerPanel(fight); setOpenActionsRowId(null); }}><FaUserClock /> Send to scorer</button>
+                              <Link href={`/administration/DeleteUpdateMatches?matchId=${id}&sourceType=${getSourceType(fight)}`}><FaEdit /> Edit fight</Link>
+                              <button type="button" className="is-danger" onClick={() => { deleteFight(fight); setOpenActionsRowId(null); }}><FaTrashAlt /> Delete</button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
