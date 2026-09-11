@@ -710,7 +710,6 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           })}
         </div>
 
-        <div style={{ display: 'grid', gap: 18, gridTemplateColumns: 'minmax(0,1.35fr) minmax(300px,.65fr)', alignItems: 'start' }}>
         <div style={{ minWidth: 0 }}>
 
         <section style={sectionStyle}>
@@ -898,7 +897,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
         </div>
 
-        <div style={{ position: 'sticky', top: 16, display: 'grid', gap: 16, minWidth: 0 }}>
+        <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>
           <section style={{ border: `1px solid ${riskBorder}`, borderRadius: 16, background: riskBg, padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
               <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.66)' }}>Break-even</span>
@@ -958,7 +957,6 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               </div>
             </div>
           )}
-        </div>
         </div>
       </div>
     );
