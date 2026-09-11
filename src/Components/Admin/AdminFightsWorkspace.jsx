@@ -696,6 +696,20 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
+          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)' }}>Editing</span>
+          {filteredRows.slice(0, 12).map((row) => {
+            const rowId = getId(row);
+            const active = String(rowId) === String(getId(f));
+            return (
+              <div key={rowId} onClick={() => { setSelectedEconomics(row); setEconomicsEdits(null); }} style={{ cursor: 'pointer', padding: '9px 14px', borderRadius: 9, border: `1px solid ${active ? '#df111b' : 'rgba(255,255,255,.12)'}`, background: active ? 'rgba(223,17,27,.14)' : 'rgba(255,255,255,.03)', display: 'flex', alignItems: 'center', gap: 9 }}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, letterSpacing: '.03em', textTransform: 'uppercase', color: active ? '#fff' : 'rgba(245,247,251,.6)' }}>{getTitle(row)}</span>
+                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.1em', textTransform: 'uppercase', padding: '3px 7px', borderRadius: 5, background: 'rgba(0,0,0,.35)', color: 'rgba(245,247,251,.5)' }}>{getSport(row)}</span>
+              </div>
+            );
+          })}
+        </div>
+
         <div style={{ display: 'grid', gap: 18, gridTemplateColumns: 'minmax(0,1.35fr) minmax(300px,.65fr)', alignItems: 'start' }}>
         <div style={{ minWidth: 0 }}>
 
@@ -703,10 +717,37 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
             {badge('01')}
             <div style={{ minWidth: 0 }}>
-              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entry &amp; prize</h3>
-              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>What players pay to enter, and what the fight advertises as the prize.</p>
+              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Fight type</h3>
+              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>A live card carries a schedule and an economy. A shadow template carries neither.</p>
             </div>
           </header>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ padding: '10px 16px', borderRadius: 9, border: `1px solid ${isShadowFight ? 'rgba(255,255,255,.12)' : '#df111b'}`, background: isShadowFight ? 'rgba(255,255,255,.035)' : 'rgba(223,17,27,.13)', fontFamily: display, fontSize: 15, fontWeight: 900, textTransform: 'uppercase', color: isShadowFight ? 'rgba(245,247,251,.5)' : '#fff' }}>Live production fight</span>
+            <span style={{ padding: '10px 16px', borderRadius: 9, border: `1px solid ${isShadowFight ? '#df111b' : 'rgba(255,255,255,.12)'}`, background: isShadowFight ? 'rgba(223,17,27,.13)' : 'rgba(255,255,255,.035)', fontFamily: display, fontSize: 15, fontWeight: 900, textTransform: 'uppercase', color: isShadowFight ? '#fff' : 'rgba(245,247,251,.5)' }}>Shadow template</span>
+          </div>
+          <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.42)', margin: '10px 0 0', lineHeight: 1.45 }}>Set on creation from the fight's registry record \u2014 to switch a fight between live and shadow, use Create fight.</p>
+        </section>
+
+        <section style={sectionStyle}>
+          <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
+            {badge('02')}
+            <div style={{ minWidth: 0 }}>
+              <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Schedule and economy</h3>
+              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Configure lock timing, entry cost and the advertised prize pool.</p>
+            </div>
+          </header>
+          {!isShadowFight && (
+            <div style={{ display: 'grid', gap: 13, gridTemplateColumns: 'repeat(2, minmax(0,1fr))', marginBottom: 18 }}>
+              <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight date</span>
+                <input type="date" value={edits.matchDate} onChange={editField('matchDate')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontSize: 15, minWidth: 0, width: '100%', padding: 12, outline: 'none' }} />
+              </label>
+              <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
+                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight time</span>
+                <input type="time" value={edits.matchTime} onChange={editField('matchTime')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontSize: 15, minWidth: 0, width: '100%', padding: 12, outline: 'none' }} />
+              </label>
+            </div>
+          )}
           {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
           {!isShadowFight && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
@@ -716,6 +757,15 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           )}
           {inputPill('Prize pool', 'pot', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: '$', disabled: isShadowFight })}
+          {!isShadowFight && (
+            <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
+              <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
+            </label>
+          )}
+          {isShadowFight && (
+            <p style={{ fontSize: 13, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: 0, lineHeight: 1.45 }}>No economy on a shadow template \u2014 the affiliate who runs the card stakes those themselves.</p>
+          )}
         </section>
 
         {(() => {
@@ -733,7 +783,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           return (
             <section style={sectionStyle}>
               <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-                {badge('02')}
+                {badge('03')}
                 <div style={{ minWidth: 0 }}>
                   <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entrants &amp; guard</h3>
                   <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
@@ -772,7 +822,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <>
               <section style={sectionStyle}>
                 <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-                  {badge('03')}
+                  {badge('04')}
                   <div style={{ minWidth: 0 }}>
                     <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Risk &amp; payout scenarios</h3>
                     <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>What settles if the fight voids, at your minimum, and on each entry past that.</p>
@@ -817,35 +867,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           );
         })()}
 
-        {!isShadowFight && (
-          <section style={sectionStyle}>
-            <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-              {badge('04')}
-              <div style={{ minWidth: 0 }}>
-                <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Schedule</h3>
-                <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>When this fight happens and how many rounds it runs.</p>
-              </div>
-            </header>
-            <div style={{ display: 'grid', gap: 13, gridTemplateColumns: 'repeat(2, minmax(0,1fr))', marginBottom: 13 }}>
-              <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
-                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight date</span>
-                <input type="date" value={edits.matchDate} onChange={editField('matchDate')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontSize: 15, minWidth: 0, width: '100%', padding: 12, outline: 'none' }} />
-              </label>
-              <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
-                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight time</span>
-                <input type="time" value={edits.matchTime} onChange={editField('matchTime')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontSize: 15, minWidth: 0, width: '100%', padding: 12, outline: 'none' }} />
-              </label>
-            </div>
-            <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
-              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
-              <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
-            </label>
-          </section>
-        )}
-
         <section style={sectionStyle}>
           <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-            {badge(isShadowFight ? '05' : '05')}
+            {badge('05')}
             <div style={{ minWidth: 0 }}>
               <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Publishing controls</h3>
               <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Who gets told, and where this card appears.</p>
