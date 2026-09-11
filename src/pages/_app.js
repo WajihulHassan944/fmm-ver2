@@ -1,4 +1,5 @@
 import "@/styles/split/globals.css";
+import React from "react";
 import "@/styles/upcomingfightsuser.css";
 import "@/styles/pastfights.css";
 import "@/styles/addtokenstowallet.css";
@@ -263,6 +264,29 @@ const IMMERSIVE_ROUTES = new Set([
   "/checkout",
 ]);
 
+class SiteErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error, info) {
+    // Any uncaught render error used to blank the whole site with Next's
+    // generic "Application error" screen. Log it loudly so the real cause is
+    // visible in the console, and show a recoverable message instead.
+    console.error('Site render crashed:', error, info?.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 14, padding: 24, background: '#05080d', color: '#f5f7fb', fontFamily: 'sans-serif', textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 800 }}>Something went wrong loading this page.</div>
+          <div style={{ fontSize: 14, opacity: 0.7, maxWidth: 420 }}>Please refresh, or try again in a moment. Check the browser console for the technical error.</div>
+          <button type="button" onClick={() => window.location.reload()} style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#df111b', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Reload</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App({ Component, ...rest }) {
   const { store, props } = wrapper.useWrappedStore(rest); // Wrapped store for SSR
 
@@ -303,9 +327,11 @@ function App({ Component, ...rest }) {
       )}
 
       <Provider store={store}>
-        <AppContent>
-          <Component {...props.pageProps} />
-        </AppContent>
+        <SiteErrorBoundary>
+          <AppContent>
+            <Component {...props.pageProps} />
+          </AppContent>
+        </SiteErrorBoundary>
       </Provider>
     </>
   );
