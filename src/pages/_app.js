@@ -265,12 +265,11 @@ const IMMERSIVE_ROUTES = new Set([
 ]);
 
 class SiteErrorBoundary extends React.Component {
-  state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
+  state = { hasError: false, message: '', stack: '' };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, message: error?.message || String(error), stack: error?.stack || '' };
+  }
   componentDidCatch(error, info) {
-    // Any uncaught render error used to blank the whole site with Next's
-    // generic "Application error" screen. Log it loudly so the real cause is
-    // visible in the console, and show a recoverable message instead.
     console.error('Site render crashed:', error, info?.componentStack);
   }
   render() {
@@ -278,7 +277,8 @@ class SiteErrorBoundary extends React.Component {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 14, padding: 24, background: '#05080d', color: '#f5f7fb', fontFamily: 'sans-serif', textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontWeight: 800 }}>Something went wrong loading this page.</div>
-          <div style={{ fontSize: 14, opacity: 0.7, maxWidth: 420 }}>Please refresh, or try again in a moment. Check the browser console for the technical error.</div>
+          <div style={{ fontSize: 14, opacity: 0.7, maxWidth: 500 }}>Please screenshot the box below and send it over, then try reloading.</div>
+          <pre style={{ maxWidth: '90vw', width: 640, textAlign: 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: 14, fontSize: 12, color: '#ffb4b4', maxHeight: 300, overflow: 'auto' }}>{this.state.message}{'\n\n'}{this.state.stack}</pre>
           <button type="button" onClick={() => window.location.reload()} style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#df111b', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Reload</button>
         </div>
       );
