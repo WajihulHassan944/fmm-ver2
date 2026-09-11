@@ -680,6 +680,74 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short' : 'Off \u2014 unguarded'}</span>
           </div>
         </section>
+
+        {(() => {
+          const free = entryFee <= 0;
+          const signed = (n) => (n === 0 ? '$0' : (n > 0 ? '+$' : '\u2212$') + Math.abs(n).toLocaleString());
+          const voidValue = guarded ? 0 : -pot;
+          const atMinValue = free ? -pot : minimumEntrants * entryFee - pot;
+          const steps = [0, 2, 5, 10, 25, 50, 100, 250];
+          const ladderScale = Math.max(pot, ...steps.map((n) => Math.abs((guarded && n < minimumEntrants) ? 0 : n * entryFee - pot)), 1);
+          const ladder = steps.map((n) => {
+            const voided = guarded && n < minimumEntrants;
+            const pl = voided ? 0 : n * entryFee - pot;
+            const half = Math.min(1, Math.abs(pl) / ladderScale) * 50;
+            return {
+              n, voided, pl,
+              color: voided ? 'rgba(245,247,251,.32)' : pl > 0 ? '#35d45d' : pl < 0 ? '#ff2a35' : 'rgba(245,247,251,.6)',
+              barColor: voided ? 'rgba(255,255,255,.14)' : pl >= 0 ? '#35d45d' : '#df111b',
+              barLeft: (pl >= 0 ? 50 : 50 - half) + '%',
+              barWidth: Math.max(half, 1.5) + '%',
+            };
+          });
+          return (
+            <>
+              <section style={sectionStyle}>
+                <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
+                  {badge('03')}
+                  <div style={{ minWidth: 0 }}>
+                    <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Risk & payout scenarios</h3>
+                    <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>What settles if the fight voids, at your minimum, and on each entry past that.</p>
+                  </div>
+                </header>
+                <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(3, minmax(0,1fr))' }}>
+                  <div>
+                    <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>If it voids</div>
+                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: guarded ? '#35d45d' : '#ff2a35' }}>{guarded ? '$0' : signed(voidValue)}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>{guarded ? 'Entries refunded, nothing paid out' : 'No guard \u2014 pot pays regardless'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>At your minimum</div>
+                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: atMinValue >= 0 ? '#35d45d' : '#ff2a35' }}>{signed(atMinValue)}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>{minimumEntrants.toLocaleString()} entrants</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>Each entry past that</div>
+                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: '#f7b51b' }}>{free ? '$0' : `$${entryFee.toLocaleString()}`}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>Straight to the house</div>
+                  </div>
+                </div>
+              </section>
+
+              <section style={sectionStyle}>
+                <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.66)', marginBottom: 13 }}>House position as entries arrive</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {ladder.map((row) => (
+                    <div key={row.n} style={{ display: 'grid', gridTemplateColumns: '56px minmax(0,1fr) 100px', alignItems: 'center', gap: 9, padding: '6px 0' }}>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: row.voided ? 'rgba(245,247,251,.32)' : 'rgba(245,247,251,.72)' }}>{row.n === 0 ? 'None' : row.n.toLocaleString()}</div>
+                      <div style={{ height: 9, borderRadius: 999, background: 'rgba(255,255,255,.07)', position: 'relative', overflow: 'hidden', minWidth: 0 }}>
+                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: row.barLeft, width: row.barWidth, background: row.barColor, borderRadius: 999 }} />
+                        <div style={{ position: 'absolute', top: -3, bottom: -3, left: '50%', width: 1.5, background: 'rgba(255,255,255,.35)' }} />
+                      </div>
+                      <div style={{ textAlign: 'right', fontSize: 12.5, fontWeight: 900, color: row.color }}>{row.voided ? 'Voided' : signed(row.pl)}</div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.42)', margin: '12px 0 0', paddingTop: 12, borderTop: `1px solid ${border}`, lineHeight: 1.45 }}>Centre line is zero. Greyed rows fall below your minimum \u2014 those void and refund instead of paying out.</p>
+              </section>
+            </>
+          );
+        })()}
       </div>
     );
   }
