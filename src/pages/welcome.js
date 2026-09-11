@@ -915,15 +915,30 @@ const fetchJson = async (path) => {
 // deploy — and never updated when fights were added. This runs per request.
 export async function getServerSideProps({ res }) {
   if (res) {
-    // NO CDN cache on the homepage. This was s-maxage=60 with a 5-minute
-    // stale-while-revalidate, which meant a fight created in the back office
-    // could take a minute to appear and a stale copy could be served for five
-    // — the server-side cache invalidation cannot reach an edge cache, so the
-    // only way for "publish and it is there" to be true is to not cache the
-    // page at all. It is server-rendered per request and the API behind it is
-    // still cached, so the cost is small.
     res.setHeader('Cache-Control', 'no-store, must-revalidate');
   }
+  try {
+    return await buildWelcomeProps();
+  } catch (error) {
+    // Any unexpected throw here used to crash the whole page (Next's generic
+    // "Application error"). A marketing homepage must never do that — fall
+    // back to the static preview content instead of a blank error screen.
+    console.error('welcome getServerSideProps failed, serving preview fallback:', error);
+    return {
+      props: {
+        fights: PREVIEW_FIGHTS,
+        board: PREVIEW_BOARD,
+        ticker: [],
+        upcoming: PREVIEW_FIGHTS.slice(0, 3).map((f) => ({ name: f.f1 + ' vs ' + f.f2, when: 'TBA' })),
+        apiReachable: false,
+        usingPreview: true,
+        products: [],
+      },
+    };
+  }
+}
+
+async function buildWelcomeProps() {
   const [fightData, boardData, apparelData] = await Promise.all([
     // prediction-fights, not fights — the latter does not exist and 404'd silently.
     fetchJson('/api/public/prediction-fights?limit=24'),
