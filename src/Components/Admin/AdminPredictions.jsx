@@ -501,6 +501,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           </section>
         )}
       </aside>
+      </div>
     </div>
   );
 };
