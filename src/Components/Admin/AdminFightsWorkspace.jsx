@@ -673,7 +673,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     else { riskLabel = 'Short'; riskColor = '#f7b51b'; riskBorder = 'rgba(247,181,27,.5)'; riskBg = 'rgba(247,181,27,.05)'; riskChipBg = 'rgba(247,181,27,.16)'; }
     const display = 'var(--ff-display, Impact, sans-serif)';
     const border = 'rgba(255,255,255,.12)';
-    const sectionStyle = { background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: `1px solid ${border}`, borderRadius: 16, padding: 20, marginBottom: 16 };
+    const sectionStyle = { background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: `1px solid ${border}`, borderRadius: 18, padding: 28, marginBottom: 22 };
     const badge = (n) => <span style={{ alignItems: 'center', background: 'rgba(223,17,27,.13)', border: '1px solid rgba(223,17,27,.4)', borderRadius: 9, color: '#fff', display: 'flex', fontFamily: display, fontWeight: 900, height: 38, justifyContent: 'center', width: 38, flex: '0 0 38px' }}>{n}</span>;
     const inputPill = (label, unit, value, onChange, accent, bg, opts = {}) => (
       <div style={{ marginBottom: 18 }}>
