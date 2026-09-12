@@ -349,6 +349,15 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     return <div className="admin-workspace"><div className="admin-empty-table">Loading fight scoring workspace.</div></div>;
   }
 
+  const roundsWonA = roundScores.filter((r) => r && normalizeNumber(r.fighterOneStats?.RW) === SCORE_POINTS.RW).length;
+  const roundsWonB = roundScores.filter((r) => r && normalizeNumber(r.fighterTwoStats?.RW) === SCORE_POINTS.RW).length;
+  const cardTotals = manualStatFields.map((stat) => ({
+    code: stat,
+    label: FIELD_LABELS[stat],
+    a: roundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterOneStats?.[stat]), 0),
+    b: roundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterTwoStats?.[stat]), 0),
+  }));
+
   return (
     <div className="admin-workspace admin-score-center admin-predictions-redesign">
       {showVideoUrlPopup && (
@@ -381,6 +390,9 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         <div><small>Round {round}</small><b>VS</b><em>{match.maxRounds || 1} max rounds</em></div>
         <article><img src={match.fighterBImage} alt={match.matchFighterB} /><strong>{match.matchFighterB}</strong><span>Blue corner</span></article>
       </section>
+
+      <div className="admin-create-fight-layout">
+      <main>
 
       <section className="admin-score-round-tabs">
         {Array.from({ length: Number(match.maxRounds || 1) }, (_, i) => i + 1).map((r) => (
@@ -444,6 +456,51 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         <button className="admin-action-secondary" type="button" onClick={() => { setFighterOneStats(emptyStats(category)); setFighterTwoStats(emptyStats(category)); }}><FaPlus /> Clear round</button>
         <span><FaTrophy /> {roundScores.filter(Boolean).length} saved rounds in this session</span>
       </section>
+
+      </main>
+
+      <aside style={{ display: 'grid', gap: 14, position: 'sticky', top: 24, minWidth: 0 }}>
+        <section className="admin-score-card-so-far">
+          <div className="admin-score-card-so-far-title">Card so far</div>
+          <div className="admin-score-card-so-far-vs">
+            <div className="is-a"><div className="admin-score-card-so-far-name">{match.matchFighterA}</div><div className="admin-score-card-so-far-count is-red">{roundsWonA}</div><div className="admin-score-card-so-far-label">Rounds won</div></div>
+            <div className="admin-score-card-so-far-x">VS</div>
+            <div className="is-b"><div className="admin-score-card-so-far-name">{match.matchFighterB}</div><div className="admin-score-card-so-far-count is-blue">{roundsWonB}</div><div className="admin-score-card-so-far-label">Rounds won</div></div>
+          </div>
+          <div className="admin-score-card-so-far-totals">
+            {cardTotals.map((t) => (
+              <div key={t.code} className="admin-score-card-so-far-row">
+                <div className="is-red">{t.a}</div>
+                <div><div>{t.label}</div><small>{t.code}</small></div>
+                <div className="is-blue">{t.b}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="admin-score-reference">
+          <div className="admin-score-reference-title">Scoring reference<span>{category === 'boxing' ? 'Boxing / bare-knuckle' : 'MMA / kickboxing'}</span></div>
+          <div className="admin-score-reference-callouts">
+            <div className="is-good"><div>Called it right</div><strong>{SCORE_POINTS.RW}+{SCORE_POINTS.RL}</strong><small>Round winner (100) plus the paired 25 credit.</small></div>
+            <div className="is-neutral"><div>Called it wrong</div><strong>{SCORE_POINTS.SP} / 0</strong><small>25 flat if survival, 0 if that round is the finish.</small></div>
+          </div>
+          <div className="admin-score-reference-table">
+            <div className="admin-score-reference-row"><span className="is-green">RW</span><span>Correct round winner</span><b>+{SCORE_POINTS.RW}</b></div>
+            <div className="admin-score-reference-row"><span className="is-green">RL</span><span>Paired round-loser credit (automatic)</span><b>+{SCORE_POINTS.RL}</b></div>
+            <div className="admin-score-reference-row"><span className="is-gold">KO</span><span>Correct finish round &mdash; KO, TKO or submission</span><b>+{SCORE_POINTS.KO}</b></div>
+            <div className="admin-score-reference-row"><span className="is-blue-code">SP</span><span>Wrong pick, round is not the finish</span><b>{SCORE_POINTS.SP} flat</b></div>
+          </div>
+          <p className="admin-score-reference-footnote">A correct round call pays 125 total (100 RW + 25 paired RL). Decision is the only outcome that isn&apos;t a finish.</p>
+        </section>
+
+        {category === 'boxing' && (
+          <section className="admin-score-tp-note">
+            <div className="admin-score-tp-note-title">Two different total punches</div>
+            <p><strong>Here in the back office</strong> total punches is the official count &mdash; it adds up from head plus body and cannot be typed over. Type the two and TP follows.</p>
+            <p><strong>On the player side</strong> it is a separate free guess &mdash; a player can predict any total they like, and it is scored against this one.</p>
+          </section>
+        )}
+      </aside>
     </div>
   );
 };

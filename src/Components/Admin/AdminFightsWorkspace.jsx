@@ -638,6 +638,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const isShadowFight = f.sourceType === 'shadow';
     const editField = (key) => (ev) => setEconomicsEdits({ ...edits, [key]: ev.target.value });
     const dirty = Boolean(economicsEdits);
+    const usd = (n) => `$${(Math.abs(Number(n) || 0) * (3.99 / 5000)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const usdSigned = (n) => { const v = Number(n) || 0; if (v === 0) return '$0.00'; return (v > 0 ? '+' : '\u2212') + usd(v); };
+    const signed = (n) => (n === 0 ? '0 tokens' : (n > 0 ? '+' : '\u2212') + Math.abs(n).toLocaleString() + ' tokens');
     const saveEconomics = async () => {
       setEconomicsSaving(true);
       try {
@@ -683,6 +686,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             style={{ flex: 1, minWidth: 0, background: 'transparent', border: 0, outline: 'none', color: accent, fontFamily: display, fontSize: 27, fontWeight: 900, padding: '11px 0', fontVariantNumeric: 'tabular-nums' }} />
           {opts.suffix && <span style={{ fontSize: 13, fontWeight: 700, color: accent }}>{opts.suffix}</span>}
         </div>
+        {opts.note && <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(245,247,251,.4)', margin: '8px 0 0' }}>{opts.note}</p>}
       </div>
     );
     return (
@@ -710,7 +714,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           })}
         </div>
 
-        <div style={{ minWidth: 0 }}>
+        <div className="admin-create-fight-layout">
+        <main>
 
         <section style={sectionStyle}>
           <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
@@ -732,7 +737,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             {badge('02')}
             <div style={{ minWidth: 0 }}>
               <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Schedule and economy</h3>
-              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Configure lock timing, entry cost and the advertised prize pool.</p>
+              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Configure lock timing, entry cost and the advertised prize pool. Declare upfront &mdash; the pot never grows with entries.</p>
             </div>
           </header>
           {!isShadowFight && (
@@ -749,6 +754,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           )}
           {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
           {!isShadowFight && (
+            <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.matchTokens || 0).toLocaleString()} tokens \u2248 {usd(edits.matchTokens)} at the standard 5,000 tokens per $3.99 rate.</p>
+          )}
+          {!isShadowFight && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
               {[0, 100, 500, 1500, 4000].map((v) => (
                 <div key={v} onClick={() => setEconomicsEdits({ ...edits, matchTokens: String(v) })} style={{ cursor: 'pointer', padding: '6px 11px', borderRadius: 7, border: `1px solid ${v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.14)'}`, background: v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.04)', fontSize: 12, fontWeight: 900, color: v === entryFee ? '#17070a' : 'rgba(245,247,251,.72)' }}>{v === 0 ? 'FREE' : v.toLocaleString()}</div>
@@ -756,6 +764,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           )}
           {inputPill('Prize pool', 'pot', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: '$', disabled: isShadowFight })}
+          {!isShadowFight && (
+            <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>Advertised cash value, declared upfront \u2014 this figure never grows with entries. It is what settles at the end regardless of how many people enter.</p>
+          )}
           {!isShadowFight && (
             <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
               <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
@@ -895,9 +906,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           </div>
         </section>
 
-        </div>
+        </main>
 
-        <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>
+        <aside>
           <section style={{ border: `1px solid ${riskBorder}`, borderRadius: 16, background: riskBg, padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
               <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.66)' }}>Break-even</span>
@@ -957,6 +968,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               </div>
             </div>
           )}
+        </aside>
         </div>
       </div>
     );
