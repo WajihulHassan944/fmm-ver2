@@ -325,6 +325,10 @@
 .admin-score-metric label { display:grid; gap:7px; margin:0!important; }
 .admin-score-metric label span { color:var(--ff-muted,var(--admin-muted)); font-size:10px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
 .admin-score-metric input { font-family:var(--ff-display,var(--admin-display))!important; font-size:28px!important; font-weight:900!important; min-height:86px!important; text-align:center; }
+.admin-score-round-tab { background:rgba(255,255,255,.03); border:1px solid var(--ff-border,rgba(255,255,255,.12)); border-radius:9px; color:rgba(245,247,251,.45); cursor:pointer; font-family:var(--ff-display); font-size:17px; font-weight:900; font-variant-numeric:tabular-nums; min-width:46px; padding:9px 11px; text-align:center; }
+.admin-score-round-tab:hover { border-color:rgba(223,17,27,.6); }
+.admin-score-round-tab.is-active { background:rgba(223,17,27,.16); border-color:#df111b; color:#fff; }
+.admin-score-round-tab.is-saved:not(.is-active) { background:rgba(53,212,93,.07); border-color:rgba(53,212,93,.35); color:rgba(245,247,251,.8); }
 .admin-score-actions-bar { align-items:center; background:rgba(7,12,18,.96); border:1px solid var(--ff-border,var(--admin-border)); border-radius:16px; display:flex; flex-wrap:wrap; gap:10px; padding:14px; position:sticky; bottom:16px; z-index:20; }
 .admin-score-actions-bar > span { color:var(--ff-muted,var(--admin-muted)); font-weight:900; margin-left:auto; text-transform:uppercase; }
 .admin-video-modal, .admin-score-select-modal { background:linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99)); border:1px solid var(--ff-border-strong,var(--admin-border-strong)); border-radius:18px; box-shadow:0 34px 90px rgba(0,0,0,.55); color:#fff; max-width:540px; padding:24px; position:relative; width:min(92vw,540px); }
