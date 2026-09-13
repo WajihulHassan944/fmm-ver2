@@ -180,7 +180,7 @@ const Calandar = () => {
                 <div><dt><FaCalendarAlt /> Date</dt><dd>{toCalendarKey(currentMatch.matchDate) || 'Date pending'}</dd></div>
                 <div><dt><FaClock /> Time</dt><dd>{formatFightTime(currentMatch.matchTime)}</dd></div>
                 <div><dt><FaMapMarkerAlt /> Venue</dt><dd>{currentMatch.venue || 'Venue pending'}</dd></div>
-                <div><dt><FaTrophy /> Prize</dt><dd>{Number(currentMatch.pot || 0) ? `$${Number(currentMatch.pot).toLocaleString()}` : 'Not specified'}</dd></div>
+                <div><dt><FaTrophy /> Prize</dt><dd>{Number(currentMatch.pot || 0) ? `${Number(currentMatch.pot).toLocaleString()} FM` : 'Not specified'}</dd></div>
               </dl>
             </div>
           </section>

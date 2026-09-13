@@ -167,7 +167,7 @@ const Promo = () => {
 	
 		<div className="title-wrap">
 		<img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1744522571/home/zn6g3lrpztxemnxzn4ud.png" className="fancy-title-img" />
-		<h1 className="fancy-title">POT: ${match.pot}, Max Rounds: {match.maxRounds}</h1>
+		<h1 className="fancy-title">POT: {match.pot} FM, Max Rounds: {match.maxRounds}</h1>
 		</div>
 		
 		<h3 className="second-last" onClick={handleJoinLeague}>Join {affiliate.firstName}'s league</h3>

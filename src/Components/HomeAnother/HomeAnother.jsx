@@ -813,7 +813,7 @@ const getPrizePool = (match) => {
     match?.pot || match?.currentPot || match?.prizePool || 0,
   );
   if (!amount) return "Open prize pool";
-  return `$${amount.toLocaleString()}`;
+  return `${amount.toLocaleString()} FM`;
 };
 
 const getPotTokenLabel = (match) => {
@@ -2679,7 +2679,7 @@ const HomeAnother = () => {
             {getPlayerCount(match).toLocaleString()} Players
           </span>
           <span>
-            <FaDollarSign aria-hidden="true" /> {getPrizePool(match)}{" "}
+            <FaCoins aria-hidden="true" /> {getPrizePool(match)}{" "}
             <small>Prize Pool</small>
           </span>
         </div>

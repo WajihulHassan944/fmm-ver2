@@ -300,12 +300,12 @@ export default function AddNewMatch() {
 
           {form.matchType === 'LIVE' && (
             <section className="admin-form-card">
-              <header><span>02</span><div><h3>Schedule and economy</h3><p>Configure lock timing, entry cost and the advertised prize pool.</p></div></header>
+              <header><span>02</span><div><h3>Schedule and economy</h3><p>Configure lock timing, entry cost and the advertised prize pool. Declare upfront — the pot never grows with entries.</p></div></header>
               <div className="admin-form-grid">
                 <label><span>Fight date</span><input type="date" name="matchDate" value={form.matchDate} onChange={change} required /></label>
                 <label><span>Fight time (EST)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} required /></label>
-                <label><span>Entry tokens</span><input type="number" min="0" name="matchTokens" value={form.matchTokens} onChange={change} /></label>
-                <label><span>Prize pool</span><input type="number" min="0" step="0.01" name="pot" value={form.pot} onChange={change} /></label>
+                <label><span>Entry tokens (FM)</span><input type="number" min="0" name="matchTokens" value={form.matchTokens} onChange={change} /></label>
+                <label><span>Prize pool (FM)</span><input type="number" min="0" step="0.01" name="pot" value={form.pot} onChange={change} /></label>
               </div>
             </section>
           )}

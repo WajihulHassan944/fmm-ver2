@@ -182,8 +182,8 @@ const PromoShadowPage = ({ affiliate, matchData }) => {
         <section className="shadow-promo-details">
           <div>
             <p className="shadow-promo-eyebrow">Prize and entry</p>
-            <h2>${Number(matchData?.pot || 0).toLocaleString()} pot</h2>
-            <p>Max rounds: {matchData?.maxRounds || 'TBA'} · Ticket: ${Number(matchData?.matchTokens || 0).toLocaleString()}</p>
+            <h2>{Number(matchData?.pot || 0).toLocaleString()} FM pot</h2>
+            <p>Max rounds: {matchData?.maxRounds || 'TBA'} · Ticket: {Number(matchData?.matchTokens || 0).toLocaleString()} FM</p>
           </div>
           <div>
             <p className="shadow-promo-eyebrow">How it works</p>

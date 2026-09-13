@@ -70,7 +70,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
                 <div className="public-affiliate-campaign-copy">
                   <p>Promotion {String(index + 1).padStart(2, '0')}</p>
                   <h3>{match.matchFighterA || 'Fighter A'} <span>vs</span> {match.matchFighterB || 'Fighter B'}</h3>
-                  <div><span><FaTrophy /> ${Number(match.pot || 0).toLocaleString()} pot</span><span><FaCoins /> {match.matchTokens || 0} token entry</span></div>
+                  <div><span><FaTrophy /> {Number(match.pot || 0).toLocaleString()} FM pot</span><span><FaCoins /> {match.matchTokens || 0} token entry</span></div>
                   <button type="button">Open promoted campaign <FaArrowRight /></button>
                 </div>
               </article>

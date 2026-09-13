@@ -152,7 +152,7 @@ const UpcomingFights = () => {
                       <div className='transformed-div-two-partTwo'>
                         <p>{match.matchDate?.split('T')[0]}</p> {/* Use the formatted date here */}
                         <h1>{match.matchType}</h1>
-                        <h1>pot ${match.pot}</h1>
+                        <h1>pot {match.pot} FM</h1>
                       </div>
                     </div>
                   </div>

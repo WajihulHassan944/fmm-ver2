@@ -116,7 +116,7 @@ const DeleteFights = () => {
                   <td>{match.matchCategoryTwo || match.matchCategory}</td>
                   <td><span className="admin-cell-stack"><strong>{match.matchDate?.split('T')[0] || 'Date pending'}</strong><small>{match.matchTime || 'Time pending'}</small></span></td>
                   <td><span className={`admin-status-badge ${match.matchStatus === 'Finished' ? 'is-success' : 'is-warning'}`}>{match.matchStatus || 'Draft'}</span></td>
-                  <td>{Number(match.pot || 0) ? `$${Number(match.pot).toLocaleString()}` : '—'}</td>
+                  <td>{Number(match.pot || 0) ? `${Number(match.pot).toLocaleString()} FM` : '—'}</td>
                   <td><div className="admin-row-actions"><button type="button" onClick={() => { setSelectedMatchId(match._id); setEditingIsShadow(false); setIsEditing(true); }}><FaEdit /> Edit</button><button type="button" className="is-danger" onClick={() => handleDeleteClick(match._id, match.affiliateId)}><FaTrashAlt /> Delete</button></div></td>
                 </tr>
               )) : <tr><td colSpan="6"><div className="admin-empty-table">No matches found.</div></td></tr>}

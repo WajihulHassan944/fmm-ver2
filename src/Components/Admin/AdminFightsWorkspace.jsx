@@ -763,9 +763,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               ))}
             </div>
           )}
-          {inputPill('Prize pool', 'pot', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: '$', disabled: isShadowFight })}
+          {inputPill('Prize pool', 'advertised total', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
           {!isShadowFight && (
-            <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>Advertised cash value, declared upfront \u2014 this figure never grows with entries. It is what settles at the end regardless of how many people enter.</p>
+            <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.pot || 0).toLocaleString()} tokens \u2248 {usd(edits.pot)} \u2014 declared upfront, this figure never grows with entries.</p>
           )}
           {!isShadowFight && (
             <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
@@ -799,9 +799,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                   <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
                 </div>
               </header>
-              {pill('Break-even entrants', 'breakEvenEntrants', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-              {inputPill('Minimum entrants required', 'minimumEntrants', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-              {pill('Live entrants right now', 'entrants', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
+              {pill('Break-even entrants', 'entries', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
+              {inputPill('Minimum entrants required', 'entries', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
+              {pill('Live entrants right now', 'entries', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
               <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
                 <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
                 <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
@@ -811,7 +811,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         })()}
 
         {(() => {
-          const signed = (n) => (n === 0 ? '$0' : (n > 0 ? '+$' : '\u2212$') + Math.abs(n).toLocaleString());
+          const signed = (n) => (n === 0 ? '0 tokens' : (n > 0 ? '+' : '\u2212') + Math.abs(n).toLocaleString() + ' tokens');
           const voidValue = guarded ? 0 : -pot;
           const atMinValue = free ? -pot : minimumEntrants * entryFee - pot;
           const steps = [0, 2, 5, 10, 25, 50, 100, 250];
@@ -929,8 +929,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                   <div style={{ fontFamily: display, fontSize: 16, fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', marginBottom: 12, color: '#fff' }}>{getTitle(f)}</div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', paddingTop: 11, borderTop: '1px solid rgba(255,255,255,.13)' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: display, fontSize: 17, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `$${pot.toLocaleString()}`}</div>
-                      <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', whiteSpace: 'nowrap' }}>Guaranteed pot</div>
+                      <div style={{ fontFamily: display, fontSize: 17, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} tokens`}</div>
+                      <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', whiteSpace: 'nowrap' }}>{free ? 'Guaranteed pot' : `Guaranteed pot \u00b7 ${usd(pot)}`}</div>
                     </div>
                     <div style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 13px', borderRadius: 999, background: '#f7b51b', color: '#17070a', fontFamily: display, fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{free ? 'ENTER FREE' : `ENTER \u00b7 $${entryFee.toLocaleString()}`}</div>
                   </div>
@@ -943,7 +943,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: '#ff2a35', whiteSpace: 'nowrap' }}>PRIZE POOL</div>
-                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `$${pot.toLocaleString()}`}</div>
+                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} tokens`}</div>
+                      <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(245,247,251,.4)', whiteSpace: 'nowrap' }}>{free ? '' : usd(pot)}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: '#ff2a35', whiteSpace: 'nowrap' }}>ENTRY FEE</div>

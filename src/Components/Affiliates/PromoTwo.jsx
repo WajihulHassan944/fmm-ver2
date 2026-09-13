@@ -135,7 +135,7 @@ const PromoTwo = ({ matchId, affiliateId }) => {
             <span>{match.matchFighterB || 'Fighter B'}</span>
           </div>
           <div className="public-promo-prize-strip">
-            <span><small>Prize pot</small><strong>${Number(match.pot || 0).toLocaleString()}</strong></span>
+            <span><small>Prize pot</small><strong>{Number(match.pot || 0).toLocaleString()} FM</strong></span>
             <span><small>Entry</small><strong>{match.matchTokens || 0} tokens</strong></span>
             <span><small>Status</small><strong><FaCheckCircle /> Approved</strong></span>
           </div>

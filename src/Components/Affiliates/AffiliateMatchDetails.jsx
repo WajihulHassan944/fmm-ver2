@@ -582,7 +582,7 @@ const handleSave = async (blobUrl) => {
       </section>
 
       <section className="affiliate-campaign-kpi-strip">
-        <article><span>Prize pot</span><strong>${Number(match.pot || 0).toLocaleString()}</strong><small>Configured winner award</small></article>
+        <article><span>Prize pot</span><strong>{Number(match.pot || 0).toLocaleString()} FM</strong><small>Configured winner award</small></article>
         <article><span>Entries</span><strong>{userPredictionCount}</strong><small>Predictions submitted</small></article>
         <article><span>Required</span><strong>{minimumUsers || '—'}</strong><small>Minimum paid players</small></article>
         <article><span>Earned</span><strong>${actualProfit.toFixed(2)}</strong><small>Calculated campaign profit</small></article>
