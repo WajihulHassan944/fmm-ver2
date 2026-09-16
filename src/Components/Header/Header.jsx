@@ -108,7 +108,7 @@ const playerNav = [
     href: '#',
     icon: FaEllipsisH,
     children: [
-      { label: 'Dashboard', href: '/UserDashboard', icon: FaHome },
+      { label: 'Dashboard', href: '/home', icon: FaHome },
       { label: 'Leagues', href: '/myLeagueRecords', icon: FaTrophy },
       { label: 'Profile', href: '/profile', icon: FaUserCircle },
       { label: 'Account Settings', href: '/account-settings', icon: FaCog },
@@ -338,7 +338,7 @@ const Header = () => {
 
   const mobileLinks = [
     { label: 'Contests', href: '/upcomingfights', icon: FaTrophy },
-    { label: 'Make Predictions', href: '/UserDashboard', icon: FaBullseye },
+    { label: 'Make Predictions', href: '/home', icon: FaBullseye },
     { label: 'Leaderboard', href: '/leaderboard', icon: FaCrown },
     { label: 'Leagues', href: '/FantasyLeagues', icon: FaTrophy },
     { label: 'Apparel', href: '/apparel', icon: FaGift },

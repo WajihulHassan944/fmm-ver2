@@ -5,8 +5,9 @@ import { FaArrowLeft, FaCheckCircle, FaFilm, FaPlus, FaSave, FaTrophy } from 're
 import { getWinnerDetails } from '../../CustomFunctions/winnerUtils';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const FIELD_LABELS = {
   HP: 'Head punches',
@@ -31,6 +32,10 @@ const AUTO_FIELDS = ['RW', 'RL', 'KO', 'SP'];
 // TP is calculated from HP + BP in the back office, never hand-entered
 // (players' free-guess TP prediction is separate and unrelated to this).
 const COMPUTED_FIELDS = ['TP'];
+const usesPunchCard = (value = '') => {
+  const category = String(value).toLowerCase();
+  return category.includes('box') || category.includes('bare') || category.includes('bkfc');
+};
 const emptyStats = (category) => Object.fromEntries((category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS).map((key) => [key, '']));
 const normalizeNumber = (value) => {
   if (value === '' || value === null || value === undefined) return 0;
@@ -74,7 +79,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     return Array.isArray(matches) ? matches.find((m) => m._id === matchId) : null;
   }, [filter, matchId, matches, shadowMatches]);
 
-  const category = match?.matchCategory === 'boxing' ? 'boxing' : 'mma';
+  const category = usesPunchCard(match?.matchCategoryTwo || match?.matchCategory) ? 'boxing' : 'mma';
   const statFields = category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS;
   const manualStatFields = statFields.filter((field) => !AUTO_FIELDS.includes(field) && !COMPUTED_FIELDS.includes(field));
   const roundWinnerIsA = normalizeNumber(fighterOneStats.RW) === SCORE_POINTS.RW;
@@ -84,7 +89,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   useEffect(() => {
     if (match) {
-      const fresh = emptyStats(match.matchCategory === 'boxing' ? 'boxing' : 'mma');
+      const fresh = emptyStats(usesPunchCard(match.matchCategoryTwo || match.matchCategory) ? 'boxing' : 'mma');
       setFighterOneStats(fresh);
       setFighterTwoStats(fresh);
       setVideoUrl(match.matchVideoUrl || '');
@@ -433,7 +438,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           {category === 'boxing' && (
             <article className="admin-score-metric admin-score-metric-computed is-red">
               <div className="admin-score-computed-label"><strong>{FIELD_LABELS.TP}</strong><span>TP</span><small>Auto-totaled from HP + BP</small></div>
-              <div className="admin-score-computed-value">{normalizeNumber(fighterOneStats.TP)}</div>
+              <div className="admin-score-computed-value">{normalizeNumber(fighterTwoStats.TP)}</div>
             </article>
           )}
         </div>

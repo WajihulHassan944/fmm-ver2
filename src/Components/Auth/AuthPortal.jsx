@@ -122,30 +122,14 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   }, [mode, role]);
 
   useEffect(() => {
-    if (playerRegistration.state !== 'polling' || !playerRegistration.email) return undefined;
-    let cancelled = false;
-    const startedAt = Date.now();
-
-    const checkVerification = async () => {
-      try {
-        const data = await apiRequest(`/user/${encodeURIComponent(playerRegistration.email)}`, { token: null });
-        if (!cancelled && data?.verified) {
-          setPlayerRegistration((current) => ({ ...current, state: 'verified' }));
-        } else if (!cancelled && Date.now() - startedAt > 120000) {
-          setPlayerRegistration((current) => ({ ...current, state: 'timed-out' }));
-        }
-      } catch (error) {
-        console.error('Verification status check failed:', error);
-      }
-    };
-
-    checkVerification();
-    const interval = setInterval(checkVerification, 5000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [playerRegistration.email, playerRegistration.state]);
+    if (!router.isReady) return;
+    if (queryValue(router.query.verified) === '1') {
+      toast.success('Email verified. Sign in to finish setting up your player account.');
+    } else if (queryValue(router.query.verification) === 'invalid') {
+      toast.error('That verification link is invalid or expired. Request a new link below.');
+      setForgotPassword(false);
+    }
+  }, [router.isReady, router.query.verification, router.query.verified]);
 
   const selectedRole = useMemo(() => roles.find((item) => item.id === role) || roles[0], [role]);
 
@@ -384,7 +368,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   }
 
   const completionCard = (() => {
-    if (playerRegistration.state === 'polling') return { title: 'Verify your email', copy: `We sent a verification link to ${playerRegistration.email}. This page will continue automatically after verification.`, icon: FaEnvelope };
+    if (playerRegistration.state === 'polling') return { title: 'Verify your email', copy: `We sent a verification link to ${playerRegistration.email}. Open it, then return here and continue to the new login.`, icon: FaEnvelope };
     if (playerRegistration.state === 'timed-out') return { title: 'Verification window ended', copy: 'The account was created, but verification was not detected within two minutes. Open the email link, then sign in.', icon: FaShieldAlt };
     if (affiliateRegistered) return affiliateInstantApproved
       ? { title: 'You\'re approved!', copy: 'Your affiliate account is live — sign in now to set up your profile and start promoting.', icon: FaUserFriends }
@@ -448,6 +432,13 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                         toast.success('Verification email resent — check your inbox (and spam folder).');
                       } catch (error) { toast.error(error.message || 'Could not resend the email.'); }
                     }}>Resend verification email</button>
+                  )}
+                  {playerRegistration.state === 'polling' && (
+                    <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
+                      setLoginForm((current) => ({ ...current, email: playerRegistration.email }));
+                      setPlayerRegistration({ state: 'idle', email: '' });
+                      updateRouteState('login', 'player');
+                    }}>I verified my email — continue <FaArrowRight /></button>
                   )}
                   <button type="button" className="theme-btn theme-btn-secondary" onClick={() => { setPlayerRegistration({ state: 'idle', email: '' }); setAffiliateRegistered(false); setAffiliateInstantApproved(false); setSponsorSubmitted(false); updateRouteState('login'); }}>Back to login</button>
                 </div>

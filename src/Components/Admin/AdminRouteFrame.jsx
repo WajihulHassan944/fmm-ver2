@@ -13,6 +13,16 @@ const ROUTE_COPY = {
     title: 'Create match',
     description: 'Build live and shadow fight cards while keeping the existing addMatch and addShadow backend contracts intact.',
   },
+  '/administration/fights': {
+    eyebrow: 'Fight operations',
+    title: 'Fight command desks',
+    description: 'Move one fight through its registry, economics, official scoring, results, and promotion desks without leaving the current back-office workflow.',
+  },
+  '/administration/predictions': {
+    eyebrow: 'Score operations',
+    title: 'Prediction scoring desk',
+    description: 'Review official fight statistics and scoring operations through the same command-center system used by the fight registry.',
+  },
   '/administration/upcomingFights': {
     eyebrow: 'Score operations',
     title: 'Submit & view scores',

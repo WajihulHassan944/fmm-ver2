@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 // Async thunk for logging in the admin
 export const loginAdmin = createAsyncThunk('adminAuth/loginAdmin', async ({ email, password }, { rejectWithValue }) => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/login', {
+    const response = await fetch(buildPublicApiUrl('/admin/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

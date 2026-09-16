@@ -31,13 +31,14 @@ import MatchDetailsPromotion from './MatchDetailsPromotion';
 import FightDataQualityCenter from './FightDataQualityCenter';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import {
   getFighterImage,
   getFighterName,
   getPublicFightDuplicateKey,
 } from '@/Utils/fightExperience';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 
@@ -584,6 +585,33 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     }
   };
 
+  const fightForDesk = (id) => allRows.find((fight) => String(getId(fight)) === String(id));
+  const closeFightDesks = () => {
+    setSelectedScore(null);
+    setSelectedScoresView(null);
+    setSelectedEconomics(null);
+    setEconomicsEdits(null);
+    setSelectedPromotion(null);
+  };
+  const openFightDesk = (desk, fight) => {
+    if (!fight) return;
+    closeFightDesks();
+    const descriptor = { id: getId(fight), filter: fight.sourceType === 'shadow' ? 'shadowTemplate' : 'normal' };
+    if (desk === 'economics') setSelectedEconomics(fight);
+    if (desk === 'scoring') setSelectedScore(descriptor);
+    if (desk === 'results') setSelectedScoresView(descriptor);
+    if (desk === 'promotion') setSelectedPromotion(fight);
+  };
+  const renderFightDeskNav = (fight, active) => (
+    <nav className="admin-fight-desk-nav" aria-label="Fight workspace desks">
+      <button type="button" className={active === 'registry' ? 'is-active' : ''} onClick={closeFightDesks}>Registry</button>
+      <button type="button" className={active === 'economics' ? 'is-active' : ''} onClick={() => openFightDesk('economics', fight)} disabled={!fight}>Economics desk</button>
+      <button type="button" className={active === 'scoring' ? 'is-active' : ''} onClick={() => openFightDesk('scoring', fight)} disabled={!fight}>Scoring desk</button>
+      <button type="button" className={active === 'results' ? 'is-active' : ''} onClick={() => openFightDesk('results', fight)} disabled={!fight}>Results</button>
+      <button type="button" className={active === 'promotion' ? 'is-active' : ''} onClick={() => openFightDesk('promotion', fight)} disabled={!fight}>Promotion</button>
+    </nav>
+  );
+
 
   if (showDataQuality) {
     return (
@@ -597,24 +625,28 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   }
 
   if (selectedScore?.id) {
+    const deskFight = fightForDesk(selectedScore.id);
     return (
       <div className="admin-workspace admin-score-workspace-shell">
         <section className="admin-page-heading admin-page-heading-compact">
           <div><span>Official scoring</span><h2>Submit fight scores</h2><p>All original score buttons, round controls, finish fight action, video URL submission, and endpoints are still active.</p></div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedScore(null)}>Back to fight registry</button>
         </section>
+        {renderFightDeskNav(deskFight, 'scoring')}
         <AdminPredictions matchId={selectedScore.id} filter={selectedScore.filter} />
       </div>
     );
   }
 
   if (selectedScoresView?.id) {
+    const deskFight = fightForDesk(selectedScoresView.id);
     return (
       <div className="admin-workspace">
         <section className="admin-page-heading admin-page-heading-compact">
           <div><span>Results archive</span><h2>View submitted scores</h2><p>Review the original score output for this fight.</p></div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedScoresView(null)}>Back to fight registry</button>
         </section>
+        {renderFightDeskNav(deskFight, 'results')}
         <ShowScores matchId={selectedScoresView.id} filter={selectedScoresView.filter} />
       </div>
     );
@@ -690,8 +722,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       </div>
     );
     return (
-      <div className="admin-workspace" style={{ background: '#05080d', minHeight: '100%', padding: 24, borderRadius: 16 }}>
-        <section style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div className="admin-workspace admin-economics-desk" style={{ background: '#05080d', minHeight: '100%', padding: 24, borderRadius: 16 }}>
+        <section className="admin-economics-heading" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#ff2a35', marginBottom: 7 }}>Fight operations</div>
             <h1 style={{ fontFamily: display, fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>{getTitle(f)}</h1>
@@ -699,8 +731,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           </div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
+        {renderFightDeskNav(f, 'economics')}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
+        <div className="admin-economics-fight-selector" style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
           <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)' }}>Editing</span>
           {filteredRows.slice(0, 12).map((row) => {
             const rowId = getId(row);
@@ -982,6 +1015,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <div><span>Promotion builder</span><h2>{getTitle(selectedPromotion)}</h2><p>Promote this live fight through the existing promotional module.</p></div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedPromotion(null)}>Back to fight registry</button>
         </section>
+        {renderFightDeskNav(selectedPromotion, 'promotion')}
         <MatchDetailsPromotion matchId={getId(selectedPromotion)} fight={selectedPromotion} />
       </div>
     );

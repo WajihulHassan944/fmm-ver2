@@ -1,16 +1,8 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
+export const getServerSideProps = async ({ query }) => {
+  const next = typeof query?.next === 'string' ? `&next=${encodeURIComponent(query.next)}` : '';
+  return {
+    redirect: { destination: `/auth?mode=login&role=player${next}`, permanent: false },
+  };
+};
 
-const Login = dynamic(
-  () => import('@/Components/Login/Login'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-
-const index = () => {
-  return <Login />
-}
-
-export default index
+export default function LoginRedirect() { return null; }
