@@ -322,15 +322,26 @@ const AffiliateDashboard = () => {
   return (
     <>
       <Head><title>Affiliate Dashboard | Fantasy MMAdness</title></Head>
-      <div className="experience-page affiliate-dashboard-experience-page">
+      <div className="experience-page affiliate-dashboard-experience-page affiliate-command-v3" data-ui-version="command-v3">
+        <section className="affiliate-command-ribbon" aria-label="Affiliate command status">
+          <div className="theme-container affiliate-command-ribbon-inner">
+            <span><i /> Affiliate command online</span>
+            <nav>
+              <a href="#shadow-templates">Fight inventory</a>
+              <a href="#live-campaign-room">Live campaigns</a>
+              <Link href="/promoter/full-cards">Full Card Promoter</Link>
+              <Link href="/affiliate-money">Money desk</Link>
+            </nav>
+          </div>
+        </section>
         <section className="xp-affiliate-hero affiliate-dashboard-hero-final">
           <div className="xp-affiliate-hero-grid" aria-hidden="true" />
           <div className="theme-container xp-affiliate-hero-layout">
             <div className="xp-affiliate-profile-card">
               <div className="xp-affiliate-avatar"><img src={profileImage} alt={fullName} /></div>
               <div>
-                <p className="xp-eyebrow"><FaBullhorn /> Creator command center</p>
-                <h1>Build the card. <span>Move the crowd.</span></h1>
+                <p className="xp-eyebrow"><FaBullhorn /> Affiliate Command 3.0</p>
+                <h1>Your promotion business. <span>One command deck.</span></h1>
                 <p>
                   Welcome back, {fullName}. Turn approved shadow templates into branded promotions,
                   grow your league, and manage every active campaign from one fight-night workspace.
@@ -346,9 +357,9 @@ const AffiliateDashboard = () => {
               </div>
             </div>
 
-            <aside className="xp-affiliate-pipeline-card">
-              <span>Campaign pipeline</span>
-              <h2>{promotedFights.length} live promotions</h2>
+            <aside className="xp-affiliate-pipeline-card affiliate-command-snapshot">
+              <span>Live business snapshot</span>
+              <h2>{promotedFights.length} active campaigns</h2>
               <div className="xp-affiliate-pipeline">
                 <div><i /><strong>{promotionFights.length}</strong><small>Templates ready</small></div>
                 <div><i /><strong>{promotedFights.length}</strong><small>Promotions live</small></div>
