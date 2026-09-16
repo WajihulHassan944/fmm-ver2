@@ -47,6 +47,11 @@ const getSport = (fight) => fight?.matchCategoryTwo || fight?.matchCategory || '
 const getTitle = (fight) => fight?.matchName || `${fight?.matchFighterA || 'Fighter A'} vs ${fight?.matchFighterB || 'Fighter B'}`;
 const formatDate = (fight) => fight?.matchDate?.split?.('T')?.[0] || 'Date pending';
 const formatTime = (fight) => fight?.matchTime || 'Time pending';
+const TERMINAL_FIGHT_STATUSES = new Set(['finished', 'completed', 'closed', 'settled', 'cancelled', 'canceled', 'void', 'voided']);
+const LIVE_FIGHT_STATUSES = new Set(['live', 'ongoing', 'in progress', 'in-progress', 'active']);
+const getFightStatus = (fight = {}) => String(fight.matchStatus || fight.matchShadowStatus || fight.status || '').trim().toLowerCase();
+const isFinishedFight = (fight = {}) => Boolean(fight.prizesSettledAt || fight.settledAt || TERMINAL_FIGHT_STATUSES.has(getFightStatus(fight)));
+const isActiveFight = (fight = {}) => LIVE_FIGHT_STATUSES.has(getFightStatus(fight));
 
 // Fight-operations economics, mirroring the break-even guard the server
 // enforces at settlement (declaredPot / entryFee, minimumEntrants falling
@@ -239,11 +244,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     return registryRows.filter((fight) => {
-      const status = String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase();
+      const status = getFightStatus(fight);
       const type = String(fight.matchType || '').toLowerCase();
       const tabMatch = activeTab === 'all'
-        || (activeTab === 'ongoing' && status === 'ongoing')
-        || (activeTab === 'finished' && status === 'finished')
+        || (activeTab === 'ongoing' && isActiveFight(fight))
+        || (activeTab === 'finished' && isFinishedFight(fight))
         || (activeTab === 'live' && type === 'live');
       if (!tabMatch) return false;
       if (!normalizedSearch) return true;
@@ -265,6 +270,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         .join(' ')
         .toLowerCase()
         .includes(normalizedSearch);
+    }).sort((a, b) => {
+      const liveDiff = Number(isActiveFight(b)) - Number(isActiveFight(a));
+      if (liveDiff) return liveDiff;
+      const finishedDiff = Number(isFinishedFight(a)) - Number(isFinishedFight(b));
+      if (finishedDiff) return finishedDiff;
+      return new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
     });
   }, [activeTab, registryRows, search]);
 
@@ -274,8 +285,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   const metrics = useMemo(() => ({
     total: registryRows.length,
-    active: registryRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'ongoing').length,
-    finished: registryRows.filter((fight) => String(fight.matchStatus || fight.matchShadowStatus || '').toLowerCase() === 'finished').length,
+    active: registryRows.filter(isActiveFight).length,
+    finished: registryRows.filter(isFinishedFight).length,
   }), [registryRows]);
 
   const getSourceType = (fight) => String(fight?.sourceType || fight?.__source || 'match').toLowerCase() === 'shadow' ? 'shadow' : 'match';
@@ -1096,7 +1107,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               {filteredRows.length ? filteredRows.map((fight, index) => {
                 const id = getId(fight);
                 const status = fight.matchStatus || 'Draft';
-                const isFinished = String(status).toLowerCase() === 'finished';
+                const isFinished = isFinishedFight(fight);
                 const isLive = String(fight.matchType || '').toUpperCase() === 'LIVE';
                 return (
                   <tr key={`${fight.__source}-${id || index}`}>
@@ -1136,6 +1147,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                       <div className="admin-row-actions admin-table-actions">
                         <button type="button" onClick={() => openEconomics(fight)}><FaFistRaised /> Economics</button>
                         {isFinished ? <button type="button" onClick={() => openScores(fight)}><FaEye /> Scores</button> : <button type="button" onClick={() => openScoring(fight)}><FaTrophy /> Score</button>}
+                        {isFinished && <button type="button" className="is-danger" disabled={bulkDeleting} onClick={() => deleteFight(fight)}><FaTrashAlt /> Delete</button>}
                         <div style={{ position: 'relative' }}>
                           <button type="button" onClick={() => setOpenActionsRowId(openActionsRowId === String(id) ? null : String(id))}>More \u25be</button>
                           {openActionsRowId === String(id) && (
