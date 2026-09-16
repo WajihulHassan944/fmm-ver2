@@ -384,7 +384,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         <title>{mode === 'login' ? 'Login' : 'Create Account'} | Fantasy MMAdness</title>
         <meta name="description" content="One secure access point for Fantasy MMAdness players, affiliates, and sponsors." />
       </Head>
-      <div className="experience-page auth-experience-page">
+      <div className={`experience-page auth-experience-page auth-role-${role} auth-mode-${mode}`}>
         <div className="xp-auth-shell">
           <aside className="xp-auth-art">
             <div className="xp-auth-art-grid" />
