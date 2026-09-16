@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const UsersPlayed = ({ userPredictions }) => {
   const [users, setUsers] = useState([]);
@@ -12,7 +13,8 @@ const UsersPlayed = ({ userPredictions }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/users");
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/public/user-directory`);
+        if (!response.ok) throw new Error('Could not load the player directory.');
         const data = await response.json();
         setUsers(data);
       } catch (error) {
