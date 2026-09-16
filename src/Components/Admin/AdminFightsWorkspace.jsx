@@ -640,7 +640,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     return (
       <div className="admin-workspace admin-score-workspace-shell">
         <section className="admin-page-heading admin-page-heading-compact">
-          <div><span>Official scoring</span><h2>Submit fight scores</h2><p>All original score buttons, round controls, finish fight action, video URL submission, and endpoints are still active.</p></div>
+          <div><span>Fight Scoring Desk</span><h2>Submit &amp; view scores</h2><p>Enter every round for both fighters in one clean workspace. Fighter A and Fighter B remain isolated, totals calculate independently, and nothing settles until the card is posted.</p></div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedScore(null)}>Back to fight registry</button>
         </section>
         {renderFightDeskNav(deskFight, 'scoring')}
