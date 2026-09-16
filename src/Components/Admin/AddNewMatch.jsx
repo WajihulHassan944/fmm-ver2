@@ -217,11 +217,11 @@ export default function AddNewMatch() {
   }
 
   return (
-    <div className="admin-workspace admin-create-fight-page admin-economics-desk" data-desk-ui="operations-v2">
-      <section className="admin-page-heading">
+    <div className="admin-workspace admin-create-fight-page admin-economics-desk admin-operations-v3" data-desk-ui="operations-v3">
+      <section className="admin-page-heading admin-operations-hero">
         <div>
-          <span>Fight Economics Desk</span>
-          <h2>Create match</h2>
+          <span>Fight Operations · Economics Desk 3.0</span>
+          <h2>Build and fund the fight.</h2>
           <p>Build live and Shadow fight cards from one clean operations desk. Configure the schedule, entry economy, prize guard, fighters, publishing controls, and player preview before anything goes live.</p>
         </div>
         <div className="admin-heading-actions">
@@ -239,7 +239,7 @@ export default function AddNewMatch() {
         <div className="is-live"><span>Publishing</span><strong>Protected workflow</strong></div>
       </section>
 
-      <nav className="admin-fight-desk-nav" aria-label="Fight desk workflow">
+      <nav className="admin-fight-desk-nav admin-operations-workflow" aria-label="Fight desk workflow">
         <button type="button" className="is-active">Economics desk</button>
         <button type="button" disabled title="Create or select a fight before scoring">Scoring desk</button>
         <button type="button" disabled title="Create or select a fight before reviewing results">Results</button>
