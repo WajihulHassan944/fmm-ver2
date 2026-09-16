@@ -138,6 +138,7 @@ import "@/styles/fmm-affiliate-campaign-v68.css";
 // Last authenticated layer: finishes remaining Affiliate, Player and legacy
 // Back Office surfaces without changing their API or business logic.
 import "@/styles/fmm-complete-experience-v72.css";
+import "@/styles/fmm-component-rebuild-v73.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
