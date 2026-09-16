@@ -186,14 +186,13 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
     const matchDate = formData.matchDate.split('T')[0];
 
-    // A part-stake is the one combination that helps nobody: it does not
-    // guarantee the card, and the money is tied up anyway. Make them choose.
-    if (economics.partialStake) {
-      const proceed = window.confirm(
-        `${economics.stake.toLocaleString()} does not cover the ${economics.pot.toLocaleString()} pot, so the card is NOT guaranteed — `
-        + 'it still voids and refunds if it comes up short. Stake the full pot to guarantee it, or leave the stake at 0. Publish anyway?'
-      );
-      if (!proceed) { setButtonText('Publish fight promotion'); return; }
+    // The deployed backend currently accepts either no paid prize or a fully
+    // guaranteed paid prize. Stop here with the exact requirement instead of
+    // sending a request that can only return the generic "Failed to add" alert.
+    if (!economics.free && economics.pot > economics.stake) {
+      alert(`The current publishing guard requires the entire ${economics.pot.toLocaleString()} FM prize to be guaranteed. Increase the guarantee to ${economics.pot.toLocaleString()} FM or change the prize settings before publishing.`);
+      setButtonText('Publish fight promotion');
+      return;
     }
 
     const data = new FormData();
@@ -242,11 +241,12 @@ const AffiliateAddNewMatch = ({ matchId }) => {
         console.log(responseData.data);
         window.location.reload();
       } else {
-        alert('Failed to add match.');
+        const problem = await response.json().catch(() => ({}));
+        alert(problem.message || `The match could not be published (${response.status}).`);
       }
     } catch (error) {
       console.error('Error adding match:', error);
-      window.location.reload();
+      alert(`The match could not be published: ${error.message || 'network error'}`);
     } finally {
       setButtonText('Publish fight promotion');
     }
