@@ -1,7 +1,10 @@
-// Keep old bookmarks working without maintaining a second, visually different
-// player dashboard. The application has one canonical home at /home.
-export const getServerSideProps = async () => ({
-  redirect: { destination: '/home', permanent: false },
-});
+import dynamic from 'next/dynamic';
 
-export default function UserDashboardRedirect() { return null; }
+const PlayerFightCenter = dynamic(
+  () => import('@/Components/UserProfile/PlayerFightCenter'),
+  { loading: () => <div className="player-fight-center-loading">Preparing your Fight Center…</div> },
+);
+
+export default function UserDashboard() {
+  return <PlayerFightCenter />;
+}
