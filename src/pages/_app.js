@@ -140,6 +140,10 @@ import "@/styles/fmm-affiliate-campaign-v68.css";
 import "@/styles/fmm-complete-experience-v72.css";
 import "@/styles/fmm-component-rebuild-v73.css";
 import "@/styles/fmm-backoffice-command-v74.css";
+// Final visual source of truth for the unified account portal and both fight
+// operations desks. It deliberately changes presentation only; the connected
+// auth, fight-economy and round-scoring handlers remain in their components.
+import "@/styles/fmm-login-desks-v75.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
