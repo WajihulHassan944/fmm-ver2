@@ -172,9 +172,9 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
           setMembershipEmail(loggedInUser.email || loginForm.email);
         } else {
           toast.success('Welcome back to the fight room.');
-          // Send players straight into the app experience, not the legacy
-          // dashboard page — the website's whole job is to funnel signups here.
-          navigateAfterAuth('/home');
+          // The Fight Center organizes every player tool and links into the
+          // immersive phone-style application when the player is ready.
+          navigateAfterAuth('/UserDashboard');
         }
       } else if (role === 'affiliate') {
         const result = await dispatch(loginAffiliate(loginForm)).unwrap();
@@ -335,7 +335,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         localStorage.setItem('authToken', accessToken);
         const account = await dispatch(fetchUser(accessToken)).unwrap();
         if (account?.currentPlan === 'None') setMembershipEmail(account.email);
-        else navigateAfterAuth('/home');
+        else navigateAfterAuth('/UserDashboard');
       }
     } catch (error) {
       toast.error(error.message || 'Google authentication failed.');
@@ -384,7 +384,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         <title>{mode === 'login' ? 'Login' : 'Create Account'} | Fantasy MMAdness</title>
         <meta name="description" content="One secure access point for Fantasy MMAdness players, affiliates, and sponsors." />
       </Head>
-      <div className="experience-page auth-experience-page">
+      <div className={`experience-page auth-experience-page auth-role-${role} auth-mode-${mode}`}>
         <div className="xp-auth-shell">
           <aside className="xp-auth-art">
             <div className="xp-auth-art-grid" />

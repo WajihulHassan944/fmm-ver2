@@ -13,6 +13,11 @@ import {
   FaDollarSign,
   FaEye,
   FaHistory,
+  FaIdBadge,
+  FaMoneyCheckAlt,
+  FaQrcode,
+  FaRegPlayCircle,
+  FaTools,
   FaPlus,
   FaTrophy,
   FaUserFriends,
@@ -348,6 +353,65 @@ const AffiliateDashboard = () => {
               <div><FaBullhorn /><span><strong>{totalPromotions}</strong><small>Total promotions</small></span></div>
             </section>
 
+            <section className="affiliate-business-suite" aria-labelledby="affiliate-business-suite-title">
+              <header className="affiliate-business-suite-heading">
+                <div>
+                  <p className="xp-eyebrow"><FaTools /> Affiliate business suite</p>
+                  <h2 id="affiliate-business-suite-title">Everything you built. One command center.</h2>
+                  <p>Promote fights, grow your audience, create campaign media, track performance, and manage your money without hunting through the old website.</p>
+                </div>
+                <span><i /> Live tools connected</span>
+              </header>
+
+              <div className="affiliate-business-suite-grid">
+                <a href="#shadow-templates" className="is-red">
+                  <FaBullhorn />
+                  <span><small>Promote</small><strong>Create a fight campaign</strong><em>Open an approved template, configure the prize and publish.</em></span>
+                  <FaArrowRight />
+                </a>
+                <Link href="/AffiliatePromotion" className="is-blue">
+                  <FaChartLine />
+                  <span><small>Track</small><strong>Campaign insights</strong><em>Review active promotions, audience activity and performance.</em></span>
+                  <FaArrowRight />
+                </Link>
+                <Link href="/affiliate-money" className="is-gold">
+                  <FaMoneyCheckAlt />
+                  <span><small>Earn</small><strong>Earnings and payouts</strong><em>See fight earnings, balances, payout history and cash-out tools.</em></span>
+                  <FaArrowRight />
+                </Link>
+                <Link href="/affiliate-league" className="is-blue">
+                  <FaTrophy />
+                  <span><small>Grow</small><strong>League manager</strong><em>Manage members, standings and your creator community.</em></span>
+                  <FaArrowRight />
+                </Link>
+                <Link href="/AffiliateProfile" className="is-red">
+                  <FaIdBadge />
+                  <span><small>Identity</small><strong>Profile and referral link</strong><em>Update your public creator card and copy your referral URL.</em></span>
+                  <FaArrowRight />
+                </Link>
+                <a href="#live-campaign-room" className="is-gold">
+                  <FaQrcode />
+                  <span><small>Create</small><strong>QR and media studio</strong><em>Open a live campaign to download artwork or record promotional video.</em></span>
+                  <FaArrowRight />
+                </a>
+                <Link href="/past-promotions" className="is-blue">
+                  <FaHistory />
+                  <span><small>Review</small><strong>Promotion archive</strong><em>Open completed campaigns and their final results.</em></span>
+                  <FaArrowRight />
+                </Link>
+                <Link href="/AffiliateAccountSettings" className="is-red">
+                  <FaDollarSign />
+                  <span><small>Manage</small><strong>Payment settings</strong><em>Maintain payout destinations and request available funds.</em></span>
+                  <FaArrowRight />
+                </Link>
+                <Link href="/affiliate-guides" className="is-gold">
+                  <FaRegPlayCircle />
+                  <span><small>Learn</small><strong>Affiliate playbook</strong><em>Follow the complete launch, sharing and growth workflow.</em></span>
+                  <FaArrowRight />
+                </Link>
+              </div>
+            </section>
+
             <section className="xp-page-section" id="shadow-templates">
               <ExperienceSectionHeading
                 eyebrow="Approved fight inventory"
@@ -409,7 +473,7 @@ const AffiliateDashboard = () => {
               )}
             </section>
 
-            <section className="xp-page-section">
+            <section className="xp-page-section" id="live-campaign-room">
               <ExperienceSectionHeading
                 eyebrow="Live campaign room"
                 title="Promoted fights"
