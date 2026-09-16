@@ -4,6 +4,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { FaCalendarAlt, FaClock, FaCoins, FaShareAlt, FaTrophy, FaUsers } from 'react-icons/fa';
 import AffiliateFightLeaderboard from '@/Components/Affiliates/AffiliateFightLeaderboard';
+import { userHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import {
   formatFightDate,
   getFightCategory,
@@ -13,7 +15,7 @@ import {
   getFighterName,
 } from '@/Utils/fightExperience';
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const normalizeRouteValue = (value = '') => String(value || '')
   .trim()
@@ -66,7 +68,7 @@ const PromoShadowPage = ({ affiliate, matchData }) => {
     try {
       const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: userHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ userId, userEmail }),
       });
 
