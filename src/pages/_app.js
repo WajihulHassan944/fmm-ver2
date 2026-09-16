@@ -121,6 +121,9 @@ import "@/styles/fmm-client-v62-unified-theme-performance.css";
 // it exists to outrank the eight earlier sheets that each set their own
 // .fmm-app-hero size and cropping with !important.
 import "@/styles/fmm-hero-fit-final.css";
+// Final, route-scoped source of truth for the complete affiliate journey.
+// This intentionally loads after the legacy experience sheets.
+import "@/styles/fmm-affiliate-premium-v63.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
