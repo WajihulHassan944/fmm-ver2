@@ -59,7 +59,6 @@ const navigationGroups = [
       { label: 'Fighter library', href: '/administration/fighters', icon: FaUsers },
       { label: 'Create fight', href: '/administration/AddNewMatch', icon: FaPlus },
       { label: 'Fight calendar', href: '/administration/Calendar', icon: FaCalendarAlt },
-      { label: 'Prediction scoring', href: '/administration/predictions', icon: FaChartBar },
       { label: 'Shadow fights', href: '/administration/ShadowFightsLibrary', icon: FaBolt },
       { label: 'Affiliate fights', href: '/administration/AffiliateMatches', icon: FaUserFriends },
       { label: 'Records & video', href: '/administration/adminRecords', icon: FaVideo },
