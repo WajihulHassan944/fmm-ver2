@@ -130,6 +130,7 @@ import "@/styles/fmm-hero-fit-final.css";
 // This intentionally loads after the legacy experience sheets.
 import "@/styles/fmm-affiliate-premium-v63.css";
 import "@/styles/fmm-player-fight-center-v64.css";
+import "@/styles/fmm-full-card-promoter-v70.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
@@ -368,6 +369,7 @@ function AppContent({ children }) {
     "/affiliate-guides",
     "/past-promotions",
     "/HowItWorks",
+    "/promoter/full-cards",
   ]);
   const isAffiliateWorkspaceRoute = affiliateWorkspaceRoutes.has(router.pathname);
   const affiliateRoutesWithOwnNav = new Set([
@@ -377,6 +379,7 @@ function AppContent({ children }) {
     "/affiliate-money",
     "/affiliate-league",
     "/past-promotions",
+    "/promoter/full-cards",
   ]);
   const hasAffiliateWorkspaceNav = affiliateRoutesWithOwnNav.has(router.pathname);
   const playerWorkspaceRoutes = new Set([
