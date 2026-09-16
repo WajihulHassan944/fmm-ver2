@@ -254,7 +254,7 @@ const RouteExperienceFrame = ({ pathname, children }) => {
   const background = ROUTE_BACKGROUNDS[pathname] || BACKGROUNDS[meta.group] || BACKGROUNDS.profile;
   const routeClassName = pathname.replace(/^\//, '').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-|-$/g, '') || 'home';
   const accountAction = isPlayerAuthenticated
-    ? { href: '/UserDashboard', label: 'Player dashboard' }
+    ? { href: '/home', label: 'Player dashboard' }
     : isAffiliateAuthenticated
       ? { href: '/AffiliateDashboard', label: 'Affiliate dashboard' }
       : { href: '/auth?mode=signup&role=player', label: 'Join free' };
