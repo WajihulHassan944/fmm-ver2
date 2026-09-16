@@ -1,0 +1,22 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import Head from 'next/head'; import Link from 'next/link'; import { useRouter } from 'next/router';
+import { FaCheckCircle, FaShareAlt, FaTrophy } from 'react-icons/fa';
+import { fullCardRequest, getStoredToken } from '@/Utils/fullCardApi';
+
+export default function PublicFullCard() {
+  const router = useRouter(); const { slug, promoterCode } = router.query;
+  const [card, setCard] = useState(null); const [leaderboard, setLeaderboard] = useState([]); const [progress, setProgress] = useState(null); const [error, setError] = useState('');
+  useEffect(() => { if (!slug || !promoterCode) return; const visitor = localStorage.getItem('fmmVisitorId') || `${Date.now()}-${Math.random()}`; localStorage.setItem('fmmVisitorId', visitor); fullCardRequest(`/api/full-cards/${slug}/${promoterCode}`, { headers: { 'x-fmm-visitor': visitor } }).then(({ card: value }) => { setCard(value); return Promise.all([fullCardRequest(`/api/full-cards/${value.id}/leaderboard`).then((x) => setLeaderboard(x.leaderboard || [])), getStoredToken('player') ? fullCardRequest(`/api/full-cards/${value.id}/progress`, { kind: 'player' }).then(setProgress) : null]); }).catch((e) => setError(e.message)); }, [slug, promoterCode]);
+  const active = useMemo(() => (card?.bouts || []).filter((b) => !['CANCELLED', 'REMOVED'].includes(b.status)), [card]);
+  const share = async () => { const url = location.href; await fullCardRequest(`/api/full-cards/${card.id}/track`, { method: 'POST', body: { type: 'share' } }).catch(() => {}); if (navigator.share) navigator.share({ title: card.eventName, url }); else navigator.clipboard.writeText(url); };
+  if (error) return <main className="public-card-state"><h1>Full Card unavailable</h1><p>{error}</p></main>;
+  if (!card) return <main className="public-card-state"><h1>Loading fight card…</h1></main>;
+  return <div className="public-full-card"><Head><title>{card.eventName} | FANTASY MMADNESS</title></Head>
+    <header className="public-card-hero" style={{ backgroundImage: `linear-gradient(90deg,rgba(2,5,10,.98),rgba(2,5,10,.5)),url(${card.eventPoster || '/images/fmm-pages/premium-duel-banner.webp'})` }}><div><p>FANTASY MMADNESS · FULL CARD</p><h1>{card.eventName}</h1><h2>{active.length} FIGHTS · {active.length * 2} FIGHTERS · ONE NIGHT</h2><span>Promoted by {card.promoter?.name} · Verified FANTASY MMADNESS Promoter</span><button onClick={share}><FaShareAlt /> Share this card</button></div></header>
+    <main className="public-card-main">
+      <section className="public-card-progress"><div><p>CARD PROGRESS</p><h2>{progress ? `${progress.predicted} OF ${progress.total} FIGHTS PREDICTED` : 'PREDICT THE FULL CARD'}</h2></div><strong>{progress?.percent || 0}%</strong><i><span style={{ width: `${progress?.percent || 0}%` }} /></i>{progress?.lockedIn ? <b><FaCheckCircle /> FULL CARD LOCKED IN</b> : progress?.nextFightId ? <Link href={`/fight/${progress.nextFightId}`}>Predict next fight</Link> : !getStoredToken('player') ? <Link href="/auth">Sign in to track progress</Link> : null}</section>
+      <div className="public-card-layout"><section className="public-card-bouts">{active.map((bout) => <article key={bout._id || bout.order}><div className="public-card-label"><span>{bout.cardSection.replace('_', ' ')}</span><strong>{bout.boutLabel}</strong></div><div className="public-card-faceoff"><figure>{bout.fighterAImage && <img src={bout.fighterAImage} alt={bout.fighterAName} />}<figcaption>{bout.fighterAName}</figcaption></figure><b>VS</b><figure>{bout.fighterBImage && <img src={bout.fighterBImage} alt={bout.fighterBName} />}<figcaption>{bout.fighterBName}</figcaption></figure></div><div className="public-card-bout-footer"><span>{bout.category} · POT {Number(bout.pot || 0).toLocaleString()} FM</span>{bout.fightId && <Link href={`/fight/${bout.fightId}`}>Make predictions</Link>}</div></article>)}</section>
+      <aside className="public-card-leaderboard"><header><FaTrophy /><div><p>FULL CARD LEADERBOARD</p><h2>Across the entire event</h2></div></header>{leaderboard.length ? leaderboard.slice(0, 10).map((row) => <div key={row.userId}><b>#{row.rank}</b>{row.profileUrl && <img src={row.profileUrl} alt="" />}<span><strong>{row.name}</strong><small>{row.fightsScored} fights scored</small></span><em>{row.totalPoints.toLocaleString()}</em></div>) : <p>No scored predictions yet.</p>}</aside></div>
+    </main></div>;
+}
+
