@@ -124,6 +124,7 @@ import "@/styles/fmm-hero-fit-final.css";
 // Final, route-scoped source of truth for the complete affiliate journey.
 // This intentionally loads after the legacy experience sheets.
 import "@/styles/fmm-affiliate-premium-v63.css";
+import "@/styles/fmm-player-fight-center-v64.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
