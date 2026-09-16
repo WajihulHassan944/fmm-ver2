@@ -46,6 +46,20 @@ const isShadowLikeFight = (match = {}) => {
   return source.includes('shadow');
 };
 
+// Past LIVE cards were historically copied into the Shadow collection by a
+// date-based cron job even when nobody scored or approved them as affiliate
+// inventory. Those rollover copies are production records, not templates.
+const isApprovedAffiliateTemplate = (match = {}) => {
+  if (!isShadowLikeFight(match)) return false;
+  const autoConverted = Boolean(match?.sourceMatchId || match?.convertedFromLiveAt);
+  const explicitlyApproved = Boolean(
+    match?.approvedForAffiliateTemplate
+    || match?.affiliateTemplateApproved
+    || match?.isAffiliateTemplate,
+  );
+  return !autoConverted || explicitlyApproved;
+};
+
 const isPromotedByAffiliate = (match = {}, affiliateId = '') => {
   if (!affiliateId) return false;
   if (String(match?.affiliateId || match?.promotedByAffiliateId || '') === affiliateId) return true;
@@ -152,7 +166,9 @@ const AffiliateDashboard = () => {
           ? safeArray(publicRows.value).filter(isShadowLikeFight)
           : [];
 
-        if (active) setPromoMatches(dedupeAffiliateFightRows([...legacyRows, ...publicShadowRows]));
+        if (active) setPromoMatches(dedupeAffiliateFightRows(
+          [...legacyRows, ...publicShadowRows].filter(isApprovedAffiliateTemplate),
+        ));
       } catch (error) {
         console.error(error);
         if (active) {
@@ -199,7 +215,7 @@ const AffiliateDashboard = () => {
   const joinedMembers = safeArray(affiliate?.usersJoined);
 
   const promotionFights = useMemo(
-    () => dedupeAffiliateFightRows(safeArray(promoMatches).filter(isShadowLikeFight)),
+    () => dedupeAffiliateFightRows(safeArray(promoMatches).filter(isApprovedAffiliateTemplate)),
     [promoMatches],
   );
 
