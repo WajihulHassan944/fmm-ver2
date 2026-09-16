@@ -394,7 +394,11 @@ function AppContent({ children }) {
     "/affiliate-create-account",
   ]);
   const isStandaloneAccountRoute = standaloneAccountRoutes.has(router.pathname);
-  const hasControlledExperienceCascade = isAffiliateWorkspaceRoute
+  // Administration, affiliate, player, and account routes all have a complete
+  // compiled style cascade. Do not append the old public-site styles after the
+  // Next.js bundle on these routes: doing so silently restores the legacy UI.
+  const hasControlledExperienceCascade = isAdministrationRoute
+    || isAffiliateWorkspaceRoute
     || isPlayerWorkspaceRoute
     || isStandaloneAccountRoute;
   const ownsAuthenticatedNavigation = hasAffiliateWorkspaceNav
@@ -622,8 +626,8 @@ function AppContent({ children }) {
             re-add its import above. */}
         {renderLegacyExperience && (
           <>
-            <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />
-            <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />}
             {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/experience-theme.css" />}
             {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />}
             {/* Legacy halves of the four split sheets — 492 KB the app route no
