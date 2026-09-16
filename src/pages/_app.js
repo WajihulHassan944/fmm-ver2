@@ -49,6 +49,11 @@ import "@/styles/homeleaderboardtwo.css";
 import "@/styles/mockpredictionsgame.css";
 import "@/styles/split/new-theme.css";
 import "@/styles/route-experience.css";
+// Base experience rules must live in the compiled cascade. Runtime-injected
+// copies are disabled on authenticated affiliate routes below so they cannot
+// load after and override the premium workspace.
+import "@/styles/experience-theme.css";
+import "@/styles/affiliate-experience-final.css";
 import "@/styles/admin-experience.css";
 import "@/styles/split/frontend-final.css";
 import "@/styles/design-port.css";
@@ -353,6 +358,52 @@ function AppContent({ children }) {
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
+  const affiliateWorkspaceRoutes = new Set([
+    "/AffiliateDashboard",
+    "/AffiliateProfile",
+    "/AffiliateAccountSettings",
+    "/AffiliatePromotion",
+    "/affiliate-money",
+    "/affiliate-league",
+    "/affiliate-guides",
+    "/past-promotions",
+    "/HowItWorks",
+  ]);
+  const isAffiliateWorkspaceRoute = affiliateWorkspaceRoutes.has(router.pathname);
+  const affiliateRoutesWithOwnNav = new Set([
+    "/AffiliateDashboard",
+    "/AffiliateProfile",
+    "/AffiliateAccountSettings",
+    "/affiliate-money",
+    "/affiliate-league",
+    "/past-promotions",
+  ]);
+  const hasAffiliateWorkspaceNav = affiliateRoutesWithOwnNav.has(router.pathname);
+  const playerWorkspaceRoutes = new Set([
+    "/UserDashboard",
+    "/YourFights",
+    "/profile",
+    "/account-settings",
+  ]);
+  const isPlayerWorkspaceRoute = playerWorkspaceRoutes.has(router.pathname);
+  const standaloneAccountRoutes = new Set([
+    "/auth",
+    "/login",
+    "/CreateAccount",
+    "/AffiliateCreateAccount",
+    "/affiliate-create-account",
+  ]);
+  const isStandaloneAccountRoute = standaloneAccountRoutes.has(router.pathname);
+  // Administration, affiliate, player, and account routes all have a complete
+  // compiled style cascade. Do not append the old public-site styles after the
+  // Next.js bundle on these routes: doing so silently restores the legacy UI.
+  const hasControlledExperienceCascade = isAdministrationRoute
+    || isAffiliateWorkspaceRoute
+    || isPlayerWorkspaceRoute
+    || isStandaloneAccountRoute;
+  const ownsAuthenticatedNavigation = hasAffiliateWorkspaceNav
+    || isPlayerWorkspaceRoute
+    || isStandaloneAccountRoute;
   const isStandaloneDemoRoute = ["/free-demo", "/mock-game", "/playforfree"].includes(router.pathname);
   // Keep the global site header hidden for admin and the standalone demo app.
   // The homepage still needs the normal desktop/laptop navbar, while CSS hides
@@ -575,17 +626,17 @@ function AppContent({ children }) {
             re-add its import above. */}
         {renderLegacyExperience && (
           <>
-            <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />
-            <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />
-            <link rel="stylesheet" href="/legacy-css/experience-theme.css" />
-            <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/experience-theme.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />}
             {/* Legacy halves of the four split sheets — 492 KB the app route no
                 longer parses. Ordered as they were bundled, so the cascade
                 between them is preserved. */}
-            <link rel="stylesheet" href="/legacy-css/globals.css" />
-            <link rel="stylesheet" href="/legacy-css/frontend-final.css" />
-            <link rel="stylesheet" href="/legacy-css/new-theme.css" />
-            <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/globals.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/frontend-final.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/new-theme.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />}
           </>
         )}
 
@@ -656,7 +707,7 @@ function AppContent({ children }) {
           its own topbar. This used to key off isExactMobile, so viewing the app
           at anything wider than the phone breakpoint (a laptop, a resized
           window) stacked the old site header above the app's real one. */}
-      {!hideLayout && !renderPrototypeExperience && <Header />}
+      {!hideLayout && !renderPrototypeExperience && !ownsAuthenticatedNavigation && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
       {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
       {renderPrototypeExperience && (

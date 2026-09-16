@@ -31,6 +31,17 @@
   color: var(--aff-copy) !important;
 }
 
+/* Authenticated affiliate pages own their complete shell. The old global
+   header is intentionally absent, so reserve no legacy-header gap. */
+.site-experience-main:has(.affiliate-dashboard-experience-page),
+.site-experience-main:has(.affiliate-money-page),
+.site-experience-main:has(.affiliate-league-page-final),
+.site-experience-main:has(.affiliate-settings-page-final),
+.site-experience-main:has(.affiliate-account-settings-page),
+.site-experience-main:has(.affiliate-past-promotions-page) {
+  padding-top: 0 !important;
+}
+
 .affiliate-dashboard-experience-page,
 .affiliate-money-page,
 .affiliate-league-page-final,

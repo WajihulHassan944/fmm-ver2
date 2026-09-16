@@ -154,9 +154,9 @@ function JarvisWorkspace() {
         <div className="jarvis-status-copy">
           <div className="jarvis-kicker">FANTASY MMADNESS OPERATIONS COPILOT</div>
           <h2>Jarvis</h2>
-          <p>Read-only AI assistance grounded in the authenticated back-office health and Swarm dashboard snapshot.</p>
+          <p>AI assistance grounded in the authenticated back-office health and Swarm dashboard snapshot. Operational changes require your explicit approval.</p>
         </div>
-        <div className="jarvis-safe"><FaShieldAlt /> READ ONLY</div>
+        <div className="jarvis-safe"><FaShieldAlt /> APPROVAL REQUIRED</div>
         <button type="button" className="jarvis-voice-toggle" onClick={() => { setVoiceOn((v) => !v); window.speechSynthesis?.cancel(); }} aria-label="Toggle spoken replies">
           {voiceOn ? <FaVolumeUp /> : <FaVolumeMute />} {voiceOn ? 'Voice on' : 'Voice off'}
         </button>

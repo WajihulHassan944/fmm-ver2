@@ -109,6 +109,36 @@ const ACTIONS = {
   },
 };
 
+const isPlainObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+const cleanId = (value) => typeof value === 'string' ? value.trim() : '';
+
+const validateAction = (action) => {
+  if (!action || !ACTIONS[action.type] || !isPlainObject(action.args)) return 'Unknown or malformed action.';
+  const args = action.args;
+
+  if (action.type === 'score_fight') {
+    if (!cleanId(args.matchId)) return 'A match ID is required before scoring can run.';
+    if (!isPlainObject(args.scoring) || !Object.keys(args.scoring).length) return 'A non-empty scoring payload is required.';
+  }
+
+  if (action.type === 'publish_fight') {
+    if (!cleanId(args.fightId)) return 'A fight ID is required before publishing can run.';
+    if (args.promotion !== undefined && !isPlainObject(args.promotion)) return 'Promotion settings must be an object.';
+  }
+
+  if (action.type === 'delete_fights') {
+    if (!Array.isArray(args.fightIds) || !args.fightIds.length) return 'At least one fight ID is required before deletion can run.';
+    if (args.fightIds.length > 100 || args.fightIds.some((id) => !cleanId(id))) return 'Fight IDs must contain 1 to 100 valid IDs.';
+  }
+
+  if (action.type === 'approve_payout') {
+    if (!cleanId(args.affiliateId) || !cleanId(args.payoutId)) return 'Affiliate and payout IDs are required.';
+    if (!Number.isFinite(Number(args.amount)) || Number(args.amount) <= 0) return 'Payout amount must be a positive number.';
+  }
+
+  return '';
+};
+
 const TOOLS = [
   {
     type: 'function', name: 'score_fight', description: 'Propose submitting official round-by-round scoring for a match. Does not execute — only proposes for admin approval.',
@@ -146,6 +176,8 @@ export default async function handler(req, res) {
     const action = req.body?.action;
     const def = action && ACTIONS[action.type];
     if (!def) return res.status(400).json({ message: 'Unknown or missing action.' });
+    const validationError = validateAction(action);
+    if (validationError) return res.status(400).json({ message: validationError });
     try {
       const { method, path, body } = def.request(action.args || {});
       const result = await adminFetch(path, token, { method, body });
@@ -209,9 +241,16 @@ export default async function handler(req, res) {
       let args = {};
       try { args = JSON.parse(call.arguments || '{}'); } catch { args = {}; }
       const def = ACTIONS[call.name];
+      const proposedAction = { type: call.name, label: def.label, args, description: def.describe(args) };
+      const validationError = validateAction(proposedAction);
+      if (validationError) {
+        return res.status(200).json({
+          reply: `I cannot safely propose that action yet: ${validationError} Please provide the missing or corrected information.`,
+        });
+      }
       return res.status(200).json({
         reply: `Proposed: ${def.label}. Review and approve below, or tell me what to change.`,
-        proposedAction: { type: call.name, label: def.label, args, description: def.describe(args) },
+        proposedAction,
       });
     }
 
