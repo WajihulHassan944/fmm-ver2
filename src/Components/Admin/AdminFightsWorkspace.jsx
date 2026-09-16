@@ -726,8 +726,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <section className="admin-economics-heading" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#ff2a35', marginBottom: 7 }}>Fight operations</div>
-            <h1 style={{ fontFamily: display, fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>{getTitle(f)}</h1>
-            <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(245,247,251,.66)', margin: '8px 0 0', maxWidth: 620, lineHeight: 1.45 }}>Edit entry fee, prize pool, minimum entrants and the auto-refund guard — changes save straight to this fight.</p>
+            <h1 style={{ fontFamily: display, fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>Create match</h1>
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(245,247,251,.66)', margin: '8px 0 0', maxWidth: 720, lineHeight: 1.45 }}>Build live and shadow fight cards. Every number shows its consequence before you publish, and the same record feeds the website and the app.</p>
           </div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
