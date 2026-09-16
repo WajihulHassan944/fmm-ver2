@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { affiliateHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import {
   FaBullhorn,
   FaCalendarAlt,
@@ -18,7 +19,7 @@ import {
   safeArray,
 } from '@/Utils/fightExperience';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const AffiliateAddNewMatch = ({ matchId }) => {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
