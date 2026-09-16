@@ -217,7 +217,7 @@ export default function AddNewMatch() {
   }
 
   return (
-    <div className="admin-workspace admin-create-fight-page admin-economics-desk">
+    <div className="admin-workspace admin-create-fight-page admin-economics-desk" data-desk-ui="operations-v2">
       <section className="admin-page-heading">
         <div>
           <span>Fight Economics Desk</span>
@@ -229,6 +229,14 @@ export default function AddNewMatch() {
           <Link className="admin-action-secondary" href="/administration/fights"><FaTrophy /> Fight registry</Link>
           <Link className="admin-action-secondary" href="/administration/ShadowFightsLibrary"><FaBolt /> Shadow library</Link>
         </div>
+      </section>
+
+      <section className="admin-desk-status-strip" aria-label="Economics desk status">
+        <div><span>Desk</span><strong>Economics</strong></div>
+        <div><span>Card type</span><strong>{form.matchType === 'LIVE' ? 'Live production' : 'Shadow template'}</strong></div>
+        <div><span>Sport</span><strong>{displayCategory || 'Not selected'}</strong></div>
+        <div><span>Rounds</span><strong>{form.maxRounds || 0}</strong></div>
+        <div className="is-live"><span>Publishing</span><strong>Protected workflow</strong></div>
       </section>
 
       <nav className="admin-fight-desk-nav" aria-label="Fight desk workflow">
@@ -260,7 +268,7 @@ export default function AddNewMatch() {
 
       <form className="admin-create-fight-layout" onSubmit={submit}>
         <main>
-          <section className="admin-form-card">
+          <section className="admin-form-card admin-desk-section admin-desk-section-identity">
             <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and choose two saved fighters with images.</p></div></header>
             <div className="admin-form-grid">
               <label><span>Fight type</span><select name="matchType" value={form.matchType} onChange={change}><option value="LIVE">Live production fight</option><option value="SHADOW">Shadow template</option></select></label>
@@ -306,7 +314,7 @@ export default function AddNewMatch() {
           </section>
 
           {form.matchType === 'LIVE' && (
-            <section className="admin-form-card">
+            <section className="admin-form-card admin-desk-section admin-desk-section-economy">
               <header><span>02</span><div><h3>Schedule and economy</h3><p>Configure lock timing, entry cost and the advertised prize pool. Declare upfront — the pot never grows with entries.</p></div></header>
               <div className="admin-form-grid">
                 <label><span>Fight date</span><input type="date" name="matchDate" value={form.matchDate} onChange={change} required /></label>
@@ -317,7 +325,7 @@ export default function AddNewMatch() {
             </section>
           )}
 
-          <section className="admin-form-card">
+          <section className="admin-form-card admin-desk-section admin-desk-section-publishing">
             <header><span>{form.matchType === 'LIVE' ? '03' : '02'}</span><div><h3>Publishing controls</h3><p>Choose who is notified and whether a reusable template is generated.</p></div></header>
             <div className="admin-toggle-grid">
               <label><input type="checkbox" name="notify" checked={form.notify} onChange={change} /><span><strong>Notify members</strong><small>Send the existing platform announcement after publishing.</small></span></label>
@@ -326,7 +334,8 @@ export default function AddNewMatch() {
           </section>
         </main>
 
-        <aside>
+        <aside className="admin-economics-control-rail">
+          <div className="admin-control-rail-heading"><span>Live control rail</span><strong>What players will see</strong><small>Updates as this card is configured.</small></div>
           <section className="admin-fight-visual-card" style={{ backgroundImage: `linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.95)),url(${previews.promotionBackground})` }}>
             <span>Live preview</span>
             <h3>{form.matchName || 'Untitled fight card'}</h3>
