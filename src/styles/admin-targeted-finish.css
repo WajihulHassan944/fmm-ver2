@@ -1743,6 +1743,72 @@
 }
 
 /* Client review update: edit video/scoring sections */
+
+/* Unified fight desks ----------------------------------------------------
+   Economics, scoring, results and promotion used to feel like unrelated
+   generations of the back office. This rail keeps one selected fight in one
+   command-room workflow and gives every desk the same navigation language. */
+.admin-fight-desk-nav {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(13, 20, 29, .98), rgba(5, 9, 14, .98));
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 14px;
+  display: flex;
+  gap: 7px;
+  margin: 0 0 22px;
+  overflow-x: auto;
+  padding: 7px;
+  scrollbar-width: thin;
+}
+.admin-fight-desk-nav button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: rgba(245, 247, 251, .62);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-family: var(--ff-display, Impact, sans-serif);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .05em;
+  min-height: 40px;
+  padding: 0 16px;
+  text-transform: uppercase;
+}
+.admin-fight-desk-nav button:hover:not(:disabled) {
+  border-color: rgba(223, 17, 27, .45);
+  color: #fff;
+}
+.admin-fight-desk-nav button.is-active {
+  background: linear-gradient(135deg, #df111b, #9e0911);
+  border-color: #ff4b54;
+  box-shadow: 0 8px 24px rgba(223, 17, 27, .24);
+  color: #fff;
+}
+.admin-fight-desk-nav button:disabled { cursor: not-allowed; opacity: .35; }
+.admin-economics-desk {
+  background:
+    radial-gradient(circle at 82% 0, rgba(22, 143, 230, .11), transparent 31%),
+    radial-gradient(circle at 12% 12%, rgba(223, 17, 27, .11), transparent 30%),
+    #05080d !important;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+.admin-economics-heading {
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  padding-bottom: 19px;
+}
+.admin-economics-fight-selector {
+  background: rgba(0, 0, 0, .22);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 13px;
+  padding: 10px;
+}
+@media (max-width: 700px) {
+  .admin-economics-desk { padding: 14px !important; }
+  .admin-fight-desk-nav { margin-inline: 0; }
+  .admin-fight-desk-nav button { padding-inline: 13px; }
+}
+
 .admin-edit-video-section,
 .admin-edit-scoring-section {
   border-color: rgba(255, 184, 77, 0.26);
