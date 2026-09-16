@@ -25,8 +25,9 @@ import {
   ExperienceSectionHeading,
 } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const AffiliateProfile = () => {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);

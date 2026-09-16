@@ -21,8 +21,9 @@ import {
   safeArray,
   sortFights,
 } from '@/Utils/fightExperience';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 const FIGHTS_PER_PAGE = 6;
 
 const PastPromotions = () => {

@@ -17,8 +17,9 @@ import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
 import { affiliateHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 const PAYMENT_METHODS = [
   { value: 'Venmo', label: 'Venmo ID', placeholder: '@creator-name' },
   { value: 'CashApp', label: 'Cash App ID', placeholder: '$creator-name' },

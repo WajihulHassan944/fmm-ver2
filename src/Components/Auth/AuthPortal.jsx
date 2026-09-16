@@ -195,7 +195,6 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       } else if (role === 'affiliate') {
         const result = await dispatch(loginAffiliate(loginForm)).unwrap();
         const affiliate = result?.user || await dispatch(fetchAffiliate(result.token)).unwrap();
-        await dispatch(fetchAffiliate(result.token));
         if (!affiliate?.verified) {
           toast.warning('Your affiliate account is awaiting administrator approval.');
         } else {

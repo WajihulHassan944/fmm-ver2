@@ -37,7 +37,6 @@ export const loginAffiliate = createAsyncThunk('authAffiliate/loginAffiliate', a
 
     dispatch(setAffiliateUser(userData.user));
 
-    // Return the data
     return {
       token,
       user: userData.user,
@@ -65,8 +64,7 @@ export const fetchAffiliate = createAsyncThunk('authAffiliate/fetchAffiliate', a
     }
 
     dispatch(setAffiliateUser(data.user));
-    console.log(data.user);
-    return data.user; // Returning user data
+    return data.user;
 
 
   } catch (error) {
@@ -100,17 +98,14 @@ const affiliateAuthSlice = createSlice({
       })
       .addCase(loginAffiliate.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.verified) {
-            state.isAuthenticatedAffiliate = true; // Only set to true if the user is verified
-        }
+        const affiliate = action.payload?.user;
+        state.isAuthenticatedAffiliate = Boolean(affiliate?.verified);
         // A read-only owner preview token must never be persisted — it would
         // outlive the preview tab and look like a real affiliate login.
         if (action.payload.token && action.payload.token !== (typeof window !== 'undefined' ? sessionStorage.getItem('previewToken') : null)) {
           localStorage.setItem('affiliateAuthToken', action.payload.token);
         }
-        state.userAffiliate = action.payload.user; // Set user from action payload
-    
-        console.log('isAuthenticatedAffiliate:', state.isAuthenticatedAffiliate); // Console log the value
+        state.userAffiliate = affiliate;
     })
 
     .addCase(loginAffiliate.rejected, (state, action) => {
@@ -126,11 +121,7 @@ const affiliateAuthSlice = createSlice({
       .addCase(fetchAffiliate.fulfilled, (state, action) => {
         state.loading = false;
         state.userAffiliate = action.payload;
-        if (action.payload.verified) {
-            state.isAuthenticatedAffiliate = true; // Only set to true if the user is verified
-        }
-        
-        console.log('isAuthenticatedAffiliate:', state.isAuthenticatedAffiliate); // Console log the value
+        state.isAuthenticatedAffiliate = Boolean(action.payload?.verified);
     })
     
       .addCase(fetchAffiliate.rejected, (state, action) => {

@@ -30,11 +30,11 @@ import {
   getFighterImage,
   safeArray,
 } from '@/Utils/fightExperience';
-import { fetchPublicFights, normalizePublicFightRows } from '@/Utils/publicApi';
+import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const MAX_CARDS = 5;
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const isShadowLikeFight = (match = {}) => {
   const source = `${match?.matchType || ''} ${match?.sourceType || ''} ${match?.__source || ''} ${match?.collection || ''}`.toLowerCase();
