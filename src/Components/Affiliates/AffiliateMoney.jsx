@@ -6,8 +6,9 @@ import {
 } from 'react-icons/fa';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { affiliateHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const coins = (value) => Number(value || 0).toLocaleString();
 
@@ -47,9 +48,12 @@ const AffiliateMoney = () => {
   const stakes = data?.stakes || [];
   const payouts = data?.payouts || [];
 
-  // Only the balance that is actually clear can be requested — anything already
-  // sitting in a pending request is spoken for.
-  const requestable = Math.max(0, Number(summary.balance || 0) - Number(summary.pendingPayouts || 0));
+  // The backend debits a payout as soon as it is requested and permits only one
+  // pending request. Do not subtract the pending amount twice or offer a second
+  // request that the server will correctly reject.
+  const requestable = Number(summary.pendingPayouts || 0) > 0
+    ? 0
+    : Math.max(0, Number(summary.balance || 0));
 
   const requestPayout = async (event) => {
     event.preventDefault();
