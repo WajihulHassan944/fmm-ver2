@@ -217,12 +217,12 @@ export default function AddNewMatch() {
   }
 
   return (
-    <div className="admin-workspace admin-create-fight-page admin-economics-create-desk">
+    <div className="admin-workspace admin-create-fight-page admin-economics-desk">
       <section className="admin-page-heading">
         <div>
-          <span>Fight operations</span>
+          <span>Fight Economics Desk</span>
           <h2>Create match</h2>
-          <p>Build live and shadow fight cards. Every number shows its consequence before you publish, and the same record feeds the website and the app.</p>
+          <p>Build live and Shadow fight cards from one clean operations desk. Configure the schedule, entry economy, prize guard, fighters, publishing controls, and player preview before anything goes live.</p>
         </div>
         <div className="admin-heading-actions">
           <Link className="admin-action-secondary" href="/administration/fighters"><FaUsers /> Fighter library</Link>
@@ -230,6 +230,13 @@ export default function AddNewMatch() {
           <Link className="admin-action-secondary" href="/administration/ShadowFightsLibrary"><FaBolt /> Shadow library</Link>
         </div>
       </section>
+
+      <nav className="admin-fight-desk-nav" aria-label="Fight desk workflow">
+        <button type="button" className="is-active">Economics desk</button>
+        <button type="button" disabled title="Create or select a fight before scoring">Scoring desk</button>
+        <button type="button" disabled title="Create or select a fight before reviewing results">Results</button>
+        <button type="button" disabled title="Create or select a fight before promotion">Promotion</button>
+      </nav>
 
       {created && (
         <section ref={createdNoticeRef} className="admin-success-panel">
@@ -254,7 +261,7 @@ export default function AddNewMatch() {
       <form className="admin-create-fight-layout" onSubmit={submit}>
         <main>
           <section className="admin-form-card">
-            <header><span>01</span><div><h3>Fight type</h3><p>A live card carries a schedule and an economy. A shadow template carries neither.</p></div></header>
+            <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and choose two saved fighters with images.</p></div></header>
             <div className="admin-form-grid">
               <label><span>Fight type</span><select name="matchType" value={form.matchType} onChange={change}><option value="LIVE">Live production fight</option><option value="SHADOW">Shadow template</option></select></label>
               <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>

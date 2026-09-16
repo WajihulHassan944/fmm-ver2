@@ -269,8 +269,47 @@
   box-shadow: 0 18px 42px rgba(0, 0, 0, .3) !important; min-width: 0 !important; overflow: hidden !important; transition: .2s ease !important;
 }
 .xp-affiliate-fight-card:hover { border-color: rgba(242, 29, 50, .55) !important; transform: translateY(-4px) !important; }
-.xp-affiliate-fight-media { background: linear-gradient(120deg, #101e30, #24131f) !important; height: 245px !important; min-height: 245px !important; }
-.xp-affiliate-fight-media figure { height: 100% !important; margin: 0 !important; width: 50% !important; }
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media {
+  align-items: stretch !important;
+  background: linear-gradient(120deg, #101e30, #24131f) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  height: 245px !important;
+  min-height: 245px !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media figure {
+  align-items: end !important;
+  display: flex !important;
+  height: 100% !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  width: 100% !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media figure:first-of-type {
+  border-right: 1px solid rgba(255, 255, 255, .1) !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media img {
+  display: block !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  position: static !important;
+  transform: none !important;
+  width: 100% !important;
+}
+.affiliate-dashboard-experience-page .xp-affiliate-fight-media > span {
+  left: 50% !important;
+  position: absolute !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 4 !important;
+}
 .xp-affiliate-fight-copy { padding: 20px !important; }
 .xp-affiliate-fight-copy h3 { color: #fff !important; font: 24px/1.05 Anton, sans-serif !important; min-height: 52px; text-transform: uppercase; }
 .xp-affiliate-fight-copy h3 span { color: var(--aff-red) !important; }
