@@ -52,6 +52,23 @@ const LIVE_FIGHT_STATUSES = new Set(['live', 'ongoing', 'in progress', 'in-progr
 const getFightStatus = (fight = {}) => String(fight.matchStatus || fight.matchShadowStatus || fight.status || '').trim().toLowerCase();
 const isFinishedFight = (fight = {}) => Boolean(fight.prizesSettledAt || fight.settledAt || TERMINAL_FIGHT_STATUSES.has(getFightStatus(fight)));
 const isActiveFight = (fight = {}) => LIVE_FIGHT_STATUSES.has(getFightStatus(fight));
+const getRegistryStatus = (fight = {}) => {
+  if (isFinishedFight(fight)) return 'Finished';
+  if (String(fight?.sourceType || fight?.matchType || '').toLowerCase().includes('shadow')) return 'Template';
+  const dateText = fight?.matchDate;
+  if (dateText) {
+    const date = new Date(dateText);
+    if (!Number.isNaN(date.getTime())) {
+      const fightDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+      const today = new Date();
+      const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      if (fightDay > todayDay) return 'Scheduled';
+      if (fightDay < todayDay && !fight?.prizesSettledAt) return 'Needs scoring';
+    }
+  }
+  const stored = String(fight?.matchStatus || '').trim();
+  return stored || 'Draft';
+};
 
 // Fight-operations economics, mirroring the break-even guard the server
 // enforces at settlement (declaredPot / entryFee, minimumEntrants falling
@@ -1106,7 +1123,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <tbody>
               {filteredRows.length ? filteredRows.map((fight, index) => {
                 const id = getId(fight);
-                const status = fight.matchStatus || 'Draft';
+                const status = getRegistryStatus(fight);
                 const isFinished = isFinishedFight(fight);
                 const isLive = String(fight.matchType || '').toUpperCase() === 'LIVE';
                 return (
@@ -1139,7 +1156,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                       </select>
                     </td>
                     <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
-                    <td><span className={`admin-status-badge ${isFinished ? 'is-success' : status === 'Ongoing' ? 'is-warning' : ''}`}>{status}</span></td>
+                    <td><span className={`admin-status-badge ${isFinished ? 'is-success' : ['Ongoing', 'Needs scoring'].includes(status) ? 'is-warning' : ''}`}>{status}</span></td>
                     <td>{`${Number(fight.matchTokens || 0).toLocaleString()} tokens`}</td>
                     <td>{Number(fight.pot || 0) ? `$${Number(fight.pot).toLocaleString()}` : '—'}</td>
                     <td>{renderEntrantsCell(fight)}</td>
