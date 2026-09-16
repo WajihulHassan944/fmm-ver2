@@ -1,0 +1,203 @@
+/* FANTASY MMADNESS operations desks v2
+   Deliberately imported after the older admin sheets. These route-scoped rules
+   replace the legacy form presentation without touching data or settlement. */
+
+.admin-economics-desk[data-desk-ui="operations-v2"],
+.admin-predictions-redesign[data-desk-ui="operations-v2"] {
+  --desk-red: #ff2435;
+  --desk-blue: #22a8ff;
+  --desk-green: #31d66b;
+  --desk-gold: #ffbd24;
+  --desk-bg: #03070b;
+  --desk-panel: #0c141e;
+  --desk-panel-2: #111b27;
+  --desk-line: rgba(255,255,255,.12);
+  background:
+    radial-gradient(900px 520px at 92% -8%, rgba(105,0,18,.55), transparent 58%),
+    linear-gradient(180deg,#03070b 0%,#060b11 100%) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.55) !important;
+  color: #f7f9fc;
+  display: grid;
+  gap: 20px;
+  max-width: 1680px !important;
+  overflow: hidden;
+  padding: clamp(18px,2.4vw,38px) !important;
+  position: relative;
+}
+
+.admin-economics-desk[data-desk-ui="operations-v2"]::before,
+.admin-predictions-redesign[data-desk-ui="operations-v2"]::before {
+  background: linear-gradient(90deg,var(--desk-red),rgba(255,36,53,0) 55%);
+  content: "";
+  height: 3px;
+  inset: 0 0 auto;
+  position: absolute;
+}
+
+.admin-economics-desk[data-desk-ui="operations-v2"] > .admin-page-heading,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] > .admin-page-heading {
+  align-items: end !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 10px 0 2px !important;
+}
+
+.admin-economics-desk[data-desk-ui="operations-v2"] > .admin-page-heading h2,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] > .admin-page-heading h2 {
+  color: #fff !important;
+  font-family: var(--admin-font-display,var(--ff-display,Impact,sans-serif)) !important;
+  font-size: clamp(40px,5vw,72px) !important;
+  letter-spacing: -.035em !important;
+  line-height: .9 !important;
+  margin: 8px 0 14px !important;
+  text-transform: uppercase;
+}
+
+.admin-economics-desk[data-desk-ui="operations-v2"] > .admin-page-heading > div:first-child > span,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] > .admin-page-heading > div:first-child > span {
+  color: var(--desk-red) !important;
+  font-size: 12px !important;
+  font-weight: 1000 !important;
+  letter-spacing: .2em !important;
+  text-transform: uppercase;
+}
+
+.admin-economics-desk[data-desk-ui="operations-v2"] > .admin-page-heading p,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] > .admin-page-heading p {
+  color: #aab7c6 !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  margin: 0 !important;
+  max-width: 820px;
+}
+
+.admin-desk-status-strip {
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--desk-line);
+  border-radius: 15px;
+  display: grid;
+  grid-template-columns: repeat(5,minmax(0,1fr));
+  overflow: hidden;
+}
+.admin-desk-status-strip > div { border-right: 1px solid var(--desk-line); display: grid; gap: 4px; padding: 13px 17px; }
+.admin-desk-status-strip > div:last-child { border: 0; }
+.admin-desk-status-strip span { color: #6f7c8b; font-size: 9px; font-weight: 1000; letter-spacing: .14em; text-transform: uppercase; }
+.admin-desk-status-strip strong { color: #fff; font-family: var(--admin-font-display,var(--ff-display,Impact,sans-serif)); font-size: 15px; letter-spacing: .03em; text-transform: uppercase; }
+.admin-desk-status-strip .is-live strong { color: var(--desk-green); }
+
+/* Economics desk */
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-fight-desk-nav {
+  background: #080d13 !important;
+  border: 1px solid var(--desk-line) !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 7px !important;
+}
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-fight-desk-nav button { flex: 1 1 0; min-height: 46px; }
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-create-fight-layout,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-create-fight-layout {
+  align-items: start !important;
+  display: grid !important;
+  gap: 22px !important;
+  grid-template-columns: minmax(0,1fr) minmax(330px,390px) !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-create-fight-layout > main { display: grid; gap: 20px; }
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-desk-section {
+  background: linear-gradient(145deg,rgba(17,27,39,.98),rgba(8,14,21,.98)) !important;
+  border: 1px solid var(--desk-line) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px rgba(0,0,0,.23) !important;
+  overflow: hidden;
+  padding: 24px !important;
+}
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-desk-section > header {
+  align-items: center !important;
+  border-bottom: 1px solid var(--desk-line) !important;
+  display: flex !important;
+  gap: 16px !important;
+  margin: 0 0 22px !important;
+  padding: 0 0 18px !important;
+}
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-desk-section > header > span {
+  align-items: center; background: rgba(150,4,20,.22) !important; border: 1px solid rgba(255,36,53,.55) !important;
+  border-radius: 12px !important; color:#fff !important; display:flex; flex:0 0 52px; font-size:16px !important; height:52px; justify-content:center;
+}
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-desk-section > header h3 { color:#fff !important; font-size: clamp(25px,2.1vw,34px) !important; margin:0 0 4px !important; text-transform:uppercase; }
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-desk-section > header p { color:#8e9cac !important; margin:0 !important; }
+.admin-economics-desk[data-desk-ui="operations-v2"] input,
+.admin-economics-desk[data-desk-ui="operations-v2"] select,
+.admin-economics-desk[data-desk-ui="operations-v2"] textarea {
+  background: #050a10 !important; border: 1px solid rgba(255,255,255,.16) !important; border-radius: 11px !important; color:#fff !important;
+}
+.admin-economics-desk[data-desk-ui="operations-v2"] input:focus,
+.admin-economics-desk[data-desk-ui="operations-v2"] select:focus,
+.admin-economics-desk[data-desk-ui="operations-v2"] textarea:focus { border-color:var(--desk-red) !important; box-shadow:0 0 0 3px rgba(255,36,53,.12) !important; }
+.admin-economics-control-rail,
+.admin-scoring-control-rail { display:grid !important; gap:14px !important; min-width:0; position:sticky !important; top:24px !important; }
+.admin-control-rail-heading { background:linear-gradient(135deg,rgba(138,5,21,.26),rgba(17,27,39,.98)); border:1px solid rgba(255,36,53,.38); border-radius:18px; display:grid; gap:5px; padding:18px; }
+.admin-control-rail-heading span { color:var(--desk-red); font-size:10px; font-weight:1000; letter-spacing:.15em; text-transform:uppercase; }
+.admin-control-rail-heading strong { color:#fff; font-family:var(--admin-font-display,var(--ff-display,Impact,sans-serif)); font-size:24px; text-transform:uppercase; }
+.admin-control-rail-heading small { color:#8997a7; }
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-fight-visual-card,
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-upload-stack,
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-inline-notice { border-radius:18px !important; box-shadow:0 18px 40px rgba(0,0,0,.3); }
+.admin-economics-desk[data-desk-ui="operations-v2"] .admin-create-submit { min-height:58px !important; width:100% !important; }
+
+/* Scoring desk */
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-hero { display:none !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-create-fight-layout > main { display:flex !important; flex-direction:column !important; gap:18px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-round-tabs,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-entry-grid,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-winner-panel,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-actions-bar,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-card-so-far,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-reference,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-tp-note {
+  background:linear-gradient(145deg,rgba(17,27,39,.98),rgba(8,14,21,.99)) !important;
+  border:1px solid var(--desk-line) !important; border-radius:20px !important; box-shadow:0 20px 45px rgba(0,0,0,.24); color:#fff;
+}
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-round-tabs { display:flex !important; flex-wrap:wrap !important; gap:9px !important; padding:24px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-section-heading { flex:1 0 100%; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-entry-grid { display:grid !important; gap:18px !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; padding:24px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-fighter-panel { background:#0a1119 !important; border-width:1px !important; border-radius:16px !important; box-shadow:none !important; overflow:hidden !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-fighter-panel.is-red { border-color:rgba(255,36,53,.65) !important; box-shadow:inset 5px 0 0 #d81122 !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-fighter-panel.is-blue { border-color:rgba(34,168,255,.65) !important; box-shadow:inset 5px 0 0 #168fe0 !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-fighter-panel > header { background:rgba(255,255,255,.025); min-height:116px; padding:20px 22px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-fighter-panel > header h3 { font-size:clamp(25px,2.2vw,36px) !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-metric { background:rgba(255,255,255,.025) !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-winner-panel { padding:20px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-actions-bar { bottom:12px !important; padding:15px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-card-so-far,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-reference,
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-tp-note { padding:20px !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-card-so-far { border-top:3px solid var(--desk-red) !important; }
+.admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-round-tab { min-height:62px !important; min-width:62px !important; }
+
+@media (max-width:1180px) {
+  .admin-economics-desk[data-desk-ui="operations-v2"] .admin-create-fight-layout,
+  .admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-create-fight-layout { grid-template-columns:minmax(0,1fr) 320px !important; }
+}
+@media (max-width:960px) {
+  .admin-economics-desk[data-desk-ui="operations-v2"] .admin-create-fight-layout,
+  .admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-create-fight-layout { grid-template-columns:1fr !important; }
+  .admin-economics-control-rail,.admin-scoring-control-rail { position:static !important; }
+  .admin-desk-status-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .admin-desk-status-strip > div { border-bottom:1px solid var(--desk-line); }
+}
+@media (max-width:680px) {
+  .admin-economics-desk[data-desk-ui="operations-v2"],.admin-predictions-redesign[data-desk-ui="operations-v2"] { border-radius:14px !important; padding:14px !important; }
+  .admin-economics-desk[data-desk-ui="operations-v2"] > .admin-page-heading,.admin-predictions-redesign[data-desk-ui="operations-v2"] > .admin-page-heading { align-items:flex-start !important; flex-direction:column !important; }
+  .admin-predictions-redesign[data-desk-ui="operations-v2"] .admin-score-entry-grid { grid-template-columns:1fr !important; padding:14px !important; }
+  .admin-economics-desk[data-desk-ui="operations-v2"] .admin-desk-section { padding:16px !important; }
+  .admin-desk-status-strip { grid-template-columns:1fr 1fr; }
+  .admin-economics-desk[data-desk-ui="operations-v2"] .admin-fight-desk-nav button { flex:0 0 auto; }
+}
