@@ -756,6 +756,19 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
 const IMAGES = ['/site/fight-clash.webp', '/site/faceoff.webp', '/site/red-corner.webp', '/site/prize-arena.webp', '/site/arena.jpg', '/site/leagues.jpg'];
 
 const money = (n) => Number(n || 0).toLocaleString('en-US');
+const TERMINAL_FIGHT_STATUSES = new Set(['finished', 'completed', 'closed', 'settled', 'cancelled', 'canceled', 'void', 'voided']);
+const LIVE_FIGHT_STATUSES = new Set(['live', 'ongoing', 'in progress', 'in-progress', 'active']);
+const normalizedFightStatus = (fight = {}) => String(fight.matchStatus || fight.status || '').trim().toLowerCase();
+const isTerminalFight = (fight = {}) => Boolean(fight.prizesSettledAt || fight.settledAt || TERMINAL_FIGHT_STATUSES.has(normalizedFightStatus(fight)));
+const isLiveFight = (fight = {}) => LIVE_FIGHT_STATUSES.has(normalizedFightStatus(fight));
+const getFightTimestamp = (fight = {}) => {
+  const rawDate = String(fight.matchDate || fight.eventDate || '').split('T')[0];
+  if (!rawDate) return Number.POSITIVE_INFINITY;
+  const timeMatch = String(fight.matchTime || '23:59').trim().match(/^(\d{1,2}):(\d{2})/);
+  const time = timeMatch ? `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}` : '23:59';
+  const timestamp = new Date(`${rawDate}T${time}:00`).getTime();
+  return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY;
+};
 
 // matchDate is date-only; the real scheduled time lives in the separate
 // matchTime field ("20:00"). Using matchDate alone always parsed to midnight,
@@ -964,7 +977,11 @@ async function buildWelcomeProps() {
     // scheduled start time passed — even while the admin still had it marked
     // Ongoing and open for predictions. Only prizesSettledAt/Finished actually
     // means "done"; a same-day fight that already started is still live.
-    .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished');
+    .filter((f) => !isTerminalFight(f))
+    // A card whose scheduled time passed but was never scored belongs in the
+    // Back Office review queue. It is not an upcoming card and must not remain
+    // on the website/app unless an admin explicitly marks it Live/Ongoing.
+    .filter((f) => isLiveFight(f) || getFightTimestamp(f) >= now);
 
   // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
   // must actually surface here — they used to only flip a flag nothing read,
@@ -983,6 +1000,8 @@ async function buildWelcomeProps() {
   const remaining = eligible
     .filter((f) => !placedIds.has(f._id || f.id))
     .sort((a, b) => {
+      const liveDiff = Number(isLiveFight(b)) - Number(isLiveFight(a));
+      if (liveDiff) return liveDiff;
       const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
       if (rankDiff) return rankDiff;
       const weight = (f) => (f.homepagePromoted ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
