@@ -27,6 +27,7 @@ const AffiliateUsers = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [addAffiliatePopup, setAddAffiliatePopup] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [showDistinctionPopup, setShowDistinctionPopup] = useState(false);
   const [distinctionAffiliateId, setDistinctionAffiliateId] = useState(null);
   const [rewardTitle, setRewardTitle] = useState('');
@@ -108,16 +109,24 @@ const AffiliateUsers = () => {
   };
 
   const fetchData = async () => {
+    setLoading(true);
+    setLoadError('');
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
-      const data = await response.json();
-      const sorted = Array.isArray(data)
-        ? [...data].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-        : data;
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.message || 'Affiliate accounts could not be loaded.');
+      const records = Array.isArray(data) ? data : (data?.affiliates || data?.users || data?.data || []);
+      if (!Array.isArray(records)) throw new Error('The affiliate response was not in a supported format.');
+      const sorted = [...records].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       setAffiliateUsers(sorted);
       setFilteredUsers(sorted);
     } catch (error) {
       console.error('Error fetching affiliate users:', error);
+      setAffiliateUsers([]);
+      setFilteredUsers([]);
+      setLoadError(error.message || 'Affiliate accounts could not be loaded.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -229,11 +238,11 @@ const AffiliateUsers = () => {
   }
 
   return (
-    <div className="admin-workspace">
-      <section className="admin-page-heading">
+    <div className="admin-workspace admin-affiliate-command-v4" data-ui-version="affiliate-admin-v4">
+      <section className="admin-page-heading admin-affiliate-command-hero">
         <div>
-          <p className="admin-page-eyebrow">People &amp; finance</p>
-          <h1>Affiliate users</h1>
+          <p className="admin-page-eyebrow">People &amp; finance · Network 4.0</p>
+          <h1>Affiliate command</h1>
           <p>Review creator accounts, approval state, reward distinctions, and affiliate operations without changing the existing workflow.</p>
         </div>
         <div className="admin-page-actions">
@@ -244,6 +253,15 @@ const AffiliateUsers = () => {
           <button type="button" className="admin-action-primary" onClick={() => setAddAffiliatePopup(true)}><FaPlus /> Add affiliate</button>
         </div>
       </section>
+
+      <section className="admin-affiliate-network-stats" aria-label="Affiliate network totals">
+        <article><span>Total affiliates</span><strong>{loading ? '—' : affiliateUsers.length}</strong><small>All creator accounts</small></article>
+        <article><span>Approved</span><strong>{loading ? '—' : affiliateUsers.filter((user) => user.verified).length}</strong><small>Ready to promote</small></article>
+        <article><span>Pending</span><strong>{loading ? '—' : affiliateUsers.filter((user) => !user.verified).length}</strong><small>Needs review</small></article>
+        <article><span>League members</span><strong>{loading ? '—' : affiliateUsers.reduce((sum, user) => sum + (user.usersJoined?.length || 0), 0)}</strong><small>Across the network</small></article>
+      </section>
+
+      {loadError && <div className="admin-affiliate-load-error"><strong>Affiliate data did not load</strong><span>{loadError}</span><button type="button" onClick={fetchData}>Try again</button></div>}
 
       <section className="admin-table-panel">
         <div className="admin-table-toolbar admin-affiliate-toolbar">
@@ -283,7 +301,7 @@ const AffiliateUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length > 0 ? filteredUsers.map((user) => (
+              {loading ? <tr><td colSpan="5"><div className="admin-empty-table">Loading affiliate accounts…</div></td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user._id}>
                   <td>
                     <button type="button" className="admin-person-cell" onClick={() => handleViewUserDetails(user)}>
