@@ -364,7 +364,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   }));
 
   return (
-    <div className="admin-workspace admin-score-center admin-predictions-redesign">
+    <div className="admin-workspace admin-score-center admin-predictions-redesign" data-desk-ui="operations-v2">
       {showVideoUrlPopup && (
         <div className="admin-modal-backdrop">
           <section className="admin-video-modal">
@@ -388,6 +388,14 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           {onBack && <button type="button" className="admin-action-secondary" onClick={onBack}><FaArrowLeft /> Back</button>}
           <button className="admin-action-danger admin-finish-fight-action" type="button" onClick={handleFinishFight}><FaCheckCircle /> Finish Fight</button>
         </div>
+      </section>
+
+      <section className="admin-desk-status-strip" aria-label="Scoring desk status">
+        <div><span>Desk</span><strong>Scoring</strong></div>
+        <div><span>Discipline</span><strong>{category}</strong></div>
+        <div><span>Current round</span><strong>{round} / {match.maxRounds || 1}</strong></div>
+        <div><span>Saved rounds</span><strong>{roundScores.filter(Boolean).length}</strong></div>
+        <div className="is-live"><span>Card state</span><strong>Not settled</strong></div>
       </section>
 
       <section className="admin-score-hero">
@@ -466,7 +474,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
       </main>
 
-      <aside style={{ display: 'grid', gap: 14, position: 'sticky', top: 24, minWidth: 0 }}>
+      <aside className="admin-scoring-control-rail">
         <section className="admin-score-card-so-far">
           <div className="admin-score-card-so-far-title">Card so far</div>
           <div className="admin-score-card-so-far-vs">
