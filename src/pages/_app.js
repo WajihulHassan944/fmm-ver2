@@ -135,6 +135,9 @@ import "@/styles/fmm-full-card-promoter-v70.css";
 // older shared sheets cannot restore raw/legacy form geometry.
 import "@/styles/fmm-admin-desks-v67.css";
 import "@/styles/fmm-affiliate-campaign-v68.css";
+// Last authenticated layer: finishes remaining Affiliate, Player and legacy
+// Back Office surfaces without changing their API or business logic.
+import "@/styles/fmm-complete-experience-v72.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
@@ -380,6 +383,7 @@ function AppContent({ children }) {
     "/AffiliateDashboard",
     "/AffiliateProfile",
     "/AffiliateAccountSettings",
+    "/AffiliatePromotion",
     "/affiliate-money",
     "/affiliate-league",
     "/past-promotions",
