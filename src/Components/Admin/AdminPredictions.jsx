@@ -438,7 +438,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           {category === 'boxing' && (
             <article className="admin-score-metric admin-score-metric-computed is-red">
               <div className="admin-score-computed-label"><strong>{FIELD_LABELS.TP}</strong><span>TP</span><small>Auto-totaled from HP + BP</small></div>
-              <div className="admin-score-computed-value">{normalizeNumber(fighterTwoStats.TP)}</div>
+              <div className="admin-score-computed-value" data-fighter="one">{normalizeNumber(fighterOneStats.TP)}</div>
             </article>
           )}
         </div>
@@ -448,7 +448,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           {category === 'boxing' && (
             <article className="admin-score-metric admin-score-metric-computed is-blue">
               <div className="admin-score-computed-label"><strong>{FIELD_LABELS.TP}</strong><span>TP</span><small>Auto-totaled from HP + BP</small></div>
-              <div className="admin-score-computed-value">{normalizeNumber(fighterOneStats.TP)}</div>
+              <div className="admin-score-computed-value" data-fighter="two">{normalizeNumber(fighterTwoStats.TP)}</div>
             </article>
           )}
         </div>
