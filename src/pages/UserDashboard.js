@@ -1,15 +1,7 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
+// Keep old bookmarks working without maintaining a second, visually different
+// player dashboard. The application has one canonical home at /home.
+export const getServerSideProps = async () => ({
+  redirect: { destination: '/home', permanent: false },
+});
 
-const DashboardMain = dynamic(
-  () => import('@/Components/Dashboard/DashboardMain'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <DashboardMain />
-}
-
-export default index
+export default function UserDashboardRedirect() { return null; }
