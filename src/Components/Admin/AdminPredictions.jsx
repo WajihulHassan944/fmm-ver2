@@ -380,9 +380,9 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
       <section className="admin-page-heading">
         <div>
-          <span>Official score entry</span>
-          <h2>{match.matchName}</h2>
-          <p>{match.matchType} · {match.matchCategoryTwo || match.matchCategory} · Round {round} of {match.maxRounds || 1}. Enter any official stat value manually or use the quick buttons.</p>
+          <span>Score operations</span>
+          <h2>Submit &amp; view scores</h2>
+          <p>Punch in every round for both fighters in one place. Totals build as you go and nothing settles until you post the card.</p>
         </div>
         <div className="admin-heading-actions">
           {onBack && <button type="button" className="admin-action-secondary" onClick={onBack}><FaArrowLeft /> Back</button>}
@@ -400,6 +400,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
       <main>
 
       <section className="admin-score-round-tabs">
+        <header className="admin-score-section-heading"><b>01</b><div><h3>Pick a round</h3><p>Filled rounds are marked. Click any one to correct it.</p></div></header>
         {Array.from({ length: Number(match.maxRounds || 1) }, (_, i) => i + 1).map((r) => (
           <button
             key={r}
@@ -432,6 +433,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
       <Popup isVisible={showKOPopup} onClose={() => setShowKOPopup(false)} onSelect={handleKOSelect} stat="KO" />
 
       <section className="admin-score-entry-grid">
+        <header className="admin-score-section-heading admin-score-entry-heading"><b>02</b><div><h3>Round {round} stats</h3><p>{category === 'boxing' ? 'Boxing card — head, body and total punches, then the round outcome.' : 'MMA card — strikes, kicks, knees and elbows, then the round outcome.'}</p></div></header>
         <div className="admin-score-fighter-panel is-red">
           <header><span>Fighter A</span><h3>{match.matchFighterA}</h3><p>Raw stats only — round winner and finish are set above.</p></header>
           <div>{manualStatFields.map((stat) => renderMetric('one', stat))}</div>
