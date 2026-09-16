@@ -1,0 +1,320 @@
+/* FANTASY MMADNESS affiliate application — final unified UI layer.
+   Route-scoped on purpose: no player, public, or admin page is affected. */
+
+:root {
+  --aff-bg: #05070b;
+  --aff-panel: #0b1119;
+  --aff-panel-2: #101925;
+  --aff-line: rgba(159, 181, 210, .17);
+  --aff-copy: #f6f8fc;
+  --aff-muted: #93a1b5;
+  --aff-red: #f21d32;
+  --aff-blue: #1598ef;
+  --aff-gold: #ffbd19;
+  --aff-green: #2fd267;
+}
+
+.affiliate-dashboard-experience-page,
+.affiliate-money-page,
+.affiliate-league-page-final,
+.affiliate-settings-page-final,
+.affiliate-account-settings-page,
+.affiliate-past-promotions-page,
+.affiliate-guide-premium-page,
+.affiliate-dashboard-detail-page,
+.affiliate-campaign-command,
+.affiliate-create-promotion-premium {
+  background:
+    radial-gradient(circle at 92% 4%, rgba(242, 29, 50, .16), transparent 30rem),
+    radial-gradient(circle at 4% 34%, rgba(21, 152, 239, .1), transparent 28rem),
+    var(--aff-bg) !important;
+  color: var(--aff-copy) !important;
+}
+
+.affiliate-dashboard-experience-page,
+.affiliate-money-page,
+.affiliate-league-page-final,
+.affiliate-settings-page-final,
+.affiliate-account-settings-page,
+.affiliate-past-promotions-page { min-height: 100vh; }
+
+/* Logged-in affiliate navigation */
+.affiliate-dashboard-experience-page .affiliate-experience-nav,
+.affiliate-money-page .affiliate-experience-nav,
+.affiliate-league-page-final .affiliate-experience-nav,
+.affiliate-settings-page-final .affiliate-experience-nav,
+.affiliate-account-settings-page .affiliate-experience-nav,
+.affiliate-past-promotions-page .affiliate-experience-nav {
+  background: rgba(5, 8, 13, .92) !important;
+  border-block: 1px solid var(--aff-line) !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .28) !important;
+  padding: 12px 0 !important;
+  position: sticky !important;
+  top: 76px !important;
+  z-index: 30 !important;
+  backdrop-filter: blur(18px);
+}
+
+.affiliate-experience-nav-inner {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+}
+.affiliate-experience-nav-inner::-webkit-scrollbar { display: none; }
+.affiliate-experience-nav-inner > a {
+  align-items: center !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  color: #9da9b9 !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  font-family: Anton, sans-serif !important;
+  font-size: 12px !important;
+  gap: 8px !important;
+  letter-spacing: .045em !important;
+  min-height: 42px !important;
+  padding: 0 15px !important;
+  text-transform: uppercase !important;
+}
+.affiliate-experience-nav-inner > a:hover {
+  background: rgba(255, 255, 255, .045) !important;
+  color: #fff !important;
+}
+.affiliate-experience-nav-inner > a.is-active {
+  background: linear-gradient(135deg, rgba(242, 29, 50, .22), rgba(242, 29, 50, .08)) !important;
+  border-color: rgba(242, 29, 50, .5) !important;
+  box-shadow: inset 3px 0 0 var(--aff-red), 0 10px 24px rgba(242, 29, 50, .1) !important;
+  color: #fff !important;
+}
+.affiliate-experience-nav-inner > a svg { color: var(--aff-red) !important; }
+
+/* Command-center dashboard */
+.affiliate-dashboard-hero-final {
+  background:
+    linear-gradient(90deg, rgba(3, 5, 9, .98) 0%, rgba(3, 5, 9, .83) 48%, rgba(3, 5, 9, .35) 100%),
+    url('/images/fmm-pages/affiliate-command-premium.webp') center right / cover no-repeat !important;
+  border-bottom: 1px solid rgba(242, 29, 50, .3) !important;
+  min-height: 510px !important;
+  padding: clamp(80px, 8vw, 120px) 0 58px !important;
+  position: relative !important;
+}
+.affiliate-dashboard-hero-final::after {
+  background: linear-gradient(90deg, var(--aff-red), transparent 38%, var(--aff-blue));
+  bottom: 0; content: ''; height: 2px; left: 0; opacity: .8; position: absolute; right: 0;
+}
+.affiliate-dashboard-hero-final .xp-affiliate-hero-layout {
+  align-items: end !important;
+  display: grid !important;
+  gap: 28px !important;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr) !important;
+  min-height: 350px !important;
+}
+.xp-affiliate-profile-card {
+  align-items: center !important;
+  background: linear-gradient(135deg, rgba(9, 14, 22, .92), rgba(9, 14, 22, .64)) !important;
+  border: 1px solid rgba(255, 255, 255, .14) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .42) !important;
+  display: grid !important;
+  gap: 24px !important;
+  grid-template-columns: 112px 1fr !important;
+  padding: 28px !important;
+  backdrop-filter: blur(14px);
+}
+.xp-affiliate-avatar {
+  background: linear-gradient(145deg, var(--aff-red), var(--aff-blue)) !important;
+  border-radius: 18px !important;
+  height: 112px !important;
+  padding: 3px !important;
+  width: 112px !important;
+}
+.xp-affiliate-avatar img { border-radius: 15px !important; height: 100% !important; object-fit: cover !important; width: 100% !important; }
+.xp-affiliate-profile-card h1 {
+  color: #fff !important;
+  font-family: Anton, sans-serif !important;
+  font-size: clamp(40px, 4.6vw, 68px) !important;
+  letter-spacing: -.02em !important;
+  line-height: .94 !important;
+  margin: 9px 0 14px !important;
+  text-transform: uppercase !important;
+}
+.xp-affiliate-profile-card h1 span { color: var(--aff-red) !important; display: block; }
+.xp-affiliate-profile-card > div > p:not(.xp-eyebrow) { color: #b2bdcb !important; line-height: 1.6 !important; max-width: 700px; }
+.xp-affiliate-pipeline-card {
+  background: linear-gradient(160deg, rgba(16, 25, 37, .96), rgba(7, 11, 17, .94)) !important;
+  border: 1px solid var(--aff-line) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .38) !important;
+  padding: 26px !important;
+}
+.xp-affiliate-pipeline-card > span { color: var(--aff-red) !important; font: 12px Anton, sans-serif !important; letter-spacing: .1em !important; text-transform: uppercase; }
+.xp-affiliate-pipeline-card h2 { color: #fff !important; font: 30px Anton, sans-serif !important; margin: 8px 0 22px !important; text-transform: uppercase; }
+.xp-affiliate-pipeline { display: grid !important; gap: 9px !important; }
+.xp-affiliate-pipeline > div {
+  align-items: center !important; background: rgba(255, 255, 255, .035) !important; border: 1px solid var(--aff-line) !important;
+  border-radius: 11px !important; display: grid !important; gap: 10px !important; grid-template-columns: 8px 44px 1fr !important; padding: 12px !important;
+}
+.xp-affiliate-pipeline i { background: var(--aff-green) !important; border-radius: 50%; box-shadow: 0 0 12px rgba(47, 210, 103, .5); height: 7px !important; width: 7px !important; }
+.xp-affiliate-pipeline strong { color: #fff !important; font: 22px Anton, sans-serif !important; }
+.xp-affiliate-pipeline small { color: var(--aff-muted) !important; }
+
+.affiliate-dashboard-main-final { padding: 42px 0 80px !important; }
+.xp-affiliate-stat-grid { display: grid !important; gap: 14px !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; margin-bottom: 42px !important; }
+.xp-affiliate-stat-grid > div {
+  align-items: center !important;
+  background: linear-gradient(145deg, rgba(16, 25, 37, .98), rgba(8, 13, 20, .98)) !important;
+  border: 1px solid var(--aff-line) !important;
+  border-radius: 15px !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .24) !important;
+  display: flex !important;
+  gap: 14px !important;
+  min-height: 112px !important;
+  padding: 20px !important;
+  position: relative !important;
+  overflow: hidden;
+}
+.xp-affiliate-stat-grid > div::after { background: var(--aff-red); bottom: 0; content: ''; height: 3px; left: 0; position: absolute; width: 34%; }
+.xp-affiliate-stat-grid > div:nth-child(even)::after { background: var(--aff-blue); }
+.xp-affiliate-stat-grid svg { color: var(--aff-red) !important; font-size: 22px !important; }
+.xp-affiliate-stat-grid > div:nth-child(even) svg { color: var(--aff-blue) !important; }
+.xp-affiliate-stat-grid strong { color: #fff !important; display: block; font: 30px Anton, sans-serif !important; }
+.xp-affiliate-stat-grid small { color: var(--aff-muted) !important; font-size: 11px !important; text-transform: uppercase; }
+
+.affiliate-dashboard-main-final .xp-page-section,
+.affiliate-money-page .xp-page-section,
+.affiliate-settings-page-final .xp-page-section,
+.affiliate-account-settings-page .xp-page-section,
+.affiliate-past-promotions-page .xp-page-section {
+  background: linear-gradient(150deg, rgba(13, 20, 30, .98), rgba(7, 11, 17, .98)) !important;
+  border: 1px solid var(--aff-line) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, .26) !important;
+  margin: 0 0 26px !important;
+  padding: clamp(22px, 3vw, 34px) !important;
+}
+
+.xp-affiliate-fight-grid { display: grid !important; gap: 18px !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.xp-affiliate-fight-card {
+  background: #090e16 !important; border: 1px solid var(--aff-line) !important; border-radius: 16px !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .3) !important; min-width: 0 !important; overflow: hidden !important; transition: .2s ease !important;
+}
+.xp-affiliate-fight-card:hover { border-color: rgba(242, 29, 50, .55) !important; transform: translateY(-4px) !important; }
+.xp-affiliate-fight-media { background: linear-gradient(120deg, #101e30, #24131f) !important; height: 245px !important; min-height: 245px !important; }
+.xp-affiliate-fight-media figure { height: 100% !important; margin: 0 !important; width: 50% !important; }
+.xp-affiliate-fight-copy { padding: 20px !important; }
+.xp-affiliate-fight-copy h3 { color: #fff !important; font: 24px/1.05 Anton, sans-serif !important; min-height: 52px; text-transform: uppercase; }
+.xp-affiliate-fight-copy h3 span { color: var(--aff-red) !important; }
+
+/* Shared secondary affiliate screens */
+.affiliate-money-hero,
+.affiliate-league-page-final > section:first-of-type,
+.affiliate-settings-page-final > section:first-of-type,
+.affiliate-account-settings-page > section:first-of-type,
+.affiliate-past-promotions-page > section:first-of-type {
+  background: linear-gradient(90deg, rgba(3, 6, 10, .97), rgba(3, 6, 10, .62)), url('/images/fmm-pages/affiliate-command-premium.webp') center / cover no-repeat !important;
+  border-bottom: 1px solid rgba(242, 29, 50, .25) !important;
+}
+.affiliate-money-summary { display: grid !important; gap: 14px !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; margin: 0 0 26px !important; }
+.affiliate-money-summary > article,
+.affiliate-settings-card,
+.affiliate-profile-preview-card,
+.affiliate-league-invite-final,
+.xp-affiliate-league-summary,
+.xp-affiliate-league-panel,
+.affiliate-past-promotion-card {
+  background: linear-gradient(150deg, rgba(16, 25, 37, .98), rgba(8, 13, 20, .98)) !important;
+  border: 1px solid var(--aff-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .25) !important;
+}
+
+/* Affiliate signup and login */
+.auth-role-affiliate.auth-experience-page {
+  background: var(--aff-bg) !important;
+  min-height: 100vh !important;
+}
+.auth-role-affiliate .xp-auth-shell { background: var(--aff-bg) !important; grid-template-columns: minmax(420px, .9fr) minmax(560px, 1.1fr) !important; }
+.auth-role-affiliate .xp-auth-art {
+  background: linear-gradient(0deg, rgba(3, 6, 10, .96), rgba(3, 6, 10, .28)), url('/images/fmm-pages/affiliate-command-premium.webp') center / cover no-repeat !important;
+  min-height: 100vh !important; position: sticky !important; top: 0 !important;
+}
+.auth-role-affiliate .xp-auth-art-copy { background: rgba(5, 8, 13, .72) !important; border: 1px solid rgba(255, 255, 255, .13) !important; border-radius: 18px !important; padding: 25px !important; backdrop-filter: blur(12px); }
+.auth-role-affiliate .xp-auth-art-copy h1 { font-size: clamp(50px, 5.5vw, 82px) !important; }
+.auth-role-affiliate .xp-auth-art-copy h1 span { color: var(--aff-red) !important; }
+.auth-role-affiliate .xp-auth-panel { background: radial-gradient(circle at 100% 0, rgba(21, 152, 239, .1), transparent 25rem), #080c12 !important; }
+.auth-role-affiliate .xp-auth-panel-inner { max-width: 720px !important; }
+.auth-role-affiliate .xp-auth-mode-switch,
+.auth-role-affiliate .xp-auth-role-switcher,
+.auth-role-affiliate .xp-auth-upload-card,
+.auth-role-affiliate .xp-auth-checks { background: rgba(255, 255, 255, .028) !important; border-color: var(--aff-line) !important; }
+.auth-role-affiliate .xp-auth-field-grid input,
+.auth-role-affiliate .xp-auth-input { background: #05080d !important; border-color: rgba(159, 181, 210, .22) !important; border-radius: 9px !important; }
+.auth-role-affiliate .xp-auth-field-grid input:focus,
+.auth-role-affiliate .xp-auth-input:focus-within { border-color: var(--aff-blue) !important; box-shadow: 0 0 0 4px rgba(21, 152, 239, .1) !important; }
+.auth-role-affiliate .xp-auth-role-switcher button.is-active { background: linear-gradient(135deg, rgba(242, 29, 50, .22), rgba(21, 152, 239, .1)) !important; border-color: var(--aff-red) !important; }
+.auth-role-affiliate .xp-auth-submit { background: linear-gradient(100deg, #e8172c, #ff3446) !important; box-shadow: 0 14px 32px rgba(242, 29, 50, .22) !important; }
+
+/* Guides and campaign workspaces */
+.affiliate-guide-premium-page { overflow: hidden; }
+.affiliate-guide-premium-hero { background: linear-gradient(90deg, rgba(3, 6, 10, .98), rgba(3, 6, 10, .55)), url('/images/fmm-pages/premium-affiliate-banner.webp') center / cover no-repeat !important; border-bottom: 1px solid rgba(242, 29, 50, .25) !important; }
+.affiliate-guide-premium-card,
+.affiliate-guide-premium-grid > *,
+.affiliate-guide-premium-reminder,
+.affiliate-campaign-panel,
+.affiliate-campaign-side-card,
+.affiliate-create-form {
+  background: linear-gradient(150deg, rgba(16, 25, 37, .98), rgba(8, 13, 20, .98)) !important;
+  border: 1px solid var(--aff-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .25) !important;
+}
+.affiliate-campaign-layout { gap: 20px !important; }
+.affiliate-campaign-action { background: rgba(255, 255, 255, .035) !important; border-color: var(--aff-line) !important; border-radius: 12px !important; }
+.affiliate-campaign-action.is-primary { background: linear-gradient(135deg, rgba(242, 29, 50, .2), rgba(242, 29, 50, .07)) !important; border-color: rgba(242, 29, 50, .5) !important; }
+
+@media (max-width: 1100px) {
+  .affiliate-dashboard-hero-final .xp-affiliate-hero-layout { grid-template-columns: 1fr !important; }
+  .xp-affiliate-pipeline-card { max-width: none !important; }
+  .xp-affiliate-fight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .xp-affiliate-stat-grid, .affiliate-money-summary { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .auth-role-affiliate .xp-auth-shell { grid-template-columns: 1fr !important; }
+  .auth-role-affiliate .xp-auth-art { min-height: 520px !important; position: relative !important; }
+}
+
+@media (max-width: 700px) {
+  .affiliate-dashboard-experience-page .affiliate-experience-nav,
+  .affiliate-money-page .affiliate-experience-nav,
+  .affiliate-league-page-final .affiliate-experience-nav,
+  .affiliate-settings-page-final .affiliate-experience-nav,
+  .affiliate-account-settings-page .affiliate-experience-nav,
+  .affiliate-past-promotions-page .affiliate-experience-nav { top: 62px !important; }
+  .affiliate-experience-nav-inner { padding-inline: 14px !important; }
+  .affiliate-experience-nav-inner > a { font-size: 10px !important; min-height: 38px !important; padding: 0 11px !important; }
+  .affiliate-dashboard-hero-final { min-height: 0 !important; padding: 76px 0 34px !important; }
+  .affiliate-dashboard-hero-final .xp-affiliate-hero-layout { min-height: 0 !important; }
+  .xp-affiliate-profile-card { align-items: start !important; grid-template-columns: 70px 1fr !important; padding: 18px !important; }
+  .xp-affiliate-avatar { border-radius: 12px !important; height: 70px !important; width: 70px !important; }
+  .xp-affiliate-avatar img { border-radius: 9px !important; }
+  .xp-affiliate-profile-card h1 { font-size: 39px !important; }
+  .xp-affiliate-profile-card > div > p:not(.xp-eyebrow) { grid-column: 1 / -1; }
+  .xp-affiliate-hero-actions { grid-column: 1 / -1; }
+  .xp-affiliate-stat-grid, .affiliate-money-summary, .xp-affiliate-fight-grid { grid-template-columns: 1fr !important; }
+  .xp-affiliate-stat-grid > div { min-height: 92px !important; }
+  .xp-affiliate-fight-media { height: 220px !important; min-height: 220px !important; }
+  .affiliate-dashboard-main-final .xp-page-section,
+  .affiliate-money-page .xp-page-section,
+  .affiliate-settings-page-final .xp-page-section,
+  .affiliate-account-settings-page .xp-page-section,
+  .affiliate-past-promotions-page .xp-page-section { border-radius: 13px !important; padding: 18px !important; }
+  .auth-role-affiliate .xp-auth-art { min-height: 450px !important; }
+  .auth-role-affiliate .xp-auth-art-copy { bottom: 20px !important; left: 16px !important; padding: 18px !important; right: 16px !important; }
+  .auth-role-affiliate .xp-auth-art-copy h1 { font-size: 45px !important; }
+  .auth-role-affiliate .xp-auth-panel { padding-inline: 16px !important; }
+  .auth-role-affiliate .xp-auth-field-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-affiliate-fight-card { transition: none !important; }
+}
