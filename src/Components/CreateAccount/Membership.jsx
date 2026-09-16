@@ -49,7 +49,7 @@ const handleSelectPlan = async (plan) => {
 
             if (response.ok) {
                 toast.success('You have successfully subscribed to the Free membership plan.');
-                router.push('/UserDashboard'); 
+                router.push('/home');
                 router.refresh(); 
              
               } else {

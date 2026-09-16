@@ -1,20 +1,5 @@
-import dynamic from 'next/dynamic';
+export const getServerSideProps = async () => ({
+  redirect: { destination: '/administration/fights', permanent: false },
+});
 
-const UpcomingFights = dynamic(
-  () => import('@/Components/Admin/UpcomingFights'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-import AdminPrivateRoute from "@/Components/PrivateRoute/PrivateRouteAdmin";
-
-const Index = () => {
-  return (
-    <AdminPrivateRoute>
-      <UpcomingFights />
-    </AdminPrivateRoute>
-  );
-};
-
-export default Index;
+export default function UpcomingFightAdminRedirect() { return null; }

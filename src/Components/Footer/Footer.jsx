@@ -60,7 +60,7 @@ const Footer = () => {
     : isSponsorAuthenticated
       ? '/sponsor-dashboard'
       : isAuthenticated
-        ? '/UserDashboard'
+        ? '/home'
         : '/home';
 
   const handleNewsletterSubmit = (event) => {
