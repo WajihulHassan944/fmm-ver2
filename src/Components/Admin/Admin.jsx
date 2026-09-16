@@ -31,6 +31,7 @@ const VisitorsAnalytics = dynamic(() => import('./VisitorsAnalytics'), {
 const Admin = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState('');
   const [dashboardCounts, setDashboardCounts] = useState({
     affiliatesCount: 0,
     matchesCount: 0,
@@ -66,11 +67,30 @@ const Admin = () => {
   useEffect(() => {
     const fetchDashboardCounts = async () => {
       try {
-        const response = await fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() });
-        const data = await response.json();
-        setDashboardCounts(data);
+        setDashboardError('');
+        const [countsResponse, affiliatesResponse] = await Promise.all([
+          fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() }),
+          fetch(buildPublicApiUrl('/affiliates'), { headers: adminHeaders() }),
+        ]);
+        const countsPayload = await countsResponse.json().catch(() => ({}));
+        const affiliatesPayload = await affiliatesResponse.json().catch(() => []);
+        if (!countsResponse.ok) throw new Error(countsPayload?.message || 'Dashboard totals could not be loaded.');
+        const affiliates = Array.isArray(affiliatesPayload)
+          ? affiliatesPayload
+          : (affiliatesPayload?.affiliates || affiliatesPayload?.users || affiliatesPayload?.data || []);
+        setDashboardCounts((current) => ({
+          ...current,
+          ...countsPayload,
+          affiliatesCount: Number(
+            countsPayload?.affiliatesCount
+            ?? countsPayload?.affiliateCount
+            ?? countsPayload?.totalAffiliates
+            ?? (Array.isArray(affiliates) ? affiliates.length : 0),
+          ),
+        }));
       } catch (error) {
         console.error('Error fetching dashboard counts:', error);
+        setDashboardError(error.message || 'Back Office totals could not be loaded.');
       } finally {
         setIsLoading(false);
       }
@@ -148,15 +168,17 @@ const Admin = () => {
   }
 
   return (
-    <div className="admin-dashboard-experience">
-      <section className="admin-dashboard-hero">
+    <div className="admin-dashboard-experience admin-command-center-v4" data-ui-version="backoffice-v4">
+      <section className="admin-dashboard-hero admin-command-center-hero-v4">
         <div className="admin-dashboard-hero-copy">
-          <span>Fantasy MMAdness operations</span>
-          <h1>Control every round from one corner.</h1>
+          <span>Fantasy MMAdness Back Office 4.0</span>
+          <h1>Run the entire platform from one command deck.</h1>
           <p>Monitor the platform, move quickly between fight operations, and keep users, affiliates, content, and community workflows under control.</p>
         </div>
         <div className="admin-dashboard-live"><i aria-hidden="true" /><span>{isLoading ? 'Syncing platform data' : 'Command center online'}</span></div>
       </section>
+
+      {dashboardError && <div className="admin-command-data-warning"><FaShieldAlt /> <span><strong>Live totals need attention</strong>{dashboardError}</span></div>}
 
       <section className="admin-metric-grid" aria-label="Platform totals">
         {metrics.map(({ label, value, icon: Icon, href, onClick }) => {
