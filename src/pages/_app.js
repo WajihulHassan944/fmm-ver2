@@ -626,17 +626,17 @@ function AppContent({ children }) {
             re-add its import above. */}
         {renderLegacyExperience && (
           <>
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/experience-theme.css" />}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />}
+            <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />
+            <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />
+            <link rel="stylesheet" href="/legacy-css/experience-theme.css" />
+            <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />
             {/* Legacy halves of the four split sheets — 492 KB the app route no
                 longer parses. Ordered as they were bundled, so the cascade
                 between them is preserved. */}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/globals.css" />}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/frontend-final.css" />}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/new-theme.css" />}
-            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />}
+            <link rel="stylesheet" href="/legacy-css/globals.css" />
+            <link rel="stylesheet" href="/legacy-css/frontend-final.css" />
+            <link rel="stylesheet" href="/legacy-css/new-theme.css" />
+            <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />
           </>
         )}
 
