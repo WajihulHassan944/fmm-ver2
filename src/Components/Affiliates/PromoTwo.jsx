@@ -14,8 +14,9 @@ import {
 import { fetchMatches } from '../../Redux/matchSlice';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 import { userHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const PromoTwo = ({ matchId, affiliateId }) => {
   const dispatch = useDispatch();
