@@ -5,6 +5,7 @@ import { FaBullhorn, FaCog, FaCoins, FaCrown, FaHistory, FaIdBadge, FaInfoCircle
 
 const ITEMS = [
   { href: '/AffiliateDashboard', label: 'Dashboard', icon: FaBullhorn },
+  { href: '/AffiliatePromotion', label: 'Promotion Center', icon: FaBullhorn },
   { href: '/affiliate-money', label: 'Earnings', icon: FaCoins },
   { href: '/promoter/full-cards', label: 'Full Cards', icon: FaLayerGroup },
   { href: '/affiliate-league', label: 'League', icon: FaUsers },

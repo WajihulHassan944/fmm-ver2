@@ -1,107 +1,98 @@
-import React, {useEffect} from 'react';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { fetchMatches } from '../../Redux/matchSlice';
+import Head from 'next/head';
+import Link from 'next/link';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
+import { FaArrowLeft, FaBullhorn, FaCheck, FaCoins, FaCopy, FaExternalLinkAlt, FaEye, FaHistory, FaUsers } from 'react-icons/fa';
+import { fetchMatches } from '../../Redux/matchSlice';
+import AffiliateExperienceNav from './AffiliateExperienceNav';
 
-const AffiliateAllFightPromotion = () => {
+const safeNumber = (value) => Number(value || 0).toLocaleString();
+
+export default function AffiliateAllFightPromotion() {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
- const dispatch = useDispatch();
-const router = useRouter();
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (matchStatus === 'idle') {
-      console.log("Fetching matches...");
-      dispatch(fetchMatches());
-    } else {
-      console.log("Matches already fetched or fetching...");
-    }
+    if (matchStatus === 'idle') dispatch(fetchMatches());
   }, [matchStatus, dispatch]);
 
+  const promoUrl = useMemo(() => {
+    if (!affiliate) return '';
+    const name = `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim();
+    return `https://fantasymmadness.com/affiliate/${encodeURIComponent(name)}`;
+  }, [affiliate]);
 
-  if (!affiliate) {
-    return <div>Loading...</div>;
-  }
+  const promoted = (Array.isArray(matches) ? matches : []).filter(
+    (match) => String(match.affiliateId || '') === String(affiliate?._id || ''),
+  );
+  const leagueCount = affiliate?.usersJoined?.length || 0;
 
-  const promoUrl = `https://fantasymmadness.com/affiliate/${encodeURIComponent(affiliate.firstName)}%20${encodeURIComponent(affiliate.lastName)}`;
-
-  // Copy URL to clipboard
-  const handleCopyClick = () => {
-    navigator.clipboard.writeText(promoUrl)
-      .then(() => {
-        alert('Promotion URL copied to clipboard!');
-      })
-      .catch(err => {
-        console.error('Failed to copy URL: ', err);
-      });
+  const copyPromotionUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(promoUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      console.error('Failed to copy promotion URL:', error);
+    }
   };
 
+  if (!affiliate) {
+    return <div className="affiliate-auth-state"><div className="xp-route-loading">Preparing your promotion center…</div></div>;
+  }
 
-
-
-  // Filter matches to count those with the current affiliate._id
-  const filteredMatches = matches.filter((m) => m.affiliateId === affiliate?._id);
-  const affiliateMatchCount = filteredMatches.length;
-
+  const fullName = `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() || affiliate.playerName || 'Affiliate';
+  const avatar = affiliate.profileUrl || '/images/fmm-experience/avatar-placeholder.svg';
 
   return (
-    <div className='myprofile allpromotion'>
-     <i
-        className="fa fa-arrow-circle-left dashboard-arrow-circle"
-        aria-hidden="true"
-        onClick={() => router.push(-1)} // Go back to the previous page
-      ></i>
-   
-      <div className='member-header'>
-        <div className='member-header-image'>
-          <img src={affiliate.profileUrl} alt="Profile" />
-        </div>
-        <h3><span className='toRemove'>Affiliate Name - </span>{affiliate.firstName} {affiliate.lastName}</h3>
-        <h3>Users <span className="toRemove"> in my League</span> : {affiliate.usersJoined.length}</h3>
+    <>
+      <Head><title>Promotion Center | FANTASY MMADNESS</title></Head>
+      <div className="experience-page affiliate-promotion-center-page">
+        <AffiliateExperienceNav />
+        <section className="affiliate-promotion-center-hero">
+          <div className="theme-container affiliate-promotion-center-hero-grid">
+            <div>
+              <button type="button" className="affiliate-promotion-back" onClick={() => router.back()}><FaArrowLeft /> Back</button>
+              <p className="xp-eyebrow"><FaBullhorn /> Affiliate promotion center</p>
+              <h1>One link. Every fight. <span>Your league.</span></h1>
+              <p>Share a single branded destination for your audience, then track views, members, campaigns and earnings from the same workspace.</p>
+            </div>
+            <aside className="affiliate-promotion-identity">
+              <img src={avatar} alt={fullName} />
+              <div><small>Promoter profile</small><strong>{fullName}</strong><span>{leagueCount} league members</span></div>
+            </aside>
+          </div>
+        </section>
+
+        <main className="theme-container affiliate-promotion-center-main">
+          <section className="affiliate-promotion-link-card">
+            <div><small>Universal promotion link</small><h2>Send fans to your complete fight room.</h2><p>{promoUrl}</p></div>
+            <div className="affiliate-promotion-link-actions">
+              <button type="button" onClick={copyPromotionUrl}>{copied ? <FaCheck /> : <FaCopy />}{copied ? 'Copied' : 'Copy link'}</button>
+              <a href={promoUrl} target="_blank" rel="noreferrer"><FaExternalLinkAlt /> Preview</a>
+            </div>
+          </section>
+
+          <section className="affiliate-promotion-stat-grid" aria-label="Affiliate promotion summary">
+            <article><FaCoins /><span><small>Balance</small><strong>{safeNumber(affiliate.tokens)}</strong><em>FM credits</em></span></article>
+            <article><FaEye /><span><small>Promotion views</small><strong>{safeNumber(affiliate.totalViews)}</strong><em>All-time reach</em></span></article>
+            <article><FaUsers /><span><small>League members</small><strong>{safeNumber(leagueCount)}</strong><em>Connected players</em></span></article>
+            <article><FaBullhorn /><span><small>Promotions</small><strong>{safeNumber(promoted.length)}</strong><em>Campaigns created</em></span></article>
+          </section>
+
+          <section className="affiliate-promotion-command-grid">
+            <Link href="/AffiliateDashboard#shadow-templates"><FaBullhorn /><span><small>Create</small><strong>Promote a fight</strong><em>Choose an approved fight template and launch a campaign.</em></span></Link>
+            <Link href="/promoter/full-cards"><FaUsers /><span><small>Full cards</small><strong>Build an event</strong><em>Group selected bouts into one promoter experience.</em></span></Link>
+            <Link href="/past-promotions"><FaHistory /><span><small>History</small><strong>Past promotions</strong><em>Review completed campaigns and their player activity.</em></span></Link>
+            <Link href="/affiliate-money"><FaCoins /><span><small>Earnings</small><strong>Money desk</strong><em>Review commissions, balances and payout history.</em></span></Link>
+          </section>
+        </main>
       </div>
-
-      <div className='allContainer'>
-        <h1 style={{textAlign:'center'}}>Your All Fights Promotion URL <span onClick={handleCopyClick} style={{ cursor: 'pointer', color: 'blue' }}>Click To Copy</span></h1>
-        <h2 style={{textAlign:'center'}}>https://fantasymmadness.com/affiliate/{affiliate.firstName} {affiliate.lastName}</h2>
-
-
-
-
-        <div className='boxesContainerAffiliate'>
-        <div className='boxxAffiliate affBalance'>
-          <i className='fa fa-futbol-o'></i>
-          <h2>Your Balance</h2>
-          <p>{affiliate.tokens}</p> {/* Render total matches */}
-        </div>
-
-        <div className='boxxAffiliate affViews' >
-          <i className='fa fa-clone'></i>
-          <h2>Promotion Views</h2>
-          <p>{affiliate.totalViews}</p> {/* Render shadow templates count */}
-        </div>
-
-        <div className='boxxAffiliate affmembers'>
-          <i className='fa fa-users'></i>
-          <h2>League Members</h2>
-          <p>{affiliate.usersJoined.length}</p> {/* Render users count */}
-        </div>
-
-        <div className='boxxAffiliate affTotalPromotions' >
-          <i className='fa fa-handshake-o'></i>
-          <h2>Total Promotions</h2>
-          <p>{affiliateMatchCount}</p> {/* Render affiliates id count */}
-        </div>
-      </div>
-
-
-
-
-
-      </div>
-    </div>
+    </>
   );
-};
-
-export default AffiliateAllFightPromotion;
+}
