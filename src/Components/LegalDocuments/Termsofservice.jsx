@@ -16,7 +16,7 @@ const Termsofservice = () => {
 
 <p>This Application is provided by:</p>
 <p>Fantasy Mmadness LLC - </p>
-<p>Owner contact email: fantasymmadness2@gmail.com</p>
+<p>Support email: contact@fantasymmadness.com</p>
 
 <h1>Information about this Application</h1>
 

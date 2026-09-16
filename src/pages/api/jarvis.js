@@ -53,6 +53,17 @@ const adminFetch = async (path, token, { method = 'GET', body } = {}) => {
   return { ok: response.ok, status: response.status, payload };
 };
 
+const notifyAdminOfJarvisFailure = async (token, message, severity = 'warning') => {
+  try {
+    await adminFetch('/api/admin/alerts', token, {
+      method: 'POST',
+      body: { source: 'Jarvis', severity, message: cleanText(message, 2000) },
+    });
+  } catch {
+    // Preserve the original Jarvis response even when the alert channel is down.
+  }
+};
+
 const sanitizeConversation = (messages) => (Array.isArray(messages) ? messages : [])
   .slice(-MAX_MESSAGES)
   .map((item) => ({
@@ -139,11 +150,13 @@ export default async function handler(req, res) {
       const { method, path, body } = def.request(action.args || {});
       const result = await adminFetch(path, token, { method, body });
       if (!result.ok) {
+        await notifyAdminOfJarvisFailure(token, `${def.label} failed: ${result.payload?.message || `HTTP ${result.status}`}`, 'critical');
         return res.status(result.status || 500).json({ message: result.payload?.message || 'The action was rejected by the admin backend.' });
       }
       return res.status(200).json({ ranAction: true, result: result.payload });
     } catch (error) {
       console.error('Jarvis action execution error:', error);
+      await notifyAdminOfJarvisFailure(token, `Action execution failed: ${error.message || 'Unknown error'}`, 'critical');
       return res.status(500).json({ message: 'The action could not be completed.' });
     }
   }
@@ -207,6 +220,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply });
   } catch (error) {
     console.error('Jarvis API error:', error);
+    await notifyAdminOfJarvisFailure(token, `Assistant request failed: ${error.message || 'Unknown error'}`);
     return res.status(500).json({ message: 'Jarvis could not complete this request.' });
   }
 }

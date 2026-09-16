@@ -1793,6 +1793,106 @@
     #05080d !important;
   border: 1px solid rgba(255, 255, 255, .08);
 }
+
+/* Claude desk references — compact operations layout, not the legacy admin form. */
+.admin-predictions-redesign {
+  background:
+    radial-gradient(circle at 92% 4%, rgba(88, 7, 16, .48), transparent 34%),
+    #03070b;
+  border-radius: 18px;
+  color: #f5f7fb;
+  padding: 30px;
+}
+
+.admin-predictions-redesign > .admin-page-heading {
+  background: transparent;
+  border: 0;
+  padding: 0 0 24px;
+}
+
+.admin-predictions-redesign > .admin-page-heading h2 {
+  font-size: clamp(32px, 4vw, 54px);
+  letter-spacing: -.02em;
+}
+
+.admin-predictions-redesign > .admin-page-heading > div:first-child > span {
+  color: #ff2435;
+  letter-spacing: .14em;
+}
+
+.admin-predictions-redesign .admin-score-hero { display: none; }
+
+.admin-predictions-redesign .admin-create-fight-layout > main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-predictions-redesign .admin-score-round-tabs { order: 1; }
+.admin-predictions-redesign .admin-score-entry-grid { order: 2; }
+.admin-predictions-redesign .admin-score-winner-panel { order: 3; }
+.admin-predictions-redesign .admin-score-actions-bar { order: 4; }
+
+.admin-score-section-heading {
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 0 0 18px;
+  width: 100%;
+}
+
+.admin-score-section-heading > b {
+  align-items: center;
+  background: rgba(160, 8, 23, .18);
+  border: 1px solid rgba(255, 35, 54, .55);
+  border-radius: 12px;
+  display: inline-flex;
+  font-family: var(--admin-font-display, Impact, sans-serif);
+  font-size: 16px;
+  height: 50px;
+  justify-content: center;
+  width: 50px;
+}
+
+.admin-score-section-heading h3 {
+  font-family: var(--admin-font-display, Impact, sans-serif);
+  font-size: 28px;
+  letter-spacing: .02em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.admin-score-section-heading p { color: rgba(255,255,255,.65); margin: 4px 0 0; }
+.admin-score-entry-heading { grid-column: 1 / -1; }
+
+.admin-predictions-redesign .admin-score-round-tabs,
+.admin-predictions-redesign .admin-score-entry-grid,
+.admin-predictions-redesign .admin-score-winner-panel,
+.admin-predictions-redesign .admin-score-card-so-far {
+  background: #0d151f;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(0,0,0,.22);
+}
+
+.admin-predictions-redesign .admin-score-fighter-panel.is-red { border-color: rgba(255,35,54,.55); }
+.admin-predictions-redesign .admin-score-fighter-panel.is-blue { border-color: rgba(27,160,255,.55); }
+.admin-predictions-redesign .admin-score-metric-computed { border: 1px dashed rgba(42,208,104,.55); background: rgba(16,83,50,.2); }
+
+.admin-economics-desk {
+  background:
+    radial-gradient(circle at 92% 5%, rgba(88, 7, 16, .48), transparent 35%),
+    #03070b !important;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 24px 60px rgba(0,0,0,.3);
+}
+
+.admin-economics-desk .admin-economics-heading h2 {
+  font-size: clamp(34px, 4vw, 54px) !important;
+  letter-spacing: -.02em;
+}
 .admin-economics-heading {
   border-bottom: 1px solid rgba(255, 255, 255, .1);
   padding-bottom: 19px;

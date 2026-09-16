@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
 
 <h1>Owner and Data Controller</h1>
 <p>Fantasy Combat Sports League LLC - Georgia</p>
-<p>Owner contact email: fantasymmadness2@gmail.com</p>
+<p>Support email: contact@fantasymmadness.com</p>
 
 <h1>Types of Data collected</h1>
 <p>The owner does not provide a list of Personal Data types collected.</p>
