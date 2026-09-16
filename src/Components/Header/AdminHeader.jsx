@@ -61,6 +61,7 @@ const navigationGroups = [
       { label: 'Fight calendar', href: '/administration/Calendar', icon: FaCalendarAlt },
       { label: 'Shadow fights', href: '/administration/ShadowFightsLibrary', icon: FaBolt },
       { label: 'Affiliate fights', href: '/administration/AffiliateMatches', icon: FaUserFriends },
+      { label: 'Full Card control', href: '/administration/full-cards', icon: FaLayerGroup },
       { label: 'Records & video', href: '/administration/adminRecords', icon: FaVideo },
     ],
   },
