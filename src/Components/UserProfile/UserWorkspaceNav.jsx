@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 
 const NAV_ITEMS = [
-  { href: '/home', label: 'Dashboard', icon: FaTachometerAlt },
+  { href: '/UserDashboard', label: 'Fight Center', icon: FaTachometerAlt },
   { href: '/YourFights', label: 'My fights', icon: FaFistRaised },
   { href: '/pro-wrestling/history', label: 'My wrestling', icon: FaCrown },
   { href: '/myLeagueRecords', label: 'My leagues', icon: FaTrophy },
