@@ -379,6 +379,27 @@ function AppContent({ children }) {
     "/past-promotions",
   ]);
   const hasAffiliateWorkspaceNav = affiliateRoutesWithOwnNav.has(router.pathname);
+  const playerWorkspaceRoutes = new Set([
+    "/UserDashboard",
+    "/YourFights",
+    "/profile",
+    "/account-settings",
+  ]);
+  const isPlayerWorkspaceRoute = playerWorkspaceRoutes.has(router.pathname);
+  const standaloneAccountRoutes = new Set([
+    "/auth",
+    "/login",
+    "/CreateAccount",
+    "/AffiliateCreateAccount",
+    "/affiliate-create-account",
+  ]);
+  const isStandaloneAccountRoute = standaloneAccountRoutes.has(router.pathname);
+  const hasControlledExperienceCascade = isAffiliateWorkspaceRoute
+    || isPlayerWorkspaceRoute
+    || isStandaloneAccountRoute;
+  const ownsAuthenticatedNavigation = hasAffiliateWorkspaceNav
+    || isPlayerWorkspaceRoute
+    || isStandaloneAccountRoute;
   const isStandaloneDemoRoute = ["/free-demo", "/mock-game", "/playforfree"].includes(router.pathname);
   // Keep the global site header hidden for admin and the standalone demo app.
   // The homepage still needs the normal desktop/laptop navbar, while CSS hides
@@ -603,15 +624,15 @@ function AppContent({ children }) {
           <>
             <link rel="stylesheet" href="/legacy-css/featured-fight-stage-final.css" />
             <link rel="stylesheet" href="/legacy-css/pro-wrestling.css" />
-            {!isAffiliateWorkspaceRoute && <link rel="stylesheet" href="/legacy-css/experience-theme.css" />}
-            {!isAffiliateWorkspaceRoute && <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/experience-theme.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/affiliate-experience-final.css" />}
             {/* Legacy halves of the four split sheets — 492 KB the app route no
                 longer parses. Ordered as they were bundled, so the cascade
                 between them is preserved. */}
-            <link rel="stylesheet" href="/legacy-css/globals.css" />
-            <link rel="stylesheet" href="/legacy-css/frontend-final.css" />
-            <link rel="stylesheet" href="/legacy-css/new-theme.css" />
-            <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/globals.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/frontend-final.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/new-theme.css" />}
+            {!hasControlledExperienceCascade && <link rel="stylesheet" href="/legacy-css/client-feedback-final.css" />}
           </>
         )}
 
@@ -682,7 +703,7 @@ function AppContent({ children }) {
           its own topbar. This used to key off isExactMobile, so viewing the app
           at anything wider than the phone breakpoint (a laptop, a resized
           window) stacked the old site header above the app's real one. */}
-      {!hideLayout && !renderPrototypeExperience && !hasAffiliateWorkspaceNav && <Header />}
+      {!hideLayout && !renderPrototypeExperience && !ownsAuthenticatedNavigation && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
       {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
       {renderPrototypeExperience && (
