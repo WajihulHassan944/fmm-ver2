@@ -119,6 +119,7 @@ const playerNav = [
 
 const affiliateNav = [
   { label: 'Dashboard', href: '/AffiliateDashboard', icon: FaHome },
+  { label: 'Earnings', href: '/affiliate-money', icon: FaCoins },
   { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'How It Works', href: '/HowItWorks', icon: FaQuestionCircle },
   { label: 'League', href: '/affiliate-league', icon: FaTrophy },
@@ -130,6 +131,7 @@ const affiliateNav = [
     icon: FaEllipsisH,
     children: [
       { label: 'Profile', href: '/AffiliateProfile', icon: FaUserCircle },
+      { label: 'Account Settings', href: '/AffiliateAccountSettings', icon: FaCog },
       { label: 'Insights', href: '/AffiliatePromotion', icon: FaChartLine },
       { label: 'Chat', href: '/fantasy-chatroom', icon: FaComments },
     ],
