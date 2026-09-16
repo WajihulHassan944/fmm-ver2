@@ -80,7 +80,7 @@ const PromoShadowPage = ({ affiliate, matchData }) => {
 
       const data = await response.json();
       alert(`${data.message}`);
-      router.push('/UserDashboard');
+      router.push('/home');
     } catch (error) {
       console.error('Error joining league:', error);
     }
