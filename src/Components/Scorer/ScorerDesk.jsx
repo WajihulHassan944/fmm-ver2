@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaExclamationTriangle, FaLock, FaMinus, FaPlus, FaSyncAlt } from 'react-icons/fa';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { SCORE_POINTS } from '@/Utils/scoringRules';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 // Same codes the server writes (normalizeRoundStatsForCategory). KN is KNEES on
 // the MMA card — knockdowns that end a fight are the KO market, not a count.
@@ -18,6 +20,10 @@ const MMA_STATS = [
 ];
 
 const SCORER_TOKEN_KEY = 'fmmScorerToken';
+const usesPunchCard = (value = '') => {
+  const category = String(value).toLowerCase();
+  return category.includes('box') || category.includes('bare') || category.includes('bkfc');
+};
 
 const readStat = (rows, round, code) => {
   const row = (rows || []).find((entry) => Number(entry.roundNumber) === Number(round));
@@ -83,8 +89,8 @@ const ScorerDesk = ({ token: initialToken }) => {
   useEffect(() => { if (token) loadFight(token); }, [token, loadFight]);
 
   const stats = useMemo(
-    () => (fight?.category === 'boxing' ? BOXING_STATS : MMA_STATS),
-    [fight?.category],
+    () => (usesPunchCard(fight?.categoryTwo || fight?.category) ? BOXING_STATS : MMA_STATS),
+    [fight?.category, fight?.categoryTwo],
   );
 
   // Load whatever is already on the fight for this round, so a scorer picking up
@@ -122,25 +128,24 @@ const ScorerDesk = ({ token: initialToken }) => {
     const numeric = (corner) => Object.fromEntries(
       stats.map(({ code }) => [code, Number(draft[corner][code]) || 0]),
     );
-    // RW/RL are paired: the winning corner takes the round, the other corner is
-    // credited automatically. The finish flag sets KO on the winner and drops
-    // the other corner to zero rather than survival.
+    // Store the same canonical point values used by the prediction cards and
+    // calculation engine. Saving boolean flags here silently broke scoring.
     const body = {
       fighterOneStats: {
         roundNumber: round,
         ...numeric('a'),
-        RW: winner === 'a' ? 1 : 0,
-        RL: loser === 'a' ? 1 : 0,
-        KO: finish && winner === 'a' ? 1 : 0,
-        SP: finish ? 0 : (loser === 'a' ? 1 : 0),
+        RW: winner === 'a' ? SCORE_POINTS.RW : SCORE_POINTS.RL,
+        RL: loser === 'a' ? SCORE_POINTS.RL : 0,
+        KO: finish ? (winner === 'a' ? SCORE_POINTS.KO : SCORE_POINTS.SP) : 0,
+        SP: finish && loser === 'a' ? SCORE_POINTS.SP : 0,
       },
       fighterTwoStats: {
         roundNumber: round,
         ...numeric('b'),
-        RW: winner === 'b' ? 1 : 0,
-        RL: loser === 'b' ? 1 : 0,
-        KO: finish && winner === 'b' ? 1 : 0,
-        SP: finish ? 0 : (loser === 'b' ? 1 : 0),
+        RW: winner === 'b' ? SCORE_POINTS.RW : SCORE_POINTS.RL,
+        RL: loser === 'b' ? SCORE_POINTS.RL : 0,
+        KO: finish ? (winner === 'b' ? SCORE_POINTS.KO : SCORE_POINTS.SP) : 0,
+        SP: finish && loser === 'b' ? SCORE_POINTS.SP : 0,
       },
     };
     try {
