@@ -41,6 +41,11 @@ import {
 const API_BASE = PUBLIC_API_BASE_URL;
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
+const ECON_TOKEN_PACK_SIZE = 5000;
+const ECON_TOKEN_PACK_USD = 3.99;
+const ECON_TOKEN_USD_RATE = ECON_TOKEN_PACK_USD / ECON_TOKEN_PACK_SIZE;
+const tokensToUsdValue = (tokens) => ((Math.max(0, Number(tokens) || 0) * ECON_TOKEN_USD_RATE).toFixed(2));
+const usdToTokensValue = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / ECON_TOKEN_USD_RATE)));
 
 const getId = (fight) => fight?._id || fight?.id;
 const getSport = (fight) => fight?.matchCategoryTwo || fight?.matchCategory || 'combat';
@@ -685,8 +690,10 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   if (selectedEconomics) {
     const f = selectedEconomics;
     const edits = economicsEdits || {
-      matchTokens: String(f.matchTokens ?? 0), pot: String(f.pot ?? 0), minimumEntrants: String(f.minimumEntrants ?? ''),
-      promoterStake: String(f.promoterStake ?? 0), platformContribution: String(f.platformContribution ?? 0),
+      matchTokens: String(f.matchTokens ?? 0), matchTokensUsd: tokensToUsdValue(f.matchTokens),
+      pot: String(f.pot ?? 0), potUsd: tokensToUsdValue(f.pot), minimumEntrants: String(f.minimumEntrants ?? ''),
+      promoterStake: String(f.promoterStake ?? 0), promoterStakeUsd: tokensToUsdValue(f.promoterStake),
+      platformContribution: String(f.platformContribution ?? 0), platformContributionUsd: tokensToUsdValue(f.platformContribution),
       projectedEntrants: String(f.projectedEntrants ?? f.entrants ?? 0), matchStatus: f.matchStatus || 'Draft',
       autoRefundIfShort: f.autoRefundIfShort !== false, maxRounds: String(f.maxRounds ?? 12),
       matchDate: (f.matchDate || '').slice(0, 10), matchTime: f.matchTime || '',
@@ -726,10 +733,14 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       return type.includes('live') && !['finished', 'closed', 'settled', 'voided'].includes(status);
     });
     const editField = (key) => (ev) => setEconomicsEdits({ ...edits, [key]: ev.target.value });
+    const editMoneyField = (tokenKey) => (ev) => {
+      const dollars = ev.target.value;
+      setEconomicsEdits({ ...edits, [`${tokenKey}Usd`]: dollars, [tokenKey]: usdToTokensValue(dollars) });
+    };
     const dirty = Boolean(economicsEdits);
-    const tokenPackSize = 5000;
-    const tokenPackUsd = 3.99;
-    const tokenUsdRate = tokenPackUsd / tokenPackSize;
+    const tokenPackSize = ECON_TOKEN_PACK_SIZE;
+    const tokenPackUsd = ECON_TOKEN_PACK_USD;
+    const tokenUsdRate = ECON_TOKEN_USD_RATE;
     const usd = (n) => `$${(Math.abs(Number(n) || 0) * tokenUsdRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const fm = (n) => `${Math.max(0, Number(n) || 0).toLocaleString()} FM`;
     const usdSigned = (n) => { const v = Number(n) || 0; if (v === 0) return '$0.00'; return (v > 0 ? '+' : '\u2212') + usd(v); };
@@ -820,6 +831,27 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         {opts.note && <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(245,247,251,.4)', margin: '8px 0 0' }}>{opts.note}</p>}
       </div>
     );
+    const moneyPill = (label, tokenKey, accent, bg, note) => {
+      const dollars = edits[`${tokenKey}Usd`] ?? tokensToUsdValue(edits[tokenKey]);
+      return (
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+            <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>{label}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(245,247,251,.45)' }}>Enter cash amount</span>
+          </div>
+          <div style={{ borderRadius: 9, border: `1px solid ${bg.border}`, background: bg.fill, padding: '4px 13px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: accent, fontFamily: display, fontSize: 24, fontWeight: 900 }}>$</span>
+            <input type="number" min="0" step="0.01" value={dollars} onChange={editMoneyField(tokenKey)}
+              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 0, outline: 'none', color: accent, fontFamily: display, fontSize: 27, fontWeight: 900, padding: '11px 0', fontVariantNumeric: 'tabular-nums' }} />
+          </div>
+          <div style={{ alignItems: 'center', background: 'rgba(255,255,255,.035)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 8, padding: '9px 11px' }}>
+            <span style={{ color: 'rgba(245,247,251,.5)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Public token amount</span>
+            <strong style={{ color: accent, fontFamily: display, fontSize: 16 }}>{Number(edits[tokenKey] || 0).toLocaleString()} FM</strong>
+          </div>
+          {note && <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(245,247,251,.4)', margin: '8px 0 0' }}>{note}</p>}
+        </div>
+      );
+    };
     return (
       <div className="admin-workspace admin-economics-desk" style={{ background: '#05080d', minHeight: '100%', padding: 24, borderRadius: 16, pointerEvents: 'auto', position: 'relative', zIndex: 2 }}>
         <section className="admin-economics-heading" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -960,27 +992,21 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               </label>
             </div>
           )}
-          {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: false })}
-          {true && (
-            <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.matchTokens || 0).toLocaleString()} tokens \u2248 {usd(edits.matchTokens)} at the standard 5,000 tokens per $3.99 rate.</p>
-          )}
-          {true && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
-              {[0, 100, 500, 1500, 4000].map((v) => (
-                <div key={v} onClick={() => setEconomicsEdits({ ...edits, matchTokens: String(v) })} style={{ cursor: 'pointer', padding: '6px 11px', borderRadius: 7, border: `1px solid ${v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.14)'}`, background: v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.04)', fontSize: 12, fontWeight: 900, color: v === entryFee ? '#17070a' : 'rgba(245,247,251,.72)' }}>{v === 0 ? 'FREE' : v.toLocaleString()}</div>
-              ))}
-            </div>
-          )}
-          {inputPill('Prize pool', 'advertised total', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: 'tokens', disabled: false })}
-          {true && (
-            <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.pot || 0).toLocaleString()} tokens \u2248 {usd(edits.pot)} \u2014 declared upfront, this figure never grows with entries.</p>
-          )}
-          {true && (
-            <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
-              {inputPill('Promoter / affiliate funding', 'committed tokens', edits.promoterStake, editField('promoterStake'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', note: 'Money committed by the promoter or affiliate toward the guaranteed prize.' })}
-              {inputPill('Platform funding', 'committed tokens', edits.platformContribution, editField('platformContribution'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }, { suffix: 'tokens', note: 'Fantasy MMADNESS contribution toward the guaranteed prize.' })}
-            </div>
-          )}
+          {moneyPill('Player entry fee', 'matchTokens', '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, 'Enter the cash price. The public fight card automatically shows the matching FM token amount.')}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
+            {[0, 5, 10, 25, 50].map((dollars) => {
+              const selected = Number(edits.matchTokensUsd || 0) === dollars;
+              return <button type="button" key={dollars} onClick={() => setEconomicsEdits({ ...edits, matchTokensUsd: dollars.toFixed(2), matchTokens: usdToTokensValue(dollars) })} style={{ cursor: 'pointer', padding: '6px 11px', borderRadius: 7, border: `1px solid ${selected ? '#f7b51b' : 'rgba(255,255,255,.14)'}`, background: selected ? '#f7b51b' : 'rgba(255,255,255,.04)', fontSize: 12, fontWeight: 900, color: selected ? '#17070a' : 'rgba(245,247,251,.72)' }}>{dollars === 0 ? 'FREE' : `$${dollars}`}</button>;
+            })}
+          </div>
+          {moneyPill('Guaranteed prize pool', 'pot', '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, 'Enter the cash prize. Players see the converted FM prize amount; the declared prize does not grow with entries.')}
+          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
+            {moneyPill('Promoter / affiliate funding', 'promoterStake', '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, 'Cash committed by the promoter or affiliate toward the guaranteed prize.')}
+            {moneyPill('Fantasy MMADNESS funding', 'platformContribution', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }, 'Cash committed by Fantasy MMADNESS toward the guaranteed prize.')}
+          </div>
+          <div style={{ background: 'rgba(22,143,230,.07)', border: '1px solid rgba(22,143,230,.35)', borderRadius: 10, color: 'rgba(245,247,251,.72)', fontSize: 12.5, lineHeight: 1.5, margin: '0 0 18px', padding: '11px 13px' }}>
+            Conversion used for this setup: <strong style={{ color: '#fff' }}>$3.99 = 5,000 FM tokens</strong>. Cash is for back-office setup; tokens are what players see and spend.
+          </div>
           {true && (
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', margin: '2px 0 18px' }}>
               {[
