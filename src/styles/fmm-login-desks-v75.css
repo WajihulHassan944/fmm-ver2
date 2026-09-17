@@ -1,9 +1,10 @@
 /* Fantasy MMAdness v75 — account portal + operations desks visual rebuild. */
 
-/* LOGIN / SIGNUP: clear the real desktop header and keep the complete artwork
-   visible. The prior 80px offset allowed the current header to cover the art. */
+/* LOGIN / SIGNUP: this route owns its navigation and intentionally hides the
+   public-site header. Remove the obsolete header gap, then anchor the artwork
+   at its top edge so faces/logo are never clipped above the viewport. */
 .auth-experience-page{
-  --auth-header-clearance:118px;
+  --auth-header-clearance:0px;
   padding-top:var(--auth-header-clearance)!important;
 }
 .auth-experience-page .xp-auth-shell{
@@ -155,7 +156,7 @@
   .admin-economics-desk .admin-create-fight-layout,.admin-predictions-redesign .admin-create-fight-layout{grid-template-columns:1fr!important}
 }
 @media(max-width:720px){
-  .auth-experience-page{--auth-header-clearance:70px}
+  .auth-experience-page{--auth-header-clearance:0px}
   .auth-experience-page .xp-auth-art{background-position:center top!important;min-height:440px!important;top:auto!important}
   .auth-experience-page .xp-auth-art-copy{bottom:16px!important;left:14px!important;padding:18px!important;right:14px!important}
   .auth-experience-page .xp-auth-art-copy h1{font-size:40px!important}
