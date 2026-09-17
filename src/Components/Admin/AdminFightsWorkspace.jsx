@@ -166,6 +166,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedEconomics, setSelectedEconomics] = useState(null);
   const [economicsEdits, setEconomicsEdits] = useState(null);
   const [economicsSaving, setEconomicsSaving] = useState(false);
+  const [economicsActivating, setEconomicsActivating] = useState(false);
+  const [economicsCarouselFilter, setEconomicsCarouselFilter] = useState('upcoming');
   const [openActionsRowId, setOpenActionsRowId] = useState(null);
   const [selectedFightIds, setSelectedFightIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -704,7 +706,25 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const minimumEntrants = Number(edits.minimumEntrants) || breakEven;
     const entrants = Number(f.entrants) || 0;
     const guarded = Boolean(edits.autoRefundIfShort);
-    const isShadowFight = f.sourceType === 'shadow';
+    const isShadowFight = String(f.sourceType || f.matchType || '').toLowerCase().includes('shadow');
+    const carouselFilters = [
+      { key: 'upcoming', label: 'Upcoming Live' },
+      { key: 'open', label: 'Open Now' },
+      { key: 'shadow', label: 'Shadow Library' },
+      { key: 'featured', label: 'Featured' },
+      { key: 'draft', label: 'Drafts' },
+      { key: 'all', label: 'All Fights' },
+    ];
+    const carouselRows = filteredRows.filter((row) => {
+      const status = String(row.matchStatus || row.matchShadowStatus || '').toLowerCase();
+      const type = String(row.sourceType || row.matchType || '').toLowerCase();
+      if (economicsCarouselFilter === 'all') return true;
+      if (economicsCarouselFilter === 'shadow') return type.includes('shadow');
+      if (economicsCarouselFilter === 'featured') return Boolean(row.featuredFight || row.featuredThisWeek || row.homepagePromoted);
+      if (economicsCarouselFilter === 'draft') return status === 'draft';
+      if (economicsCarouselFilter === 'open') return ['open', 'live', 'ongoing', 'active'].includes(status) && !type.includes('shadow');
+      return type.includes('live') && !['finished', 'closed', 'settled', 'voided'].includes(status);
+    });
     const editField = (key) => (ev) => setEconomicsEdits({ ...edits, [key]: ev.target.value });
     const dirty = Boolean(economicsEdits);
     const tokenPackSize = 5000;
@@ -737,6 +757,42 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         toast.error(error.message || 'Could not save economics.');
       } finally {
         setEconomicsSaving(false);
+      }
+    };
+    const activateShadowFight = async () => {
+      if (!isShadowFight || economicsActivating) return;
+      setEconomicsActivating(true);
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/shadow/${encodeURIComponent(getId(f))}/activate`, {
+          method: 'POST',
+          headers: adminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            matchDate: edits.matchDate,
+            matchTime: edits.matchTime,
+            matchStatus: edits.matchStatus === 'Draft' ? 'Draft' : 'Scheduled',
+            matchTokens: edits.matchTokens,
+            pot: edits.pot,
+            promoterStake: edits.promoterStake,
+            platformContribution: edits.platformContribution,
+            projectedEntrants: edits.projectedEntrants,
+            minimumEntrants: edits.minimumEntrants,
+            autoRefundIfShort: edits.autoRefundIfShort,
+            homepagePromoted: edits.homepagePromoted,
+            featuredThisWeek: edits.featuredThisWeek,
+            featuredFight: edits.featuredFight,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.message || 'Could not activate Shadow fight.');
+        toast.success('Shadow template activated as a new live contest.');
+        setSelectedEconomics({ ...payload.fight, sourceType: 'match' });
+        setEconomicsEdits(null);
+        setEconomicsCarouselFilter('upcoming');
+        refreshFightRows();
+      } catch (error) {
+        toast.error(error.message || 'Could not activate Shadow fight.');
+      } finally {
+        setEconomicsActivating(false);
       }
     };
     const covered = f.sourceType !== 'shadow' && guarded && entrants >= minimumEntrants;
@@ -820,19 +876,51 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           </div>
         </section>
 
-        <div className="admin-economics-fight-selector" style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
-          <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)' }}>Editing</span>
-          {filteredRows.slice(0, 12).map((row) => {
-            const rowId = getId(row);
-            const active = String(rowId) === String(getId(f));
-            return (
-              <div key={rowId} onClick={() => { setSelectedEconomics(row); setEconomicsEdits(null); }} style={{ cursor: 'pointer', padding: '9px 14px', borderRadius: 9, border: `1px solid ${active ? '#df111b' : 'rgba(255,255,255,.12)'}`, background: active ? 'rgba(223,17,27,.14)' : 'rgba(255,255,255,.03)', display: 'flex', alignItems: 'center', gap: 9 }}>
-                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, letterSpacing: '.03em', textTransform: 'uppercase', color: active ? '#fff' : 'rgba(245,247,251,.6)' }}>{getTitle(row)}</span>
-                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.1em', textTransform: 'uppercase', padding: '3px 7px', borderRadius: 5, background: 'rgba(0,0,0,.35)', color: 'rgba(245,247,251,.5)' }}>{getSport(row)}</span>
-              </div>
-            );
-          })}
-        </div>
+        <section className="admin-economics-carousel" style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+            {carouselFilters.map((filter) => (
+              <button key={filter.key} type="button" onClick={() => setEconomicsCarouselFilter(filter.key)} style={{ border: `1px solid ${economicsCarouselFilter === filter.key ? '#df111b' : 'rgba(255,255,255,.14)'}`, borderRadius: 999, background: economicsCarouselFilter === filter.key ? 'rgba(223,17,27,.18)' : 'rgba(255,255,255,.035)', color: economicsCarouselFilter === filter.key ? '#fff' : 'rgba(245,247,251,.64)', cursor: 'pointer', fontSize: 11, fontWeight: 900, letterSpacing: '.07em', padding: '9px 13px', textTransform: 'uppercase' }}>
+                {filter.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory' }}>
+            {carouselRows.map((row) => {
+              const rowId = getId(row);
+              const active = String(rowId) === String(getId(f));
+              const rowType = String(row.sourceType || row.matchType || '').toLowerCase();
+              const shadow = rowType.includes('shadow');
+              const rowFee = Number(row.matchTokens) || 0;
+              const rowPot = Number(row.pot) || 0;
+              return (
+                <button key={rowId} type="button" onClick={() => { setSelectedEconomics(row); setEconomicsEdits(null); }} style={{ scrollSnapAlign: 'start', flex: '0 0 270px', cursor: 'pointer', textAlign: 'left', padding: 0, borderRadius: 14, overflow: 'hidden', border: `1px solid ${active ? '#df111b' : 'rgba(255,255,255,.13)'}`, background: active ? 'rgba(223,17,27,.11)' : 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', color: '#fff' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: 105, background: 'radial-gradient(circle at center,rgba(223,17,27,.18),transparent 65%)' }}>
+                    <img src={getFighterImage(row, 'A') || FALLBACK_A} alt="" style={{ width: '100%', height: 105, objectFit: 'contain', objectPosition: 'bottom center' }} />
+                    <img src={getFighterImage(row, 'B') || FALLBACK_B} alt="" style={{ width: '100%', height: 105, objectFit: 'contain', objectPosition: 'bottom center' }} />
+                  </div>
+                  <div style={{ padding: 13 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 7 }}>
+                      <span style={{ color: shadow ? '#168fe6' : '#35d45d', fontSize: 9.5, fontWeight: 900, letterSpacing: '.1em' }}>{shadow ? 'SHADOW TEMPLATE' : 'LIVE FIGHT'}</span>
+                      <span style={{ color: 'rgba(245,247,251,.45)', fontSize: 9.5, fontWeight: 800 }}>{formatDate(row)}</span>
+                    </div>
+                    <strong style={{ display: 'block', fontFamily: display, fontSize: 17, lineHeight: 1.05, textTransform: 'uppercase' }}>{getTitle(row)}</strong>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 11, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.1)' }}>
+                      <span><small style={{ display: 'block', color: 'rgba(245,247,251,.4)', fontSize: 8.5 }}>ENTRY</small><b style={{ color: '#f7b51b', fontSize: 12 }}>{fm(rowFee)} · {usd(rowFee)}</b></span>
+                      <span><small style={{ display: 'block', color: 'rgba(245,247,251,.4)', fontSize: 8.5 }}>PRIZE</small><b style={{ color: '#35d45d', fontSize: 12 }}>{fm(rowPot)} · {usd(rowPot)}</b></span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+            {!carouselRows.length && <div style={{ border: '1px dashed rgba(255,255,255,.16)', borderRadius: 14, color: 'rgba(245,247,251,.5)', padding: 28, width: '100%' }}>No fights in this view. Choose another filter or create a fight.</div>}
+          </div>
+          {isShadowFight && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', border: '1px solid rgba(22,143,230,.45)', borderRadius: 13, background: 'rgba(22,143,230,.08)', padding: 15 }}>
+              <div><strong style={{ color: '#fff', display: 'block', fontFamily: display, textTransform: 'uppercase' }}>Reusable Shadow template</strong><small style={{ color: 'rgba(245,247,251,.58)' }}>Edit the defaults below, then create a separate live contest. This template will remain in the library.</small></div>
+              <button type="button" className="admin-action-primary" onClick={activateShadowFight} disabled={economicsActivating}>{economicsActivating ? 'Activating…' : 'Activate as Live Contest'}</button>
+            </div>
+          )}
+        </section>
 
         <div className="admin-create-fight-layout">
         <main>
