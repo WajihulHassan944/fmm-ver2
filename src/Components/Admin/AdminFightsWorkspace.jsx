@@ -841,7 +841,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           </div>
           <div style={{ borderRadius: 9, border: `1px solid ${bg.border}`, background: bg.fill, padding: '4px 13px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ color: accent, fontFamily: display, fontSize: 24, fontWeight: 900 }}>$</span>
-            <input type="number" min="0" step="0.01" value={dollars} onChange={editMoneyField(tokenKey)}
+            <input type="number" min="0" step="0.01" value={dollars} onChange={editMoneyField(tokenKey)} onFocus={(event) => event.currentTarget.select()}
               style={{ flex: 1, minWidth: 0, background: 'transparent', border: 0, outline: 'none', color: accent, fontFamily: display, fontSize: 27, fontWeight: 900, padding: '11px 0', fontVariantNumeric: 'tabular-nums' }} />
           </div>
           <div style={{ alignItems: 'center', background: 'rgba(255,255,255,.035)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 8, padding: '9px 11px' }}>
