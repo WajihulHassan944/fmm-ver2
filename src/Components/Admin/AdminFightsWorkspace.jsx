@@ -860,7 +860,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Configure lock timing, entry cost and the advertised prize pool. Declare upfront &mdash; the pot never grows with entries.</p>
             </div>
           </header>
-          {!isShadowFight && (
+          {true && (
             <div style={{ display: 'grid', gap: 13, gridTemplateColumns: 'repeat(2, minmax(0,1fr))', marginBottom: 18 }}>
               <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
                 <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Fight date</span>
@@ -873,10 +873,10 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           )}
           {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: false })}
-          {!isShadowFight && (
+          {true && (
             <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.matchTokens || 0).toLocaleString()} tokens \u2248 {usd(edits.matchTokens)} at the standard 5,000 tokens per $3.99 rate.</p>
           )}
-          {!isShadowFight && (
+          {true && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
               {[0, 100, 500, 1500, 4000].map((v) => (
                 <div key={v} onClick={() => setEconomicsEdits({ ...edits, matchTokens: String(v) })} style={{ cursor: 'pointer', padding: '6px 11px', borderRadius: 7, border: `1px solid ${v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.14)'}`, background: v === entryFee ? '#f7b51b' : 'rgba(255,255,255,.04)', fontSize: 12, fontWeight: 900, color: v === entryFee ? '#17070a' : 'rgba(245,247,251,.72)' }}>{v === 0 ? 'FREE' : v.toLocaleString()}</div>
@@ -884,16 +884,16 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           )}
           {inputPill('Prize pool', 'advertised total', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: 'tokens', disabled: false })}
-          {!isShadowFight && (
+          {true && (
             <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.pot || 0).toLocaleString()} tokens \u2248 {usd(edits.pot)} \u2014 declared upfront, this figure never grows with entries.</p>
           )}
-          {!isShadowFight && (
+          {true && (
             <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
               {inputPill('Promoter / affiliate funding', 'committed tokens', edits.promoterStake, editField('promoterStake'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', note: 'Money committed by the promoter or affiliate toward the guaranteed prize.' })}
               {inputPill('Platform funding', 'committed tokens', edits.platformContribution, editField('platformContribution'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }, { suffix: 'tokens', note: 'Fantasy MMADNESS contribution toward the guaranteed prize.' })}
             </div>
           )}
-          {!isShadowFight && (
+          {true && (
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', margin: '2px 0 18px' }}>
               {[
                 ['FUNDED UP FRONT', fundedPrize, '#35d45d'],
@@ -907,7 +907,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               ))}
             </div>
           )}
-          {!isShadowFight && (
+          {true && (
             <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
               <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
               <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
@@ -1067,7 +1067,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               <span style={{ padding: '5px 10px', borderRadius: 999, background: riskChipBg, fontSize: 10.5, fontWeight: 900, letterSpacing: '.09em', textTransform: 'uppercase', color: riskColor }}>{riskLabel}</span>
             </div>
             <div style={{ fontFamily: display, fontSize: 52, lineHeight: 0.88, fontWeight: 900, color: riskColor, fontVariantNumeric: 'tabular-nums' }}>{free ? '\u2014' : breakEven.toLocaleString()}</div>
-            {!isShadowFight && (
+            {true && (
               <div onClick={() => setEconomicsEdits({ ...edits, minimumEntrants: String(breakEven) })} style={{ cursor: 'pointer', marginTop: 14, textAlign: 'center', padding: 10, borderRadius: 9, border: '1px solid rgba(223,17,27,.45)', background: 'rgba(223,17,27,.12)', fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>Set minimum to break-even</div>
             )}
           </section>
@@ -1112,12 +1112,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           </section>
 
-          {dirty && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', background: 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', border: '1px solid rgba(223,17,27,.5)', borderRadius: 16, padding: '16px 18px' }}>
-              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: '#f7b51b' }}>Unsaved changes</span>
+          {(
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', background: 'linear-gradient(180deg,rgba(16,24,34,.99),rgba(7,12,18,.99))', border: `1px solid ${dirty ? 'rgba(247,181,27,.7)' : 'rgba(53,212,93,.45)'}`, borderRadius: 16, padding: '16px 18px', position: 'sticky', bottom: 16, zIndex: 30, boxShadow: '0 16px 42px rgba(0,0,0,.5)' }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: dirty ? '#f7b51b' : '#35d45d' }}>{dirty ? 'Unsaved economic changes' : 'Economic setup ready to submit'}</span>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button type="button" className="admin-action-secondary" onClick={() => setEconomicsEdits(null)} disabled={economicsSaving}>Revert</button>
-                <button type="button" className="admin-action-primary" onClick={saveEconomics} disabled={economicsSaving}>{economicsSaving ? 'Saving\u2026' : 'Save changes'}</button>
+                <button type="button" className="admin-action-secondary" onClick={() => setEconomicsEdits(null)} disabled={economicsSaving || !dirty}>Revert</button>
+                <button type="button" className="admin-action-primary" onClick={saveEconomics} disabled={economicsSaving}>{economicsSaving ? 'Saving\u2026' : 'Save Economic Setup'}</button>
               </div>
             </div>
           )}
