@@ -150,6 +150,8 @@ import "@/styles/fmm-operations-desks-v76.css";
 import "@/styles/fmm-admin-invites-input-v77.css";
 // Final scoring-only reference layer. Must remain after all admin desk sheets.
 import "@/styles/fmm-scoring-desk-reference-v78.css";
+// Final promoter cash-entry and public FM conversion presentation.
+import "@/styles/fmm-promoter-money-v79.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
