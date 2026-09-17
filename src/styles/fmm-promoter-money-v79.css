@@ -1,0 +1,96 @@
+/* FANTASY MMADNESS v79 — promoter cash and public FM conversion clarity. */
+.full-card-shell .full-card-money-field{
+  background:linear-gradient(145deg,rgba(20,30,42,.98),rgba(7,12,18,.98))!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  border-radius:14px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:8px!important;
+  padding:15px!important;
+  text-transform:none!important;
+}
+.full-card-shell .full-card-money-field>strong{
+  color:#fff!important;
+  font-family:Anton,sans-serif!important;
+  font-size:17px!important;
+  font-weight:400!important;
+  letter-spacing:.035em!important;
+  line-height:1.1!important;
+  text-transform:uppercase!important;
+}
+.full-card-shell .full-card-money-help{
+  color:#9eabb9!important;
+  font-size:12px!important;
+  font-weight:500!important;
+  line-height:1.35!important;
+}
+.full-card-shell .full-card-money-input{
+  align-items:center!important;
+  background:#03070b!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  border-radius:11px!important;
+  display:grid!important;
+  grid-template-columns:46px minmax(0,1fr) 48px!important;
+  min-height:62px!important;
+  overflow:hidden!important;
+}
+.full-card-shell .full-card-money-input:focus-within{
+  border-color:#ffbd22!important;
+  box-shadow:0 0 0 3px rgba(255,189,34,.13)!important;
+}
+.full-card-shell .full-card-money-input>b{
+  align-items:center!important;
+  align-self:stretch!important;
+  background:linear-gradient(145deg,#ffca35,#e99b00)!important;
+  color:#151006!important;
+  display:flex!important;
+  font-family:Anton,sans-serif!important;
+  font-size:25px!important;
+  justify-content:center!important;
+}
+.full-card-shell .full-card-money-input>input{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  color:#fff!important;
+  font-family:Anton,sans-serif!important;
+  font-size:24px!important;
+  height:60px!important;
+  min-height:60px!important;
+  outline:0!important;
+  padding:8px 12px!important;
+}
+.full-card-shell .full-card-money-input>input::placeholder{color:#697582!important}
+.full-card-shell .full-card-money-input>em{
+  color:#7f8b98!important;
+  font-size:10px!important;
+  font-style:normal!important;
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+}
+.full-card-shell .full-card-money-field>small{
+  align-items:center!important;
+  color:#98a6b5!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  font-size:12px!important;
+  gap:5px!important;
+  min-height:22px!important;
+}
+.full-card-shell .full-card-money-field>small>b{
+  color:#2bd36b!important;
+  font-family:Anton,sans-serif!important;
+  font-size:18px!important;
+  font-weight:400!important;
+  letter-spacing:.025em!important;
+}
+.full-card-shell .full-card-bout-money{
+  align-content:start!important;
+  gap:12px!important;
+}
+@media(max-width:1000px){
+  .full-card-shell .full-card-bout-money{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:680px){
+  .full-card-shell .full-card-bout-money{grid-template-columns:1fr!important}
+}
