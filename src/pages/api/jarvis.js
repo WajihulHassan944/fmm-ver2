@@ -53,17 +53,6 @@ const adminFetch = async (path, token, { method = 'GET', body } = {}) => {
   return { ok: response.ok, status: response.status, payload };
 };
 
-const notifyAdminOfJarvisFailure = async (token, message, severity = 'warning') => {
-  try {
-    await adminFetch('/api/admin/alerts', token, {
-      method: 'POST',
-      body: { source: 'Jarvis', severity, message: cleanText(message, 2000) },
-    });
-  } catch {
-    // Preserve the original Jarvis response even when the alert channel is down.
-  }
-};
-
 const sanitizeConversation = (messages) => (Array.isArray(messages) ? messages : [])
   .slice(-MAX_MESSAGES)
   .map((item) => ({
@@ -107,36 +96,58 @@ const ACTIONS = {
     request: (a) => ({ method: 'POST', path: '/confirm-payment-affiliate', body: { affiliateId: a.affiliateId, amount: a.amount, payoutId: a.payoutId } }),
     describe: (a) => `Pay out $${a.amount} to affiliate ${a.affiliateId} (payout ${a.payoutId}) — debits their balance immediately.`,
   },
-};
-
-const isPlainObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-const cleanId = (value) => typeof value === 'string' ? value.trim() : '';
-
-const validateAction = (action) => {
-  if (!action || !ACTIONS[action.type] || !isPlainObject(action.args)) return 'Unknown or malformed action.';
-  const args = action.args;
-
-  if (action.type === 'score_fight') {
-    if (!cleanId(args.matchId)) return 'A match ID is required before scoring can run.';
-    if (!isPlainObject(args.scoring) || !Object.keys(args.scoring).length) return 'A non-empty scoring payload is required.';
-  }
-
-  if (action.type === 'publish_fight') {
-    if (!cleanId(args.fightId)) return 'A fight ID is required before publishing can run.';
-    if (args.promotion !== undefined && !isPlainObject(args.promotion)) return 'Promotion settings must be an object.';
-  }
-
-  if (action.type === 'delete_fights') {
-    if (!Array.isArray(args.fightIds) || !args.fightIds.length) return 'At least one fight ID is required before deletion can run.';
-    if (args.fightIds.length > 100 || args.fightIds.some((id) => !cleanId(id))) return 'Fight IDs must contain 1 to 100 valid IDs.';
-  }
-
-  if (action.type === 'approve_payout') {
-    if (!cleanId(args.affiliateId) || !cleanId(args.payoutId)) return 'Affiliate and payout IDs are required.';
-    if (!Number.isFinite(Number(args.amount)) || Number(args.amount) <= 0) return 'Payout amount must be a positive number.';
-  }
-
-  return '';
+  create_swarm_job: {
+    label: 'Create a Jarvis content job',
+    request: (a) => ({ method: 'POST', path: '/api/admin/swarm/jobs', body: a }),
+    describe: (a) => `Create a ${a.jobType || 'custom'} job${a.title ? `: ${a.title}` : ''}.`,
+  },
+  create_fight_campaign: {
+    label: 'Run a full fight campaign',
+    request: (a) => ({ method: 'POST', path: '/api/admin/swarm/campaigns/fight/full', body: a }),
+    describe: (a) => `Run all selected promotional agents for fight ${a.fightId}${a.title ? ` (${a.title})` : ''}.`,
+  },
+  run_schedule: {
+    label: 'Run an automation schedule',
+    request: (a) => {
+      const paths = {
+        daily: '/api/admin/swarm/schedules/daily/run',
+        weekly: '/api/admin/swarm/schedules/weekly/run',
+        seo: '/api/admin/swarm/schedules/daily/seo',
+        social: '/api/admin/swarm/schedules/daily/social',
+        calendar: '/api/admin/swarm/schedules/daily/calendar-refresh',
+        growth: '/api/admin/swarm/schedules/daily/july-growth',
+      };
+      return { method: 'POST', path: paths[a.schedule], body: a.options || {} };
+    },
+    validate: (a) => ['daily', 'weekly', 'seo', 'social', 'calendar', 'growth'].includes(a.schedule),
+    describe: (a) => `Run the ${a.schedule} Jarvis automation schedule now.`,
+  },
+  manage_artifact: {
+    label: 'Review a generated output',
+    request: (a) => {
+      const actions = {
+        approve: 'approve', publish: 'approve', reject: 'reject',
+        regenerate: 'regenerate', apply_seo: 'apply-seo', generate_banner: 'generate-blog-banner',
+      };
+      return {
+        method: 'POST',
+        path: `/api/admin/swarm/artifacts/${encodeURIComponent(a.artifactId)}/${actions[a.action]}`,
+        body: { ...(a.options || {}), ...(a.action === 'publish' ? { publish: true } : {}) },
+      };
+    },
+    validate: (a) => Boolean(a.artifactId) && ['approve', 'publish', 'reject', 'regenerate', 'apply_seo', 'generate_banner'].includes(a.action),
+    describe: (a) => `${String(a.action || '').replace('_', ' ')} artifact ${a.artifactId}.`,
+  },
+  manage_swarm_job: {
+    label: 'Manage a Jarvis job',
+    request: (a) => ({
+      method: 'POST',
+      path: `/api/admin/swarm/jobs/${encodeURIComponent(a.jobId)}/${a.action}`,
+      body: { reason: a.reason || `${a.action} requested through Jarvis` },
+    }),
+    validate: (a) => Boolean(a.jobId) && ['cancel', 'retry'].includes(a.action),
+    describe: (a) => `${a.action} Jarvis job ${a.jobId}.`,
+  },
 };
 
 const TOOLS = [
@@ -155,6 +166,26 @@ const TOOLS = [
   {
     type: 'function', name: 'approve_payout', description: 'Propose approving a pending affiliate payout request, debiting their balance. Does not execute — only proposes for admin approval.',
     parameters: { type: 'object', properties: { affiliateId: { type: 'string' }, payoutId: { type: 'string' }, amount: { type: 'number' } }, required: ['affiliateId', 'payoutId', 'amount'] },
+  },
+  {
+    type: 'function', name: 'create_swarm_job', description: 'Propose creating one content, SEO, social, research, analytics, fight-data, or operations job in the existing Jarvis/Swarm system.',
+    parameters: { type: 'object', properties: { jobType: { type: 'string' }, title: { type: 'string' }, topic: { type: 'string' }, sport: { type: 'string' }, fightId: { type: 'string' }, platforms: { type: 'array', items: { type: 'string' } }, keywords: { type: 'array', items: { type: 'string' } }, metadata: { type: 'object' } }, required: ['jobType', 'topic'] },
+  },
+  {
+    type: 'function', name: 'create_fight_campaign', description: 'Propose running the complete existing multi-agent promotional campaign for one fight.',
+    parameters: { type: 'object', properties: { fightId: { type: 'string' }, title: { type: 'string' }, topic: { type: 'string' }, sport: { type: 'string' }, platforms: { type: 'array', items: { type: 'string' } }, keywords: { type: 'array', items: { type: 'string' } }, includeAll: { type: 'boolean' }, jobTypes: { type: 'array', items: { type: 'string' } } }, required: ['fightId', 'topic'] },
+  },
+  {
+    type: 'function', name: 'run_schedule', description: 'Propose running an existing daily, weekly, SEO, social, calendar-refresh, or growth automation now.',
+    parameters: { type: 'object', properties: { schedule: { type: 'string', enum: ['daily', 'weekly', 'seo', 'social', 'calendar', 'growth'] }, options: { type: 'object' } }, required: ['schedule'] },
+  },
+  {
+    type: 'function', name: 'manage_artifact', description: 'Propose approving, publishing, rejecting, regenerating, applying SEO from, or generating a banner for an existing Jarvis output.',
+    parameters: { type: 'object', properties: { artifactId: { type: 'string' }, action: { type: 'string', enum: ['approve', 'publish', 'reject', 'regenerate', 'apply_seo', 'generate_banner'] }, options: { type: 'object' } }, required: ['artifactId', 'action'] },
+  },
+  {
+    type: 'function', name: 'manage_swarm_job', description: 'Propose cancelling or retrying an existing Jarvis job.',
+    parameters: { type: 'object', properties: { jobId: { type: 'string' }, action: { type: 'string', enum: ['cancel', 'retry'] }, reason: { type: 'string' } }, required: ['jobId', 'action'] },
   },
 ];
 
@@ -176,19 +207,18 @@ export default async function handler(req, res) {
     const action = req.body?.action;
     const def = action && ACTIONS[action.type];
     if (!def) return res.status(400).json({ message: 'Unknown or missing action.' });
-    const validationError = validateAction(action);
-    if (validationError) return res.status(400).json({ message: validationError });
+    if (def.validate && !def.validate(action.args || {})) {
+      return res.status(400).json({ message: 'That action is missing required information or uses an unsupported option.' });
+    }
     try {
       const { method, path, body } = def.request(action.args || {});
       const result = await adminFetch(path, token, { method, body });
       if (!result.ok) {
-        await notifyAdminOfJarvisFailure(token, `${def.label} failed: ${result.payload?.message || `HTTP ${result.status}`}`, 'critical');
         return res.status(result.status || 500).json({ message: result.payload?.message || 'The action was rejected by the admin backend.' });
       }
       return res.status(200).json({ ranAction: true, result: result.payload });
     } catch (error) {
       console.error('Jarvis action execution error:', error);
-      await notifyAdminOfJarvisFailure(token, `Action execution failed: ${error.message || 'Unknown error'}`, 'critical');
       return res.status(500).json({ message: 'The action could not be completed.' });
     }
   }
@@ -204,17 +234,40 @@ export default async function handler(req, res) {
   if (!message) return res.status(400).json({ message: 'Message is required.' });
 
   try {
-    const healthResult = await adminFetch('/api/admin/swarm/health', token);
-    if (!healthResult.ok) {
-      return res.status(healthResult.status === 401 || healthResult.status === 403 ? 401 : 503).json({
-        message: healthResult.status === 401 || healthResult.status === 403
-          ? 'Your admin session is invalid or expired.'
-          : 'Could not verify the admin session with the operations backend.',
+    // Authenticate independently of Swarm so Jarvis can still answer when the
+    // automation gateway is offline. The legacy dashboard-counts route uses
+    // the same admin-token middleware as the rest of the back office.
+    const [healthResult, authResult] = await Promise.all([
+      adminFetch('/api/admin/swarm/health', token).catch(() => ({ ok: false, status: 503, payload: null })),
+      adminFetch('/dashboard-counts', token).catch(() => ({ ok: false, status: 503, payload: null })),
+    ]);
+    const authenticated = healthResult.ok || authResult.ok;
+    if (!authenticated) {
+      const denied = [healthResult.status, authResult.status].some((status) => status === 401 || status === 403);
+      return res.status(denied ? 401 : 503).json({
+        message: denied ? 'Your admin session is invalid or expired.' : 'The back-office service could not verify your admin session.',
       });
     }
 
-    const dashboardResult = await adminFetch('/api/admin/swarm/dashboard', token).catch(() => ({ ok: false, payload: null }));
-    const snapshot = compactSnapshot(healthResult.payload, dashboardResult.ok ? dashboardResult.payload : null);
+    const contextPaths = [
+      '/api/admin/swarm/dashboard?fallbackCache=true',
+      '/api/admin/swarm/jobs?limit=12',
+      '/api/admin/swarm/artifacts?limit=12',
+      '/api/admin/swarm/campaigns?limit=8',
+      '/api/admin/swarm/catalog?fallbackLocal=true',
+    ];
+    const contextResults = await Promise.all(contextPaths.map((path) => adminFetch(path, token).catch(() => ({ ok: false, payload: null }))));
+    const snapshot = compactSnapshot(
+      healthResult.ok ? healthResult.payload : { swarmReachable: false, note: 'Swarm is temporarily unavailable; Jarvis chat remains available.' },
+      {
+        admin: authResult.ok ? authResult.payload : null,
+        dashboard: contextResults[0].ok ? contextResults[0].payload : null,
+        jobs: contextResults[1].ok ? contextResults[1].payload : null,
+        artifacts: contextResults[2].ok ? contextResults[2].payload : null,
+        campaigns: contextResults[3].ok ? contextResults[3].payload : null,
+        catalog: contextResults[4].ok ? contextResults[4].payload : null,
+      },
+    );
     const history = sanitizeConversation(req.body?.messages);
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -224,9 +277,10 @@ export default async function handler(req, res) {
       tools: TOOLS,
       instructions: [
         'You are Jarvis, the Fantasy MMAdness back-office operations assistant.',
-        'You can PROPOSE actions (score_fight, publish_fight, delete_fights, approve_payout) using the provided tools when the admin asks you to score, publish, delete, or pay out something.',
+        'You are the central assistant for fights, scoring, economics, affiliates, promoters, marketing, content, SEO, social media, data quality, growth, and Swarm automation.',
+        'You can propose the supplied operational actions, content jobs, full-fight campaigns, schedules, artifact reviews, and job controls.',
         'Calling a tool only proposes the action for the admin to review and explicitly approve — it never executes by itself. Always fill in every field you can from the conversation and the snapshot; ask the admin for anything required that is missing rather than guessing at IDs or amounts.',
-        'For anything that is not one of those four action types, just answer with analysis and next steps — do not invent other tools.',
+        'For requests not covered by a supplied tool, answer with analysis and exact next steps. Never claim an action ran unless the approved execution response confirms it.',
         'Treat the supplied back-office snapshot as current but possibly partial. Never invent missing fight records, metrics, payouts, statuses, or user data.',
         `Current read-only back-office snapshot: ${snapshot}`,
       ].join('\n'),
@@ -241,25 +295,18 @@ export default async function handler(req, res) {
       let args = {};
       try { args = JSON.parse(call.arguments || '{}'); } catch { args = {}; }
       const def = ACTIONS[call.name];
-      const proposedAction = { type: call.name, label: def.label, args, description: def.describe(args) };
-      const validationError = validateAction(proposedAction);
-      if (validationError) {
-        return res.status(200).json({
-          reply: `I cannot safely propose that action yet: ${validationError} Please provide the missing or corrected information.`,
-        });
-      }
       return res.status(200).json({
         reply: `Proposed: ${def.label}. Review and approve below, or tell me what to change.`,
-        proposedAction,
+        proposedAction: { type: call.name, label: def.label, args, description: def.describe(args) },
+        systemStatus: { jarvis: 'online', swarm: healthResult.ok ? 'online' : 'limited' },
       });
     }
 
     const reply = cleanText(response.output_text, 12000);
     if (!reply) return res.status(502).json({ message: 'Jarvis returned an empty response.' });
-    return res.status(200).json({ reply });
+    return res.status(200).json({ reply, systemStatus: { jarvis: 'online', swarm: healthResult.ok ? 'online' : 'limited' } });
   } catch (error) {
     console.error('Jarvis API error:', error);
-    await notifyAdminOfJarvisFailure(token, `Assistant request failed: ${error.message || 'Unknown error'}`);
     return res.status(500).json({ message: 'Jarvis could not complete this request.' });
   }
 }

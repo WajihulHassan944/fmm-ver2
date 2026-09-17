@@ -12,9 +12,11 @@ const speak = (text) => {
 
 const QUICK_PROMPTS = [
   'Summarize the current fight operations state.',
-  'What data-quality issues should I check before promoting a fight?',
-  'Give me a safe checklist before publishing a fight campaign.',
-  'What should I review in Swarm today?',
+  'Create a complete promotional campaign for my selected fight.',
+  'Show me the latest Jarvis jobs and outputs that need approval.',
+  'Prepare social, SEO, blog, and email content for fight night.',
+  'Check fight data quality, economics, scoring, affiliates, and promoters.',
+  'Give me today’s growth and retention action plan.',
 ];
 
 const starterMessage = {
@@ -30,6 +32,7 @@ function JarvisWorkspace() {
   const [listening, setListening] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  const [systemStatus, setSystemStatus] = useState({ jarvis: 'checking', swarm: 'checking' });
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -93,6 +96,7 @@ function JarvisWorkspace() {
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.message || `Jarvis request failed (${response.status})`);
       const reply = payload.reply || 'No response returned.';
+      if (payload.systemStatus) setSystemStatus(payload.systemStatus);
       setMessages((current) => [...current, {
         role: 'assistant',
         content: reply,
@@ -154,9 +158,9 @@ function JarvisWorkspace() {
         <div className="jarvis-status-copy">
           <div className="jarvis-kicker">FANTASY MMADNESS OPERATIONS COPILOT</div>
           <h2>Jarvis</h2>
-          <p>AI assistance grounded in the authenticated back-office health and Swarm dashboard snapshot. Operational changes require your explicit approval.</p>
+          <p>Your back-office assistant for fights, economics, scoring, affiliates, promoters, campaigns, content, SEO, growth and automation.</p>
         </div>
-        <div className="jarvis-safe"><FaShieldAlt /> APPROVAL REQUIRED</div>
+        <div className="jarvis-safe"><FaShieldAlt /> APPROVAL SAFE</div>
         <button type="button" className="jarvis-voice-toggle" onClick={() => { setVoiceOn((v) => !v); window.speechSynthesis?.cancel(); }} aria-label="Toggle spoken replies">
           {voiceOn ? <FaVolumeUp /> : <FaVolumeMute />} {voiceOn ? 'Voice on' : 'Voice off'}
         </button>
@@ -174,7 +178,7 @@ function JarvisWorkspace() {
             <FaShieldAlt />
             <div>
               <strong>Approval-safe</strong>
-              <span>Jarvis can score, publish, delete, and pay out — but every action shows you exactly what it will do first, and only runs after you click Approve.</span>
+              <span>Jarvis can run fight campaigns, content agents, schedules, scoring, publishing and payouts. Every change waits for your approval.</span>
             </div>
           </div>
           <button type="button" className="jarvis-clear" onClick={() => setMessages([starterMessage])}>
@@ -184,8 +188,8 @@ function JarvisWorkspace() {
 
         <div className="jarvis-chat-card">
           <div className="jarvis-chat-head">
-            <div><span className="jarvis-dot" /> Jarvis online</div>
-            <span>Authenticated admin workspace</span>
+            <div><span className={`jarvis-dot${systemStatus.jarvis === 'online' ? '' : ' is-checking'}`} /> Jarvis {systemStatus.jarvis}</div>
+            <span>Swarm {systemStatus.swarm} · authenticated admin workspace</span>
           </div>
           <div className="jarvis-messages" aria-live="polite">
             {messages.map((item, index) => (
@@ -277,6 +281,7 @@ function JarvisWorkspace() {
         .jarvis-chat-head { display: flex; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.07); color: rgba(255,255,255,.48); font-size: 10px; font-weight: 800; }
         .jarvis-chat-head > div { display: flex; align-items: center; gap: 7px; color: #cfe0ff; }
         .jarvis-dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 10px rgba(52,211,153,.75); }
+        .jarvis-dot.is-checking { background: #f2b544; box-shadow: 0 0 10px rgba(242,181,68,.65); }
         .jarvis-messages { overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
         .jarvis-row { display: flex; }
         .jarvis-row.is-user { justify-content: flex-end; }
