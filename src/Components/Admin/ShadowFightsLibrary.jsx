@@ -299,16 +299,16 @@ const ShadowFightsLibrary = () => {
                 type="button"
                 onClick={() => openDetails(match)}
                 aria-label={`Open ${getFightTitle(match)}`}
-                style={{ textAlign: 'left', border: '1px solid rgba(255,255,255,.14)', borderRadius: 14, padding: 14, background: 'rgba(255,255,255,.04)', color: 'inherit', cursor: 'pointer', minHeight: 188 }}
+                style={{ display: 'block', width: '100%', overflow: 'hidden', textAlign: 'left', border: '1px solid rgba(255,255,255,.14)', borderRadius: 14, padding: 14, background: 'rgba(255,255,255,.04)', color: 'inherit', cursor: 'pointer', minHeight: 220 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '66px 28px 66px', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12, minHeight: 72 }}>
                   <OptimizedImage src={match.fighterA?.primaryImage || match.fighterAId?.primaryImage || match.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={66} height={66} sizes="66px" />
                   <strong style={{ color: '#ef4444' }}>VS</strong>
                   <OptimizedImage src={match.fighterB?.primaryImage || match.fighterBId?.primaryImage || match.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={66} height={66} sizes="66px" />
                 </div>
-                <strong style={{ display: 'block', fontSize: 15, lineHeight: 1.3 }}>{getFightTitle(match)}</strong>
-                <small style={{ display: 'block', marginTop: 6, opacity: .72 }}>{getSport(match)} · {getStatus(match)}</small>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 12, fontSize: 12 }}>
+                <strong style={{ display: 'block', minHeight: 40, fontSize: 15, lineHeight: 1.3, overflowWrap: 'anywhere' }}>{getFightTitle(match)}</strong>
+                <small style={{ display: 'block', marginTop: 6, opacity: .72, whiteSpace: 'normal', overflowWrap: 'anywhere' }}>{getSport(match)} · {getStatus(match)}</small>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.1)', fontSize: 12 }}>
                   <span>{match.maxRounds || '—'} rounds</span>
                   <span>{affiliateEntries(match).length} affiliates</span>
                 </div>
