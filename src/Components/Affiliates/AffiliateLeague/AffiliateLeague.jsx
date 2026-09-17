@@ -6,11 +6,14 @@ import { toast } from 'react-toastify';
 import {
   FaArrowLeft,
   FaArrowRight,
+  FaArchive,
   FaCheck,
   FaCopy,
   FaSearch,
   FaShieldAlt,
   FaSyncAlt,
+  FaTrash,
+  FaUndo,
   FaTrophy,
   FaUserCheck,
   FaUserFriends,
@@ -19,6 +22,7 @@ import AffiliateExperienceNav from '../AffiliateExperienceNav';
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { fullCardRequest } from '@/Utils/fullCardApi';
 
 const API_BASE = PUBLIC_API_BASE_URL;
 const ITEMS_PER_PAGE = 10;
@@ -91,6 +95,8 @@ const AffiliateLeague = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [copied, setCopied] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [rosterFilter, setRosterFilter] = useState('active');
+  const [memberAction, setMemberAction] = useState('');
 
   useEffect(() => {
     if (!affiliate) return;
@@ -110,6 +116,15 @@ const AffiliateLeague = () => {
       setError('');
 
       try {
+        try {
+          const managed = await fullCardRequest('/api/affiliates/me/league-members', { kind: 'affiliate' });
+          if (active && Array.isArray(managed?.members)) {
+            setMembers(managed.members);
+            return;
+          }
+        } catch (managedError) {
+          console.warn('Managed affiliate roster unavailable; using directory fallback.', managedError);
+        }
         const response = await fetch(`${API_BASE}/api/public/user-directory?refresh=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
         if (!response.ok) throw new Error(`Users request failed with status ${response.status}`);
         const payload = await response.json();
@@ -143,13 +158,19 @@ const AffiliateLeague = () => {
 
   const visibleMembers = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return members;
-    return members.filter((member) => (
-      member.name.toLowerCase().includes(query)
-      || member.email.toLowerCase().includes(query)
-      || member.plan.toLowerCase().includes(query)
-    ));
-  }, [members, search]);
+    return members.filter((member) => {
+      const matchesSearch = !query
+        || member.name.toLowerCase().includes(query)
+        || member.email.toLowerCase().includes(query)
+        || member.plan.toLowerCase().includes(query);
+      const matchesFilter = rosterFilter === 'all'
+        || (rosterFilter === 'active' && !member.archived && !member.removed && !member.testAccount)
+        || (rosterFilter === 'test' && member.testAccount && !member.removed)
+        || (rosterFilter === 'archived' && member.archived && !member.removed)
+        || (rosterFilter === 'removed' && member.removed);
+      return matchesSearch && matchesFilter;
+    });
+  }, [members, search, rosterFilter]);
 
   const totalPages = Math.max(1, Math.ceil(visibleMembers.length / ITEMS_PER_PAGE));
   const page = Math.min(currentPage, totalPages);
@@ -172,6 +193,23 @@ const AffiliateLeague = () => {
   const verifiedCount = members.filter((member) => member.verified).length;
   const subscribedCount = members.filter((member) => member.subscribed).length;
   const referralUrl = `https://fantasymmadness.com/my-fantasy-team?referenceId=${affiliate?._id || ''}`;
+
+  const manageMember = async (member, action) => {
+    const labels = { archive: 'archive', restore: 'restore', mark_test: 'mark as a test account', unmark_test: 'remove the test label from', remove: 'remove from this affiliate league' };
+    if (action === 'remove' && !window.confirm(`Remove ${member.email} from this affiliate's office? Their FANTASY MMADNESS account, wallet, predictions and winnings will not be deleted.`)) return;
+    setMemberAction(`${member.key || member.id}:${action}`);
+    try {
+      await fullCardRequest(`/api/affiliates/me/league-members/${encodeURIComponent(member.key || member.id)}`, {
+        method: 'PATCH', kind: 'affiliate', body: { action },
+      });
+      toast.success(`Member ${labels[action]} updated.`);
+      setReloadKey((value) => value + 1);
+    } catch (actionError) {
+      toast.error(actionError.message || 'The roster could not be updated.');
+    } finally {
+      setMemberAction('');
+    }
+  };
 
   const copyInviteLink = async () => {
     try {
@@ -271,6 +309,13 @@ const AffiliateLeague = () => {
                     placeholder="Search members by name, email, or plan"
                   />
                 </label>
+                <select className="affiliate-roster-filter" value={rosterFilter} onChange={(event) => setRosterFilter(event.target.value)}>
+                  <option value="active">Active roster</option>
+                  <option value="test">Test accounts</option>
+                  <option value="archived">Archived</option>
+                  <option value="removed">Removed</option>
+                  <option value="all">All members</option>
+                </select>
                 <button type="button" onClick={() => setReloadKey((value) => value + 1)} disabled={loading}>
                   <FaSyncAlt className={loading ? 'affiliate-spin' : ''} /> Refresh
                 </button>
@@ -284,7 +329,7 @@ const AffiliateLeague = () => {
                 <div className="xp-affiliate-league-table-wrap">
                   <table className="xp-affiliate-league-table">
                     <thead>
-                      <tr><th>Rank</th><th>Member</th><th>Plan</th><th>Status</th><th>Joined</th></tr>
+                      <tr><th>Rank</th><th>Member</th><th>Plan</th><th>Status</th><th>Last active</th><th>Joined</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {paginatedMembers.length ? paginatedMembers.map((member, index) => (
@@ -298,11 +343,25 @@ const AffiliateLeague = () => {
                           </td>
                           <td>{member.plan}</td>
                           <td><span className={`affiliate-member-status ${member.verified ? 'is-verified' : ''}`}>{member.verified ? 'Active' : 'Email not verified'}</span></td>
+                          <td>{formatMemberDate(member.lastActiveAt)}</td>
                           <td>{formatMemberDate(member.joinedAt)}</td>
+                          <td>
+                            <div className="affiliate-roster-actions">
+                              {member.removed || member.archived ? (
+                                <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'restore')}><FaUndo /> Restore</button>
+                              ) : (
+                                <>
+                                  <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'archive')}><FaArchive /> Archive</button>
+                                  <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, member.testAccount ? 'unmark_test' : 'mark_test')}>{member.testAccount ? 'Real member' : 'Test'}</button>
+                                  <button type="button" className="is-remove" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'remove')}><FaTrash /> Remove</button>
+                                </>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan="5">
+                          <td colSpan="7">
                             <div className="xp-table-empty">
                               {search ? 'No league members match this search.' : 'No members have joined this affiliate league yet.'}
                             </div>
