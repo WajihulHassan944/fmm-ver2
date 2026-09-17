@@ -68,19 +68,23 @@ const Admin = () => {
     const fetchDashboardCounts = async () => {
       try {
         setDashboardError('');
-        const [countsResponse, affiliatesResponse] = await Promise.all([
+        const [countsResult, affiliatesResult] = await Promise.allSettled([
           fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() }),
           fetch(buildPublicApiUrl('/affiliates'), { headers: adminHeaders() }),
         ]);
-        const countsPayload = await countsResponse.json().catch(() => ({}));
-        const affiliatesPayload = await affiliatesResponse.json().catch(() => []);
-        if (!countsResponse.ok) throw new Error(countsPayload?.message || 'Dashboard totals could not be loaded.');
+        const countsResponse = countsResult.status === 'fulfilled' ? countsResult.value : null;
+        const affiliatesResponse = affiliatesResult.status === 'fulfilled' ? affiliatesResult.value : null;
+        const countsPayload = countsResponse ? await countsResponse.json().catch(() => ({})) : {};
+        const affiliatesPayload = affiliatesResponse ? await affiliatesResponse.json().catch(() => []) : [];
+        if (!countsResponse?.ok && !affiliatesResponse?.ok) {
+          throw new Error(countsPayload?.message || 'Back Office data could not be reached. Check the admin session and retry.');
+        }
         const affiliates = Array.isArray(affiliatesPayload)
           ? affiliatesPayload
           : (affiliatesPayload?.affiliates || affiliatesPayload?.users || affiliatesPayload?.data || []);
         setDashboardCounts((current) => ({
           ...current,
-          ...countsPayload,
+          ...(countsResponse?.ok ? countsPayload : {}),
           affiliatesCount: Number(
             countsPayload?.affiliatesCount
             ?? countsPayload?.affiliateCount

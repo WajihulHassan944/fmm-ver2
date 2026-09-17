@@ -15,6 +15,7 @@ import {
 import {
   FMM_ASSET_BASE,
   getFightCategory,
+  getFightId,
   getFighterImage,
   safeArray,
 } from '@/Utils/fightExperience';
@@ -49,7 +50,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
       setLoadError('');
 
       try {
-        const response = await fetch(`${API_BASE}/shadow`);
+        const response = await fetch(`${API_BASE}/shadow?compact=promotion&limit=150`);
         if (!response.ok) throw new Error('Failed to fetch promo matches');
         const data = await response.json();
         if (active) setPromoMatches(Array.isArray(data) ? data : []);
@@ -71,7 +72,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
   }, []);
 
   const promoDetails = useMemo(
-    () => safeArray(promoMatches).find((match) => String(match?._id || '') === String(matchId || '')),
+    () => safeArray(promoMatches).find((match) => String(getFightId(match)) === String(matchId || '')),
     [matchId, promoMatches],
   );
 
@@ -175,30 +176,30 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     event.preventDefault();
 
     const url = `${API_BASE}/addMatch`;
-    const matchDetails = promoMatches.find((match) => match._id === matchId);
+    const matchDetails = promoMatches.find((match) => String(getFightId(match)) === String(matchId || ''));
 
     if (!matchDetails) {
       alert('Match not found!');
       return;
     }
 
-    const localDateTime = new Date(`${formData.matchDate}T${formData.matchTime}:00`);
-    const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
-    const matchDate = formData.matchDate.split('T')[0];
-
-    // The deployed backend currently accepts either no paid prize or a fully
-    // guaranteed paid prize. Stop here with the exact requirement instead of
-    // sending a request that can only return the generic "Failed to add" alert.
-    if (!economics.free && economics.pot > economics.stake) {
-      alert(`The current publishing guard requires the entire ${economics.pot.toLocaleString()} FM prize to be guaranteed. Increase the guarantee to ${economics.pot.toLocaleString()} FM or change the prize settings before publishing.`);
-      setButtonText('Publish fight promotion');
+    if (!affiliate?._id) {
+      alert('Your affiliate session is not ready. Please sign out, sign back in, and try again.');
       return;
     }
+    if (!formData.matchDate || !formData.matchTime) {
+      alert('Choose the promotion date and start time before publishing.');
+      return;
+    }
+
+    const matchTimeEST = String(formData.matchTime).slice(0, 5);
+    const matchDate = formData.matchDate.split('T')[0];
 
     const data = new FormData();
     data.append('matchTokens', economics.free ? 0 : formData.matchTokens);
     data.append('promoterStake', economics.free ? 0 : economics.stake);
     data.append('potTarget', economics.free ? 0 : economics.pot);
+    data.append('autoRefundIfShort', economics.free ? false : true);
     data.append('shadowFightId', matchDetails._id);
     data.append('affiliateId', affiliate._id);
     data.append('pot', formData.pot);
@@ -206,25 +207,32 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     data.append('amountOverPotBudget', formData.amountOverPotBudget);
     data.append('matchDate', matchDate);
     data.append('matchTime', matchTimeEST);
-    data.append('fighterAImageUrl', matchDetails.fighterAImage);
-    data.append('fighterBImageUrl', matchDetails.fighterBImage);
-    data.append('fighterAImageDeleteUrlFromReq', matchDetails.fighterAImageDeleteUrl);
-    data.append('fighterBImageDeleteUrlFromReq', matchDetails.fighterBImageDeleteUrl);
-    data.append('promotionBackgroundUrl', matchDetails.promotionBackground);
-    data.append('promotionBackgroundDeleteUrlFromReq', matchDetails.promotionBackgroundDeleteUrl);
-    data.append('matchStatus', matchDetails.matchStatus);
+    const appendIfPresent = (key, value) => {
+      if (value !== undefined && value !== null && String(value).trim() !== '') data.append(key, value);
+    };
+    appendIfPresent('fighterAId', matchDetails.fighterAId?._id || matchDetails.fighterAId);
+    appendIfPresent('fighterBId', matchDetails.fighterBId?._id || matchDetails.fighterBId);
+    appendIfPresent('fighterAImageUrl', matchDetails.fighterAImage);
+    appendIfPresent('fighterBImageUrl', matchDetails.fighterBImage);
+    appendIfPresent('fighterAImageDeleteUrlFromReq', matchDetails.fighterAImageDeleteUrl);
+    appendIfPresent('fighterBImageDeleteUrlFromReq', matchDetails.fighterBImageDeleteUrl);
+    appendIfPresent('promotionBackgroundUrl', matchDetails.promotionBackground);
+    appendIfPresent('promotionBackgroundDeleteUrlFromReq', matchDetails.promotionBackgroundDeleteUrl);
+    // A promoted template becomes a new upcoming live card. Never inherit the
+    // template's historical Finished/Closed/Draft state.
+    data.append('matchStatus', 'Ongoing');
     data.append('matchCategory', matchDetails.matchCategory);
-    data.append('matchCategoryTwo', matchDetails.matchCategoryTwo);
+    appendIfPresent('matchCategoryTwo', matchDetails.matchCategoryTwo);
     data.append('matchName', matchDetails.matchName);
     data.append('matchFighterA', matchDetails.matchFighterA);
     data.append('matchFighterB', matchDetails.matchFighterB);
     data.append('matchDescription', matchDetails.matchDescription);
-    data.append('matchVideoUrl', matchDetails.matchVideoUrl);
+    appendIfPresent('matchVideoUrl', matchDetails.matchVideoUrl);
     data.append('matchType', 'SHADOW');
     data.append('maxRounds', matchDetails.maxRounds);
     data.append('notify', false);
-    data.append('BoxingMatch', JSON.stringify(matchDetails.BoxingMatch));
-    data.append('MMAMatch', JSON.stringify(matchDetails.MMAMatch));
+    if (matchDetails.BoxingMatch) data.append('BoxingMatch', JSON.stringify(matchDetails.BoxingMatch));
+    if (matchDetails.MMAMatch) data.append('MMAMatch', JSON.stringify(matchDetails.MMAMatch));
 
     setButtonText('Saving, please wait...');
 
@@ -237,12 +245,16 @@ const AffiliateAddNewMatch = ({ matchId }) => {
 
       if (response.ok) {
         const responseData = await response.json();
-        alert('Match added successfully!');
-        console.log(responseData.data);
-        window.location.reload();
+        alert('Fight promotion published successfully.');
+        console.log(responseData.data || responseData.matchId);
+        window.location.assign('/AffiliateDashboard#promoted-fights');
       } else {
         const problem = await response.json().catch(() => ({}));
-        alert(problem.message || `The match could not be published (${response.status}).`);
+        if (response.status === 401 || response.status === 403) {
+          alert(problem.message || 'Your affiliate session expired. Please sign in again before publishing.');
+        } else {
+          alert(problem.message || problem.error || `The match could not be published (${response.status}).`);
+        }
       }
     } catch (error) {
       console.error('Error adding match:', error);
@@ -271,7 +283,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     <section className="affiliate-create-promotion affiliate-create-promotion-premium">
       <header className="affiliate-create-header">
         <div className="affiliate-create-identity">
-          <img src={affiliate.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`} alt={fullName} />
+          <img src={affiliate.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`} alt={fullName} loading="lazy" decoding="async" />
           <span>
             <small><FaBullhorn /> Promotion owner</small>
             <strong>{fullName}</strong>
@@ -281,7 +293,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
 
         <div className="affiliate-create-fight-summary">
           <figure>
-            <img src={getFighterImage(promoDetails, 'A')} alt={promoDetails.matchFighterA || 'Fighter A'} />
+            <img src={getFighterImage(promoDetails, 'A')} alt={promoDetails.matchFighterA || 'Fighter A'} loading="eager" decoding="async" fetchPriority="high" />
             <figcaption>{promoDetails.matchFighterA || 'Fighter A'}</figcaption>
           </figure>
           <div>
@@ -290,7 +302,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
             <small>{promoDetails.matchName || 'Approved fight template'}</small>
           </div>
           <figure>
-            <img src={getFighterImage(promoDetails, 'B')} alt={promoDetails.matchFighterB || 'Fighter B'} />
+            <img src={getFighterImage(promoDetails, 'B')} alt={promoDetails.matchFighterB || 'Fighter B'} loading="eager" decoding="async" fetchPriority="high" />
             <figcaption>{promoDetails.matchFighterB || 'Fighter B'}</figcaption>
           </figure>
         </div>

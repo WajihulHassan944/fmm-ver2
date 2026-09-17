@@ -52,7 +52,7 @@ const PastPromotions = () => {
       setPromotionError('');
 
       try {
-        const response = await fetch(`${API_BASE}/shadow`);
+        const response = await fetch(`${API_BASE}/shadow?compact=promotion&limit=150`);
         if (!response.ok) throw new Error('Failed to fetch promo matches');
         const data = await response.json();
         if (active) setPromoMatches(Array.isArray(data) ? data : []);
@@ -169,12 +169,12 @@ const PastPromotions = () => {
                       <article className="affiliate-past-promotion-card" key={resultId || fight?._shadowId || index}>
                         <div className="affiliate-past-promotion-media">
                           <figure>
-                            <img src={getFighterImage(fight, 'A', index)} alt={fight?.matchFighterA || 'Fighter A'} />
+                            <img src={getFighterImage(fight, 'A', index)} alt={fight?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" />
                             <figcaption>{fight?.matchFighterA || 'Fighter A'}</figcaption>
                           </figure>
                           <div><span>{getFightCategory(fight)}</span><strong>VS</strong><small>Final</small></div>
                           <figure>
-                            <img src={getFighterImage(fight, 'B', index)} alt={fight?.matchFighterB || 'Fighter B'} />
+                            <img src={getFighterImage(fight, 'B', index)} alt={fight?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" />
                             <figcaption>{fight?.matchFighterB || 'Fighter B'}</figcaption>
                           </figure>
                         </div>
