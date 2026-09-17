@@ -51,17 +51,29 @@ export default function FullCardPromoterDesk() {
             <label>Start time<input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /></label>
             <label>Venue<input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} /></label>
             <label>City / location<input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></label>
-            <label>Event poster<input type="file" accept="image/*" onChange={(e) => image(e, (value) => setForm((f) => ({ ...f, eventPoster: value })))} />{form.eventPoster && <img src={form.eventPoster} alt="Event poster preview" />}</label>
-            <label>Promotion logo<input type="file" accept="image/*" onChange={(e) => image(e, (value) => setForm((f) => ({ ...f, promotionLogo: value })))} />{form.promotionLogo && <img src={form.promotionLogo} alt="Promotion logo preview" />}</label>
+            <label className="full-card-upload-field">
+              <strong>Event Poster Upload</strong>
+              <span>Upload the main event artwork users will see on the full-card page.</span>
+              <input type="file" accept="image/*" onChange={(e) => image(e, (value) => setForm((f) => ({ ...f, eventPoster: value })))} />
+              <b>{form.eventPoster ? 'Change event poster' : 'Choose event poster'}</b>
+              {form.eventPoster && <img src={form.eventPoster} alt="Event poster preview" />}
+            </label>
+            <label className="full-card-upload-field">
+              <strong>Promotional Logo Upload</strong>
+              <span>Upload the promoter, organization, gym, or event logo.</span>
+              <input type="file" accept="image/*" onChange={(e) => image(e, (value) => setForm((f) => ({ ...f, promotionLogo: value })))} />
+              <b>{form.promotionLogo ? 'Change promotional logo' : 'Choose promotional logo'}</b>
+              {form.promotionLogo && <img src={form.promotionLogo} alt="Promotion logo preview" />}
+            </label>
             <label className="is-wide">Event description<textarea rows="3" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
             {permission.canOfferFullCardPrize && <label>Optional Full Card grand prize<input type="number" min="0" value={form.fullCardPrize} onChange={(e) => setForm({ ...form, fullCardPrize: e.target.value })} /></label>}
           </div>
         </section>
         <section className="full-card-builder"><header><b>02</b><div><p>CARD ORDER</p><h2>Add Fighters & Pots</h2><span>Upload each fighter, choose the sport, and set that fight’s individual pot.</span></div><button type="button" onClick={() => setForm((f) => ({ ...f, bouts: [...f.bouts, emptyBout(f.bouts.length)] }))}><FaPlus /> Add fight</button></header>
           <div className="full-card-bouts">{form.bouts.map((bout, index) => <article key={index} className="full-card-bout-editor">
-            <div className="full-card-bout-order"><strong>{String(index + 1).padStart(2, '0')}</strong><button onClick={() => move(index, -1)} type="button"><FaArrowUp /></button><button onClick={() => move(index, 1)} type="button"><FaArrowDown /></button><button onClick={() => setForm((f) => ({ ...f, bouts: f.bouts.filter((_, i) => i !== index) }))} type="button"><FaTrash /></button></div>
+            <div className="full-card-bout-order"><strong>{String(index + 1).padStart(2, '0')}</strong><button onClick={() => move(index, -1)} type="button" disabled={index === 0} title="Move this fight higher on the card"><FaArrowUp /><span>Move up</span></button><button onClick={() => move(index, 1)} type="button" disabled={index === form.bouts.length - 1} title="Move this fight lower on the card"><FaArrowDown /><span>Move down</span></button><button className="is-delete" onClick={() => setForm((f) => ({ ...f, bouts: f.bouts.filter((_, i) => i !== index) }))} type="button" title="Delete this fight from the card"><FaTrash /><span>Delete</span></button></div>
             <div className="full-card-bout-meta"><input value={bout.boutLabel} onChange={(e) => updateBout(index, 'boutLabel', e.target.value)} /><select value={bout.cardSection} onChange={(e) => updateBout(index, 'cardSection', e.target.value)}><option value="MAIN_CARD">Main card</option><option value="PRELIM">Prelim</option></select><select value={bout.category} onChange={(e) => updateBout(index, 'category', e.target.value)}><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="Bare-knuckle">Bare Knuckle</option><option value="kickboxing">Kickboxing</option><option value="pro-wrestling">Pro Wrestling</option></select></div>
-            {['A', 'B'].map((side) => <div className={`full-card-fighter is-${side.toLowerCase()}`} key={side}><span>Fighter {side}</span>{bout[`fighter${side}Image`] && <img src={bout[`fighter${side}Image`]} alt="Fighter preview" />}<input placeholder={`Fighter ${side} name`} value={bout[`fighter${side}Name`]} onChange={(e) => updateBout(index, `fighter${side}Name`, e.target.value)} /><input type="file" accept="image/*" onChange={(e) => image(e, (value) => updateBout(index, `fighter${side}Image`, value))} /></div>)}
+            {['A', 'B'].map((side) => <div className={`full-card-fighter is-${side.toLowerCase()}`} key={side}><span>Fighter {side}</span><div className="full-card-fighter-preview">{bout[`fighter${side}Image`] ? <img src={bout[`fighter${side}Image`]} alt={`Fighter ${side} preview`} /> : <em>Upload Fighter {side} photo</em>}</div><input placeholder={`Fighter ${side} name`} value={bout[`fighter${side}Name`]} onChange={(e) => updateBout(index, `fighter${side}Name`, e.target.value)} /><label className="full-card-fighter-upload"><input type="file" accept="image/*" onChange={(e) => image(e, (value) => updateBout(index, `fighter${side}Image`, value))} /><b>{bout[`fighter${side}Image`] ? 'Change Fighter ' + side + ' photo' : 'Upload Fighter ' + side + ' photo'}</b></label></div>)}
             <div className="full-card-bout-money"><label>Fight pot<input type="number" min="0" value={bout.pot} onChange={(e) => updateBout(index, 'pot', e.target.value)} /></label><label>Player entry (FM)<input type="number" min="0" value={bout.entryTokens} onChange={(e) => updateBout(index, 'entryTokens', e.target.value)} /></label></div>
           </article>)}</div>
         </section>
