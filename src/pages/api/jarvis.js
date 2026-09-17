@@ -66,6 +66,15 @@ const compactSnapshot = (health, dashboard) => {
   return raw.length > 12000 ? `${raw.slice(0, 12000)}…` : raw;
 };
 
+const backendErrorMessage = (result) => {
+  const payload = result?.payload;
+  if (payload && typeof payload === 'object') {
+    return cleanText(payload.message || payload.error || payload.detail || payload.reason, 1000);
+  }
+  if (typeof payload === 'string') return cleanText(payload, 1000);
+  return '';
+};
+
 // --------------------------------------------------------------------------
 // Actions Jarvis is allowed to run. Each maps to a real, already-existing
 // admin endpoint — the same ones the back-office UI itself calls — so
@@ -214,7 +223,12 @@ export default async function handler(req, res) {
       const { method, path, body } = def.request(action.args || {});
       const result = await adminFetch(path, token, { method, body });
       if (!result.ok) {
-        return res.status(result.status || 500).json({ message: result.payload?.message || 'The action was rejected by the admin backend.' });
+        const detail = backendErrorMessage(result);
+        return res.status(result.status || 500).json({
+          message: detail || `The admin backend rejected this action (${result.status || 500}).`,
+          backendStatus: result.status || 500,
+          actionType: action.type,
+        });
       }
       return res.status(200).json({ ranAction: true, result: result.payload });
     } catch (error) {

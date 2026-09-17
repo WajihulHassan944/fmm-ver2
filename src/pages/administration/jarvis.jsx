@@ -32,6 +32,7 @@ function JarvisWorkspace() {
   const [listening, setListening] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
   const [systemStatus, setSystemStatus] = useState({ jarvis: 'checking', swarm: 'checking' });
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -44,11 +45,25 @@ function JarvisWorkspace() {
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
+    recognition.onstart = () => {
+      setVoiceError('');
+      setListening(true);
+    };
     recognition.onresult = (event) => {
       const heard = event.results?.[0]?.[0]?.transcript || '';
       if (heard.trim()) send(heard.trim());
     };
-    recognition.onerror = () => setListening(false);
+    recognition.onerror = (event) => {
+      setListening(false);
+      const messages = {
+        'not-allowed': 'Microphone access is blocked. Click the lock beside the website address, allow Microphone, then reload.',
+        'service-not-allowed': 'Chrome speech recognition is blocked on this device or browser profile.',
+        'audio-capture': 'No working microphone was detected. Check the Windows microphone input.',
+        'no-speech': 'I did not hear anything. Click the microphone and try again.',
+        network: 'Chrome could not reach its speech-recognition service. Check the connection and try again.',
+      };
+      setVoiceError(messages[event.error] || `Voice recognition stopped (${event.error || 'unknown error'}).`);
+    };
     recognition.onend = () => setListening(false);
     recognitionRef.current = recognition;
     setVoiceSupported(true);
@@ -63,10 +78,13 @@ function JarvisWorkspace() {
       return;
     }
     window.speechSynthesis?.cancel();
+    setVoiceError('');
     try {
       recognitionRef.current.start();
-      setListening(true);
-    } catch (_error) { /* already started */ }
+    } catch (error) {
+      setListening(false);
+      setVoiceError(error?.message || 'The microphone could not start. Reload the page and try again.');
+    }
   };
 
   const requestHistory = useMemo(
@@ -238,6 +256,11 @@ function JarvisWorkspace() {
             <button type="button" onClick={() => send()} disabled={loading || !draft.trim()} aria-label="Send to Jarvis">
               <FaPaperPlane />
             </button>
+            {(listening || voiceError) && (
+              <div className={`jarvis-voice-status${voiceError ? ' is-error' : ''}`} role="status">
+                {voiceError || 'Listening… speak now.'}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -291,7 +314,9 @@ function JarvisWorkspace() {
         .jarvis-message.is-thinking { color: rgba(255,255,255,.62); }
         .jarvis-message-role { margin-bottom: 5px; font-size: 9px; color: #82a9ff; font-weight: 900; letter-spacing: .1em; }
         .jarvis-message-content { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.58; color: rgba(255,255,255,.84); }
-        .jarvis-composer { display: grid; grid-template-columns: minmax(0,1fr) 50px; align-items: end; gap: 10px; padding: 14px; border-top: 1px solid rgba(255,255,255,.07); background: rgba(4,5,9,.72); }
+        .jarvis-composer { display: grid; grid-template-columns: minmax(0,1fr) 42px 50px; align-items: end; gap: 10px; padding: 14px; border-top: 1px solid rgba(255,255,255,.07); background: rgba(4,5,9,.72); }
+        .jarvis-voice-status { grid-column: 1 / -1; color: #6ee7b7; font-size: 11px; line-height: 1.4; padding: 0 4px 2px; }
+        .jarvis-voice-status.is-error { color: #fca5a5; }
         .jarvis-composer textarea { width: 100%; resize: none; outline: none; border: 1px solid rgba(255,255,255,.11); border-radius: 14px; background: rgba(255,255,255,.055); color: #fff; padding: 12px 13px; font: inherit; font-size: 13px; line-height: 1.45; }
         .jarvis-composer textarea:focus { border-color: rgba(77,141,255,.52); box-shadow: 0 0 0 3px rgba(77,141,255,.08); }
         .jarvis-composer button { width: 50px; height: 48px; display: grid; place-items: center; border: 0; border-radius: 14px; color: #fff; background: linear-gradient(135deg,#4d8dff,#8b5cf6); cursor: pointer; box-shadow: 0 10px 26px rgba(77,141,255,.22); }
