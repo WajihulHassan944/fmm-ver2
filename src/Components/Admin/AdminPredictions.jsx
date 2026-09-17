@@ -137,19 +137,22 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   };
 
   const handleKOSelect = (finisher) => {
+    // A correct finish-round pick pays 525 total: 500 KO/submission + 25 SP.
+    // SP is a single round result, never duplicated across both fighters.
     if (finisher === 'one' || finisher === SCORE_POINTS.KO) {
-      setFighterOneStats((stats) => ({ ...stats, KO: SCORE_POINTS.KO, SP: 0 }));
-      setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
+      setFighterOneStats((stats) => ({ ...stats, KO: SCORE_POINTS.KO, SP: SCORE_POINTS.SP }));
+      setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
     } else {
-      setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
-      setFighterTwoStats((stats) => ({ ...stats, KO: SCORE_POINTS.KO, SP: 0 }));
+      setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
+      setFighterTwoStats((stats) => ({ ...stats, KO: SCORE_POINTS.KO, SP: SCORE_POINTS.SP }));
     }
     setShowKOPopup(false);
   };
 
   const handleNoFinishThisRound = () => {
+    // The fight advancing to the next round is one 25-point survival outcome.
     setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
-    setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
+    setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
   };
 
   const handleMetricInput = (fighter, stat, value) => {
@@ -175,14 +178,14 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
       || normalizeNumber(fighterTwoStats.RW) === SCORE_POINTS.RW;
     const hasFinishOrSurvival = normalizeNumber(fighterOneStats.KO) === SCORE_POINTS.KO
       || normalizeNumber(fighterTwoStats.KO) === SCORE_POINTS.KO
-      || (normalizeNumber(fighterOneStats.SP) === SCORE_POINTS.SP
-        && normalizeNumber(fighterTwoStats.SP) === SCORE_POINTS.SP);
+      || normalizeNumber(fighterOneStats.SP) === SCORE_POINTS.SP
+      || normalizeNumber(fighterTwoStats.SP) === SCORE_POINTS.SP;
     if (!hasRoundWinner) {
       toast.error(`Choose who won Round ${round} before saving.`);
       return;
     }
     if (!hasFinishOrSurvival) {
-      toast.error(`Choose a finisher or confirm both fighters survived Round ${round}.`);
+      toast.error(`Choose a finisher or confirm the fight advanced past Round ${round}.`);
       return;
     }
 
@@ -522,12 +525,12 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         </section>
 
         <section className="admin-score-winner-panel">
-          <header><span>Was there a KO or submission this round?</span><p>Choose the finisher, or confirm that both fighters survived.</p></header>
+          <header><span>Was there a KO or submission this round?</span><p>Choose the finisher, or confirm the fight advanced to the next round.</p></header>
           <div className="admin-score-winner-choices">
             <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect('one')}><strong>{match.matchFighterA}</strong><small>Tap if they scored the finish</small></button>
             <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect('two')}><strong>{match.matchFighterB}</strong><small>Tap if they scored the finish</small></button>
           </div>
-          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — both fighters survived (+{SCORE_POINTS.SP} SP each)</button>
+          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — fight continues (+{SCORE_POINTS.SP} SP total)</button>
         </section>
       </section>
 
