@@ -152,6 +152,8 @@ import "@/styles/fmm-admin-invites-input-v77.css";
 import "@/styles/fmm-scoring-desk-reference-v78.css";
 // Final promoter cash-entry and public FM conversion presentation.
 import "@/styles/fmm-promoter-money-v79.css";
+// Affiliate-owned roster management, loaded after legacy league styles.
+import "@/styles/fmm-affiliate-roster-v80.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
