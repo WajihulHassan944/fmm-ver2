@@ -21,6 +21,15 @@ import {
 } from '@/Utils/fightExperience';
 
 const API_BASE = PUBLIC_API_BASE_URL;
+const AFFILIATE_TOKEN_PACK_SIZE = 5000;
+const AFFILIATE_TOKEN_PACK_USD = 3.99;
+const AFFILIATE_TOKEN_USD_RATE = AFFILIATE_TOKEN_PACK_USD / AFFILIATE_TOKEN_PACK_SIZE;
+const affiliateTokensToUsd = (tokens) => {
+  const amount = Number(tokens);
+  return Number.isFinite(amount) && amount > 0 ? (amount * AFFILIATE_TOKEN_USD_RATE).toFixed(2) : '';
+};
+const affiliateUsdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / AFFILIATE_TOKEN_USD_RATE)));
+const selectNumericValue = (event) => event.currentTarget.select();
 
 const AffiliateAddNewMatch = ({ matchId }) => {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
@@ -32,9 +41,12 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     shadowFightId: '',
     prizeMode: 'paid',
     matchTokens: '',
+    matchTokensUsd: '',
     affiliateId: '',
     promoterStake: '',
+    promoterStakeUsd: '',
     pot: '',
+    potUsd: '',
     profit: '',
     amountOverPotBudget: '',
     matchDate: '',
@@ -82,7 +94,10 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     setFormData((current) => ({
       ...current,
       matchTokens: current.matchTokens || promoDetails.matchTokens || '',
+      matchTokensUsd: current.matchTokensUsd || affiliateTokensToUsd(promoDetails.matchTokens),
       pot: current.pot || promoDetails.pot || '',
+      potUsd: current.potUsd || affiliateTokensToUsd(promoDetails.pot),
+      promoterStakeUsd: current.promoterStakeUsd || affiliateTokensToUsd(current.promoterStake),
       profit: current.profit || promoDetails.profit || '',
       amountOverPotBudget: current.amountOverPotBudget || promoDetails.amountOverPotBudget || '',
       matchDate: current.matchDate || String(promoDetails.matchDate || '').slice(0, 10),
@@ -169,7 +184,15 @@ const AffiliateAddNewMatch = ({ matchId }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((current) => ({ ...current, [name]: value }));
+    const tokenFieldByMoneyField = {
+      matchTokensUsd: 'matchTokens',
+      potUsd: 'pot',
+      promoterStakeUsd: 'promoterStake',
+    };
+    const tokenField = tokenFieldByMoneyField[name];
+    setFormData((current) => tokenField
+      ? { ...current, [name]: value, [tokenField]: affiliateUsdToTokens(value) }
+      : { ...current, [name]: value });
   };
 
   const handleSubmit = async (event) => {
@@ -337,21 +360,24 @@ const AffiliateAddNewMatch = ({ matchId }) => {
         <div className="affiliate-create-field-grid">
           <label>
             <span><FaDollarSign /> Prize pot <small>{economics.free ? 'Value of the apparel or award' : 'Winner award'}</small></span>
-            <input type="number" name="pot" min="1" step="1" value={formData.pot} onChange={handleChange} required />
+            <input type="number" name="potUsd" min="0" step="0.01" placeholder="0.00" value={formData.potUsd} onChange={handleChange} onFocus={selectNumericValue} required />
+            <small className="affiliate-money-conversion">{Number(formData.pot || 0).toLocaleString()} FM tokens shown publicly</small>
           </label>
           {!economics.free && (
             <label>
-              <span><FaCoins /> Player buy-in <small>Tokens per entry</small></span>
-              <input type="number" name="matchTokens" min="1" step="1" value={formData.matchTokens} onChange={handleChange} required />
+              <span><FaDollarSign /> Player buy-in <small>Cash price per entry</small></span>
+              <input type="number" name="matchTokensUsd" min="0" step="0.01" placeholder="0.00" value={formData.matchTokensUsd} onChange={handleChange} onFocus={selectNumericValue} required />
+              <small className="affiliate-money-conversion">{Number(formData.matchTokens || 0).toLocaleString()} FM tokens charged publicly</small>
             </label>
           )}
           {!economics.free && (
             <label className={economics.partialStake ? 'is-short' : ''}>
               <span>
                 <FaShieldAlt /> Guarantee the prize
-                <small>{economics.guaranteed ? 'Card runs no matter what' : 'Optional — leave at 0'}</small>
+                <small>{economics.guaranteed ? 'Card runs no matter what' : 'Optional cash amount — leave blank for none'}</small>
               </span>
-              <input type="number" name="promoterStake" min="0" step="1" value={formData.promoterStake} onChange={handleChange} />
+              <input type="number" name="promoterStakeUsd" min="0" step="0.01" placeholder="0.00" value={formData.promoterStakeUsd} onChange={handleChange} onFocus={selectNumericValue} />
+              <small className="affiliate-money-conversion">{Number(formData.promoterStake || 0).toLocaleString()} FM tokens committed</small>
             </label>
           )}
           <label>
@@ -364,11 +390,11 @@ const AffiliateAddNewMatch = ({ matchId }) => {
           </label>
           <label>
             <span><FaDollarSign /> Projected profit <small>Optional manual value</small></span>
-            <input type="number" name="profit" min="0" step="0.01" value={formData.profit} onChange={handleChange} />
+            <input type="number" name="profit" min="0" step="0.01" value={formData.profit} onChange={handleChange} onFocus={selectNumericValue} />
           </label>
           <label>
             <span><FaDollarSign /> Amount over budget <small>Optional manual value</small></span>
-            <input type="number" name="amountOverPotBudget" min="0" step="0.01" value={formData.amountOverPotBudget} onChange={handleChange} />
+            <input type="number" name="amountOverPotBudget" min="0" step="0.01" value={formData.amountOverPotBudget} onChange={handleChange} onFocus={selectNumericValue} />
           </label>
         </div>
 
