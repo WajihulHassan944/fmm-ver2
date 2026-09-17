@@ -148,6 +148,8 @@ import "@/styles/fmm-login-desks-v75.css";
 // sheets cannot reorder the scoring workflow or flatten fight-type controls.
 import "@/styles/fmm-operations-desks-v76.css";
 import "@/styles/fmm-admin-invites-input-v77.css";
+// Final scoring-only reference layer. Must remain after all admin desk sheets.
+import "@/styles/fmm-scoring-desk-reference-v78.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";
