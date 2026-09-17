@@ -214,7 +214,6 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   };
 
   const jumpToRound = (targetRound) => {
-    const maxRounds = Number(match?.maxRounds || 1);
     if (targetRound < 1 || targetRound > maxRounds || targetRound === round) return;
     const existing = roundScores[targetRound - 1];
     if (existing) {
