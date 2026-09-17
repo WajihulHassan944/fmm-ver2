@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import {
   FaArrowLeft,
   FaBolt,
+  FaChevronLeft,
+  FaChevronRight,
   FaEdit,
   FaEye,
   FaFistRaised,
@@ -30,6 +32,9 @@ const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 const getId = (value) => value?._id || value?.id;
 const getFightTitle = (match) => match?.matchName || `${match?.matchFighterA || 'Fighter A'} vs ${match?.matchFighterB || 'Fighter B'}`;
 const affiliateEntries = (match) => Array.isArray(match?.AffiliateIds) ? match.AffiliateIds : [];
+const getSport = (match) => match?.matchCategoryTwo || match?.matchCategory || 'Combat';
+const getStatus = (match) => String(match?.matchStatus || match?.matchShadowStatus || 'Template');
+const BROWSER_PAGE_SIZE = 6;
 
 const ShadowFightsLibrary = () => {
   const dispatch = useDispatch();
@@ -43,6 +48,9 @@ const ShadowFightsLibrary = () => {
   const [selectedScore, setSelectedScore] = useState(null);
   const [selectedScoresView, setSelectedScoresView] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sportFilter, setSportFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [browserPage, setBrowserPage] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchMatchesData = async () => {
@@ -82,20 +90,41 @@ const ShadowFightsLibrary = () => {
     fetchAffiliatesData();
   }, []);
 
+  const availableSports = useMemo(() => Array.from(new Set(matches.map(getSport).filter(Boolean))).sort(), [matches]);
+  const availableStatuses = useMemo(() => Array.from(new Set(matches.map(getStatus).filter(Boolean))).sort(), [matches]);
+
   const filteredMatches = useMemo(() => {
     const term = searchQuery.trim().toLowerCase();
-    if (!term) return matches;
-    return matches.filter((match) => [
-      match?.matchName,
-      match?.matchFighterA,
-      match?.matchFighterB,
-      match?.matchDescription,
-      match?.matchCategory,
-      match?.matchCategoryTwo,
-      match?.matchStatus,
-      match?.matchType,
-    ].filter(Boolean).join(' ').toLowerCase().includes(term));
-  }, [matches, searchQuery]);
+    return matches.filter((match) => {
+      if (sportFilter !== 'all' && getSport(match) !== sportFilter) return false;
+      if (statusFilter !== 'all' && getStatus(match) !== statusFilter) return false;
+      if (!term) return true;
+      return [
+        match?.matchName,
+        match?.matchFighterA,
+        match?.matchFighterB,
+        match?.matchDescription,
+        match?.matchCategory,
+        match?.matchCategoryTwo,
+        match?.matchStatus,
+        match?.matchType,
+      ].filter(Boolean).join(' ').toLowerCase().includes(term);
+    });
+  }, [matches, searchQuery, sportFilter, statusFilter]);
+
+  const browserPageCount = Math.max(1, Math.ceil(filteredMatches.length / BROWSER_PAGE_SIZE));
+  const browserMatches = useMemo(() => filteredMatches.slice(
+    browserPage * BROWSER_PAGE_SIZE,
+    (browserPage + 1) * BROWSER_PAGE_SIZE,
+  ), [filteredMatches, browserPage]);
+
+  useEffect(() => {
+    setBrowserPage(0);
+  }, [searchQuery, sportFilter, statusFilter]);
+
+  useEffect(() => {
+    if (browserPage >= browserPageCount) setBrowserPage(browserPageCount - 1);
+  }, [browserPage, browserPageCount]);
 
   const totalAffiliateLinks = useMemo(() => matches.reduce((sum, match) => sum + affiliateEntries(match).length, 0), [matches]);
   const sportCount = useMemo(() => new Set(matches.map((match) => match?.matchCategoryTwo || match?.matchCategory).filter(Boolean)).size, [matches]);
@@ -109,6 +138,13 @@ const ShadowFightsLibrary = () => {
   const openDetails = (match) => {
     setSelectedMatch(match);
     setShowFightPopup(true);
+  };
+
+  const browseDetail = (direction) => {
+    if (!filteredMatches.length) return;
+    const currentIndex = filteredMatches.findIndex((match) => getId(match) === getId(selectedMatch));
+    const nextIndex = (Math.max(0, currentIndex) + direction + filteredMatches.length) % filteredMatches.length;
+    setSelectedMatch(filteredMatches[nextIndex]);
   };
 
   const openAffiliates = (match = selectedMatch) => {
@@ -220,9 +256,63 @@ const ShadowFightsLibrary = () => {
         <article><span><FaFistRaised /></span><div><small>Combat categories</small><strong>{sportCount}</strong></div></article>
       </section>
 
+      <section className="admin-table-panel" aria-label="Quick shadow fight picker" style={{ marginBottom: 22 }}>
+        <div className="admin-table-toolbar" style={{ alignItems: 'stretch', gap: 12, flexWrap: 'wrap' }}>
+          <label className="admin-table-search" style={{ flex: '1 1 300px' }}><FaSearch /><input type="search" placeholder="Find a fighter or shadow fight..." value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} /></label>
+          <select aria-label="Filter by combat category" value={sportFilter} onChange={(event) => setSportFilter(event.target.value)} className="admin-action-secondary" style={{ minHeight: 44 }}>
+            <option value="all">All combat categories</option>
+            {availableSports.map((sport) => <option key={sport} value={sport}>{sport}</option>)}
+          </select>
+          <select aria-label="Filter by fight status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="admin-action-secondary" style={{ minHeight: 44 }}>
+            <option value="all">All statuses</option>
+            {availableStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '4px 18px 14px' }}>
+          <div>
+            <strong style={{ display: 'block' }}>Quick fight picker</strong>
+            <small style={{ opacity: 0.72 }}>Pick a card to inspect it, then move forward or backward without closing the window.</small>
+          </div>
+          <span className="admin-result-count">{filteredMatches.length} fights</span>
+        </div>
+
+        {browserMatches.length ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, padding: '0 18px 18px' }}>
+            {browserMatches.map((match, index) => (
+              <button
+                key={getId(match) || index}
+                type="button"
+                onClick={() => openDetails(match)}
+                aria-label={`Open ${getFightTitle(match)}`}
+                style={{ textAlign: 'left', border: '1px solid rgba(255,255,255,.14)', borderRadius: 14, padding: 14, background: 'rgba(255,255,255,.04)', color: 'inherit', cursor: 'pointer', minHeight: 188 }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+                  <OptimizedImage src={match.fighterA?.primaryImage || match.fighterAId?.primaryImage || match.fighterAImage || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={66} height={66} sizes="66px" />
+                  <strong style={{ color: '#ef4444' }}>VS</strong>
+                  <OptimizedImage src={match.fighterB?.primaryImage || match.fighterBId?.primaryImage || match.fighterBImage || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={66} height={66} sizes="66px" />
+                </div>
+                <strong style={{ display: 'block', fontSize: 15, lineHeight: 1.3 }}>{getFightTitle(match)}</strong>
+                <small style={{ display: 'block', marginTop: 6, opacity: .72 }}>{getSport(match)} · {getStatus(match)}</small>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 12, fontSize: 12 }}>
+                  <span>{match.maxRounds || '—'} rounds</span>
+                  <span>{affiliateEntries(match).length} affiliates</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : <div className="admin-empty-table">{loading ? 'Loading shadow fights.' : 'No fights match these filters.'}</div>}
+
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 14, padding: '0 18px 18px' }}>
+          <button type="button" className="admin-action-secondary" disabled={browserPageCount <= 1} onClick={() => setBrowserPage((page) => (page - 1 + browserPageCount) % browserPageCount)}><FaChevronLeft /> Previous fights</button>
+          <strong aria-live="polite">Page {browserPage + 1} of {browserPageCount}</strong>
+          <button type="button" className="admin-action-secondary" disabled={browserPageCount <= 1} onClick={() => setBrowserPage((page) => (page + 1) % browserPageCount)}>Next fights <FaChevronRight /></button>
+        </div>
+      </section>
+
       <section className="admin-table-panel admin-shadow-table-panel">
         <div className="admin-table-toolbar">
-          <label className="admin-table-search"><FaSearch /><input type="search" placeholder="Search fighter, template, category, or status" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} /></label>
+          <strong>Detailed shadow registry</strong>
           <span className="admin-result-count">{filteredMatches.length} of {matches.length} templates</span>
         </div>
 
@@ -280,6 +370,11 @@ const ShadowFightsLibrary = () => {
               <h3>{getFightTitle(selectedMatch)}</h3>
               <p>{selectedMatch.matchDescription || 'No template description has been supplied.'}</p>
               <dl><div><dt>Affiliates promoting</dt><dd>{affiliateEntries(selectedMatch).length}</dd></div><div><dt>Maximum rounds</dt><dd>{selectedMatch.maxRounds || '—'}</dd></div></dl>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 14 }}>
+              <button type="button" className="admin-action-secondary" onClick={() => browseDetail(-1)}><FaChevronLeft /> Previous fight</button>
+              <span className="admin-result-count">{Math.max(1, filteredMatches.findIndex((match) => getId(match) === getId(selectedMatch)) + 1)} of {filteredMatches.length}</span>
+              <button type="button" className="admin-action-secondary" onClick={() => browseDetail(1)}>Next fight <FaChevronRight /></button>
             </div>
             <footer>
               <button type="button" className="admin-action-secondary" onClick={() => openAffiliates(selectedMatch)}><FaUsers /> View affiliates</button>
