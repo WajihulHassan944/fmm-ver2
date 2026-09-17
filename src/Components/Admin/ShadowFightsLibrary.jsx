@@ -34,6 +34,20 @@ const getFightTitle = (match) => match?.matchName || `${match?.matchFighterA || 
 const affiliateEntries = (match) => Array.isArray(match?.AffiliateIds) ? match.AffiliateIds : [];
 const getSport = (match) => match?.matchCategoryTwo || match?.matchCategory || 'Combat';
 const getStatus = (match) => String(match?.matchStatus || match?.matchShadowStatus || 'Template');
+const isScoredFight = (match) => {
+  const status = getStatus(match).trim().toLowerCase();
+  const completedStatus = ['finished', 'completed', 'scored', 'settled', 'closed', 'final'].includes(status);
+  const hasScoreData = Boolean(
+    match?.prizesSettledAt ||
+    match?.scoresSubmittedAt ||
+    match?.scoringCompletedAt ||
+    match?.winner ||
+    match?.result ||
+    (Array.isArray(match?.roundScores) && match.roundScores.length) ||
+    (Array.isArray(match?.scores) && match.scores.length)
+  );
+  return completedStatus || hasScoreData;
+};
 const BROWSER_PAGE_SIZE = 6;
 
 const ShadowFightsLibrary = () => {
@@ -58,13 +72,13 @@ const ShadowFightsLibrary = () => {
     try {
       const payload = await fightDataQualityApi.adminShadowLibrary({ limit: 200, matchType: 'all' });
       const rows = Array.isArray(payload?.items) ? payload.items : [];
-      setMatches(orderFightsForDisplay(rows));
+      setMatches(orderFightsForDisplay(rows.filter(isScoredFight)));
     } catch (adminApiError) {
       console.warn('Admin shadow library endpoint unavailable, falling back to legacy shadow feed:', adminApiError.message);
       try {
         const response = await fetch(`${API_BASE}/shadow`, { headers: adminHeaders() });
         const data = await response.json();
-        setMatches(orderFightsForDisplay(Array.isArray(data) ? data : []));
+        setMatches(orderFightsForDisplay((Array.isArray(data) ? data : []).filter(isScoredFight)));
       } catch (error) {
         console.error('Error fetching matches:', error);
         setMatches([]);
@@ -243,7 +257,7 @@ const ShadowFightsLibrary = () => {
   return (
     <div className="admin-workspace admin-shadow-library-workspace">
       <section className="admin-page-heading">
-        <div><span>Fight operations</span><h2>Shadow fights library</h2><p>Search, inspect, score, edit, delete, and review affiliate usage for shadow fight templates only.</p></div>
+        <div><span>Fight operations</span><h2>Shadow fights library</h2><p>Completed and scored fights only. Upcoming and ongoing fights stay in the Fight Registry until scoring is finished.</p></div>
         <div className="admin-heading-actions">
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={() => { fetchMatchesData(); fetchAffiliatesData(); }}><FaSyncAlt className={loading ? 'xp-spin' : ''} /> Refresh</button>
@@ -251,7 +265,7 @@ const ShadowFightsLibrary = () => {
       </section>
 
       <section className="admin-shadow-metrics" aria-label="Shadow library summary">
-        <article><span><FaBolt /></span><div><small>Templates</small><strong>{matches.length}</strong></div></article>
+        <article><span><FaBolt /></span><div><small>Scored fights</small><strong>{matches.length}</strong></div></article>
         <article><span><FaUserFriends /></span><div><small>Affiliate links</small><strong>{totalAffiliateLinks}</strong></div></article>
         <article><span><FaFistRaised /></span><div><small>Combat categories</small><strong>{sportCount}</strong></div></article>
       </section>
@@ -272,7 +286,7 @@ const ShadowFightsLibrary = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '4px 18px 14px' }}>
           <div>
             <strong style={{ display: 'block' }}>Quick fight picker</strong>
-            <small style={{ opacity: 0.72 }}>Pick a card to inspect it, then move forward or backward without closing the window.</small>
+            <small style={{ opacity: 0.72 }}>Browse completed fights, inspect one, then move forward or backward without closing the window.</small>
           </div>
           <span className="admin-result-count">{filteredMatches.length} fights</span>
         </div>
