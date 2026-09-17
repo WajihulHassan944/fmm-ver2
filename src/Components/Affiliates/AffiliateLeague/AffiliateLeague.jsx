@@ -31,12 +31,22 @@ const getJoinedUserId = (entry) => {
   return String(entry?.userId || entry?._id || entry?.id || '');
 };
 
+const normalizeVerification = (value) => {
+  if (value === true || value === 1) return true;
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return ['true', '1', 'yes', 'verified', 'active', 'approved', 'complete', 'completed'].includes(normalized);
+};
+
 const buildMember = (entry, directory, index) => {
   const embeddedUser = entry?.userId && typeof entry.userId === 'object' ? entry.userId : entry;
   const userId = getJoinedUserId(entry);
-  const directoryUser = directory.find(
-    (user) => String(user?._id || user?.id || '') === userId,
-  );
+  const embeddedEmail = String(embeddedUser?.email || entry?.email || '').trim().toLowerCase();
+  const directoryUser = directory.find((user) => {
+    const directoryId = String(user?._id || user?.id || user?.userId || '');
+    const directoryEmail = String(user?.email || '').trim().toLowerCase();
+    return (userId && directoryId === userId)
+      || (embeddedEmail && directoryEmail === embeddedEmail);
+  });
   const user = { ...(embeddedUser && typeof embeddedUser === 'object' ? embeddedUser : {}), ...(directoryUser || {}) };
   const name = String(
     user?.playerName
@@ -49,8 +59,15 @@ const buildMember = (entry, directory, index) => {
     name,
     email: String(user?.email || 'Email unavailable'),
     plan: String(user?.currentPlan || (user?.isSubscribed ? 'Subscribed' : 'Member')),
-    verified: Boolean(user?.verified),
-    subscribed: Boolean(user?.isSubscribed),
+    verified: normalizeVerification(
+      user?.verified
+      ?? user?.isVerified
+      ?? user?.emailVerified
+      ?? user?.accountVerified
+      ?? user?.verificationStatus
+      ?? user?.accountStatus,
+    ),
+    subscribed: normalizeVerification(user?.isSubscribed ?? user?.subscribed),
     avatar: user?.profileUrl || `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`,
     joinedAt: entry?.joinedAt || user?.joinedAt || user?.createdAt || null,
   };
@@ -93,7 +110,7 @@ const AffiliateLeague = () => {
       setError('');
 
       try {
-        const response = await fetch(`${API_BASE}/api/public/user-directory`);
+        const response = await fetch(`${API_BASE}/api/public/user-directory?refresh=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
         if (!response.ok) throw new Error(`Users request failed with status ${response.status}`);
         const payload = await response.json();
         const directory = Array.isArray(payload)
@@ -280,7 +297,7 @@ const AffiliateLeague = () => {
                             </div>
                           </td>
                           <td>{member.plan}</td>
-                          <td><span className={`affiliate-member-status ${member.verified ? 'is-verified' : ''}`}>{member.verified ? 'Verified' : 'Pending'}</span></td>
+                          <td><span className={`affiliate-member-status ${member.verified ? 'is-verified' : ''}`}>{member.verified ? 'Active' : 'Email not verified'}</span></td>
                           <td>{formatMemberDate(member.joinedAt)}</td>
                         </tr>
                       )) : (
