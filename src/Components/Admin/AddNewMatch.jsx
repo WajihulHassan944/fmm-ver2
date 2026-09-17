@@ -240,10 +240,10 @@ export default function AddNewMatch() {
       </section>
 
       <nav className="admin-fight-desk-nav admin-operations-workflow" aria-label="Fight desk workflow">
-        <button type="button" className="is-active">Economics desk</button>
-        <button type="button" disabled title="Create or select a fight before scoring">Scoring desk</button>
-        <button type="button" disabled title="Create or select a fight before reviewing results">Results</button>
-        <button type="button" disabled title="Create or select a fight before promotion">Promotion</button>
+        <Link href="/administration/AddNewMatch" className="is-active">Economics desk</Link>
+        <Link href="/administration/upcomingFights">Scoring desk</Link>
+        <Link href="/administration/PreviousMatches">Results</Link>
+        <Link href="/administration/full-cards">Promotion</Link>
       </nav>
 
       {created && (
