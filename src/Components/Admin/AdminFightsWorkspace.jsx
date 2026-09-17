@@ -684,6 +684,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const f = selectedEconomics;
     const edits = economicsEdits || {
       matchTokens: String(f.matchTokens ?? 0), pot: String(f.pot ?? 0), minimumEntrants: String(f.minimumEntrants ?? ''),
+      promoterStake: String(f.promoterStake ?? 0), platformContribution: String(f.platformContribution ?? 0),
+      projectedEntrants: String(f.projectedEntrants ?? f.entrants ?? 0), matchStatus: f.matchStatus || 'Draft',
       autoRefundIfShort: f.autoRefundIfShort !== false, maxRounds: String(f.maxRounds ?? 12),
       matchDate: (f.matchDate || '').slice(0, 10), matchTime: f.matchTime || '',
       notify: Boolean(f.notify), addToShadow: Boolean(f.addToShadow),
@@ -691,7 +693,14 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     };
     const entryFee = Number(edits.matchTokens) || 0;
     const pot = Number(edits.pot) || 0;
-    const breakEven = entryFee > 0 ? Math.ceil(pot / entryFee) : 0;
+    const promoterStake = Number(edits.promoterStake) || 0;
+    const platformContribution = Number(edits.platformContribution) || 0;
+    const fundedPrize = Math.min(pot, promoterStake + platformContribution);
+    const unfundedPrize = Math.max(0, pot - fundedPrize);
+    const projectedEntrants = Number(edits.projectedEntrants) || 0;
+    const projectedRevenue = projectedEntrants * entryFee;
+    const projectedPosition = projectedRevenue + fundedPrize - pot;
+    const breakEven = entryFee > 0 ? Math.ceil(unfundedPrize / entryFee) : 0;
     const minimumEntrants = Number(edits.minimumEntrants) || breakEven;
     const entrants = Number(f.entrants) || 0;
     const guarded = Boolean(edits.autoRefundIfShort);
@@ -708,6 +717,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             minimumEntrants: edits.minimumEntrants, autoRefundIfShort: edits.autoRefundIfShort, matchTokens: edits.matchTokens, pot: edits.pot,
+            promoterStake: edits.promoterStake, platformContribution: edits.platformContribution,
+            projectedEntrants: edits.projectedEntrants, matchStatus: edits.matchStatus,
             maxRounds: edits.maxRounds, matchDate: edits.matchDate, matchTime: edits.matchTime,
             notify: edits.notify, addToShadow: edits.addToShadow, homepagePromoted: edits.homepagePromoted, featuredThisWeek: edits.featuredThisWeek, featuredFight: edits.featuredFight,
           }),
@@ -829,6 +840,26 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.pot || 0).toLocaleString()} tokens \u2248 {usd(edits.pot)} \u2014 declared upfront, this figure never grows with entries.</p>
           )}
           {!isShadowFight && (
+            <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
+              {inputPill('Promoter / affiliate funding', 'committed tokens', edits.promoterStake, editField('promoterStake'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', note: 'Money committed by the promoter or affiliate toward the guaranteed prize.' })}
+              {inputPill('Platform funding', 'committed tokens', edits.platformContribution, editField('platformContribution'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }, { suffix: 'tokens', note: 'Fantasy MMADNESS contribution toward the guaranteed prize.' })}
+            </div>
+          )}
+          {!isShadowFight && (
+            <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', margin: '2px 0 18px' }}>
+              {[
+                ['FUNDED UP FRONT', fundedPrize, '#35d45d'],
+                ['PRIZE LIABILITY', unfundedPrize, unfundedPrize ? '#ff2a35' : '#35d45d'],
+                ['ENTRY BREAK-EVEN', breakEven, '#168fe6'],
+              ].map(([label, value, color]) => (
+                <div key={label} style={{ border: `1px solid ${border}`, borderRadius: 10, background: 'rgba(255,255,255,.035)', padding: 13 }}>
+                  <small style={{ color: 'rgba(245,247,251,.48)', fontWeight: 900, letterSpacing: '.08em' }}>{label}</small>
+                  <strong style={{ color, display: 'block', fontFamily: display, fontSize: 23, marginTop: 4 }}>{Number(value).toLocaleString()}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+          {!isShadowFight && (
             <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
               <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
               <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
@@ -863,6 +894,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               {pill('Break-even entrants', 'entries', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
               {inputPill('Minimum entrants required', 'entries', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
               {pill('Live entrants right now', 'entries', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
+              {inputPill('Projected entrants', 'planning estimate', edits.projectedEntrants, editField('projectedEntrants'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { note: 'Used for revenue and liability forecasting only; it does not change the live entrant count.' })}
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0,1fr))', marginBottom: 18 }}>
+                {pill('Projected entry revenue', 'tokens', projectedRevenue.toLocaleString(), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' })}
+                {pill('Projected net position', 'after prize', signed(projectedPosition), projectedPosition >= 0 ? '#35d45d' : '#ff2a35', { border: projectedPosition >= 0 ? 'rgba(53,212,93,.42)' : 'rgba(223,17,27,.5)', fill: projectedPosition >= 0 ? 'rgba(53,212,93,.07)' : 'rgba(223,17,27,.07)' })}
+              </div>
               <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
                 <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
                 <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
@@ -947,6 +983,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </div>
           </header>
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
+            <label style={{ display: 'grid', gap: 7, gridColumn: '1 / -1' }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Contest status</span>
+              <select value={edits.matchStatus} onChange={editField('matchStatus')} disabled={isShadowFight} style={{ background: '#090e15', border: `1px solid ${border}`, borderRadius: 9, color: '#fff', fontSize: 15, padding: 12 }}>
+                {['Draft', 'Scheduled', 'Open', 'Live', 'Closed', 'Finished'].map((status) => <option key={status} value={status}>{status}</option>)}
+              </select>
+              <small style={{ color: 'rgba(245,247,251,.5)' }}>Draft hides the contest; Open accepts entries; Live locks normal entry; Closed and Finished stop entry.</small>
+            </label>
             {[
               { key: 'notify', label: 'Notify members', hint: 'Platform announcement on publish' },
               { key: 'addToShadow', label: 'Create shadow copy', hint: 'Same card available to affiliate creators' },
