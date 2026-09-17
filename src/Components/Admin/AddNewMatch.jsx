@@ -217,12 +217,12 @@ export default function AddNewMatch() {
   }
 
   return (
-    <div className="admin-workspace admin-create-fight-page admin-economics-desk admin-operations-v3" data-desk-ui="operations-v3">
+    <div className="admin-workspace admin-create-fight-page admin-economics-desk admin-operations-v3 admin-operations-v4" data-desk-ui="operations-v4">
       <section className="admin-page-heading admin-operations-hero">
         <div>
-          <span>Fight Operations · Economics Desk 3.0</span>
-          <h2>Build and fund the fight.</h2>
-          <p>Build live and Shadow fight cards from one clean operations desk. Configure the schedule, entry economy, prize guard, fighters, publishing controls, and player preview before anything goes live.</p>
+          <span>Fight operations · Economics desk 4.0</span>
+          <h2>Create match</h2>
+          <p>Build live and Shadow fight cards from one clean operations desk. Every number shows its consequence before you publish, and the same record feeds the website and the app.</p>
         </div>
         <div className="admin-heading-actions">
           <Link className="admin-action-secondary" href="/administration/fighters"><FaUsers /> Fighter library</Link>
@@ -269,9 +269,12 @@ export default function AddNewMatch() {
       <form className="admin-create-fight-layout" onSubmit={submit}>
         <main>
           <section className="admin-form-card admin-desk-section admin-desk-section-identity">
-            <header><span>01</span><div><h3>Fight identity</h3><p>Name the card, select its discipline and choose two saved fighters with images.</p></div></header>
+            <header><span>01</span><div><h3>Fight type &amp; identity</h3><p>Choose how this card operates, then name it and assign both corners.</p></div></header>
             <div className="admin-form-grid">
-              <label><span>Fight type</span><select name="matchType" value={form.matchType} onChange={change}><option value="LIVE">Live production fight</option><option value="SHADOW">Shadow template</option></select></label>
+              <div className="admin-fight-type-cards is-wide" role="group" aria-label="Fight type">
+                <button type="button" className={form.matchType === 'LIVE' ? 'is-active' : ''} onClick={() => setForm((current) => ({ ...current, matchType: 'LIVE' }))}><strong>Live production fight</strong><span>Carries a schedule, player economy and publishing controls.</span></button>
+                <button type="button" className={form.matchType === 'SHADOW' ? 'is-active' : ''} onClick={() => setForm((current) => ({ ...current, matchType: 'SHADOW' }))}><strong>Shadow template</strong><span>Reusable inventory for affiliate-created promotions.</span></button>
+              </div>
               <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
               <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
               <div className="admin-fighter-select-grid is-wide">

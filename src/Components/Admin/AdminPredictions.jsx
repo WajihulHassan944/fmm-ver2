@@ -364,7 +364,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   }));
 
   return (
-    <div className="admin-workspace admin-score-center admin-predictions-redesign admin-operations-v3" data-desk-ui="operations-v3">
+    <div className="admin-workspace admin-score-center admin-predictions-redesign admin-operations-v3 admin-operations-v4" data-desk-ui="operations-v4">
       {showVideoUrlPopup && (
         <div className="admin-modal-backdrop">
           <section className="admin-video-modal">
@@ -380,8 +380,8 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
       <section className="admin-page-heading admin-operations-hero">
         <div>
-          <span>Fight Operations · Scoring Desk 3.0</span>
-          <h2>Score each corner. Round by round.</h2>
+          <span>Score operations · Scoring desk 4.0</span>
+          <h2>Submit &amp; view scores</h2>
           <p>Punch in every round for both fighters in one place. Totals build as you go and nothing settles until you post the card.</p>
         </div>
         <div className="admin-heading-actions">

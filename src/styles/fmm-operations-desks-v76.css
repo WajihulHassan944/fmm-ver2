@@ -1,0 +1,81 @@
+/* Fantasy MMAdness v76 — component-level Economics + Scoring desk correction. */
+.admin-operations-v4{
+  --desk-surface:#0b131d;
+  background-color:#03070c!important;
+}
+
+.admin-operations-v4 .admin-operations-hero{
+  background:
+    radial-gradient(circle at 84% 12%,rgba(238,20,45,.27),transparent 34%),
+    linear-gradient(105deg,#04090f 0%,#090f17 62%,#25040a 100%)!important;
+  min-height:245px!important;
+}
+.admin-operations-v4 .admin-operations-hero h2{
+  font-size:clamp(52px,6vw,88px)!important;
+  max-width:900px!important;
+}
+
+.admin-fight-type-cards{
+  display:grid!important;
+  gap:14px!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.admin-fight-type-cards button{
+  background:#111923!important;
+  border:1px solid #2a3541!important;
+  border-radius:14px!important;
+  color:#d8e1e9!important;
+  cursor:pointer!important;
+  display:grid!important;
+  gap:7px!important;
+  min-height:108px!important;
+  padding:20px!important;
+  text-align:left!important;
+}
+.admin-fight-type-cards button strong{font-size:18px!important;letter-spacing:.035em!important;text-transform:uppercase!important}
+.admin-fight-type-cards button span{color:#91a0ad!important;line-height:1.45!important}
+.admin-fight-type-cards button.is-active{
+  background:linear-gradient(135deg,rgba(239,23,47,.24),rgba(17,25,35,.98))!important;
+  border-color:#ed1b32!important;
+  box-shadow:inset 4px 0 0 #ed1b32,0 14px 35px rgba(0,0,0,.24)!important;
+  color:#fff!important;
+}
+
+/* The intended scoring sequence is round -> separate corner stats -> winner /
+   finish -> save. Older markup placed outcome controls before the corner data. */
+.admin-predictions-redesign.admin-operations-v4 .admin-create-fight-layout>main{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-round-tabs{order:1!important}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-entry-grid{order:2!important}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-winner-panel{order:3!important}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-actions-bar{order:4!important}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-entry-grid{
+  border-top:3px solid #ed1b32!important;
+}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-fighter-panel{
+  border-radius:14px!important;
+  overflow:hidden!important;
+}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-fighter-panel>header span{
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-fighter-panel.is-red>header span{color:#ff3047!important}
+.admin-predictions-redesign.admin-operations-v4 .admin-score-fighter-panel.is-blue>header span{color:#25aefa!important}
+
+.admin-command-data-warning{
+  align-items:center!important;
+  display:flex!important;
+  gap:14px!important;
+}
+.admin-command-data-warning>span{flex:1!important}
+.admin-command-data-warning>button{flex:0 0 auto!important}
+
+@media(max-width:720px){
+  .admin-fight-type-cards{grid-template-columns:1fr!important}
+  .admin-operations-v4 .admin-operations-hero h2{font-size:44px!important}
+  .admin-command-data-warning{align-items:stretch!important;flex-direction:column!important}
+}

@@ -144,6 +144,9 @@ import "@/styles/fmm-backoffice-command-v74.css";
 // operations desks. It deliberately changes presentation only; the connected
 // auth, fight-economy and round-scoring handlers remain in their components.
 import "@/styles/fmm-login-desks-v75.css";
+// Component-level v76 desk correction. This remains last so legacy admin
+// sheets cannot reorder the scoring workflow or flatten fight-type controls.
+import "@/styles/fmm-operations-desks-v76.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";

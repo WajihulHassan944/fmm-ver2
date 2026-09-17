@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import {
   FaArrowRight,
   FaBell,
@@ -29,6 +30,7 @@ const VisitorsAnalytics = dynamic(() => import('./VisitorsAnalytics'), {
 });
 
 const Admin = () => {
+  const router = useRouter();
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState('');
@@ -64,9 +66,9 @@ const Admin = () => {
     fetchFeatureDemand();
   }, []);
 
-  useEffect(() => {
-    const fetchDashboardCounts = async () => {
+  const fetchDashboardCounts = useCallback(async () => {
       try {
+        setIsLoading(true);
         setDashboardError('');
         const [countsResult, affiliatesResult] = await Promise.allSettled([
           fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() }),
@@ -76,8 +78,20 @@ const Admin = () => {
         const affiliatesResponse = affiliatesResult.status === 'fulfilled' ? affiliatesResult.value : null;
         const countsPayload = countsResponse ? await countsResponse.json().catch(() => ({})) : {};
         const affiliatesPayload = affiliatesResponse ? await affiliatesResponse.json().catch(() => []) : [];
+        const sessionRejected = [countsResponse, affiliatesResponse]
+          .filter(Boolean)
+          .some((response) => response.status === 401 || response.status === 403);
+        if (sessionRejected) {
+          if (typeof window !== 'undefined') {
+            window.localStorage.removeItem('adminAuthToken');
+            window.localStorage.removeItem('adminToken');
+            window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again to reconnect live Back Office totals.');
+          }
+          router.replace('/administration/login?reason=session-expired');
+          return;
+        }
         if (!countsResponse?.ok && !affiliatesResponse?.ok) {
-          throw new Error(countsPayload?.message || 'Back Office data could not be reached. Check the admin session and retry.');
+          throw new Error(countsPayload?.message || 'Live Back Office totals are temporarily unavailable. Retry the connection.');
         }
         const affiliates = Array.isArray(affiliatesPayload)
           ? affiliatesPayload
@@ -98,10 +112,11 @@ const Admin = () => {
       } finally {
         setIsLoading(false);
       }
-    };
+  }, [router]);
 
+  useEffect(() => {
     fetchDashboardCounts();
-  }, []);
+  }, [fetchDashboardCounts]);
 
   const handleResetStats = async () => {
     try {
@@ -182,7 +197,7 @@ const Admin = () => {
         <div className="admin-dashboard-live"><i aria-hidden="true" /><span>{isLoading ? 'Syncing platform data' : 'Command center online'}</span></div>
       </section>
 
-      {dashboardError && <div className="admin-command-data-warning"><FaShieldAlt /> <span><strong>Live totals need attention</strong>{dashboardError}</span></div>}
+      {dashboardError && <div className="admin-command-data-warning"><FaShieldAlt /> <span><strong>Live totals need attention</strong>{dashboardError}</span><button type="button" className="admin-action-secondary" onClick={fetchDashboardCounts}>Retry live totals</button></div>}
 
       <section className="admin-metric-grid" aria-label="Platform totals">
         {metrics.map(({ label, value, icon: Icon, href, onClick }) => {
