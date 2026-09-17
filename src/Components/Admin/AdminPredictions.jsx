@@ -525,9 +525,9 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           <header><span>Was there a KO or submission this round?</span><p>Choose the finisher, or confirm that both fighters survived.</p></header>
           <div className="admin-score-winner-choices">
             <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect('one')}><strong>{match.matchFighterA}</strong><small>Tap if they scored the finish</small></button>
-            <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect('two')}><strong>{match.matchFighterB}</strong><small>Tap if they finished it</small></button>
+            <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect('two')}><strong>{match.matchFighterB}</strong><small>Tap if they scored the finish</small></button>
           </div>
-          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — both fighters survived (+${SCORE_POINTS.SP} SP each)</button>
+          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — both fighters survived (+{SCORE_POINTS.SP} SP each)</button>
         </section>
       </section>
 
