@@ -136,10 +136,20 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     setShowRWPopup(false);
   };
 
-  const handleKOSelect = (value) => {
-    setFighterOneStats((prevStats) => ({ ...prevStats, KO: value, ...(category === 'boxing' ? { SP: value === SCORE_POINTS.KO ? SCORE_POINTS.SP : SCORE_POINTS.KO } : {}) }));
-    setFighterTwoStats((prevStats) => ({ ...prevStats, KO: value === SCORE_POINTS.KO ? SCORE_POINTS.SP : SCORE_POINTS.KO, SP: value }));
+  const handleKOSelect = (finisher) => {
+    if (finisher === 'one' || finisher === SCORE_POINTS.KO) {
+      setFighterOneStats((stats) => ({ ...stats, KO: SCORE_POINTS.KO, SP: 0 }));
+      setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
+    } else {
+      setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
+      setFighterTwoStats((stats) => ({ ...stats, KO: SCORE_POINTS.KO, SP: 0 }));
+    }
     setShowKOPopup(false);
+  };
+
+  const handleNoFinishThisRound = () => {
+    setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
+    setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: SCORE_POINTS.SP }));
   };
 
   const handleMetricInput = (fighter, stat, value) => {
@@ -161,6 +171,21 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   };
 
   const handleSave = async () => {
+    const hasRoundWinner = normalizeNumber(fighterOneStats.RW) === SCORE_POINTS.RW
+      || normalizeNumber(fighterTwoStats.RW) === SCORE_POINTS.RW;
+    const hasFinishOrSurvival = normalizeNumber(fighterOneStats.KO) === SCORE_POINTS.KO
+      || normalizeNumber(fighterTwoStats.KO) === SCORE_POINTS.KO
+      || (normalizeNumber(fighterOneStats.SP) === SCORE_POINTS.SP
+        && normalizeNumber(fighterTwoStats.SP) === SCORE_POINTS.SP);
+    if (!hasRoundWinner) {
+      toast.error(`Choose who won Round ${round} before saving.`);
+      return;
+    }
+    if (!hasFinishOrSurvival) {
+      toast.error(`Choose a finisher or confirm both fighters survived Round ${round}.`);
+      return;
+    }
+
     const payload = {
       fighterOneStats: { ...normalizeStatsForSubmit(fighterOneStats), roundNumber: round },
       fighterTwoStats: { ...normalizeStatsForSubmit(computeFighterTwoStats()), roundNumber: round },
@@ -497,15 +522,12 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         </section>
 
         <section className="admin-score-winner-panel">
-          <header><span>Did anyone finish it?</span><p>KO, TKO or submission.</p></header>
+          <header><span>Was there a KO or submission this round?</span><p>Choose the finisher, or confirm that both fighters survived.</p></header>
           <div className="admin-score-winner-choices">
-            <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.KO)}><strong>{match.matchFighterA}</strong><small>Tap if they finished it</small></button>
-            <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.SP)}><strong>{match.matchFighterB}</strong><small>Tap if they finished it</small></button>
+            <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect('one')}><strong>{match.matchFighterA}</strong><small>Tap if they scored the finish</small></button>
+            <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect('two')}><strong>{match.matchFighterB}</strong><small>Tap if they finished it</small></button>
           </div>
-          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={() => {
-            setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
-            setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
-          }}>Went the distance — no finish</button>
+          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — both fighters survived (+${SCORE_POINTS.SP} SP each)</button>
         </section>
       </section>
 
