@@ -761,7 +761,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       </div>
     );
     return (
-      <div className="admin-workspace admin-economics-desk" style={{ background: '#05080d', minHeight: '100%', padding: 24, borderRadius: 16 }}>
+      <div className="admin-workspace admin-economics-desk" style={{ background: '#05080d', minHeight: '100%', padding: 24, borderRadius: 16, pointerEvents: 'auto', position: 'relative', zIndex: 2 }}>
         <section className="admin-economics-heading" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#ff2a35', marginBottom: 7 }}>Fight operations</div>
@@ -824,7 +824,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               </label>
             </div>
           )}
-          {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
+          {inputPill('Entry tokens', 'matchTokens', edits.matchTokens, editField('matchTokens'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { suffix: 'tokens', disabled: false })}
           {!isShadowFight && (
             <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.matchTokens || 0).toLocaleString()} tokens \u2248 {usd(edits.matchTokens)} at the standard 5,000 tokens per $3.99 rate.</p>
           )}
@@ -835,7 +835,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               ))}
             </div>
           )}
-          {inputPill('Prize pool', 'advertised total', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: 'tokens', disabled: isShadowFight })}
+          {inputPill('Prize pool', 'advertised total', edits.pot, editField('pot'), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' }, { suffix: 'tokens', disabled: false })}
           {!isShadowFight && (
             <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: '-8px 0 14px', lineHeight: 1.4 }}>{Number(edits.pot || 0).toLocaleString()} tokens \u2248 {usd(edits.pot)} \u2014 declared upfront, this figure never grows with entries.</p>
           )}
@@ -866,7 +866,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </label>
           )}
           {isShadowFight && (
-            <p style={{ fontSize: 13, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: 0, lineHeight: 1.45 }}>No economy on a shadow template \u2014 the affiliate who runs the card stakes those themselves.</p>
+            <p style={{ fontSize: 13, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: 0, lineHeight: 1.45 }}>Template economics are editable here. These values become defaults when the fight is published or used by an affiliate.</p>
           )}
         </section>
 
@@ -985,7 +985,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
             <label style={{ display: 'grid', gap: 7, gridColumn: '1 / -1' }}>
               <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Contest status</span>
-              <select value={edits.matchStatus} onChange={editField('matchStatus')} disabled={isShadowFight} style={{ background: '#090e15', border: `1px solid ${border}`, borderRadius: 9, color: '#fff', fontSize: 15, padding: 12 }}>
+              <select value={edits.matchStatus} onChange={editField('matchStatus')} style={{ background: '#090e15', border: `1px solid ${border}`, borderRadius: 9, color: '#fff', fontSize: 15, padding: 12 }}>
                 {['Draft', 'Scheduled', 'Open', 'Live', 'Closed', 'Finished'].map((status) => <option key={status} value={status}>{status}</option>)}
               </select>
               <small style={{ color: 'rgba(245,247,251,.5)' }}>Draft hides the contest; Open accepts entries; Live locks normal entry; Closed and Finished stop entry.</small>
