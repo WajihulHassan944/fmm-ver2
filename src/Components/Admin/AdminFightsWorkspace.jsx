@@ -707,7 +707,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const isShadowFight = f.sourceType === 'shadow';
     const editField = (key) => (ev) => setEconomicsEdits({ ...edits, [key]: ev.target.value });
     const dirty = Boolean(economicsEdits);
-    const usd = (n) => `$${(Math.abs(Number(n) || 0) * (3.99 / 5000)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const tokenPackSize = 5000;
+    const tokenPackUsd = 3.99;
+    const tokenUsdRate = tokenPackUsd / tokenPackSize;
+    const usd = (n) => `$${(Math.abs(Number(n) || 0) * tokenUsdRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const fm = (n) => `${Math.max(0, Number(n) || 0).toLocaleString()} FM`;
     const usdSigned = (n) => { const v = Number(n) || 0; if (v === 0) return '$0.00'; return (v > 0 ? '+' : '\u2212') + usd(v); };
     const signed = (n) => (n === 0 ? '0 tokens' : (n > 0 ? '+' : '\u2212') + Math.abs(n).toLocaleString() + ' tokens');
     const saveEconomics = async () => {
@@ -765,12 +769,56 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         <section className="admin-economics-heading" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#ff2a35', marginBottom: 7 }}>Fight operations</div>
-            <h1 style={{ fontFamily: display, fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>Create match</h1>
+            <h1 style={{ fontFamily: display, fontSize: 34, letterSpacing: '.01em', margin: 0, lineHeight: 0.95, textTransform: 'uppercase', color: '#f5f7fb' }}>{getTitle(f)}</h1>
             <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(245,247,251,.66)', margin: '8px 0 0', maxWidth: 720, lineHeight: 1.45 }}>Build live and shadow fight cards. Every number shows its consequence before you publish, and the same record feeds the website and the app.</p>
           </div>
           <button type="button" className="admin-action-secondary" onClick={() => setSelectedEconomics(null)}>Back to fight registry</button>
         </section>
         {renderFightDeskNav(f, 'economics')}
+
+        <section style={{ ...sectionStyle, marginTop: 18 }}>
+          <div style={{ display: 'grid', gap: 18, gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,.9fr)', alignItems: 'stretch' }}>
+            <div>
+              <div style={{ color: '#ff2a35', fontSize: 10.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', marginBottom: 10 }}>Selected fight setup</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 12 }}>
+                {[['A', getFighterName(f, 'A') || f.matchFighterA || 'Fighter A'], ['B', getFighterName(f, 'B') || f.matchFighterB || 'Fighter B']].map(([side, name], index) => (
+                  <React.Fragment key={side}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flexDirection: side === 'B' ? 'row-reverse' : 'row', textAlign: side === 'B' ? 'right' : 'left' }}>
+                      <img src={getFighterImage(f, side) || (side === 'A' ? FALLBACK_A : FALLBACK_B)} alt="" style={{ width: 68, height: 68, borderRadius: 12, objectFit: 'cover', border: `1px solid ${side === 'A' ? 'rgba(223,17,27,.55)' : 'rgba(22,143,230,.55)'}` }} />
+                      <div style={{ minWidth: 0 }}><small style={{ color: 'rgba(245,247,251,.42)', fontWeight: 900 }}>FIGHTER {side}</small><strong style={{ display: 'block', color: '#fff', fontFamily: display, fontSize: 20, textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</strong></div>
+                    </div>
+                    {index === 0 && <strong style={{ color: '#f7b51b', fontFamily: display, fontSize: 18 }}>VS</strong>}
+                  </React.Fragment>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+                {[getSport(f), edits.matchStatus, edits.matchDate || 'Date pending', edits.matchTime || 'Time pending', `${edits.maxRounds} rounds`].map((value) => <span key={value} style={{ border: '1px solid rgba(255,255,255,.12)', borderRadius: 999, color: 'rgba(245,247,251,.72)', fontSize: 11, fontWeight: 800, padding: '7px 10px', textTransform: 'uppercase' }}>{value}</span>)}
+              </div>
+            </div>
+            <div style={{ border: '1px solid rgba(247,181,27,.42)', borderRadius: 14, background: 'rgba(247,181,27,.06)', padding: 18 }}>
+              <div style={{ color: '#f7b51b', fontSize: 10.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase' }}>FM coin conversion</div>
+              <div style={{ color: '#fff', fontFamily: display, fontSize: 30, marginTop: 8 }}>{tokenPackSize.toLocaleString()} FM = {usd(tokenPackSize)}</div>
+              <p style={{ color: 'rgba(245,247,251,.62)', fontSize: 12.5, lineHeight: 1.5, margin: '8px 0 0' }}>Standard rate: 1,000 FM = {usd(1000)} · 100 FM = {usd(100)} · 1 FM = ${tokenUsdRate.toFixed(6)}.</p>
+              <p style={{ color: 'rgba(245,247,251,.42)', fontSize: 11.5, lineHeight: 1.45, margin: '8px 0 0' }}>Every value below is shown in both FM coins and estimated USD.</p>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', marginTop: 18 }}>
+            {[
+              ['ENTRY FEE', fm(entryFee), usd(entryFee), '#f7b51b'],
+              ['PRIZE POOL', fm(pot), usd(pot), '#35d45d'],
+              ['FUNDED UP FRONT', fm(fundedPrize), usd(fundedPrize), '#35d45d'],
+              ['PRIZE LIABILITY', fm(unfundedPrize), usd(unfundedPrize), unfundedPrize ? '#ff2a35' : '#35d45d'],
+              ['BREAK-EVEN', `${breakEven.toLocaleString()} entrants`, entryFee ? `at ${fm(entryFee)} / ${usd(entryFee)}` : 'Free contest', '#168fe6'],
+              ['PROJECTED REVENUE', fm(projectedRevenue), usd(projectedRevenue), '#f7b51b'],
+            ].map(([label, primary, secondary, color]) => (
+              <div key={label} style={{ border: '1px solid rgba(255,255,255,.11)', borderRadius: 11, background: 'rgba(255,255,255,.03)', padding: 14 }}>
+                <small style={{ color: 'rgba(245,247,251,.42)', fontSize: 9.5, fontWeight: 900, letterSpacing: '.1em' }}>{label}</small>
+                <strong style={{ color, display: 'block', fontFamily: display, fontSize: 21, marginTop: 4 }}>{primary}</strong>
+                <span style={{ color: 'rgba(245,247,251,.58)', display: 'block', fontSize: 12, marginTop: 3 }}>{secondary}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="admin-economics-fight-selector" style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
           <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)' }}>Editing</span>
@@ -944,11 +992,11 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                   <div>
                     <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>At your minimum</div>
                     <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: atMinValue >= 0 ? '#35d45d' : '#ff2a35' }}>{signed(atMinValue)}</div>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>{minimumEntrants.toLocaleString()} entrants</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>{minimumEntrants.toLocaleString()} entrants · {usd(Math.max(0, minimumEntrants * entryFee - pot))} projected net</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>Each entry past that</div>
-                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: '#f7b51b' }}>{free ? '$0' : `$${entryFee.toLocaleString()}`}</div>
+                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: '#f7b51b' }}>{free ? '0 FM / $0.00' : `${fm(entryFee)} / ${usd(entryFee)}`}</div>
                     <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>Straight to the house</div>
                   </div>
                 </div>
@@ -1036,7 +1084,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                       <div style={{ fontFamily: display, fontSize: 17, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} tokens`}</div>
                       <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', whiteSpace: 'nowrap' }}>{free ? 'Guaranteed pot' : `Guaranteed pot \u00b7 ${usd(pot)}`}</div>
                     </div>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 13px', borderRadius: 999, background: '#f7b51b', color: '#17070a', fontFamily: display, fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{free ? 'ENTER FREE' : `ENTER \u00b7 $${entryFee.toLocaleString()}`}</div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 13px', borderRadius: 999, background: '#f7b51b', color: '#17070a', fontFamily: display, fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{free ? 'ENTER FREE' : `ENTER \u00b7 ${fm(entryFee)} (${usd(entryFee)})`}</div>
                   </div>
                 </div>
               </div>
