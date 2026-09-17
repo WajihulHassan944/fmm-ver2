@@ -88,12 +88,43 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   const finisherIsB = normalizeNumber(fighterTwoStats.KO) === SCORE_POINTS.KO;
 
   useEffect(() => {
-    if (match) {
-      const fresh = emptyStats(usesPunchCard(match.matchCategoryTwo || match.matchCategory) ? 'boxing' : 'mma');
-      setFighterOneStats(fresh);
-      setFighterTwoStats(fresh);
-      setVideoUrl(match.matchVideoUrl || '');
-    }
+    if (!match) return;
+
+    const activeCategory = usesPunchCard(match.matchCategoryTwo || match.matchCategory) ? 'boxing' : 'mma';
+    const scoreContainer = activeCategory === 'boxing'
+      ? (match.BoxingMatch || match.boxingMatch || {})
+      : (match.MMAMatch || match.mmaMatch || {});
+    const fighterOneRounds = Array.isArray(scoreContainer.fighterOneStats) ? scoreContainer.fighterOneStats : [];
+    const fighterTwoRounds = Array.isArray(scoreContainer.fighterTwoStats) ? scoreContainer.fighterTwoStats : [];
+    const maxSavedRound = Math.max(
+      0,
+      ...fighterOneRounds.map((row, index) => normalizeNumber(row?.roundNumber) || index + 1),
+      ...fighterTwoRounds.map((row, index) => normalizeNumber(row?.roundNumber) || index + 1),
+    );
+    const hydratedRounds = Array.from(
+      { length: Math.max(Number(match.maxRounds || 1), maxSavedRound) },
+      (_, index) => {
+        const roundNumber = index + 1;
+        const one = fighterOneRounds.find((row, rowIndex) => (normalizeNumber(row?.roundNumber) || rowIndex + 1) === roundNumber);
+        const two = fighterTwoRounds.find((row, rowIndex) => (normalizeNumber(row?.roundNumber) || rowIndex + 1) === roundNumber);
+        if (!one && !two) return undefined;
+        return {
+          fighterOneStats: { ...emptyStats(activeCategory), ...(one || {}) },
+          fighterTwoStats: { ...emptyStats(activeCategory), ...(two || {}) },
+        };
+      },
+    );
+
+    setRoundScores(hydratedRounds);
+    const firstOpenRound = hydratedRounds.findIndex((saved) => !saved);
+    const initialRound = firstOpenRound >= 0
+      ? firstOpenRound + 1
+      : Math.max(1, Math.min(hydratedRounds.length || 1, Number(match.maxRounds || 1)));
+    const selected = hydratedRounds[initialRound - 1];
+    setRound(initialRound);
+    setFighterOneStats(selected?.fighterOneStats || emptyStats(activeCategory));
+    setFighterTwoStats(selected?.fighterTwoStats || emptyStats(activeCategory));
+    setVideoUrl(match.matchVideoUrl || '');
   }, [match]);
 
   const computeFighterTwoStats = () => ({ ...fighterTwoStats });
