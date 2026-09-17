@@ -54,6 +54,17 @@ const pickRenderableImage = (...values) => values.find((value) => {
   return text && !['null', 'undefined', 'none', 'n/a'].includes(text.toLowerCase());
 });
 
+// Cloudinary fight art is often stored at poster resolution. Request a
+// responsive delivery variant for cards instead of downloading the original
+// multi-megabyte flyer. Non-Cloudinary and local assets stay untouched.
+export const optimizeFightImageUrl = (value, width = 720) => {
+  const raw = String(value || '').trim();
+  if (!raw || !/res\.cloudinary\.com/i.test(raw) || !raw.includes('/upload/')) return raw;
+  if (/\/upload\/(?:[^/]*,)?(?:f_auto|q_auto|w_\d+)/i.test(raw)) return raw;
+  const safeWidth = Math.max(160, Math.min(1600, Number(width) || 720));
+  return raw.replace('/upload/', `/upload/f_auto,q_auto:eco,c_limit,w_${safeWidth}/`);
+};
+
 const getNestedImageValue = (value) => {
   if (!value || typeof value === 'string') return '';
   return pickRenderableImage(
@@ -102,7 +113,7 @@ export const getFighterImage = (match, side = 'A', index = 0) => {
         match?.imageB,
       ];
   const direct = pickRenderableImage(...candidates);
-  if (direct) return direct;
+  if (direct) return optimizeFightImageUrl(direct);
   return getFallbackFighterImage(side, index);
 };
 

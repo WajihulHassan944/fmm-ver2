@@ -152,7 +152,7 @@ const AffiliateDashboard = () => {
 
       try {
         const [legacyResult, publicRows] = await Promise.allSettled([
-          fetch(`${API_BASE}/shadow?limit=500&includeDrafts=true`).then(async (response) => {
+          fetch(`${API_BASE}/shadow?compact=promotion&limit=150&includeDrafts=true`).then(async (response) => {
             if (!response.ok) throw new Error('Failed to fetch shadow templates');
             return response.json();
           }),
@@ -459,9 +459,9 @@ const AffiliateDashboard = () => {
                       return (
                         <article className="xp-affiliate-fight-card is-template" key={fightId || displayIndex}>
                           <div className="xp-affiliate-fight-media">
-                            <figure><img src={getFighterImage(match, 'A', displayIndex)} alt={match?.matchFighterA || 'Fighter A'} /></figure>
+                            <figure><img src={getFighterImage(match, 'A', displayIndex)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
                             <span>VS</span>
-                            <figure><img src={getFighterImage(match, 'B', displayIndex)} alt={match?.matchFighterB || 'Fighter B'} /></figure>
+                            <figure><img src={getFighterImage(match, 'B', displayIndex)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
                             <i>{getFightCategory(match)}</i>
                           </div>
                           <div className="xp-affiliate-fight-copy">
@@ -522,9 +522,9 @@ const AffiliateDashboard = () => {
                         >
                           <div className="xp-affiliate-live-badge"><i /> Live promotion</div>
                           <div className="xp-affiliate-fight-media">
-                            <figure><img src={getFighterImage(match, 'A', displayIndex + 2)} alt={match?.matchFighterA || 'Fighter A'} /></figure>
+                            <figure><img src={getFighterImage(match, 'A', displayIndex + 2)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
                             <span>VS</span>
-                            <figure><img src={getFighterImage(match, 'B', displayIndex + 2)} alt={match?.matchFighterB || 'Fighter B'} /></figure>
+                            <figure><img src={getFighterImage(match, 'B', displayIndex + 2)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
                             <i>{getFightCategory(match)}</i>
                           </div>
                           <div className="xp-affiliate-fight-copy">
