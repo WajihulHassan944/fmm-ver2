@@ -147,6 +147,7 @@ import "@/styles/fmm-login-desks-v75.css";
 // Component-level v76 desk correction. This remains last so legacy admin
 // sheets cannot reorder the scoring workflow or flatten fight-type controls.
 import "@/styles/fmm-operations-desks-v76.css";
+import "@/styles/fmm-admin-invites-input-v77.css";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 import Head from "next/head";

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 import UserDetails from './UserDetails';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
@@ -39,9 +40,21 @@ const AffiliateUsers = () => {
   const [recentInvites, setRecentInvites] = useState([]);
   const router = useRouter();
 
+  const requireFreshAdminSession = (response) => {
+    if (response.status !== 401 && response.status !== 403) return false;
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('adminAuthToken');
+      window.localStorage.removeItem('adminToken');
+      window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again to manage affiliate and promoter invitations.');
+    }
+    router.replace('/administration/login?reason=session-expired');
+    return true;
+  };
+
   const loadRecentInvites = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-invites', { headers: adminHeaders() });
+      const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-invites'), { headers: adminHeaders() });
+      if (requireFreshAdminSession(response)) return;
       const data = await response.json();
       if (response.ok) setRecentInvites(data.invites || []);
     } catch { /* non-blocking */ }
@@ -50,11 +63,12 @@ const AffiliateUsers = () => {
   const generateInstantApprovalLink = async () => {
     setInviteBusy(true);
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-invites', {
+      const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-invites'), {
         method: 'POST',
         headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ expiresInDays: 14 }),
       });
+      if (requireFreshAdminSession(response)) return;
       const data = await response.json();
       if (!response.ok) throw new Error(data?.message || 'Could not create the invite link.');
       setInviteLink(data.url);
@@ -112,7 +126,8 @@ const AffiliateUsers = () => {
     setLoading(true);
     setLoadError('');
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
+      const response = await fetch(buildPublicApiUrl('/affiliates'), { headers: adminHeaders() });
+      if (requireFreshAdminSession(response)) return;
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.message || 'Affiliate accounts could not be loaded.');
       const records = Array.isArray(data) ? data : (data?.affiliates || data?.users || data?.data || []);
@@ -124,7 +139,9 @@ const AffiliateUsers = () => {
       console.error('Error fetching affiliate users:', error);
       setAffiliateUsers([]);
       setFilteredUsers([]);
-      setLoadError(error.message || 'Affiliate accounts could not be loaded.');
+      setLoadError(error instanceof TypeError
+        ? 'The browser could not reach the affiliate service. Check the connection, then retry.'
+        : (error.message || 'Affiliate accounts could not be loaded.'));
     } finally {
       setLoading(false);
     }
@@ -250,8 +267,24 @@ const AffiliateUsers = () => {
           <button type="button" className="admin-action-secondary" onClick={handleNavigation}><FaUsers /> Admin records</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/payouts')}><FaWallet /> Payouts</button>
           <button type="button" className="admin-action-secondary" disabled={inviteBusy} onClick={() => { generateInstantApprovalLink(); }}><FaLink /> {inviteBusy ? 'Generating…' : 'Instant-approval link'}</button>
+          <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/full-cards')}><FaAward /> Promoter invitations</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddAffiliatePopup(true)}><FaPlus /> Add affiliate</button>
         </div>
+      </section>
+
+      <section className="admin-invitation-paths" aria-label="Pre-approved invitation tools">
+        <article>
+          <span>Affiliate access</span>
+          <h2>Send a pre-approved affiliate link</h2>
+          <p>Create a one-time, 14-day link for a trusted fighter, influencer, or creator. Their new affiliate account is approved automatically.</p>
+          <button type="button" disabled={inviteBusy} onClick={generateInstantApprovalLink}><FaLink /> {inviteBusy ? 'Creating link…' : 'Create affiliate link'}</button>
+        </article>
+        <article>
+          <span>Promoter access</span>
+          <h2>Invite a Full Card Promoter</h2>
+          <p>Select an existing affiliate, enable Full Card tools, and copy their private promoter invitation.</p>
+          <button type="button" onClick={() => router.push('/administration/full-cards')}><FaAward /> Open promoter invitations</button>
+        </article>
       </section>
 
       <section className="admin-affiliate-network-stats" aria-label="Affiliate network totals">

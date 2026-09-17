@@ -2,7 +2,9 @@ import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 export const getStoredToken = (kind = 'player') => {
   if (typeof window === 'undefined') return '';
-  return window.localStorage.getItem(kind === 'admin' ? 'adminAuthToken' : kind === 'affiliate' ? 'affiliateAuthToken' : 'authToken') || '';
+  if (kind === 'admin') return window.localStorage.getItem('adminAuthToken') || window.localStorage.getItem('adminToken') || '';
+  if (kind === 'affiliate') return window.localStorage.getItem('affiliateAuthToken') || window.localStorage.getItem('authToken') || '';
+  return window.localStorage.getItem('authToken') || '';
 };
 
 export async function fullCardRequest(path, { method = 'GET', body, kind = 'public', headers = {} } = {}) {
