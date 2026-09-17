@@ -965,11 +965,16 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>A live card carries a schedule and an economy. A shadow template carries neither.</p>
             </div>
           </header>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ padding: '10px 16px', borderRadius: 9, border: `1px solid ${isShadowFight ? 'rgba(255,255,255,.12)' : '#df111b'}`, background: isShadowFight ? 'rgba(255,255,255,.035)' : 'rgba(223,17,27,.13)', fontFamily: display, fontSize: 15, fontWeight: 900, textTransform: 'uppercase', color: isShadowFight ? 'rgba(245,247,251,.5)' : '#fff' }}>Live production fight</span>
-            <span style={{ padding: '10px 16px', borderRadius: 9, border: `1px solid ${isShadowFight ? '#df111b' : 'rgba(255,255,255,.12)'}`, background: isShadowFight ? 'rgba(223,17,27,.13)' : 'rgba(255,255,255,.035)', fontFamily: display, fontSize: 15, fontWeight: 900, textTransform: 'uppercase', color: isShadowFight ? '#fff' : 'rgba(245,247,251,.5)' }}>Shadow template</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 14 }}>
+            <div style={{ padding: '17px 18px', borderRadius: 12, border: `1px solid ${isShadowFight ? 'rgba(255,255,255,.12)' : '#df111b'}`, background: isShadowFight ? 'rgba(255,255,255,.035)' : 'rgba(223,17,27,.13)', color: isShadowFight ? 'rgba(245,247,251,.5)' : '#fff' }}>
+              <strong style={{ display: 'block', fontFamily: display, fontSize: 18, fontWeight: 900, textTransform: 'uppercase' }}>Live production fight</strong>
+              <small style={{ color: 'rgba(245,247,251,.7)', display: 'block', fontSize: 13, marginTop: 6 }}>Carries a schedule and its own saved economy</small>
+            </div>
+            <div style={{ padding: '17px 18px', borderRadius: 12, border: `1px solid ${isShadowFight ? '#df111b' : 'rgba(255,255,255,.12)'}`, background: isShadowFight ? 'rgba(223,17,27,.13)' : 'rgba(255,255,255,.035)', color: isShadowFight ? '#fff' : 'rgba(245,247,251,.5)' }}>
+              <strong style={{ display: 'block', fontFamily: display, fontSize: 18, fontWeight: 900, textTransform: 'uppercase' }}>Shadow template</strong>
+              <small style={{ color: 'rgba(245,247,251,.7)', display: 'block', fontSize: 13, marginTop: 6 }}>Reusable scored fight for owner, affiliates, and promoters</small>
+            </div>
           </div>
-          <p style={{ fontSize: 12.5, fontWeight: 500, color: 'rgba(245,247,251,.42)', margin: '10px 0 0', lineHeight: 1.45 }}>Set on creation from the fight's registry record \u2014 to switch a fight between live and shadow, use Create fight.</p>
         </section>
 
         <section style={sectionStyle}>
@@ -1021,127 +1026,33 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               ))}
             </div>
           )}
-          {true && (
-            <label style={{ display: 'grid', gap: 7, minWidth: 0, maxWidth: 220 }}>
+          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', marginTop: 4 }}>
+            <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
               <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Maximum rounds</span>
-              <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
+              <input type="number" min="1" max="30" value={edits.maxRounds} onChange={editField('maxRounds')} onFocus={(event) => event.currentTarget.select()} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
             </label>
-          )}
+            <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Minimum entrants</span>
+              <input type="number" min="0" value={edits.minimumEntrants} onChange={editField('minimumEntrants')} onFocus={(event) => event.currentTarget.select()} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
+              <small style={{ color: 'rgba(245,247,251,.48)' }}>Below this number, entries are refunded.</small>
+            </label>
+            <label style={{ display: 'grid', gap: 7, minWidth: 0 }}>
+              <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Projected entrants</span>
+              <input type="number" min="0" value={edits.projectedEntrants} onChange={editField('projectedEntrants')} onFocus={(event) => event.currentTarget.select()} style={{ background: 'rgba(0,0,0,.34)', border: `1px solid ${border}`, borderRadius: 9, boxSizing: 'border-box', color: '#fff', fontFamily: display, fontSize: 20, fontWeight: 900, minWidth: 0, width: '100%', padding: '11px 12px', outline: 'none' }} />
+              <small style={{ color: 'rgba(245,247,251,.48)' }}>Planning only; does not change live entries.</small>
+            </label>
+          </div>
           {isShadowFight && (
             <p style={{ fontSize: 13, fontWeight: 500, color: 'rgba(245,247,251,.5)', margin: 0, lineHeight: 1.45 }}>Template economics are editable here. These values become defaults when the fight is published or used by an affiliate.</p>
           )}
         </section>
 
-        {(() => {
-          const pill = (label, unit, value, accent, bg) => (
-            <div style={{ marginBottom: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
-                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>{label}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(245,247,251,.34)' }}>{unit}</span>
-              </div>
-              <div style={{ borderRadius: 9, border: `1px solid ${bg.border}`, background: bg.fill, padding: '11px 13px' }}>
-                <div style={{ fontFamily: display, fontSize: 27, fontWeight: 900, color: accent, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-              </div>
-            </div>
-          );
-          return (
-            <section style={sectionStyle}>
-              <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-                {badge('03')}
-                <div style={{ minWidth: 0 }}>
-                  <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Entrants &amp; guard</h3>
-                  <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>The break-even math and live entrant count the settlement guard checks against.</p>
-                </div>
-              </header>
-              {pill('Break-even entrants', 'entries', breakEven || '\u2014', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-              {inputPill('Minimum entrants required', 'entries', edits.minimumEntrants, editField('minimumEntrants'), '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' })}
-              {pill('Live entrants right now', 'entries', isShadowFight ? 'Shadow template' : entrants, covered ? '#35d45d' : '#f7b51b', covered ? { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' } : { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' })}
-              {inputPill('Projected entrants', 'planning estimate', edits.projectedEntrants, editField('projectedEntrants'), '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, { note: 'Used for revenue and liability forecasting only; it does not change the live entrant count.' })}
-              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0,1fr))', marginBottom: 18 }}>
-                {pill('Projected entry revenue', 'tokens', projectedRevenue.toLocaleString(), '#35d45d', { border: 'rgba(53,212,93,.42)', fill: 'rgba(53,212,93,.07)' })}
-                {pill('Projected net position', 'after prize', signed(projectedPosition), projectedPosition >= 0 ? '#35d45d' : '#ff2a35', { border: projectedPosition >= 0 ? 'rgba(53,212,93,.42)' : 'rgba(223,17,27,.5)', fill: projectedPosition >= 0 ? 'rgba(53,212,93,.07)' : 'rgba(223,17,27,.07)' })}
-              </div>
-              <div style={{ borderRadius: 9, border: `1px solid ${guarded ? 'rgba(53,212,93,.42)' : 'rgba(247,181,27,.45)'}`, background: guarded ? 'rgba(53,212,93,.07)' : 'rgba(247,181,27,.07)', padding: '13px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }} onClick={() => setEconomicsEdits({ ...edits, autoRefundIfShort: !edits.autoRefundIfShort })}>
-                <span style={{ fontFamily: display, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,.74)' }}>Auto-refund guard</span>
-                <span style={{ fontFamily: display, fontSize: 16, fontWeight: 900, color: guarded ? '#35d45d' : '#f7b51b', textTransform: 'uppercase' }}>{guarded ? 'On \u2014 voids and refunds if short (tap to turn off)' : 'Off \u2014 unguarded (tap to turn on)'}</span>
-              </div>
-            </section>
-          );
-        })()}
-
-        {(() => {
-          const signed = (n) => (n === 0 ? '0 tokens' : (n > 0 ? '+' : '\u2212') + Math.abs(n).toLocaleString() + ' tokens');
-          const voidValue = guarded ? 0 : -pot;
-          const atMinValue = free ? -pot : minimumEntrants * entryFee - pot;
-          const steps = [0, 2, 5, 10, 25, 50, 100, 250];
-          const ladderScale = Math.max(pot, ...steps.map((n) => Math.abs((guarded && n < minimumEntrants) ? 0 : n * entryFee - pot)), 1);
-          const ladder = steps.map((n) => {
-            const voided = guarded && n < minimumEntrants;
-            const pl = voided ? 0 : n * entryFee - pot;
-            const half = Math.min(1, Math.abs(pl) / ladderScale) * 50;
-            return {
-              n, voided, pl,
-              color: voided ? 'rgba(245,247,251,.32)' : pl > 0 ? '#35d45d' : pl < 0 ? '#ff2a35' : 'rgba(245,247,251,.6)',
-              barColor: voided ? 'rgba(255,255,255,.14)' : pl >= 0 ? '#35d45d' : '#df111b',
-              barLeft: (pl >= 0 ? 50 : 50 - half) + '%',
-              barWidth: Math.max(half, 1.5) + '%',
-            };
-          });
-          return (
-            <>
-              <section style={sectionStyle}>
-                <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-                  {badge('04')}
-                  <div style={{ minWidth: 0 }}>
-                    <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Risk &amp; payout scenarios</h3>
-                    <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>What settles if the fight voids, at your minimum, and on each entry past that.</p>
-                  </div>
-                </header>
-                <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(3, minmax(0,1fr))' }}>
-                  <div>
-                    <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>If it voids</div>
-                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: guarded ? '#35d45d' : '#ff2a35' }}>{guarded ? '$0' : signed(voidValue)}</div>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>{guarded ? 'Entries refunded, nothing paid out' : 'No guard \u2014 pot pays regardless'}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>At your minimum</div>
-                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: atMinValue >= 0 ? '#35d45d' : '#ff2a35' }}>{signed(atMinValue)}</div>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>{minimumEntrants.toLocaleString()} entrants · {usd(Math.max(0, minimumEntrants * entryFee - pot))} projected net</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.11em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', marginBottom: 4 }}>Each entry past that</div>
-                    <div style={{ fontFamily: display, fontSize: 24, fontWeight: 900, color: '#f7b51b' }}>{free ? '0 FM / $0.00' : `${fm(entryFee)} / ${usd(entryFee)}`}</div>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.38)', marginTop: 2 }}>Straight to the house</div>
-                  </div>
-                </div>
-              </section>
-
-              <section style={sectionStyle}>
-                <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: 'rgba(245,247,251,.66)', marginBottom: 13 }}>House position as entries arrive</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {ladder.map((row) => (
-                    <div key={row.n} style={{ display: 'grid', gridTemplateColumns: '56px minmax(0,1fr) 100px', alignItems: 'center', gap: 9, padding: '6px 0' }}>
-                      <div style={{ fontSize: 13, fontWeight: 900, color: row.voided ? 'rgba(245,247,251,.32)' : 'rgba(245,247,251,.72)' }}>{row.n === 0 ? 'None' : row.n.toLocaleString()}</div>
-                      <div style={{ height: 9, borderRadius: 999, background: 'rgba(255,255,255,.07)', position: 'relative', overflow: 'hidden', minWidth: 0 }}>
-                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: row.barLeft, width: row.barWidth, background: row.barColor, borderRadius: 999 }} />
-                        <div style={{ position: 'absolute', top: -3, bottom: -3, left: '50%', width: 1.5, background: 'rgba(255,255,255,.35)' }} />
-                      </div>
-                      <div style={{ textAlign: 'right', fontSize: 12.5, fontWeight: 900, color: row.color }}>{row.voided ? 'Voided' : signed(row.pl)}</div>
-                    </div>
-                  ))}
-                </div>
-                <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(245,247,251,.42)', margin: '12px 0 0', paddingTop: 12, borderTop: `1px solid ${border}`, lineHeight: 1.45 }}>Centre line is zero. Greyed rows fall below your minimum \u2014 those void and refund instead of paying out.</p>
-              </section>
-            </>
-          );
-        })()}
-
         <section style={sectionStyle}>
           <header style={{ alignItems: 'start', borderBottom: `1px solid ${border}`, display: 'flex', gap: 13, marginBottom: 19, paddingBottom: 16 }}>
-            {badge('05')}
+            {badge('03')}
             <div style={{ minWidth: 0 }}>
               <h3 style={{ color: '#fff', fontFamily: display, fontSize: 26, margin: 0, textTransform: 'uppercase' }}>Publishing controls</h3>
-              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Who gets told, and where this card appears.</p>
+              <p style={{ color: 'rgba(245,247,251,.66)', margin: '4px 0 0', fontSize: 14 }}>Who gets told, what is protected, and where this card appears.</p>
             </div>
           </header>
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
@@ -1154,7 +1065,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             </label>
             {[
               { key: 'notify', label: 'Notify members', hint: 'Platform announcement on publish' },
-              { key: 'addToShadow', label: 'Create shadow copy', hint: 'Same card available to affiliate creators' },
+              { key: 'addToShadow', label: 'Archive after scoring', hint: 'Moves to Shadow Library only after scoring is completed' },
               { key: 'homepagePromoted', label: 'Homepage banner', hint: 'Top of the website' },
               { key: 'featuredThisWeek', label: 'Featured this week', hint: 'App home rail' },
               { key: 'featuredFight', label: 'Featured fight', hint: 'The big card, both surfaces' },
