@@ -82,6 +82,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   const category = usesPunchCard(match?.matchCategoryTwo || match?.matchCategory) ? 'boxing' : 'mma';
   const statFields = category === 'boxing' ? BOXING_FIELDS : MMA_FIELDS;
   const manualStatFields = statFields.filter((field) => !AUTO_FIELDS.includes(field) && !COMPUTED_FIELDS.includes(field));
+  const maxRounds = Math.max(1, normalizeNumber(match?.maxRounds || match?.rounds || match?.totalRounds) || (category === 'boxing' ? 12 : 5));
   const roundWinnerIsA = normalizeNumber(fighterOneStats.RW) === SCORE_POINTS.RW;
   const roundWinnerIsB = normalizeNumber(fighterTwoStats.RW) === SCORE_POINTS.RW;
   const finisherIsA = normalizeNumber(fighterOneStats.KO) === SCORE_POINTS.KO;
@@ -102,7 +103,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
       ...fighterTwoRounds.map((row, index) => normalizeNumber(row?.roundNumber) || index + 1),
     );
     const hydratedRounds = Array.from(
-      { length: Math.max(Number(match.maxRounds || 1), maxSavedRound) },
+      { length: Math.max(maxRounds, maxSavedRound) },
       (_, index) => {
         const roundNumber = index + 1;
         const one = fighterOneRounds.find((row, rowIndex) => (normalizeNumber(row?.roundNumber) || rowIndex + 1) === roundNumber);
@@ -119,7 +120,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     const firstOpenRound = hydratedRounds.findIndex((saved) => !saved);
     const initialRound = firstOpenRound >= 0
       ? firstOpenRound + 1
-      : Math.max(1, Math.min(hydratedRounds.length || 1, Number(match.maxRounds || 1)));
+      : Math.max(1, Math.min(hydratedRounds.length || 1, maxRounds));
     const selected = hydratedRounds[initialRound - 1];
     setRound(initialRound);
     setFighterOneStats(selected?.fighterOneStats || emptyStats(activeCategory));
@@ -188,7 +189,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
             return newScores;
           });
 
-          if (round < Number(match.maxRounds || 1)) {
+          if (round < maxRounds) {
             const fresh = emptyStats(category);
             setFighterOneStats(fresh);
             setFighterTwoStats(fresh);
@@ -242,7 +243,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   };
 
   const handleNext = () => {
-    if (round < Number(match.maxRounds || 1)) {
+    if (round < maxRounds) {
       setRound((prevRound) => {
         const newRound = prevRound + 1;
         const nextScores = roundScores[newRound - 1];
@@ -385,13 +386,22 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     return <div className="admin-workspace"><div className="admin-empty-table">Loading fight scoring workspace.</div></div>;
   }
 
-  const roundsWonA = roundScores.filter((r) => r && normalizeNumber(r.fighterOneStats?.RW) === SCORE_POINTS.RW).length;
-  const roundsWonB = roundScores.filter((r) => r && normalizeNumber(r.fighterTwoStats?.RW) === SCORE_POINTS.RW).length;
+  // The side rail is a live scorecard: include the round being typed before
+  // Save is pressed, while still retaining every previously saved round.
+  const liveRoundScores = [...roundScores];
+  liveRoundScores[round - 1] = {
+    fighterOneStats: normalizeStatsForSubmit(fighterOneStats),
+    fighterTwoStats: normalizeStatsForSubmit(fighterTwoStats),
+  };
+  const currentRoundHasData = [...Object.values(fighterOneStats), ...Object.values(fighterTwoStats)]
+    .some((value) => normalizeNumber(value) > 0);
+  const roundsWonA = liveRoundScores.filter((r) => r && normalizeNumber(r.fighterOneStats?.RW) === SCORE_POINTS.RW).length;
+  const roundsWonB = liveRoundScores.filter((r) => r && normalizeNumber(r.fighterTwoStats?.RW) === SCORE_POINTS.RW).length;
   const cardTotals = statFields.map((stat) => ({
     code: stat,
     label: FIELD_LABELS[stat],
-    a: roundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterOneStats?.[stat]), 0),
-    b: roundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterTwoStats?.[stat]), 0),
+    a: liveRoundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterOneStats?.[stat]), 0),
+    b: liveRoundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterTwoStats?.[stat]), 0),
   }));
 
   return (
@@ -424,14 +434,14 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
       <section className="admin-desk-status-strip" aria-label="Scoring desk status">
         <div><span>Desk</span><strong>Scoring</strong></div>
         <div><span>Discipline</span><strong>{category}</strong></div>
-        <div><span>Current round</span><strong>{round} / {match.maxRounds || 1}</strong></div>
+        <div><span>Current round</span><strong>{round} / {maxRounds}</strong></div>
         <div><span>Saved rounds</span><strong>{roundScores.filter(Boolean).length}</strong></div>
         <div className="is-live"><span>Card state</span><strong>Not settled</strong></div>
       </section>
 
       <section className="admin-score-hero">
         <article><img src={match.fighterAImage} alt={match.matchFighterA} /><strong>{match.matchFighterA}</strong><span>Red corner</span></article>
-        <div><small>Round {round}</small><b>VS</b><em>{match.maxRounds || 1} max rounds</em></div>
+        <div><small>Round {round}</small><b>VS</b><em>{maxRounds} max rounds</em></div>
         <article><img src={match.fighterBImage} alt={match.matchFighterB} /><strong>{match.matchFighterB}</strong><span>Blue corner</span></article>
       </section>
 
@@ -440,7 +450,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
       <section className="admin-score-round-tabs">
         <header className="admin-score-section-heading"><b>01</b><div><h3>Pick a round</h3><p>Filled rounds are marked. Click any one to correct it.</p></div></header>
-        {Array.from({ length: Number(match.maxRounds || 1) }, (_, i) => i + 1).map((r) => (
+        {Array.from({ length: maxRounds }, (_, i) => i + 1).map((r) => (
           <button
             key={r}
             type="button"
@@ -448,7 +458,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
             onClick={() => jumpToRound(r)}
           >
             <strong>{r}</strong>
-            <small>{roundScores[r - 1] ? 'Saved' : 'Empty'}</small>
+            <small>{roundScores[r - 1] ? 'Saved' : (r === round && currentRoundHasData ? 'Editing' : 'Empty')}</small>
           </button>
         ))}
       </section>
@@ -504,7 +514,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         <button className="admin-action-secondary" type="button" onClick={handlePrev} disabled={round === 1}>← Previous</button>
         <button className="admin-action-secondary" type="button" onClick={() => { setFighterOneStats(emptyStats(category)); setFighterTwoStats(emptyStats(category)); }}><FaPlus /> Clear Round</button>
         <span><FaTrophy /> {roundScores.filter(Boolean).length} saved rounds</span>
-        <button className="admin-primary-action" type="button" onClick={handleSave}><FaSave /> {round < Number(match.maxRounds || 1) ? 'Save & Next Round →' : 'Save Final Round'}</button>
+        <button className="admin-primary-action" type="button" onClick={handleSave}><FaSave /> {round < maxRounds ? 'Save & Next Round →' : 'Save Final Round'}</button>
       </section>
 
       <section className="admin-score-entry-grid admin-score-finish-panel">
@@ -517,7 +527,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
           <button type="submit" className="admin-action-secondary"><FaFilm /> Save Fight Video</button>
         </form>
         <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
-          <span><FaTrophy /> {roundScores.filter(Boolean).length} of {match.maxRounds || 1} rounds saved</span>
+          <span><FaTrophy /> {roundScores.filter(Boolean).length} of {maxRounds} rounds saved</span>
           <button className="admin-action-danger admin-finish-fight-action" type="button" onClick={handleFinishFight}><FaCheckCircle /> Finish Fight & Settle Card</button>
         </div>
       </section>
