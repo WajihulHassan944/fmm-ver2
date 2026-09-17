@@ -387,7 +387,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
 
   const roundsWonA = roundScores.filter((r) => r && normalizeNumber(r.fighterOneStats?.RW) === SCORE_POINTS.RW).length;
   const roundsWonB = roundScores.filter((r) => r && normalizeNumber(r.fighterTwoStats?.RW) === SCORE_POINTS.RW).length;
-  const cardTotals = manualStatFields.map((stat) => ({
+  const cardTotals = statFields.map((stat) => ({
     code: stat,
     label: FIELD_LABELS[stat],
     a: roundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterOneStats?.[stat]), 0),
