@@ -424,7 +424,8 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
     .some((value) => normalizeNumber(value) > 0);
   const roundsWonA = liveRoundScores.filter((r) => r && normalizeNumber(r.fighterOneStats?.RW) === SCORE_POINTS.RW).length;
   const roundsWonB = liveRoundScores.filter((r) => r && normalizeNumber(r.fighterTwoStats?.RW) === SCORE_POINTS.RW).length;
-  const cardTotals = statFields.map((stat) => ({
+  // SP is an automatic player-side award, not an official fighter statistic.
+  const cardTotals = statFields.filter((stat) => stat !== 'SP').map((stat) => ({
     code: stat,
     label: FIELD_LABELS[stat],
     a: liveRoundScores.reduce((sum, r) => sum + normalizeNumber(r?.fighterOneStats?.[stat]), 0),
@@ -530,7 +531,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
             <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect('one')}><strong>{match.matchFighterA}</strong><small>Tap if they scored the finish</small></button>
             <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect('two')}><strong>{match.matchFighterB}</strong><small>Tap if they scored the finish</small></button>
           </div>
-          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — fight continues (+{SCORE_POINTS.SP} SP total)</button>
+          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={handleNoFinishThisRound}>No finish this round — fight continues</button>
         </section>
       </section>
 
@@ -587,9 +588,9 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
             <div className="admin-score-reference-row"><span className="is-green">RW</span><span>Correct round winner</span><b>+{SCORE_POINTS.RW}</b></div>
             <div className="admin-score-reference-row"><span className="is-green">RL</span><span>Paired round-loser credit (automatic)</span><b>+{SCORE_POINTS.RL}</b></div>
             <div className="admin-score-reference-row"><span className="is-gold">KO</span><span>Correct finish round &mdash; KO, TKO or submission</span><b>+{SCORE_POINTS.KO}</b></div>
-            <div className="admin-score-reference-row"><span className="is-blue-code">SP</span><span>Wrong pick, round is not the finish</span><b>{SCORE_POINTS.SP} flat</b></div>
+            <div className="admin-score-reference-row"><span className="is-blue-code">AUTO</span><span>Fight continues — player survival award</span><b>+{SCORE_POINTS.SP}</b></div>
           </div>
-          <p className="admin-score-reference-footnote">A correct round call pays 125 total (100 RW + 25 paired RL). Decision is the only outcome that isn&apos;t a finish.</p>
+          <p className="admin-score-reference-footnote">You record the official outcome here. User points, including the automatic 25-point survival award when the fight continues, are calculated by the scoring engine.</p>
         </section>
 
         {category === 'boxing' && (
