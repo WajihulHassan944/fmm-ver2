@@ -53,7 +53,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
   const [shadowMatches, setShadowMatches] = useState([]);
   const matches = useSelector((state) => state.matches.data);
   const [round, setRound] = useState(1);
-  const [showVideoUrlPopup, setShowVideoUrlPopup] = useState(true);
+  const [showVideoUrlPopup, setShowVideoUrlPopup] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
   const [fighterOneStats, setFighterOneStats] = useState(emptyStats('boxing'));
   const [fighterTwoStats, setFighterTwoStats] = useState(emptyStats('boxing'));
@@ -386,7 +386,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         </div>
         <div className="admin-heading-actions">
           {onBack && <button type="button" className="admin-action-secondary" onClick={onBack}><FaArrowLeft /> Back</button>}
-          <button className="admin-action-danger admin-finish-fight-action" type="button" onClick={handleFinishFight}><FaCheckCircle /> Finish Fight</button>
+
         </div>
       </section>
 
@@ -416,25 +416,10 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
             className={`admin-score-round-tab ${r === round ? 'is-active' : ''} ${roundScores[r - 1] ? 'is-saved' : ''}`}
             onClick={() => jumpToRound(r)}
           >
-            {r}
+            <strong>{r}</strong>
+            <small>{roundScores[r - 1] ? 'Saved' : 'Empty'}</small>
           </button>
         ))}
-      </section>
-
-      <section className="admin-score-winner-panel">
-        <header><span>Round winner</span><p>Pick a corner — the other corner's paired credit is applied automatically.</p></header>
-        <div className="admin-score-winner-choices">
-          <button type="button" className={`is-a ${roundWinnerIsA ? 'is-active' : ''}`} onClick={() => handleRWSelect(SCORE_POINTS.RW)}>{match.matchFighterA}</button>
-          <button type="button" className={`is-b ${roundWinnerIsB ? 'is-active' : ''}`} onClick={() => handleRWSelect(SCORE_POINTS.RL)}>{match.matchFighterB}</button>
-        </div>
-      </section>
-
-      <section className="admin-score-winner-panel">
-        <header><span>Finish this round?</span><p>Only set this on the actual finish round (KO, TKO, or submission).</p></header>
-        <div className="admin-score-winner-choices">
-          <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.KO)}>{match.matchFighterA} finishes</button>
-          <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.SP)}>{match.matchFighterB} finishes</button>
-        </div>
       </section>
 
       <Popup isVisible={showRWPopup} onClose={() => setShowRWPopup(false)} onSelect={handleRWSelect} stat="RW" />
@@ -462,14 +447,48 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
             </article>
           )}
         </div>
+
+        <section className="admin-score-winner-panel">
+          <header><span>Who won Round {round}?</span><p>The other corner is credited automatically.</p></header>
+          <div className="admin-score-winner-choices">
+            <button type="button" className={`is-a ${roundWinnerIsA ? 'is-active' : ''}`} onClick={() => handleRWSelect(SCORE_POINTS.RW)}><strong>{match.matchFighterA}</strong><small>Tap to award the round</small></button>
+            <button type="button" className={`is-b ${roundWinnerIsB ? 'is-active' : ''}`} onClick={() => handleRWSelect(SCORE_POINTS.RL)}><strong>{match.matchFighterB}</strong><small>Tap to award the round</small></button>
+          </div>
+        </section>
+
+        <section className="admin-score-winner-panel">
+          <header><span>Did anyone finish it?</span><p>KO, TKO or submission.</p></header>
+          <div className="admin-score-winner-choices">
+            <button type="button" className={`is-a ${finisherIsA ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.KO)}><strong>{match.matchFighterA}</strong><small>Tap if they finished it</small></button>
+            <button type="button" className={`is-b ${finisherIsB ? 'is-active' : ''}`} onClick={() => handleKOSelect(SCORE_POINTS.SP)}><strong>{match.matchFighterB}</strong><small>Tap if they finished it</small></button>
+          </div>
+          <button type="button" className="admin-action-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }} onClick={() => {
+            setFighterOneStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
+            setFighterTwoStats((stats) => ({ ...stats, KO: 0, SP: 0 }));
+          }}>Went the distance — no finish</button>
+        </section>
       </section>
 
       <section className="admin-score-actions-bar">
-        <button className="admin-action-secondary" type="button" onClick={handlePrev} disabled={round === 1}>Prev</button>
-        <button className="admin-action-secondary" type="button" onClick={handleNext} disabled={round === Number(match.maxRounds || 1)}>Next</button>
-        <button className="admin-primary-action" type="button" onClick={handleSave}><FaSave /> Save</button>
-        <button className="admin-action-secondary" type="button" onClick={() => { setFighterOneStats(emptyStats(category)); setFighterTwoStats(emptyStats(category)); }}><FaPlus /> Clear round</button>
-        <span><FaTrophy /> {roundScores.filter(Boolean).length} saved rounds in this session</span>
+        <button className="admin-action-secondary" type="button" onClick={handlePrev} disabled={round === 1}>← Previous</button>
+        <button className="admin-action-secondary" type="button" onClick={() => { setFighterOneStats(emptyStats(category)); setFighterTwoStats(emptyStats(category)); }}><FaPlus /> Clear Round</button>
+        <span><FaTrophy /> {roundScores.filter(Boolean).length} saved rounds</span>
+        <button className="admin-primary-action" type="button" onClick={handleSave}><FaSave /> {round < Number(match.maxRounds || 1) ? 'Save & Next Round →' : 'Save Final Round'}</button>
+      </section>
+
+      <section className="admin-score-entry-grid admin-score-finish-panel">
+        <header className="admin-score-section-heading admin-score-entry-heading"><b>03</b><div><h3>Finish the Fight</h3><p>Attach the replay, then settle the card only when every round is saved and verified.</p></div></header>
+        <form onSubmit={handleVideoUrlSubmit} style={{ gridColumn: '1 / -1', display: 'grid', gap: 10 }}>
+          <label style={{ display: 'grid', gap: 7 }}>
+            <strong>Video URL</strong>
+            <input type="url" value={videoUrl} onChange={(event) => setVideoUrl(event.target.value)} placeholder="https://..." style={{ width: '100%' }} />
+          </label>
+          <button type="submit" className="admin-action-secondary"><FaFilm /> Save Fight Video</button>
+        </form>
+        <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+          <span><FaTrophy /> {roundScores.filter(Boolean).length} of {match.maxRounds || 1} rounds saved</span>
+          <button className="admin-action-danger admin-finish-fight-action" type="button" onClick={handleFinishFight}><FaCheckCircle /> Finish Fight & Settle Card</button>
+        </div>
       </section>
 
       </main>
@@ -494,7 +513,7 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
         </section>
 
         <section className="admin-score-reference">
-          <div className="admin-score-reference-title">Scoring reference<span>{category === 'boxing' ? 'Boxing / bare-knuckle' : 'MMA / kickboxing'}</span></div>
+          <div className="admin-score-reference-title">What Round {round} Pays<span>Standard round</span></div>
           <div className="admin-score-reference-callouts">
             <div className="is-good"><div>Called it right</div><strong>{SCORE_POINTS.RW}+{SCORE_POINTS.RL}</strong><small>Round winner (100) plus the paired 25 credit.</small></div>
             <div className="is-neutral"><div>Called it wrong</div><strong>{SCORE_POINTS.SP} / 0</strong><small>25 flat if survival, 0 if that round is the finish.</small></div>
