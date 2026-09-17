@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
-import { buildPublicApiUrl } from '@/Utils/publicApi';
 import UserDetails from './UserDetails';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
@@ -53,7 +52,7 @@ const AffiliateUsers = () => {
 
   const loadRecentInvites = async () => {
     try {
-      const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-invites'), { headers: adminHeaders() });
+      const response = await fetch('/api/admin/affiliate-invites', { headers: adminHeaders() });
       if (requireFreshAdminSession(response)) return;
       const data = await response.json();
       if (response.ok) setRecentInvites(data.invites || []);
@@ -63,7 +62,7 @@ const AffiliateUsers = () => {
   const generateInstantApprovalLink = async () => {
     setInviteBusy(true);
     try {
-      const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-invites'), {
+      const response = await fetch('/api/admin/affiliate-invites', {
         method: 'POST',
         headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ expiresInDays: 14 }),
@@ -126,7 +125,7 @@ const AffiliateUsers = () => {
     setLoading(true);
     setLoadError('');
     try {
-      const response = await fetch(buildPublicApiUrl('/affiliates'), { headers: adminHeaders() });
+      const response = await fetch('/api/admin/affiliate-network', { headers: adminHeaders() });
       if (requireFreshAdminSession(response)) return;
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.message || 'Affiliate accounts could not be loaded.');
