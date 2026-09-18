@@ -5,7 +5,7 @@
   background:#0a1119!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:9px!important;color:#fff!important;
   font-weight:800!important;min-height:48px!important;padding:0 38px 0 13px!important
 }
-.affiliate-league-page-final .affiliate-roster-actions{display:flex!important;flex-wrap:wrap!important;gap:6px!important;min-width:220px!important}
+.affiliate-league-page-final .affiliate-roster-actions{display:flex!important;flex-wrap:wrap!important;gap:6px!important;margin-top:8px!important;min-width:220px!important}
 .affiliate-league-page-final .affiliate-roster-actions button{
   align-items:center!important;background:#151e28!important;border:1px solid #35414d!important;border-radius:7px!important;color:#fff!important;
   cursor:pointer!important;display:inline-flex!important;font-size:10px!important;font-weight:900!important;gap:5px!important;min-height:34px!important;padding:6px 9px!important;text-transform:uppercase!important
@@ -25,14 +25,7 @@
 }
 .affiliate-league-page-final .affiliate-roster-type.is-real{border-color:rgba(43,201,133,.55)!important;color:#71e0aa!important}
 .affiliate-league-page-final .affiliate-roster-type.is-test{border-color:rgba(242,181,68,.55)!important;color:#f2c66d!important}
-.affiliate-league-page-final .xp-affiliate-league-table{min-width:1320px!important}
-@media(min-width:761px){
-  .affiliate-league-page-final .xp-affiliate-league-table th:last-child,
-  .affiliate-league-page-final .xp-affiliate-league-table td:last-child{
-    background:#080e15!important;box-shadow:-12px 0 20px rgba(0,0,0,.38)!important;position:sticky!important;right:0!important;z-index:2!important
-  }
-  .affiliate-league-page-final .xp-affiliate-league-table th:last-child{background:#111820!important;z-index:3!important}
-}
+.affiliate-league-page-final .xp-affiliate-league-table{min-width:1120px!important}
 @media(max-width:760px){
   .affiliate-league-page-final .xp-affiliate-league-toolbar{align-items:stretch!important;flex-direction:column!important}
   .affiliate-league-page-final .xp-affiliate-league-toolbar>label{flex-basis:auto!important}
