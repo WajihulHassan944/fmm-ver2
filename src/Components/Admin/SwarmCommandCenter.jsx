@@ -273,6 +273,15 @@ const SwarmCommandCenter = () => {
   const ionosOnline = Boolean(health?.swarmReachable);
   const localOnline = Boolean(health?.localWorkerReachable || config?.localWorkerEnabled);
   const online = ionosOnline || localOnline;
+  const workerStatusLabel = ionosOnline && localOnline
+    ? 'Dual workers online'
+    : ionosOnline
+      ? 'IONOS worker online'
+      : localOnline
+        ? 'Self-contained worker online'
+        : config?.enabled
+          ? 'Workers need attention'
+          : 'Workers not configured';
   const globalSettings = settings?.global || {};
 
   const showMessage = useCallback((nextMessage, { scroll = true } = {}) => {
@@ -879,7 +888,7 @@ const SwarmCommandCenter = () => {
         </div>
         <span className={`admin-status-badge ${online ? 'is-success' : config?.enabled ? 'is-danger' : 'is-warning'}`}>
           {online ? <FaShieldAlt /> : config?.enabled ? <FaExclamationTriangle /> : <FaBolt />}
-          {online ? 'IONOS swarm online' : config?.enabled ? 'Gateway needs attention' : 'Gateway installed / disabled'}
+          {workerStatusLabel}
         </span>
       </section>
 
