@@ -28,13 +28,14 @@ import { fetchMatches } from '../../Redux/matchSlice';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { ExperienceEmptyState, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import {
-  FMM_ASSET_BASE,
+  AFFILIATE_AVATAR_FALLBACK,
   getFightCategory,
   getFightId,
   getFightRounds,
   getFightStatus,
   getFighterImage,
   safeArray,
+  useImageFallback,
 } from '@/Utils/fightExperience';
 import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
@@ -251,7 +252,7 @@ const AffiliateDashboard = () => {
   const fullName = [affiliate?.firstName, affiliate?.lastName]
     .filter(Boolean)
     .join(' ') || affiliate?.playerName || 'Affiliate';
-  const profileImage = affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`;
+  const profileImage = affiliate?.profileUrl || AFFILIATE_AVATAR_FALLBACK;
   const wrestlingMatches = safeWrestlingArray(wrestlingSummary?.matches);
   const wrestlingCommission = Number(wrestlingSummary?.totalCommissionTokens || 0);
 
@@ -353,7 +354,7 @@ const AffiliateDashboard = () => {
           <div className="xp-affiliate-hero-grid" aria-hidden="true" />
           <div className="theme-container xp-affiliate-hero-layout">
             <div className="xp-affiliate-profile-card">
-              <div className="xp-affiliate-avatar"><img src={profileImage} alt={fullName} /></div>
+              <div className="xp-affiliate-avatar"><img src={profileImage} alt={fullName} onError={useImageFallback} /></div>
               <div>
                 <p className="xp-eyebrow"><FaBullhorn /> Affiliate Command 3.0</p>
                 <h1>Your promotion business. <span>One command deck.</span></h1>
