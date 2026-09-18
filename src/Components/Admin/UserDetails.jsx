@@ -7,6 +7,7 @@ const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 const UserDetails = ({ user }) => {
   const [showEmailTemplate, setShowEmailTemplate] = useState(false);
   const [emailStatus, setEmailStatus] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState(user.email || '');
   const [message, setMessage] = useState(`Dear ${user.firstName} ${user.lastName},\n\nWe are pleased to inform you that your request to become a Fantasy mmadness Affiliate User has been successfully confirmed. You can now enjoy the full benefits of our affiliate program.\n\nThank you for your continued support.\n\nBest regards,\nFantasy mmadness Team`);
   const [buttonText, setButtonText] = useState('Send Email');
   const [isVerified, setIsVerified] = useState(user.verified);
@@ -59,7 +60,7 @@ const UserDetails = ({ user }) => {
   const handleSubmitEmail = async (event) => {
     event.preventDefault();
     const emailData = {
-      email: user.email,
+      email: recipientEmail.trim(),
       subject: 'Fantasy mmadness Affiliate User confirmation',
       message,
     };
@@ -79,7 +80,8 @@ const UserDetails = ({ user }) => {
         setButtonText('Sent Successfully!');
         setEmailStatus(payload.message || 'Email sent successfully');
       } else {
-        const failure = payload.message || `Failed to send email (${response.status})`;
+        const diagnostic = [payload.code, payload.command, payload.responseCode].filter(Boolean).join(' / ');
+        const failure = `${payload.message || `Failed to send email (${response.status})`}${diagnostic ? ` (${diagnostic})` : ''}`;
         setEmailStatus(failure);
         setButtonText('Try Again');
       }
@@ -157,7 +159,7 @@ const UserDetails = ({ user }) => {
             <div className="admin-rule-form-grid">
               <label>
                 Email to
-                <input type="email" id="email" name="email" value={user.email} readOnly />
+                <input type="email" id="email" name="email" value={recipientEmail} onChange={(event) => setRecipientEmail(event.target.value)} required />
               </label>
               <label>
                 Subject
