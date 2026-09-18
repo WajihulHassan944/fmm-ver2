@@ -2425,7 +2425,9 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderHome(sports, filteredEvents, allEvents, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s) {
-    const bannerEvent = allEvents.find((event) => event.featuredThisWeek) || allEvents[0];
+    // Never let API ordering silently replace the curated featured artwork.
+    // When no fight is explicitly featured, retain the approved legacy banner.
+    const bannerEvent = allEvents.find((event) => event.featuredThisWeek);
     const detailEvent = allEvents.find((event) => event.featuredFight)
       || allEvents.find((event) => event.id !== bannerEvent?.id)
       || bannerEvent;
@@ -2442,7 +2444,7 @@ class FantasyMobileAppCore extends React.Component {
           this.renderTicker(),
           this.renderStatsBar(),
           this.renderSportSelector(sports, s),
-          this.renderFeaturedBanner(bannerEvent),
+          bannerEvent ? this.renderFeaturedBanner(bannerEvent) : this.renderFeaturedBannerLegacy(),
           this.renderUpcomingEvents(filteredEvents, s),
           this.renderFeaturedDetail(s, detailEvent)
         );
