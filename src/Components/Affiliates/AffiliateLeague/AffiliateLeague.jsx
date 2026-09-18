@@ -341,7 +341,7 @@ const AffiliateLeague = () => {
                 <div className="xp-affiliate-league-table-wrap">
                   <table className="xp-affiliate-league-table">
                     <thead>
-                      <tr><th>Rank</th><th>Member</th><th>Plan</th><th>Account status</th><th>Roster type</th><th>Last active</th><th>Joined</th><th>Actions</th></tr>
+                      <tr><th>Rank</th><th>Member &amp; controls</th><th>Plan</th><th>Account status</th><th>Roster type</th><th>Last active</th><th>Joined</th></tr>
                     </thead>
                     <tbody>
                       {paginatedMembers.length ? paginatedMembers.map((member, index) => (
@@ -350,7 +350,27 @@ const AffiliateLeague = () => {
                           <td>
                             <div className="xp-member-cell">
                               <img src={member.avatar} alt="" />
-                              <span><strong>{member.name}</strong><small>{member.email}</small></span>
+                              <span>
+                                <strong>{member.name}</strong><small>{member.email}</small>
+                                <div className="affiliate-roster-actions">
+                                  {member.removed || member.archived ? (
+                                    <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'restore')}><FaUndo /> Restore</button>
+                                  ) : (
+                                    <>
+                                      <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'archive')}><FaArchive /> Archive</button>
+                                      <button
+                                        type="button"
+                                        disabled={Boolean(memberAction)}
+                                        title={member.testAccount ? 'Remove the test-account label' : 'Move this member to the Test accounts list'}
+                                        onClick={() => manageMember(member, member.testAccount ? 'unmark_test' : 'mark_test')}
+                                      >
+                                        {member.testAccount ? 'Remove test label' : 'Mark as test'}
+                                      </button>
+                                      <button type="button" className="is-remove" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'remove')}><FaTrash /> Remove</button>
+                                    </>
+                                  )}
+                                </div>
+                              </span>
                             </div>
                           </td>
                           <td>{member.plan}</td>
@@ -358,30 +378,10 @@ const AffiliateLeague = () => {
                           <td><span className={`affiliate-roster-type ${member.testAccount ? 'is-test' : 'is-real'}`}>{member.testAccount ? 'Test account' : 'Real member'}</span></td>
                           <td>{formatMemberDate(member.lastActiveAt)}</td>
                           <td>{formatMemberDate(member.joinedAt)}</td>
-                          <td>
-                            <div className="affiliate-roster-actions">
-                              {member.removed || member.archived ? (
-                                <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'restore')}><FaUndo /> Restore</button>
-                              ) : (
-                                <>
-                                  <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'archive')}><FaArchive /> Archive</button>
-                                  <button
-                                    type="button"
-                                    disabled={Boolean(memberAction)}
-                                    title={member.testAccount ? 'Remove the test-account label' : 'Move this member to the Test accounts list'}
-                                    onClick={() => manageMember(member, member.testAccount ? 'unmark_test' : 'mark_test')}
-                                  >
-                                    {member.testAccount ? 'Remove test label' : 'Mark as test'}
-                                  </button>
-                                  <button type="button" className="is-remove" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'remove')}><FaTrash /> Remove</button>
-                                </>
-                              )}
-                            </div>
-                          </td>
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan="8">
+                          <td colSpan="7">
                             <div className="xp-table-empty">
                               {search ? 'No league members match this search.' : 'No members have joined this affiliate league yet.'}
                             </div>
