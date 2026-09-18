@@ -127,6 +127,27 @@ const feedbackInputStyle = {
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 const asInt = (value) => Number.parseInt(String(value ?? '0'), 10) || 0;
+const MOBILE_FIGHT_CACHE_KEY = 'fmm-mobile-fights-v1';
+const readCachedMobileFights = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const cached = JSON.parse(window.localStorage.getItem(MOBILE_FIGHT_CACHE_KEY) || '{}');
+    return Date.now() - Number(cached.savedAt || 0) < 15 * 60 * 1000 ? asArray(cached.items) : [];
+  } catch { return []; }
+};
+const cacheMobileFights = (items) => {
+  try { window.localStorage.setItem(MOBILE_FIGHT_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), items })); } catch { /* storage unavailable */ }
+};
+
+// Video/countdown records are editorial assets, not playable fight cards.
+// They must never occupy Featured Week or the first mobile carousel position.
+const isPlayableMobileFight = (fight = {}) => {
+  const title = String(fight.matchName || '').trim();
+  if (/\b(countdown|trailer|highlights?)\b/i.test(title)) return false;
+  const fighterA = resolveMobileFighterName(fight, 'A');
+  const fighterB = resolveMobileFighterName(fight, 'B');
+  return Boolean(fighterA && fighterB && fighterA.toLowerCase() !== fighterB.toLowerCase());
+};
 
 // --------------------------------------------------------------------------
 // NORMALISERS
@@ -269,7 +290,7 @@ const buildSampleFights = () => SAMPLE_CARD.map((row, index) => {
 // COMPONENT
 // ==========================================================================
 const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) => {
-  const [fights, setFights] = useState([]);
+  const [fights, setFights] = useState(() => readCachedMobileFights());
   const [fighterLibrary, setFighterLibrary] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [leagues, setLeagues] = useState([]);
@@ -288,7 +309,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     seasonCards: { enabled: false },
     teamCards: { enabled: false, picksRequired: 5 },
   });
-  const [dataLoading, setDataLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(() => readCachedMobileFights().length === 0);
   // What the last data load actually did. Surfaced in the app so a failure is
   // visible instead of looking like an empty database.
   const [loadReport, setLoadReport] = useState(null);
@@ -421,14 +442,11 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
         // down to a different shape (f1/f2/sport/poster) that AppCore's normalizer
         // doesn't recognize, so real posters/images fell back to generic stock art
         // and, after the literal-fallback removal, fights could disappear outright.
-        const nameable = rawFights.filter((f) => f && (
-          f.matchFighterA || f.fighterAName || f.fighterA?.displayName
-          || /\s+vs\.?\s+/i.test(String(f.matchName || ''))
-        ));
+        const nameable = rawFights.filter(isPlayableMobileFight);
         // Same match can come back twice from the API (re-saved card, paginated
         // overlap) — collapse by id so it never renders as two identical cards.
         const seenIds = new Set();
-        const dedupedFights = rawFights.filter((f) => {
+        const dedupedFights = nameable.filter((f) => {
           const key = f?._id || f?.id || f?.matchId;
           if (!key) return true;
           if (seenIds.has(key)) return false;
@@ -437,6 +455,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
         });
         // Real fights always win. The preview card only fills an empty screen.
         setFights(nameable.length ? dedupedFights : buildSampleFights());
+        if (nameable.length) cacheMobileFights(dedupedFights);
         setUsingSampleCard(nameable.length === 0);
         setShadowFights(asArray(fightRes.shadowFights));
         setDataLoading(false);
@@ -461,9 +480,6 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     // Whole-library fighter photos for the genre pills — every registered
     // fighter, not just ones on a scheduled fight, so a discipline with no
     // upcoming card still cycles real faces and new signups show up right away.
-    track('fighterLibrary', publicRequest('/api/public/combat-fighters?limit=300&status=active'))
-      .then((libRes) => setFighterLibrary(asArray(libRes.items || libRes.fighters || libRes.data)));
-
     // Wave 2 is deferred entirely. The store and blog tabs are not the landing
     // screen, so these must never hold up first paint.
     track('apparel', publicRequest('/api/public/apparel-products?limit=24'))
@@ -472,6 +488,10 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
       .then((apparelRes) => setApparel(apparelRes.source === 'fallback' ? [] : asArray(apparelRes.items || apparelRes.products || apparelRes.apparel)));
     track('blogs', publicRequest('/api/blogs?limit=12'))
       .then((blogRes) => setBlogs(asArray(blogRes.blogs || blogRes.posts)));
+    setTimeout(() => {
+      track('fighterLibrary', publicRequest('/api/public/combat-fighters?limit=300&status=active'))
+        .then((libRes) => setFighterLibrary(asArray(libRes.items || libRes.fighters || libRes.data)));
+    }, 250);
 
     const [rawFights, boardRows, leagueRows] = await Promise.all([fightsPromise, boardPromise, leaguePromise]);
 
