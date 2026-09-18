@@ -354,14 +354,14 @@ const SwarmCommandCenter = () => {
       const [configResult, healthResult, jobsResult, artifactsResult, catalogResult, settingsResult, dashboardResult, eventsResult, campaignPacksResult, campaignsResult] = await Promise.allSettled([
         swarmApi.config(),
         swarmApi.health(),
-        swarmApi.listJobs(jobQuery),
-        swarmApi.listArtifacts(artifactQuery),
-        swarmApi.catalog({ fallbackLocal: true }),
-        swarmApi.settings({ fallbackLocal: true }),
-        swarmApi.dashboard({ fallbackCache: true }),
+        swarmApi.listJobs({ ...jobQuery, source: 'cache' }),
+        swarmApi.listArtifacts({ ...artifactQuery, source: 'cache' }),
+        swarmApi.catalog({ source: 'local', fallbackLocal: true }),
+        swarmApi.settings({ source: 'local', fallbackLocal: true }),
+        swarmApi.dashboard({ source: 'cache', fallbackCache: true }),
         swarmApi.events({ limit: 14 }),
-        swarmApi.campaignPacks({ fallbackLocal: true }),
-        swarmApi.listCampaigns(campaignQuery),
+        swarmApi.campaignPacks({ source: 'local', fallbackLocal: true }),
+        swarmApi.listCampaigns({ ...campaignQuery, source: 'cache' }),
       ]);
 
       setConfig(configResult.status === 'fulfilled' ? configResult.value : null);
