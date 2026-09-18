@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 const Index = () => {
   const [videoFile, setVideoFile] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [notice, setNotice] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
 
   const handleDrop = (e) => {
@@ -13,7 +13,7 @@ const Index = () => {
     if (file && file.type.startsWith('video/')) {
       setVideoFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-      setSuccess(false);
+      setNotice('');
     }
   };
 
@@ -21,12 +21,11 @@ const Index = () => {
     e.preventDefault();
   };
 
-  const handlePost = () => {
-    if (videoFile) {
-      // Post logic here...
-      setSuccess(true);
-    }
-  };
+  const handlePost = () => setNotice(
+    videoFile
+      ? 'TikTok publishing is not connected yet. Your video is previewed here, but nothing was posted.'
+      : 'Choose a video before continuing.'
+  );
 
   return (
     <div className="admin-panel">
@@ -52,9 +51,7 @@ const Index = () => {
         Post to TikTok
       </button>
 
-      {success && (
-        <p className="success-msg">✅ Video posted to TikTok successfully</p>
-      )}
+      {notice && <p className="form-result">{notice}</p>}
     </div>
   );
 };

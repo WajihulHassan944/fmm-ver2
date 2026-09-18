@@ -110,11 +110,12 @@ const postBlogToBackend = async (parsedBlog) => {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ message: userInput }),
     });
 
     const data = await res.json();
+    if (!res.ok || !data.reply) throw new Error(data.message || 'The blog assistant could not respond.');
     const aiContent = data.reply;
 
     // Always show message

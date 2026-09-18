@@ -1064,7 +1064,7 @@ const SwarmCommandCenter = () => {
           <section className="admin-swarm-panel">
             <header>
               <div><span>What the swarm does</span><h2>Client-ready automation</h2></div>
-              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.traffic-growth-dashboard')} disabled={Boolean(actionId)}><FaChartLine /> Traffic report</button>
+              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('analytics.traffic-growth-dashboard')} disabled={Boolean(actionId)}><FaChartLine /> Traffic report</button>
             </header>
             <div className="admin-swarm-dashboard-grid">
               <article><small>Automations</small><strong>{Number(counts.enabledAutomations || 0).toLocaleString()}/{Number(counts.totalAutomations || catalogRows.length || 0).toLocaleString()}</strong><span>Configured controls</span></article>
@@ -1082,7 +1082,7 @@ const SwarmCommandCenter = () => {
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('calendar')}><FaCalendarAlt /><strong>Calendar refresh</strong><span>Refresh fight schedule opportunities for website/user dashboard.</span></button>
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('social')}><FaBullhorn /><strong>Social drafts</strong><span>Create multiple daily drafts for X, Instagram, and Facebook.</span></button>
                 <button type="button" disabled={Boolean(actionId)} onClick={() => runScheduleAction('july')}><FaUserPlus /><strong>July 10K daily pack</strong><span>Event calendar, fight card, blogs, YouTube, Shorts, and retention drafts.</span></button>
-                <button type="button" disabled={Boolean(actionId)} onClick={() => runManualAutomation('automation.growth-plan-1000-users')}><FaUserPlus /><strong>1000-user plan</strong><span>Generate the next traffic and acquisition action plan.</span></button>
+                <button type="button" disabled={Boolean(actionId)} onClick={() => runManualAutomation('analytics.user-growth-1000-plan')}><FaUserPlus /><strong>1000-user plan</strong><span>Generate the next traffic and acquisition action plan.</span></button>
               </div>
               <div className="admin-swarm-social-platform-line">
                 <span><FaTwitter /> X/Twitter drafts</span>
@@ -1308,8 +1308,8 @@ const SwarmCommandCenter = () => {
               <label><FaRobot /><input type="search" value={filters.fightId} onChange={(event) => setFilters((current) => ({ ...current, fightId: event.target.value }))} placeholder="Fight ID" /></label>
               <label><FaRocket /><input type="search" value={filters.campaignId} onChange={(event) => setFilters((current) => ({ ...current, campaignId: event.target.value }))} placeholder="Campaign ID" /></label>
               <label><FaSearch /><select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}><option value="">All job states</option><option value="queued">Queued</option><option value="running">Running</option><option value="awaiting_review">Awaiting review</option><option value="published">Published</option><option value="failed">Failed</option><option value="dead_letter">Dead letter</option></select></label>
-              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.failed-job-retry-report')} disabled={Boolean(actionId)}><FaRedo /> Retry report</button>
-              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.agent-performance-dashboard')} disabled={Boolean(actionId)}><FaChartLine /> Agent dashboard</button>
+              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('automation.failed-job-retry-plan')} disabled={Boolean(actionId)}><FaRedo /> Retry plan</button>
+              <button type="button" className="admin-action-secondary" onClick={() => runManualAutomation('analytics.agent-performance')} disabled={Boolean(actionId)}><FaChartLine /> Agent dashboard</button>
               <button type="button" className="admin-action-secondary" onClick={() => loadSwarm()}><FaSyncAlt /> Refresh</button>
             </div>
           </header>
