@@ -198,6 +198,43 @@ const TOOLS = [
   },
 ];
 
+const toolsForJobTypes = (jobTypes = []) => {
+  const supported = [...new Set(jobTypes.filter((value) => typeof value === 'string' && value.trim()).map((value) => value.trim()))];
+  if (!supported.length) {
+    return TOOLS.filter((tool) => !['create_swarm_job', 'create_fight_campaign'].includes(tool.name));
+  }
+  return TOOLS.map((tool) => {
+    if (tool.name === 'create_swarm_job') {
+      return {
+        ...tool,
+        parameters: {
+          ...tool.parameters,
+          properties: {
+            ...tool.parameters.properties,
+            jobType: { ...tool.parameters.properties.jobType, enum: supported },
+          },
+        },
+      };
+    }
+    if (tool.name === 'create_fight_campaign') {
+      return {
+        ...tool,
+        parameters: {
+          ...tool.parameters,
+          properties: {
+            ...tool.parameters.properties,
+            jobTypes: {
+              ...tool.parameters.properties.jobTypes,
+              items: { ...tool.parameters.properties.jobTypes.items, enum: supported },
+            },
+          },
+        },
+      };
+    }
+    return tool;
+  });
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -269,6 +306,7 @@ export default async function handler(req, res) {
       '/api/admin/swarm/artifacts?limit=12',
       '/api/admin/swarm/campaigns?limit=8',
       '/api/admin/swarm/catalog?fallbackLocal=true',
+      '/api/admin/swarm/job-types?source=local',
     ];
     const contextResults = await Promise.all(contextPaths.map((path) => adminFetch(path, token).catch(() => ({ ok: false, payload: null }))));
     const snapshot = compactSnapshot(
@@ -282,13 +320,16 @@ export default async function handler(req, res) {
         catalog: contextResults[4].ok ? contextResults[4].payload : null,
       },
     );
+    const supportedJobTypes = contextResults[5].ok && Array.isArray(contextResults[5].payload?.jobTypes)
+      ? contextResults[5].payload.jobTypes
+      : [];
     const history = sanitizeConversation(req.body?.messages);
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await client.responses.create({
       model: process.env.OPENAI_JARVIS_MODEL || process.env.OPENAI_MODEL || 'gpt-5',
       store: false,
-      tools: TOOLS,
+      tools: toolsForJobTypes(supportedJobTypes),
       instructions: [
         'You are Jarvis, the Fantasy MMAdness back-office operations assistant.',
         'You are the central assistant for fights, scoring, economics, affiliates, promoters, marketing, content, SEO, social media, data quality, growth, and Swarm automation.',
@@ -296,6 +337,9 @@ export default async function handler(req, res) {
         'Calling a tool only proposes the action for the admin to review and explicitly approve — it never executes by itself. Always fill in every field you can from the conversation and the snapshot; ask the admin for anything required that is missing rather than guessing at IDs or amounts.',
         'For requests not covered by a supplied tool, answer with analysis and exact next steps. Never claim an action ran unless the approved execution response confirms it.',
         'Treat the supplied back-office snapshot as current but possibly partial. Never invent missing fight records, metrics, payouts, statuses, or user data.',
+        supportedJobTypes.length
+          ? `For Swarm actions, use only one of these registered jobType values: ${supportedJobTypes.join(', ')}.`
+          : 'The registered Swarm job-type list is temporarily unavailable. Prefer a schedule or campaign action instead of inventing a jobType.',
         `Current read-only back-office snapshot: ${snapshot}`,
       ].join('\n'),
       input: [
