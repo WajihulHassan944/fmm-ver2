@@ -240,7 +240,8 @@ export const clearAdminTokenAndRedirect = (message = 'Your admin session expired
 };
 
 const buildUrl = (path, query) => {
-  const url = new URL(`${API_BASE_URL}${path}`);
+  const base = typeof window !== 'undefined' ? window.location.origin : API_BASE_URL;
+  const url = new URL(`${base}${path}`);
   if (query && typeof query === 'object') {
     Object.entries(query).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value));
@@ -255,7 +256,17 @@ export async function swarmRequest(path, options = {}) {
   const method = fetchOptions.method || (body ? 'POST' : 'GET');
   const isFormDataBody = typeof FormData !== 'undefined' && body instanceof FormData;
 
-  const response = await fetch(buildUrl(path, query), {
+  const requestUrl = isFormDataBody
+    ? (() => {
+        const url = new URL(`${API_BASE_URL}${path}`);
+        Object.entries(query || {}).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value));
+        });
+        return url.toString();
+      })()
+    : buildUrl(path, query);
+
+  const response = await fetch(requestUrl, {
     ...fetchOptions,
     method,
     headers: {
