@@ -33,6 +33,7 @@ import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { adminHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import {
+  getFallbackFighterImage,
   getFighterImage,
   getFighterName,
   getPublicFightDuplicateKey,
@@ -182,6 +183,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [showDataQuality, setShowDataQuality] = useState(false);
   const [retiringShadow, setRetiringShadow] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [fighterImageByName, setFighterImageByName] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -253,8 +255,34 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     // so a fight created after that point never showed up here otherwise.
     dispatch(fetchMatches({ includeDrafts: true }));
     loadNormalMatches();
+    fightDataQualityApi.combatFighters({ limit: 2000 })
+      .then((payload) => {
+        const rows = normalizeMatchFeedRows(payload);
+        const imageMap = {};
+        rows.forEach((fighter) => {
+          const image = fighter?.primaryImage || fighter?.image || fighter?.fighterImage || '';
+          if (!image) return;
+          [fighter?.displayName, fighter?.name, fighter?.normalizedName, ...(Array.isArray(fighter?.aliases) ? fighter.aliases : [])]
+            .filter(Boolean)
+            .forEach((name) => { imageMap[String(name).trim().toLowerCase()] = image; });
+        });
+        setFighterImageByName(imageMap);
+      })
+      .catch(() => setFighterImageByName({}));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
+
+  const getRegistryFighterMedia = (fight, side) => {
+    const generic = getFallbackFighterImage(side);
+    const stored = getFighterImage(fight, side);
+    const libraryImage = fighterImageByName[String(getFighterName(fight, side)).trim().toLowerCase()] || '';
+    return {
+      // The managed fighter library is authoritative and also repairs old
+      // fight rows that contain expired upload URLs.
+      src: libraryImage || stored,
+      fallback: generic,
+    };
+  };
 
   const allRows = useMemo(() => normalizeRows(matches), [matches]);
 
@@ -1242,6 +1270,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                 const status = getRegistryStatus(fight);
                 const isFinished = isFinishedFight(fight);
                 const isLive = String(fight.matchType || '').toUpperCase() === 'LIVE';
+                const fighterAMedia = getRegistryFighterMedia(fight, 'A');
+                const fighterBMedia = getRegistryFighterMedia(fight, 'B');
                 return (
                   <tr key={`${fight.__source}-${id || index}`}>
                     <td>
@@ -1251,7 +1281,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><OptimizedImage src={getFighterImage(fight, 'A') || FALLBACK_A} fallbackSrc={FALLBACK_A} alt="" width={54} height={54} sizes="54px" /><OptimizedImage src={getFighterImage(fight, 'B') || FALLBACK_B} fallbackSrc={FALLBACK_B} alt="" width={54} height={54} sizes="54px" /></span>
+                        <span><OptimizedImage src={fighterAMedia.src || FALLBACK_A} fallbackSrc={fighterAMedia.fallback || FALLBACK_A} alt={`${getFighterName(fight, 'A')} photo`} width={54} height={54} sizes="54px" /><OptimizedImage src={fighterBMedia.src || FALLBACK_B} fallbackSrc={fighterBMedia.fallback || FALLBACK_B} alt={`${getFighterName(fight, 'B')} photo`} width={54} height={54} sizes="54px" /></span>
                         <div><strong>{getTitle(fight)}</strong><small>{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')}</small><small>ID: {id}</small></div>
                       </div>
                     </td>
