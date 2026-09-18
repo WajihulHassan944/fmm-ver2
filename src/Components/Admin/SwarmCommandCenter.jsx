@@ -270,7 +270,9 @@ const SwarmCommandCenter = () => {
     });
   }, [catalogRows, filters.group, filters.search, filters.vertical, settings]);
 
-  const online = Boolean(health?.swarmReachable);
+  const ionosOnline = Boolean(health?.swarmReachable);
+  const localOnline = Boolean(health?.localWorkerReachable || config?.localWorkerEnabled);
+  const online = ionosOnline || localOnline;
   const globalSettings = settings?.global || {};
 
   const showMessage = useCallback((nextMessage, { scroll = true } = {}) => {
@@ -1051,8 +1053,10 @@ const SwarmCommandCenter = () => {
             </header>
             <div className="admin-swarm-health-list">
               <p><strong>Backend gateway</strong><span>{config ? 'Installed' : 'Not loaded'}</span></p>
-              <p><strong>Swarm enabled</strong><span>{config?.enabled ? 'Yes' : 'No'}</span></p>
-              <p><strong>IONOS reachable</strong><span>{online ? 'Yes' : 'No'}</span></p>
+              <p><strong>Automation available</strong><span>{online ? 'Yes' : 'No'}</span></p>
+              <p><strong>Worker mode</strong><span>{health?.workerMode || config?.workerMode || '—'}</span></p>
+              <p><strong>IONOS worker</strong><span>{ionosOnline ? 'Online' : 'Unavailable'}</span></p>
+              <p><strong>Self-contained worker</strong><span>{localOnline ? 'Online' : 'Unavailable'}</span></p>
               <p><strong>Default mode</strong><span>{config?.defaultMode || globalSettings.defaultMode || '—'}</span></p>
               <p><strong>Global pause</strong><span>{globalSettings.paused ? 'Paused' : 'Active'}</span></p>
               <p><strong>Social publishing</strong><span>{config?.socialPublishEnabled && globalSettings.socialPublishEnabled ? 'Enabled' : 'Draft only'}</span></p>
