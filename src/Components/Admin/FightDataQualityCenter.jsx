@@ -53,6 +53,7 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
   const [fightersPayload, setFightersPayload] = useState(null);
   const [fighterSearch, setFighterSearch] = useState('');
   const [suggestionsPayload, setSuggestionsPayload] = useState(null);
+  const [deletePreview, setDeletePreview] = useState(null);
 
   const duplicateGroups = useMemo(() => getRows(duplicatePayload), [duplicatePayload]);
   const imageRows = useMemo(() => getRows(imagePayload), [imagePayload]);
@@ -140,21 +141,32 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
     setSelectedDeleteIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   };
 
+  const isProtectedDuplicate = (match = {}) => {
+    const status = String(match.matchStatus || match.status || '').toLowerCase();
+    return Boolean(match.hasStats) || /live|active|progress|scoring/.test(status);
+  };
+
   const selectSuggestedDeletes = (group) => {
     const preserveId = String(group.preserveSuggestion || '');
-    const ids = (group.matches || []).map((item) => String(item.id)).filter((id) => id && id !== preserveId);
+    const ids = (group.matches || [])
+      .filter((item) => !isProtectedDuplicate(item))
+      .map((item) => String(item.id))
+      .filter((id) => id && id !== preserveId);
     setSelectedDeleteIds((current) => Array.from(new Set([...current, ...ids])));
+    setDeletePreview(null);
   };
 
   const runDuplicateDelete = async (dryRun = true) => {
     if (!selectedDeleteIds.length) return toast.warning('Select duplicate fight IDs first.');
     if (!dryRun) {
-      const confirmed = window.confirm(`Delete ${selectedDeleteIds.length} selected duplicate fight record(s)? This cannot be undone.`);
-      if (!confirmed) return;
+      if (!deletePreview) return toast.warning('Run the dry-run immediately before deleting these records.');
+      const confirmation = window.prompt(`Permanent deletion of ${selectedDeleteIds.length} fight record(s). Type DELETE to continue.`);
+      if (confirmation !== 'DELETE') return toast.info('Deletion cancelled.');
     }
     setActionId(dryRun ? 'dry-run-delete' : 'delete');
     try {
       const payload = await fightDataQualityApi.deleteDuplicateFights(selectedDeleteIds, dryRun);
+      if (dryRun) setDeletePreview({ ids: [...selectedDeleteIds], count: payload?.deleteCount ?? selectedDeleteIds.length });
       toast.success(dryRun ? `${payload?.deleteCount || 0} fights would be deleted.` : `${payload?.deletedCount || 0} duplicate fights deleted.`);
       if (!dryRun) {
         setSelectedDeleteIds([]);
@@ -230,9 +242,14 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
           </div>
           <div className="admin-bulk-actions">
             <button type="button" className="admin-action-secondary" disabled={!selectedDeleteIds.length || Boolean(actionId)} onClick={() => runDuplicateDelete(true)}><FaCheck /> Dry-run selected</button>
-            <button type="button" className="admin-danger-action" disabled={!selectedDeleteIds.length || Boolean(actionId)} onClick={() => runDuplicateDelete(false)}><FaTrashAlt /> Delete selected</button>
+            <button type="button" className="admin-danger-action" disabled={!selectedDeleteIds.length || Boolean(actionId) || !deletePreview || deletePreview.ids.join(',') !== selectedDeleteIds.join(',')} onClick={() => runDuplicateDelete(false)}><FaTrashAlt /> Delete selected</button>
             <small>{duplicatePayload?.strategy || 'LIVE and SHADOW records may intentionally coexist, so review before deleting.'}</small>
           </div>
+          <div className="admin-quality-safety-guide">
+            <FaUserShield />
+            <div><strong>Safe cleanup is enforced</strong><span>Suggested selection skips scored, live, active, and in-progress records. Run the dry-run after your final selection; permanent deletion stays locked until it passes.</span></div>
+          </div>
+          {deletePreview && <div className="admin-quality-delete-preview"><FaCheck /><span>Dry-run passed: {deletePreview.count} selected record(s) are ready for final review. Changing the selection locks deletion again.</span></div>}
           <div className="admin-quality-group-list">
             {!duplicateGroups.length ? <div className="admin-swarm-empty"><FaDatabase /><strong>No duplicate groups found</strong><span>Run the checker again after importing new fight data.</span></div> : duplicateGroups.map((group) => (
               <article key={group.key} className="admin-quality-group-card">
@@ -246,7 +263,8 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
                     <tbody>{(group.matches || []).map((match) => {
                       const id = String(match.id || '');
                       const preserve = id === String(group.preserveSuggestion || '');
-                      return <tr key={id} className={preserve ? 'is-preserve-row' : ''}><td><input type="checkbox" disabled={preserve} checked={selectedDeleteIds.includes(id)} onChange={() => toggleDeleteId(id)} /></td><td><strong>{match.matchName || 'Untitled'}</strong><small>{match.matchFighterA} vs {match.matchFighterB}</small></td><td>{match.matchType || '—'}</td><td><span className="admin-status-badge is-warning">{match.matchStatus || '—'}</span></td><td>{match.hasStats ? 'Yes' : 'No'}</td><td>{match.hasImages ? 'Yes' : 'No'}</td><td>{formatDate(match.updatedAt)}</td></tr>;
+                      const protectedRecord = isProtectedDuplicate(match);
+                      return <tr key={id} className={preserve ? 'is-preserve-row' : protectedRecord ? 'is-protected-row' : ''}><td><input type="checkbox" disabled={preserve} checked={selectedDeleteIds.includes(id)} onChange={() => { toggleDeleteId(id); setDeletePreview(null); }} /></td><td><strong>{match.matchName || 'Untitled'}</strong><small>{match.matchFighterA} vs {match.matchFighterB}</small>{preserve && <em className="admin-quality-record-label is-keep">KEEP</em>}{!preserve && protectedRecord && <em className="admin-quality-record-label is-review">MANUAL REVIEW</em>}</td><td>{match.matchType || '—'}</td><td><span className="admin-status-badge is-warning">{match.matchStatus || '—'}</span></td><td>{match.hasStats ? 'Yes — protected' : 'No'}</td><td>{match.hasImages ? 'Yes' : 'No'}</td><td>{formatDate(match.updatedAt)}</td></tr>;
                     })}</tbody>
                   </table>
                 </div>
@@ -268,6 +286,7 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
             </div>
           </header>
           <small className="admin-swarm-note">Remote checks are read-only. They verify 404/missing URLs but never replace images automatically.</small>
+          <div className="admin-quality-safety-guide"><FaImage /><div><strong>Repair, do not delete</strong><span>Use this report to find the affected fight. Open Fight Registry to replace the broken fighter or poster image while preserving scores, entries, and promotion history.</span><a className="admin-action-secondary" href="/administration/fights">Open Fight Registry</a></div></div>
           <div className="admin-data-table-scroll">
             <table className="admin-data-table admin-quality-table">
               <thead><tr><th>Fight</th><th>Fighters</th><th>Type</th><th>Status</th><th>Broken fields</th><th>Image statuses</th></tr></thead>
@@ -299,6 +318,7 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
               <button type="button" className="admin-action-secondary" onClick={loadSuggestions} disabled={Boolean(actionId)}><FaPlus /> Suggest</button>
             </header>
             <small className="admin-swarm-note">Suggestions are dry-run. Use “Create” only after reviewing the name and image candidate.</small>
+            <a className="admin-action-secondary" href="/administration/fighters"><FaEdit /> Edit, archive, or restore fighters</a>
             <div className="admin-quality-suggestion-list">
               {fighterSuggestions.slice(0, 12).map((suggestion) => <article key={`${suggestion.category}-${suggestion.normalizedName}`}><strong>{suggestion.displayName}</strong><span>{suggestion.category} · {suggestion.matchCount} matches</span>{suggestion.primaryImageCandidate ? <a href={suggestion.primaryImageCandidate} target="_blank" rel="noreferrer">Preview image</a> : <em>No image candidate</em>}<button type="button" className="admin-topbar-primary" disabled={Boolean(actionId)} onClick={() => createFighterFromSuggestion(suggestion)}><FaPlus /> Create</button></article>)}
               {!fighterSuggestions.length && <p className="admin-swarm-note">No suggestions loaded yet.</p>}
@@ -316,6 +336,7 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
             <article><small>RW</small><strong>{points.RW}</strong><span>{scoringConfig?.labels?.RW}</span></article>
             <article><small>RL</small><strong>{points.RL}</strong><span>{scoringConfig?.labels?.RL}</span></article>
           </div>
+          <div className="admin-quality-safety-guide"><FaBolt /><div><strong>Reference only</strong><span>This screen reads the backend scoring source. It does not erase scores or rewrite finished fights.</span></div></div>
           <div className="admin-swarm-section-preview">
             <section><strong>Radio-style admin selection</strong><p>Admin selects the round winner/finish outcome once. Opponent RW/RL and KO/SP values are derived consistently from backend config.</p></section>
             <section><strong>No stat auto-calculation</strong><p>Actual fight stats such as punches, strikes, kicks, knockdowns, and elbows stay manually editable and are not auto-calculated.</p></section>
