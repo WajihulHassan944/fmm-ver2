@@ -129,12 +129,14 @@ const REGISTRY_VIEW_COPY = [
 ];
 
 const isRenderable = (value) => typeof value === 'string' && value.trim() && !['null', 'undefined'].includes(value.trim().toLowerCase());
+const isRealFighterImage = (value = '') => isRenderable(value) && !String(value).includes('/images/fmm-experience/fighter-action-');
 
 const adminFightQualityScore = (fight = {}) => {
   const typeScore = String(fight?.matchType || '').toUpperCase() === 'LIVE' ? 10000 : 0;
   const status = String(fight?.matchStatus || fight?.matchShadowStatus || '').toLowerCase();
   const statusScore = status === 'ongoing' ? 600 : status === 'finished' ? 400 : 100;
-  const imageScore = [getFighterImage(fight, 'A'), getFighterImage(fight, 'B'), fight?.promotionBackground].filter(isRenderable).length * 50;
+  const imageScore = [getFighterImage(fight, 'A'), getFighterImage(fight, 'B')].filter(isRealFighterImage).length * 50
+    + (isRenderable(fight?.promotionBackground) ? 50 : 0);
   const statsScore = (Array.isArray(fight?.BoxingMatch?.fighterOneStats) && fight.BoxingMatch.fighterOneStats.length)
     || (Array.isArray(fight?.MMAMatch?.fighterOneStats) && fight.MMAMatch.fighterOneStats.length)
     ? 120 : 0;
@@ -297,19 +299,36 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
+  const allRows = useMemo(() => normalizeRows(matches), [matches]);
+
+  const fightRecordImageMaps = useMemo(() => {
+    const byName = {};
+    const byEvent = {};
+    allRows.forEach((row) => {
+      const eventKey = String(row?.matchName || '').trim().toLowerCase();
+      const images = {};
+      ['A', 'B'].forEach((side) => {
+        const image = getFighterImage(row, side);
+        if (!isRealFighterImage(image)) return;
+        byName[String(getFighterName(row, side)).trim().toLowerCase()] = image;
+        images[side] = image;
+      });
+      if (eventKey && (images.A || images.B)) byEvent[eventKey] = { ...(byEvent[eventKey] || {}), ...images };
+    });
+    return { byName, byEvent };
+  }, [allRows]);
+
   const getRegistryFighterMedia = (fight, side) => {
     const generic = getFallbackFighterImage(side);
     const stored = getFighterImage(fight, side);
-    const libraryImage = fighterImageByName[String(getFighterName(fight, side)).trim().toLowerCase()] || '';
-    return {
-      // The managed fighter library is authoritative and also repairs old
-      // fight rows that contain expired upload URLs.
-      src: libraryImage || stored,
-      fallback: generic,
-    };
+    const nameKey = String(getFighterName(fight, side)).trim().toLowerCase();
+    const eventKey = String(fight?.matchName || '').trim().toLowerCase();
+    const recovered = fighterImageByName[nameKey]
+      || fightRecordImageMaps.byName[nameKey]
+      || fightRecordImageMaps.byEvent[eventKey]?.[side]
+      || '';
+    return { src: recovered || stored, fallback: generic };
   };
-
-  const allRows = useMemo(() => normalizeRows(matches), [matches]);
 
   const registryRows = useMemo(() => {
     const rows = registryView === 'unique' ? dedupeAdminFightRows(allRows) : allRows;
