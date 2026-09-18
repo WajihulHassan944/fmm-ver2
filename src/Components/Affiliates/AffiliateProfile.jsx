@@ -24,7 +24,7 @@ import {
   ExperienceHero,
   ExperienceSectionHeading,
 } from '@/Components/Theme/ExperiencePrimitives';
-import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
+import { AFFILIATE_AVATAR_FALLBACK, safeArray, useImageFallback } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const API_BASE = PUBLIC_API_BASE_URL;
@@ -35,7 +35,7 @@ const AffiliateProfile = () => {
 
   const [profileUrl, setProfileUrl] = useState(affiliate?.profileUrl || null);
   const [profilePreview, setProfilePreview] = useState(
-    affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`,
+    affiliate?.profileUrl || AFFILIATE_AVATAR_FALLBACK,
   );
   const [firstName, setFirstName] = useState(affiliate?.firstName || '');
   const [lastName, setLastName] = useState(affiliate?.lastName || '');
@@ -65,7 +65,7 @@ const AffiliateProfile = () => {
       return () => URL.revokeObjectURL(objectUrl);
     }
 
-    setProfilePreview(profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`);
+    setProfilePreview(profileUrl || AFFILIATE_AVATAR_FALLBACK);
     return undefined;
   }, [profileUrl]);
 
@@ -172,7 +172,7 @@ const AffiliateProfile = () => {
                 <form className="affiliate-settings-card affiliate-profile-form affiliate-profile-editor-card" onSubmit={handleSubmit}>
                   <div className="affiliate-avatar-editor">
                     <div>
-                      <img src={profilePreview} alt={fullName} />
+                      <img src={profilePreview} alt={fullName} onError={useImageFallback} />
                       <label htmlFor="affiliate-avatar"><FaCamera /> Change photo</label>
                       <input
                         id="affiliate-avatar"
@@ -207,11 +207,10 @@ const AffiliateProfile = () => {
 
                 <aside className="affiliate-profile-preview-card">
                   <div className="affiliate-profile-preview-media" aria-hidden="true">
-                    <img src={`${FMM_ASSET_BASE}/fighter-david-benavidez.webp`} alt="" />
                     <span>Creator card</span>
                   </div>
                   <div className="affiliate-profile-preview-content">
-                    <div className="affiliate-profile-preview-avatar"><img src={profilePreview} alt={fullName} /></div>
+                    <div className="affiliate-profile-preview-avatar"><img src={profilePreview} alt={fullName} onError={useImageFallback} /></div>
                     <p className="xp-eyebrow">Public profile preview</p>
                     <h2>{fullName}</h2>
                     <strong>@{playerName || 'creator'}</strong>
