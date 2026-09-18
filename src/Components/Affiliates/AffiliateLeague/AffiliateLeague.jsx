@@ -195,14 +195,21 @@ const AffiliateLeague = () => {
   const referralUrl = `https://fantasymmadness.com/my-fantasy-team?referenceId=${affiliate?._id || ''}`;
 
   const manageMember = async (member, action) => {
-    const labels = { archive: 'archive', restore: 'restore', mark_test: 'mark as a test account', unmark_test: 'remove the test label from', remove: 'remove from this affiliate league' };
+    const labels = { archive: 'archived', restore: 'restored', mark_test: 'moved to Test accounts', unmark_test: 'returned to the active roster', remove: 'removed from this affiliate league' };
     if (action === 'remove' && !window.confirm(`Remove ${member.email} from this affiliate's office? Their FANTASY MMADNESS account, wallet, predictions and winnings will not be deleted.`)) return;
+    if (action === 'mark_test' && !window.confirm(`Mark ${member.email} as a test account?\n\nThis only moves the member to the Test accounts list. It does not change email verification, login access, wallet, predictions, or winnings.`)) return;
+    if (action === 'unmark_test' && !window.confirm(`Return ${member.email} to the active roster?\n\nThis removes only the test-account label. It does not change email verification or account access.`)) return;
     setMemberAction(`${member.key || member.id}:${action}`);
     try {
-      await fullCardRequest(`/api/affiliates/me/league-members/${encodeURIComponent(member.key || member.id)}`, {
+      const result = await fullCardRequest(`/api/affiliates/me/league-members/${encodeURIComponent(member.key || member.id)}`, {
         method: 'PATCH', kind: 'affiliate', body: { action },
       });
-      toast.success(`Member ${labels[action]} updated.`);
+      if (result?.member) {
+        setMembers((current) => current.map((row) => (
+          (row.key || row.id) === (result.member.key || result.member.id) ? result.member : row
+        )));
+      }
+      toast.success(`Member ${labels[action]}.`);
       setReloadKey((value) => value + 1);
     } catch (actionError) {
       toast.error(actionError.message || 'The roster could not be updated.');
@@ -342,7 +349,7 @@ const AffiliateLeague = () => {
                             </div>
                           </td>
                           <td>{member.plan}</td>
-                          <td><span className={`affiliate-member-status ${member.verified ? 'is-verified' : ''}`}>{member.verified ? 'Active' : 'Email not verified'}</span></td>
+                          <td><span className={`affiliate-member-status ${member.verified ? 'is-verified' : ''}`}>{member.verified ? 'Verified' : 'Pending verification'}</span></td>
                           <td>{formatMemberDate(member.lastActiveAt)}</td>
                           <td>{formatMemberDate(member.joinedAt)}</td>
                           <td>
@@ -352,7 +359,14 @@ const AffiliateLeague = () => {
                               ) : (
                                 <>
                                   <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'archive')}><FaArchive /> Archive</button>
-                                  <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, member.testAccount ? 'unmark_test' : 'mark_test')}>{member.testAccount ? 'Real member' : 'Test'}</button>
+                                  <button
+                                    type="button"
+                                    disabled={Boolean(memberAction)}
+                                    title={member.testAccount ? 'Remove the test-account label' : 'Move this member to the Test accounts list'}
+                                    onClick={() => manageMember(member, member.testAccount ? 'unmark_test' : 'mark_test')}
+                                  >
+                                    {member.testAccount ? 'Remove test label' : 'Mark as test'}
+                                  </button>
                                   <button type="button" className="is-remove" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'remove')}><FaTrash /> Remove</button>
                                 </>
                               )}
