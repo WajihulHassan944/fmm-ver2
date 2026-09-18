@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { adminHeaders } from '@/Utils/authFetch';
 
 const TweetUploader = () => {
   const [prompt, setPrompt] = useState('');
@@ -22,7 +23,7 @@ const TweetUploader = () => {
     try {
       const gptRes = await fetch('/api/tweet-gpt', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ prompt }),
       });
 
@@ -50,7 +51,7 @@ const TweetUploader = () => {
     try {
       const tweetRes = await fetch('/api/tweet', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ prompt: generatedTweet }),
       });
 
