@@ -96,28 +96,38 @@ export const getFighterImage = (match, side = 'A', index = 0) => {
         // Highest priority: normalized fighter-library/database image fields.
         match?.fighterAPrimaryImage,
         match?.fighterAResolvedImage,
+        match?.fighterAImageResolved,
         match?.resolvedFighterAImage,
+        match?.featuredFightFighterAImage,
         getNestedImageValue(match?.fighterA),
         getNestedImageValue(match?.fighterAId),
         getNestedImageValue(match?.fighterOne),
         getNestedImageValue(match?.fighterOneId),
         // Fallback only: legacy fight-side images kept for old records.
         match?.fighterAImage,
+        match?.fighterAImageUrl,
+        match?.fighterAImageURL,
         match?.matchFighterAImage,
         match?.fighterOneImage,
+        match?.fighterOneImageUrl,
         match?.imageA,
       ]
     : [
         match?.fighterBPrimaryImage,
         match?.fighterBResolvedImage,
+        match?.fighterBImageResolved,
         match?.resolvedFighterBImage,
+        match?.featuredFightFighterBImage,
         getNestedImageValue(match?.fighterB),
         getNestedImageValue(match?.fighterBId),
         getNestedImageValue(match?.fighterTwo),
         getNestedImageValue(match?.fighterTwoId),
         match?.fighterBImage,
+        match?.fighterBImageUrl,
+        match?.fighterBImageURL,
         match?.matchFighterBImage,
         match?.fighterTwoImage,
+        match?.fighterTwoImageUrl,
         match?.imageB,
       ];
   const direct = pickRenderableImage(...candidates);
