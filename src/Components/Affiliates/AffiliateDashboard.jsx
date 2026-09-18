@@ -32,6 +32,7 @@ import {
   getFightCategory,
   getFightId,
   getFightRounds,
+  getFightStatus,
   getFighterImage,
   safeArray,
 } from '@/Utils/fightExperience';
@@ -46,19 +47,26 @@ const isShadowLikeFight = (match = {}) => {
   return source.includes('shadow');
 };
 
-// Past LIVE cards were historically copied into the Shadow collection by a
-// date-based cron job even when nobody scored or approved them as affiliate
-// inventory. Those rollover copies are production records, not templates.
+// A Shadow record becomes reusable affiliate inventory only after official
+// round scoring has been saved for both fighters.
 const isApprovedAffiliateTemplate = (match = {}) => {
   if (!isShadowLikeFight(match)) return false;
-  const autoConverted = Boolean(match?.sourceMatchId || match?.convertedFromLiveAt);
-  const explicitlyApproved = Boolean(
-    match?.approvedForAffiliateTemplate
-    || match?.affiliateTemplateApproved
-    || match?.isAffiliateTemplate,
-  );
-  return !autoConverted || explicitlyApproved;
+  const hasCompleteStats = (container) => Array.isArray(container?.fighterOneStats)
+    && container.fighterOneStats.length > 0
+    && Array.isArray(container?.fighterTwoStats)
+    && container.fighterTwoStats.length > 0;
+  if (!hasCompleteStats(match?.BoxingMatch) && !hasCompleteStats(match?.MMAMatch)) return false;
+  return true;
 };
+
+const isPromotableLiveFight = (match = {}) => (
+  !isShadowLikeFight(match)
+  && getFightStatus(match) !== 'past'
+  && !/draft|cancel/i.test(String(match?.matchStatus || match?.status || ''))
+  && String(match?.matchBy || '').toLowerCase() !== 'affiliate'
+  && !match?.sourceShadowId
+  && !match?.sourceLiveMatchId
+);
 
 const isPromotedByAffiliate = (match = {}, affiliateId = '') => {
   if (!affiliateId) return false;
@@ -105,12 +113,14 @@ const AffiliateDashboard = () => {
   const matchStatus = useSelector((state) => state.matches.status);
 
   const [shadowMatchId, setShadowMatchId] = useState(null);
+  const [promotionSourceType, setPromotionSourceType] = useState('shadow');
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null, initialMatch: null });
   const [promoMatches, setPromoMatches] = useState([]);
   const [affiliatePromotedFights, setAffiliatePromotedFights] = useState([]);
   const [promoLoading, setPromoLoading] = useState(true);
   const [promoError, setPromoError] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+  const [liveStartIndex, setLiveStartIndex] = useState(0);
   const [promoStartIndex, setPromoStartIndex] = useState(0);
   const [promotedStartIndex, setPromotedStartIndex] = useState(0);
   const [wrestlingSummary, setWrestlingSummary] = useState(null);
@@ -152,7 +162,7 @@ const AffiliateDashboard = () => {
 
       try {
         const [legacyResult, publicRows] = await Promise.allSettled([
-          fetch(`${API_BASE}/shadow?compact=promotion&limit=150&includeDrafts=true`).then(async (response) => {
+          fetch(`${API_BASE}/shadow?compact=promotion&limit=150&scoredOnly=true`).then(async (response) => {
             if (!response.ok) throw new Error('Failed to fetch shadow templates');
             return response.json();
           }),
@@ -217,6 +227,11 @@ const AffiliateDashboard = () => {
   const promotionFights = useMemo(
     () => dedupeAffiliateFightRows(safeArray(promoMatches).filter(isApprovedAffiliateTemplate)),
     [promoMatches],
+  );
+
+  const livePromotionFights = useMemo(
+    () => dedupeAffiliateFightRows(liveMatches.filter(isPromotableLiveFight)),
+    [liveMatches],
   );
 
   const legacyPromotedFights = useMemo(
@@ -299,7 +314,7 @@ const AffiliateDashboard = () => {
         <button type="button" className="xp-dashboard-back" onClick={() => setShadowMatchId(null)}>
           <FaArrowLeft /> Back to affiliate dashboard
         </button>
-        <AffiliateAddNewMatch matchId={shadowMatchId} />
+        <AffiliateAddNewMatch matchId={shadowMatchId} sourceType={promotionSourceType} />
       </div>
     );
   }
@@ -441,9 +456,60 @@ const AffiliateDashboard = () => {
 
             <section className="xp-page-section" id="shadow-templates">
               <ExperienceSectionHeading
+                eyebrow="Current fight inventory"
+                title="Promote a live fight"
+                description="Create an affiliate campaign from a scheduled or live fight. These fights remain live records and do not become Shadow templates."
+              />
+
+              {livePromotionFights.length ? (
+                <>
+                  <div className="xp-affiliate-fight-grid">
+                    {livePromotionFights.slice(liveStartIndex, liveStartIndex + MAX_CARDS).map((match, index) => {
+                      const fightId = getFightId(match);
+                      const displayIndex = liveStartIndex + index;
+                      return (
+                        <article className="xp-affiliate-fight-card is-live-source" key={fightId || displayIndex}>
+                          <div className="xp-affiliate-fight-media">
+                            <figure><img src={getFighterImage(match, 'A', displayIndex)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
+                            <span>VS</span>
+                            <figure><img src={getFighterImage(match, 'B', displayIndex)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
+                            <i>{getFightCategory(match)}</i>
+                          </div>
+                          <div className="xp-affiliate-fight-copy">
+                            <p>Live fight</p>
+                            <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
+                            <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Live fight promotion'}</span></div>
+                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
+                              setPromotionSourceType('live');
+                              setShadowMatchId(fightId);
+                            }}>
+                              Promote live fight <FaArrowRight />
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  {renderPagination({
+                    startIndex: liveStartIndex,
+                    total: livePromotionFights.length,
+                    label: 'Live fight',
+                    onPrevious: () => setLiveStartIndex((current) => Math.max(0, current - MAX_CARDS)),
+                    onNext: () => setLiveStartIndex((current) => (
+                      current + MAX_CARDS < livePromotionFights.length ? current + MAX_CARDS : current
+                    )),
+                  })}
+                </>
+              ) : (
+                <ExperienceEmptyState title="No live fights are available" description="Scheduled and live fights will appear here when they are ready to promote." />
+              )}
+            </section>
+
+            <section className="xp-page-section" id="scored-shadow-templates">
+              <ExperienceSectionHeading
                 eyebrow="Approved fight inventory"
-                title="Shadow fight templates"
-                description="All available Shadow/template fights appear here. Create a new promotion, or reopen a campaign you already promoted."
+                title="Scored Shadow fight templates"
+                description="Only completed fights with official scoring saved for both fighters appear here."
               />
 
               {promoLoading ? (
@@ -473,7 +539,7 @@ const AffiliateDashboard = () => {
                               className="theme-btn theme-btn-primary"
                               onClick={() => isPromotedByAffiliate(match, affiliateId)
                                 ? setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match })
-                                : setShadowMatchId(fightId)}
+                                : (() => { setPromotionSourceType('shadow'); setShadowMatchId(fightId); })()}
                             >
                               {isPromotedByAffiliate(match, affiliateId) ? 'Open campaign' : 'Create promotion'} <FaArrowRight />
                             </button>
