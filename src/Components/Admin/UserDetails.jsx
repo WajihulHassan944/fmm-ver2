@@ -73,13 +73,15 @@ const UserDetails = ({ user }) => {
         }),
         body: JSON.stringify(emailData),
       });
+      const payload = await response.json().catch(() => ({}));
 
       if (response.ok) {
         setButtonText('Sent Successfully!');
-        setEmailStatus('Email sent successfully');
+        setEmailStatus(payload.message || 'Email sent successfully');
       } else {
-        setEmailStatus('Failed to send email');
-        setButtonText('Failed to send email');
+        const failure = payload.message || `Failed to send email (${response.status})`;
+        setEmailStatus(failure);
+        setButtonText('Try Again');
       }
     } catch (error) {
       console.error('Error sending email:', error);
