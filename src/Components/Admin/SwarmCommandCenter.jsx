@@ -221,6 +221,7 @@ const SwarmCommandCenter = () => {
   const requestedFightId = String(router.query?.fightId || router.query?.matchId || '').trim();
   const requestedCampaignId = String(router.query?.campaignId || '').trim();
   const requestedScopeLabel = String(router.query?.scopeLabel || router.query?.fightLabel || '').trim();
+  const requestedJobType = String(router.query?.jobType || '').trim();
 
   useEffect(() => {
     const requestedTab = String(router.query?.tab || '');
@@ -248,6 +249,10 @@ const SwarmCommandCenter = () => {
   const settings = useMemo(() => getAutomationSettingsFromPayload(settingsPayload), [settingsPayload]);
   const dashboard = useMemo(() => getAutomationDashboardFromPayload(dashboardPayload), [dashboardPayload]);
   const catalogRows = useMemo(() => buildCatalogRows(catalog), [catalog]);
+  useEffect(() => {
+    if (!requestedJobType || !catalogRows.some((item) => item.value === requestedJobType)) return;
+    setForm((current) => ({ ...current, jobType: requestedJobType }));
+  }, [catalogRows, requestedJobType]);
   const counts = useMemo(() => normalizeDashboardCounts(dashboard, health), [dashboard, health]);
   const displayedCampaigns = useMemo(() => campaigns.map(normalizeCampaignDisplay), [campaigns]);
   const activeFightScope = filters.fightId.trim();
