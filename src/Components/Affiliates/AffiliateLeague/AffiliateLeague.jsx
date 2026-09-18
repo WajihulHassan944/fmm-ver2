@@ -95,18 +95,11 @@ const AffiliateLeague = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [copied, setCopied] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
-  const [rosterFilter, setRosterFilter] = useState('active');
+  const [rosterFilter, setRosterFilter] = useState('all');
   const [memberAction, setMemberAction] = useState('');
 
   useEffect(() => {
     if (!affiliate) return;
-
-    if (!joinedMembers.length) {
-      setMembers([]);
-      setLoading(false);
-      setError('');
-      return;
-    }
 
     let active = true;
     const fallbackMembers = joinedMembers.map((entry, index) => buildMember(entry, [], index));
@@ -383,7 +376,11 @@ const AffiliateLeague = () => {
                         <tr>
                           <td colSpan="7">
                             <div className="xp-table-empty">
-                              {search ? 'No league members match this search.' : 'No members have joined this affiliate league yet.'}
+                              {search
+                                ? 'No league members match this search.'
+                                : members.length
+                                  ? `No members are in the ${rosterFilter} view. Choose All members to see the complete roster.`
+                                  : 'No members have joined this affiliate league yet.'}
                             </div>
                           </td>
                         </tr>
