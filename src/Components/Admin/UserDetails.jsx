@@ -81,7 +81,8 @@ const UserDetails = ({ user }) => {
         setEmailStatus(payload.message || 'Email sent successfully');
       } else {
         const diagnostic = [payload.code, payload.command, payload.responseCode].filter(Boolean).join(' / ');
-        const failure = `${payload.message || `Failed to send email (${response.status})`}${diagnostic ? ` (${diagnostic})` : ''}`;
+        const providerDetail = String(payload.providerResponse || '').trim();
+        const failure = `${payload.message || `Failed to send email (${response.status})`}${diagnostic ? ` (${diagnostic})` : ''}${providerDetail ? ` Provider response: ${providerDetail}` : ''}`;
         setEmailStatus(failure);
         setButtonText('Try Again');
       }
