@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import {
   FaArrowRight,
   FaBell,
@@ -30,7 +29,6 @@ const VisitorsAnalytics = dynamic(() => import('./VisitorsAnalytics'), {
 });
 
 const Admin = () => {
-  const router = useRouter();
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState('');
@@ -66,57 +64,24 @@ const Admin = () => {
     fetchFeatureDemand();
   }, []);
 
-  const fetchDashboardCounts = useCallback(async () => {
+  useEffect(() => {
+    const fetchDashboardCounts = async () => {
       try {
-        setIsLoading(true);
+        const response = await fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() });
+        if (!response.ok) throw new Error(response.status === 401 || response.status === 403 ? 'Admin session expired' : `Backend returned ${response.status}`);
+        const data = await response.json();
+        setDashboardCounts(data);
         setDashboardError('');
-        const [countsResult, affiliatesResult] = await Promise.allSettled([
-          fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() }),
-          fetch(buildPublicApiUrl('/affiliates'), { headers: adminHeaders() }),
-        ]);
-        const countsResponse = countsResult.status === 'fulfilled' ? countsResult.value : null;
-        const affiliatesResponse = affiliatesResult.status === 'fulfilled' ? affiliatesResult.value : null;
-        const countsPayload = countsResponse ? await countsResponse.json().catch(() => ({})) : {};
-        const affiliatesPayload = affiliatesResponse ? await affiliatesResponse.json().catch(() => []) : [];
-        const sessionRejected = [countsResponse, affiliatesResponse]
-          .filter(Boolean)
-          .some((response) => response.status === 401 || response.status === 403);
-        if (sessionRejected) {
-          if (typeof window !== 'undefined') {
-            window.localStorage.removeItem('adminAuthToken');
-            window.localStorage.removeItem('adminToken');
-            window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again to reconnect live Back Office totals.');
-          }
-          router.replace('/administration/login?reason=session-expired');
-          return;
-        }
-        if (!countsResponse?.ok && !affiliatesResponse?.ok) {
-          throw new Error(countsPayload?.message || 'Live Back Office totals are temporarily unavailable. Retry the connection.');
-        }
-        const affiliates = Array.isArray(affiliatesPayload)
-          ? affiliatesPayload
-          : (affiliatesPayload?.affiliates || affiliatesPayload?.users || affiliatesPayload?.data || []);
-        setDashboardCounts((current) => ({
-          ...current,
-          ...(countsResponse?.ok ? countsPayload : {}),
-          affiliatesCount: Number(
-            countsPayload?.affiliatesCount
-            ?? countsPayload?.affiliateCount
-            ?? countsPayload?.totalAffiliates
-            ?? (Array.isArray(affiliates) ? affiliates.length : 0),
-          ),
-        }));
       } catch (error) {
         console.error('Error fetching dashboard counts:', error);
-        setDashboardError(error.message || 'Back Office totals could not be loaded.');
+        setDashboardError(error.message || 'Platform data unavailable');
       } finally {
         setIsLoading(false);
       }
-  }, [router]);
+    };
 
-  useEffect(() => {
     fetchDashboardCounts();
-  }, [fetchDashboardCounts]);
+  }, []);
 
   const handleResetStats = async () => {
     try {
@@ -152,8 +117,8 @@ const Admin = () => {
     { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Apparel orders', metric: `${dashboardCounts.apparelOrdersCount || 0} orders`, status: dashboardCounts.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
     { area: 'Community alerts', metric: `${dashboardCounts.unreadNotificationsCount || 0} unread`, status: dashboardCounts.unreadNotificationsCount ? 'Attention' : 'Clear', statusClass: dashboardCounts.unreadNotificationsCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'View notifications' },
-    { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Gateway', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
-    { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Ready', statusClass: 'is-success', href: '/administration/seo-growth', action: 'Open SEO center' },
+    { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
+    { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
   ];
 
   const quickActions = [
@@ -187,17 +152,15 @@ const Admin = () => {
   }
 
   return (
-    <div className="admin-dashboard-experience admin-command-center-v4" data-ui-version="backoffice-v4">
-      <section className="admin-dashboard-hero admin-command-center-hero-v4">
+    <div className="admin-dashboard-experience">
+      <section className="admin-dashboard-hero">
         <div className="admin-dashboard-hero-copy">
-          <span>Fantasy MMAdness Back Office 4.0</span>
-          <h1>Run the entire platform from one command deck.</h1>
+          <span>Fantasy MMAdness operations</span>
+          <h1>Control every round from one corner.</h1>
           <p>Monitor the platform, move quickly between fight operations, and keep users, affiliates, content, and community workflows under control.</p>
         </div>
-        <div className="admin-dashboard-live"><i aria-hidden="true" /><span>{isLoading ? 'Syncing platform data' : 'Command center online'}</span></div>
+        <div className="admin-dashboard-live"><i aria-hidden="true" /><span>{isLoading ? 'Syncing platform data' : dashboardError ? `Needs attention: ${dashboardError}` : 'Platform data connected'}</span></div>
       </section>
-
-      {dashboardError && <div className="admin-command-data-warning"><FaShieldAlt /> <span><strong>Live totals need attention</strong>{dashboardError}</span><button type="button" className="admin-action-secondary" onClick={fetchDashboardCounts}>Retry live totals</button></div>}
 
       <section className="admin-metric-grid" aria-label="Platform totals">
         {metrics.map(({ label, value, icon: Icon, href, onClick }) => {
