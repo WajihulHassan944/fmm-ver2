@@ -13,11 +13,12 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import {
-  FMM_ASSET_BASE,
+  AFFILIATE_AVATAR_FALLBACK,
   getFightCategory,
   getFightId,
   getFighterImage,
   safeArray,
+  useImageFallback,
 } from '@/Utils/fightExperience';
 
 const API_BASE = PUBLIC_API_BASE_URL;
@@ -312,7 +313,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
     <section className="affiliate-create-promotion affiliate-create-promotion-premium">
       <header className="affiliate-create-header">
         <div className="affiliate-create-identity">
-          <img src={affiliate.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`} alt={fullName} loading="lazy" decoding="async" />
+          <img src={affiliate.profileUrl || AFFILIATE_AVATAR_FALLBACK} alt={fullName} loading="lazy" decoding="async" onError={useImageFallback} />
           <span>
             <small><FaBullhorn /> Promotion owner</small>
             <strong>{fullName}</strong>
