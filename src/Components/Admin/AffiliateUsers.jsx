@@ -8,6 +8,7 @@ import {
   FaAward,
   FaCopy,
   FaEye,
+  FaEnvelope,
   FaLink,
   FaPlus,
   FaSearch,
@@ -37,6 +38,13 @@ const AffiliateUsers = () => {
   const [inviteLink, setInviteLink] = useState('');
   const [showInvitePopup, setShowInvitePopup] = useState(false);
   const [recentInvites, setRecentInvites] = useState([]);
+  const [selectedAffiliateIds, setSelectedAffiliateIds] = useState([]);
+  const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
+  const [bulkSubject, setBulkSubject] = useState('Fantasy MMAdness affiliate update');
+  const [bulkMessage, setBulkMessage] = useState('Hello {firstName},\n\n');
+  const [bulkSending, setBulkSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
+  const [bulkResults, setBulkResults] = useState([]);
   const router = useRouter();
 
   const requireFreshAdminSession = (response) => {
@@ -180,6 +188,60 @@ const AffiliateUsers = () => {
     setDetailsOpen(true);
   };
 
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+  const visibleEmailIds = filteredUsers.filter((user) => isValidEmail(user.email)).map((user) => user._id);
+  const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedAffiliateIds.includes(id));
+  const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email));
+
+  const toggleAffiliate = (id) => {
+    setSelectedAffiliateIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
+  };
+
+  const toggleVisibleAffiliates = () => {
+    setSelectedAffiliateIds((current) => allVisibleSelected
+      ? current.filter((id) => !visibleEmailIds.includes(id))
+      : [...new Set([...current, ...visibleEmailIds])]);
+  };
+
+  const sendBulkEmail = async () => {
+    if (!bulkSubject.trim() || !bulkMessage.trim() || selectedRecipients.length === 0) {
+      toast.error('Select at least one affiliate and enter a subject and message.');
+      return;
+    }
+    setBulkSending(true);
+    setBulkResults([]);
+    setBulkProgress({ sent: 0, failed: 0, total: selectedRecipients.length });
+    const results = [];
+    let sent = 0;
+    let failed = 0;
+    for (const recipient of selectedRecipients) {
+      try {
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+          method: 'POST',
+          headers: adminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            email: recipient.email.trim(),
+            subject: bulkSubject.trim(),
+            message: bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate'),
+          }),
+        });
+        if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data?.message || 'Email was rejected.');
+        sent += 1;
+        results.push({ id: recipient._id, email: recipient.email, ok: true });
+      } catch (error) {
+        failed += 1;
+        results.push({ id: recipient._id, email: recipient.email, ok: false, message: error.message || 'Failed to send.' });
+      }
+      setBulkProgress({ sent, failed, total: selectedRecipients.length });
+      setBulkResults([...results]);
+    }
+    setBulkSending(false);
+    if (failed) toast.warning(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed.`);
+    else toast.success(`${sent} affiliate email${sent === 1 ? '' : 's'} sent.`);
+  };
+
   const handleDeleteUser = async (id) => {
     if (!window.confirm('Delete this affiliate? This cannot be undone.')) return;
     const deleteUserPromise = new Promise(async (resolve, reject) => {
@@ -267,6 +329,7 @@ const AffiliateUsers = () => {
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/payouts')}><FaWallet /> Payouts</button>
           <button type="button" className="admin-action-secondary" disabled={inviteBusy} onClick={() => { generateInstantApprovalLink(); }}><FaLink /> {inviteBusy ? 'Generating…' : 'Instant-approval link'}</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/full-cards')}><FaAward /> Promoter invitations</button>
+          <button type="button" className="admin-action-secondary" disabled={!selectedRecipients.length} onClick={() => { setBulkResults([]); setBulkEmailOpen(true); }}><FaEnvelope /> Email selected ({selectedRecipients.length})</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddAffiliatePopup(true)}><FaPlus /> Add affiliate</button>
         </div>
       </section>
@@ -325,6 +388,7 @@ const AffiliateUsers = () => {
           <table className="admin-data-table">
             <thead>
               <tr>
+                <th className="admin-select-column"><input type="checkbox" aria-label="Select all visible affiliates with email addresses" checked={allVisibleSelected} onChange={toggleVisibleAffiliates} /></th>
                 <th>Creator</th>
                 <th>Status</th>
                 <th>Distinction</th>
@@ -333,8 +397,9 @@ const AffiliateUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? <tr><td colSpan="5"><div className="admin-empty-table">Loading affiliate accounts…</div></td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => (
+              {loading ? <tr><td colSpan="6"><div className="admin-empty-table">Loading affiliate accounts…</div></td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user._id}>
+                  <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || 'affiliate'} for email`} checked={selectedAffiliateIds.includes(user._id)} disabled={!isValidEmail(user.email)} onChange={() => toggleAffiliate(user._id)} /></td>
                   <td>
                     <button type="button" className="admin-person-cell" onClick={() => handleViewUserDetails(user)}>
                       <img src={user.profileUrl || FALLBACK_AVATAR} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'} />
@@ -371,12 +436,35 @@ const AffiliateUsers = () => {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="5"><div className="admin-empty-table">No affiliates match the current search and approval filter.</div></td></tr>
+                <tr><td colSpan="6"><div className="admin-empty-table">No affiliates match the current search and approval filter.</div></td></tr>
               )}
             </tbody>
           </table>
         </div>
       </section>
+
+      {bulkEmailOpen && (
+        <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !bulkSending) setBulkEmailOpen(false); }}>
+          <section className="admin-inspector-modal admin-bulk-email-modal">
+            <header>
+              <div><span>Affiliate communications</span><h3>Email {selectedRecipients.length} affiliates</h3></div>
+              <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
+            </header>
+            <div className="admin-modal-form-body admin-stacked-form">
+              <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. Use <strong>{'{firstName}'}</strong> to personalize each greeting.</p>
+              <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
+              <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
+              <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
+              {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.total} total</span></div>}
+              {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors">{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}</div>}
+            </div>
+            <footer>
+              <button type="button" className="admin-action-primary" disabled={bulkSending || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : `Send ${selectedRecipients.length} emails`}</button>
+              <button type="button" className="admin-action-secondary" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)}>Close</button>
+            </footer>
+          </section>
+        </div>
+      )}
 
       {showDistinctionPopup && (
         <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowDistinctionPopup(false); }}>
