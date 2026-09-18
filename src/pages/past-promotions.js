@@ -1,12 +1,5 @@
-import dynamic from 'next/dynamic';
 import React from 'react';
-
-const PastPromotions = dynamic(
-  () => import('@/Components/Affiliates/PastPromotions/PastPromotions'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
+import PastPromotions from '@/Components/Affiliates/PastPromotions/PastPromotions';
 
 const index = () => {
   return <PastPromotions />
