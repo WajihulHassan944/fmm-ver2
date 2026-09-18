@@ -240,7 +240,11 @@ export const clearAdminTokenAndRedirect = (message = 'Your admin session expired
 };
 
 const buildUrl = (path, query) => {
-  const base = typeof window !== 'undefined' ? window.location.origin : API_BASE_URL;
+  // Only Swarm and SEO currently have same-origin Next.js proxy routes.
+  // Other admin APIs (fight registry, combat fighters, data quality, etc.)
+  // must continue to use the configured backend connection directly.
+  const hasSameOriginProxy = path.startsWith('/api/admin/swarm') || path.startsWith('/api/admin/seo');
+  const base = typeof window !== 'undefined' && hasSameOriginProxy ? window.location.origin : API_BASE_URL;
   const url = new URL(`${base}${path}`);
   if (query && typeof query === 'object') {
     Object.entries(query).forEach(([key, value]) => {
