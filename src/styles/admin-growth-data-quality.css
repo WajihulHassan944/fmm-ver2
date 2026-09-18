@@ -119,6 +119,9 @@
   background: rgba(52, 211, 153, .07);
 }
 
+.admin-quality-table .is-protected-row { background: rgba(247,181,27,.055); }
+.admin-quality-record-label{border-radius:999px;display:inline-block;font-size:.62rem;font-style:normal;font-weight:900;letter-spacing:.08em;margin-top:.45rem;padding:.2rem .45rem}.admin-quality-record-label.is-keep{background:rgba(52,211,153,.13);color:#6ee7b7}.admin-quality-record-label.is-review{background:rgba(247,181,27,.13);color:#fcd34d}.admin-quality-safety-guide,.admin-quality-delete-preview{align-items:flex-start;background:rgba(32,167,255,.07);border:1px solid rgba(32,167,255,.24);border-radius:14px;color:rgba(255,255,255,.72);display:flex;gap:.8rem;margin:.85rem 0;padding:1rem}.admin-quality-safety-guide>svg,.admin-quality-delete-preview>svg{color:#20a7ff;flex:none;margin-top:.15rem}.admin-quality-safety-guide>div{align-items:flex-start;display:flex;flex-direction:column;gap:.3rem}.admin-quality-safety-guide strong,.admin-quality-delete-preview strong{color:#fff}.admin-quality-safety-guide span,.admin-quality-delete-preview span{font-size:.8rem;line-height:1.5}.admin-quality-safety-guide a{margin-top:.35rem}.admin-quality-delete-preview{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.25)}.admin-quality-delete-preview>svg{color:#34d399}
+
 .admin-quality-status-list {
   grid-template-columns: repeat(3, minmax(0, max-content));
   justify-content: flex-start;
