@@ -20,7 +20,7 @@ import {
 } from 'react-icons/fa';
 import AffiliateExperienceNav from '../AffiliateExperienceNav';
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
-import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
+import { AFFILIATE_AVATAR_FALLBACK, safeArray, useImageFallback } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { fullCardRequest } from '@/Utils/fullCardApi';
 
@@ -72,7 +72,7 @@ const buildMember = (entry, directory, index) => {
       ?? user?.accountStatus,
     ),
     subscribed: normalizeVerification(user?.isSubscribed ?? user?.subscribed),
-    avatar: user?.profileUrl || `${FMM_ASSET_BASE}/fighter-jadden-addison.webp`,
+    avatar: user?.profileUrl || AFFILIATE_AVATAR_FALLBACK,
     joinedAt: entry?.joinedAt || user?.joinedAt || user?.createdAt || null,
   };
 };
@@ -268,7 +268,7 @@ const AffiliateLeague = () => {
           <div className="theme-container xp-affiliate-league-shell">
             <section className="affiliate-league-invite-card affiliate-league-invite-final">
               <div className="affiliate-league-owner">
-                <img src={affiliate?.profileUrl || `${FMM_ASSET_BASE}/fighter-conor-benn.webp`} alt={affiliateName} />
+                <img src={affiliate?.profileUrl || AFFILIATE_AVATAR_FALLBACK} alt={affiliateName} onError={useImageFallback} />
                 <span>
                   <small>League owner</small>
                   <strong>{affiliateName}</strong>
@@ -342,7 +342,7 @@ const AffiliateLeague = () => {
                           <td><span className="xp-rank-chip">#{(page - 1) * ITEMS_PER_PAGE + index + 1}</span></td>
                           <td>
                             <div className="xp-member-cell">
-                              <img src={member.avatar} alt="" />
+                              <img src={member.avatar} alt="" onError={useImageFallback} />
                               <span>
                                 <strong>{member.name}</strong><small>{member.email}</small>
                                 <div className="affiliate-roster-actions">

@@ -2360,8 +2360,9 @@
 
 .affiliate-profile-preview-media {
   background:
-    linear-gradient(180deg, rgba(3, 7, 12, 0.05), rgba(3, 7, 12, 0.94)),
-    url('/images/fmm-experience/fighter-action-blue.webp') center / cover;
+    linear-gradient(180deg, rgba(3, 7, 12, 0.08), rgba(3, 7, 12, 0.88)),
+    linear-gradient(90deg, rgba(223, 17, 27, 0.12), transparent 48%, rgba(22, 143, 230, 0.12)),
+    url('/images/fmm-pages/profile-arena-hd.webp') center 42% / cover;
   height: 300px;
   overflow: hidden;
   position: relative;
@@ -2372,16 +2373,6 @@
   content: '';
   inset: 0;
   position: absolute;
-}
-
-.affiliate-profile-preview-media > img {
-  filter: drop-shadow(0 22px 30px rgba(0, 0, 0, 0.6));
-  height: 100%;
-  object-fit: contain;
-  object-position: right bottom;
-  position: absolute;
-  right: -10px;
-  width: 78%;
 }
 
 .affiliate-profile-preview-media > span {
@@ -2784,10 +2775,6 @@
 
   .affiliate-profile-preview-media {
     height: 230px;
-  }
-
-  .affiliate-profile-preview-media > img {
-    width: 92%;
   }
 
   .affiliate-settings-modal {

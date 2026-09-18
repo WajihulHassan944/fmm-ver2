@@ -1,6 +1,7 @@
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
 
 export const FMM_ASSET_BASE = '/images/fmm-experience';
+export const AFFILIATE_AVATAR_FALLBACK = `${FMM_ASSET_BASE}/avatar-placeholder.svg`;
 
 const GENERIC_FIGHTER_FALLBACKS = {
   A: 'fighter-action-blue.webp',
@@ -57,12 +58,19 @@ const pickRenderableImage = (...values) => values.find((value) => {
 // Cloudinary fight art is often stored at poster resolution. Request a
 // responsive delivery variant for cards instead of downloading the original
 // multi-megabyte flyer. Non-Cloudinary and local assets stay untouched.
-export const optimizeFightImageUrl = (value, width = 720) => {
+export const optimizeFightImageUrl = (value, width = 960) => {
   const raw = String(value || '').trim();
   if (!raw || !/res\.cloudinary\.com/i.test(raw) || !raw.includes('/upload/')) return raw;
   if (/\/upload\/(?:[^/]*,)?(?:f_auto|q_auto|w_\d+)/i.test(raw)) return raw;
   const safeWidth = Math.max(160, Math.min(1600, Number(width) || 720));
-  return raw.replace('/upload/', `/upload/f_auto,q_auto:eco,c_limit,w_${safeWidth}/`);
+  return raw.replace('/upload/', `/upload/f_auto,q_auto:good,c_limit,w_${safeWidth},dpr_auto/`);
+};
+
+export const useImageFallback = (event, fallback = AFFILIATE_AVATAR_FALLBACK) => {
+  const image = event?.currentTarget;
+  if (!image || image.dataset.fallbackApplied === 'true') return;
+  image.dataset.fallbackApplied = 'true';
+  image.src = fallback;
 };
 
 const getNestedImageValue = (value) => {
