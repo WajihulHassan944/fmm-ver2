@@ -14,8 +14,27 @@
 .affiliate-league-page-final .affiliate-roster-actions button.is-remove{border-color:rgba(242,29,50,.55)!important;color:#ff6a78!important}
 .affiliate-league-page-final .affiliate-roster-actions button:disabled{cursor:wait!important;opacity:.45!important}
 .affiliate-league-page-final .affiliate-member-status{white-space:nowrap!important}
-.affiliate-league-page-final .xp-affiliate-league-table{min-width:1180px!important}
+.affiliate-league-page-final .affiliate-roster-status-guide{
+  align-items:center!important;background:rgba(22,156,242,.07)!important;border-bottom:1px solid rgba(255,255,255,.1)!important;
+  color:rgba(255,255,255,.72)!important;display:flex!important;flex-wrap:wrap!important;font-size:12px!important;gap:8px 22px!important;padding:10px 16px!important
+}
+.affiliate-league-page-final .affiliate-roster-status-guide strong{color:#fff!important}
+.affiliate-league-page-final .affiliate-roster-type{
+  border:1px solid rgba(255,255,255,.18)!important;border-radius:999px!important;display:inline-flex!important;font-size:10px!important;
+  font-weight:900!important;padding:5px 8px!important;text-transform:uppercase!important;white-space:nowrap!important
+}
+.affiliate-league-page-final .affiliate-roster-type.is-real{border-color:rgba(43,201,133,.55)!important;color:#71e0aa!important}
+.affiliate-league-page-final .affiliate-roster-type.is-test{border-color:rgba(242,181,68,.55)!important;color:#f2c66d!important}
+.affiliate-league-page-final .xp-affiliate-league-table{min-width:1320px!important}
+@media(min-width:761px){
+  .affiliate-league-page-final .xp-affiliate-league-table th:last-child,
+  .affiliate-league-page-final .xp-affiliate-league-table td:last-child{
+    background:#080e15!important;box-shadow:-12px 0 20px rgba(0,0,0,.38)!important;position:sticky!important;right:0!important;z-index:2!important
+  }
+  .affiliate-league-page-final .xp-affiliate-league-table th:last-child{background:#111820!important;z-index:3!important}
+}
 @media(max-width:760px){
   .affiliate-league-page-final .xp-affiliate-league-toolbar{align-items:stretch!important;flex-direction:column!important}
   .affiliate-league-page-final .xp-affiliate-league-toolbar>label{flex-basis:auto!important}
+  .affiliate-league-page-final .affiliate-roster-status-guide{align-items:flex-start!important;flex-direction:column!important}
 }

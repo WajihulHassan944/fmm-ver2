@@ -328,6 +328,11 @@ const AffiliateLeague = () => {
                 </button>
               </div>
 
+              <div className="affiliate-roster-status-guide">
+                <span><strong>Account status</strong> shows whether FANTASY MMADNESS has verified the member&apos;s account.</span>
+                <span><strong>Roster type</strong> lets you separate real members from test accounts without changing their verification.</span>
+              </div>
+
               {error && <div className="affiliate-league-warning"><FaShieldAlt /> {error}</div>}
 
               {loading && !members.length ? (
@@ -336,7 +341,7 @@ const AffiliateLeague = () => {
                 <div className="xp-affiliate-league-table-wrap">
                   <table className="xp-affiliate-league-table">
                     <thead>
-                      <tr><th>Rank</th><th>Member</th><th>Plan</th><th>Status</th><th>Last active</th><th>Joined</th><th>Actions</th></tr>
+                      <tr><th>Rank</th><th>Member</th><th>Plan</th><th>Account status</th><th>Roster type</th><th>Last active</th><th>Joined</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {paginatedMembers.length ? paginatedMembers.map((member, index) => (
@@ -350,6 +355,7 @@ const AffiliateLeague = () => {
                           </td>
                           <td>{member.plan}</td>
                           <td><span className={`affiliate-member-status ${member.verified ? 'is-verified' : ''}`}>{member.verified ? 'Verified' : 'Pending verification'}</span></td>
+                          <td><span className={`affiliate-roster-type ${member.testAccount ? 'is-test' : 'is-real'}`}>{member.testAccount ? 'Test account' : 'Real member'}</span></td>
                           <td>{formatMemberDate(member.lastActiveAt)}</td>
                           <td>{formatMemberDate(member.joinedAt)}</td>
                           <td>
@@ -375,7 +381,7 @@ const AffiliateLeague = () => {
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan="7">
+                          <td colSpan="8">
                             <div className="xp-table-empty">
                               {search ? 'No league members match this search.' : 'No members have joined this affiliate league yet.'}
                             </div>
