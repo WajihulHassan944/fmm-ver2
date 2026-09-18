@@ -33,9 +33,11 @@ const SwarmStatusPanel = () => {
 
   const status = useMemo(() => {
     if (state.loading) return { label: 'Checking', className: 'is-warning', icon: FaBolt };
-    if (state.health?.swarmReachable) return { label: 'Online', className: 'is-success', icon: FaShieldAlt };
+    if (state.health?.swarmReachable && state.health?.localWorkerReachable) return { label: 'Dual workers online', className: 'is-success', icon: FaShieldAlt };
+    if (state.health?.swarmReachable) return { label: 'IONOS online', className: 'is-success', icon: FaShieldAlt };
+    if (state.health?.localWorkerReachable || state.config?.localWorkerEnabled) return { label: 'Local worker online', className: 'is-success', icon: FaShieldAlt };
     if (state.config?.enabled || state.health?.enabled) return { label: 'Needs attention', className: 'is-danger', icon: FaExclamationTriangle };
-    return { label: 'Installed / disabled', className: 'is-warning', icon: FaRobot };
+    return { label: 'Workers unavailable', className: 'is-danger', icon: FaRobot };
   }, [state]);
 
   const StatusIcon = status.icon;
@@ -46,13 +48,13 @@ const SwarmStatusPanel = () => {
     <section className="admin-dashboard-panel admin-swarm-status-panel">
       <div className="admin-dashboard-panel-heading">
         <h2>Swarm automation</h2>
-        <span>IONOS worker bridge</span>
+        <span>IONOS primary + self-contained failover</span>
       </div>
 
       <div className="admin-swarm-status-headline">
         <span className={`admin-status-badge ${status.className}`}><StatusIcon /> {status.label}</span>
         <p>
-          {state.health?.message || state.error || 'Centralized MMA and pro-wrestling automation is connected through the backend gateway.'}
+          {state.health?.message || state.error || `Worker mode: ${state.health?.workerMode || state.config?.workerMode || 'checking'}.`}
         </p>
       </div>
 
