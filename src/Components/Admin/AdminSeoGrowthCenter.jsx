@@ -44,7 +44,7 @@ const growthActions = [
   { id: 'weekly-traffic', label: 'Weekly traffic report', helper: 'Keyword opportunities and growth priorities.', icon: FaChartLine, run: (body) => swarmApi.runWeeklySchedule(body) },
   { id: 'calendar-refresh', label: 'Fight schedule refresh', helper: 'Keep fight/event calendar opportunity queue fresh.', icon: FaCalendarAlt, run: (body) => swarmApi.runDailyCalendarRefresh(body) },
   { id: 'daily-social', label: 'Daily social drafts', helper: 'X, Instagram, Facebook draft queue for daily promotion.', icon: FaRocket, run: (body) => swarmApi.runDailySocial(body) },
-  { id: 'growth-plan', label: '1000-user growth plan', helper: 'Acquisition plan focused on traffic and returning users.', icon: FaUserPlus, jobType: 'automation.growth-plan-1000-users' },
+  { id: 'growth-plan', label: '1000-user growth plan', helper: 'Acquisition plan focused on traffic and returning users.', icon: FaUserPlus, jobType: 'analytics.user-growth-1000-plan' },
   { id: 'keyword-opportunity', label: 'Keyword opportunities', helper: 'Find MMA, boxing, wrestling long-tail topics.', icon: FaMagic, jobType: 'seo.keyword-opportunity' },
   { id: 'missing-meta', label: 'Missing metadata', helper: 'Find pages missing titles, descriptions, cards.', icon: FaFileAlt, jobType: 'seo.missing-metadata-detector' },
   { id: 'broken-links', label: 'Broken internal links', helper: 'Find broken or weak internal-link paths.', icon: FaLink, jobType: 'seo.broken-link-detector' },
