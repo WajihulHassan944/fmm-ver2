@@ -33,59 +33,18 @@ function JarvisWorkspace() {
   const [voiceOn, setVoiceOn] = useState(true);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceError, setVoiceError] = useState('');
+  const [transcribing, setTranscribing] = useState(false);
   const [systemStatus, setSystemStatus] = useState({ jarvis: 'checking', swarm: 'checking' });
   const bottomRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const recorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const audioStreamRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-    recognition.onstart = () => {
-      setVoiceError('');
-      setListening(true);
-    };
-    recognition.onresult = (event) => {
-      const heard = event.results?.[0]?.[0]?.transcript || '';
-      if (heard.trim()) send(heard.trim());
-    };
-    recognition.onerror = (event) => {
-      setListening(false);
-      const messages = {
-        'not-allowed': 'Microphone access is blocked. Click the lock beside the website address, allow Microphone, then reload.',
-        'service-not-allowed': 'Chrome speech recognition is blocked on this device or browser profile.',
-        'audio-capture': 'No working microphone was detected. Check the Windows microphone input.',
-        'no-speech': 'I did not hear anything. Click the microphone and try again.',
-        network: 'Chrome could not reach its speech-recognition service. Check the connection and try again.',
-      };
-      setVoiceError(messages[event.error] || `Voice recognition stopped (${event.error || 'unknown error'}).`);
-    };
-    recognition.onend = () => setListening(false);
-    recognitionRef.current = recognition;
-    setVoiceSupported(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setVoiceSupported(Boolean(navigator.mediaDevices?.getUserMedia && window.MediaRecorder));
+    return () => audioStreamRef.current?.getTracks?.().forEach((track) => track.stop());
   }, []);
-
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
-    if (listening) {
-      recognitionRef.current.stop();
-      setListening(false);
-      return;
-    }
-    window.speechSynthesis?.cancel();
-    setVoiceError('');
-    try {
-      recognitionRef.current.start();
-    } catch (error) {
-      setListening(false);
-      setVoiceError(error?.message || 'The microphone could not start. Reload the page and try again.');
-    }
-  };
 
   const requestHistory = useMemo(
     () => messages.filter((item, index) => index > 0 && (item.role === 'user' || item.role === 'assistant')).slice(-12),
@@ -130,6 +89,66 @@ function JarvisWorkspace() {
     } finally {
       setLoading(false);
       window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 40);
+    }
+  };
+
+  const transcribeRecording = async (blob) => {
+    setTranscribing(true);
+    setVoiceError('');
+    try {
+      const audio = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(String(reader.result || '').split(',')[1] || '');
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const token = window.localStorage.getItem('adminAuthToken') || window.localStorage.getItem('adminToken') || '';
+      const response = await fetch('/api/jarvis-transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ audio, mimeType: blob.type || 'audio/webm' }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || `Voice transcription failed (${response.status})`);
+      setDraft(payload.text || '');
+      await send(payload.text);
+    } catch (error) {
+      setVoiceError(error?.message || 'Jarvis could not understand the recording.');
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const toggleListening = async () => {
+    if (!voiceSupported || transcribing) return;
+    if (listening) {
+      recorderRef.current?.stop();
+      return;
+    }
+    window.speechSynthesis?.cancel();
+    setVoiceError('');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStreamRef.current = stream;
+      audioChunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      recorderRef.current = recorder;
+      recorder.ondataavailable = (event) => { if (event.data?.size) audioChunksRef.current.push(event.data); };
+      recorder.onstart = () => setListening(true);
+      recorder.onerror = () => setVoiceError('The microphone stopped unexpectedly. Please try again.');
+      recorder.onstop = async () => {
+        setListening(false);
+        stream.getTracks().forEach((track) => track.stop());
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        if (blob.size) await transcribeRecording(blob);
+        else setVoiceError('No sound was recorded. Check the selected Windows microphone.');
+      };
+      recorder.start();
+    } catch (error) {
+      setListening(false);
+      setVoiceError(error?.name === 'NotAllowedError'
+        ? 'Microphone access is blocked. Click the lock beside the website address, allow Microphone, then reload.'
+        : 'The microphone could not start. Check the Windows microphone input and try again.');
     }
   };
 
@@ -249,16 +268,16 @@ function JarvisWorkspace() {
               maxLength={4000}
             />
             {voiceSupported && (
-              <button type="button" className={`jarvis-mic${listening ? ' is-live' : ''}`} onClick={toggleListening} aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}>
+              <button type="button" className={`jarvis-mic${listening ? ' is-live' : ''}`} onClick={toggleListening} disabled={transcribing} aria-label={listening ? 'Stop recording and send to Jarvis' : 'Record a voice command'} title={listening ? 'Click again when finished' : 'Click to speak'}>
                 <FaMicrophone />
               </button>
             )}
             <button type="button" onClick={() => send()} disabled={loading || !draft.trim()} aria-label="Send to Jarvis">
               <FaPaperPlane />
             </button>
-            {(listening || voiceError) && (
+            {(listening || transcribing || voiceError) && (
               <div className={`jarvis-voice-status${voiceError ? ' is-error' : ''}`} role="status">
-                {voiceError || 'Listening… speak now.'}
+                {voiceError || (transcribing ? 'Jarvis is transcribing your command…' : 'Listening… speak now, then click the microphone again when finished.')}
               </div>
             )}
           </div>
