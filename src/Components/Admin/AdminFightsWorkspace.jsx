@@ -218,23 +218,48 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
-      const payload = await fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' });
-      const adminRows = normalizeMatchFeedRows(payload);
-      if (adminRows.length) {
-        setMatches(adminRows);
-        return;
-      }
-
-      // Safety fallback for older backend deployments that do not yet expose the combined admin registry.
-      const [legacyRows, shadowPayload] = await Promise.allSettled([
+      // The combined registry is intentionally compact. Merge it with the
+      // richer legacy records so uploaded fighter photos are not discarded.
+      const [adminPayload, legacyRows, shadowPayload] = await Promise.allSettled([
+        fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' }),
         loadLegacyMatchFeed(),
         fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
       ]);
-      const rows = [
+      const adminRows = adminPayload.status === 'fulfilled' ? normalizeMatchFeedRows(adminPayload.value) : [];
+      const detailRows = [
         ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
         ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
       ];
-      setMatches(rows);
+      const detailsById = new Map(detailRows.map((row) => [String(getId(row)), row]));
+      const mergedRows = adminRows.map((row) => {
+        const detailed = detailsById.get(String(getId(row)));
+        if (!detailed) return row;
+        detailsById.delete(String(getId(row)));
+        return {
+          ...detailed,
+          ...row,
+          // Preserve populated nested fighter objects from either response.
+          fighterA: row.fighterA || detailed.fighterA,
+          fighterB: row.fighterB || detailed.fighterB,
+          fighterAId: row.fighterAId || detailed.fighterAId,
+          fighterBId: row.fighterBId || detailed.fighterBId,
+          fighterOne: row.fighterOne || detailed.fighterOne,
+          fighterTwo: row.fighterTwo || detailed.fighterTwo,
+          fighterAPrimaryImage: row.fighterAPrimaryImage || detailed.fighterAPrimaryImage,
+          fighterBPrimaryImage: row.fighterBPrimaryImage || detailed.fighterBPrimaryImage,
+          fighterAResolvedImage: row.fighterAResolvedImage || detailed.fighterAResolvedImage,
+          fighterBResolvedImage: row.fighterBResolvedImage || detailed.fighterBResolvedImage,
+          resolvedFighterAImage: row.resolvedFighterAImage || detailed.resolvedFighterAImage,
+          resolvedFighterBImage: row.resolvedFighterBImage || detailed.resolvedFighterBImage,
+          fighterAImage: row.fighterAImage || detailed.fighterAImage,
+          fighterBImage: row.fighterBImage || detailed.fighterBImage,
+          matchFighterAImage: row.matchFighterAImage || detailed.matchFighterAImage,
+          matchFighterBImage: row.matchFighterBImage || detailed.matchFighterBImage,
+          featuredFightFighterAImage: row.featuredFightFighterAImage || detailed.featuredFightFighterAImage,
+          featuredFightFighterBImage: row.featuredFightFighterBImage || detailed.featuredFightFighterBImage,
+        };
+      });
+      setMatches(adminRows.length ? [...mergedRows, ...detailsById.values()] : detailRows);
     } catch (adminApiError) {
       console.warn('Combined admin fight registry unavailable, trying legacy match feed:', adminApiError.message);
       try {
