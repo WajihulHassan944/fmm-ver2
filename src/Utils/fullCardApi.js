@@ -7,6 +7,15 @@ export const getStoredToken = (kind = 'player') => {
   return window.localStorage.getItem('authToken') || '';
 };
 
+const readableRequestError = (payload, status) => {
+  const rawMessage = String(payload?.message || payload?.error || '').trim();
+  const looksLikeHtml = /<!doctype|<html|<head|<body/i.test(rawMessage);
+  if (!rawMessage || looksLikeHtml || rawMessage.length > 240) {
+    return `The service could not complete this request (${status}). Please try again.`;
+  }
+  return rawMessage;
+};
+
 export async function fullCardRequest(path, { method = 'GET', body, kind = 'public', headers = {} } = {}) {
   const token = kind === 'public' ? '' : getStoredToken(kind);
   const response = await fetch(`${PUBLIC_API_BASE_URL}${path}`, {
@@ -14,8 +23,14 @@ export async function fullCardRequest(path, { method = 'GET', body, kind = 'publ
     headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...headers },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.message || `Request failed (${response.status})`);
+  const responseText = await response.text();
+  let payload = {};
+  try {
+    payload = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    payload = {};
+  }
+  if (!response.ok) throw new Error(readableRequestError(payload, response.status));
   return payload;
 }
 
