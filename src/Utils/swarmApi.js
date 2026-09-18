@@ -279,14 +279,17 @@ export async function swarmRequest(path, options = {}) {
   });
 
   const contentType = response.headers.get('content-type') || '';
-  const payload = contentType.includes('application/json') ? await response.json() : await response.text();
+  const isJson = contentType.includes('application/json');
+  const payload = isJson ? await response.json() : await response.text();
 
   if (!response.ok) {
     const code = typeof payload === 'object' ? payload.code || payload.error?.code : '';
     const shouldLogin = response.status === 401 && (payload?.shouldLogin || code === 'ADMIN_TOKEN_INVALID_OR_EXPIRED' || code === 'ADMIN_TOKEN_REQUIRED');
     const message = typeof payload === 'object'
       ? payload.message || payload.code || payload.error?.message || `Request failed with HTTP ${response.status}`
-      : payload || `Request failed with HTTP ${response.status}`;
+      : contentType.includes('text/html')
+        ? `The server returned a webpage instead of API data (HTTP ${response.status}). Please retry after the deployment finishes.`
+        : String(payload || `Request failed with HTTP ${response.status}`).slice(0, 500);
     const error = new Error(message);
     error.status = response.status;
     error.payload = payload;
@@ -295,6 +298,10 @@ export async function swarmRequest(path, options = {}) {
       clearAdminTokenAndRedirect(message || 'Your admin session expired. Please login again.');
     }
     throw error;
+  }
+
+  if (!isJson) {
+    throw new Error('The server returned an invalid response instead of API data. Please retry in a moment.');
   }
 
   return payload;
