@@ -1,12 +1,5 @@
-import dynamic from 'next/dynamic';
 import React from 'react';
-
-const AffiliateAllFightPromotion = dynamic(
-  () => import('@/Components/Affiliates/AffiliateAllFightPromotion'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
+import AffiliateAllFightPromotion from '@/Components/Affiliates/AffiliateAllFightPromotion';
 
 const index = () => {
   return <AffiliateAllFightPromotion />
