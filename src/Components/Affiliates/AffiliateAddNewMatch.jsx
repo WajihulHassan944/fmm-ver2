@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { affiliateHeaders } from '@/Utils/authFetch';
-import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { fetchPublicFights, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import {
   FaBullhorn,
   FaCalendarAlt,
@@ -31,7 +31,7 @@ const affiliateTokensToUsd = (tokens) => {
 const affiliateUsdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / AFFILIATE_TOKEN_USD_RATE)));
 const selectNumericValue = (event) => event.currentTarget.select();
 
-const AffiliateAddNewMatch = ({ matchId }) => {
+const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const [promoMatches, setPromoMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,15 +62,20 @@ const AffiliateAddNewMatch = ({ matchId }) => {
       setLoadError('');
 
       try {
-        const response = await fetch(`${API_BASE}/shadow?compact=promotion&limit=150`);
-        if (!response.ok) throw new Error('Failed to fetch promo matches');
-        const data = await response.json();
-        if (active) setPromoMatches(Array.isArray(data) ? data : []);
+        if (sourceType === 'live') {
+          const data = await fetchPublicFights({ limit: 500 });
+          if (active) setPromoMatches(safeArray(data));
+        } else {
+          const response = await fetch(`${API_BASE}/shadow?compact=promotion&limit=150&scoredOnly=true`);
+          if (!response.ok) throw new Error('Failed to fetch scored Shadow templates');
+          const data = await response.json();
+          if (active) setPromoMatches(Array.isArray(data) ? data : []);
+        }
       } catch (error) {
         console.error(error);
         if (active) {
           setPromoMatches([]);
-          setLoadError('The approved fight template could not be loaded.');
+          setLoadError(sourceType === 'live' ? 'The live fight could not be loaded.' : 'The scored Shadow template could not be loaded.');
         }
       } finally {
         if (active) setLoading(false);
@@ -81,7 +86,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [sourceType]);
 
   const promoDetails = useMemo(
     () => safeArray(promoMatches).find((match) => String(getFightId(match)) === String(matchId || '')),
@@ -223,7 +228,8 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     data.append('promoterStake', economics.free ? 0 : economics.stake);
     data.append('potTarget', economics.free ? 0 : economics.pot);
     data.append('autoRefundIfShort', economics.free ? false : true);
-    data.append('shadowFightId', matchDetails._id);
+    if (sourceType === 'live') data.append('sourceLiveMatchId', matchDetails._id);
+    else data.append('shadowFightId', matchDetails._id);
     data.append('affiliateId', affiliate._id);
     data.append('pot', formData.pot);
     data.append('profit', formData.profit);
@@ -254,8 +260,8 @@ const AffiliateAddNewMatch = ({ matchId }) => {
     data.append('matchType', 'SHADOW');
     data.append('maxRounds', matchDetails.maxRounds);
     data.append('notify', false);
-    if (matchDetails.BoxingMatch) data.append('BoxingMatch', JSON.stringify(matchDetails.BoxingMatch));
-    if (matchDetails.MMAMatch) data.append('MMAMatch', JSON.stringify(matchDetails.MMAMatch));
+    if (sourceType === 'shadow' && matchDetails.BoxingMatch) data.append('BoxingMatch', JSON.stringify(matchDetails.BoxingMatch));
+    if (sourceType === 'shadow' && matchDetails.MMAMatch) data.append('MMAMatch', JSON.stringify(matchDetails.MMAMatch));
 
     setButtonText('Saving, please wait...');
 
@@ -288,7 +294,7 @@ const AffiliateAddNewMatch = ({ matchId }) => {
   };
 
   if (loading) {
-    return <div className="affiliate-create-loading">Loading approved fight template…</div>;
+    return <div className="affiliate-create-loading">Loading {sourceType === 'live' ? 'live fight' : 'scored Shadow template'}…</div>;
   }
 
   if (loadError) {
