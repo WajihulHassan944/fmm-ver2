@@ -2068,7 +2068,7 @@ class FantasyMobileAppCore extends React.Component {
   shareToSocial = (platform) => {
     this.playCheer();
     this.props.onShare?.({ platform, text: 'Join my Fantasy MMAdness fight card.' });
-    this.showToast('📱 ' + platform + ' post ready — your link + the fight poster are pre-loaded, just tap send!');
+    this.showToast('📱 ' + platform + ' share text and your tracked league link are ready.');
   };
   openSocialProfile = (platform) => {
     const href = SOCIAL_PROFILE_URLS[platform];
@@ -5281,6 +5281,7 @@ class FantasyMobileAppCore extends React.Component {
     if (s.modal === 'shareKit') {
       const kit = s.shareKit || {};
       const share = kit.share || {};
+      const creative = kit.creative || {};
       const rows = [
         ['Facebook', share.facebook, '#4d8dff'],
         ['TikTok', share.tiktok, '#a855f7'],
@@ -5289,9 +5290,25 @@ class FantasyMobileAppCore extends React.Component {
       ].filter(([, text]) => text);
       return overlay([
         closeBtn,
+        React.createElement('div', { key: 'creative', style: { position: 'relative', minHeight: 150, marginBottom: 12, borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg,#151b2b,#08090d)', border: '1px solid rgba(242,181,68,.35)' } },
+          creative.fightPoster && React.createElement('img', { src: creative.fightPoster, alt: creative.headline || 'Fight poster', style: { width: '100%', height: 180, objectFit: 'cover', display: 'block', opacity: .68 } }),
+          !creative.fightPoster && React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', alignItems: 'center', minHeight: 150, padding: 18 } },
+            creative.fighterAImage && React.createElement('img', { src: creative.fighterAImage, alt: '', style: { width: 86, height: 86, objectFit: 'cover', borderRadius: '50%', border: '2px solid #df1c25' } }),
+            React.createElement('strong', { style: { color: '#f2b544', fontSize: 18 } }, 'VS'),
+            creative.fighterBImage && React.createElement('img', { src: creative.fighterBImage, alt: '', style: { width: 86, height: 86, objectFit: 'cover', borderRadius: '50%', border: '2px solid #3578e5' } })
+          ),
+          React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 10, background: 'linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.88))' } },
+            React.createElement('img', { src: creative.brandLogo, alt: 'Fantasy MMAdness', style: { width: 54, height: 54, objectFit: 'contain', borderRadius: 8 } }),
+            React.createElement('div', null,
+              React.createElement('strong', { style: { display: 'block', fontSize: 15, color: '#fff' } }, creative.headline || 'Fantasy MMAdness fight'),
+              React.createElement('span', { style: { fontSize: 10, color: '#f2b544', fontWeight: 800 } }, 'Promoted by ' + (creative.promotedBy || kit.attribution?.leagueName || 'Fantasy MMAdness'))
+            )
+          ),
+          creative.affiliateCover && React.createElement('img', { src: creative.affiliateCover, alt: 'Affiliate', style: { position: 'absolute', right: 10, top: 10, width: 46, height: 46, objectFit: 'cover', borderRadius: '50%', border: '2px solid #f2b544' } })
+        ),
         React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: '#f2b544', marginBottom: 3 } }, 'SHARE THIS CARD'),
         React.createElement('div', { key: 'sub', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.5)', lineHeight: 1.5, marginBottom: 13 } },
-          'Written for you. Tap to copy, then paste into a post — the link credits every signup to your league.'
+          'Branded for your league. Copy a post below; every link carries your affiliate attribution.'
         ),
         ...rows.map(([label, text, color]) => React.createElement('div', {
           key: label,
@@ -6145,7 +6162,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { key: 'link', style: { padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,.06)', fontSize: 12, fontWeight: 700, marginBottom: 10, overflowWrap: 'anywhere' } }, cleanText(this.props.currentUser?.affiliateReferralUrl, this.props.currentUser?.referralUrl, this.props.currentUser?.affiliateSlug ? `fantasymmadness.com/affiliate/${this.props.currentUser.affiliateSlug}` : '', 'Your referral link appears after affiliate approval.')),
       React.createElement('div', { key: 'btn', onClick: this.copyReferral, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(77,141,255,.6)', marginBottom: 14 } }, 'COPY REFERRAL LINK'),
       React.createElement('div', { key: 'dashboard', onClick: () => { this.setState({ modal: 'affiliateDash' }); this.loadAffiliate(); }, style: { textAlign: 'center', padding: '11px 0', borderRadius: 999, border: '1px solid rgba(242,181,68,.45)', color: '#f2b544', fontWeight: 900, fontSize: 12, cursor: 'pointer', marginBottom: 14 } }, 'VIEW MY DASHBOARD'),
-      React.createElement('div', { key: 'kitLabel', style: { fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 8 } }, 'ONE-TAP SHARE — LINK + FIGHT POSTER PRE-LOADED'),
+      React.createElement('div', { key: 'kitLabel', style: { fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.5)', marginBottom: 8 } }, 'ONE-TAP SHARE — TRACKED LEAGUE LINK'),
       React.createElement('div', { key: 'kit', style: { display: 'flex', gap: 8 } },
         [['X', '#000'], ['Instagram', '#dd2a7b'], ['Facebook', '#1877f2'], ['TikTok', '#25f4ee']].map(([name, color]) => React.createElement('div', {
           key: name, onClick: () => this.shareToSocial(name),
