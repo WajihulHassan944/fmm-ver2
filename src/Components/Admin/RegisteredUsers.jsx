@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { adminJsonHeaders } from '@/Utils/authFetch';
+import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
   FaArrowLeft,
   FaBan,
   FaCoins,
+  FaEnvelope,
   FaEye,
   FaPlus,
   FaSearch,
@@ -22,7 +23,25 @@ const RegisteredUsers = () => {
   const [addUserPopup, setAddUserPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
+  const [bulkSubject, setBulkSubject] = useState('Fantasy MMAdness update');
+  const [bulkMessage, setBulkMessage] = useState('Hello {firstName},\n\n');
+  const [bulkSending, setBulkSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
+  const [bulkResults, setBulkResults] = useState([]);
   const router = useRouter();
+
+  const requireFreshAdminSession = (response) => {
+    if (response.status !== 401 && response.status !== 403) return false;
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('adminAuthToken');
+      window.localStorage.removeItem('adminToken');
+      window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again to manage registered users.');
+    }
+    router.replace('/administration/login?reason=session-expired');
+    return true;
+  };
 
   const fetchData = async () => {
     try {
@@ -155,6 +174,69 @@ const RegisteredUsers = () => {
     ].filter(Boolean).join(' ').toLowerCase().includes(query));
   }, [searchQuery, users]);
 
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+  const canReceiveBulkEmail = (user) => isValidEmail(user?.email)
+    && !user?.selfExcluded
+    && !user?.emailOptOut
+    && !user?.unsubscribed;
+  const visibleEmailIds = filteredUsers.filter(canReceiveBulkEmail).map((user) => user._id);
+  const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedUserIds.includes(id));
+  const selectedRecipients = users.filter((user) => selectedUserIds.includes(user._id) && canReceiveBulkEmail(user));
+
+  const toggleUser = (id) => {
+    setSelectedUserIds((current) => current.includes(id)
+      ? current.filter((value) => value !== id)
+      : [...current, id]);
+  };
+
+  const toggleVisibleUsers = () => {
+    setSelectedUserIds((current) => allVisibleSelected
+      ? current.filter((id) => !visibleEmailIds.includes(id))
+      : [...new Set([...current, ...visibleEmailIds])]);
+  };
+
+  const sendBulkEmail = async () => {
+    if (!bulkSubject.trim() || !bulkMessage.trim() || selectedRecipients.length === 0) {
+      toast.error('Select at least one user and enter a subject and message.');
+      return;
+    }
+
+    setBulkSending(true);
+    setBulkResults([]);
+    setBulkProgress({ sent: 0, failed: 0, total: selectedRecipients.length });
+    const results = [];
+    let sent = 0;
+    let failed = 0;
+
+    for (const recipient of selectedRecipients) {
+      try {
+        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+          method: 'POST',
+          headers: adminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            email: recipient.email.trim(),
+            subject: bulkSubject.trim(),
+            message: bulkMessage.replaceAll('{firstName}', recipient.firstName || recipient.playerName || 'Fight Fan'),
+          }),
+        });
+        if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data?.message || 'Email was rejected.');
+        sent += 1;
+        results.push({ id: recipient._id, email: recipient.email, ok: true });
+      } catch (error) {
+        failed += 1;
+        results.push({ id: recipient._id, email: recipient.email, ok: false, message: error.message || 'Failed to send.' });
+      }
+      setBulkProgress({ sent, failed, total: selectedRecipients.length });
+      setBulkResults([...results]);
+    }
+
+    setBulkSending(false);
+    if (failed) toast.warning(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed.`);
+    else toast.success(`${sent} user email${sent === 1 ? '' : 's'} sent.`);
+  };
+
   return (
     <div className="admin-workspace">
       <section className="admin-page-heading">
@@ -166,6 +248,7 @@ const RegisteredUsers = () => {
         <div className="admin-page-actions">
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/suspended-accounts')}><FaBan /> Suspended accounts</button>
+          <button type="button" className="admin-action-secondary" disabled={!selectedRecipients.length} onClick={() => { setBulkResults([]); setBulkEmailOpen(true); }}><FaEnvelope /> Email selected ({selectedRecipients.length})</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddUserPopup(true)}><FaPlus /> Add user</button>
         </div>
       </section>
@@ -188,6 +271,7 @@ const RegisteredUsers = () => {
           <table className="admin-data-table">
             <thead>
               <tr>
+                <th className="admin-select-column"><input type="checkbox" aria-label="Select all visible registered users with eligible email addresses" checked={allVisibleSelected} onChange={toggleVisibleUsers} /></th>
                 <th>Player</th>
                 <th>Plan</th>
                 <th>Tokens</th>
@@ -199,6 +283,7 @@ const RegisteredUsers = () => {
             <tbody>
               {filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user._id}>
+                  <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || user.playerName || 'user'} for email`} checked={selectedUserIds.includes(user._id)} disabled={!canReceiveBulkEmail(user)} onChange={() => toggleUser(user._id)} /></td>
                   <td>
                     <button type="button" className="admin-person-cell" onClick={() => handleView(user)}>
                       <img src={user.profileUrl || FALLBACK_AVATAR} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Player'} />
@@ -217,12 +302,35 @@ const RegisteredUsers = () => {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="6"><div className="admin-empty-table">No registered users match the search.</div></td></tr>
+                <tr><td colSpan="7"><div className="admin-empty-table">No registered users match the search.</div></td></tr>
               )}
             </tbody>
           </table>
         </div>
       </section>
+
+      {bulkEmailOpen && (
+        <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !bulkSending) setBulkEmailOpen(false); }}>
+          <section className="admin-inspector-modal admin-bulk-email-modal">
+            <header>
+              <div><span>Player communications</span><h3>Email {selectedRecipients.length} registered users</h3></div>
+              <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
+            </header>
+            <div className="admin-modal-form-body admin-stacked-form">
+              <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified Gmail process already used for affiliate email. Use <strong>{'{firstName}'}</strong> to personalize each greeting. Self-excluded and opted-out accounts are not included.</p>
+              <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
+              <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
+              <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
+              {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.total} total</span></div>}
+              {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors">{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}</div>}
+            </div>
+            <footer>
+              <button type="button" className="admin-action-primary" disabled={bulkSending || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : `Send ${selectedRecipients.length} emails`}</button>
+              <button type="button" className="admin-action-secondary" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)}>Close</button>
+            </footer>
+          </section>
+        </div>
+      )}
 
       {selectedUser && (
         <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedUser(null); }}>
