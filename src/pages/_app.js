@@ -231,7 +231,7 @@ const AdminHeader = dynamic(() => import("@/Components/Header/AdminHeader"), {
   loading: () => null,
 });
 
-const ChatbaseWidget = dynamic(() => import("@/Components/ChatbaseWidget"), {
+const SupportWidget = dynamic(() => import("@/Components/SupportWidget"), {
   ssr: false,
   loading: () => null,
 });
@@ -736,7 +736,7 @@ function AppContent({ children }) {
           window) stacked the old site header above the app's real one. */}
       {!hideLayout && !renderPrototypeExperience && !ownsAuthenticatedNavigation && <Header />}
       {renderLegacyExperience && showAdminChrome && <AdminHeader />}
-      {renderLegacyExperience && !hideFooterChrome && <ChatbaseWidget />}
+      {!isAdminLoginRoute && <SupportWidget />}
       {renderPrototypeExperience && (
         <div className="fmm-app-desktop-shell">
           <div className="fmm-app-desktop-column">
