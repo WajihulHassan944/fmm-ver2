@@ -2465,15 +2465,16 @@ const HomeAnother = () => {
 
     const formData = new FormData(e.target);
     const data = {
-      fullName: formData.get("fullName"),
+      name: formData.get("fullName"),
       email: formData.get("email"),
-      subject: formData.get("subject"),
+      category: "other",
+      subject: formData.get("subject") || "Homepage contact question",
       message: formData.get("message"),
     };
 
     try {
       const response = await fetch(
-        buildPublicApiUrl("/contact-us-fantasymmadness"),
+        buildPublicApiUrl("/api/support/tickets"),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

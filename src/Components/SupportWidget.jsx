@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { FaChevronDown, FaEnvelope, FaLifeRing, FaPaperPlane, FaTimes } from 'react-icons/fa';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { userJsonHeaders } from '@/Utils/authFetch';
 
 const QUICK_HELP = [
   {
@@ -35,6 +36,7 @@ export default function SupportWidget() {
   const [form, setForm] = useState({
     fullName: [identity.firstName, identity.lastName].filter(Boolean).join(' '),
     email: identity.email || '',
+    category: 'other',
     subject: '',
     message: '',
   });
@@ -57,19 +59,21 @@ export default function SupportWidget() {
     setBusy(true);
     setStatus('');
     try {
-      const response = await fetch(buildPublicApiUrl('/contact-us-fantasymmadness'), {
+      const response = await fetch(buildPublicApiUrl('/api/support/tickets'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: userJsonHeaders(),
         body: JSON.stringify({
-          fullName: form.fullName,
+          name: form.fullName,
           email: form.email,
+          category: form.category,
           subject: `[${pageLabel}] ${form.subject}`,
           message: `${form.message}\n\nPage: ${router.asPath || router.pathname}`,
         }),
       });
-      if (!response.ok) throw new Error('Support could not receive that message.');
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || 'Support could not receive that message.');
       setForm((current) => ({ ...current, subject: '', message: '' }));
-      setStatus('Message sent. Support will follow up by email.');
+      setStatus(`Ticket ${payload.ticketNumber} created. Keep this number. Support will follow up by email.`);
     } catch (error) {
       setStatus(error.message || 'Message could not be sent. Email contact@fantasymmadness.com.');
     } finally {
@@ -103,6 +107,13 @@ export default function SupportWidget() {
                 <input value={form.fullName} onChange={(e) => update('fullName', e.target.value)} placeholder="Your name" aria-label="Your name" required />
                 <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="Email" aria-label="Email address" required />
               </div>
+              <select value={form.category} onChange={(e) => update('category', e.target.value)} aria-label="Support category">
+                <option value="other">General question</option>
+                <option value="account">Account or login</option>
+                <option value="payment">Payment or prize</option>
+                <option value="scoring">Scoring or prediction</option>
+                <option value="affiliate">Affiliate or fight promotion</option>
+              </select>
               <input value={form.subject} onChange={(e) => update('subject', e.target.value)} placeholder="What do you need help with?" aria-label="Support subject" required />
               <textarea value={form.message} onChange={(e) => update('message', e.target.value)} placeholder="Ask your question or describe what happened…" aria-label="Support message" rows={4} required />
               <button className="fmm-support-send" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send to Support'} <FaPaperPlane /></button>
@@ -141,9 +152,9 @@ export default function SupportWidget() {
         .fmm-support-divider span { padding: 0 9px; }
         .fmm-support-panel form { display: grid; gap: 8px; }
         .fmm-support-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .fmm-support-panel input,.fmm-support-panel textarea { width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.13); border-radius: 10px; background: #03060c; color: #fff; padding: 11px 12px; outline: none; font: inherit; }
+        .fmm-support-panel input,.fmm-support-panel textarea,.fmm-support-panel select { width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,.13); border-radius: 10px; background: #03060c; color: #fff; padding: 11px 12px; outline: none; font: inherit; }
         .fmm-support-panel textarea { resize: vertical; min-height: 92px; }
-        .fmm-support-panel input:focus,.fmm-support-panel textarea:focus { border-color: #ffcf45; box-shadow: 0 0 0 2px rgba(255,207,69,.12); }
+        .fmm-support-panel input:focus,.fmm-support-panel textarea:focus,.fmm-support-panel select:focus { border-color: #ffcf45; box-shadow: 0 0 0 2px rgba(255,207,69,.12); }
         .fmm-support-send { min-height: 43px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; background: linear-gradient(135deg,#c9171e,#ef3037); color: #fff; font-weight: 900; cursor: pointer; }
         .fmm-support-send:disabled { opacity: .65; cursor: wait; }
         .fmm-support-status { margin: 2px 0; color: #ffdc68; font-size: .8rem; font-weight: 700; }

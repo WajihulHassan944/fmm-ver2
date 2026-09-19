@@ -103,6 +103,11 @@ const ROUTE_COPY = {
     title: 'Notifications',
     description: 'Review and publish notification content through the existing admin notification flow.',
   },
+  '/administration/support': {
+    eyebrow: 'Customer support',
+    title: 'Support ticket desk',
+    description: 'Receive customer questions, assign ownership, email replies, and track every request through resolution.',
+  },
   '/administration/swarm': {
     eyebrow: 'Automation',
     title: 'Swarm command center',

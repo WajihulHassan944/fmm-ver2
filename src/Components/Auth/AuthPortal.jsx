@@ -292,18 +292,19 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     submitLockRef.current = true;
     setIsSubmitting(true);
     try {
-      await apiRequest('/contact-us-fantasymmadness', {
+      const ticket = await apiRequest('/api/support/tickets', {
         method: 'POST',
         token: null,
         body: {
-          fullName: sponsorForm.fullName,
+          name: sponsorForm.fullName,
           email: sponsorForm.email,
+          category: 'other',
           subject: `Sponsorship enquiry — ${sponsorForm.company}`,
           message: `Company: ${sponsorForm.company}\nWebsite: ${sponsorForm.website || 'Not provided'}\n\n${sponsorForm.message}`,
         },
       });
       setSponsorSubmitted(true);
-      toast.success('Sponsorship enquiry sent.');
+      toast.success(`Sponsorship ticket ${ticket.ticketNumber} created.`);
     } catch (error) {
       toast.error(error.message || 'Unable to send your enquiry.');
     } finally {

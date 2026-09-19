@@ -15,23 +15,25 @@ const Contact = () => {
 
     const formData = new FormData(event.currentTarget);
     const data = {
-      fullName: formData.get('fullName'),
+      name: formData.get('fullName'),
       email: formData.get('email'),
-      subject: formData.get('subject'),
+      category: 'other',
+      subject: formData.get('subject') || 'Contact form question',
       message: formData.get('message'),
     };
 
     try {
-      const response = await fetch(buildPublicApiUrl('/contact-us-fantasymmadness'), {
+      const response = await fetch(buildPublicApiUrl('/api/support/tickets'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error('Message could not be sent.');
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || 'Message could not be sent.');
 
       setButtonText('Sent');
-      setStatusText('Message sent. The Fantasy MMAdness team will follow up.');
+      setStatusText(`Ticket ${payload.ticketNumber} created. Keep this number; the Fantasy MMAdness team will follow up.`);
       event.currentTarget.reset();
       window.setTimeout(() => setButtonText('Send Message'), 1800);
     } catch (error) {
