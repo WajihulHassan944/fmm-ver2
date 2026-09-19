@@ -22,6 +22,8 @@ This file protects confirmed Fantasy MMAdness behavior from being overwritten by
 | Live promotions | Affiliates may promote live fights without turning them into Shadow templates. | Affiliate dashboard production build and promotion route tests. |
 | Auto discovery | Discovered UFC events remain Draft/Closed and private until admin promotion. | `ufc-event-discovery.test.js` and backend suite. |
 | Affiliate email | Gmail accounts use Gmail SMTP even if an obsolete custom host remains configured; recipient remains editable. | Backend suite; frontend production build; production send test by an authenticated admin. |
+| Promotion notifications | Publishing an affiliate fight notifies that affiliate's league bells, respects player email opt-outs/cooldown, and records a Back Office notification. It never enables the legacy platform-wide blast. | Publish as a verified affiliate; confirm member bell/reach, Back Office notification, and `notify=false` on `/addMatch`. |
+| Affiliate public links | New universal links use the affiliate's stable ID; previously shared full-name, username, and league-name links continue resolving. | Open both an ID link and a legacy name link on desktop and phone. |
 | Back office | Existing admin, Swarm, Jarvis, Economics, scoring, and Full Card routes are outside phone/affiliate-only changes. | Review changed-file list before merge. |
 
 ## September 18, 2026 release scope
@@ -30,3 +32,12 @@ This file protects confirmed Fantasy MMAdness behavior from being overwritten by
 - Replace unstable affiliate page dynamic imports with direct imports.
 - Route the configured Gmail sender through Gmail SMTP.
 - No fight records, affiliate records, league members, scoring data, or back-office features are modified.
+
+## September 19, 2026 release scope
+
+- Notify only the publishing affiliate's connected league when a promotion goes live.
+- Keep the authenticated Gmail sender and all member email preference protections unchanged.
+- Add a durable Back Office audit notification for successful affiliate announcements.
+- Repair public affiliate URLs with stable ID links plus backward-compatible legacy link resolution.
+- Show both promoted live fights and scored Shadow campaigns in the affiliate's public fight room.
+- No users, affiliates, league members, fights, wallets, predictions, or winnings are deleted or rewritten.
