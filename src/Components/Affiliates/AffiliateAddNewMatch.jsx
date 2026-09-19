@@ -275,8 +275,29 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
 
       if (response.ok) {
         const responseData = await response.json();
-        alert('Fight promotion published successfully.');
-        console.log(responseData.data || responseData.matchId);
+        const publishedFightId = responseData.matchId || responseData.data?._id;
+        let confirmation = 'Fight promotion published successfully.';
+
+        // Notify only this promoter's league. Keep the legacy platform-wide
+        // `notify` switch off so one affiliate cannot email every FMM account.
+        if (publishedFightId) {
+          try {
+            const noticeResponse = await fetch(`${API_BASE}/api/affiliates/me/promotions/${encodeURIComponent(publishedFightId)}/announce`, {
+              method: 'POST',
+              headers: affiliateHeaders({ 'Content-Type': 'application/json' }),
+              body: JSON.stringify({}),
+            });
+            const notice = await noticeResponse.json().catch(() => ({}));
+            if (noticeResponse.ok) confirmation = `${confirmation}\n\n${notice.message || 'Your league was notified.'}`;
+            else if (notice.code === 'EMPTY_LEAGUE') confirmation = `${confirmation}\n\nNo league members are connected yet, so there was nobody to notify.`;
+            else confirmation = `${confirmation}\n\nThe fight is live, but the league notice needs attention: ${notice.message || `request failed (${noticeResponse.status})`}`;
+          } catch (noticeError) {
+            confirmation = `${confirmation}\n\nThe fight is live, but the league notice could not be sent: ${noticeError.message || 'network error'}`;
+          }
+        }
+
+        alert(confirmation);
+        console.log(responseData.data || publishedFightId);
         window.location.assign('/AffiliateDashboard#promoted-fights');
       } else {
         const problem = await response.json().catch(() => ({}));
