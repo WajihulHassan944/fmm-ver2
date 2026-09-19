@@ -13,14 +13,31 @@ import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperi
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
+const normalizeIdentifier = (value) => decodeURIComponent(String(value || '')).trim().toLowerCase();
+const slugifyIdentifier = (value) => normalizeIdentifier(value)
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+const matchesAffiliateIdentifier = (affiliate, identifier) => {
+  const normalized = normalizeIdentifier(identifier);
+  const slug = slugifyIdentifier(identifier);
+  const fullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ');
+  const candidates = [affiliate?._id, affiliate?.id, affiliate?.playerName, affiliate?.affiliateName, affiliate?.leagueName, fullName]
+    .filter(Boolean);
+  return candidates.some((candidate) => normalizeIdentifier(candidate) === normalized || slugifyIdentifier(candidate) === slug);
+};
+
 const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   const router = useRouter();
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null });
 
   const visiblePromotions = useMemo(() => {
     if (!affiliate?._id) return [];
-    return safeArray(promoMatches).filter((match) => safeArray(match?.AffiliateIds).some(
-      (affiliateObject) => String(affiliateObject?.AffiliateId || '') === String(affiliate._id),
+    return safeArray(promoMatches).filter((match) => (
+      String(match?.affiliateId || '') === String(affiliate._id)
+      || safeArray(match?.AffiliateIds).some(
+        (affiliateObject) => String(affiliateObject?.AffiliateId || '') === String(affiliate._id),
+      )
     ));
   }, [affiliate, promoMatches]);
 
@@ -45,7 +62,9 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   }
 
   const affiliateName = [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || affiliate.playerName || 'Affiliate';
-  const memberCount = safeArray(affiliate.usersJoined).length;
+  const memberCount = Array.isArray(affiliate.usersJoined)
+    ? affiliate.usersJoined.length
+    : Number(affiliate.usersJoined || 0);
 
   return (
     <section className="public-affiliate-campaign-page">
@@ -90,11 +109,28 @@ export async function getServerSideProps(context) {
   let promoMatches = [];
 
   try {
-    const affiliateRes = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(affiliateName)}`);
-    if (affiliateRes.ok) affiliate = await affiliateRes.json();
+    const [publicAffiliatesRes, legacyAffiliateRes, promoRes, publicFightsRes] = await Promise.all([
+      fetch(`${API_BASE}/api/public/affiliates?limit=200`),
+      fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(affiliateName)}`),
+      fetch(`${API_BASE}/shadow`),
+      fetch(`${API_BASE}/api/public/fights?limit=500`),
+    ]);
 
-    const promoRes = await fetch(`${API_BASE}/shadow`);
-    if (promoRes.ok) promoMatches = await promoRes.json();
+    if (publicAffiliatesRes.ok) {
+      const publicAffiliates = await publicAffiliatesRes.json();
+      affiliate = safeArray(publicAffiliates).find((row) => matchesAffiliateIdentifier(row, affiliateName)) || null;
+    }
+    // Keep every previously shared full-name URL working during migration.
+    if (!affiliate && legacyAffiliateRes.ok) affiliate = await legacyAffiliateRes.json();
+    const shadowRows = promoRes.ok ? await promoRes.json() : [];
+    const publicFightPayload = publicFightsRes.ok ? await publicFightsRes.json() : [];
+    const publicFightRows = Array.isArray(publicFightPayload)
+      ? publicFightPayload
+      : publicFightPayload.items || publicFightPayload.fights || publicFightPayload.matches || publicFightPayload.data || [];
+    const byId = new Map([...safeArray(shadowRows), ...safeArray(publicFightRows)]
+      .filter((row) => row?._id)
+      .map((row) => [String(row._id), row]));
+    promoMatches = [...byId.values()];
   } catch (error) {
     console.error('Error fetching data:', error);
   }
