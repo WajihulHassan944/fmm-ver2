@@ -68,7 +68,7 @@ export default function MembershipCheckout() {
     if (!router.isReady) return;
     if (isFmPlus) {
       const requestedPlan = String(router.query.plan || '').toLowerCase();
-      if (requestedPlan === 'pass') setFmPlusPlan(requestedPlan);
+      if (['pass', 'monthly'].includes(requestedPlan)) setFmPlusPlan(requestedPlan);
       return;
     }
     const requestedCart = parseCartQuery(router.query.cart);
@@ -243,6 +243,12 @@ export default function MembershipCheckout() {
         setPaymentResult({ state: 'success', orderNumber: payload.orderNumber, creditedCoins: payload.creditedCoins });
         return;
       }
+      if (payload.subscribed) {
+        setPaymentResult({ state: 'pending', orderNumber: payload.orderNumber, message: payload.message });
+        setStatus(payload.message || 'Monthly auto-renew is active and awaiting its first successful payment.');
+        setSubmitting(false);
+        return;
+      }
       if (!payload.checkoutUrl) throw new Error('Secure payment is not configured yet.');
       if (payload.checkoutMethod === 'POST' && payload.formToken) {
         const hostedForm = document.createElement('form');
@@ -302,8 +308,8 @@ export default function MembershipCheckout() {
               <section className="fm-checkout-card fm-plus-products">
                 <div className="fm-card-title"><span>1</span><div><h2>Choose your FM+ plan</h2><p>Both plans unlock the same benefits.</p></div></div>
                 <div className="fm-plus-plan-grid">
-                  {FM_PLUS_PLANS.map((plan) => <button type="button" key={plan.id} disabled={plan.id === 'monthly'} className={fmPlusPlan === plan.id ? 'is-active' : ''} onClick={() => { setFmPlusPlan(plan.id); idempotencyKey.current = ''; }}>
-                    <b>{plan.id === 'monthly' ? 'COMING SOON' : plan.badge}</b><span>{plan.label}</span><strong>{money(plan.priceCents)}{plan.id === 'monthly' ? '/mo' : ''}</strong><small>{plan.id === 'monthly' ? 'Available after recurring billing is activated' : plan.description}</small>
+                  {FM_PLUS_PLANS.map((plan) => <button type="button" key={plan.id} className={fmPlusPlan === plan.id ? 'is-active' : ''} onClick={() => { setFmPlusPlan(plan.id); idempotencyKey.current = ''; }}>
+                    <b>{plan.badge}</b><span>{plan.label}</span><strong>{money(plan.priceCents)}{plan.id === 'monthly' ? '/mo' : ''}</strong><small>{plan.description}</small>
                   </button>)}
                 </div>
                 <aside className="fm-plus-benefits"><strong>FM+ BENEFITS</strong>{['1,000 bonus FM coins', 'Early Fantasy Card access', 'Exclusive FM+ leagues', 'No ads', '25 FM streak saves'].map((benefit) => <span key={benefit}><FaCheck /> {benefit}</span>)}</aside>
