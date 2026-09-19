@@ -23,8 +23,11 @@ export default function AffiliateAllFightPromotion() {
 
   const promoUrl = useMemo(() => {
     if (!affiliate) return '';
-    const name = `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim();
-    return `https://fantasymmadness.com/affiliate/${encodeURIComponent(name)}`;
+    // IDs do not change when a promoter edits their name or league branding.
+    // The public route still accepts legacy name/username links.
+    const publicIdentifier = affiliate._id || affiliate.id || affiliate.playerName
+      || `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim();
+    return `https://fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}`;
   }, [affiliate]);
 
   const promoted = (Array.isArray(matches) ? matches : []).filter(
