@@ -95,6 +95,7 @@ const navigationGroups = [
     icon: FaComments,
     items: [
       { label: 'Forum & chat', href: '/administration/Community', icon: FaComments, matchPrefixes: ['/administration/threads', '/administration/chatroom'] },
+      { label: 'Support tickets', href: '/administration/support', icon: FaEnvelope },
       { label: 'Notifications', href: '/administration/notifications', icon: FaBell },
     ],
   },
