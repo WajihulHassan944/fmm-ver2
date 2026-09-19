@@ -26,6 +26,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC
 
 const buildPublicApiUrl = (path) => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
 
+const urlBase64ToUint8Array = (value) => {
+  const padding = '='.repeat((4 - (value.length % 4)) % 4);
+  const base64 = (value + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = window.atob(base64);
+  return Uint8Array.from([...raw].map((character) => character.charCodeAt(0)));
+};
+
 // --------------------------------------------------------------------------
 // SESSION
 //
@@ -986,14 +993,36 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   }, []);
 
   const onEnablePush = useCallback(async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
+    if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
       return { ok: false, message: 'This browser does not support notifications.' };
     }
     try {
-      const permission = await Notification.requestPermission();
-      return { ok: permission === 'granted', permission };
+      const token = readSessionToken();
+      if (!token) return { ok: false, message: 'Sign in before enabling browser alerts.' };
+      const headers = { Authorization: `Bearer ${token}` };
+      const keyResponse = await fetch(buildPublicApiUrl('/api/player/push/public-key'), { headers });
+      const keyPayload = await keyResponse.json().catch(() => ({}));
+      if (!keyResponse.ok || !keyPayload.configured || !keyPayload.publicKey) {
+        return { ok: false, message: keyPayload.message || 'Browser alerts are not configured yet.' };
+      }
+      const registration = await navigator.serviceWorker.register('/player-push-sw.js');
+      const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+      if (permission !== 'granted') return { ok: false, permission, message: 'Notification permission was not granted.' };
+      const existing = await registration.pushManager.getSubscription();
+      const subscription = existing || await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(keyPayload.publicKey),
+      });
+      const response = await fetch(buildPublicApiUrl('/api/player/push/subscribe'), {
+        method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.subscribed) throw new Error(payload.message || 'This device could not be connected.');
+      await fetch(buildPublicApiUrl('/api/player/push/test'), { method: 'POST', headers }).catch(() => null);
+      return { ok: true, permission, subscribed: true, message: 'Browser alerts are connected to this device.' };
     } catch (error) {
-      return { ok: false };
+      return { ok: false, message: error.message || 'Browser alerts could not be enabled.' };
     }
   }, []);
 
