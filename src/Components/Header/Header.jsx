@@ -6,6 +6,7 @@ import Link from 'next/link';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
+import { userHeaders } from '@/Utils/authFetch';
 import {
   FaBars,
   FaBell,
@@ -36,6 +37,7 @@ import {
 } from 'react-icons/fa';
 
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
@@ -163,6 +165,9 @@ const Header = () => {
   const [authStatusSponsor, setAuthStatusSponsor] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [playerNotifications, setPlayerNotifications] = useState([]);
+  const [notificationUnread, setNotificationUnread] = useState(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -173,7 +178,60 @@ const Header = () => {
   useEffect(() => {
     setActiveDropdown(null);
     setMobileOpen(false);
+    setNotificationOpen(false);
   }, [asPath]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setPlayerNotifications([]);
+      setNotificationUnread(0);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const loadNotifications = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/users/me/notifications`, {
+          headers: userHeaders(),
+          cache: 'no-store',
+        });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (cancelled) return;
+        setPlayerNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
+        setNotificationUnread(Number(payload?.unread) || 0);
+      } catch (_error) {
+        // Keep the header usable during a temporary API interruption.
+      }
+    };
+
+    loadNotifications();
+    const timer = window.setInterval(loadNotifications, 30000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') loadNotifications();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [isAuthenticated]);
+
+  const openPlayerNotifications = async () => {
+    setNotificationOpen((current) => !current);
+    if (!notificationUnread) return;
+    setNotificationUnread(0);
+    setPlayerNotifications((current) => current.map((item) => ({ ...item, unread: false })));
+    try {
+      await fetch(`${API_BASE}/api/users/me/notifications/read`, {
+        method: 'POST',
+        headers: userHeaders(),
+      });
+    } catch (_error) {
+      // The feed remains visible; it can retry on the next open.
+    }
+  };
 
   const isActive = (href) => {
     if (!href || href === '#') return false;
@@ -372,15 +430,48 @@ const Header = () => {
             </span>
           </Link>
 
-          <Link
-            href={mobileAccountHref}
-            className="theme-home-mobile-notifications"
-            aria-label={mobileAccountLabel}
-          >
-            <FaBell aria-hidden="true" />
-            <span className="theme-home-mobile-badge" aria-hidden="true">3</span>
-          </Link>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              className="theme-home-mobile-notifications"
+              aria-label={notificationUnread ? `${notificationUnread} unread notifications` : 'Notifications'}
+              aria-expanded={notificationOpen}
+              onClick={openPlayerNotifications}
+            >
+              <FaBell aria-hidden="true" />
+              {notificationUnread > 0 && (
+                <span className="theme-home-mobile-badge" aria-hidden="true">{Math.min(notificationUnread, 99)}</span>
+              )}
+            </button>
+          ) : (
+            <Link href={mobileAccountHref} className="theme-home-mobile-notifications" aria-label={mobileAccountLabel}>
+              <FaBell aria-hidden="true" />
+            </Link>
+          )}
         </div>
+      )}
+
+      {notificationOpen && isAuthenticated && (
+        <aside
+          className="theme-player-notification-panel"
+          aria-label="Player notifications"
+          style={{ position: 'absolute', right: 12, top: 64, zIndex: 1000, width: 'min(92vw, 380px)', maxHeight: '70vh', overflowY: 'auto', padding: 14, borderRadius: 14, background: '#111827', color: '#fff', boxShadow: '0 18px 48px rgba(0,0,0,.45)' }}
+        >
+          <header style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+            <strong>Notifications</strong>
+            <button type="button" onClick={() => setNotificationOpen(false)} aria-label="Close notifications" style={{ color: '#fff', background: 'transparent', border: 0 }}><FaTimes /></button>
+          </header>
+          {playerNotifications.length ? playerNotifications.slice(0, 20).map((item) => (
+            <Link
+              key={item.id}
+              href={item.fightId ? `/upcomingfights?fight=${encodeURIComponent(item.fightId)}` : '/home'}
+              style={{ display: 'block', padding: '10px 8px', marginBottom: 6, borderRadius: 8, color: '#fff', textDecoration: 'none', background: item.unread ? 'rgba(242,181,68,.18)' : 'rgba(255,255,255,.06)' }}
+            >
+              <strong style={{ display: 'block' }}>{item.title || 'Fantasy MMAdness update'}</strong>
+              {item.body && <small style={{ color: '#d1d5db' }}>{item.body}</small>}
+            </Link>
+          )) : <p style={{ margin: 0, color: '#d1d5db' }}>No new notifications yet.</p>}
+        </aside>
       )}
 
       <Link href={dashboardHomeHref} className="theme-brand" aria-label="Fantasy MMAdness home">
