@@ -27,6 +27,7 @@ const UserAccountSettings = () => {
   const user = useSelector((state) => state.user);
 
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(Boolean(user?.isNotificationsEnabled));
+  const [fightEmailNotifications, setFightEmailNotifications] = useState(user?.fightEmailNotifications !== false);
   const [isSubscribed, setIsSubscribed] = useState(Boolean(user?.isSubscribed));
   const [isUSCitizen, setIsUSCitizen] = useState(Boolean(user?.isUSCitizen));
   const [venmoId, setVenmoId] = useState('');
@@ -40,6 +41,7 @@ const UserAccountSettings = () => {
   useEffect(() => {
     if (!user) return;
     setIsNotificationsEnabled(Boolean(user.isNotificationsEnabled));
+    setFightEmailNotifications(user.fightEmailNotifications !== false);
     setIsSubscribed(Boolean(user.isSubscribed));
     setIsUSCitizen(Boolean(user.isUSCitizen));
     setSelectedPaymentMethod(user.preferredPaymentMethod || '');
@@ -85,6 +87,7 @@ const UserAccountSettings = () => {
         formData.append('zipCode', user.zipCode || '');
         formData.append('shortBio', user.shortBio || '');
         formData.append('isNotificationsEnabled', isNotificationsEnabled);
+        formData.append('fightEmailNotifications', fightEmailNotifications);
         formData.append('isSubscribed', isSubscribed);
         formData.append('isUSCitizen', isUSCitizen);
 
@@ -196,6 +199,11 @@ const UserAccountSettings = () => {
               <label>
                 <input type="checkbox" checked={isNotificationsEnabled} onChange={(event) => setIsNotificationsEnabled(event.target.checked)} />
                 <span><i><FaBell /></i><strong>SMS activity notifications</strong><small>I would like to be sent activity notifications via SMS.</small></span>
+                <b aria-hidden="true" />
+              </label>
+              <label>
+                <input type="checkbox" checked={fightEmailNotifications} onChange={(event) => setFightEmailNotifications(event.target.checked)} />
+                <span><i><FaEnvelope /></i><strong>Fight alerts by email</strong><small>Email me when a new fight is published or my league announces a fight.</small></span>
                 <b aria-hidden="true" />
               </label>
               <label>
