@@ -259,6 +259,11 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
   const fighterOneStats = Array.isArray(liveStats?.fighterOneStats) ? liveStats.fighterOneStats : [];
   const fighterTwoStats = Array.isArray(liveStats?.fighterTwoStats) ? liveStats.fighterTwoStats : [];
   const userEntry = fight.userEntry && typeof fight.userEntry === 'object' ? fight.userEntry : null;
+  const explicitPoster = resolveLiveMedia(
+    fight.homepagePromotion?.mobilePosterImage, fight.homepagePromotion?.posterImage,
+    fight.homepagePromotion?.image, fight.fightPosterMobileImage, fight.fightPosterImage,
+    fight.posterImage, fight.matchPosterImage, fight.bannerImage,
+  );
 
   return {
     id: cleanText(fight._id, fight.id, fight.matchId, `live-${index}`),
@@ -303,23 +308,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     fallbackImage: getEventFallbackImage(sport),
     fighterAImage: resolveLiveMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterA?.primaryImage, fight.fighterA?.image),
     fighterBImage: resolveLiveMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterB?.primaryImage, fight.fighterB?.image),
-    image: resolveLiveMedia(
-      fight.homepagePromotion?.mobilePosterImage,
-      fight.homepagePromotion?.posterImage,
-      fight.homepagePromotion?.image,
-      fight.fightPosterMobileImage,
-      fight.fightPosterImage,
-      fight.posterImage,
-      fight.matchPosterImage,
-      fight.bannerImage,
-      fight.promotionBackground,
-      fight.resolvedFighterAImage,
-      fight.fighterAPrimaryImage,
-      fight.fighterAImage,
-      fight.resolvedFighterBImage,
-      fight.fighterBPrimaryImage,
-      fight.fighterBImage,
-    ),
+    image: explicitPoster,
+    hasPoster: Boolean(explicitPoster),
   };
 };
 
@@ -3755,11 +3745,12 @@ class FantasyMobileAppCore extends React.Component {
       style: { margin: '0 16px 16px', position: 'relative', borderRadius: 14, overflow: 'hidden', minHeight: 246, border: '1px solid ' + event.tagColor, boxShadow: '0 0 18px ' + event.tagColor + '55', cursor: 'pointer', background: '#080a10' }
     },
       React.createElement('div', { className: 'fmm-unified-arena-bg', style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-approved-arena-' + event.id, shape: 'rect', placeholder: 'Fantasy MMAdness arena', fit: 'cover', src: 'arena-approved-v62.webp' })),
-      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--left', style: { position: 'absolute', left: 0, top: 0, bottom: 74, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
-      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--right', style: { position: 'absolute', right: 0, top: 0, bottom: 74, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage })),
+      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--left', style: { position: 'absolute', left: 0, top: 0, bottom: 108, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
+      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--right', style: { position: 'absolute', right: 0, top: 0, bottom: 108, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage })),
       React.createElement('div', { className: 'fmm-unified-featured-overlay', style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(5,6,10,.14) 0%,rgba(5,6,10,.03) 30%,rgba(5,6,10,.03) 70%,rgba(5,6,10,.16) 100%),linear-gradient(180deg,rgba(5,6,10,.02),rgba(5,6,10,.6))' } }),
-      React.createElement('div', { className: 'fmm-unified-featured-content', style: { position: 'relative', minHeight: 246, padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', textAlign: 'center', background: 'linear-gradient(180deg,transparent 34%,rgba(5,6,10,.72) 58%,rgba(5,6,10,.94) 78%)' } },
-        React.createElement('span', { style: { color: '#f2b544', fontSize: 9, fontWeight: 900 } }, '★ FEATURED THIS WEEK · ' + event.date),
+      React.createElement('span', { className: 'fmm-unified-featured-label', style: { position: 'absolute', zIndex: 4, top: 10, left: 10, color: '#2b1b00', background: '#f2b544', borderRadius: 999, padding: '5px 9px', fontSize: 8.5, fontWeight: 1000, boxShadow: '0 0 12px rgba(242,181,68,.55)' } }, '★ FEATURED THIS WEEK'),
+      React.createElement('div', { className: 'fmm-unified-featured-content', style: { position: 'relative', minHeight: 246, padding: '156px 14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', textAlign: 'center', background: 'linear-gradient(180deg,transparent 48%,rgba(5,6,10,.9) 64%,rgba(5,6,10,.98) 78%)' } },
+        React.createElement('span', { style: { color: '#c9d3e8', fontSize: 8, fontWeight: 900 } }, event.date),
         React.createElement('h2', { style: { fontFamily: "'Anton',sans-serif", fontSize: 21, lineHeight: 1.08, margin: '4px 0', textShadow: '0 2px 10px rgba(0,0,0,.85)' } }, event.f1, React.createElement('em', { style: { color: '#ef4444', fontStyle: 'normal' } }, ' VS '), event.f2),
         React.createElement('div', { style: { display: 'flex', gap: 12, fontSize: 10, fontWeight: 900, marginBottom: 9 } },
           React.createElement('span', { style: { color: '#22c55e' } }, event.prize || 'PRIZE TERMS PENDING'),
@@ -3798,7 +3789,12 @@ class FantasyMobileAppCore extends React.Component {
         },
           s.flashCard[ev.id] && React.createElement('div', { key: s.flashCard[ev.id], style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle,rgba(242,181,68,.55),transparent 70%)', animation: 'quickFlash .6s ease-out forwards', zIndex: 5, pointerEvents: 'none' } }),
           React.createElement('div', { style: { height: 150, position: 'relative' } },
-            React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage }),
+            ev.hasPoster
+              ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage })
+              : React.createElement('div', { className: 'fmm-unified-upcoming-fighters', style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
+                  React.createElement(MobileImageSlot, { id: 'event-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'cover', src: ev.fighterAImage, fallbackSrc: ev.fallbackImage }),
+                  React.createElement(MobileImageSlot, { id: 'event-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'cover', src: ev.fighterBImage, fallbackSrc: ev.fallbackImage })
+                ),
             React.createElement('div', { style: { position: 'absolute', top: 6, left: 6, background: ev.tagColor, color: '#fff', fontSize: 8, fontWeight: 900, padding: '3px 6px', borderRadius: 5 } }, ev.tag),
             s.showNewTag && s.newFightId === ev.backendId && React.createElement('div', { style: { position: 'absolute', top: 6, right: 6, background: '#22c55e', color: '#05120a', fontSize: 8, fontWeight: 1000, padding: '3px 7px', borderRadius: 999, animation: 'newTagFlash .8s ease-in-out infinite' } }, 'NEW')
           ),
