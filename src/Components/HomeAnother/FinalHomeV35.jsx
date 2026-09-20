@@ -292,7 +292,6 @@ const getExplicitPoster = (fight = {}) => {
     fight?.eventPoster,
     fight?.homepagePromotion?.posterImage,
     fight?.homepagePromotion?.image,
-    fight?.promotionBackground,
   ];
   const posterSrc = posterFields.find((item) => item && !String(item).startsWith("data:") && !isDesignFallbackPoster(item));
   if (posterSrc) return posterSrc;
@@ -315,7 +314,10 @@ const buildUpcomingEvent = (fight = {}, index = 0) => {
     color: sportAssets[key]?.color || "#ef4444",
     date: getDateLabel(fight),
     prize: getPrize(fight),
-    image: explicitPoster || getFighterImage(fight, "A") || getFighterImage(fight, "B") || sportAssets[key]?.image || sportAssets.mma.image,
+    image: explicitPoster,
+    fighterAImage: getFighterImage(fight, "A"),
+    fighterBImage: getFighterImage(fight, "B"),
+    hasPoster: Boolean(explicitPoster),
     fallbackImage: sportAssets[key]?.image || sportAssets.mma.image,
     href: getFightHref(fight),
   };
@@ -716,7 +718,12 @@ const FinalHomeV35 = ({
               <article key={event.id} style={{ "--event-color": event.color }}>
                 <Link href={event.href}>
                   <figure>
-                    <img src={event.image} alt="" onError={(error) => { error.currentTarget.onerror = null; error.currentTarget.src = event.fallbackImage || sportAssets.mma.image; }} />
+                    {event.hasPoster ? <img src={event.image} alt="" onError={(error) => { error.currentTarget.onerror = null; error.currentTarget.src = event.fallbackImage || sportAssets.mma.image; }} /> : (
+                      <span className="fmm-v35-event-fighters" aria-hidden="true">
+                        <img src={event.fighterAImage || event.fallbackImage} alt="" />
+                        <img src={event.fighterBImage || event.fallbackImage} alt="" />
+                      </span>
+                    )}
                     <figcaption>{event.tag}</figcaption>
                   </figure>
                   <h3>{event.f1} <em>VS</em> {event.f2}</h3>
