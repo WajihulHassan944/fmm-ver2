@@ -39,6 +39,25 @@
   object-position: center !important;
 }
 
+.fmm-home-v35-final .fmm-v35-event-fighters {
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  overflow: hidden !important;
+}
+
+.fmm-home-v35-final .fmm-v35-event-fighters img {
+  position: static !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  object-fit: cover !important;
+}
+
+.fmm-home-v35-final .fmm-v35-event-fighters img:first-child { object-position: 42% center !important; }
+.fmm-home-v35-final .fmm-v35-event-fighters img:last-child { object-position: 58% center !important; }
+
 /* Home: make the chest one clear, shiny CTA with scattered coins, not bunched side-by-side coins. */
 .fmm-home-v35-final .fmm-v35-chest {
   width: clamp(142px, 32vw, 184px) !important;
