@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { FaChevronDown, FaEnvelope, FaLifeRing, FaPaperPlane, FaTimes } from 'react-icons/fa';
@@ -29,6 +29,7 @@ export default function SupportWidget() {
   const user = useSelector((state) => state.auth?.user || state.user?.user || null);
   const affiliate = useSelector((state) => state.affiliateAuth?.userAffiliate || null);
   const identity = affiliate || user || {};
+  const isAffiliate = Boolean(affiliate);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -40,6 +41,16 @@ export default function SupportWidget() {
     subject: '',
     message: '',
   });
+
+  useEffect(() => {
+    if (!identity?.email) return;
+    setForm((current) => ({
+      ...current,
+      fullName: current.fullName || [identity.firstName, identity.lastName].filter(Boolean).join(' '),
+      email: current.email || identity.email,
+      category: isAffiliate && current.category === 'other' ? 'affiliate' : current.category,
+    }));
+  }, [identity.email, identity.firstName, identity.lastName, isAffiliate]);
 
   const pageLabel = useMemo(() => {
     const path = String(router.asPath || router.pathname || '/').split('?')[0];
@@ -65,7 +76,7 @@ export default function SupportWidget() {
         body: JSON.stringify({
           name: form.fullName,
           email: form.email,
-          category: form.category,
+          category: isAffiliate ? 'affiliate' : form.category,
           subject: `[${pageLabel}] ${form.subject}`,
           message: `${form.message}\n\nPage: ${router.asPath || router.pathname}`,
         }),
