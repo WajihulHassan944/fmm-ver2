@@ -50,6 +50,38 @@ const tokensToUsdValue = (tokens) => ((Math.max(0, Number(tokens) || 0) * ECON_T
 const usdToTokensValue = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / ECON_TOKEN_USD_RATE)));
 
 const getId = (fight) => fight?._id || fight?.id;
+const getFightCreatedAt = (fight = {}) => {
+  const stored = new Date(fight.createdAt || fight.created_at || fight.publishedAt || fight.updatedAt || 0).getTime();
+  if (Number.isFinite(stored) && stored > 0) return stored;
+  const id = String(getId(fight) || '');
+  if (/^[a-f0-9]{24}$/i.test(id)) return Number.parseInt(id.slice(0, 8), 16) * 1000;
+  const scheduled = new Date(fight.matchDate || 0).getTime();
+  return Number.isFinite(scheduled) ? scheduled : 0;
+};
+const getFightSearchText = (fight = {}) => [
+  getId(fight),
+  fight.id,
+  fight.matchId,
+  fight.fighterAId?._id || fight.fighterAId,
+  fight.fighterBId?._id || fight.fighterBId,
+  fight.matchName,
+  getFighterName(fight, 'A'),
+  getFighterName(fight, 'B'),
+  fight.matchFighterA,
+  fight.matchFighterB,
+  getSport(fight),
+  fight.matchDescription,
+].filter(Boolean).join(' ').toLowerCase();
+const getFightSearchRank = (fight = {}, query = '') => {
+  if (!query) return 0;
+  const names = [getFighterName(fight, 'A'), getFighterName(fight, 'B')]
+    .map((value) => String(value || '').trim().toLowerCase());
+  if (names.some((name) => name === query)) return 0;
+  if (names.some((name) => name.startsWith(query))) return 1;
+  if (names.some((name) => name.split(/\s+/).some((word) => word.startsWith(query)))) return 2;
+  if (names.some((name) => name.includes(query))) return 3;
+  return 4;
+};
 const getSport = (fight) => fight?.matchCategoryTwo || fight?.matchCategory || 'combat';
 const getTitle = (fight) => fight?.matchName || `${fight?.matchFighterA || 'Fighter A'} vs ${fight?.matchFighterB || 'Fighter B'}`;
 const formatDate = (fight) => fight?.matchDate?.split?.('T')?.[0] || 'Date pending';
@@ -370,30 +402,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         || (activeTab === 'live' && type === 'live');
       if (!tabMatch) return false;
       if (!normalizedSearch) return true;
-      return [
-        getId(fight),
-        fight.id,
-        fight.matchId,
-        fight.fighterAId?._id || fight.fighterAId,
-        fight.fighterBId?._id || fight.fighterBId,
-        fight.matchName,
-        getFighterName(fight, 'A'),
-        getFighterName(fight, 'B'),
-        fight.matchFighterA,
-        fight.matchFighterB,
-        getSport(fight),
-        fight.matchDescription,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(normalizedSearch);
+      return getFightSearchText(fight).includes(normalizedSearch);
     }).sort((a, b) => {
-      const liveDiff = Number(isActiveFight(b)) - Number(isActiveFight(a));
-      if (liveDiff) return liveDiff;
-      const finishedDiff = Number(isFinishedFight(a)) - Number(isFinishedFight(b));
-      if (finishedDiff) return finishedDiff;
-      return new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
+      if (normalizedSearch) {
+        const relevance = getFightSearchRank(a, normalizedSearch) - getFightSearchRank(b, normalizedSearch);
+        if (relevance) return relevance;
+      }
+      return getFightCreatedAt(b) - getFightCreatedAt(a);
     });
   }, [activeTab, registryRows, search]);
 
