@@ -390,14 +390,14 @@ export default function AddNewMatch() {
                 <label className="admin-money-conversion-field">
                   <span>Player entry fee (USD)</span>
                   <div className="admin-money-input"><b>$</b><input type="number" min="0" step="0.01" name="matchTokensUsd" value={form.matchTokensUsd} onChange={change} placeholder="0.00" /></div>
-                  <small><strong>{Number(form.matchTokens || 0).toLocaleString()} FM</strong> charged publicly</small>
+                  <small><strong>{Number(form.matchTokens || 0).toLocaleString()} FM COINS</strong> charged publicly</small>
                 </label>
                 <label className="admin-money-conversion-field">
                   <span>Guaranteed prize pool (USD)</span>
                   <div className="admin-money-input"><b>$</b><input type="number" min="0" step="0.01" name="potUsd" value={form.potUsd} onChange={change} placeholder="0.00" /></div>
-                  <small><strong>{Number(form.pot || 0).toLocaleString()} FM</strong> shown publicly</small>
+                  <small><strong>{Number(form.pot || 0).toLocaleString()} FM COINS</strong> shown publicly</small>
                 </label>
-                <div className="admin-fm-rate-note is-wide"><span>FM conversion</span><strong>$3.99 = 5,000 FM</strong><small>Cash amounts stay in the back office. Players see and spend the converted FM amount.</small></div>
+                <div className="admin-fm-rate-note is-wide"><span>FM COINS conversion</span><strong>$3.99 = 5,000 FM COINS</strong><small>Cash amounts stay in the back office. Players see and spend the converted FM COINS amount.</small></div>
               </div>
             </section>
           )}

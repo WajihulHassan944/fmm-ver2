@@ -70,6 +70,7 @@ import "@/styles/adminswarm.css";
 import "@/styles/admin-growth-data-quality.css";
 import "@/styles/phase4-seo-pages.css";
 import "@/styles/client-end-user-fixes.css";
+import "@/styles/fm-coins-system.css";
 import "@/styles/public-fight-detail.css";
 import "@/styles/home-mobile-design-phone.css";
 import "@/styles/user-dashboard-mobile-phone.css";

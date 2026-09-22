@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { FMCoin } from '@/Components/Common/FMCoin';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -274,16 +275,16 @@ export default function MembershipCheckout() {
   return (
     <>
       <Head>
-        <title>{isFmPlus ? 'FM+ Checkout' : 'FM Coin Checkout'} | Fantasy MMAdness</title>
-        <meta name="description" content={isFmPlus ? 'Choose an FM+ plan and continue to secure payment.' : 'Review FM coin packs and continue to secure Fantasy MMAdness payment.'} />
+        <title>{isFmPlus ? 'FM+ Checkout' : 'FM COINS Checkout'} | FANTASY MMADNESS</title>
+        <meta name="description" content={isFmPlus ? 'Choose an FM+ plan and continue to secure payment.' : 'Review FM COINS packs and continue to secure FANTASY MMADNESS payment.'} />
       </Head>
       <main className="fm-cart-page">
         <div className="fm-cart-shell">
           <header className="fm-cart-header">
             <Link href="/" aria-label="Back to Fantasy MMAdness"><FaArrowLeft /></Link>
             <div className="fm-cart-heading">
-              <h1>{isFmPlus ? '⭐ FM+ CHECKOUT' : '🪙 FM COIN CHECKOUT'}</h1>
-              <p>{isFmPlus ? 'Choose how you want to unlock FM+.' : `${creditedCoins.toLocaleString()} FM coins · secure encrypted checkout`}</p>
+              <h1>{isFmPlus ? '⭐ FM+ CHECKOUT' : 'FM COINS CHECKOUT'}</h1>
+              <p>{isFmPlus ? 'Choose how you want to unlock FM+.' : `${creditedCoins.toLocaleString()} FM COINS · secure encrypted checkout`}</p>
             </div>
             <i aria-hidden="true"><FaLock /></i>
           </header>
@@ -294,10 +295,10 @@ export default function MembershipCheckout() {
             {paymentResult?.state === 'success' ? <FaCheck /> : <FaShieldAlt />}
             <h2>{paymentResult?.state === 'success' ? 'PAYMENT CONFIRMED' : paymentResult?.state === 'failed' ? 'PAYMENT NEEDS ATTENTION' : paymentResult?.state === 'pending' ? 'PAYMENT IS PROCESSING' : 'VERIFYING PAYMENT'}</h2>
             <p>{paymentResult?.state === 'success'
-              ? `${Number(paymentResult.creditedCoins || 0).toLocaleString()} FM has been credited successfully.`
+              ? `${Number(paymentResult.creditedCoins || 0).toLocaleString()} FM COINS have been credited successfully.`
               : paymentResult?.state === 'failed'
                 ? paymentResult.message || 'The payment could not be confirmed. Please contact support with the order reference.'
-                : 'The secure processor is confirming the transaction. Coins are credited only after approval.'}</p>
+                : 'The secure processor is confirming the transaction. FM COINS are credited only after approval.'}</p>
             <small>ORDER: {paymentResult?.orderNumber || returnOrder || 'PENDING'}</small>
             {paymentResult?.state === 'success' && returnCountdown !== null && returnCountdown > 0 ? (
               <small className="fm-checkout-autoreturn">Taking you back in {returnCountdown}…</small>
@@ -312,17 +313,17 @@ export default function MembershipCheckout() {
                     <b>{plan.badge}</b><span>{plan.label}</span><strong>{money(plan.priceCents)}{plan.id === 'monthly' ? '/mo' : ''}</strong><small>{plan.description}</small>
                   </button>)}
                 </div>
-                <aside className="fm-plus-benefits"><strong>FM+ BENEFITS</strong>{['1,000 bonus FM coins', 'Early Fantasy Card access', 'Exclusive FM+ leagues', 'No ads', '25 FM streak saves'].map((benefit) => <span key={benefit}><FaCheck /> {benefit}</span>)}</aside>
+                <aside className="fm-plus-benefits"><strong>FM+ BENEFITS</strong>{['1,000 bonus FM COINS', 'Early Fantasy Card access', 'Exclusive FM+ leagues', 'No ads', '25 FM COINS streak saves'].map((benefit) => <span key={benefit}><FaCheck /> {benefit}</span>)}</aside>
               </section>
             ) : (
               <section className="fm-checkout-card fm-line-items">
                 {items.length ? items.map((item) => <article key={item.sku}>
-                  <div className="fm-pack-coin">FM</div>
-                  <div className="fm-pack-copy"><strong>{item.coins.toLocaleString()} FM COIN PACK</strong><span>{(item.coins * item.quantity).toLocaleString()} FM coins</span><b>{money(item.priceCents * item.quantity)}</b><button type="button" onClick={() => changeQuantity(item.sku, -item.quantity)}>Remove</button></div>
+                  <div className="fm-pack-coin"><FMCoin size="xl" motion="flip" /></div>
+                  <div className="fm-pack-copy"><strong>{item.coins.toLocaleString()} FM COINS PACK</strong><span>{(item.coins * item.quantity).toLocaleString()} FM COINS</span><b>{money(item.priceCents * item.quantity)}</b><button type="button" onClick={() => changeQuantity(item.sku, -item.quantity)}>Remove</button></div>
                   <div className="fm-qty"><button type="button" onClick={() => changeQuantity(item.sku, -1)} aria-label={`Decrease ${item.coins} FM quantity`}><FaMinus /></button><b>{item.quantity}</b><button type="button" onClick={() => changeQuantity(item.sku, 1)} aria-label={`Increase ${item.coins} FM quantity`}><FaPlus /></button></div>
                 </article>) : <div className="fm-empty-cart"><FaCoins /><strong>Choose a coin pack</strong><p>Select the amount you want credited to your fight wallet.</p></div>}
                 <button className="fm-change-pack" type="button" onClick={() => setShowPacks((value) => !value)}>{showPacks ? 'CLOSE PACK OPTIONS' : items.length ? 'CHANGE OR ADD A PACK' : 'SHOW COIN PACKS'}</button>
-                {showPacks || !items.length ? <div className="fm-pack-picker">{PACKS.map((pack) => <button type="button" key={pack.sku} onClick={() => choosePack(pack.sku)} className={pack.popular ? 'is-popular' : ''}>{pack.popular ? <b>MOST POPULAR</b> : null}<span>{pack.coins.toLocaleString()} FM</span><strong>{money(pack.priceCents)}</strong></button>)}</div> : null}
+                {showPacks || !items.length ? <div className="fm-pack-picker">{PACKS.map((pack) => <button type="button" key={pack.sku} onClick={() => choosePack(pack.sku)} className={pack.popular ? 'is-popular' : ''}>{pack.popular ? <b>MOST POPULAR</b> : null}<span>{pack.coins.toLocaleString()} FM COINS</span><strong>{money(pack.priceCents)}</strong></button>)}</div> : null}
               </section>
             )}
 
@@ -330,18 +331,18 @@ export default function MembershipCheckout() {
               <h2>ORDER SUMMARY</h2>
               {isFmPlus ? <p><span>FM+ {selectedPlan.label}</span><strong>{money(selectedPlan.priceCents)}</strong></p> : <>
                 <p><span>Subtotal</span><strong>{money(subtotalCents)}</strong></p>
-                <p><span>Coin pack</span><strong>{baseCoins.toLocaleString()} FM</strong></p>
-                {firstPurchaseEligible && baseCoins > 0 ? <p className="is-bonus"><span>🎁 First-purchase bonus</span><strong>+{bonusCoins.toLocaleString()} FM</strong></p> : null}
-                <p><span>FM coins credited</span><strong>{creditedCoins.toLocaleString()} FM</strong></p>
+                <p><span>FM COINS pack</span><strong>{baseCoins.toLocaleString()} FM COINS</strong></p>
+                {firstPurchaseEligible && baseCoins > 0 ? <p className="is-bonus"><span>🎁 First-purchase bonus</span><strong>+{bonusCoins.toLocaleString()} FM COINS</strong></p> : null}
+                <p><span>FM COINS credited</span><strong>{creditedCoins.toLocaleString()} FM COINS</strong></p>
               </>}
               <p className="is-total"><span>Total</span><strong>{money(subtotalCents)}</strong></p>
-              <small>Digital purchase — coins credit to your wallet immediately after confirmed payment. No shipping required.</small>
+              <small>Digital purchase — FM COINS credit to your wallet immediately after confirmed payment. No shipping required.</small>
             </aside>
 
             <section className="fm-checkout-card fm-cart-billing">
               {user?.email
-                ? <aside className="fm-cart-account is-signed-in"><FaCheck /><span><strong>Signed in as {user.email}</strong><small>{isFmPlus ? 'FM+ benefits apply to this player account after confirmed payment.' : 'Coins credit directly to this player wallet after confirmed payment.'}</small></span></aside>
-                : <aside className="fm-cart-account"><FaCoins /><span><strong>Your player account is created automatically</strong><small>We use the details below, include 500 FM welcome coins, and email a single-use link to set your password. No separate sign-up form.</small></span></aside>}
+                ? <aside className="fm-cart-account is-signed-in"><FaCheck /><span><strong>Signed in as {user.email}</strong><small>{isFmPlus ? 'FM+ benefits apply to this player account after confirmed payment.' : 'FM COINS credit directly to this player wallet after confirmed payment.'}</small></span></aside>
+                : <aside className="fm-cart-account"><FaCoins /><span><strong>Your player account is created automatically</strong><small>We use the details below, include 500 welcome FM COINS, and email a single-use link to set your password. No separate sign-up form.</small></span></aside>}
               <div className="fm-card-title"><span>{isFmPlus ? '2' : '1'}</span><div><h2>BILLING DETAILS</h2><p>Must match the billing address on your card.</p></div></div>
               <div className="fm-cart-fields">
                 <label className="is-wide"><span>NAME ON CARD *</span><input name="name" required value={form.name} onChange={update} autoComplete="cc-name" placeholder="Jordan Reyes" /></label>
@@ -361,8 +362,8 @@ export default function MembershipCheckout() {
               </div>
               <label className="fm-cart-check"><input type="checkbox" name="ageConfirmed" checked={form.ageConfirmed} onChange={update} /><span>I confirm that I am 18 or older and eligible to purchase.</span></label>
               <label className="fm-cart-check"><input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={update} /><span>I accept the <Link href="/terms">terms</Link> and <Link href="/privacy-policy">privacy policy</Link>.</span></label>
-              <button className="fm-pay-button" type="submit" disabled={submitting || (!isFmPlus && !items.length)}>{submitting ? 'CREATING SECURE CHECKOUT…' : `PAY ${money(subtotalCents)} · ${isFmPlus ? `START ${selectedPlan.label.toUpperCase()}` : `GET ${creditedCoins.toLocaleString()} FM`}`}</button>
-              <small className="fm-security-note"><FaShieldAlt /> Card details are encrypted and sent directly to our payment processor. Fantasy MMAdness never sees or stores your card number.</small>
+              <button className="fm-pay-button" type="submit" disabled={submitting || (!isFmPlus && !items.length)}>{submitting ? 'CREATING SECURE CHECKOUT…' : `PAY ${money(subtotalCents)} · ${isFmPlus ? `START ${selectedPlan.label.toUpperCase()}` : `GET ${creditedCoins.toLocaleString()} FM COINS`}`}</button>
+              <small className="fm-security-note"><FaShieldAlt /> Card details are encrypted and sent directly to our payment processor. FANTASY MMADNESS never sees or stores your card number.</small>
               {status ? <p className="fm-cart-status" role="alert">{status}</p> : null}
             </section>
           </form>}

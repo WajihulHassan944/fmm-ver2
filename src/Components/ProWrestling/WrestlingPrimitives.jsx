@@ -105,7 +105,7 @@ export const WrestlingMatchCard = ({ match, actionLabel, actionHref, onAction, c
         <div className="pw-match-card-meta">
           <span><FaCalendarAlt /> {formatWrestlingDate(match?.matchDate)}</span>
           <span><FaUsers /> {formatTokenAmount(match?.participantCount)} players</span>
-          <span><FaCoins /> {formatTokenAmount(match?.currentPot)} token pot</span>
+          <span><FaCoins /> {formatTokenAmount(match?.currentPot)} FM COINS pot</span>
         </div>
         <div className="pw-match-card-bottom">
           <span>{locked ? <FaLock /> : <FaBolt />} {locked ? WRESTLING_STATUS_COPY[match?.status] || 'Locked' : `Locks in ${formatWrestlingCountdown(match?.lockAt)}`}</span>

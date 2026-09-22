@@ -82,7 +82,7 @@ export default function AffiliateAllFightPromotion() {
           </section>
 
           <section className="affiliate-promotion-stat-grid" aria-label="Affiliate promotion summary">
-            <article><FaCoins /><span><small>Balance</small><strong>{safeNumber(affiliate.tokens)}</strong><em>FM credits</em></span></article>
+            <article><FaCoins /><span><small>Balance</small><strong>{safeNumber(affiliate.tokens)}</strong><em>FM COINS</em></span></article>
             <article><FaEye /><span><small>Promotion views</small><strong>{safeNumber(affiliate.totalViews)}</strong><em>All-time reach</em></span></article>
             <article><FaUsers /><span><small>League members</small><strong>{safeNumber(leagueCount)}</strong><em>Connected players</em></span></article>
             <article><FaBullhorn /><span><small>Promotions</small><strong>{safeNumber(promoted.length)}</strong><em>Campaigns created</em></span></article>

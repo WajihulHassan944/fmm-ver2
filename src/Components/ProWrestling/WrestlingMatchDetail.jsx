@@ -158,19 +158,19 @@ const WrestlingMatchDetail = () => {
         <main className="theme-container pw-main pw-detail-main">
           <section className="pw-contest-command-card">
             <div className="pw-contest-command-metrics">
-              <article><FaCoins /><span><small>Entry fee</small><strong>{formatTokenAmount(match.entryFeeTokens)} tokens</strong></span></article>
-              <article><FaTrophy /><span><small>Current pot</small><strong>{formatTokenAmount(match.currentPot)} tokens</strong></span></article>
+              <article><FaCoins /><span><small>Entry fee</small><strong>{formatTokenAmount(match.entryFeeTokens)} FM COINS</strong></span></article>
+              <article><FaTrophy /><span><small>Current pot</small><strong>{formatTokenAmount(match.currentPot)} FM COINS</strong></span></article>
               <article><FaUsers /><span><small>Players entered</small><strong>{formatTokenAmount(match.participantCount)}</strong></span></article>
               <article><FaLock /><span><small>Prediction lock</small><strong>{formatWrestlingCountdown(match.lockAt, now)}</strong></span></article>
             </div>
             <div className="pw-contest-command-action">
               {entry ? (
                 <div className="pw-entry-confirmation"><FaCheckCircle /><span><strong>Contest entry confirmed</strong><small>{prediction ? `Prediction ${prediction.predictionStatus?.toLowerCase() || 'saved'}` : 'Build your prediction card before lock time.'}</small></span></div>
-              ) : <div><small>Your fight wallet</small><strong>{formatTokenAmount(user?.tokens)} tokens available</strong></div>}
+              ) : <div><small>Your fight wallet</small><strong>{formatTokenAmount(user?.tokens)} FM COINS available</strong></div>}
               {action ? (
                 <Link href={action.href} className="pw-btn pw-btn-primary">{action.label} {ActionIcon && <ActionIcon />}</Link>
               ) : canJoin ? (
-                <button type="button" className="pw-btn pw-btn-primary" onClick={joinContest} disabled={joining}>{joining ? 'Entering contest…' : `Enter for ${formatTokenAmount(match.entryFeeTokens)} tokens`} <FaArrowRight /></button>
+                <button type="button" className="pw-btn pw-btn-primary" onClick={joinContest} disabled={joining}>{joining ? 'Entering contest…' : `Enter for ${formatTokenAmount(match.entryFeeTokens)} FM COINS`} <FaArrowRight /></button>
               ) : (
                 <span className="pw-closed-action"><FaLock /> This contest is not accepting new entries.</span>
               )}

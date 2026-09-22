@@ -5,12 +5,12 @@ import {
   FaArrowLeft,
   FaArrowRight,
   FaClock,
-  FaCoins,
   FaLock,
   FaShieldAlt,
 } from 'react-icons/fa';
 import AddTokensToWallet from '../UserProfile/AddTokensToWallet';
 import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
+import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 
 const PurchaseTokensIntimation = ({ matchId }) => {
   const router = useRouter();
@@ -54,8 +54,8 @@ const PurchaseTokensIntimation = ({ matchId }) => {
       <div className="player-wallet-gate-backdrop" aria-hidden="true" />
       <div className="theme-container player-wallet-gate-shell">
         <header>
-          <div><p><FaLock /> Wallet requirement</p><h1>Add tokens. <span>Enter the fight.</span></h1><small>Your existing wallet balance is below this fight card&apos;s entry requirement.</small></div>
-          <button type="button" onClick={() => router.push('/checkout')}><FaCoins /><span><small>Current wallet</small><strong>{user.tokens || 0}</strong><em>tokens</em></span></button>
+          <div><p><FaLock /> Wallet requirement</p><h1>Add FM COINS. <span>Enter the fight.</span></h1><small>Your FM COINS balance is below this fight card&apos;s entry requirement.</small></div>
+          <button type="button" onClick={() => router.push('/checkout')}><FMCoin size="lg" motion="shine" /><span><small>Current wallet</small><strong>{Number(user.tokens || 0).toLocaleString()}</strong><em>FM COINS</em></span></button>
         </header>
 
         <section className="player-wallet-gate-fight">
@@ -65,14 +65,14 @@ const PurchaseTokensIntimation = ({ matchId }) => {
         </section>
 
         <section className="player-wallet-gate-summary">
-          <article><small>Fight entry</small><strong>{match.matchTokens || 0} tokens</strong></article>
-          <article><small>Your wallet</small><strong>{user.tokens || 0} tokens</strong></article>
-          <article><small>Additional requirement</small><strong>{Math.max(0, Number(match.matchTokens || 0) - Number(user.tokens || 0))} tokens</strong></article>
+          <article><small>Fight entry</small><FMCoinAmount amount={match.matchTokens || 0} size="sm" /></article>
+          <article><small>Your wallet</small><FMCoinAmount amount={user.tokens || 0} size="sm" /></article>
+          <article><small>Additional requirement</small><FMCoinAmount amount={Math.max(0, Number(match.matchTokens || 0) - Number(user.tokens || 0))} size="sm" motion="bounce" /></article>
         </section>
 
         <div className="player-wallet-gate-action">
           <span><FaShieldAlt /> Predictions should be completed at least 10 minutes before the fight starts.</span>
-          <button type="button" onClick={() => setShowPurchase(true)}>Purchase tokens <FaArrowRight /></button>
+          <button type="button" onClick={() => setShowPurchase(true)}>Get FM COINS <FaArrowRight /></button>
         </div>
       </div>
     </section>
