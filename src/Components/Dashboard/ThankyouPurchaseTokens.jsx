@@ -32,7 +32,7 @@ const ThankyouPurchaseTokens = ({ amount }) => {
     <div className="thankyou-purchase-tokens-parent">
       <div className="thankyou-purchase-tokens-child">
         <h1>Thank you for your purchase!</h1>
-        <h2>Tokens are successfully added to your fight wallet.</h2>
+        <h2>FM COINS were successfully added to your fight wallet.</h2>
       </div>
     </div>
   );
