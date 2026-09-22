@@ -390,7 +390,7 @@ const AffiliateDashboard = () => {
         <main className="xp-page-main xp-dashboard-main affiliate-dashboard-main-final">
           <div className="theme-container">
             <section className="xp-dashboard-stat-grid xp-affiliate-stat-grid">
-              <div><FaDollarSign /><span><strong>{Number(affiliate.tokens || 0).toLocaleString()}</strong><small>Affiliate balance</small></span></div>
+              <div><FaCoins /><span><strong>{Number(affiliate.tokens || 0).toLocaleString()}</strong><small>FM COINS balance</small></span></div>
               <div><FaEye /><span><strong>{Number(affiliate.totalViews || 0).toLocaleString()}</strong><small>Promotion views</small></span></div>
               <div><FaUserFriends /><span><strong>{joinedMembers.length}</strong><small>League members</small></span></div>
               <div><FaBullhorn /><span><strong>{totalPromotions}</strong><small>Total promotions</small></span></div>
@@ -653,7 +653,7 @@ const AffiliateDashboard = () => {
                   <div className="affiliate-wrestling-command-stats">
                     <span><strong>{wrestlingLoading ? '—' : wrestlingMatches.length}</strong><small>Assigned cards</small></span>
                     <span><strong>{wrestlingLoading ? '—' : Number(wrestlingSummary?.attributedEntries || 0).toLocaleString()}</strong><small>Attributed entries</small></span>
-                    <span><strong>{wrestlingLoading ? '—' : formatTokenAmount(wrestlingCommission)}</strong><small>Commission tokens</small></span>
+                    <span><strong>{wrestlingLoading ? '—' : formatTokenAmount(wrestlingCommission)}</strong><small>Commission FM COINS</small></span>
                   </div>
                   <div className="affiliate-wrestling-command-actions">
                     <Link href="/pro-wrestling" className="theme-btn theme-btn-primary">Open wrestling lobby <FaArrowRight /></Link>
@@ -671,7 +671,7 @@ const AffiliateDashboard = () => {
                       <div><img src={getWrestlerImage(match.competitorA, 'A')} alt="" /><b>VS</b><img src={getWrestlerImage(match.competitorB, 'B')} alt="" /></div>
                       <p>{match.status} · {formatWrestlingDate(match.matchDate)}</p>
                       <h3>{match.matchTitle}</h3>
-                      <span>{formatTokenAmount(match.currentPot)} token pot <FaArrowRight /></span>
+                      <span>{formatTokenAmount(match.currentPot)} FM COINS pot <FaArrowRight /></span>
                     </Link>
                   )) : (
                     <div className="affiliate-wrestling-command-empty"><FaCrown /><strong>No wrestling card is assigned yet.</strong><span>Assigned Pro Wrestling campaigns will appear here automatically.</span></div>
