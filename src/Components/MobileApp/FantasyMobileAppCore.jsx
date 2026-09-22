@@ -308,8 +308,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     featuredFight: Boolean(fight.featuredFight),
     featuredThisWeekImage: resolveLiveMedia(fight.featuredThisWeekImage),
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
-    featuredFightFighterAImage: resolveExactFighterMedia(fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterA?.primaryImage, fight.fighterA?.image),
-    featuredFightFighterBImage: resolveExactFighterMedia(fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterB?.primaryImage, fight.fighterB?.image),
+    featuredFightFighterAImage: resolveExactFighterMedia(fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterA?.primaryImage, fight.fighterA?.profileUrl, fight.fighterA?.profileImage, fight.fighterA?.imageUrl, fight.fighterA?.image, fight.fighterA?.avatar),
+    featuredFightFighterBImage: resolveExactFighterMedia(fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterB?.primaryImage, fight.fighterB?.profileUrl, fight.fighterB?.profileImage, fight.fighterB?.imageUrl, fight.fighterB?.image, fight.fighterB?.avatar),
     // Transparent-background versions, derived from the same Cloudinary URLs.
     // Screens use these as src and the plain ones as fallbackSrc, so a missing
     // transform degrades to the original photo instead of a broken image.
@@ -340,8 +340,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     isShadow: Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')),
     serverEntered: Boolean(userEntry || fight.predictionSubmitted || fight.userPredictionSubmitted),
     fallbackImage: getEventFallbackImage(sport),
-    fighterAImage: resolveExactFighterMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterA?.primaryImage, fight.fighterA?.image),
-    fighterBImage: resolveExactFighterMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterB?.primaryImage, fight.fighterB?.image),
+    fighterAImage: resolveExactFighterMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterA?.primaryImage, fight.fighterA?.profileUrl, fight.fighterA?.profileImage, fight.fighterA?.imageUrl, fight.fighterA?.image, fight.fighterA?.avatar),
+    fighterBImage: resolveExactFighterMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterB?.primaryImage, fight.fighterB?.profileUrl, fight.fighterB?.profileImage, fight.fighterB?.imageUrl, fight.fighterB?.image, fight.fighterB?.avatar),
     image: explicitPoster,
     hasPoster: Boolean(explicitPoster),
   };
