@@ -4266,10 +4266,10 @@ class FantasyMobileAppCore extends React.Component {
           key: ev.id, style: { background: 'rgba(255,255,255,.05)', border: '1px solid ' + ev.tagColor, borderRadius: 12, overflow: 'hidden', boxShadow: '0 0 16px ' + ev.tagColor + '55, inset 0 0 12px ' + ev.tagColor + '20' }
         },
           React.createElement('div', { style: { height: 170, position: 'relative', background: '#000' } },
-            ev.hasPoster ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image }) : React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
+            (ev.fighterAImage || ev.fighterBImage) ? React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
               ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'contest-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'cover', src: ev.fighterAImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f1 || '?')[0]),
               ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'contest-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'cover', src: ev.fighterBImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f2 || '?')[0])
-            )
+            ) : ev.hasPoster ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image }) : React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42, fontWeight: 900 } }, `${(ev.f1 || '?')[0]}  VS  ${(ev.f2 || '?')[0]}`)
           ),
           React.createElement('div', { style: { padding: 12 } },
             React.createElement('div', { style: { display: 'inline-flex', marginBottom: 6, background: ev.tagColor, color: '#fff', fontSize: 9, fontWeight: 900, padding: '4px 8px', borderRadius: 6 } }, ev.tag),
