@@ -181,7 +181,11 @@ const adminFightQualityScore = (fight = {}) => {
 const dedupeAdminFightRows = (rows = []) => {
   const selected = new Map();
   (Array.isArray(rows) ? rows : []).forEach((fight) => {
-    const key = getPublicFightDuplicateKey(fight) || String(getId(fight) || '');
+    // Without a scheduled day, matching names can describe different bouts.
+    const day = String(fight?.matchDateKey || fight?.eventDateKey || fight?.matchDate || '').slice(0, 10);
+    const key = /^\\d{4}-\\d{2}-\\d{2}$/.test(day)
+      ? getPublicFightDuplicateKey(fight)
+      : String(getId(fight) || '');
     if (!key) return;
     const current = selected.get(key);
     if (!current || adminFightQualityScore(fight) > adminFightQualityScore(current)) {
@@ -201,10 +205,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [matches, setMatches] = useState([]);
   const [matchRowsLoading, setMatchRowsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
-  // Administrators must land on the complete registry. "Unique fights" remains
-  // available as an optional cleanup view, but must never hide valid records by
-  // default when two feeds describe the same card differently.
-  const [registryView, setRegistryView] = useState('all');
+  // Show one card per dated bout by default; All records remains available
+  // for auditing every persisted fight ID.
+  const [registryView, setRegistryView] = useState('unique');
   const [search, setSearch] = useState('');
   const [selectedScore, setSelectedScore] = useState(null);
   const [selectedScoresView, setSelectedScoresView] = useState(null);
