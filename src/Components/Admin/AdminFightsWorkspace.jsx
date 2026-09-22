@@ -183,7 +183,7 @@ const dedupeAdminFightRows = (rows = []) => {
   (Array.isArray(rows) ? rows : []).forEach((fight) => {
     // Without a scheduled day, matching names can describe different bouts.
     const day = String(fight?.matchDateKey || fight?.eventDateKey || fight?.matchDate || '').slice(0, 10);
-    const key = /^\\d{4}-\\d{2}-\\d{2}$/.test(day)
+    const key = /^\d{4}-\d{2}-\d{2}$/.test(day)
       ? getPublicFightDuplicateKey(fight)
       : String(getId(fight) || '');
     if (!key) return;
