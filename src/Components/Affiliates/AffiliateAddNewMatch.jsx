@@ -389,13 +389,13 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
           <label>
             <span><FaDollarSign /> Prize pot <small>{economics.free ? 'Value of the apparel or award' : 'Winner award'}</small></span>
             <input type="number" name="potUsd" min="0" step="0.01" placeholder="0.00" value={formData.potUsd} onChange={handleChange} onFocus={selectNumericValue} required />
-            <small className="affiliate-money-conversion">{Number(formData.pot || 0).toLocaleString()} FM tokens shown publicly</small>
+            <small className="affiliate-money-conversion">{Number(formData.pot || 0).toLocaleString()} FM COINS shown publicly</small>
           </label>
           {!economics.free && (
             <label>
               <span><FaDollarSign /> Player buy-in <small>Cash price per entry</small></span>
               <input type="number" name="matchTokensUsd" min="0" step="0.01" placeholder="0.00" value={formData.matchTokensUsd} onChange={handleChange} onFocus={selectNumericValue} required />
-              <small className="affiliate-money-conversion">{Number(formData.matchTokens || 0).toLocaleString()} FM tokens charged publicly</small>
+              <small className="affiliate-money-conversion">{Number(formData.matchTokens || 0).toLocaleString()} FM COINS charged publicly</small>
             </label>
           )}
           {!economics.free && (
@@ -405,7 +405,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
                 <small>{economics.guaranteed ? 'Card runs no matter what' : 'Optional cash amount — leave blank for none'}</small>
               </span>
               <input type="number" name="promoterStakeUsd" min="0" step="0.01" placeholder="0.00" value={formData.promoterStakeUsd} onChange={handleChange} onFocus={selectNumericValue} />
-              <small className="affiliate-money-conversion">{Number(formData.promoterStake || 0).toLocaleString()} FM tokens committed</small>
+              <small className="affiliate-money-conversion">{Number(formData.promoterStake || 0).toLocaleString()} FM COINS committed</small>
             </label>
           )}
           <label>
