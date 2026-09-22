@@ -812,8 +812,8 @@ const getPrizePool = (match) => {
   const amount = Number(
     match?.pot || match?.currentPot || match?.prizePool || 0,
   );
-  if (!amount) return "Open prize pool";
-  return `${amount.toLocaleString()} FM`;
+  if (!amount) return "OPEN FM COINS";
+  return `${amount.toLocaleString()} FM COINS`;
 };
 
 const getPotTokenLabel = (match) => {
@@ -1067,9 +1067,9 @@ const getMobileCountdownDisplay = (match, now) => {
 };
 
 const getMobileDisplayFights = (fights = [], sportKey = "mma", limit = 3) => {
-  const visible = Array.isArray(fights)
-    ? fights.filter(Boolean).slice(0, limit)
-    : [];
+  const visible = dedupeHomepageFights(Array.isArray(fights) ? fights : [])
+    .filter(Boolean)
+    .slice(0, limit);
 
   if (visible.length >= limit) return visible;
 
@@ -1083,7 +1083,7 @@ const getMobileDisplayFights = (fights = [], sportKey = "mma", limit = 3) => {
 
 const getMobileEntryFee = (match = {}) => {
   const amount = Number(match?.entryFee || match?.fee || match?.cost || 0);
-  return amount > 0 ? `$${amount.toLocaleString()}` : "$5";
+  return amount > 0 ? `${amount.toLocaleString()} FM COINS` : "FREE";
 };
 
 const getHomeSportViewAllHref = (sportKey) =>
@@ -1358,13 +1358,7 @@ const MobilePhoneHome = ({
       ...(Array.isArray(heroSlides) ? heroSlides : []),
       ...mobileSections.flatMap((section) => section.fights || []),
     ];
-    const seen = new Set();
-    const real = source.filter((fight) => {
-      const key = getFightId(fight) || getFightTitle(fight);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    const real = dedupeHomepageFights(source);
     if (real.length) return real;
     return mobileSections.map((section, index) =>
       getMobileFallbackFight(section.key, index),
@@ -1377,7 +1371,10 @@ const MobilePhoneHome = ({
     10,
   );
   const featuredFight = selectedSportFights[0] || uniqueAllFights[0];
-  const upcomingFights = selectedSportFights.slice(0, 10);
+  const featuredDuplicateKey = getPublicFightDuplicateKey(featuredFight);
+  const upcomingFights = selectedSportFights
+    .filter((fight) => getPublicFightDuplicateKey(fight) !== featuredDuplicateKey)
+    .slice(0, 10);
 
   const isLoggedIn = Boolean(
     currentUser?._id || currentUser?.email || currentUser?.username,
@@ -1928,8 +1925,8 @@ const MobilePhoneHome = ({
             <small>{featuredLabel}</small>
             <h2 id="fmm-app-featured-title">{fighterA} <em>VS</em> {fighterB}</h2>
             <div>
-              <strong>{featuredPrize} POOL</strong>
-              <strong>{featuredEntryFee} ENTRY</strong>
+              <strong className="is-fm-coins"><FaCoins aria-hidden="true" /> {featuredPrize}</strong>
+              <strong className="is-fm-coins"><FaCoins aria-hidden="true" /> {featuredEntryFee} ENTRY</strong>
               <strong>{featuredEntries.toLocaleString()} ENTRIES</strong>
             </div>
           </div>
@@ -1949,17 +1946,22 @@ const MobilePhoneHome = ({
             const color = categoryColor(fight);
             const left = getHomeFighterName(fight, "A");
             const right = getHomeFighterName(fight, "B");
+            const leftImage = getHomeFighterImage(fight, "A", index, { allowFallback: false });
+            const rightImage = getHomeFighterImage(fight, "B", index + 1, { allowFallback: false });
             return (
               <article key={getFightId(fight) || `upcoming-${index}`} style={{ "--event-color": color }}>
                 <Link href={getFightDetailHref(fight)} onClick={() => onPremiumTap("tick")}>
                   <figure>
-                    <img src={posterForFight(fight, index)} alt="" />
-                    <figcaption>{getMobileEventLabel(fight)}</figcaption>
+                    <span className="fmm-app-upcoming-fighters" aria-hidden="true">
+                      {leftImage ? <img src={leftImage} alt="" /> : <b>{quickPickLabel(left).slice(0, 1)}</b>}
+                      {rightImage ? <img src={rightImage} alt="" /> : <b>{quickPickLabel(right).slice(0, 1)}</b>}
+                    </span>
                   </figure>
                   <div>
+                    <span className="fmm-app-event-tag">{getMobileEventLabel(fight)}</span>
                     <h3>{left} <em>VS</em> {right}</h3>
                     <time>{getMobileShortDate(fight)} · {getLockLabel(fight, now)}</time>
-                    <strong>{getPrizePool(fight)}</strong>
+                    <strong className="is-fm-coins"><FaCoins aria-hidden="true" /> {getPrizePool(fight)}</strong>
                   </div>
                 </Link>
                 <div className="fmm-app-quick-picks">
@@ -1993,7 +1995,7 @@ const MobilePhoneHome = ({
             <span><small>ENTRY FEE</small><b>{featuredEntryFee}</b></span>
             <span><small>ENTRIES</small><b>{featuredEntries.toLocaleString()}</b></span>
           </div>
-          <strong className="fmm-app-detail-prize">{featuredPrize} POOL</strong>
+          <strong className="fmm-app-detail-prize is-fm-coins"><FaCoins aria-hidden="true" /> {featuredPrize}</strong>
           <Link href={featuredHref} onClick={() => onPremiumTap("boom")}>MAKE PREDICTIONS</Link>
         </div>
       </section>
