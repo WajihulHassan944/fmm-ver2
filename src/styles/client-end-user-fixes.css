@@ -290,6 +290,26 @@
 }
 .admin-direct-fighter-note { display: block; margin-top: 9px; line-height: 1.4; }
 
+/* Uploaded cutouts often include very different amounts of transparent canvas.
+   The preview component trims that canvas; this frame then gives both corners
+   the same stage height and scale. */
+.admin-fight-visual-card .admin-uniform-fighter-preview {
+  align-items: flex-end;
+  display: flex;
+  height: 220px;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+}
+.admin-fight-visual-card .admin-uniform-fighter-preview img {
+  flex: 0 0 auto;
+  height: 220px !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  width: auto !important;
+}
+
 /* Cash-first economics with the public FM conversion shown immediately. */
 .admin-money-conversion-field { min-width: 0; }
 .admin-money-input {
