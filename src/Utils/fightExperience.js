@@ -209,10 +209,9 @@ export const getFightPlayerCount = (match) => {
 
 export const getFightPrize = (match) => {
   const raw = match?.pot ?? match?.currentPot ?? match?.prizePool ?? match?.prize ?? match?.rewardAmount ?? match?.entryPrize ?? 0;
-  if (typeof raw === 'string' && raw.trim() && !/^tba$/i.test(raw.trim())) return raw.trim();
-  const amount = Number(raw);
-  if (!Number.isFinite(amount) || amount <= 0) return 'Open prize pool';
-  return `$${amount.toLocaleString()}`;
+  const amount = Number(String(raw || '').replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(amount) || amount <= 0) return 'OPEN FM COINS';
+  return `${amount.toLocaleString()} FM COINS`;
 };
 
 export const getFightRounds = (match) => {
@@ -265,8 +264,10 @@ const getFightQualityScore = (match = {}) => {
 };
 
 export const getPublicFightDuplicateKey = (match = {}) => {
-  const fighterA = normalizeFightKeyPart(getFighterName(match, 'A'));
-  const fighterB = normalizeFightKeyPart(getFighterName(match, 'B'));
+  // Fighter names occasionally arrive with spacing differences (for example
+  // "Hadribeaj" vs "Hadri beaj"). Treat those as one public card.
+  const fighterA = normalizeFightKeyPart(getFighterName(match, 'A')).replace(/\s+/g, '');
+  const fighterB = normalizeFightKeyPart(getFighterName(match, 'B')).replace(/\s+/g, '');
   if (!fighterA || !fighterB || fighterA === 'fighter a' || fighterB === 'fighter b') {
     return normalizeFightKeyPart(getFightId(match)) || normalizeFightKeyPart(match?.matchName);
   }
