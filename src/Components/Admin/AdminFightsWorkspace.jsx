@@ -229,15 +229,19 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
-      // The combined registry is intentionally compact. Merge it with the
-      // richer legacy records so uploaded fighter photos are not discarded.
-      const [adminPayload, legacyRows, shadowPayload, publicRows] = await Promise.allSettled([
-        fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' }),
+      // Paint the compact registry immediately. Rich photo/detail feeds hydrate
+      // it in the background instead of holding the whole table behind the
+      // slowest of four network requests.
+      const adminPayload = await fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' });
+      const adminRows = normalizeMatchFeedRows(adminPayload);
+      setMatches(adminRows);
+      setMatchRowsLoading(false);
+
+      const [legacyRows, shadowPayload, publicRows] = await Promise.allSettled([
         loadLegacyMatchFeed(),
         fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
         loadPublicMatchFeed(),
       ]);
-      const adminRows = adminPayload.status === 'fulfilled' ? normalizeMatchFeedRows(adminPayload.value) : [];
       const detailRows = [
         ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
         ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
@@ -333,10 +337,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const generic = getFallbackFighterImage(side);
     const stored = getFighterImage(fight, side);
     const nameKey = String(getFighterName(fight, side)).trim().toLowerCase();
-    const eventKey = String(fight?.matchName || '').trim().toLowerCase();
     const recovered = fighterImageByName[nameKey]
       || fightRecordImageMaps.byName[nameKey]
-      || fightRecordImageMaps.byEvent[eventKey]?.[side]
       || '';
     return { src: recovered || stored, fallback: generic };
   };

@@ -178,6 +178,7 @@ export default function AddNewMatch() {
   };
 
   const submitLockRef = useRef(false);
+  const publishRequestIdRef = useRef(globalThis.crypto?.randomUUID?.() || `fight-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -201,8 +202,9 @@ export default function AddNewMatch() {
 
       const data = new FormData();
       appendLegacyFight(data, form);
+      data.append('publishRequestId', publishRequestIdRef.current);
       const endpoint = form.matchType === 'SHADOW' ? `${API_BASE}/addShadow` : `${API_BASE}/addMatch`;
-      const response = await fetch(endpoint, { headers: adminHeaders(), method: 'POST', body: data });
+      const response = await fetch(endpoint, { headers: adminHeaders({ 'Idempotency-Key': publishRequestIdRef.current }), method: 'POST', body: data });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Failed to add match.');
 
@@ -235,6 +237,7 @@ export default function AddNewMatch() {
       } else {
         resetAfterCreate();
       }
+      publishRequestIdRef.current = globalThis.crypto?.randomUUID?.() || `fight-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     } catch (requestError) {
       // A network drop (no HTTP response reached the browser) can happen
       // AFTER the backend already saved the fight — resubmitting blind is
@@ -268,6 +271,7 @@ export default function AddNewMatch() {
             });
             setError('');
             resetAfterCreate();
+            publishRequestIdRef.current = globalThis.crypto?.randomUUID?.() || `fight-${Date.now()}-${Math.random().toString(36).slice(2)}`;
             return;
           }
         } catch (registryCheckError) {
