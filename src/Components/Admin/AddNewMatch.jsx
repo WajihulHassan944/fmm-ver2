@@ -46,6 +46,27 @@ const normaliseCategory = (value) => {
 const DEFAULT_ROUNDS = { boxing: '12', 'Bare-knuckle': '5', mma: '5', kickboxing: '5' };
 const ROUND_PRESETS = ['3', '5', '10', '12'];
 
+const DirectFighterEntry = ({ side, name, image, preview, onNameChange, onImageChange }) => (
+  <section className="admin-direct-fighter-card" aria-label={`Create Fighter ${side} with a photo`}>
+    <div className="admin-direct-fighter-heading">
+      <span>New fighter {side}</span>
+      <small>Not in the library? Add them here.</small>
+    </div>
+    <div className="admin-direct-fighter-fields">
+      <input type="text" aria-label={`Fighter ${side} name`} placeholder={`Fighter ${side} name`} value={name} onChange={(event) => onNameChange(event.target.value)} />
+      <label className={`admin-direct-fighter-upload ${image ? 'has-image' : ''}`}>
+        <OptimizedImage src={image ? preview : (side === 'A' ? FALLBACK_A : FALLBACK_B)} fallbackSrc={side === 'A' ? FALLBACK_A : FALLBACK_B} alt={image ? `${name || `Fighter ${side}`} upload preview` : ''} width={54} height={54} sizes="54px" />
+        <span>
+          <strong><FaCloudUploadAlt /> {image ? 'Change picture' : 'Upload fighter picture'}</strong>
+          <small>{image?.name || 'JPG, PNG or WEBP'}</small>
+        </span>
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => onImageChange(event.target.files?.[0] || null)} />
+      </label>
+    </div>
+    <small className="admin-direct-fighter-note">The fighter and original picture will be saved to the fighter library when this fight is published.</small>
+  </section>
+);
+
 const appendLegacyFight = (data, form, { shadow = false } = {}) => {
   data.append('matchCategory', form.matchCategory);
   data.append('matchCategoryTwo', form.matchCategoryTwo);
@@ -281,20 +302,14 @@ export default function AddNewMatch() {
                 <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('A', fighter)} required={!form.fighterAImage} />
                 <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('B', fighter)} required={!form.fighterBImage} />
               </div>
-              {!form.fighterAId && (
-                <label className="is-wide admin-fighter-file-field"><span>Or: Fighter A name + photo, no library lookup</span>
-                  <input type="text" placeholder="Fighter A name" value={form.matchFighterA} onChange={(event) => setForm((current) => ({ ...current, matchFighterA: event.target.value }))} style={{ marginBottom: 8 }} />
-                  <input type="file" accept="image/*" onChange={(event) => setForm((current) => ({ ...current, fighterAImage: event.target.files?.[0] || null }))} />
-                  <small>Auto-added to the fighter library on save.</small>
-                </label>
-              )}
-              {!form.fighterBId && (
-                <label className="is-wide admin-fighter-file-field"><span>Or: Fighter B name + photo, no library lookup</span>
-                  <input type="text" placeholder="Fighter B name" value={form.matchFighterB} onChange={(event) => setForm((current) => ({ ...current, matchFighterB: event.target.value }))} style={{ marginBottom: 8 }} />
-                  <input type="file" accept="image/*" onChange={(event) => setForm((current) => ({ ...current, fighterBImage: event.target.files?.[0] || null }))} />
-                  <small>Auto-added to the fighter library on save.</small>
-                </label>
-              )}
+              <div className="admin-direct-fighter-grid is-wide">
+                {!form.fighterAId && (
+                  <DirectFighterEntry side="A" name={form.matchFighterA} image={form.fighterAImage} preview={previews.fighterAImage} onNameChange={(value) => setForm((current) => ({ ...current, matchFighterA: value }))} onImageChange={(value) => setForm((current) => ({ ...current, fighterAImage: value }))} />
+                )}
+                {!form.fighterBId && (
+                  <DirectFighterEntry side="B" name={form.matchFighterB} image={form.fighterBImage} preview={previews.fighterBImage} onNameChange={(value) => setForm((current) => ({ ...current, matchFighterB: value }))} onImageChange={(value) => setForm((current) => ({ ...current, fighterBImage: value }))} />
+                )}
+              </div>
               <label>
                 <span>Maximum rounds</span>
                 <input type="number" min="1" max="30" name="maxRounds" value={form.maxRounds} onChange={change} />
