@@ -22,7 +22,9 @@ const EMPTY = {
   matchDate: '',
   matchTime: '',
   matchTokens: '0',
+  matchTokensUsd: '',
   pot: '0',
+  potUsd: '',
   matchType: 'LIVE',
   maxRounds: '12',
   notify: true,
@@ -45,6 +47,10 @@ const normaliseCategory = (value) => {
 // MMA, kickboxing and bare knuckle all run five.
 const DEFAULT_ROUNDS = { boxing: '12', 'Bare-knuckle': '5', mma: '5', kickboxing: '5' };
 const ROUND_PRESETS = ['3', '5', '10', '12'];
+const TOKEN_PACK_SIZE = 5000;
+const TOKEN_PACK_USD = 3.99;
+const TOKEN_USD_RATE = TOKEN_PACK_USD / TOKEN_PACK_SIZE;
+const usdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / TOKEN_USD_RATE)));
 
 const DirectFighterEntry = ({ side, name, image, preview, onNameChange, onImageChange }) => (
   <section className="admin-direct-fighter-card" aria-label={`Create Fighter ${side} with a photo`}>
@@ -96,6 +102,10 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
     data.append('matchTime', matchTimeEST);
     data.append('matchTokens', form.matchTokens);
     data.append('pot', form.pot);
+    data.append('matchTokensUsd', form.matchTokensUsd || '0');
+    data.append('potUsd', form.potUsd || '0');
+    data.append('fmConversionTokens', String(TOKEN_PACK_SIZE));
+    data.append('fmConversionUsd', String(TOKEN_PACK_USD));
     data.append('addToShadow', form.addToShadowTemplates);
   }
 };
@@ -136,6 +146,12 @@ export default function AddNewMatch() {
         ...normaliseCategory(value),
         maxRounds: DEFAULT_ROUNDS[value] || current.maxRounds,
       }));
+      return;
+    }
+    const tokenFieldByUsdField = { matchTokensUsd: 'matchTokens', potUsd: 'pot' };
+    const tokenField = tokenFieldByUsdField[name];
+    if (tokenField) {
+      setForm((current) => ({ ...current, [name]: value, [tokenField]: usdToTokens(value) }));
       return;
     }
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : type === 'file' ? files?.[0] || null : value }));
@@ -337,8 +353,17 @@ export default function AddNewMatch() {
               <div className="admin-form-grid">
                 <label><span>Fight date</span><input type="date" name="matchDate" value={form.matchDate} onChange={change} required /></label>
                 <label><span>Fight time (EST)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} required /></label>
-                <label><span>Entry tokens (FM)</span><input type="number" min="0" name="matchTokens" value={form.matchTokens} onChange={change} /></label>
-                <label><span>Prize pool (FM)</span><input type="number" min="0" step="0.01" name="pot" value={form.pot} onChange={change} /></label>
+                <label className="admin-money-conversion-field">
+                  <span>Player entry fee (USD)</span>
+                  <div className="admin-money-input"><b>$</b><input type="number" min="0" step="0.01" name="matchTokensUsd" value={form.matchTokensUsd} onChange={change} placeholder="0.00" /></div>
+                  <small><strong>{Number(form.matchTokens || 0).toLocaleString()} FM</strong> charged publicly</small>
+                </label>
+                <label className="admin-money-conversion-field">
+                  <span>Guaranteed prize pool (USD)</span>
+                  <div className="admin-money-input"><b>$</b><input type="number" min="0" step="0.01" name="potUsd" value={form.potUsd} onChange={change} placeholder="0.00" /></div>
+                  <small><strong>{Number(form.pot || 0).toLocaleString()} FM</strong> shown publicly</small>
+                </label>
+                <div className="admin-fm-rate-note is-wide"><span>FM conversion</span><strong>$3.99 = 5,000 FM</strong><small>Cash amounts stay in the back office. Players see and spend the converted FM amount.</small></div>
               </div>
             </section>
           )}
