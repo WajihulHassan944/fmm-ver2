@@ -97,7 +97,7 @@ export default function FullCardPromoterDesk() {
               {form.promotionLogo && <img src={form.promotionLogo} alt="Promotion logo preview" />}
             </label>
             <label className="is-wide">Event description<textarea rows="3" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
-            {permission.canOfferFullCardPrize && <label className="full-card-money-field"><strong>Optional Full Card Grand Prize</strong><span className="full-card-money-help">Enter the cash amount you want to offer. Players will see its FM token value.</span><div className="full-card-money-input"><b>$</b><input type="number" min="0" step="0.01" placeholder="0.00" value={form.fullCardPrizeUsd} onFocus={selectMoneyValue} onChange={(e) => setForm({ ...form, fullCardPrizeUsd: e.target.value, fullCardPrize: promoterUsdToTokens(e.target.value) })} /><em>USD</em></div><small><b>{Number(form.fullCardPrize || 0).toLocaleString()} FM</b> shown publicly</small></label>}
+            {permission.canOfferFullCardPrize && <label className="full-card-money-field"><strong>Optional Full Card Grand Prize</strong><span className="full-card-money-help">Enter the cash amount you want to offer. Players will see its FM COINS value.</span><div className="full-card-money-input"><b>$</b><input type="number" min="0" step="0.01" placeholder="0.00" value={form.fullCardPrizeUsd} onFocus={selectMoneyValue} onChange={(e) => setForm({ ...form, fullCardPrizeUsd: e.target.value, fullCardPrize: promoterUsdToTokens(e.target.value) })} /><em>USD</em></div><small><b>{Number(form.fullCardPrize || 0).toLocaleString()} FM COINS</b> shown publicly</small></label>}
           </div>
         </section>
         <section className="full-card-builder"><header><b>02</b><div><p>CARD ORDER</p><h2>Add Fighters & Pots</h2><span>Upload each fighter, choose the sport, and set that fight’s individual pot.</span></div><button type="button" onClick={() => setForm((f) => ({ ...f, bouts: [...f.bouts, emptyBout(f.bouts.length)] }))}><FaPlus /> Add fight</button></header>
@@ -110,13 +110,13 @@ export default function FullCardPromoterDesk() {
                 <strong>Guaranteed Fight Pot</strong>
                 <span className="full-card-money-help">Enter the cash value committed to this fight.</span>
                 <div className="full-card-money-input"><b>$</b><input type="number" min="0" step="0.01" placeholder="0.00" value={bout.potUsd} onFocus={selectMoneyValue} onChange={(e) => updateBout(index, 'potUsd', e.target.value)} /><em>USD</em></div>
-                <small>Public prize: <b>{Number(bout.pot || 0).toLocaleString()} FM</b></small>
+                <small>Public prize: <b>{Number(bout.pot || 0).toLocaleString()} FM COINS</b></small>
               </label>
               <label className="full-card-money-field">
                 <strong>Player Entry Cost</strong>
-                <span className="full-card-money-help">Enter the cash price. Players pay the converted FM amount.</span>
+                <span className="full-card-money-help">Enter the cash price. Players pay the converted FM COINS amount.</span>
                 <div className="full-card-money-input"><b>$</b><input type="number" min="0" step="0.01" placeholder="0.00" value={bout.entryUsd} onFocus={selectMoneyValue} onChange={(e) => updateBout(index, 'entryUsd', e.target.value)} /><em>USD</em></div>
-                <small>Player entry: <b>{Number(bout.entryTokens || 0).toLocaleString()} FM</b></small>
+                <small>Player entry: <b>{Number(bout.entryTokens || 0).toLocaleString()} FM COINS</b></small>
               </label>
             </div>
           </article>)}</div>
