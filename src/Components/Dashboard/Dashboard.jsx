@@ -32,6 +32,7 @@ import FightLeaderboard from "../GlobalLeaderboard/FightLeaderboard";
 import PurchaseTokensIntimation from "./PurchaseTokensIntimation";
 import FinishedFightUserBoard from "../FinishedFightUserBoard/FinishedFightUserBoard";
 import UserWorkspaceNav from "../UserProfile/UserWorkspaceNav";
+import { FMCoin } from "@/Components/Common/FMCoin";
 import {
   getFightCategory,
   getFightId,
@@ -154,14 +155,14 @@ const getDashboardMobileEntry = (match = {}) => {
 
   if (match?.matchTokens == null) return "Free";
   const tokens = Number(match.matchTokens || 0);
-  return tokens > 0 ? `${tokens.toLocaleString()} tokens` : "Free";
+  return tokens > 0 ? `${tokens.toLocaleString()} FM COINS` : "Free";
 };
 
 const getDashboardMobilePrize = (match = {}) => {
   const amount = Number(
     match?.pot ?? match?.currentPot ?? match?.prizePool ?? match?.prize ?? 0,
   );
-  return amount > 0 ? `${amount.toLocaleString()} FM` : "Open prize pool";
+  return amount > 0 ? `${amount.toLocaleString()} FM COINS` : "Open prize pool";
 };
 
 const getDashboardMobileFightTitle = (match = {}) =>
@@ -320,7 +321,7 @@ const MobileWrestlingContestRow = ({ match, index = 0 }) => {
           <div>
             <span>
               <small>Entry</small>
-              <strong>{match?.entryFeeTokens || 0} tokens</strong>
+              <strong>{match?.entryFeeTokens || 0} FM COINS</strong>
             </span>
             <span>
               <small>Status</small>
@@ -390,7 +391,7 @@ const MobilePlayerDashboard = ({
         </div>
         <h1>Player Command Center</h1>
         <p>
-          Track pending picks, open fight cards, wallet tokens, and completed
+          Track pending picks, open fight cards, FM COINS, and completed
           results from one phone-first fight-night view.
         </p>
 
@@ -469,9 +470,9 @@ const MobilePlayerDashboard = ({
           <span>Submitted Cards</span>
         </article>
         <article>
-          <FaCoins aria-hidden="true" />
-          <strong>{user.tokens || 0}</strong>
-          <span>Wallet Tokens</span>
+          <FMCoin size="md" motion="shine" />
+          <strong>{Number(user.tokens || 0).toLocaleString()}</strong>
+          <span>FM COINS</span>
         </article>
         <article>
           <FaMedal aria-hidden="true" />
@@ -1165,7 +1166,7 @@ const Dashboard = () => {
                 <FaCoins />{" "}
                 {match.matchTokens === null
                   ? "Free"
-                  : `${match.matchTokens || 0} tokens`}
+                  : `${match.matchTokens || 0} FM COINS`}
               </span>
             </div>
             {match.matchDescription && <small>{match.matchDescription}</small>}
@@ -1427,10 +1428,10 @@ const Dashboard = () => {
               role="button"
               tabIndex={0}
             >
-              <FaCoins />
+              <FMCoin size="md" motion="shine" />
               <span>
-                <strong>{user.tokens || 0}</strong>
-                <small>Wallet tokens</small>
+                <strong>{Number(user.tokens || 0).toLocaleString()}</strong>
+                <small>FM COINS</small>
               </span>
             </article>
             <article>
@@ -1564,7 +1565,7 @@ const Dashboard = () => {
                   </div>
                   <p>
                     {formatWrestlingDate(wrestlingMatches[0].matchDate)} ·{" "}
-                    {wrestlingMatches[0].entryFeeTokens || 0} token entry
+                    {wrestlingMatches[0].entryFeeTokens || 0} FM COINS entry
                   </p>
                   <Link
                     href={`/pro-wrestling/matches/${wrestlingMatches[0]._id}`}
