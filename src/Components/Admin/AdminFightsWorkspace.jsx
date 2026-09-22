@@ -217,20 +217,31 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     return normalizeMatchFeedRows(data);
   };
 
+  const loadPublicMatchFeed = async () => {
+    const response = await fetch(`${API_BASE}/api/public/fights?limit=500&includeDrafts=true&_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+    });
+    if (!response.ok) throw new Error(`Public match feed failed with ${response.status}`);
+    return normalizeMatchFeedRows(await response.json());
+  };
+
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
       // The combined registry is intentionally compact. Merge it with the
       // richer legacy records so uploaded fighter photos are not discarded.
-      const [adminPayload, legacyRows, shadowPayload] = await Promise.allSettled([
+      const [adminPayload, legacyRows, shadowPayload, publicRows] = await Promise.allSettled([
         fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' }),
         loadLegacyMatchFeed(),
         fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
+        loadPublicMatchFeed(),
       ]);
       const adminRows = adminPayload.status === 'fulfilled' ? normalizeMatchFeedRows(adminPayload.value) : [];
       const detailRows = [
         ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
         ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
+        ...(publicRows.status === 'fulfilled' ? normalizeMatchFeedRows(publicRows.value) : []),
       ];
       const detailsById = new Map(detailRows.map((row) => [String(getId(row)), row]));
       const mergedRows = adminRows.map((row) => {
