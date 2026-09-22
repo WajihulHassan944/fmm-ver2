@@ -825,9 +825,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const tokenPackUsd = ECON_TOKEN_PACK_USD;
     const tokenUsdRate = ECON_TOKEN_USD_RATE;
     const usd = (n) => `$${(Math.abs(Number(n) || 0) * tokenUsdRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    const fm = (n) => `${Math.max(0, Number(n) || 0).toLocaleString()} FM`;
+    const fm = (n) => `${Math.max(0, Number(n) || 0).toLocaleString()} FM COINS`;
     const usdSigned = (n) => { const v = Number(n) || 0; if (v === 0) return '$0.00'; return (v > 0 ? '+' : '\u2212') + usd(v); };
-    const signed = (n) => (n === 0 ? '0 tokens' : (n > 0 ? '+' : '\u2212') + Math.abs(n).toLocaleString() + ' tokens');
+    const signed = (n) => (n === 0 ? '0 FM COINS' : (n > 0 ? '+' : '\u2212') + Math.abs(n).toLocaleString() + ' FM COINS');
     const saveEconomics = async () => {
       setEconomicsSaving(true);
       try {
@@ -928,8 +928,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               style={{ flex: 1, minWidth: 0, background: 'transparent', border: 0, outline: 'none', color: accent, fontFamily: display, fontSize: 27, fontWeight: 900, padding: '11px 0', fontVariantNumeric: 'tabular-nums' }} />
           </div>
           <div style={{ alignItems: 'center', background: 'rgba(255,255,255,.035)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 8, padding: '9px 11px' }}>
-            <span style={{ color: 'rgba(245,247,251,.5)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Public token amount</span>
-            <strong style={{ color: accent, fontFamily: display, fontSize: 16 }}>{Number(edits[tokenKey] || 0).toLocaleString()} FM</strong>
+            <span style={{ color: 'rgba(245,247,251,.5)', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Public FM COINS amount</span>
+            <strong style={{ color: accent, fontFamily: display, fontSize: 16 }}>{Number(edits[tokenKey] || 0).toLocaleString()} FM COINS</strong>
           </div>
           {note && <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(245,247,251,.4)', margin: '8px 0 0' }}>{note}</p>}
         </div>
@@ -967,10 +967,10 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               </div>
             </div>
             <div style={{ border: '1px solid rgba(247,181,27,.42)', borderRadius: 14, background: 'rgba(247,181,27,.06)', padding: 18 }}>
-              <div style={{ color: '#f7b51b', fontSize: 10.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase' }}>FM coin conversion</div>
-              <div style={{ color: '#fff', fontFamily: display, fontSize: 30, marginTop: 8 }}>{tokenPackSize.toLocaleString()} FM = {usd(tokenPackSize)}</div>
-              <p style={{ color: 'rgba(245,247,251,.62)', fontSize: 12.5, lineHeight: 1.5, margin: '8px 0 0' }}>Standard rate: 1,000 FM = {usd(1000)} · 100 FM = {usd(100)} · 1 FM = ${tokenUsdRate.toFixed(6)}.</p>
-              <p style={{ color: 'rgba(245,247,251,.42)', fontSize: 11.5, lineHeight: 1.45, margin: '8px 0 0' }}>Every value below is shown in both FM coins and estimated USD.</p>
+              <div style={{ color: '#f7b51b', fontSize: 10.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase' }}>FM COINS conversion</div>
+              <div style={{ color: '#fff', fontFamily: display, fontSize: 30, marginTop: 8 }}>{tokenPackSize.toLocaleString()} FM COINS = {usd(tokenPackSize)}</div>
+              <p style={{ color: 'rgba(245,247,251,.62)', fontSize: 12.5, lineHeight: 1.5, margin: '8px 0 0' }}>Standard rate: 1,000 FM COINS = {usd(1000)} · 100 FM COINS = {usd(100)} · 1 FM COIN = ${tokenUsdRate.toFixed(6)}.</p>
+              <p style={{ color: 'rgba(245,247,251,.42)', fontSize: 11.5, lineHeight: 1.45, margin: '8px 0 0' }}>Every value below is shown in both FM COINS and estimated USD.</p>
             </div>
           </div>
           <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', marginTop: 18 }}>
@@ -1080,7 +1080,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               </label>
             </div>
           )}
-          {moneyPill('Player entry fee', 'matchTokens', '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, 'Enter the cash price. The public fight card automatically shows the matching FM token amount.')}
+          {moneyPill('Player entry fee', 'matchTokens', '#f7b51b', { border: 'rgba(247,181,27,.45)', fill: 'rgba(247,181,27,.07)' }, 'Enter the cash price. The public fight card automatically shows the matching FM COINS amount.')}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '-10px 0 18px' }}>
             {[0, 5, 10, 25, 50].map((dollars) => {
               const selected = Number(edits.matchTokensUsd || 0) === dollars;
@@ -1093,7 +1093,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             {moneyPill('Fantasy MMADNESS funding', 'platformContribution', '#168fe6', { border: 'rgba(22,143,230,.42)', fill: 'rgba(22,143,230,.07)' }, 'Cash committed by Fantasy MMADNESS toward the guaranteed prize.')}
           </div>
           <div style={{ background: 'rgba(22,143,230,.07)', border: '1px solid rgba(22,143,230,.35)', borderRadius: 10, color: 'rgba(245,247,251,.72)', fontSize: 12.5, lineHeight: 1.5, margin: '0 0 18px', padding: '11px 13px' }}>
-            Conversion used for this setup: <strong style={{ color: '#fff' }}>$3.99 = 5,000 FM tokens</strong>. Cash is for back-office setup; tokens are what players see and spend.
+            Conversion used for this setup: <strong style={{ color: '#fff' }}>$3.99 = 5,000 FM COINS</strong>. Cash is for back-office setup; FM COINS are what players see and spend.
           </div>
           {true && (
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(3, minmax(0,1fr))', margin: '2px 0 18px' }}>
@@ -1189,7 +1189,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                   <div style={{ fontFamily: display, fontSize: 16, fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', marginBottom: 12, color: '#fff' }}>{getTitle(f)}</div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', paddingTop: 11, borderTop: '1px solid rgba(255,255,255,.13)' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: display, fontSize: 17, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} tokens`}</div>
+                      <div style={{ fontFamily: display, fontSize: 17, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} FM COINS`}</div>
                       <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(245,247,251,.42)', whiteSpace: 'nowrap' }}>{free ? 'Guaranteed pot' : `Guaranteed pot \u00b7 ${usd(pot)}`}</div>
                     </div>
                     <div style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 13px', borderRadius: 999, background: '#f7b51b', color: '#17070a', fontFamily: display, fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{free ? 'ENTER FREE' : `ENTER \u00b7 ${fm(entryFee)} (${usd(entryFee)})`}</div>
@@ -1203,7 +1203,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: '#ff2a35', whiteSpace: 'nowrap' }}>PRIZE POOL</div>
-                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} tokens`}</div>
+                      <div style={{ fontFamily: display, fontSize: 14, fontWeight: 900, color: '#35d45d', whiteSpace: 'nowrap' }}>{free ? 'BADGES' : `${pot.toLocaleString()} FM COINS`}</div>
                       <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(245,247,251,.4)', whiteSpace: 'nowrap' }}>{free ? '' : usd(pot)}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>
@@ -1358,7 +1358,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
                     <td><span className={`admin-status-badge ${isFinished ? 'is-success' : ['Ongoing', 'Needs scoring'].includes(status) ? 'is-warning' : ''}`}>{status}</span></td>
-                    <td>{`${Number(fight.matchTokens || 0).toLocaleString()} tokens`}</td>
+                    <td>{`${Number(fight.matchTokens || 0).toLocaleString()} FM COINS`}</td>
                     <td>{Number(fight.pot || 0) ? `$${Number(fight.pot).toLocaleString()}` : '—'}</td>
                     <td>{renderEntrantsCell(fight)}</td>
                     <td>
