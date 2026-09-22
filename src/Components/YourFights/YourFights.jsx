@@ -258,7 +258,7 @@ const YourFights = () => {
           <div className="player-fight-library-meta">
             <span><FaCalendarAlt /> {match.matchDate?.split('T')[0] || 'Date TBA'}</span>
             <span><FaUsers /> {safePredictions(match).length} players</span>
-            <span><FaCoins /> {match.matchTokens === null ? 'Free entry' : `${match.matchTokens || 0} tokens`}</span>
+            <span><FaCoins /> {match.matchTokens === null ? 'Free entry' : `${match.matchTokens || 0} FM COINS`}</span>
           </div>
           <div className="player-fight-library-metrics">{metricCodes.map((code) => <span key={code}>{code}</span>)}</div>
           <p>{isCompleted ? 'Your predictions are submitted. Open the live/result score center.' : remaining.hasStarted ? 'Fight has started' : `Predictions lock in ${remaining.diffHrs}h ${remaining.diffMins}m`}</p>
@@ -297,7 +297,7 @@ const YourFights = () => {
         <section className="player-fights-stat-grid">
           <article><FaHistory /><span><strong>{completedMatches.length}</strong><small>Completed entries</small></span></article>
           <article><FaFistRaised /><span><strong>{pendingMatches.length}</strong><small>Pending cards</small></span></article>
-          <article onClick={() => router.push('/checkout')} role="button" tabIndex={0}><FaCoins /><span><strong>{user.tokens || 0}</strong><small>Wallet tokens</small></span></article>
+          <article onClick={() => router.push('/checkout')} role="button" tabIndex={0}><FaCoins /><span><strong>{Number(user.tokens || 0).toLocaleString()}</strong><small>FM COINS</small></span></article>
           <article><FaTrophy /><span><strong>{totalPoints}</strong><small>Leaderboard points</small></span></article>
           <article onClick={() => router.push('/pro-wrestling/history')} role="button" tabIndex={0}><FaCrown /><span><strong>{wrestlingHistory.length}</strong><small>Wrestling cards</small></span></article>
         </section>
