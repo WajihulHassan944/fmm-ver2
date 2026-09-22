@@ -268,6 +268,10 @@ const sumLiveStrikes = (rows = [], sport = 'mma') => (Array.isArray(rows) ? rows
 
 const normalizeLiveEvent = (fight = {}, index = 0) => {
   const sport = resolveSport(fight);
+  const fighterARecord = [fight.fighterA, fight.fighterAId, fight.fighterOne, fight.fighterOneId].find((value) => value && typeof value === 'object') || {};
+  const fighterBRecord = [fight.fighterB, fight.fighterBId, fight.fighterTwo, fight.fighterTwoId].find((value) => value && typeof value === 'object') || {};
+  const fighterARecordImage = resolveExactFighterMedia(fighterARecord.primaryImage, fighterARecord.resolvedImage, fighterARecord.imageUrl, fighterARecord.profileImage, fighterARecord.fighterImage, fighterARecord.avatar, fighterARecord.image, fighterARecord.imageHealth?.url, fighterARecord.imageHealth?.secure_url, fighterARecord.imageHealth?.primaryImage);
+  const fighterBRecordImage = resolveExactFighterMedia(fighterBRecord.primaryImage, fighterBRecord.resolvedImage, fighterBRecord.imageUrl, fighterBRecord.profileImage, fighterBRecord.fighterImage, fighterBRecord.avatar, fighterBRecord.image, fighterBRecord.imageHealth?.url, fighterBRecord.imageHealth?.secure_url, fighterBRecord.imageHealth?.primaryImage);
   const rawDate = cleanText(fight.matchDateKey, fight.eventDateKey, fight.matchDate, fight.eventDate, fight.date, fight.lockAt);
   const iso = getDateOnlyKey(rawDate);
   const rawPrize = cleanText(fight.prize, fight.prizePool, fight.winningAmount, fight.currentPot, fight.pot);
@@ -308,8 +312,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     featuredFight: Boolean(fight.featuredFight),
     featuredThisWeekImage: resolveLiveMedia(fight.featuredThisWeekImage),
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
-    featuredFightFighterAImage: resolveExactFighterMedia(fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterA?.primaryImage, fight.fighterA?.profileUrl, fight.fighterA?.profileImage, fight.fighterA?.imageUrl, fight.fighterA?.image, fight.fighterA?.avatar),
-    featuredFightFighterBImage: resolveExactFighterMedia(fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterB?.primaryImage, fight.fighterB?.profileUrl, fight.fighterB?.profileImage, fight.fighterB?.imageUrl, fight.fighterB?.image, fight.fighterB?.avatar),
+    featuredFightFighterAImage: resolveExactFighterMedia(fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fighterARecordImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterOneImageUrl, fight.imageA),
+    featuredFightFighterBImage: resolveExactFighterMedia(fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fighterBRecordImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterTwoImageUrl, fight.imageB),
     // Transparent-background versions, derived from the same Cloudinary URLs.
     // Screens use these as src and the plain ones as fallbackSrc, so a missing
     // transform degrades to the original photo instead of a broken image.
@@ -340,8 +344,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     isShadow: Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')),
     serverEntered: Boolean(userEntry || fight.predictionSubmitted || fight.userPredictionSubmitted),
     fallbackImage: getEventFallbackImage(sport),
-    fighterAImage: resolveExactFighterMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterA?.primaryImage, fight.fighterA?.profileUrl, fight.fighterA?.profileImage, fight.fighterA?.imageUrl, fight.fighterA?.image, fight.fighterA?.avatar),
-    fighterBImage: resolveExactFighterMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterB?.primaryImage, fight.fighterB?.profileUrl, fight.fighterB?.profileImage, fight.fighterB?.imageUrl, fight.fighterB?.image, fight.fighterB?.avatar),
+    fighterAImage: resolveExactFighterMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fighterARecordImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterOneImageUrl, fight.imageA),
+    fighterBImage: resolveExactFighterMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fighterBRecordImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterTwoImageUrl, fight.imageB),
     image: explicitPoster,
     hasPoster: Boolean(explicitPoster),
   };
