@@ -228,6 +228,15 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     return normalizeMatchFeedRows(await response.json());
   };
 
+  const loadPredictionMatchFeed = async () => {
+    const response = await fetch(`${API_BASE}/api/public/prediction-fights?limit=500&includeDrafts=true&_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+    });
+    if (!response.ok) throw new Error(`Prediction match feed failed with ${response.status}`);
+    return normalizeMatchFeedRows(await response.json());
+  };
+
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
@@ -239,15 +248,17 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       setMatches(adminRows);
       setMatchRowsLoading(false);
 
-      const [legacyRows, shadowPayload, publicRows] = await Promise.allSettled([
+      const [legacyRows, shadowPayload, publicRows, predictionRows] = await Promise.allSettled([
         loadLegacyMatchFeed(),
         fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
         loadPublicMatchFeed(),
+        loadPredictionMatchFeed(),
       ]);
       const detailRows = [
         ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
         ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
         ...(publicRows.status === 'fulfilled' ? normalizeMatchFeedRows(publicRows.value) : []),
+        ...(predictionRows.status === 'fulfilled' ? normalizeMatchFeedRows(predictionRows.value) : []),
       ];
       const detailsById = new Map(detailRows.map((row) => [String(getId(row)), row]));
       const mergedRows = adminRows.map((row) => {
