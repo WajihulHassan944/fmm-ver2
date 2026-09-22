@@ -118,6 +118,32 @@ const cleanText = (...values) => {
   return '';
 };
 
+const normalizeFighterLookupName = (value = '') => String(value || '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]/g, '');
+
+const buildFighterLibraryImageMap = (fighters = []) => {
+  const map = new Map();
+  (Array.isArray(fighters) ? fighters : []).forEach((fighter) => {
+    const image = resolveLiveMedia(fighter?.primaryImage, fighter?.image, fighter?.fighterImage, fighter?.profileUrl);
+    if (!image) return;
+    [fighter?.displayName, fighter?.name, fighter?.normalizedName, ...(Array.isArray(fighter?.aliases) ? fighter.aliases : [])]
+      .filter(Boolean)
+      .forEach((name) => map.set(normalizeFighterLookupName(name), image));
+  });
+  return map;
+};
+
+const enrichFightWithLibraryImages = (fight = {}, libraryImages = new Map()) => {
+  const aName = cleanText(fight.matchFighterA, fight.fighterAName, fight.fighterA?.displayName, fight.f1, String(fight.matchName || fight.name || '').split(/\s+vs\.?\s+/i)[0]);
+  const bName = cleanText(fight.matchFighterB, fight.fighterBName, fight.fighterB?.displayName, fight.f2, String(fight.matchName || fight.name || '').split(/\s+vs\.?\s+/i)[1]);
+  return {
+    ...fight,
+    fighterAPrimaryImage: fight.fighterAPrimaryImage || fight.resolvedFighterAImage || fight.fighterAImage || libraryImages.get(normalizeFighterLookupName(aName)) || '',
+    fighterBPrimaryImage: fight.fighterBPrimaryImage || fight.resolvedFighterBImage || fight.fighterBImage || libraryImages.get(normalizeFighterLookupName(bName)) || '',
+  };
+};
+
 const getEventFallbackImage = (sport = 'mma') => {
   const supported = ['boxing', 'mma', 'bareknuckle', 'kickboxing', 'wrestling'];
   const key = supported.includes(sport) ? sport : 'mma';
@@ -2113,8 +2139,9 @@ class FantasyMobileAppCore extends React.Component {
       { id: 'wrestling', name: 'PRO WRESTLING', count: '', color: '#a855f7' },
     ].map(sp => ({ ...sp, active: s.activeSport === sp.id }));
 
+    const fighterLibraryImages = buildFighterLibraryImageMap(this.props.fighterLibrary);
     const liveEvents = Array.isArray(this.props.fights)
-      ? this.props.fights.map(normalizeLiveEvent).filter(event => event.f1 && event.f2)
+      ? this.props.fights.map((fight, index) => normalizeLiveEvent(enrichFightWithLibraryImages(fight, fighterLibraryImages), index)).filter(event => event.f1 && event.f2)
       : [];
     const eventsRaw = dedupeLiveEvents(liveEvents);
     const now = new Date();
