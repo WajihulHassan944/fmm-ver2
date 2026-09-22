@@ -3,6 +3,7 @@ import OptimizedImage from '@/Components/Common/OptimizedImage';
 import {
   FaCalendarAlt,
   FaClock,
+  FaCoins,
   FaMapMarkerAlt,
   FaPlay,
   FaTrophy,
@@ -90,7 +91,7 @@ export const FightVisualCard = ({ match, index = 0, onAction, compact = false, f
         </div>
         <div className="xp-fight-card-footer">
           <div>
-            <strong>{status === 'past' ? resultLabel : getFightPrize(match)}</strong>
+            <strong className={status === 'past' ? '' : 'is-fm-coins'}>{status === 'past' ? resultLabel : <><FaCoins aria-hidden="true" /> {getFightPrize(match)}</>}</strong>
             <small>{status === 'past' ? 'Official result' : 'Prize pool'}</small>
           </div>
           <button type="button" className="xp-card-action" onClick={() => onAction?.(match)}>
@@ -121,7 +122,7 @@ export const FightTimelineRow = ({ match, index = 0, onAction, actionLabel }) =>
         <p>{formatFightDate(match)} · {getFightRounds(match)}</p>
       </div>
       <div className="xp-timeline-side">
-        <strong>{status === 'past' ? match?.result || 'Final' : getFightPrize(match)}</strong>
+        <strong className={status === 'past' ? '' : 'is-fm-coins'}>{status === 'past' ? match?.result || 'Final' : <><FaCoins aria-hidden="true" /> {getFightPrize(match)}</>}</strong>
         <button type="button" onClick={() => onAction?.(match)}>{actionLabel || (status === 'past' ? 'View result' : 'Open fight')} →</button>
       </div>
     </article>
