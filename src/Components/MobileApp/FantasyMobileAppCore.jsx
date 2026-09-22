@@ -82,7 +82,8 @@ const resolveSlotAsset = (id = '', src = '') => {
 
 const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder, position }) => {
   const borderRadius = shape === 'circle' ? '50%' : radius ? Number(radius) : 0;
-  const resolvedFallback = explicitAsset(fallbackSrc) || resolveSlotAsset(id);
+  const isDynamicFightSlot = /^(event|contest|featured-week|detail)-/.test(String(id));
+  const resolvedFallback = explicitAsset(fallbackSrc) || (isDynamicFightSlot ? '' : resolveSlotAsset(id));
   return React.createElement('img', {
     id,
     src: resolveSlotAsset(id, src || fallbackSrc),
@@ -95,7 +96,8 @@ const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, p
       const image = event.currentTarget;
       if (!image || image.dataset.fallbackApplied === 'true') return;
       image.dataset.fallbackApplied = 'true';
-      image.src = resolvedFallback;
+      if (resolvedFallback) image.src = resolvedFallback;
+      else image.style.display = 'none';
     },
     style: {
       display: 'block',
