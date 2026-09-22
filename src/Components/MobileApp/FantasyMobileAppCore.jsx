@@ -3,6 +3,7 @@ import React from 'react';
 import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
 import designTokens from './design-tokens.json';
+import { FMCoin } from '@/Components/Common/FMCoin';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
 const EVENT_POSTER_FILES = [
@@ -2357,7 +2358,7 @@ class FantasyMobileAppCore extends React.Component {
             animation: this.state.walletFlash ? 'walletFlash .7s ease' : 'none'
           }
         },
-          React.createElement('div', { style: { width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg,#ffe08a,#a8720f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, color: '#3a2500' } }, 'FM'),
+          React.createElement(FMCoin, { size: 'md', motion: 'shine' }),
           React.createElement('span', { style: { fontWeight: 700, fontSize: 13, animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, coinsFmt),
           React.createElement('div', { style: { width: 16, height: 16, borderRadius: '50%', background: '#f2b544', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#3a2500' } }, '+')
         ),
@@ -3967,10 +3968,10 @@ class FantasyMobileAppCore extends React.Component {
         }, '⚡ SKIP WAIT — 75 FM')
       ),
       React.createElement('div', { style: { flex: 1, background: 'radial-gradient(circle at 50% -30%, rgba(255,255,255,.18), transparent 55%), radial-gradient(ellipse 80% 60% at 15% 110%, rgba(239,68,68,.22), transparent 60%), radial-gradient(ellipse 80% 60% at 85% 110%, rgba(77,141,255,.22), transparent 60%), rgba(255,255,255,.05)', border: '1px solid #f2b54490', borderRadius: 12, padding: 10, boxShadow: '0 0 18px #f2b54460, inset 0 0 14px #f2b54420' } },
-        React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f2b544', marginBottom: 4 } }, 'COINS WALLET'),
-        React.createElement('div', { style: { fontSize: 26, textAlign: 'center', display: 'inline-block', width: '100%', animation: 'chestBounceLoop 2.4s ease-in-out infinite', filter: 'drop-shadow(0 0 6px rgba(242,181,68,.8))' } }, '🪙'),
-        React.createElement('div', { key: s.coins, style: { fontSize: 13, fontWeight: 800, textAlign: 'center', animation: 'wordmarkGlow 1.2s ease-out' } }, s.coins.toLocaleString() + ' COINS'),
-        React.createElement('div', { onClick: () => this.openModal('addcoins'), style: { marginTop: 4, textAlign: 'center', padding: '7px 0', borderRadius: 8, fontSize: 11, fontWeight: 900, background: '#f2b544', color: '#2b1b00', cursor: 'pointer' } }, 'ADD COINS +')
+        React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f7b51b', marginBottom: 4 } }, 'FM COINS WALLET'),
+        React.createElement('div', { style: { textAlign: 'center', display: 'flex', justifyContent: 'center', margin: '5px 0' } }, React.createElement(FMCoin, { size: 'xl', motion: 'flip' })),
+        React.createElement('div', { key: s.coins, style: { fontSize: 13, fontWeight: 800, color: '#ffd700', textAlign: 'center', animation: 'wordmarkGlow 1.2s ease-out' } }, s.coins.toLocaleString() + ' FM COINS'),
+        React.createElement('div', { onClick: () => this.openModal('addcoins'), style: { marginTop: 4, textAlign: 'center', padding: '7px 0', borderRadius: 8, fontSize: 11, fontWeight: 900, background: '#f7b51b', color: '#2b1b00', cursor: 'pointer' } }, 'ADD FM COINS +')
       )
     ), React.createElement('div', { style: { display: 'flex', gap: 8, padding: '0 16px 16px' } },
       React.createElement('div', { style: { flex: 1, position: 'relative', overflow: 'hidden', border: '1px solid #f2b54490', borderRadius: 12, padding: 10, boxShadow: '0 0 14px #f2b54440' } },
@@ -5386,7 +5387,7 @@ class FantasyMobileAppCore extends React.Component {
     if (s.modal === 'wallet' || s.modal === 'addcoins') return overlay([
       closeBtn,
       React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 18, marginBottom: 4, color: '#f2b544' } }, 'FM COINS'),
-      React.createElement('div', { key: 'b', style: { fontSize: 26, fontWeight: 800, marginBottom: 12, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, s.coins.toLocaleString() + ' coins'),
+      React.createElement('div', { key: 'b', style: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 26, fontWeight: 800, marginBottom: 12, color: '#ffd700', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, React.createElement(FMCoin, { size: 'lg', motion: 'shine' }), s.coins.toLocaleString() + ' FM COINS'),
       React.createElement('div', { key: 'l', style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 8 } }, 'ADD MORE'),
       React.createElement('div', { key: 'p', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
         !s.hasPurchased && React.createElement('div', { key: 'fb', style: { fontSize: 10.5, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '7px 9px', marginBottom: 2 } }, '🎁 First purchase gets you DOUBLE coins — today only'),
@@ -5395,7 +5396,7 @@ class FantasyMobileAppCore extends React.Component {
           style: { position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: 10, background: popular ? 'rgba(242,181,68,.1)' : 'rgba(255,255,255,.05)', border: popular ? '1.5px solid #f2b544' : '1px solid rgba(242,181,68,.3)', cursor: 'pointer' }
         },
           popular && React.createElement('div', { style: { position: 'absolute', top: -9, left: 12, fontSize: 8.5, fontWeight: 900, letterSpacing: .4, color: '#2b1b00', background: 'linear-gradient(90deg,#ffd873,#f2b544)', borderRadius: 999, padding: '2px 8px' } }, 'MOST POPULAR'),
-          React.createElement('span', { style: { fontWeight: 800 } }, amt.toLocaleString() + ' FM' + (!s.hasPurchased ? ' → ' + (amt * 2).toLocaleString() + ' FM' : '')),
+          React.createElement('span', { style: { fontWeight: 800 } }, amt.toLocaleString() + ' FM COINS' + (!s.hasPurchased ? ' → ' + (amt * 2).toLocaleString() + ' FM COINS' : '')),
           React.createElement('span', { style: { fontWeight: 800, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, price)
         ))
       ),
@@ -5494,12 +5495,12 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 's', style: { fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 12 } }, 'Predict full-match totals — not round by round'),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.featuredFightFighterAImage || ev.fighterAImage, fallbackSrc: ev.image || ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.fighterAImage, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.featuredFightFighterBImage || ev.fighterBImage, fallbackSrc: ev.image || ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.fighterBImage, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
@@ -5568,12 +5569,12 @@ class FantasyMobileAppCore extends React.Component {
         ),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.featuredFightFighterAImage || ev.fighterAImage, fallbackSrc: ev.image || ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.fighterAImage, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.featuredFightFighterBImage || ev.fighterBImage, fallbackSrc: ev.image || ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.fighterBImage, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
@@ -5643,12 +5644,12 @@ class FantasyMobileAppCore extends React.Component {
         ),
         React.createElement('div', { key: 'hdr', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.featuredFightFighterAImage || ev.fighterAImage, fallbackSrc: ev.image || ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(239,68,68,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-a-' + ev.id, shape: 'circle', placeholder: ev.f1, fit: 'cover', position: 'center top', src: ev.fighterAImage, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#ef4444' } }, ev.f1)
           ),
           React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 14, color: 'rgba(255,255,255,.35)', padding: '0 8px' } }, 'VS'),
           React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 } },
-            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.featuredFightFighterBImage || ev.fighterBImage, fallbackSrc: ev.image || ev.fallbackImage })),
+            React.createElement('div', { style: { width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(77,141,255,.5)' } }, React.createElement(MobileImageSlot, { id: 'event-poster-b-' + ev.id, shape: 'circle', placeholder: ev.f2, fit: 'cover', position: 'center top', src: ev.fighterBImage, fallbackSrc: ev.fallbackImage })),
             React.createElement('div', { style: { fontWeight: 900, fontSize: 11, color: '#4d8dff' } }, ev.f2)
           )
         ),
