@@ -30,6 +30,7 @@ import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 import FightDataQualityCenter from './FightDataQualityCenter';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
+import { FMCoin } from '@/Components/Common/FMCoin';
 import { adminHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import {
@@ -168,7 +169,10 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [matches, setMatches] = useState([]);
   const [matchRowsLoading, setMatchRowsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [registryView, setRegistryView] = useState('unique');
+  // Administrators must land on the complete registry. "Unique fights" remains
+  // available as an optional cleanup view, but must never hide valid records by
+  // default when two feeds describe the same card differently.
+  const [registryView, setRegistryView] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedScore, setSelectedScore] = useState(null);
   const [selectedScoresView, setSelectedScoresView] = useState(null);
@@ -240,26 +244,24 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const loadNormalMatches = async () => {
     setMatchRowsLoading(true);
     try {
-      // Paint the compact registry immediately. Rich photo/detail feeds hydrate
-      // it in the background instead of holding the whole table behind the
-      // slowest of four network requests.
-      const adminPayload = await fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' });
-      const adminRows = normalizeMatchFeedRows(adminPayload);
-      setMatches(adminRows);
-      setMatchRowsLoading(false);
-
-      const [legacyRows, shadowPayload, publicRows, predictionRows] = await Promise.allSettled([
+      // Every collection is an independent source of truth. A failure in the
+      // authenticated admin endpoint must not erase fights that successfully
+      // loaded from the LIVE, SHADOW, public, or prediction collections.
+      const [adminPayload, legacyRows, shadowPayload, publicRows, predictionRows] = await Promise.allSettled([
+        fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' }),
         loadLegacyMatchFeed(),
         fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
         loadPublicMatchFeed(),
         loadPredictionMatchFeed(),
       ]);
+      const adminRows = adminPayload.status === 'fulfilled' ? normalizeMatchFeedRows(adminPayload.value) : [];
       const detailRows = [
         ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
         ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
         ...(publicRows.status === 'fulfilled' ? normalizeMatchFeedRows(publicRows.value) : []),
         ...(predictionRows.status === 'fulfilled' ? normalizeMatchFeedRows(predictionRows.value) : []),
       ];
+      if (!adminRows.length && !detailRows.length) throw new Error('Every fight registry feed failed or returned no records');
       const detailsById = new Map(detailRows.map((row) => [String(getId(row)), row]));
       const mergedRows = adminRows.map((row) => {
         const detailed = detailsById.get(String(getId(row)));
@@ -290,15 +292,9 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         };
       });
       setMatches(adminRows.length ? [...mergedRows, ...detailsById.values()] : detailRows);
-    } catch (adminApiError) {
-      console.warn('Combined admin fight registry unavailable, trying legacy match feed:', adminApiError.message);
-      try {
-        const rows = await loadLegacyMatchFeed();
-        setMatches(rows);
-      } catch (legacyError) {
-        console.error('Error fetching fight registry rows:', legacyError);
-        setMatches([]);
-      }
+    } catch (registryError) {
+      console.error('Error fetching all fight registry feeds:', registryError);
+      setMatches([]);
     } finally {
       setMatchRowsLoading(false);
     }
@@ -1374,7 +1370,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     <td><span className="admin-cell-stack"><strong>{formatDate(fight)}</strong><small>{formatTime(fight)}</small></span></td>
                     <td><span className={`admin-status-badge ${isFinished ? 'is-success' : ['Ongoing', 'Needs scoring'].includes(status) ? 'is-warning' : ''}`}>{status}</span></td>
                     <td>{`${Number(fight.matchTokens || 0).toLocaleString()} FM COINS`}</td>
-                    <td>{Number(fight.pot || 0) ? `$${Number(fight.pot).toLocaleString()}` : '—'}</td>
+                    <td>{Number(fight.pot || 0) ? <span className="admin-fm-coin-value"><FMCoin size={18} /> {Number(fight.pot).toLocaleString()} FM COINS</span> : '—'}</td>
                     <td>{renderEntrantsCell(fight)}</td>
                     <td>
                       <div className="admin-row-actions admin-table-actions">
