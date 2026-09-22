@@ -164,6 +164,15 @@ const resolveLiveMedia = (...values) => {
   return '';
 };
 
+const resolveExactFighterMedia = (...values) => {
+  const src = resolveLiveMedia(...values);
+  if (!src) return '';
+  const normalized = String(src).toLowerCase();
+  // Generic design art is not a fighter photo and must never be paired with a name.
+  if (normalized.includes('/images/hero-fight') || normalized.includes('/images/mobile-home/') || normalized.includes('/images/fmm-experience/')) return '';
+  return src;
+};
+
 const unwrapMaybeMarkdownUrl = (value = '') => {
   const text = String(value || '').trim();
   const markdownMatch = text.match(/\((https?:\/\/[^)]+)\)/i);
@@ -271,8 +280,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     featuredFight: Boolean(fight.featuredFight),
     featuredThisWeekImage: resolveLiveMedia(fight.featuredThisWeekImage),
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
-    featuredFightFighterAImage: resolveLiveMedia(cleanText(fight.featuredFightFighterAImage, fight.fighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterA?.primaryImage, fight.fighterA?.image)),
-    featuredFightFighterBImage: resolveLiveMedia(cleanText(fight.featuredFightFighterBImage, fight.fighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterB?.primaryImage, fight.fighterB?.image)),
+    featuredFightFighterAImage: resolveExactFighterMedia(fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterA?.primaryImage, fight.fighterA?.image),
+    featuredFightFighterBImage: resolveExactFighterMedia(fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterB?.primaryImage, fight.fighterB?.image),
     // Transparent-background versions, derived from the same Cloudinary URLs.
     // Screens use these as src and the plain ones as fallbackSrc, so a missing
     // transform degrades to the original photo instead of a broken image.
@@ -303,8 +312,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     isShadow: Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')),
     serverEntered: Boolean(userEntry || fight.predictionSubmitted || fight.userPredictionSubmitted),
     fallbackImage: getEventFallbackImage(sport),
-    fighterAImage: resolveLiveMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterA?.primaryImage, fight.fighterA?.image),
-    fighterBImage: resolveLiveMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterB?.primaryImage, fight.fighterB?.image),
+    fighterAImage: resolveExactFighterMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fight.fighterAImage, fight.fighterA?.primaryImage, fight.fighterA?.image),
+    fighterBImage: resolveExactFighterMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fight.fighterBImage, fight.fighterB?.primaryImage, fight.fighterB?.image),
     image: explicitPoster,
     hasPoster: Boolean(explicitPoster),
   };
@@ -346,6 +355,16 @@ const dedupeLiveEvents = (events = []) => {
   const seen = new Set();
   return events.filter((event) => {
     const key = getCanonicalEventKey(event);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const dedupeFightRecords = (fights = []) => {
+  const seen = new Set();
+  return fights.filter((fight, index) => {
+    const key = getCanonicalEventKey(normalizeLiveEvent(fight, index));
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -1359,7 +1378,7 @@ class FantasyMobileAppCore extends React.Component {
   // player can only draft someone actually scheduled to compete.
   fighterPoolForSlot = (slotKey) => {
     const family = { boxing: 'boxing', bareknuckle: 'boxing', mma: 'mma', kickboxing: 'mma', wrestling: 'wrestling' }[slotKey] || 'mma';
-    const fights = Array.isArray(this.props.fights) ? this.props.fights : [];
+    const fights = dedupeFightRecords(Array.isArray(this.props.fights) ? this.props.fights : []);
     const names = new Set();
     fights.forEach(fight => {
       const category = String(fight.category || fight.matchCategory || '').toLowerCase();
@@ -3593,7 +3612,7 @@ class FantasyMobileAppCore extends React.Component {
       const a = cleanText(fight.matchFighterA, fight.fighterAName);
       const b = cleanText(fight.matchFighterB, fight.fighterBName);
       if (pot > 0 && a && b) {
-        items.push(['💰', `${a.toUpperCase()} vs ${b.toUpperCase()} — ${pot.toLocaleString()} FM pot`, '#22c55e']);
+        items.push(['🪙', `${a.toUpperCase()} vs ${b.toUpperCase()} — ${pot.toLocaleString()} FM COINS pot`, '#f2b544']);
       }
     });
 
