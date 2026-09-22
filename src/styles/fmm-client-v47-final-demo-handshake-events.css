@@ -131,6 +131,94 @@
   }
 }
 
+/* Production /home uses the fmm-app component. Keep all FM currency gold. */
+.fmm-app-fixed-home .is-fm-coins,
+.fmm-app-fixed-home .fmm-app-detail-prize.is-fm-coins,
+.fmm-app-fixed-home .fmm-app-upcoming-rail article > a:first-child strong.is-fm-coins {
+  color: #ffd54a !important;
+  text-shadow: 0 0 13px rgba(255, 191, 25, .62) !important;
+}
+.fmm-app-fixed-home .is-fm-coins svg {
+  color: #ffbf19 !important;
+  filter: drop-shadow(0 0 6px rgba(255, 191, 25, .72)) !important;
+}
+
+/* All Contests cards share the same gold FM currency treatment. */
+.xp-fight-card .is-fm-coins,
+.xp-fight-timeline-row .is-fm-coins {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: #ffd54a !important;
+  text-shadow: 0 0 12px rgba(255, 191, 25, .55) !important;
+}
+.xp-fight-card .is-fm-coins svg,
+.xp-fight-timeline-row .is-fm-coins svg {
+  color: #ffbf19 !important;
+  filter: drop-shadow(0 0 6px rgba(255, 191, 25, .7)) !important;
+}
+
+/* Real fighter pairs replace unrelated event fallback posters. */
+.fmm-app-fixed-home .fmm-app-upcoming-fighters {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  overflow: hidden !important;
+  background: radial-gradient(circle at 50% 35%, rgba(70, 82, 110, .32), #070910 74%) !important;
+}
+.fmm-app-fixed-home .fmm-app-upcoming-fighters img {
+  position: static !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .72)) !important;
+}
+.fmm-app-fixed-home .fmm-app-upcoming-fighters b {
+  display: grid !important;
+  place-items: center !important;
+  color: #ffd54a !important;
+  font-family: var(--app-heading-font) !important;
+  font-size: 2.5rem !important;
+  background: rgba(255, 255, 255, .035) !important;
+}
+
+/* Event tags live below the image and can no longer cover a face. */
+.fmm-app-fixed-home .fmm-app-event-tag {
+  display: inline-flex !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  margin: 0 0 7px !important;
+  padding: 5px 9px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  background: var(--event-color) !important;
+  color: #fff !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: .07em !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Make Featured This Week fighters visually dominant on the real /home route. */
+.fmm-app-fixed-home .fmm-app-featured-cutout {
+  width: 34% !important;
+  height: 86% !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-cutout img,
+.fmm-app-fixed-home .fmm-app-featured-cutout picture {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+}
+.fmm-app-fixed-home .fmm-app-featured-cutout.is-left { left: -2% !important; }
+.fmm-app-fixed-home .fmm-app-featured-cutout.is-right { right: -2% !important; }
+
 /* Home: make the chest one clear, shiny CTA with scattered coins, not bunched side-by-side coins. */
 .fmm-home-v35-final .fmm-v35-chest {
   width: clamp(142px, 32vw, 184px) !important;
