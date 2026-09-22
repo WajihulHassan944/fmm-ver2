@@ -147,7 +147,7 @@ const WrestlingPredictionPage = () => {
           <div className="theme-container pw-prediction-hero-inner">
             <Link href={`/pro-wrestling/matches/${match._id}`} className="pw-inline-back"><FaArrowLeft /> Contest overview</Link>
             <div><p className="pw-eyebrow"><FaTrophy /> Full-match prediction card</p><h1>Call every move. <span>Own the result.</span></h1><p>{match.matchTitle} · {formatWrestlingDate(match.matchDate)}</p></div>
-            <aside><WrestlingStatusBadge status={match.status} /><span><FaLock /> {formatWrestlingCountdown(match.lockAt)}</span><strong>{user.tokens || 0} wallet tokens</strong></aside>
+            <aside><WrestlingStatusBadge status={match.status} /><span><FaLock /> {formatWrestlingCountdown(match.lockAt)}</span><strong>{user.tokens || 0} FM COINS</strong></aside>
           </div>
         </section>
         <WrestlingModeNav active="contests" />
@@ -159,7 +159,7 @@ const WrestlingPredictionPage = () => {
             <header>
               <div><p>Prediction status</p><strong>{existingPrediction?.predictionStatus || 'New scorecard'}</strong></div>
               <div><p>Total predicted actions</p><strong>{totalActions}</strong></div>
-              <div><p>Entry fee committed</p><strong>{entry.entryFeeTokens} tokens</strong></div>
+              <div><p>Entry fee committed</p><strong>{entry.entryFeeTokens} FM COINS</strong></div>
             </header>
 
             <div className="pw-prediction-competitors">
