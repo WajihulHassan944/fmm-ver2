@@ -6,7 +6,6 @@ import {
   FaArrowRight,
   FaCalendarAlt,
   FaClock,
-  FaCoins,
   FaFistRaised,
   FaLock,
   FaShieldAlt,
@@ -16,6 +15,7 @@ import {
 import MakePredictions from '../MakePredictions/MakePredictions';
 import { getFightCategory, getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 
 const isSameId = (left, right) => String(left || '') === String(right || '');
 
@@ -182,8 +182,8 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
             </span>
           </div>
           <button type="button" className="player-fight-entry-wallet" onClick={openCoinCheckout}>
-            <FaCoins />
-            <span><small>Fight wallet</small><strong>{walletTokens}</strong><em>tokens available</em></span>
+            <FMCoin size="lg" motion="shine" />
+            <span><small>Fight wallet</small><strong>{walletTokens.toLocaleString()}</strong><em>FM COINS available</em></span>
           </button>
         </header>
 
@@ -209,9 +209,9 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
           <div className="player-fight-entry-cost-card">
             <FaLock />
             <span>Entry requirement</span>
-            <strong>{tokenCost === 0 ? 'Free' : tokenCost}</strong>
-            <small>{tokenCost === 0 ? 'No tokens required' : 'tokens to enter'}</small>
-            <i className={enoughTokens ? 'is-ready' : 'is-low'}>{enoughTokens ? 'Wallet ready' : 'Add tokens required'}</i>
+            {tokenCost === 0 ? <strong>Free</strong> : <FMCoinAmount amount={tokenCost} size="sm" motion="flip" />}
+            <small>{tokenCost === 0 ? 'No FM COINS required' : 'to enter'}</small>
+            <i className={enoughTokens ? 'is-ready' : 'is-low'}>{enoughTokens ? 'Wallet ready' : 'Add FM COINS'}</i>
           </div>
         </section>
 
@@ -233,7 +233,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
             <span><strong>Secure fight entry</strong><small>Your entry is confirmed before the scorecard opens.</small></span>
           </div>
           <button type="button" onClick={handleMatchClick} disabled={isEntering || submittedPrediction}>
-            {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : enoughTokens ? 'Make predictions' : 'Add coins to enter'} <FaArrowRight />
+            {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : enoughTokens ? 'Make predictions' : 'Add FM COINS to enter'} <FaArrowRight />
           </button>
         </section>
         {entryStatus ? <p role="alert" style={{ margin: '10px 0 0', color: '#ff8a8a', fontWeight: 800, textAlign: 'center' }}>{entryStatus}</p> : null}
