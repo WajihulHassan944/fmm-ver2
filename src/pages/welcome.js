@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { FMCoin } from '@/Components/Common/FMCoin';
 
 // ==========================================================================
 // The public website — converted from "Fantasy MMAdness Website.dc.html".
@@ -402,7 +403,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 13, borderTop: '1px solid rgba(216,220,228,.14)' }}>
                       <div>
-                        <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 21, color: fight.potColor, fontVariantNumeric: 'tabular-nums' }}>{fight.potLabel}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: "'Anton', sans-serif", fontSize: 21, color: fight.potColor, fontVariantNumeric: 'tabular-nums', textShadow: '0 0 12px rgba(242,181,68,.5)' }}><FMCoin size="sm" motion="shine" />{fight.potLabel}</div>
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', letterSpacing: '.06em', textTransform: 'uppercase' }}>{fight.potNote}</div>
                       </div>
                       <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.cta}</a>
@@ -826,12 +827,12 @@ const toFightCard = (f, index) => {
       badge: guaranteed > 0 ? 'Guaranteed pot' : index === 0 ? 'Main event' : '',
       badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : 'rgba(225,29,46,.94)',
       badgeText: '#fff',
-      potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM' : money(fee) + ' FM',
-      potColor: '#22c55e',
+      potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM COINS' : money(fee) + ' FM COINS',
+      potColor: '#f2b544',
       potNote: fee === 0 ? 'Titles & sponsor prizes'
         : guaranteed > 0 ? 'Guaranteed pot'
           : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
-      cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee),
+      cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee) + ' FM COINS',
       ctaBg: '#22c55e',
       ctaBorder: '0',
       ctaColor: '#052e14',
@@ -1035,7 +1036,7 @@ async function buildWelcomeProps() {
   const ticker = [];
   if (board[0]) ticker.push({ text: `\ud83d\udc51 ${board[0].name} leads the board \u2014 ${board[0].points} pts`, color: '#f5a623' });
   fights.slice(0, 3).forEach((f) => {
-    ticker.push({ text: `\ud83e\udd4a ${f.f1} vs ${f.f2} \u2014 ${f.potLabel}`, color: '#22c55e' });
+    ticker.push({ text: `\ud83e\ude99 ${f.f1} vs ${f.f2} \u2014 ${f.potLabel}`, color: '#f2b544' });
   });
   if (fights.length) ticker.push({ text: `\u26a1 ${fights.length} card${fights.length === 1 ? '' : 's'} open for predictions`, color: '#2b6fe8' });
   if (ticker.length < 3) {
