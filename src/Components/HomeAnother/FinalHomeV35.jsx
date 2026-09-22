@@ -195,7 +195,7 @@ const getFightId = (fight = {}) => fight?._id || fight?.id || fight?.matchId || 
 const getFightIdentity = (fight = {}) => {
   const id = getFightId(fight);
   const names = [getFighterName(fight, "A"), getFighterName(fight, "B")]
-    .map((name) => cleanText(name).toLowerCase())
+    .map((name) => cleanText(name).toLowerCase().replace(/[^a-z0-9]/g, ""))
     .sort()
     .join("::");
   const date = String(pick(fight?.matchDateKey, fight?.eventDateKey, fight?.matchDate, fight?.date, fight?.scheduledAt, "")).slice(0, 10);
@@ -737,7 +737,7 @@ const FinalHomeV35 = ({
             <h2 id="fmm-v35-featured-week-title">{weeklyFighterA} <em>VS</em> {weeklyFighterB}</h2>
             <div className="fmm-v35-fw-meta">
               <strong className="is-fm-coins"><FaCoins /> {weeklyPrize}<small> PRIZE POOL</small></strong>
-              <strong>{weeklyEntry}<small> ENTRY FEE</small></strong>
+              <strong className="is-fm-coins"><FaCoins /> {weeklyEntry}<small> ENTRY FEE</small></strong>
               <strong>{weeklyEntriesLabel}<small> ENTRIES</small></strong>
             </div>
             <Link href={weeklyHref}>MAKE PREDICTIONS</Link>
@@ -778,7 +778,7 @@ const FinalHomeV35 = ({
             <span>FEATURED FIGHT · {featuredSport.longLabel}</span>
             <h2 id="fmm-v35-detail-title">{fighterA} <em>VS</em> {fighterB}</h2>
             <div className="fmm-v35-detail-meta"><b>{getShortDate(featuredFight)}</b><b>{cleanText(featuredFight?.matchTime || featuredFight?.time || "TIME TBA")}</b><b>{cleanText(featuredFight?.venue || "VENUE TBA")}</b></div>
-            <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong>{featuredPrize}</strong></p><p><small>FM ENTRY FEE</small><strong>{featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
+            <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong className="is-fm-coins"><FaCoins /> {featuredPrize}</strong></p><p><small>FM COINS ENTRY FEE</small><strong className="is-fm-coins"><FaCoins /> {featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
             <Link href={predictionHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
           </div>
