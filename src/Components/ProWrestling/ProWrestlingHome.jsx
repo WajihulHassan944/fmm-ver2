@@ -78,7 +78,7 @@ const ProWrestlingHome = () => {
           stats={[
             { value: openMatches.length, label: 'Open contests', icon: FaBolt },
             { value: liveMatches.length, label: 'Live matches', icon: FaChartLine },
-            { value: totalPot.toLocaleString(), label: 'Tokens in play', icon: FaCoins },
+            { value: totalPot.toLocaleString(), label: 'FM COINS in play', icon: FaCoins },
           ]}
         >
           <div className="pw-featured-poster">
@@ -136,7 +136,7 @@ const ProWrestlingHome = () => {
               <p>Every stage is connected to the existing Fantasy MMAdness user account and fight wallet. Entries are protected by backend lock times and settlement rules.</p>
               <div className="pw-flow-steps">
                 {[
-                  ['01', 'Join the contest', 'Pay the listed token entry fee from the existing fight wallet.'],
+                  ['01', 'Join the contest', 'Pay the listed FM COINS entry fee from the existing fight wallet.'],
                   ['02', 'Build your scorecard', 'Forecast HP, BP, K, PM, FM for both competitors, choose Wrestler A or Wrestler B, and call the finish market.'],
                   ['03', 'Follow live scoring', 'Watch actual action totals, provisional points, and rank movement.'],
                   ['04', 'Review the result', 'See the official score breakdown, final leaderboard, and payout.'],
