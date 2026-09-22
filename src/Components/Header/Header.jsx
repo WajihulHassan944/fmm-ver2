@@ -4,6 +4,7 @@ import { logout } from '../../Redux/authSlice';
 import { logoutAffiliate } from '../../Redux/affiliateAuthSlice';
 import Link from 'next/link';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
+import { FMCoin } from '@/Components/Common/FMCoin';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import { userHeaders } from '@/Utils/authFetch';
@@ -72,7 +73,7 @@ const publicNav = [
   { label: 'Contests', href: '/upcomingfights', icon: FaBullseye, children: contestLinks },
   { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
-  { label: 'Tokens', href: '/fights-rewards', icon: FaCoins },
+  { label: 'FM COINS', href: '/fights-rewards', icon: FaCoins },
   { label: 'How To Play', href: '/guides', icon: FaQuestionCircle },
   {
     label: 'Affiliates',
@@ -103,7 +104,7 @@ const playerNav = [
   { label: 'Contests', href: '/YourFights', icon: FaBullseye },
   { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
-  { label: 'Tokens', href: '/fights-rewards', icon: FaCoins },
+  { label: 'FM COINS', href: '/fights-rewards', icon: FaCoins },
   { label: 'Community', href: '/community-forum', icon: FaComments },
   {
     label: 'More',
@@ -421,9 +422,9 @@ const Header = () => {
           <Link
             href="/fights-rewards"
             className="theme-home-mobile-wallet"
-            aria-label={`Fantasy coin balance: ${homeMobileWalletTokens.toLocaleString()}`}
+            aria-label={`FM COINS balance: ${homeMobileWalletTokens.toLocaleString()}`}
           >
-            <span className="theme-home-mobile-coin">FM</span>
+            <FMCoin size="md" motion="shine" />
             <strong>{homeMobileWalletTokens.toLocaleString()}</strong>
             <span className="theme-home-mobile-wallet-plus" aria-hidden="true">
               <FaPlus />
