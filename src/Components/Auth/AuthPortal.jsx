@@ -104,6 +104,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const [playerRegistration, setPlayerRegistration] = useState({ state: 'idle', email: '' });
   const [affiliateRegistered, setAffiliateRegistered] = useState(false);
   const [affiliateInstantApproved, setAffiliateInstantApproved] = useState(false);
+  const [promoterInstantApproved, setPromoterInstantApproved] = useState(false);
   const [sponsorSubmitted, setSponsorSubmitted] = useState(false);
   const [membershipEmail, setMembershipEmail] = useState('');
   const [affiliateImagePreview, setAffiliateImagePreview] = useState('');
@@ -276,7 +277,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       const result = await apiRequest('/registerAffiliate', { method: 'POST', token: null, body: payload });
       setAffiliateRegistered(true);
       setAffiliateInstantApproved(Boolean(result?.instantApproved));
-      toast.success(result?.instantApproved ? 'You\'re approved! Sign in to get started.' : 'Affiliate application submitted.');
+      setPromoterInstantApproved(Boolean(result?.promoterApproved));
+      toast.success(result?.promoterApproved ? 'Promoter access approved! Sign in to build your fight card.' : result?.instantApproved ? 'You\'re approved! Sign in to get started.' : 'Affiliate application submitted.');
     } catch (error) {
       toast.error(error.message || 'Unable to submit the affiliate application.');
     } finally {
@@ -371,6 +373,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const completionCard = (() => {
     if (playerRegistration.state === 'polling') return { title: 'Verify your email', copy: `We sent a verification link to ${playerRegistration.email}. Open it, then return here and continue to the new login.`, icon: FaEnvelope };
     if (playerRegistration.state === 'timed-out') return { title: 'Verification window ended', copy: 'The account was created, but verification was not detected within two minutes. Open the email link, then sign in.', icon: FaShieldAlt };
+    if (affiliateRegistered && promoterInstantApproved) return { title: 'Promoter access approved!', copy: 'Your affiliate and Full Card Promoter tools are ready. Sign in to build and share your fight card.', icon: FaUserFriends };
     if (affiliateRegistered) return affiliateInstantApproved
       ? { title: 'You\'re approved!', copy: 'Your affiliate account is live — sign in now to set up your profile and start promoting.', icon: FaUserFriends }
       : { title: 'Application received', copy: 'Your affiliate account is pending administrator review. You can sign in after the account is approved.', icon: FaUserFriends };
