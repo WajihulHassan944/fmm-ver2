@@ -496,7 +496,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     track('blogs', publicRequest('/api/blogs?limit=12'))
       .then((blogRes) => setBlogs(asArray(blogRes.blogs || blogRes.posts)));
     setTimeout(() => {
-      track('fighterLibrary', publicRequest('/api/public/combat-fighters?limit=2000&status=active'))
+      track('fighterLibrary', publicRequest('/api/public/combat-fighters?limit=2000'))
         .then((libRes) => setFighterLibrary(asArray(libRes.items || libRes.fighters || libRes.data)));
     }, 250);
 
