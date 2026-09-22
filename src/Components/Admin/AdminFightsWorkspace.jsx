@@ -294,39 +294,33 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         ...(predictionRows.status === 'fulfilled' ? normalizeMatchFeedRows(predictionRows.value) : []),
       ];
       if (!adminRows.length && !detailRows.length) throw new Error('Every fight registry feed failed or returned no records');
-      const detailsById = new Map(detailRows.map((row) => [String(getId(row)), row]));
-      const mergedRows = adminRows.map((row) => {
-        const detailed = detailsById.get(String(getId(row)));
-        if (!detailed) return row;
-        detailsById.delete(String(getId(row)));
-        return {
-          ...detailed,
-          ...row,
-          // Preserve populated nested fighter objects from either response.
-          fighterA: row.fighterA || detailed.fighterA,
-          fighterB: row.fighterB || detailed.fighterB,
-          fighterAId: row.fighterAId || detailed.fighterAId,
-          fighterBId: row.fighterBId || detailed.fighterBId,
-          fighterOne: row.fighterOne || detailed.fighterOne,
-          fighterTwo: row.fighterTwo || detailed.fighterTwo,
-          fighterAPrimaryImage: row.fighterAPrimaryImage || detailed.fighterAPrimaryImage,
-          fighterBPrimaryImage: row.fighterBPrimaryImage || detailed.fighterBPrimaryImage,
-          fighterAResolvedImage: row.fighterAResolvedImage || detailed.fighterAResolvedImage,
-          fighterBResolvedImage: row.fighterBResolvedImage || detailed.fighterBResolvedImage,
-          resolvedFighterAImage: row.resolvedFighterAImage || detailed.resolvedFighterAImage,
-          resolvedFighterBImage: row.resolvedFighterBImage || detailed.resolvedFighterBImage,
-          fighterAImage: row.fighterAImage || detailed.fighterAImage,
-          fighterBImage: row.fighterBImage || detailed.fighterBImage,
-          matchFighterAImage: row.matchFighterAImage || detailed.matchFighterAImage,
-          matchFighterBImage: row.matchFighterBImage || detailed.matchFighterBImage,
-          featuredFightFighterAImage: row.featuredFightFighterAImage || detailed.featuredFightFighterAImage,
-          featuredFightFighterBImage: row.featuredFightFighterBImage || detailed.featuredFightFighterBImage,
-        };
-      });
-      setMatches(adminRows.length ? [...mergedRows, ...detailsById.values()] : detailRows);
+      // Merge repeated feed entries by their persisted ID. A fight that only
+      // appears in a fallback feed must stay visible, even when the admin
+      // endpoint returns a partial page.
+      const rowsById = new Map();
+      const mergeRow = (row) => {
+        const id = String(getId(row) || '');
+        if (!id) return;
+        const previous = rowsById.get(id);
+        if (!previous) {
+          rowsById.set(id, row);
+          return;
+        }
+        const merged = { ...previous, ...row };
+        // A summary feed may omit images and creation timestamps. Keep the
+        // populated values from either response so sorting remains stable.
+        Object.keys(previous).forEach((key) => {
+          if (row[key] == null || row[key] === '') merged[key] = previous[key];
+        });
+        rowsById.set(id, merged);
+      };
+      detailRows.forEach(mergeRow);
+      adminRows.forEach(mergeRow);
+      setMatches(Array.from(rowsById.values()));
     } catch (registryError) {
       console.error('Error fetching all fight registry feeds:', registryError);
-      setMatches([]);
+      // Keep the last successful registry visible through a transient outage.
+      toast.error('Fight Registry could not refresh. Showing the last loaded fights.');
     } finally {
       setMatchRowsLoading(false);
     }
