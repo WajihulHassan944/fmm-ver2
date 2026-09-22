@@ -140,7 +140,9 @@ const adminFightQualityScore = (fight = {}) => {
   const statsScore = (Array.isArray(fight?.BoxingMatch?.fighterOneStats) && fight.BoxingMatch.fighterOneStats.length)
     || (Array.isArray(fight?.MMAMatch?.fighterOneStats) && fight.MMAMatch.fighterOneStats.length)
     ? 120 : 0;
-  return typeScore + statusScore + imageScore + statsScore;
+  const createdAt = new Date(fight?.createdAt || fight?.updatedAt || 0).getTime();
+  const recencyScore = Number.isFinite(createdAt) ? createdAt / 1e12 : 0;
+  return typeScore + statusScore + imageScore + statsScore + recencyScore;
 };
 
 const dedupeAdminFightRows = (rows = []) => {
