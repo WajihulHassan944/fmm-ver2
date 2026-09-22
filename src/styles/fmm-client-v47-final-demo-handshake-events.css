@@ -58,6 +58,79 @@
 .fmm-home-v35-final .fmm-v35-event-fighters img:first-child { object-position: 42% center !important; }
 .fmm-home-v35-final .fmm-v35-event-fighters img:last-child { object-position: 58% center !important; }
 
+.fmm-home-v35-final .fmm-v35-event-fighters b,
+.fmm-home-v35-final .fmm-v35-event-empty {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  color: #f8d56a !important;
+  background: radial-gradient(circle, rgba(242,181,68,.18), rgba(8,10,16,.96) 68%) !important;
+  font-family: var(--v35-heading) !important;
+  font-size: 2.5rem !important;
+}
+
+.fmm-home-v35-final .fmm-v35-event-empty {
+  position: absolute !important;
+  inset: 0 !important;
+  padding: 18px !important;
+  text-align: center !important;
+  font-size: .8rem !important;
+  letter-spacing: .12em !important;
+}
+
+/* Keep all titles and promotion labels below the photos so faces stay clear. */
+.fmm-home-v35-final .fmm-v35-event-rail .fmm-v35-event-tag {
+  display: inline-flex !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  margin: 0 0 8px !important;
+  padding: 5px 9px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  background: var(--event-color) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: .08em !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Larger featured fighters with their heads clear of the center title. */
+.fmm-home-v35-final .fmm-v35-fw-fighter {
+  width: clamp(150px, 31%, 330px) !important;
+  max-height: 88% !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+}
+.fmm-home-v35-final .fmm-v35-fw-fighter.is-left { left: 0 !important; }
+.fmm-home-v35-final .fmm-v35-fw-fighter.is-right { right: 0 !important; }
+
+/* FM is a gold coin currency everywhere these cards advertise a pot or entry. */
+.fmm-home-v35-final .is-fm-coins {
+  color: #ffd54a !important;
+  text-shadow: 0 0 12px rgba(255,197,35,.45) !important;
+}
+.fmm-home-v35-final .is-fm-coins > svg {
+  color: #ffbf19 !important;
+  filter: drop-shadow(0 0 6px rgba(255,191,25,.72)) !important;
+}
+
+@media (max-width: 600px) {
+  .fmm-home-v35-final .fmm-v35-fw-fighter {
+    width: 34% !important;
+    max-height: 82% !important;
+  }
+  .fmm-home-v35-final .fmm-v35-fw-copy {
+    width: 58% !important;
+  }
+  .fmm-home-v35-final .fmm-v35-fw-copy h2 {
+    font-size: clamp(25px, 8vw, 34px) !important;
+  }
+}
+
 /* Home: make the chest one clear, shiny CTA with scattered coins, not bunched side-by-side coins. */
 .fmm-home-v35-final .fmm-v35-chest {
   width: clamp(142px, 32vw, 184px) !important;

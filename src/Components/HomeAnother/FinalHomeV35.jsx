@@ -192,6 +192,29 @@ const firstName = (name) => cleanText(name, "Fighter").split(/\s+/)[0] || "Fight
 
 const getFightId = (fight = {}) => fight?._id || fight?.id || fight?.matchId || fight?.slug || "";
 
+const getFightIdentity = (fight = {}) => {
+  const id = getFightId(fight);
+  const names = [getFighterName(fight, "A"), getFighterName(fight, "B")]
+    .map((name) => cleanText(name).toLowerCase())
+    .sort()
+    .join("::");
+  const date = String(pick(fight?.matchDateKey, fight?.eventDateKey, fight?.matchDate, fight?.date, fight?.scheduledAt, "")).slice(0, 10);
+  const hasRealNames = !names.includes("fighter a") && !names.includes("fighter b");
+  if (hasRealNames) return `card:${names}:${date}:${getSportKey(fight)}`;
+  return id ? `id:${String(id)}` : `card:${names}:${date}:${getSportKey(fight)}`;
+};
+
+const dedupeFights = (fights = []) => {
+  const seen = new Set();
+  return fights.filter((fight) => {
+    if (!fight) return false;
+    const identity = getFightIdentity(fight);
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  });
+};
+
 const getFightHref = (fight = {}) => {
   const id = getFightId(fight);
   if (!id || String(id).startsWith("fallback")) return "/upcomingfights";
@@ -264,7 +287,14 @@ const getFighterImage = (fight = {}, side = "A") => {
   const isA = side === "A";
   const fighter = getFighter(fight, side);
   return pick(
+    isA ? fight?.fighterAPrimaryImage : fight?.fighterBPrimaryImage,
+    isA ? fight?.fighterAResolvedImage : fight?.fighterBResolvedImage,
+    isA ? fight?.fighterAImageResolved : fight?.fighterBImageResolved,
+    isA ? fight?.resolvedFighterAImage : fight?.resolvedFighterBImage,
+    isA ? fight?.featuredFightFighterAImage : fight?.featuredFightFighterBImage,
     isA ? fight?.fighterAImage : fight?.fighterBImage,
+    isA ? fight?.fighterAImageUrl : fight?.fighterBImageUrl,
+    isA ? fight?.fighterAImageURL : fight?.fighterBImageURL,
     isA ? fight?.fighter1Image : fight?.fighter2Image,
     isA ? fight?.redCornerImage : fight?.blueCornerImage,
     isA ? fight?.cornerAImage : fight?.cornerBImage,
@@ -273,7 +303,7 @@ const getFighterImage = (fight = {}, side = "A") => {
     fighter?.image,
     fighter?.imageUrl,
     fighter?.avatar,
-    sportAssets[getSportKey(fight)]?.image || sportAssets.mma.image,
+    "",
   );
 };
 
@@ -306,6 +336,8 @@ const getExplicitPoster = (fight = {}) => {
 const buildUpcomingEvent = (fight = {}, index = 0) => {
   const explicitPoster = getExplicitPoster(fight);
   const key = getSportKey(fight);
+  const fighterAImage = getFighterImage(fight, "A");
+  const fighterBImage = getFighterImage(fight, "B");
   return {
     id: getFightId(fight) || `fallback-${index}`,
     f1: getFighterName(fight, "A"),
@@ -315,8 +347,9 @@ const buildUpcomingEvent = (fight = {}, index = 0) => {
     date: getDateLabel(fight),
     prize: getPrize(fight),
     image: explicitPoster,
-    fighterAImage: getFighterImage(fight, "A"),
-    fighterBImage: getFighterImage(fight, "B"),
+    fighterAImage,
+    fighterBImage,
+    hasFighters: Boolean(fighterAImage || fighterBImage),
     hasPoster: Boolean(explicitPoster),
     fallbackImage: sportAssets[key]?.image || sportAssets.mma.image,
     href: getFightHref(fight),
@@ -327,15 +360,14 @@ const getPrize = (fight = {}, fallback = "PRIZE TERMS PENDING") => {
   const raw = pick(fight?.prizePool, fight?.prize, fight?.winningAmount, fight?.cashPrize, fight?.currentPot, fight?.pot);
   if (!raw) return fallback;
   const numeric = numberFrom(raw);
-  if (String(raw).includes("$")) return String(raw);
-  if (numeric > 0) return `$${numeric.toLocaleString()}`;
+  if (numeric > 0) return `${numeric.toLocaleString()} FM COINS`;
   return String(raw);
 };
 
 const getEntry = (fight = {}) => {
   const raw = pick(fight?.entryFee, fight?.fee, fight?.entryCost, fight?.cost, fight?.matchTokens, fight?.tokensRequired);
   const numeric = numberFrom(raw);
-  if (numeric > 0) return `${numeric.toLocaleString()} FM`;
+  if (numeric > 0) return `${numeric.toLocaleString()} FM COINS`;
   return "FREE";
 };
 
@@ -511,13 +543,13 @@ const FinalHomeV35 = ({
   const activeSport = sportAssets[activeFightSport] ? activeFightSport : "boxing";
   const activeSection = sports.find((sport) => sport.key === activeSport) || sports[0];
   const realFights = Array.isArray(activeSection?.fights)
-    ? activeSection.fights.filter((fight) => fight && !isPastFinalFight(fight, now))
+    ? dedupeFights(activeSection.fights.filter((fight) => fight && !isPastFinalFight(fight, now)))
     : [];
   const allRealFights = useMemo(
-    () => [
+    () => dedupeFights([
       ...(Array.isArray(heroSlides) ? heroSlides : []),
       ...sports.flatMap((sport) => sport.fights || []),
-    ].filter((fight) => fight && !isPastFinalFight(fight, now)),
+    ].filter((fight) => fight && !isPastFinalFight(fight, now))),
     [heroSlides, sports, now],
   );
 
@@ -545,8 +577,9 @@ const FinalHomeV35 = ({
     || allRealFights.find((fight) => String(getFightId(fight)) !== String(getFightId(featuredThisWeekFight)))
     || featuredThisWeekFight;
 
-  const upcomingEvents = (realFights.length ? realFights : allRealFights)
-    .filter((fight, index, rows) => rows.findIndex((row) => String(getFightId(row)) === String(getFightId(fight))) === index)
+  const featuredIdentities = new Set([getFightIdentity(featuredThisWeekFight), getFightIdentity(featuredFight)]);
+  const upcomingEvents = dedupeFights(realFights.length ? realFights : allRealFights)
+    .filter((fight) => !featuredIdentities.has(getFightIdentity(fight)))
     .slice(0, 8)
     .map(buildUpcomingEvent);
 
@@ -703,7 +736,7 @@ const FinalHomeV35 = ({
             <small>{weeklySport.longLabel}</small>
             <h2 id="fmm-v35-featured-week-title">{weeklyFighterA} <em>VS</em> {weeklyFighterB}</h2>
             <div className="fmm-v35-fw-meta">
-              <strong>{weeklyPrize}<small> CASH POOL</small></strong>
+              <strong className="is-fm-coins"><FaCoins /> {weeklyPrize}<small> PRIZE POOL</small></strong>
               <strong>{weeklyEntry}<small> ENTRY FEE</small></strong>
               <strong>{weeklyEntriesLabel}<small> ENTRIES</small></strong>
             </div>
@@ -718,17 +751,17 @@ const FinalHomeV35 = ({
               <article key={event.id} style={{ "--event-color": event.color }}>
                 <Link href={event.href}>
                   <figure>
-                    {event.hasPoster ? <img src={event.image} alt="" onError={(error) => { error.currentTarget.onerror = null; error.currentTarget.src = event.fallbackImage || sportAssets.mma.image; }} /> : (
+                    {event.hasFighters ? (
                       <span className="fmm-v35-event-fighters" aria-hidden="true">
-                        <img src={event.fighterAImage || event.fallbackImage} alt="" />
-                        <img src={event.fighterBImage || event.fallbackImage} alt="" />
+                        {event.fighterAImage ? <img src={event.fighterAImage} alt="" /> : <b>{firstName(event.f1).slice(0, 1)}</b>}
+                        {event.fighterBImage ? <img src={event.fighterBImage} alt="" /> : <b>{firstName(event.f2).slice(0, 1)}</b>}
                       </span>
-                    )}
-                    <figcaption>{event.tag}</figcaption>
+                    ) : event.hasPoster ? <img src={event.image} alt="" /> : <span className="fmm-v35-event-empty">PHOTOS COMING SOON</span>}
                   </figure>
+                  <span className="fmm-v35-event-tag">{event.tag}</span>
                   <h3>{event.f1} <em>VS</em> {event.f2}</h3>
                   <time>{event.date}</time>
-                  <strong>{event.prize}</strong>
+                  <strong className="is-fm-coins"><FaCoins /> {event.prize}</strong>
                 </Link>
                 <div><Link href={event.href}>⚡ {firstName(event.f1)}</Link><Link href={event.href}>⚡ {firstName(event.f2)}</Link></div>
                 <Link href={event.href} className="fmm-v35-enter">ENTER NOW</Link>
