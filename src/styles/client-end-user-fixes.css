@@ -290,6 +290,59 @@
 }
 .admin-direct-fighter-note { display: block; margin-top: 9px; line-height: 1.4; }
 
+/* Cash-first economics with the public FM conversion shown immediately. */
+.admin-money-conversion-field { min-width: 0; }
+.admin-money-input {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 14px;
+  background: rgba(3,8,14,.78);
+}
+.admin-money-input:focus-within { border-color: #f7b51b; box-shadow: 0 0 0 2px rgba(247,181,27,.14); }
+.admin-money-input b {
+  display: grid;
+  place-items: center;
+  border-right: 1px solid rgba(255,255,255,.12);
+  color: #f7b51b;
+  font-family: var(--ff-display);
+  font-size: 20px;
+}
+.admin-money-input input {
+  min-width: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.admin-money-conversion-field > small {
+  color: rgba(255,255,255,.58);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.admin-money-conversion-field > small strong { color: #35d45d; font-size: 13px; }
+.admin-fm-rate-note {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 14px;
+  grid-column: 1 / -1;
+  padding: 13px 15px;
+  border: 1px solid rgba(247,181,27,.3);
+  border-radius: 14px;
+  background: rgba(247,181,27,.06);
+}
+.admin-fm-rate-note span { color: #f7b51b; font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.admin-fm-rate-note strong { color: #fff; font-size: 14px; }
+.admin-fm-rate-note small { color: rgba(255,255,255,.56); font-size: 11px; }
+@media (max-width: 640px) {
+  .admin-fm-rate-note { grid-template-columns: 1fr; gap: 5px; }
+}
+
 /* Admin fighter library upload, pagination, and overflow polish. */
 .admin-combat-fighters-page,
 .admin-combat-fighters-page * { box-sizing: border-box; }
