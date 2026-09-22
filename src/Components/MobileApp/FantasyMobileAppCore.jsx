@@ -265,7 +265,7 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
   const fighterOneStats = Array.isArray(liveStats?.fighterOneStats) ? liveStats.fighterOneStats : [];
   const fighterTwoStats = Array.isArray(liveStats?.fighterTwoStats) ? liveStats.fighterTwoStats : [];
   const userEntry = fight.userEntry && typeof fight.userEntry === 'object' ? fight.userEntry : null;
-  const explicitPoster = resolveLiveMedia(
+  const explicitPoster = resolveExactFighterMedia(
     fight.homepagePromotion?.mobilePosterImage, fight.homepagePromotion?.posterImage,
     fight.homepagePromotion?.image, fight.fightPosterMobileImage, fight.fightPosterImage,
     fight.posterImage, fight.matchPosterImage, fight.bannerImage,
@@ -1378,7 +1378,7 @@ class FantasyMobileAppCore extends React.Component {
   // player can only draft someone actually scheduled to compete.
   fighterPoolForSlot = (slotKey) => {
     const family = { boxing: 'boxing', bareknuckle: 'boxing', mma: 'mma', kickboxing: 'mma', wrestling: 'wrestling' }[slotKey] || 'mma';
-    const fights = dedupeFightRecords(Array.isArray(this.props.fights) ? this.props.fights : []);
+    const fights = Array.isArray(this.props.fights) ? this.props.fights : [];
     const names = new Set();
     fights.forEach(fight => {
       const category = String(fight.category || fight.matchCategory || '').toLowerCase();
@@ -3576,7 +3576,7 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderTicker() {
-    const fights = Array.isArray(this.props.fights) ? this.props.fights : [];
+    const fights = dedupeFightRecords(Array.isArray(this.props.fights) ? this.props.fights : []);
     const board = Array.isArray(this.props.leaderboard) ? this.props.leaderboard : [];
     const items = [];
 
