@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { fullCardRequest } from '@/Utils/fullCardApi';
 import UserDetails from './UserDetails';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
@@ -34,6 +35,8 @@ const AffiliateUsers = () => {
   const [rewardTitle, setRewardTitle] = useState('');
   const [rewardImage, setRewardImage] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [promoterBusyId, setPromoterBusyId] = useState(null);
+  const [approvedPromoterIds, setApprovedPromoterIds] = useState([]);
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const [showInvitePopup, setShowInvitePopup] = useState(false);
@@ -276,6 +279,21 @@ const AffiliateUsers = () => {
     });
   };
 
+  const approvePromoter = async (user) => {
+    if (!user?._id || promoterBusyId) return;
+    setPromoterBusyId(user._id);
+    try {
+      await fullCardRequest(`/api/admin/full-card-promoters/${user._id}`, {
+        method: 'PATCH', kind: 'admin', body: { enabled: true, role: 'PROMOTER' },
+      });
+      setApprovedPromoterIds((current) => [...new Set([...current, user._id])]);
+      setAffiliateUsers((current) => current.map((affiliate) => affiliate._id === user._id ? { ...affiliate, verified: true } : affiliate));
+      toast.success(`${user.playerName || user.firstName || 'Affiliate'} can promote fights now.`);
+    } catch (error) {
+      toast.error(error.message || 'Could not approve promoter access.');
+    } finally { setPromoterBusyId(null); }
+  };
+
   const addAffiliate = async (data) => {
     try {
       const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-affiliate', {
@@ -344,7 +362,7 @@ const AffiliateUsers = () => {
         <article>
           <span>Promoter access</span>
           <h2>Invite a Full Card Promoter</h2>
-          <p>Select an existing affiliate, enable Full Card tools, and copy their private promoter invitation.</p>
+          <p>Approve an affiliate instantly from the list below, or create a private invitation link to share with them.</p>
           <button type="button" onClick={() => router.push('/administration/full-cards')}><FaAward /> Open promoter invitations</button>
         </article>
       </section>
@@ -391,13 +409,14 @@ const AffiliateUsers = () => {
                 <th className="admin-select-column"><input type="checkbox" aria-label="Select all visible affiliates with email addresses" checked={allVisibleSelected} onChange={toggleVisibleAffiliates} /></th>
                 <th>Creator</th>
                 <th>Status</th>
+                <th>Promoter</th>
                 <th>Distinction</th>
                 <th>Profile</th>
                 <th>Delete</th>
               </tr>
             </thead>
             <tbody>
-              {loading ? <tr><td colSpan="6"><div className="admin-empty-table">Loading affiliate accounts…</div></td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => (
+              {loading ? <tr><td colSpan="7"><div className="admin-empty-table">Loading affiliate accounts…</div></td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user._id}>
                   <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || 'affiliate'} for email`} checked={selectedAffiliateIds.includes(user._id)} disabled={!isValidEmail(user.email)} onChange={() => toggleAffiliate(user._id)} /></td>
                   <td>
@@ -410,6 +429,7 @@ const AffiliateUsers = () => {
                     </button>
                   </td>
                   <td><span className={`admin-status-badge ${user.verified ? 'is-success' : 'is-warning'}`}>{user.verified ? 'Approved' : 'Pending'}</span></td>
+                  <td><button type="button" className="admin-distinction-button" disabled={promoterBusyId === user._id || approvedPromoterIds.includes(user._id) || (user.canCreateFullCards && !user.promoterSuspendedAt)} onClick={() => approvePromoter(user)}><FaAward /> {promoterBusyId === user._id ? 'Approving…' : approvedPromoterIds.includes(user._id) || (user.canCreateFullCards && !user.promoterSuspendedAt) ? 'Promoter approved' : 'Approve promoter'}</button></td>
                   <td>
                     <button
                       type="button"
@@ -436,7 +456,7 @@ const AffiliateUsers = () => {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="6"><div className="admin-empty-table">No affiliates match the current search and approval filter.</div></td></tr>
+                <tr><td colSpan="7"><div className="admin-empty-table">No affiliates match the current search and approval filter.</div></td></tr>
               )}
             </tbody>
           </table>
