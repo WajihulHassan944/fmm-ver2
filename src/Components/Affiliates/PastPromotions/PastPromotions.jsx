@@ -183,7 +183,7 @@ const PastPromotions = () => {
                           <h3>{fight?.matchName || `${fight?.matchFighterA || 'Fighter A'} vs ${fight?.matchFighterB || 'Fighter B'}`}</h3>
                           <div>
                             <span><FaTrophy /> Prize pot {Number(fight?.pot || 0).toLocaleString()}</span>
-                            <span>{Number(fight?.matchTokens || 0).toLocaleString()} token buy-in</span>
+                            <span>{Number(fight?.matchTokens || 0).toLocaleString()} FM COINS buy-in</span>
                           </div>
                           {resultId ? (
                             <Link href={`/past-fight/${resultId}`} className="theme-btn theme-btn-secondary">
