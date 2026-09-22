@@ -279,14 +279,30 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       // Every collection is an independent source of truth. A failure in the
       // authenticated admin endpoint must not erase fights that successfully
       // loaded from the LIVE, SHADOW, public, or prediction collections.
-      const [adminPayload, legacyRows, shadowPayload, publicRows, predictionRows] = await Promise.allSettled([
-        fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' }),
+      const adminRequest = fightDataQualityApi.adminFights({ limit: 500, includeDrafts: true, source: 'all', matchType: 'all' });
+      const detailRequests = [
         loadLegacyMatchFeed(),
         fightDataQualityApi.adminShadowLibrary({ limit: 500, includeDrafts: true, matchType: 'all' }),
         loadPublicMatchFeed(),
         loadPredictionMatchFeed(),
-      ]);
-      const adminRows = adminPayload.status === 'fulfilled' ? normalizeMatchFeedRows(adminPayload.value) : [];
+      ];
+
+      // The combined admin endpoint is the complete Registry source. Render it
+      // immediately instead of blocking the table on four slower enrichment
+      // feeds. Those feeds still merge in afterward to recover legacy images
+      // and records if an older collection has not been migrated yet.
+      let adminRows = [];
+      try {
+        adminRows = normalizeMatchFeedRows(await adminRequest);
+        if (adminRows.length) {
+          setMatches(adminRows);
+          setMatchRowsLoading(false);
+        }
+      } catch (adminError) {
+        console.warn('Complete admin fight feed unavailable; using registry fallbacks:', adminError);
+      }
+
+      const [legacyRows, shadowPayload, publicRows, predictionRows] = await Promise.allSettled(detailRequests);
       const detailRows = [
         ...(legacyRows.status === 'fulfilled' ? normalizeMatchFeedRows(legacyRows.value) : []),
         ...(shadowPayload.status === 'fulfilled' ? normalizeMatchFeedRows(shadowPayload.value) : []),
