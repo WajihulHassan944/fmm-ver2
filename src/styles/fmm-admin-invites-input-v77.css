@@ -30,7 +30,6 @@
 .admin-economics-desk.admin-operations-v4 .admin-create-fight-layout main,
 .admin-economics-desk.admin-operations-v4 .admin-form-card,
 .admin-economics-desk.admin-operations-v4 .admin-form-grid,
-.admin-economics-desk.admin-operations-v4 .admin-form-grid label,
 .admin-economics-desk.admin-operations-v4 .admin-fighter-select{
   pointer-events:auto!important;
   position:relative!important;
@@ -48,6 +47,11 @@
 .admin-economics-desk.admin-operations-v4 select,
 .admin-economics-desk.admin-operations-v4 textarea{cursor:text!important}
 .admin-economics-desk.admin-operations-v4 select{cursor:pointer!important}
+
+/* Do not give every form label a sibling stacking context: later controls
+   would otherwise paint over the open fighter menu. */
+.admin-economics-desk.admin-operations-v4 .admin-fighter-select.is-open{z-index:40!important}
+.admin-economics-desk.admin-operations-v4 .admin-fighter-select-menu{z-index:41!important}
 
 .admin-operations-v4 .admin-operations-workflow a{
   align-items:center!important;
