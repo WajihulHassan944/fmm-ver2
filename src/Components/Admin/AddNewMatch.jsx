@@ -51,6 +51,7 @@ const TOKEN_PACK_SIZE = 5000;
 const TOKEN_PACK_USD = 3.99;
 const TOKEN_USD_RATE = TOKEN_PACK_USD / TOKEN_PACK_SIZE;
 const usdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / TOKEN_USD_RATE)));
+const normalizeFightText = (value) => String(value || '').trim().toLowerCase();
 
 const DirectFighterEntry = ({ side, name, image, preview, onNameChange, onImageChange }) => (
   <section className="admin-direct-fighter-card" aria-label={`Create Fighter ${side} with a photo`}>
@@ -240,6 +241,39 @@ export default function AddNewMatch() {
       // what created duplicates before. Say so explicitly instead of just
       // "failed", so the reflex is to check the registry, not click again.
       const isNetworkDrop = requestError instanceof TypeError;
+      if (isNetworkDrop) {
+        try {
+          const registryResponse = await fetch(`${API_BASE}/api/public/fights?limit=500&includeDrafts=true&_=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+          });
+          const registryPayload = await registryResponse.json().catch(() => ({}));
+          const registryRows = Array.isArray(registryPayload)
+            ? registryPayload
+            : registryPayload?.items || registryPayload?.data || registryPayload?.rows || [];
+          const savedFight = registryRows.find((fight) => (
+            normalizeFightText(fight.matchName || fight.title) === normalizeFightText(form.matchName)
+            && normalizeFightText(fight.matchFighterA || fight.fighterA?.name) === normalizeFightText(form.matchFighterA)
+            && normalizeFightText(fight.matchFighterB || fight.fighterB?.name) === normalizeFightText(form.matchFighterB)
+            && String(fight.matchDate || fight.date || '').slice(0, 10) === String(form.matchDate || '').slice(0, 10)
+          ));
+          if (savedFight) {
+            setCreated({
+              id: savedFight._id || savedFight.id,
+              type: form.matchType,
+              name: form.matchName,
+              category: displayCategory,
+              fighterA: form.matchFighterA,
+              fighterB: form.matchFighterB,
+            });
+            setError('');
+            resetAfterCreate();
+            return;
+          }
+        } catch (registryCheckError) {
+          console.warn('Unable to confirm the published fight after a dropped response:', registryCheckError);
+        }
+      }
       setError(isNetworkDrop
         ? 'Lost connection while publishing. The fight may have already been created — check Fight registry before publishing again.'
         : (requestError.message || 'Unable to create the fight card.'));
