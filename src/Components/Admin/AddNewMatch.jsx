@@ -158,6 +158,7 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
     const matchDate = form.matchDate ? form.matchDate.split('T')[0] : '';
     data.append('matchDate', matchDate);
     data.append('matchTime', matchTimeEST);
+    data.append('eventTimeZone', 'America/New_York');
     data.append('matchTokens', form.matchTokens);
     data.append('pot', form.pot);
     data.append('matchTokensUsd', form.matchTokensUsd || '0');
@@ -447,7 +448,7 @@ export default function AddNewMatch() {
               <header><span>02</span><div><h3>Schedule and economy</h3><p>Configure lock timing, entry cost and the advertised prize pool. Declare upfront — the pot never grows with entries.</p></div></header>
               <div className="admin-form-grid">
                 <label><span>Fight date</span><input type="date" name="matchDate" value={form.matchDate} onChange={change} required /></label>
-                <label><span>Fight time (EST)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} required /></label>
+                <label><span>Fight time (ET)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} required /></label>
                 <label className="admin-money-conversion-field">
                   <span>Player entry fee (USD)</span>
                   <div className="admin-money-input"><b>$</b><input type="number" min="0" step="0.01" name="matchTokensUsd" value={form.matchTokensUsd} onChange={change} placeholder="0.00" /></div>
@@ -482,7 +483,7 @@ export default function AddNewMatch() {
               <b>VS</b>
               <article><UniformFighterPreview src={previews.fighterBImage} fallbackSrc={FALLBACK_B} alt="Fighter B preview" /><strong>{form.matchFighterB || 'Fighter B'}</strong></article>
             </div>
-            <small><FaCalendarAlt /> {form.matchDate || 'Schedule pending'} · {form.matchTime || 'TBA'} EST</small>
+            <small><FaCalendarAlt /> {form.matchDate || 'Schedule pending'} · {form.matchTime || 'TBA'} ET</small>
           </section>
           <section className="admin-upload-stack">
             <label><FaCloudUploadAlt /><span><strong>Fight background</strong><small>{form.promotionBackground?.name || 'Select a high-resolution promotion image'}</small></span><input hidden type="file" accept="image/*" name="promotionBackground" onChange={change} /></label>
