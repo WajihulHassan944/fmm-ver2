@@ -22,9 +22,9 @@ export default function PlayPage({ fights = [] }) {
       <p style={{ color: '#bec7d7', maxWidth: 680 }}>Pick an open fight. Sign in or create a player account, make your predictions, and compete on its leaderboard. You can join directly without an affiliate link.</p>
       {fights.length ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 18, marginTop: 30 }}>
         {fights.map((fight) => <article key={getFightId(fight)} style={{ border: '1px solid #46526b', borderRadius: 16, overflow: 'hidden', background: '#111827' }}>
-          <div style={{ display: 'flex', height: 170, background: '#080b13' }}>
-            <img src={getFighterImage(fight, 'A', 0)} alt="" style={{ width: '50%', objectFit: 'cover' }} />
-            <img src={getFighterImage(fight, 'B', 1)} alt="" style={{ width: '50%', objectFit: 'cover' }} />
+          <div style={{ display: 'flex', height: 'clamp(230px, 25vw, 300px)', background: 'radial-gradient(ellipse at center bottom, #1c263b, #080b13 75%)' }}>
+            <img src={getFighterImage(fight, 'A', 0)} alt="" style={{ display: 'block', width: '50%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom' }} />
+            <img src={getFighterImage(fight, 'B', 1)} alt="" style={{ display: 'block', width: '50%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom' }} />
           </div>
           <div style={{ padding: 20 }}>
             <small style={{ color: '#f5a623' }}>{getFightCategory(fight)} · {formatFightDate(fight)}</small>
