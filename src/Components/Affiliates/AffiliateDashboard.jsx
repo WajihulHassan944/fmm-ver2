@@ -9,6 +9,7 @@ import {
   FaChartLine,
   FaCheck,
   FaCopy,
+  FaCoins,
   FaCrown,
   FaDollarSign,
   FaEye,

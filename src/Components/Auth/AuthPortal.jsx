@@ -148,7 +148,16 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     const query = {};
     if (queryValue(router.query.fight)) query.fight = queryValue(router.query.fight);
     if (queryValue(router.query.league)) query.league = queryValue(router.query.league);
-    router.push(Object.keys(query).length ? { pathname, query } : pathname);
+    // A selected public fight must survive both login and signup. Preserve
+    // its play flag instead of replacing the URL's query with the fight id.
+    if (pathname.startsWith('/fight/')) {
+      const [path, search] = pathname.split('?');
+      const params = new URLSearchParams(search || '');
+      params.set('play', '1');
+      router.push(`${path}?${params.toString()}`);
+    } else {
+      router.push(Object.keys(query).length ? { pathname, query } : pathname);
+    }
     onSuccess?.();
   };
 

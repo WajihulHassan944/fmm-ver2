@@ -239,7 +239,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             </a>
 
             <div data-fmm="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '26px', fontSize: '14.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase' }}>
-              <a href="#fights" style={{ color: 'rgba(255,255,255,.82)' }}>Fight Cards</a>
+              <a href="/play" style={{ color: 'rgba(255,255,255,.82)' }}>Play Now</a>
               <a href="#contests" style={{ color: 'rgba(255,255,255,.82)' }}>How to Play</a>
               <a href="#leagues" style={{ color: 'rgba(255,255,255,.82)' }}>Leagues</a>
               <a href="#board" style={{ color: 'rgba(255,255,255,.82)' }}>Leaderboard</a>
@@ -324,7 +324,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                 </p>
               </div>
               <div data-fmm="hero-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: '52px', padding: '0 30px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.06em', boxShadow: '0 8px 26px rgba(225,29,46,.42)' }}>START FREE</a>
+                <a href="/play" style={{ display: 'inline-flex', alignItems: 'center', height: '52px', padding: '0 30px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.06em', boxShadow: '0 8px 26px rgba(225,29,46,.42)' }}>PLAY A FIGHT</a>
                 <a href="#contests" style={{ display: 'inline-flex', alignItems: 'center', height: '52px', padding: '0 28px', borderRadius: '999px', background: 'rgba(255,255,255,.08)', border: '1.5px solid rgba(216,220,228,.42)', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.06em' }}>TRY A DEMO FIGHT</a>
               </div>
             </div>
@@ -406,7 +406,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: "'Anton', sans-serif", fontSize: 21, color: fight.potColor, fontVariantNumeric: 'tabular-nums', textShadow: '0 0 12px rgba(242,181,68,.5)' }}><FMCoin size="sm" motion="shine" />{fight.potLabel}</div>
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', letterSpacing: '.06em', textTransform: 'uppercase' }}>{fight.potNote}</div>
                       </div>
-                      <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.cta}</a>
+                      <a href={fight.id ? `/fight/${encodeURIComponent(fight.id)}${fight.entryOpen ? '?play=1' : ''}` : '/play'} style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.entryOpen ? fight.cta : 'VIEW FIGHT'}</a>
                     </div>
                   </div>
                 </div>
@@ -720,7 +720,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             <div>
               <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '11px' }}>Play</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
-                <a href="#fights" style={{ color: 'rgba(255,255,255,.72)' }}>Fight cards</a>
+                <a href="/play" style={{ color: 'rgba(255,255,255,.72)' }}>Play Now</a>
                 <a href="#board" style={{ color: 'rgba(255,255,255,.72)' }}>Leaderboard</a>
                 <a href="/auth?mode=signup&role=affiliate" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
               </div>
@@ -813,6 +813,7 @@ const toFightCard = (f, index) => {
     const category = String(f.matchCategory || '').toUpperCase();
     return {
       id: String(f._id || index),
+      entryOpen: typeof f.entryOpen === 'boolean' ? f.entryOpen : !isTerminalFight(f) && getFightTimestamp(f) > Date.now(),
       slot: index + 1,
       f1: resolveFightName(f, 'A').toUpperCase(),
       f2: resolveFightName(f, 'B').toUpperCase(),

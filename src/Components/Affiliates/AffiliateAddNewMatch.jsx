@@ -233,6 +233,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
     else data.append('shadowFightId', matchDetails._id);
     data.append('affiliateId', affiliate._id);
     data.append('pot', formData.pot);
+    data.append('eventTimeZone', Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York');
     data.append('profit', formData.profit);
     data.append('amountOverPotBudget', formData.amountOverPotBudget);
     data.append('matchDate', matchDate);
@@ -413,7 +414,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
             <input type="date" name="matchDate" value={formData.matchDate} onChange={handleChange} required />
           </label>
           <label>
-            <span><FaCalendarAlt /> Start time <small>Local fight time</small></span>
+            <span><FaCalendarAlt /> Start time <small>Your local time</small></span>
             <input type="time" name="matchTime" value={formData.matchTime} onChange={handleChange} required />
           </label>
           <label>

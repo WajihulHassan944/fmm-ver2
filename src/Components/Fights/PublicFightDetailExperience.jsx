@@ -39,6 +39,16 @@ import { SITE_URL } from '@/Utils/seoConfig';
 
 const sameId = (left, right) => String(left || '') === String(right || '');
 
+const entryOpen = (fight) => {
+  if (typeof fight?.entryOpen === 'boolean') return fight.entryOpen;
+  const status = `${fight?.matchStatus || ''} ${fight?.matchShadowOpenStatus || ''}`.toLowerCase();
+  if (/finished|closed|draft|completed|cancelled/.test(status)) return false;
+  const date = String(fight?.matchDate || '').slice(0, 10);
+  const time = /^\d{1,2}:\d{2}/.test(String(fight?.matchTime || '')) ? String(fight.matchTime).slice(0, 5) : '23:59';
+  const lock = fight?.lockAt ? new Date(fight.lockAt).getTime() : date ? new Date(`${date}T${time}:00`).getTime() : NaN;
+  return Number.isFinite(lock) && lock > Date.now();
+};
+
 const hasUsableDetailImage = (value) => {
   const text = typeof value === 'string' ? value.trim() : '';
   return Boolean(text && !['null', 'undefined', 'none', 'n/a'].includes(text.toLowerCase()));
@@ -167,7 +177,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   const resolvedFight = useMemo(() => mergeFightForDetail(fight || {}, userScopedFight || null), [fight, userScopedFight]);
   const hasSubmitted = submittedOverride || hasUserSubmittedFight(resolvedFight, userId);
   const status = getFightStatus(resolvedFight);
-  const playable = status !== 'past' && !hasSubmitted;
+  const playable = entryOpen(resolvedFight) && !hasSubmitted;
   const title = getFightName(resolvedFight);
   const category = getFightCategory(resolvedFight);
   const heroImage = getFightHeroImage(resolvedFight);
@@ -183,14 +193,14 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   }, [hasSubmitted, matchId, router.isReady, router.query?.fight, router.query?.play, userId]);
 
   const handleEnterFight = () => {
-    if (hasSubmitted) return;
+    if (!playable) return;
     if (!userId) {
       router.push({
         pathname: '/auth',
         query: {
           mode: 'signup',
           role: 'player',
-          next: `/fight/${matchId}`,
+          next: `/fight/${matchId}?play=1`,
           fight: matchId,
         },
       });
@@ -243,8 +253,8 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
               <span><FaTrophy /> {getFightStatusLabel(resolvedFight)}</span>
             </div>
             <div className="public-fight-detail-actions">
-              <button type="button" className="theme-btn theme-btn-primary" onClick={handleEnterFight} disabled={hasSubmitted || status === 'past'}>
-                {hasSubmitted ? 'Predictions submitted' : status === 'past' ? 'Entry closed' : userId ? 'Enter fight' : 'Sign up free to enter'} <FaArrowRight />
+              <button type="button" className="theme-btn theme-btn-primary" onClick={handleEnterFight} disabled={!playable}>
+                {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : userId ? 'Play this fight' : 'Sign up to play this fight'} <FaArrowRight />
               </button>
               <a href="#fight-leaderboard" className="theme-btn theme-btn-secondary">View leaderboard <FaTrophy /></a>
             </div>
@@ -290,8 +300,8 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
           <p className="public-fight-eyebrow"><FaShieldAlt /> Prediction access</p>
           <h2>{hasSubmitted ? 'Entry already confirmed' : playable ? 'Ready to participate' : 'Entry not available'}</h2>
           <p>{hasSubmitted ? 'Your prediction card is already submitted for this fight.' : playable ? 'Create a free player account or continue as a player to open the fight entry room and make predictions.' : 'This card is no longer open for new predictions.'}</p>
-          <button type="button" onClick={handleEnterFight} disabled={hasSubmitted || !playable}>
-            {hasSubmitted ? 'Already played' : userId ? 'Start predictions' : 'Sign up and play'} <FaArrowRight />
+          <button type="button" onClick={handleEnterFight} disabled={!playable}>
+            {hasSubmitted ? 'Already played' : !playable ? 'Entry closed' : userId ? 'Start predictions' : 'Sign up and play'} <FaArrowRight />
           </button>
         </article>
       </section>
