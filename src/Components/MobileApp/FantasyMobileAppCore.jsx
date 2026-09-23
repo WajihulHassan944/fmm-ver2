@@ -1779,6 +1779,10 @@ class FantasyMobileAppCore extends React.Component {
   joinLiveLeague = async (league) => {
     const id = cleanText(league?._id, league?.id);
     if (!id || this.state.joinedLeagueIds[id]) return;
+    if (league?.leagueStatus !== 'ACTIVE') {
+      this.showToast('This league is resting. Check back after its next fight promotion.');
+      return;
+    }
     // Not signed in? Ask in-app and resume the join afterwards, instead of
     // bouncing to /login and losing which league they picked.
     if (!this.props.currentUser) {
@@ -1789,8 +1793,11 @@ class FantasyMobileAppCore extends React.Component {
       this.props.onJoin?.();
       return;
     }
-    const joined = await this.props.onJoinLeague({ league });
-    if (!joined) return;
+    const joined = await this.props.onJoinLeague(id);
+    if (!joined?.ok) {
+      this.showToast(joined?.message || 'Could not join this league. Please try again.');
+      return;
+    }
     this.setState((state) => ({ joinedLeagueIds: { ...state.joinedLeagueIds, [id]: true } }));
     this.showToast('League joined successfully');
   };
@@ -3267,7 +3274,8 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderLeagues(s, events) {
-    const leagues = Array.isArray(this.props.leagues) ? this.props.leagues : [];
+    const leagues = Array.isArray(this.props.leagues) ? [...this.props.leagues].sort((a, b) =>
+      Number(b?.leagueStatus === 'ACTIVE') - Number(a?.leagueStatus === 'ACTIVE')) : [];
     const users = Array.isArray(this.props.leagueUsers) ? this.props.leagueUsers : [];
     const userById = new Map(users.map((user) => [String(user?._id || user?.id || ''), user]));
     return React.createElement('div', { style: { padding: '8px 16px 24px', position: 'relative', overflow: 'hidden', minHeight: '100%' } },
@@ -3292,22 +3300,24 @@ class FantasyMobileAppCore extends React.Component {
               const id = cleanText(league?._id, league?.id, `league-${index}`);
               const name = cleanText(league?.playerName, league?.leagueName, league?.name, [league?.firstName, league?.lastName].filter(Boolean).join(' '), `Fight League ${index + 1}`);
               const members = Array.isArray(league?.usersJoined) ? league.usersJoined : [];
+              const memberCount = Number(league?.usersJoined) || members.length;
+              const active = league?.leagueStatus === 'ACTIVE';
               const joined = Boolean(s.joinedLeagueIds[id]);
               const memberNames = members.slice(0, 4).map((entry) => {
                 const member = userById.get(String(entry?.userId || entry?._id || ''));
                 return cleanText(member?.playerName, member?.username, member?.firstName);
               }).filter(Boolean);
-              return React.createElement('article', { key: id, onClick: () => this.openModal('leagueDetail', { ...league, id, name, members: members.length, joined }), style: { padding: 14, borderRadius: 14, border: '1px solid rgba(168,85,247,.45)', background: 'rgba(255,255,255,.055)', boxShadow: '0 0 16px rgba(168,85,247,.2)', cursor: 'pointer' } },
+              return React.createElement('article', { key: id, onClick: () => this.openModal('leagueDetail', { ...league, id, name, members: memberCount, joined }), style: { padding: 14, borderRadius: 14, border: '1px solid rgba(168,85,247,.45)', background: 'rgba(255,255,255,.055)', boxShadow: '0 0 16px rgba(168,85,247,.2)', cursor: 'pointer' } },
                 React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
                   React.createElement('div', { style: { width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', flex: '0 0 48px', background: '#10121a' } }, React.createElement(MobileImageSlot, { id: 'league-' + id, shape: 'circle', placeholder: name, fit: 'cover', src: league?.profileUrl })),
                   React.createElement('div', { style: { flex: 1, minWidth: 0 } },
                     React.createElement('strong', { style: { display: 'block', fontSize: 14 } }, name),
-                    React.createElement('span', { style: { color: 'rgba(255,255,255,.55)', fontSize: 9, fontWeight: 700 } }, members.length + ' members' + (memberNames.length ? ' · ' + memberNames.join(', ') : ''))
+                    React.createElement('span', { style: { color: 'rgba(255,255,255,.55)', fontSize: 9, fontWeight: 700 } }, memberCount + ' members' + (memberNames.length ? ' · ' + memberNames.join(', ') : ''))
                   ),
-                  React.createElement('span', { style: { color: '#22c55e', fontSize: 9, fontWeight: 900 } }, 'OPEN')
+                  React.createElement('span', { style: { color: active ? '#22c55e' : '#f2b544', fontSize: 9, fontWeight: 900 } }, active ? 'ACTIVE' : 'RESTING')
                 ),
                 league?.rewardTitle && React.createElement('div', { style: { marginTop: 9, padding: 8, borderRadius: 8, color: '#f2b544', background: 'rgba(242,181,68,.1)', fontSize: 10, fontWeight: 800 } }, '🏆 ' + league.rewardTitle),
-                React.createElement('div', { onClick: (event) => { event.stopPropagation(); this.joinLiveLeague(league); }, style: { marginTop: 10, textAlign: 'center', padding: '9px 0', borderRadius: 8, background: joined ? 'rgba(34,197,94,.15)' : '#a855f7', color: joined ? '#22c55e' : '#fff', fontWeight: 900, fontSize: 11, cursor: joined ? 'default' : 'pointer' } }, joined ? 'JOINED ✓' : 'JOIN LEAGUE')
+                React.createElement('div', { onClick: (event) => { event.stopPropagation(); if (active && !joined) this.joinLiveLeague(league); }, style: { marginTop: 10, textAlign: 'center', padding: '9px 0', borderRadius: 8, background: joined ? 'rgba(34,197,94,.15)' : active ? '#a855f7' : 'rgba(255,255,255,.1)', color: joined ? '#22c55e' : active ? '#fff' : '#f2b544', fontWeight: 900, fontSize: 11, cursor: active && !joined ? 'pointer' : 'default' } }, joined ? 'JOINED ✓' : active ? 'JOIN LEAGUE' : 'CURRENTLY CLOSED')
               );
             })),
       this.renderH2HWaitlistCard(s)
@@ -5498,10 +5508,10 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 'kicker', style: { fontSize: 9.5, fontWeight: 900, letterSpacing: .8, color: '#a855f7', marginBottom: 3 } }, league.joined ? 'YOUR LEAGUE' : 'PUBLIC LEAGUE'),
         React.createElement('div', { key: 'name', style: { fontFamily: "'Anton',sans-serif", fontSize: 20, marginBottom: 10 } }, league.name || league.leagueName || 'LEAGUE'),
         React.createElement('div', { key: 'rows', style: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 } },
-          [['Members', league.members], ['Reward', league.rewardTitle], ['Status', league.joined ? 'Joined' : 'Open']].filter((row) => row[1] !== undefined && row[1] !== null && row[1] !== '').map(([label, value]) => React.createElement('div', { key: label, style: { display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', paddingBottom: 6, borderBottom: '1px solid rgba(255,255,255,.08)' } }, React.createElement('span', null, label), React.createElement('span', { style: { color: '#fff', fontWeight: 900 } }, value)))),
+          [['Members', league.members], ['Reward', league.rewardTitle], ['Status', league.joined ? 'Joined' : league.leagueStatus === 'ACTIVE' ? 'Active' : 'Resting']].filter((row) => row[1] !== undefined && row[1] !== null && row[1] !== '').map(([label, value]) => React.createElement('div', { key: label, style: { display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', paddingBottom: 6, borderBottom: '1px solid rgba(255,255,255,.08)' } }, React.createElement('span', null, label), React.createElement('span', { style: { color: '#fff', fontWeight: 900 } }, value)))),
         league.joined
           ? React.createElement('div', { key: 'view', onClick: () => { this.closeModal(); this.setTab('leaderboard'); }, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: '#a855f7', fontWeight: 900, fontSize: 12.5, cursor: 'pointer' } }, 'VIEW STANDINGS')
-          : React.createElement('div', { key: 'join', onClick: () => { this.joinLiveLeague(league); this.closeModal(); }, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: '#a855f7', fontWeight: 900, fontSize: 12.5, cursor: 'pointer' } }, 'JOIN LEAGUE'),
+          : React.createElement('div', { key: 'join', onClick: () => { if (league.leagueStatus === 'ACTIVE') { this.joinLiveLeague(league); this.closeModal(); } }, style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: league.leagueStatus === 'ACTIVE' ? '#a855f7' : 'rgba(255,255,255,.1)', fontWeight: 900, fontSize: 12.5, cursor: league.leagueStatus === 'ACTIVE' ? 'pointer' : 'default' } }, league.leagueStatus === 'ACTIVE' ? 'JOIN LEAGUE' : 'CURRENTLY CLOSED'),
       ]);
     }
 
