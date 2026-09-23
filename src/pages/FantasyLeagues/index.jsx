@@ -18,6 +18,7 @@ import styles from './FantasyLeagues.module.css';
 import { useSelector } from 'react-redux';
 import Login from '@/Components/Login/Login';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { userHeaders } from '@/Utils/authFetch';
 
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -47,7 +48,7 @@ const FantasyLeagues = () => {
       const leagueRows = safeArray(payload?.leagues || payload?.affiliates || payload?.data || payload);
       const userRows = safeArray(payload?.users);
 
-      setAffiliates(leagueRows);
+      setAffiliates([...leagueRows].sort((a, b) => Number(b?.leagueStatus === 'ACTIVE') - Number(a?.leagueStatus === 'ACTIVE')));
       setUsers(userRows);
     } catch (error) {
       console.error('Failed to fetch league data:', error);
@@ -85,7 +86,7 @@ const FantasyLeagues = () => {
   }, [affiliates, query]);
 
   const totalMembers = useMemo(
-    () => affiliates.reduce((total, affiliate) => total + safeArray(affiliate?.usersJoined).length, 0),
+    () => affiliates.reduce((total, affiliate) => total + (Number(affiliate?.usersJoined) || safeArray(affiliate?.usersJoined).length), 0),
     [affiliates],
   );
 
@@ -110,6 +111,7 @@ const FantasyLeagues = () => {
   };
 
   const handleJoinBtnClick = (affiliate) => {
+    if (affiliate?.leagueStatus !== 'ACTIVE') return;
     if (!isAuthenticated) {
       setRedirectToLogin(true);
       setPendingAffiliateJoin(affiliate);
@@ -133,15 +135,13 @@ const FantasyLeagues = () => {
     try {
       const response = await fetch(buildPublicApiUrl(`/affiliate/${affiliate._id}/join`), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: userHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ userId, userEmail }),
       });
 
       if (response.ok) {
         alert('Successfully joined the league');
-        const updatedRes = await fetch(buildPublicApiUrl('/affiliates'));
-        const updatedAffiliates = await updatedRes.json();
-        setAffiliates(safeArray(updatedAffiliates));
+        await fetchLeagueData();
       } else {
         const data = await response.json();
         alert(`${data.message}`);
@@ -243,6 +243,8 @@ const FantasyLeagues = () => {
                 {visibleAffiliates.map((affiliate, index) => {
                   const affiliateId = affiliate?._id || `league-${index}`;
                   const members = safeArray(affiliate?.usersJoined);
+                  const memberCount = Number(affiliate?.usersJoined) || members.length;
+                  const active = affiliate?.leagueStatus === 'ACTIVE';
                   const joined = isAuthenticated && hasUserJoined(affiliate);
                   const isOpen = Boolean(openCardIds[affiliateId]);
                   const leagueName = affiliate?.playerName
@@ -254,7 +256,7 @@ const FantasyLeagues = () => {
                       <div className={styles.cardGlow} aria-hidden="true" />
                       <header className={styles.cardHeader}>
                         <span className={styles.cardIndex}>#{String(index + 1).padStart(2, '0')}</span>
-                        <span className={styles.cardStatus}><i /> Open league</span>
+                        <span className={styles.cardStatus}><i /> {active ? 'Active league' : 'Resting league'}</span>
                       </header>
 
                       <div className={styles.identityRow}>
@@ -274,7 +276,7 @@ const FantasyLeagues = () => {
                       </div>
 
                       <div className={styles.cardMetrics}>
-                        <div><FaUsers /><span><strong>{members.length}</strong><small>Members</small></span></div>
+                        <div><FaUsers /><span><strong>{memberCount}</strong><small>Members</small></span></div>
                         <div><FaTrophy /><span><strong>{affiliate?.rewardTitle ? 'Reward' : 'Ranked'}</strong><small>Format</small></span></div>
                       </div>
 
@@ -304,9 +306,9 @@ const FantasyLeagues = () => {
                           type="button"
                           className={joined ? styles.joinedButton : styles.joinButton}
                           onClick={() => handleJoinBtnClick(affiliate)}
-                          disabled={joined || joiningId === affiliateId}
+                          disabled={joined || !active || joiningId === affiliateId}
                         >
-                          {joiningId === affiliateId ? 'Joining…' : joined ? <><FaCheck /> Joined</> : <>Join league <FaArrowRight /></>}
+                          {joiningId === affiliateId ? 'Joining…' : joined ? <><FaCheck /> Joined</> : active ? <>Join league <FaArrowRight /></> : 'Currently closed'}
                         </button>
                       </div>
 
