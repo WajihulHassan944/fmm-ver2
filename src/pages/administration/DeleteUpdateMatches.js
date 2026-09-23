@@ -1,5 +1,10 @@
-export const getServerSideProps = async () => ({
-  redirect: { destination: '/administration/fights', permanent: false },
-});
+import Head from 'next/head';
+import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
+import DeleteFights from '@/Components/Admin/DeleteFights';
 
-export default function FightMaintenanceRedirect() { return null; }
+export default function FightMaintenancePage() {
+  return <AdminPrivateRoute>
+    <Head><title>Edit Fight | FANTASY MMADNESS Administration</title></Head>
+    <DeleteFights />
+  </AdminPrivateRoute>;
+}

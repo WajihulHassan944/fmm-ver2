@@ -213,6 +213,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [selectedScoresView, setSelectedScoresView] = useState(null);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [selectedEconomics, setSelectedEconomics] = useState(null);
+  const [economicsLinkOpened, setEconomicsLinkOpened] = useState(false);
   const [economicsEdits, setEconomicsEdits] = useState(null);
   const [economicsSaving, setEconomicsSaving] = useState(false);
   const [economicsActivating, setEconomicsActivating] = useState(false);
@@ -355,6 +356,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   }, [dispatch]);
 
   const allRows = useMemo(() => normalizeRows(matches), [matches]);
+
+  useEffect(() => {
+    const fightId = new URLSearchParams(window.location.search).get('economicsFightId');
+    if (!fightId || economicsLinkOpened) return;
+    const fight = allRows.find((row) => String(getId(row)) === fightId);
+    if (fight) { setSelectedEconomics(fight); setEconomicsLinkOpened(true); }
+  }, [allRows, economicsLinkOpened]);
 
   const fightRecordImageMaps = useMemo(() => {
     const byName = {};
@@ -896,6 +904,14 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
           }),
         });
         const guardData = await guardRes.json();
+        if (guardRes.status === 401) {
+          window.localStorage.removeItem('adminAuthToken');
+          window.localStorage.removeItem('adminToken');
+          window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again, then reopen the economic setup to save your changes.');
+          const next = `/administration/fights?economicsFightId=${encodeURIComponent(getId(f))}`;
+          window.location.assign(`/administration/login?reason=session-expired&next=${encodeURIComponent(next)}`);
+          return;
+        }
         if (!guardRes.ok || !guardData.ok) throw new Error(guardData.message || 'Could not save economics.');
         toast.success('Fight economics updated.');
         setSelectedEconomics({ ...f, ...guardData });

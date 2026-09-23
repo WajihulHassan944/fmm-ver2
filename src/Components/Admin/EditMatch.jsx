@@ -48,20 +48,23 @@ const getFighterNameSafe = (fighter) => fighter ? getCombatFighterName(fighter) 
 const EditMatch = ({ matchId, isShadow }) => {
   const [match, setMatch] = useState(null);
   const [matchStatus, setMatchStatus] = useState('idle');
+  const [loadError, setLoadError] = useState('');
+  const [needsLogin, setNeedsLogin] = useState(false);
 
   useEffect(() => {
     if (isShadow) return;
     let active = true;
     setMatchStatus('loading');
     fetch(`${API_BASE}/api/admin/matches/${matchId}`, { headers: adminHeaders() })
-      .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
-      .then(({ ok, data }) => {
+      .then((response) => response.json().then((data) => ({ ok: response.ok, status: response.status, data })))
+      .then(({ ok, status, data }) => {
         if (!active) return;
+        if (status === 401) setNeedsLogin(true);
         if (!ok) throw new Error(data?.message || 'Fight not found.');
         setMatch(data.match);
         setMatchStatus('succeeded');
       })
-      .catch(() => { if (active) setMatchStatus('failed'); });
+      .catch((error) => { if (active) { setLoadError(error.message); setMatchStatus('failed'); } });
     return () => { active = false; };
   }, [matchId, isShadow]);
 
@@ -327,7 +330,16 @@ const EditMatch = ({ matchId, isShadow }) => {
 
         window.location.reload();
       } else {
-        alert('Failed to update match.');
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          window.localStorage.removeItem('adminAuthToken');
+          window.localStorage.removeItem('adminToken');
+          window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again and reopen this fight to save your edits.');
+          const next = window.location.pathname + window.location.search;
+          window.location.assign(`/administration/login?reason=session-expired&next=${encodeURIComponent(next)}`);
+          return;
+        }
+        alert(errorData.message || 'Failed to update match.');
       }
     } catch (error) {
       console.error('Error updating match:', error);
@@ -347,8 +359,9 @@ const EditMatch = ({ matchId, isShadow }) => {
     return (
       <div className="admin-edit-fight-workspace">
         <section className="admin-edit-fight-banner">
-          <div><span>Production fight</span><h3>{matchStatus === 'loading' || matchStatus === 'idle' ? 'Loading fight…' : 'Fight not found'}</h3>
-          <p>{matchStatus === 'loading' || matchStatus === 'idle' ? 'Fetching the latest fight registry.' : `No fight with id ${matchId} was found. It may still be indexing — try reopening this page.`}</p></div>
+          <div><span>Production fight</span><h3>{matchStatus === 'loading' || matchStatus === 'idle' ? 'Loading fight…' : needsLogin ? 'Admin session expired' : 'Fight could not be loaded'}</h3>
+          <p>{matchStatus === 'loading' || matchStatus === 'idle' ? 'Fetching the latest fight registry.' : loadError || `No fight with id ${matchId} was found. Try reopening this page.`}</p>
+          {needsLogin && <a href={`/administration/login?reason=session-expired&next=${encodeURIComponent(`/administration/DeleteUpdateMatches?matchId=${matchId}`)}`}>Sign in to edit this fight</a>}</div>
         </section>
       </div>
     );
@@ -391,7 +404,7 @@ const EditMatch = ({ matchId, isShadow }) => {
           <div className="admin-edit-form-grid">
             <label className="is-wide"><span>Fight video URL</span><input type="url" name="matchVideoUrl" value={formData.matchVideoUrl} onChange={handleChange} placeholder="https://youtube.com/watch?v=..." /></label>
             <label className="is-wide"><span>Promotional video URL</span><input type="url" name="matchPromotionalVideoUrl" value={formData.matchPromotionalVideoUrl} onChange={handleChange} placeholder="Optional promo / trailer URL" /></label>
-            {!isShadow && <label><span>Public fight status</span><select name="matchStatus" value={formData.matchStatus} onChange={handleChange}><option value="">Keep current</option><option value="Draft">Draft</option><option value="Scheduled">Scheduled</option><option value="Live">Live</option><option value="Open">Open</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
+            {!isShadow && <label><span>Public fight status</span><select name="matchStatus" value={formData.matchStatus} onChange={handleChange}><option value="">Keep current</option><option value="Draft">Draft</option><option value="Scheduled">Scheduled</option><option value="Ongoing">Ongoing</option><option value="Live">Live</option><option value="Open">Open</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
             {isShadow && <label><span>Shadow status</span><select name="matchShadowStatus" value={formData.matchShadowStatus} onChange={handleChange}><option value="">Keep current</option><option value="Template">Template</option><option value="Open">Open</option><option value="Live">Live</option><option value="Finished">Finished</option><option value="Closed">Closed</option></select></label>}
             {isShadow && <label><span>Shadow open status</span><select name="matchShadowOpenStatus" value={formData.matchShadowOpenStatus} onChange={handleChange}><option value="">Keep current</option><option value="Open">Open</option><option value="Closed">Closed</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label>}
           </div>

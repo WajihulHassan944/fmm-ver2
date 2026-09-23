@@ -28,7 +28,8 @@ const AdminLogin = () => {
     event.preventDefault();
     dispatch(loginAdmin({ email, password })).then((action) => {
       if (action.type === 'adminAuth/loginAdmin/fulfilled') {
-        router.push('/administration');
+        const requested = new URLSearchParams(window.location.search).get('next') || '';
+        router.push(requested.startsWith('/administration/') && !requested.startsWith('//') ? requested : '/administration');
       }
     });
   };
