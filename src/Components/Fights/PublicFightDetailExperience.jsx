@@ -44,7 +44,7 @@ const entryOpen = (fight) => {
   const status = `${fight?.matchStatus || ''} ${fight?.matchShadowOpenStatus || ''}`.toLowerCase();
   if (/finished|closed|draft|completed|cancelled/.test(status)) return false;
   const date = String(fight?.matchDate || '').slice(0, 10);
-  const time = /^\\d{1,2}:\\d{2}/.test(String(fight?.matchTime || '')) ? String(fight.matchTime).slice(0, 5) : '23:59';
+  const time = /^\d{1,2}:\d{2}/.test(String(fight?.matchTime || '')) ? String(fight.matchTime).slice(0, 5) : '23:59';
   const lock = fight?.lockAt ? new Date(fight.lockAt).getTime() : date ? new Date(`${date}T${time}:00`).getTime() : NaN;
   return Number.isFinite(lock) && lock > Date.now();
 };
