@@ -222,6 +222,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [promotionUpdatingId, setPromotionUpdatingId] = useState('');
   const [placementUpdatingKey, setPlacementUpdatingKey] = useState('');
+  const [entryLockUpdatingId, setEntryLockUpdatingId] = useState('');
+  const [entryLockDrafts, setEntryLockDrafts] = useState({});
   const [scoutingUpdatingId, setScoutingUpdatingId] = useState('');
   const [showDataQuality, setShowDataQuality] = useState(false);
   const [retiringShadow, setRetiringShadow] = useState(false);
@@ -482,6 +484,35 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       toast.error(error.message || 'Failed to reorder fight.');
     } finally {
       setPlacementUpdatingKey('');
+    }
+  };
+
+  const updateFightEntryLock = async (fight, action) => {
+    const id = String(getId(fight) || '');
+    if (!id || entryLockUpdatingId) return;
+    if (action === 'close' && !window.confirm(`Close new entries for ${getTitle(fight)} now? Existing predictions remain saved.`)) return;
+    const localTime = entryLockDrafts[id];
+    const timestamp = action === 'schedule' ? new Date(localTime).getTime() : null;
+    if (action === 'schedule' && (!Number.isFinite(timestamp) || timestamp <= Date.now())) {
+      toast.error('Choose a future cutoff time in your local time zone.');
+      return;
+    }
+    setEntryLockUpdatingId(id);
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/fights/${encodeURIComponent(id)}/entry-lock`, {
+        method: 'POST',
+        headers: adminHeaders({ Accept: 'application/json', 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ action, ...(action === 'schedule' ? { lockAt: new Date(timestamp).toISOString() } : {}) }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || 'Could not update this fight cutoff.');
+      toast.success(action === 'close' ? 'New entries closed for this fight.' : 'Fight entry cutoff saved.');
+      setOpenActionsRowId(null);
+      refreshFightRows();
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setEntryLockUpdatingId('');
     }
   };
 
@@ -1428,6 +1459,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                               <button type="button" disabled={scoutingUpdatingId === String(id)} onClick={() => { generateScoutingReport(fight); setOpenActionsRowId(null); }}>
                                 <FaRobot /> {scoutingUpdatingId === String(id) ? 'Generating...' : fight.aiScoutingReport ? 'Refresh AI report' : 'Generate AI report'}
                               </button>
+                              {fight.sourceType !== 'shadow' && !isFinished && <>
+                                <label style={{ fontSize: 12, color: '#fff' }} htmlFor={`entry-cutoff-${id}`}>Entry cutoff (your local time)</label>
+                                <input id={`entry-cutoff-${id}`} type="datetime-local" value={entryLockDrafts[id] || ''} onChange={(event) => setEntryLockDrafts((current) => ({ ...current, [id]: event.target.value }))} />
+                                <button type="button" disabled={entryLockUpdatingId === String(id)} onClick={() => updateFightEntryLock(fight, 'schedule')}>Save entry cutoff</button>
+                                <button type="button" className="is-danger" disabled={entryLockUpdatingId === String(id) || Boolean(fight.entryClosedAt)} onClick={() => updateFightEntryLock(fight, 'close')}>{fight.entryClosedAt ? 'Entries closed' : 'Close entries now'}</button>
+                              </>}
                               <Link href={`/administration/swarm?tab=jobs&fightId=${encodeURIComponent(id || '')}&scopeLabel=${encodeURIComponent(getTitle(fight) || id || '')}`}><FaRobot /> Swarm jobs</Link>
                               <button type="button" onClick={() => { openScorerPanel(fight); setOpenActionsRowId(null); }}><FaUserClock /> Send to scorer</button>
                               <Link href={`/administration/DeleteUpdateMatches?matchId=${id}&sourceType=${getSourceType(fight)}`}><FaEdit /> Edit fight</Link>
