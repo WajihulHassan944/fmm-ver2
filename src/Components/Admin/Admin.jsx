@@ -122,6 +122,7 @@ const Admin = () => {
   ];
 
   const quickActions = [
+    { title: 'This Week’s Three Fights', copy: 'See the fights to promote, review Swarm drafts, and copy their player links.', href: '/administration/growth', icon: FaBolt },
     { title: 'Homepage posters', copy: 'Promote fight posters and shadow-fight videos to the homepage mobile funnel.', href: '/administration/homepage-content', icon: FaBullhorn },
     { title: 'Create a match', copy: 'Build a new fight card and prediction setup.', href: '/administration/AddNewMatch', icon: FaPlus },
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },

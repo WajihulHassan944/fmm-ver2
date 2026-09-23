@@ -196,6 +196,9 @@ const AdminHeader = () => {
         <Link href="/administration" className={`admin-overview-link ${pathname === '/administration' ? 'is-active' : ''}`} title="Command center">
           <FaChartBar /><span>Command center</span>
         </Link>
+        <Link href="/administration/growth" className={`admin-overview-link ${pathname === '/administration/growth' ? 'is-active' : ''}`} title="This Week’s Three Fights">
+          <FaBolt /><span>This Week’s Three Fights</span>
+        </Link>
 
         <label className="admin-command-search">
           <FaSearch aria-hidden="true" />
