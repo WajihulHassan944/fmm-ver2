@@ -3,6 +3,7 @@ import { adminHeaders } from '@/Utils/authFetch';
 import { fetchPublicPredictionFights, PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
+import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
 import { fullCardRequest } from '@/Utils/fullCardApi';
 import UserDetails from './UserDetails';
 import { toast } from 'react-toastify';
@@ -244,10 +245,12 @@ const AffiliateUsers = () => {
     }
     setPosterUploading(true);
     try {
-      const form = new FormData(); form.append('poster', file);
+      const prepared = await prepareFightPosterUpload(file);
+      const form = new FormData(); form.append('poster', prepared);
       const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/fights/${encodeURIComponent(fightId)}/social-poster`, { method: 'POST', headers: adminHeaders(), body: form });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.poster) throw new Error(result.message || 'The poster could not be uploaded.');
+      if (requireFreshAdminSession(response)) return;
+      if (!response.ok || !result.poster) throw new Error(result.message || `The poster could not be uploaded (HTTP ${response.status}).`);
       setPosterUrls((current) => ({ ...current, [fightId]: result.poster }));
       toast.success('Fight poster saved. Each affiliate gets their own tracked QR version.');
     } catch (error) { toast.error(error.message || 'The poster could not be uploaded.'); }
@@ -260,7 +263,8 @@ const AffiliateUsers = () => {
     const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight').slice(0, 150);
-    const posts = affiliateFightPosts(title, fightLink);
+    const campaignFight = posterFights.find((fight) => String(getFightId(fight)) === launchFightId);
+    const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens);
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
