@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 
 const WIDTH = 1080;
 const HEIGHT = 1350;
@@ -10,7 +11,8 @@ const loadImage = (src) => new Promise((resolve) => {
   image.crossOrigin = 'anonymous';
   image.onload = () => resolve(image);
   image.onerror = () => resolve(null);
-  image.src = src;
+  const resolved = resolvePublicMediaUrl(src);
+  image.src = /^https:\/\//i.test(resolved) ? `/api/fight-poster-image?url=${encodeURIComponent(resolved)}` : resolved;
 });
 
 const labelForSport = (sport) => {
@@ -49,7 +51,7 @@ const drawFighter = (ctx, image, side) => {
     const scale = Math.min(width / image.width, height / image.height);
     const w = image.width * scale;
     const h = image.height * scale;
-    ctx.drawImage(image, x + (width - w) / 2, top + height - h, w, h);
+    ctx.drawImage(image, x + (width - w) / 2, top + 18, w, h);
   } else {
     ctx.fillStyle = left ? '#13264a' : '#491820';
     ctx.fillRect(x, top, width, height);
@@ -97,6 +99,7 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     loadImage(fighterAImage), loadImage(fighterBImage), loadImage(LOGO),
     QRCode.toDataURL(url, { width: 420, margin: 3, errorCorrectionLevel: 'M' }).then(loadImage),
   ]);
+  if (!left || !right) throw new Error('A saved fighter photo could not be loaded for this poster. Check both fight photos.');
   drawFighter(ctx, left, 'A'); drawFighter(ctx, right, 'B');
   // Colored edges distinguish the two athletes while keeping their real photos intact.
   ctx.save(); ctx.globalCompositeOperation = 'screen';
@@ -112,12 +115,15 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
   ctx.textAlign = 'center';
   if (logo) {
     ctx.save(); ctx.shadowColor = '#050510'; ctx.shadowBlur = 28;
-    ctx.drawImage(logo, 423, 25, 234, 234); ctx.restore();
+    // The logo asset has a dark square backdrop. Screen blending makes the
+    // black blend into the arena while retaining the vivid logo colors.
+    ctx.globalCompositeOperation = 'screen';
+    ctx.drawImage(logo, 385, 6, 310, 310); ctx.restore();
   } else {
     ctx.fillStyle = '#ffc23b'; fitText(ctx, 'FANTASY MMADNESS', 830, 72); ctx.fillText('FANTASY MMADNESS', 540, 130);
   }
   ctx.fillStyle = '#ffce59'; ctx.font = '900 31px Arial, sans-serif';
-  ctx.fillText(labelForSport(sport), 540, 280);
+  ctx.fillText(labelForSport(sport), 540, 326);
   ctx.fillStyle = '#ffcb4e'; ctx.shadowColor = '#ff6200'; ctx.shadowBlur = 18;
   fitText(ctx, 'VS', 140, 114); ctx.fillText('VS', 540, 640); ctx.shadowBlur = 0;
   const names = [nameLines(fighterA), nameLines(fighterB)];
@@ -149,8 +155,7 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     ctx.fillStyle = '#fff'; ctx.fillRect(882, 1150, 171, 171);
     ctx.drawImage(qr, 891, 1159, 153, 153);
   }
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 25px Arial, sans-serif';
-  ctx.fillText('SCAN TO PLAY', 968, 1338);
+  ctx.fillStyle = '#fff';
   ctx.font = '900 34px Arial, sans-serif'; ctx.fillText('FANTASYMMADNESS.COM', 435, 1260, 800);
   return canvas.toDataURL('image/png');
 }
