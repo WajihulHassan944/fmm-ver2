@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { fetchPublicPredictionFights, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
@@ -22,8 +22,6 @@ export default function FightLaunchDesk() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [poster, setPoster] = useState('');
-  const [posterError, setPosterError] = useState('');
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadedPosters, setUploadedPosters] = useState({});
@@ -32,6 +30,7 @@ export default function FightLaunchDesk() {
   const id = fight ? String(getFightId(fight)) : '';
   const url = id ? `https://www.fantasymmadness.com/fight/${encodeURIComponent(id)}?play=1&utm_source=owner&utm_medium=social&utm_campaign=fight_launch` : '';
   const title = fight ? titleFor(fight) : '';
+  const posterImage = uploadedPosters[id] || fight?.fightPosterImage || fight?.promotionBackground || fight?.fightPosterMobileImage || '';
   const prizeLine = Number(fight?.matchTokens) > 0 && Number(fight?.pot) > 0
     ? 'Compete for cash prizes where eligible. See the fight page for entry details, prize rules, and availability.'
     : 'Play for prizes and bragging rights. See the fight page for the rewards and entry rules.';
@@ -41,31 +40,17 @@ export default function FightLaunchDesk() {
   const xPost = `Join the fight: ${title.slice(0, 40)}. Make your picks and compete for prizes where eligible. Check rules and join: ${url}`;
   const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. The owner has already set up the fight and its economics. Open your personal kit to download the social poster with your tracked QR, then share it with your ready-made Facebook, Instagram, TikTok, or X caption. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds under the existing affiliate split. Review your recipients before sending.`;
 
-  useEffect(() => {
-    if (!fight || !url) { setPoster(''); return; }
-    let active = true;
-    setPoster('');
-    setPosterError('');
-    buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
-      fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
-      basePoster: uploadedPosters[id] || fight.fightPosterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
-      date: formatFightDate(fight), url, prize: fight.pot, entryCoins: fight.matchTokens })
-      .then((image) => { if (active) setPoster(image); })
-      .catch((err) => { if (active) setPosterError(err.message || 'Could not make this poster. Check the fighter photos.'); });
-    return () => { active = false; };
-  }, [fight, url, uploadedPosters, id]);
-
   const uploadPoster = async (file) => {
     if (!file || !id) return;
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 8 * 1024 * 1024) {
-      toast.error('Choose a PNG, JPEG, or WebP image under 8 MB.'); return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 25 * 1024 * 1024) {
+      setUploadError('Choose a PNG, JPEG, or WebP image under 25 MB.'); return;
     }
     setUploadBusy(true);
     setUploadError('');
     try {
       const prepared = await prepareFightPosterUpload(file);
       const body = new FormData(); body.append('poster', prepared);
-      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/fights/${encodeURIComponent(id)}/social-poster`, { method: 'POST', headers: adminHeaders(), body });
+      const response = await fetch(`/api/admin/fights/${encodeURIComponent(id)}/social-poster`, { method: 'POST', headers: adminHeaders(), body });
       const result = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) throw new Error('Your admin session has expired. Sign in again, then retry the upload.');
       if (response.status === 413) throw new Error('The poster is too large for the server. Try a smaller image.');
@@ -94,9 +79,10 @@ export default function FightLaunchDesk() {
     if (!fight || busy) return;
     setBusy(true);
     try {
-      const image = poster || await buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
+      if (!posterImage) throw new Error('Upload a fight poster before downloading a social poster.');
+      const image = await buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
         fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
-        basePoster: uploadedPosters[id] || fight.fightPosterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
+        basePoster: posterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
         date: formatFightDate(fight), url, prize: fight.pot, entryCoins: fight.matchTokens });
       saveFightSocialPoster(image, id);
       toast.success('Fight post image downloaded.');
@@ -114,15 +100,15 @@ export default function FightLaunchDesk() {
     </label>
     <div className={styles.uploadPanel}>
       <label htmlFor="fight-launch-poster">Upload your finished fight poster</label>
-      <p>Select a fight above, then choose a PNG, JPEG, or WebP image (up to 8 MB). Each affiliate kit adds that affiliate's tracked link and QR code to your artwork.</p>
+      <p>Select a fight above, then choose your PNG, JPEG, or WebP poster (up to 25 MB). Each affiliate kit adds that affiliate's tracked link and QR code to your artwork.</p>
       <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp" disabled={!fight || uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} />
-      <small>{uploadBusy ? 'Uploading poster…' : fight && (uploadedPosters[id] || fight.fightPosterImage) ? 'Poster saved for this fight. Choose another image to replace it.' : fight ? 'No poster uploaded for this fight yet.' : 'Choose an open fight to enable upload.'}</small>
+      <small>{uploadBusy ? 'Uploading poster…' : fight && (uploadedPosters[id] || fight.fightPosterImage) ? 'Poster saved for this fight. Choose another image to replace it.' : fight ? 'The fight poster is shown below. Upload your own to replace it for affiliate kits.' : 'Choose an open fight to enable upload.'}</small>
       {uploadError && <p role="alert" className={styles.uploadError}>{uploadError}</p>}
     </div>
     {loading ? <p>Loading fights…</p> : !fight ? <p>No fights are open for entry right now. Publish one in the Fight Registry first.</p> : <>
       <div className={styles.layout}>
-        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing the fight poster…</p>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
-        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy}>{busy ? 'Preparing image…' : 'Download social poster PNG'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster uses this owner link. Affiliate posters use each affiliate’s own tracked link and QR in their personal kit. Include a clickable link in Facebook and X posts too.</small></div>
+        <div className={styles.preview}>{posterImage ? <img src={resolvePublicMediaUrl(posterImage)} alt={`Fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={resolvePublicMediaUrl(getFighterImage(fight, 'A'))} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={resolvePublicMediaUrl(getFighterImage(fight, 'B'))} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
+        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
       <div className={styles.affiliate}><div><strong>Send personal social posters to affiliates</strong><p>Each approved affiliate gets a ready-to-post kit with this fight design, their own tracked QR and link, and Facebook, Instagram, TikTok, and X captions. Review recipients before sending.</p></div><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
