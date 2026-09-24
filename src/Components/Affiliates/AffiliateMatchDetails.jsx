@@ -3,6 +3,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState, useRef }  from 'react';
 import AffiliateFightLeaderboard from './AffiliateFightLeaderboard';
+import ShareQrCode from '../Common/ShareQrCode';
 import { fetchMatches } from '../../Redux/matchSlice';
 import QRCode from 'qrcode'; 
 import dynamic from "next/dynamic";
@@ -631,6 +632,7 @@ const handleSave = async (blobUrl) => {
               <span><small>Public campaign URL</small><strong>{promotionUrl}</strong></span>
               <i><FaCopy /> Copy</i>
             </button>
+            <ShareQrCode url={promotionUrl} filename="fight-promotion-qr.png" />
           </section>
 
           <section className="affiliate-campaign-panel">

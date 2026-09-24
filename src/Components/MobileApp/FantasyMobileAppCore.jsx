@@ -4,6 +4,7 @@ import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
 import designTokens from './design-tokens.json';
 import { FMCoin } from '@/Components/Common/FMCoin';
+import ShareQrCode from '@/Components/Common/ShareQrCode';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
 const EVENT_POSTER_FILES = [
@@ -5407,6 +5408,10 @@ class FantasyMobileAppCore extends React.Component {
         },
           React.createElement('div', { style: { fontSize: 9, fontWeight: 900, color: '#f2b544', marginBottom: 4 } }, 'LEAGUE INVITE LINK · TAP TO COPY'),
           React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.7)', wordBreak: 'break-all' } }, kit.joinLink)
+        ),
+        (kit.fightLink || kit.joinLink) && React.createElement('div', { key: 'qr-codes', style: { display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 } },
+          kit.fightLink && React.createElement(ShareQrCode, { url: kit.fightLink, label: 'This fight', fileName: 'fantasy-mmadness-fight' }),
+          kit.joinLink && React.createElement(ShareQrCode, { url: kit.joinLink, label: 'Your league', fileName: 'fantasy-mmadness-league' })
         )
       ]);
     }

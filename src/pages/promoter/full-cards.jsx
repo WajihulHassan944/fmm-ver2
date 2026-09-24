@@ -64,7 +64,7 @@ export default function FullCardPromoterDesk() {
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const showQr = async (url) => { setQr(await QRCode.toDataURL(url, { width: 320, margin: 2, color: { dark: '#07101aff', light: '#ffffffff' } })); };
+  const showQr = async (url) => { try { setQr(await QRCode.toDataURL(url, { width: 900, margin: 4, color: { dark: '#07101aff', light: '#ffffffff' } })); } catch (_error) { setMessage('Could not create this QR code. Copy the link instead.'); } };
 
   return <div className="full-card-shell">
     <Head><title>Full Card Promotions | FANTASY MMADNESS</title></Head><AffiliateExperienceNav />
@@ -124,7 +124,7 @@ export default function FullCardPromoterDesk() {
         <div className="full-card-publish-bar"><div><strong>Scoring</strong><span>We handle the scoring. You build the fight card.</span></div><button disabled={saving} onClick={() => save(false)}><FaSave /> Save draft</button><button disabled={saving} className="is-primary" onClick={() => save(true)}>Publish Full Card</button></div>
         <section className="full-card-library"><header><p>MY FIGHT CARDS</p><h2>Manage & Share</h2></header><div className="full-card-grid">{cards.map((card) => <article key={card.id}><span>{card.status}</span>{card.eventPoster && <img src={card.eventPoster} alt="" />}<h3>{card.eventName}</h3><p>{card.bouts?.length || 0} fights · {new Date(card.eventDate).toLocaleDateString()}</p><div><button onClick={() => edit(card)}>Edit</button>{card.shareUrl && <><button onClick={() => navigator.clipboard.writeText(card.shareUrl)}><FaCopy /> Link</button><button onClick={() => showQr(card.shareUrl)}><FaQrcode /> QR</button><Link href={`/card/${card.slug}/${card.promoterCode}`}><FaShareAlt /> Open</Link></>}</div></article>)}</div></section>
       </>}
-      {qr && <div className="full-card-qr-modal" onClick={() => setQr('')}><div onClick={(e) => e.stopPropagation()}><h2>Full Card QR Code</h2><img src={qr} alt="Full Card QR code" /><button onClick={() => setQr('')}>Close</button></div></div>}
+      {qr && <div className="full-card-qr-modal" onClick={() => setQr('')}><div onClick={(e) => e.stopPropagation()}><h2>Full Card QR Code</h2><img src={qr} alt="Full Card QR code" /><p>Fans scan this to open your full card.</p><a href={qr} download="fantasy-mmadness-full-card.png" style={{ display: 'inline-block', padding: '10px 16px', marginRight: 12, borderRadius: 8, background: '#ffbd22', color: '#080d14', fontWeight: 800 }}>Download PNG</a><button onClick={() => setQr('')}>Close</button></div></div>}
     </main>
   </div>;
 }

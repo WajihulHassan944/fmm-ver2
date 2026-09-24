@@ -1,0 +1,8 @@
+.root { display: inline-block; max-width: 100%; vertical-align: top; }
+.toggle, .download { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 9px; padding: 10px 13px; border: 1px solid #ad75ed; background: #7140a7; color: #fff; font: inherit; font-weight: 800; cursor: pointer; text-decoration: none; }
+.toggle:disabled { opacity: .55; cursor: default; }
+.panel { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 15px; margin-top: 9px; background: #171b27; border: 1px solid #ad75ed; border-radius: 12px; max-width: 260px; color: #fff; text-align: center; box-shadow: 0 10px 30px #0005; }
+.panel img { background: white; border-radius: 8px; max-width: 100%; height: auto; }
+.panel p { font-size: 12px; line-height: 1.4; color: #d7dce7; margin: 0; }
+.download { background: #eeaa2f; border-color: #eeaa2f; color: #23150a; }
+.error { color: #ff9e9e; font-size: 12px; }
