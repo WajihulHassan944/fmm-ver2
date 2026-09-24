@@ -167,10 +167,9 @@ const AffiliateUsers = () => {
     const title = typeof router.query.launchTitle === 'string' ? router.query.launchTitle.slice(0, 150) : '';
     if (!router.isReady || !fightId || !affiliateUsers.length || preparedLaunch.current === fightId) return;
     preparedLaunch.current = fightId;
-    const fightUrl = `https://www.fantasymmadness.com/fight/${encodeURIComponent(fightId)}?play=1`;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`${title || 'A new fight'} is ready to promote | FANTASY MMADNESS`);
-    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Share this fight with your audience using YOUR OWN affiliate fight link and QR code from your account so eligible player activity is attributed to you.\n\nFight page: ${fightUrl}\n\nLog in to your affiliate account to get your tracked share link. When posting, tell your audience you may earn a commission.\n\nFANTASY MMADNESS`);
+    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Your personal fight link and QR are ready to share:\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE: {qrLink}\nOPEN YOUR READY-TO-POST KIT: {shareKit}\n\nFACEBOOK (copy and post):\n{facebookPost}\n\nINSTAGRAM (post the QR image and copy this caption):\n{instagramPost}\n\nX (copy and post):\n{xPost}\n\nYour fight link carries your affiliate attribution. Eligible participation is subject to your affiliate terms.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
     setBulkEmailOpen(true);
   }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers]);
@@ -208,7 +207,22 @@ const AffiliateUsers = () => {
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   const visibleEmailIds = filteredUsers.filter((user) => isValidEmail(user.email)).map((user) => user._id);
   const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedAffiliateIds.includes(id));
-  const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email));
+  const launchFightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
+  const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email) && (!launchFightId || user.verified));
+
+  const affiliateLaunchMessage = (recipient) => {
+    const affiliateId = String(recipient._id);
+    const fightLink = `https://www.fantasymmadness.com/fight/${encodeURIComponent(launchFightId)}?ref=${encodeURIComponent(affiliateId)}`;
+    const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
+    const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
+    const title = (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight').slice(0, 150);
+    return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
+      .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
+      .replaceAll('{shareKit}', shareKit)
+      .replaceAll('{facebookPost}', `I’m predicting ${title} on FANTASY MMADNESS. Join my fight league: ${fightLink} I may earn a commission from eligible participation.`)
+      .replaceAll('{instagramPost}', `Predict ${title} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. I may earn a commission from eligible participation.`)
+      .replaceAll('{xPost}', `Predict ${title} with me on FANTASY MMADNESS: ${fightLink} I may earn a commission from eligible participation.`);
+  };
 
   const toggleAffiliate = (id) => {
     setSelectedAffiliateIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
@@ -239,7 +253,7 @@ const AffiliateUsers = () => {
           body: JSON.stringify({
             email: recipient.email.trim(),
             subject: bulkSubject.trim(),
-            message: bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate'),
+            message: launchFightId ? affiliateLaunchMessage(recipient) : bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate'),
           }),
         });
         if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
@@ -485,9 +499,10 @@ const AffiliateUsers = () => {
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
             <div className="admin-modal-form-body admin-stacked-form">
-              <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. Use <strong>{'{firstName}'}</strong> to personalize each greeting.</p>
+              <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. {launchFightId ? 'Each approved affiliate receives their own tracked fight link, QR download, and ready-to-copy posts.' : <>Use <strong>{'{firstName}'}</strong> to personalize each greeting.</>}</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
+              {launchFightId && selectedRecipients.length > 0 && <details className="admin-bulk-email-note"><summary>Preview the first affiliate’s actual message</summary><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{affiliateLaunchMessage(selectedRecipients[0])}</pre></details>}
               <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
               {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.total} total</span></div>}
               {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors">{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}</div>}
