@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
-import { fetchPublicPredictionFights, PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
@@ -236,18 +236,18 @@ const AffiliateUsers = () => {
   const launchFightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
   const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email) && (!launchFightId || user.verified));
   const posterFight = posterFights.find((fight) => String(getFightId(fight)) === posterFightId);
-  const posterUrl = posterUrls[posterFightId] || posterFight?.fightPosterImage || '';
+  const posterUrl = posterUrls[posterFightId] || posterFight?.fightPosterImage || posterFight?.promotionBackground || posterFight?.fightPosterMobileImage || '';
 
   const uploadCampaignPoster = async (file, fightId = posterFightId) => {
     if (!file || !fightId) return;
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 8 * 1024 * 1024) {
-      toast.error('Choose a PNG, JPEG, or WebP image under 8 MB.'); return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 25 * 1024 * 1024) {
+      toast.error('Choose a PNG, JPEG, or WebP image under 25 MB.'); return;
     }
     setPosterUploading(true);
     try {
       const prepared = await prepareFightPosterUpload(file);
       const form = new FormData(); form.append('poster', prepared);
-      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/fights/${encodeURIComponent(fightId)}/social-poster`, { method: 'POST', headers: adminHeaders(), body: form });
+      const response = await fetch(`/api/admin/fights/${encodeURIComponent(fightId)}/social-poster`, { method: 'POST', headers: adminHeaders(), body: form });
       const result = await response.json().catch(() => ({}));
       if (requireFreshAdminSession(response)) return;
       if (!response.ok || !result.poster) throw new Error(result.message || `The poster could not be uploaded (HTTP ${response.status}).`);
@@ -446,7 +446,7 @@ const AffiliateUsers = () => {
             <label style={{ display: 'block', marginBottom: 14 }}>Upload your finished poster
               <input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0]); event.target.value = ''; }} style={{ display: 'block', marginTop: 6, maxWidth: '100%' }} />
             </label>
-            <p>{posterUploading ? 'Saving poster…' : posterUrl ? 'Poster saved for this fight. Affiliates will see it with their personal QR.' : 'No uploaded poster yet. The share kit can still make a poster from fighter photos.'}</p>
+            <p>{posterUploading ? 'Saving poster…' : (posterUrls[posterFightId] || posterFight?.fightPosterImage) ? 'Poster saved for this fight. Affiliates will see it with their personal QR.' : posterUrl ? 'Showing the fight poster. Upload your finished version to replace it.' : 'No fight poster yet. Upload your finished version above.'}</p>
             <button type="button" className="admin-action-primary" disabled={!posterFight || posterUploading} onClick={() => router.push({ pathname: '/administration/AffiliateUsers', query: { launchFight: posterFightId, launchTitle: `${getFighterName(posterFight, 'A')} vs ${getFighterName(posterFight, 'B')}` } })}>Prepare affiliate announcement →</button>
           </div>
           {posterUrl && <img src={resolvePublicMediaUrl(posterUrl)} alt="Saved fight poster artwork" style={{ width: 150, maxHeight: 210, objectFit: 'contain', borderRadius: 10 }} />}
