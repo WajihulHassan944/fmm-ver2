@@ -4,6 +4,12 @@
 .heading p, .affiliate p, .share small { color: #c6cbd8; line-height: 1.45; }
 .picker { display: grid; gap: 8px; margin: 20px 0; font-weight: 800; }
 .picker select, .share input, .templates textarea { width: 100%; background: #0e121c; border: 1px solid #525c72; border-radius: 8px; padding: 12px; color: white; font: inherit; box-sizing: border-box; }
+.uploadPanel { display: grid; gap: 9px; margin: 0 0 20px; border: 1px solid #a667d5; border-radius: 12px; background: #292039; padding: 18px; }
+.uploadPanel label { font-size: 20px; font-weight: 800; color: #ffbd4d; }
+.uploadPanel p { margin: 0; line-height: 1.45; color: #e0d8e8; }
+.uploadPanel input { max-width: 100%; font: inherit; }
+.uploadPanel input:disabled { opacity: .6; }
+.uploadPanel small { color: #d8cbe2; }
 .layout { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(300px, 1fr); gap: 16px; }
 .preview, .share, .templates article, .affiliate { background: #222637; border: 1px solid #444c62; border-radius: 12px; padding: 16px; min-width: 0; }
 .photos { background: #101520; display: flex; justify-content: center; align-items: center; height: 180px; overflow: hidden; border-radius: 8px; }
