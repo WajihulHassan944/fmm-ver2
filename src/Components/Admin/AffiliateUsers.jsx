@@ -62,6 +62,7 @@ const AffiliateUsers = () => {
   const [posterLoadError, setPosterLoadError] = useState('');
   const router = useRouter();
   const preparedLaunch = useRef('');
+  const bulkEmailBodyRef = useRef(null);
 
   const requireFreshAdminSession = (response) => {
     if (response.status !== 401 && response.status !== 403) return false;
@@ -327,6 +328,7 @@ const AffiliateUsers = () => {
       setBulkResults([...results]);
     }
     setBulkSending(false);
+    bulkEmailBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     if (failed) toast.warning(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed.`);
     else toast.success(`${sent} affiliate email${sent === 1 ? '' : 's'} sent.`);
   };
@@ -578,7 +580,8 @@ const AffiliateUsers = () => {
               <div><span>Affiliate communications</span><h3>Email {selectedRecipients.length} affiliates</h3></div>
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
-            <div className={`admin-modal-form-body admin-stacked-form ${modalStyles.body}`}>
+            <div ref={bulkEmailBodyRef} className={`admin-modal-form-body admin-stacked-form ${modalStyles.body}`}>
+              {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors" role="alert"><strong>{bulkResults.filter((result) => !result.ok).length} email failed</strong>{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}<button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds(bulkResults.filter((result) => !result.ok).map((result) => result.id))}>Select failed recipients to retry</button></div>}
               <div className={modalStyles.recipientPicker}>
                 <strong>Choose affiliates to email ({selectedRecipients.length} of {eligibleRecipients.length})</strong>
                 <div className={modalStyles.actions}>
@@ -601,7 +604,6 @@ const AffiliateUsers = () => {
               {launchFightId && selectedRecipients.length > 0 && <details className="admin-bulk-email-note"><summary>Preview the first affiliate’s actual message</summary><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{affiliateLaunchMessage(selectedRecipients[0])}</pre></details>}
               <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
               {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.total} total</span></div>}
-              {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors">{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}</div>}
             </div>
             <footer>
               <button type="button" className="admin-action-primary" disabled={bulkSending || posterUploading || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : `Send ${selectedRecipients.length} emails`}</button>
