@@ -79,11 +79,26 @@ const arenaLight = (ctx, x, color) => {
 };
 
 /** Produce the same portrait social poster for owner links and affiliate links. */
-export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, sport, event, date, url }) {
+export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, basePoster, sport, event, date, url }) {
   if (!url) throw new Error('A fight link is required.');
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH; canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
+  if (basePoster) {
+    const [art, qr] = await Promise.all([loadImage(basePoster), QRCode.toDataURL(url, { width: 420, margin: 3, errorCorrectionLevel: 'H' }).then(loadImage)]);
+    if (!art) throw new Error('The uploaded fight poster could not be loaded. Check its image URL.');
+    ctx.fillStyle = '#080b18'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    const scale = Math.min(WIDTH / art.width, 1080 / art.height);
+    ctx.drawImage(art, (WIDTH - art.width * scale) / 2, (1080 - art.height * scale) / 2, art.width * scale, art.height * scale);
+    ctx.fillStyle = '#10172c'; ctx.fillRect(0, 1080, WIDTH, 270);
+    ctx.fillStyle = '#ed263b'; ctx.fillRect(0, 1080, WIDTH, 7);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+    ctx.font = '900 54px Impact, Arial Black, sans-serif'; ctx.fillText('PREDICT THE FIGHT', 36, 1160, 810);
+    ctx.font = 'bold 27px Arial, sans-serif'; ctx.fillText('SCAN TO JOIN THIS LEAGUE', 36, 1210, 790);
+    ctx.font = 'bold 26px Arial, sans-serif'; ctx.fillText('FANTASYMMADNESS.COM', 36, 1290, 790);
+    if (qr) { ctx.fillStyle = '#fff'; ctx.fillRect(850, 1100, 200, 200); ctx.drawImage(qr, 860, 1110, 180, 180); }
+    return canvas.toDataURL('image/png');
+  }
   const background = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
   background.addColorStop(0, '#071c43'); background.addColorStop(.49, '#080b18'); background.addColorStop(1, '#420711');
   ctx.fillStyle = background; ctx.fillRect(0, 0, WIDTH, HEIGHT);
