@@ -7,6 +7,8 @@ import { affiliateHeaders, getAffiliateToken } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
+import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
+import { formatFightDate } from '@/Utils/fightExperience';
 import styles from '@/Components/Admin/FightLaunchDesk.module.css';
 
 export default function AffiliateFightLaunch() {
@@ -17,6 +19,8 @@ export default function AffiliateFightLaunch() {
   const [error, setError] = useState('');
   const [social, setSocial] = useState(null);
   const [socialBusy, setSocialBusy] = useState('');
+  const [poster, setPoster] = useState('');
+  const [posterBusy, setPosterBusy] = useState(false);
   const loadSocial = async () => {
     try {
       const response = await fetch(`${PUBLIC_API_BASE_URL}/api/affiliates/me/social/status?fightId=${encodeURIComponent(fightId)}`, { headers: affiliateHeaders() });
@@ -37,6 +41,37 @@ export default function AffiliateFightLaunch() {
       .finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
   }, [router.isReady, fightId]);
+
+  useEffect(() => {
+    const creative = kit?.creative;
+    if (!creative || !kit.fightLink) return;
+    let active = true;
+    setPoster('');
+    buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
+      fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
+      fighterAImage: creative.fighterAImage, fighterBImage: creative.fighterBImage,
+      sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
+      prizeCoins: creative.prizeCoins, entryCoins: creative.entryCoins, url: kit.fightLink })
+      .then((image) => { if (active) setPoster(image); })
+      .catch(() => { if (active) setPoster(''); });
+    return () => { active = false; };
+  }, [kit]);
+
+  const downloadPoster = async () => {
+    if (!kit?.fightLink || posterBusy) return;
+    setPosterBusy(true);
+    try {
+      const creative = kit.creative || {};
+      const image = poster || await buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
+        fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
+        fighterAImage: creative.fighterAImage, fighterBImage: creative.fighterBImage,
+        sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
+        prizeCoins: creative.prizeCoins, entryCoins: creative.entryCoins, url: kit.fightLink });
+      saveFightSocialPoster(image, fightId);
+      toast.success('Your fight poster is ready with your tracked QR.');
+    } catch { toast.error('Could not prepare your poster. Try downloading the QR separately.'); }
+    finally { setPosterBusy(false); }
+  };
 
   useEffect(() => {
     if (!router.isReady || !router.query.connection) return;
@@ -79,35 +114,37 @@ export default function AffiliateFightLaunch() {
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
   const copyByPlatform = affiliateFightPosts(name, link);
-  const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['X', copyByPlatform.x]] : [];
+  const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['TikTok', copyByPlatform.tiktok], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
     <Head><title>Your fight share kit | FANTASY MMADNESS</title></Head>
-    <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Connect an account to publish, or copy a post and download your QR. Your fight link is tied to your affiliate account.</p></div>
+    <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Download your ready-to-post fight poster with your own tracked QR, then share it with the caption for your social account.</p></div>
     {busy && <p>Preparing your personal fight link…</p>}
     {!busy && !getAffiliateToken() && <p><Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate to see your personal kit →</Link></p>}
     {error && <p role="alert">{error} <Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate →</Link></p>}
     {kit && <>
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>
-          {kit.creative?.fightPoster ? <img src={kit.creative.fightPoster} alt={name} style={{ width: '100%', maxHeight: 320, objectFit: 'contain' }} />
+          {poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} style={{ width: '100%', maxHeight: 460, objectFit: 'contain' }} /> : kit.creative?.fightPoster ? <img src={kit.creative.fightPoster} alt={name} style={{ width: '100%', maxHeight: 320, objectFit: 'contain' }} />
             : <div className={styles.photos}><img src={kit.creative?.fighterAImage} alt="First fighter" /><strong>VS</strong><img src={kit.creative?.fighterBImage} alt="Second fighter" /></div>}
           <h3>{name}</h3><p>Promoted by {kit.creative?.promotedBy || kit.attribution?.leagueName}</p>
         </div>
-        <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><div className={styles.buttons}><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Download your QR and test it before posting. Put the clickable fight link in Facebook and X posts, too.</small></div>
+        <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Download my fight poster PNG'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>The poster QR contains your personal link. Test it before posting, and include the clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{posts.map(([platform, value]) => { const key = platform.toLowerCase(); const account = social?.[key]; return <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
-        <p className={styles.socialStatus}>{account?.connected ? `Connected: ${account.label}` : account?.configured ? 'Account not connected' : 'Direct publishing awaiting platform setup'}{account?.status === 'published' ? ' · Published for this fight' : account?.status === 'review' ? ' · Check your account before retrying' : ''}</p>
-        <div className={styles.buttons}>
+        <p className={styles.socialStatus}>{platform === 'TikTok' ? 'Ready to post manually with your personal QR poster' : account?.connected ? `Connected: ${account.label}` : account?.configured ? 'Account not connected' : 'Direct publishing awaiting platform setup'}{account?.status === 'published' ? ' · Published for this fight' : account?.status === 'review' ? ' · Check your account before retrying' : ''}</p>
+        {platform !== 'TikTok' && <div className={styles.buttons}>
           <button type="button" disabled={!account?.configured || Boolean(socialBusy)} onClick={() => connect(key)}>{account?.connected ? 'Reconnect account' : 'Connect account'}</button>
           <button type="button" disabled={!account?.connected || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
-        </div>
+        </div>}
         <div className={styles.buttons} style={{ marginTop: 10 }}>
           {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} target="_blank" rel="noopener noreferrer">Open Facebook share</a>}
           {platform === 'Instagram' && <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Open Instagram</a>}
+          {platform === 'TikTok' && <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">Open TikTok</a>}
           {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post</a>}
         </div>
         {platform === 'Facebook' && <small>Connect a Facebook Page you manage. Publishing to personal profiles is unavailable. The manual share option opens Facebook with your tracked link.</small>}
-        {platform === 'Instagram' && <small>Connect an Instagram professional account linked to a Facebook Page. Publish uses the fight poster and caption; for a QR image, download and post your personal QR manually. Instagram caption links are not clickable.</small>}
+        {platform === 'Instagram' && <small>For the poster with your personal QR, download it above and upload it to Instagram with this caption. Direct Publish uses the fight’s existing public poster until image publishing is configured. Instagram caption links are not clickable.</small>}
+        {platform === 'TikTok' && <small>Download your fight poster above, upload it as a photo post in TikTok, and paste this caption. Put your tracked link in your bio where available; viewers can scan the QR in the post.</small>}
         {platform === 'X' && <small>Publish posts the prepared text and tracked link to your connected X account.</small>}
       </article>; })}</div>
     </>}

@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const png = await QRCode.toBuffer(link, { type: 'png', width: 900, margin: 4, errorCorrectionLevel: 'M' });
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.setHeader('Content-Disposition', `attachment; filename="fantasy-mmadness-fight-${fightId}.png"`);
+    res.setHeader('Content-Disposition', `${req.query.inline === '1' ? 'inline' : 'attachment'}; filename="fantasy-mmadness-fight-${fightId}.png"`);
     return res.status(200).send(png);
   } catch (error) {
     console.error('Fight QR generation failed:', error);

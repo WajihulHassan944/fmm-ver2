@@ -170,7 +170,7 @@ const AffiliateUsers = () => {
     preparedLaunch.current = fightId;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`FANTASY MMADNESS Owner Office: ${title || 'A new fight'} is ready to share`);
-    setBulkMessage(`From the FANTASY MMADNESS Owner Office\n\nHello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Your personal fight link and QR are ready to share:\n\n1. Open your ready-to-post kit: {shareKit}\n2. Copy the post for your social account, download your QR image, and publish it yourself.\n3. See your signups and estimated share on your Earnings page. Settled earnings become available for payout under your existing terms.\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE: {qrLink}\n\nFACEBOOK (copy and post):\n{facebookPost}\n\nINSTAGRAM (post the QR image and copy this caption):\n{instagramPost}\n\nX (copy and post):\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split. Your estimated share and credited earnings appear in your affiliate Earnings page after settlement.\n\nFANTASY MMADNESS`);
+    setBulkMessage(`From the FANTASY MMADNESS Owner Office\n\nHello {firstName},\n\n${title || 'A new fight'} is live for promotion. The owner has already created the fight and set its entry and prize amounts. You only need to share it with your audience.\n\n1. OPEN YOUR PERSONAL FIGHT POSTER: {shareKit}\n2. Click Download my fight poster PNG. The eye-catching poster has the fighters, the fight details and YOUR tracked QR.\n3. Copy the ready-made Facebook, Instagram, TikTok, or X caption and post the poster yourself. Include your clickable fight link wherever links work.\n4. Track your signups and estimated share on your Earnings page. Settled earnings become available for payout under your existing terms.\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE (separate download): {qrLink}\n\nFACEBOOK CAPTION:\n{facebookPost}\n\nINSTAGRAM CAPTION (upload your personal fight poster):\n{instagramPost}\n\nTIKTOK CAPTION (upload your personal fight poster):\n{tiktokPost}\n\nX CAPTION:\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
     setBulkEmailOpen(true);
   }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers]);
@@ -223,6 +223,7 @@ const AffiliateUsers = () => {
       .replaceAll('{shareKit}', shareKit)
       .replaceAll('{facebookPost}', posts.facebook)
       .replaceAll('{instagramPost}', posts.instagram)
+      .replaceAll('{tiktokPost}', posts.tiktok)
       .replaceAll('{xPost}', posts.x);
   };
 
@@ -256,6 +257,7 @@ const AffiliateUsers = () => {
             email: recipient.email.trim(),
             subject: bulkSubject.trim(),
             message: launchFightId ? affiliateLaunchMessage(recipient) : bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate'),
+            ...(launchFightId ? { launchFightId } : {}),
           }),
         });
         if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
