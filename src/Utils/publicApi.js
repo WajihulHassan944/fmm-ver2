@@ -776,6 +776,7 @@ const mergeFightDetailWithListRow = (detailFight = {}, listFight = {}) => {
     ...listFight,
     matchDescription: pickUsableString(listFight.matchDescription, detailFight.matchDescription),
     matchVideoUrl: pickUsableString(listFight.matchVideoUrl, detailFight.matchVideoUrl),
+    fightPosterImage: pickUsableString(listFight.fightPosterImage, detailFight.fightPosterImage),
     promotionBackground: pickUsableString(listFight.promotionBackground, detailFight.promotionBackground),
     BoxingMatch: detailFight.BoxingMatch || listFight.BoxingMatch,
     MMAMatch: detailFight.MMAMatch || listFight.MMAMatch,
