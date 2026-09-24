@@ -34,8 +34,8 @@ export default function AffiliateFightLaunch() {
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
   const posts = kit ? [
-    ['Facebook', `Affiliate post: I’m predicting ${name} on FANTASY MMADNESS. Join me: ${link} `],
-    ['Instagram', `Affiliate post: Predict ${name} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. `],
+    ['Facebook', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. I’m predicting ${name} on FANTASY MMADNESS. Join me: ${link} `],
+    ['Instagram', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. Predict ${name} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. `],
     ['X', `Predict ${name} with me on FANTASY MMADNESS: ${link} `],
   ] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>

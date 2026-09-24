@@ -238,6 +238,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         body: JSON.stringify({
           predictions: rounds,
           category: match.matchCategory,
+          ...(typeof router.query.ref === 'string' ? { referralAffiliateId: router.query.ref } : {}),
         }),
       });
 

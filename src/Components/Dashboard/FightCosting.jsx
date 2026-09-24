@@ -75,7 +75,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     const walletTokens = Number(user?.tokens || 0);
     if (walletTokens < tokenCost) {
       const currentPick = ['a', 'b'].includes(String(router.query?.pick || '').toLowerCase()) ? `&pick=${String(router.query.pick).toLowerCase()}` : '';
-      router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${currentPick}`)}`);
+      router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${currentPick}${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`)}`);
       return;
     }
     let active = true;
@@ -90,7 +90,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
         if (!active) return;
         if (response.ok) setShowPredictions(true);
         else if (response.status === 402 || /insufficient/i.test(String(data.message || ''))) {
-          router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1`)}`);
+          router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`)}`);
         } else setEntryStatus(data.message || 'Could not open this scorecard. Please try again.');
       })
       .catch(() => { if (active) setEntryStatus('The scorecard could not be opened. Please try again.'); })
@@ -112,7 +112,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
   const tokenCost = Number(match.matchTokens || 0);
   const walletTokens = Number(user?.tokens || 0);
   const enoughTokens = walletTokens >= tokenCost;
-  const openCoinCheckout = () => router.push(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1`)}`);
+  const openCoinCheckout = () => router.push(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`)}`);
 
   const handleMatchClick = async () => {
     if (submittedPrediction) {

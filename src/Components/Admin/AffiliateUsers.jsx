@@ -169,7 +169,7 @@ const AffiliateUsers = () => {
     preparedLaunch.current = fightId;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`${title || 'A new fight'} is ready to promote | FANTASY MMADNESS`);
-    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Your personal fight link and QR are ready to share:\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE: {qrLink}\nOPEN YOUR READY-TO-POST KIT: {shareKit}\n\nFACEBOOK (copy and post):\n{facebookPost}\n\nINSTAGRAM (post the QR image and copy this caption):\n{instagramPost}\n\nX (copy and post):\n{xPost}\n\nYour fight link carries your affiliate attribution. Owner-fight referral commissions have not yet been configured; sharing does not currently create a payout.\n\nFANTASY MMADNESS`);
+    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Your personal fight link and QR are ready to share:\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE: {qrLink}\nOPEN YOUR READY-TO-POST KIT: {shareKit}\n\nFACEBOOK (copy and post):\n{facebookPost}\n\nINSTAGRAM (post the QR image and copy this caption):\n{instagramPost}\n\nX (copy and post):\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split. Your estimated share and credited earnings appear in your affiliate Earnings page after settlement.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
     setBulkEmailOpen(true);
   }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers]);
@@ -219,8 +219,8 @@ const AffiliateUsers = () => {
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
-      .replaceAll('{facebookPost}', `Affiliate post: I’m predicting ${title} on FANTASY MMADNESS. Join me: ${fightLink} `)
-      .replaceAll('{instagramPost}', `Affiliate post: Predict ${title} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. `)
+      .replaceAll('{facebookPost}', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. I’m predicting ${title} on FANTASY MMADNESS. Join me: ${fightLink} `)
+      .replaceAll('{instagramPost}', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. Predict ${title} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. `)
       .replaceAll('{xPost}', `Predict ${title} with me on FANTASY MMADNESS: ${fightLink} `);
   };
 

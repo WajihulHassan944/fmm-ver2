@@ -102,10 +102,7 @@ const AffiliateMoney = () => {
         <div className="theme-container">
           <p className="xp-eyebrow"><FaCoins /> Promoter earnings</p>
           <h1>What your cards <span>actually paid.</span></h1>
-          <p className="affiliate-money-lede">
-            Every number here is read back out of the settlement ledger — not recalculated — so it
-            matches what was paid to the coin.
-          </p>
+          <p className="affiliate-money-lede">Credited earnings come from the settlement ledger. Live referral estimates are shown separately until the fight settles.</p>
         </div>
       </section>
 
@@ -127,7 +124,7 @@ const AffiliateMoney = () => {
             <article>
               <span>Lifetime earned</span>
               <strong>{loading ? '—' : coins(summary.lifetimeEarned)}</strong>
-              <small>Across {summary.fightsSettled || 0} settled cards</small>
+              <small>Across {summary.fightsSettled || 0} settled fights</small>
             </article>
             <article>
               <span>Paid out</span>
@@ -137,7 +134,7 @@ const AffiliateMoney = () => {
             <article>
               <span>Your split</span>
               <strong>{loading ? '—' : `${summary.splitPct || 50}%`}</strong>
-              <small>{coins(summary.totalEntrants)} entrants brought in</small>
+              <small>Owner fight referrals share platform proceeds; promoted cards keep their existing pot split.</small>
             </article>
           </section>
 
@@ -146,7 +143,8 @@ const AffiliateMoney = () => {
             <h2>Players your fight links brought in</h2>
             {referralError && <p role="alert">{referralError}</p>}
             {referrals && <><p>{coins(referrals.signups)} signups · {coins(referrals.verifiedSignups)} verified · {coins(referrals.participatingPlayers)} participating players · {coins(referrals.paidEntries)} paid entries</p>
-              <p>These are attributed player activities. Commission on FANTASY MMADNESS owned fights has not been configured or credited. The balance and earnings above reflect settled promoter cards only.</p></>}
+              <p><strong>{coins(referrals.earnedCoins)} FM COINS credited</strong> from settled owner fights. Open-fight amounts below are estimates; voided or refunded entries earn nothing.</p>
+              {(referrals.fights || []).map((fight) => <p key={fight.fightId}><strong>{fight.label}</strong> · {coins(fight.paidEntries)} paid entries · {fight.settled ? `${coins(fight.earnedCoins)} FM COINS credited` : fight.voided ? 'Voided — no commission' : `${coins(fight.estimatedCoins)} FM COINS estimated if settled`}</p>)}</>}
           </section>
 
           <section className="xp-page-section affiliate-money-payout">
@@ -183,9 +181,7 @@ const AffiliateMoney = () => {
             <p className="xp-eyebrow">Per fight</p>
             <h2>Earnings breakdown</h2>
             <p className="affiliate-money-section-note">
-              Your {summary.splitPct || 50}% splits in two: a fixed cut of the pot you promised, plus
-              half of everything the card took above it. The second number is the one that grows
-              when you fill the room.
+              Promoted card earnings include your fixed cut and surplus share. Owner-fight referrals split the platform’s proceeds attributable to your entries at the same {summary.splitPct || 50}% rate.
             </p>
 
             {loading ? (
@@ -196,6 +192,7 @@ const AffiliateMoney = () => {
                   <thead>
                     <tr>
                       <th>Fight</th>
+                      <th>Source</th>
                       <th>Entrants</th>
                       <th>Card revenue</th>
                       <th>Fixed cut</th>
@@ -210,6 +207,7 @@ const AffiliateMoney = () => {
                           <strong>{row.fightLabel || 'Fight'}</strong>
                           <small>{row.settledAt ? new Date(row.settledAt).toLocaleDateString() : ''}</small>
                         </td>
+                        <td>{row.source || 'Promoted card'}</td>
                         <td>{coins(row.entrants)}</td>
                         <td>{coins(row.revenue)}</td>
                         <td>{coins(row.fixedCut)}</td>
