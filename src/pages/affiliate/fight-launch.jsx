@@ -107,8 +107,9 @@ export default function AffiliateFightLaunch() {
   const publish = async (platform) => {
     setSocialBusy(platform);
     try {
+      if (platform !== 'x' && !poster) throw new Error('Wait for your personal poster to finish preparing before publishing.');
       const response = await fetch(`${PUBLIC_API_BASE_URL}/api/affiliates/me/social/${platform}/publish`, {
-        method: 'POST', headers: affiliateHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ fightId }),
+        method: 'POST', headers: affiliateHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ fightId, ...(platform === 'x' ? {} : { poster }) }),
       });
       const result = await response.json();
       if (!response.ok || result.status !== 'published') throw new Error(result.message || 'The platform did not confirm publication.');
@@ -145,7 +146,7 @@ export default function AffiliateFightLaunch() {
         <p className={styles.socialStatus}>{platform === 'TikTok' ? 'Ready to post manually with your personal QR poster' : account?.connected ? `Connected: ${account.label}` : account?.configured ? 'Account not connected' : 'Direct publishing awaiting platform setup'}{account?.status === 'published' ? ' · Published for this fight' : account?.status === 'review' ? ' · Check your account before retrying' : ''}</p>
         {platform !== 'TikTok' && <div className={styles.buttons}>
           <button type="button" disabled={!account?.configured || Boolean(socialBusy)} onClick={() => connect(key)}>{account?.connected ? 'Reconnect account' : 'Connect account'}</button>
-          <button type="button" disabled={!account?.connected || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
+          <button type="button" disabled={!account?.connected || (key !== 'x' && !poster) || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
         </div>}
         <div className={styles.buttons} style={{ marginTop: 10 }}>
           {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} target="_blank" rel="noopener noreferrer">Open Facebook share</a>}
@@ -154,7 +155,7 @@ export default function AffiliateFightLaunch() {
           {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post</a>}
         </div>
         {platform === 'Facebook' && <small>Connect a Facebook Page you manage. Publishing to personal profiles is unavailable. The manual share option opens Facebook with your tracked link.</small>}
-        {platform === 'Instagram' && <small>For the poster with your personal QR, download it above and upload it to Instagram with this caption. Direct Publish uses the fight’s existing public poster until image publishing is configured. Instagram caption links are not clickable.</small>}
+        {platform === 'Instagram' && <small>Publish sends the personal poster above with your tracked QR to your connected professional Instagram account. Instagram caption links are not clickable.</small>}
         {platform === 'TikTok' && <small>Download your fight poster above, upload it as a photo post in TikTok, and paste this caption. Put your tracked link in your bio where available; viewers can scan the QR in the post.</small>}
         {platform === 'X' && <small>Publish posts the prepared text and tracked link to your connected X account.</small>}
       </article>; })}</div>
