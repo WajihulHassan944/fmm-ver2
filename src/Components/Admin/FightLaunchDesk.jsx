@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { fetchPublicPredictionFights } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
@@ -22,6 +23,8 @@ export default function FightLaunchDesk() {
   const [error, setError] = useState('');
   const [poster, setPoster] = useState('');
   const [posterError, setPosterError] = useState('');
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadedPosters, setUploadedPosters] = useState({});
   const open = useMemo(() => getOpenFights(fights), [fights]);
   const fight = open.find((row) => String(getFightId(row)) === selected) || open[0];
   const id = fight ? String(getFightId(fight)) : '';
@@ -40,12 +43,29 @@ export default function FightLaunchDesk() {
     setPosterError('');
     buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
       fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
-      sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
+      basePoster: uploadedPosters[id] || fight.fightPosterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
       date: formatFightDate(fight), url })
       .then((image) => { if (active) setPoster(image); })
       .catch((err) => { if (active) setPosterError(err.message || 'Could not make this poster. Check the fighter photos.'); });
     return () => { active = false; };
-  }, [fight, url]);
+  }, [fight, url, uploadedPosters, id]);
+
+  const uploadPoster = async (file) => {
+    if (!file || !id) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 8 * 1024 * 1024) {
+      toast.error('Choose a PNG, JPEG, or WebP image under 8 MB.'); return;
+    }
+    setUploadBusy(true);
+    try {
+      const body = new FormData(); body.append('poster', file);
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/fights/${encodeURIComponent(id)}/social-poster`, { method: 'POST', headers: adminHeaders(), body });
+      const result = await response.json();
+      if (!response.ok || !result.poster) throw new Error(result.message || 'Could not upload the poster.');
+      setUploadedPosters((current) => ({ ...current, [id]: result.poster }));
+      toast.success('Poster saved. Each affiliate kit will add its own tracked QR.');
+    } catch (error) { toast.error(error.message); }
+    finally { setUploadBusy(false); }
+  };
 
   useEffect(() => {
     let live = true;
@@ -67,7 +87,7 @@ export default function FightLaunchDesk() {
     try {
       const image = poster || await buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
         fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
-        sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
+        basePoster: uploadedPosters[id] || fight.fightPosterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
         date: formatFightDate(fight), url });
       saveFightSocialPoster(image, id);
       toast.success('Fight post image downloaded.');
@@ -85,7 +105,7 @@ export default function FightLaunchDesk() {
     </label>
     {loading ? <p>Loading fights…</p> : !fight ? <p>No fights are open for entry right now. Publish one in the Fight Registry first.</p> : <>
       <div className={styles.layout}>
-        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing the fight poster…</p>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
+        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing the fight poster…</p>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link><label style={{ display: 'block', marginTop: 16 }}>Upload your finished poster for this fight<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} /></label><small>{uploadBusy ? 'Uploading poster…' : 'Your artwork is saved to this fight. Each affiliate receives a version with their own link and QR code.'}</small></div>
         <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy}>{busy ? 'Preparing image…' : 'Download social poster PNG'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster uses this owner link. Affiliate posters use each affiliate’s own tracked link and QR in their personal kit. Include a clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
