@@ -20,6 +20,7 @@ import {
   FaUserFriends,
 } from 'react-icons/fa';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
+import ShareQrCode from '@/Components/Common/ShareQrCode';
 import {
   ExperienceHero,
   ExperienceSectionHeading,
@@ -235,6 +236,7 @@ const AffiliateProfile = () => {
               <div className="affiliate-referral-url affiliate-referral-url-final">
                 <span>{referralUrl}</span>
                 <button type="button" onClick={copyToClipboard}>{copied ? <FaCheck /> : <FaCopy />} {copied ? 'Copied' : 'Copy link'}</button>
+                <ShareQrCode url={referralUrl} label="Your league invite" fileName="fantasy-mmadness-league-invite" />
               </div>
               <div className="affiliate-referral-actions">
                 <Link href="/affiliate-league" className="theme-btn theme-btn-secondary"><FaIdBadge /> Manage league</Link>

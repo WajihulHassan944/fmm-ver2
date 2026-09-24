@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { FaArrowLeft, FaBullhorn, FaCheck, FaCoins, FaCopy, FaExternalLinkAlt, FaEye, FaHistory, FaUsers } from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
+import ShareQrCode from '@/Components/Common/ShareQrCode';
 
 const safeNumber = (value) => Number(value || 0).toLocaleString();
 
@@ -77,6 +78,7 @@ export default function AffiliateAllFightPromotion() {
             <div><small>Universal promotion link</small><h2>Send fans to your complete fight room.</h2><p>{promoUrl}</p></div>
             <div className="affiliate-promotion-link-actions">
               <button type="button" onClick={copyPromotionUrl}>{copied ? <FaCheck /> : <FaCopy />}{copied ? 'Copied' : 'Copy link'}</button>
+              <ShareQrCode url={promoUrl} label="Your fight room" fileName="fantasy-mmadness-fight-room" />
               <a href={promoUrl} target="_blank" rel="noreferrer"><FaExternalLinkAlt /> Preview</a>
             </div>
           </section>
