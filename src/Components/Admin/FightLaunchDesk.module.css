@@ -14,7 +14,7 @@
 .preview a, .affiliate a { color: #ffbd4d; }
 .share { display: flex; flex-direction: column; gap: 10px; }
 .buttons { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
-.buttons button, .templates button, .affiliate a { border: 1px solid #a667d5; border-radius: 8px; padding: 10px 12px; background: #722da7; color: white; font: inherit; font-weight: bold; cursor: pointer; text-decoration: none; }
+.buttons button, .buttons a, .templates button, .affiliate a { border: 1px solid #a667d5; border-radius: 8px; padding: 10px 12px; background: #722da7; color: white; font: inherit; font-weight: bold; cursor: pointer; text-decoration: none; }
 .buttons button:disabled { opacity: .6; cursor: wait; }
 .templates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .templates article > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }

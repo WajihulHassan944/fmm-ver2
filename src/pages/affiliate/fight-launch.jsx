@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { affiliateHeaders, getAffiliateToken } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
+import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import styles from '@/Components/Admin/FightLaunchDesk.module.css';
 
 export default function AffiliateFightLaunch() {
@@ -33,11 +34,8 @@ export default function AffiliateFightLaunch() {
   };
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
-  const posts = kit ? [
-    ['Facebook', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. I’m predicting ${name} on FANTASY MMADNESS. Join me: ${link} `],
-    ['Instagram', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. Predict ${name} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. `],
-    ['X', `Predict ${name} with me on FANTASY MMADNESS: ${link} `],
-  ] : [];
+  const copyByPlatform = affiliateFightPosts(name, link);
+  const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
     <Head><title>Your fight share kit | FANTASY MMADNESS</title></Head>
     <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Copy a post, download your QR, and share it. Your fight link is tied to your affiliate account.</p></div>
@@ -53,7 +51,15 @@ export default function AffiliateFightLaunch() {
         </div>
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><div className={styles.buttons}><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Download your QR and test it before posting. Put the clickable fight link in Facebook and X posts, too.</small></div>
       </div>
-      <div className={styles.templates}>{posts.map(([platform, value]) => <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} /></article>)}</div>
+      <div className={styles.templates}>{posts.map(([platform, value]) => <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
+        <div className={styles.buttons} style={{ marginTop: 10 }}>
+          {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} target="_blank" rel="noopener noreferrer">Open Facebook share</a>}
+          {platform === 'Instagram' && <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Open Instagram</a>}
+          {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post</a>}
+        </div>
+        {platform === 'Facebook' && <small>Facebook opens with your tracked link. Copy and paste the caption if it is not filled in.</small>}
+        {platform === 'Instagram' && <small>Download your QR image, upload it in Instagram, and paste the caption. Add your tracked link to your bio if you mention it.</small>}
+      </article>)}</div>
     </>}
   </main>;
 }

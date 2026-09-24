@@ -36,7 +36,7 @@ export default function FightLaunchDesk() {
   const title = fight ? titleFor(fight) : '';
   const facebook = `Think you know ${title}? Predict the action, score points, and climb the FANTASY MMADNESS leaderboard. Play this fight: ${url}\n\nKnow a fight fan? Send this to them. #FantasyMMadness #CombatSports`;
   const instagram = `Think you know ${title}? Predict the action. Score points. Climb the leaderboard.\n\nScan the QR in this post or visit FANTASYMMADNESS.COM to play.\n\n#FantasyMMadness #FightNight #CombatSports`;
-  const xPost = `Think you know ${title}? Predict the action and climb the FANTASY MMADNESS leaderboard. Play: ${url}`;
+  const xPost = `Think you know ${title.slice(0, 65)}? Predict the action with FANTASY MMADNESS. Play: ${url} #FANTASYMMADNESS`;
   const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. Your personal fight link, QR image, and Facebook, Instagram, and X posts are ready. Open your fight kit and share with your audience. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split. Your estimated share and credited earnings appear in your affiliate Earnings page after settlement.\n\nEach affiliate receives their OWN tracked link and QR. Review your recipients before sending.`;
 
   useEffect(() => {

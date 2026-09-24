@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { fullCardRequest } from '@/Utils/fullCardApi';
 import UserDetails from './UserDetails';
 import { toast } from 'react-toastify';
@@ -168,8 +169,8 @@ const AffiliateUsers = () => {
     if (!router.isReady || !fightId || !affiliateUsers.length || preparedLaunch.current === fightId) return;
     preparedLaunch.current = fightId;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
-    setBulkSubject(`${title || 'A new fight'} is ready to promote | FANTASY MMADNESS`);
-    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Your personal fight link and QR are ready to share:\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE: {qrLink}\nOPEN YOUR READY-TO-POST KIT: {shareKit}\n\nFACEBOOK (copy and post):\n{facebookPost}\n\nINSTAGRAM (post the QR image and copy this caption):\n{instagramPost}\n\nX (copy and post):\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split. Your estimated share and credited earnings appear in your affiliate Earnings page after settlement.\n\nFANTASY MMADNESS`);
+    setBulkSubject(`FANTASY MMADNESS Owner Office: ${title || 'A new fight'} is ready to share`);
+    setBulkMessage(`From the FANTASY MMADNESS Owner Office\n\nHello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Your personal fight link and QR are ready to share:\n\n1. Open your ready-to-post kit: {shareKit}\n2. Copy the post for your social account, download your QR image, and publish it yourself.\n3. See your signups and estimated share on your Earnings page. Settled earnings become available for payout under your existing terms.\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE: {qrLink}\n\nFACEBOOK (copy and post):\n{facebookPost}\n\nINSTAGRAM (post the QR image and copy this caption):\n{instagramPost}\n\nX (copy and post):\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split. Your estimated share and credited earnings appear in your affiliate Earnings page after settlement.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
     setBulkEmailOpen(true);
   }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers]);
@@ -216,12 +217,13 @@ const AffiliateUsers = () => {
     const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight').slice(0, 150);
+    const posts = affiliateFightPosts(title, fightLink);
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
-      .replaceAll('{facebookPost}', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. I’m predicting ${title} on FANTASY MMADNESS. Join me: ${fightLink} `)
-      .replaceAll('{instagramPost}', `I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link. Predict ${title} with me on FANTASY MMADNESS. Scan my QR or use the fight link in my bio. `)
-      .replaceAll('{xPost}', `Predict ${title} with me on FANTASY MMADNESS: ${fightLink} `);
+      .replaceAll('{facebookPost}', posts.facebook)
+      .replaceAll('{instagramPost}', posts.instagram)
+      .replaceAll('{xPost}', posts.x);
   };
 
   const toggleAffiliate = (id) => {
