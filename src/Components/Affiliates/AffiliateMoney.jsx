@@ -20,6 +20,8 @@ const PAYOUT_ICON = {
 
 const AffiliateMoney = () => {
   const [data, setData] = useState(null);
+  const [referrals, setReferrals] = useState(null);
+  const [referralError, setReferralError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [requesting, setRequesting] = useState(false);
@@ -34,6 +36,12 @@ const AffiliateMoney = () => {
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Could not load your earnings.');
       setData(payload);
+      try {
+        const referralResponse = await fetch(`${API_BASE}/api/affiliates/me/fight-referrals`, { headers: affiliateHeaders() });
+        const referralPayload = await referralResponse.json().catch(() => ({}));
+        if (!referralResponse.ok) throw new Error(referralPayload.message || 'Referral counts are unavailable.');
+        setReferrals(referralPayload); setReferralError('');
+      } catch (referralFailure) { setReferrals(null); setReferralError(referralFailure.message); }
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -131,6 +139,14 @@ const AffiliateMoney = () => {
               <strong>{loading ? '—' : `${summary.splitPct || 50}%`}</strong>
               <small>{coins(summary.totalEntrants)} entrants brought in</small>
             </article>
+          </section>
+
+          <section className="xp-page-section">
+            <p className="xp-eyebrow">Owner fight referrals</p>
+            <h2>Players your fight links brought in</h2>
+            {referralError && <p role="alert">{referralError}</p>}
+            {referrals && <><p>{coins(referrals.signups)} signups · {coins(referrals.verifiedSignups)} verified · {coins(referrals.participatingPlayers)} participating players · {coins(referrals.paidEntries)} paid entries</p>
+              <p>These are attributed player activities. Commission on FANTASY MMADNESS owned fights has not been configured or credited. The balance and earnings above reflect settled promoter cards only.</p></>}
           </section>
 
           <section className="xp-page-section affiliate-money-payout">

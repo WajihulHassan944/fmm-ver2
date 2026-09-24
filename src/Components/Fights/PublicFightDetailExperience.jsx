@@ -200,8 +200,9 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
         query: {
           mode: 'signup',
           role: 'player',
-          next: `/fight/${matchId}?play=1`,
+          next: `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`,
           fight: matchId,
+          ...(router.query.ref ? { referrer: String(router.query.ref) } : {}),
         },
       });
       return;

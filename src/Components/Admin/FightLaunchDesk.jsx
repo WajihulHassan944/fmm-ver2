@@ -37,7 +37,7 @@ export default function FightLaunchDesk() {
   const facebook = `Think you know ${title}? Predict the action, score points, and climb the FANTASY MMADNESS leaderboard. Play this fight: ${url}\n\nKnow a fight fan? Send this to them. #FantasyMMadness #CombatSports`;
   const instagram = `Think you know ${title}? Predict the action. Score points. Climb the leaderboard.\n\nScan the QR in this post or visit FANTASYMMADNESS.COM to play.\n\n#FantasyMMadness #FightNight #CombatSports`;
   const xPost = `Think you know ${title}? Predict the action and climb the FANTASY MMADNESS leaderboard. Play: ${url}`;
-  const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. Your personal fight link, QR image, and Facebook, Instagram, and X posts are ready. Open your fight kit and share with your audience. Eligible participation is subject to your affiliate terms.\n\nEach affiliate receives their OWN tracked link and QR. Review your recipients before sending.`;
+  const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. Your personal fight link, QR image, and Facebook, Instagram, and X posts are ready. Open your fight kit and share with your audience. Owner-fight referral commissions have not yet been configured; sharing does not currently create a payout.\n\nEach affiliate receives their OWN tracked link and QR. Review your recipients before sending.`;
 
   useEffect(() => {
     let live = true;

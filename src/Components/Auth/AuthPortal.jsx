@@ -252,7 +252,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       await apiRequest('/register', {
         method: 'POST',
         token: null,
-        body: { ...playerForm, ...(referrerId ? { referrerId } : {}), recaptchaToken },
+        body: { ...playerForm, ...(referrerId ? { referrerId, referredFightId: queryValue(router.query.fight) } : {}), recaptchaToken },
       });
       setPlayerRegistration({ state: 'polling', email: playerForm.email });
       toast.success('Account created. Check your email to verify it.');
@@ -333,7 +333,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       const data = await apiRequest(endpoint, {
         method: 'POST',
         token: null,
-        body: { token: credential, ...(role === 'player' && referrerId ? { referrerId } : {}) },
+        body: { token: credential, ...(role === 'player' && referrerId ? { referrerId, referredFightId: queryValue(router.query.fight) } : {}) },
       });
       const accessToken = data?.accessToken || data?.token;
       if (!accessToken) throw new Error(data?.message || 'Google authentication failed');
