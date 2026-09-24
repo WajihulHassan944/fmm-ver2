@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
 import { fullCardRequest } from '@/Utils/fullCardApi';
 import UserDetails from './UserDetails';
@@ -49,6 +49,7 @@ const AffiliateUsers = () => {
   const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
   const [bulkResults, setBulkResults] = useState([]);
   const router = useRouter();
+  const preparedLaunch = useRef('');
 
   const requireFreshAdminSession = (response) => {
     if (response.status !== 401 && response.status !== 403) return false;
@@ -160,6 +161,19 @@ const AffiliateUsers = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
+    const title = typeof router.query.launchTitle === 'string' ? router.query.launchTitle.slice(0, 150) : '';
+    if (!router.isReady || !fightId || !affiliateUsers.length || preparedLaunch.current === fightId) return;
+    preparedLaunch.current = fightId;
+    const fightUrl = `https://www.fantasymmadness.com/fight/${encodeURIComponent(fightId)}?play=1`;
+    setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
+    setBulkSubject(`${title || 'A new fight'} is ready to promote | FANTASY MMADNESS`);
+    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is open on FANTASY MMADNESS. Share this fight with your audience using YOUR OWN affiliate fight link and QR code from your account so eligible player activity is attributed to you.\n\nFight page: ${fightUrl}\n\nLog in to your affiliate account to get your tracked share link. When posting, tell your audience you may earn a commission.\n\nFANTASY MMADNESS`);
+    setBulkResults([]);
+    setBulkEmailOpen(true);
+  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers]);
 
   useEffect(() => {
     const filtered = affiliateUsers.filter((user) => {
