@@ -65,6 +65,17 @@ const angledGlow = (ctx, x, y, color) => {
   ctx.fillStyle = glow; ctx.fillRect(0, 0, WIDTH, HEIGHT);
 };
 
+const arenaLight = (ctx, x, color) => {
+  const beam = ctx.createLinearGradient(x, 0, 540, 790);
+  beam.addColorStop(0, color);
+  beam.addColorStop(1, '#00000000');
+  ctx.fillStyle = beam;
+  ctx.beginPath(); ctx.moveTo(x - 58, 0); ctx.lineTo(x + 58, 0);
+  ctx.lineTo(540, 800); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.shadowColor = color; ctx.shadowBlur = 32;
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, 30, 12, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+};
+
 /** Produce the same portrait social poster for owner links and affiliate links. */
 export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, sport, event, date, url }) {
   if (!url) throw new Error('A fight link is required.');
@@ -75,6 +86,8 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
   background.addColorStop(0, '#071c43'); background.addColorStop(.49, '#080b18'); background.addColorStop(1, '#420711');
   ctx.fillStyle = background; ctx.fillRect(0, 0, WIDTH, HEIGHT);
   angledGlow(ctx, 140, 280, '#1466ff'); angledGlow(ctx, 995, 280, '#f51c38');
+  for (const x of [75, 205, 360]) arenaLight(ctx, x, '#367fff45');
+  for (const x of [720, 875, 1010]) arenaLight(ctx, x, '#ff344945');
   // Arena beams and vivid rings frame the two existing fighter photos.
   ctx.strokeStyle = '#ffffff26'; ctx.lineWidth = 2;
   for (let i = 0; i < 12; i += 1) {
@@ -85,6 +98,14 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     QRCode.toDataURL(url, { width: 420, margin: 3, errorCorrectionLevel: 'M' }).then(loadImage),
   ]);
   drawFighter(ctx, left, 'A'); drawFighter(ctx, right, 'B');
+  // Colored edges distinguish the two athletes while keeping their real photos intact.
+  ctx.save(); ctx.globalCompositeOperation = 'screen';
+  const blueEdge = ctx.createLinearGradient(0, 0, 540, 0);
+  blueEdge.addColorStop(0, '#004eee28'); blueEdge.addColorStop(1, '#004eee00');
+  ctx.fillStyle = blueEdge; ctx.fillRect(0, 160, 540, 680);
+  const redEdge = ctx.createLinearGradient(540, 0, 1080, 0);
+  redEdge.addColorStop(0, '#f20c2700'); redEdge.addColorStop(1, '#f20c2728');
+  ctx.fillStyle = redEdge; ctx.fillRect(540, 160, 540, 680); ctx.restore();
   const vignette = ctx.createLinearGradient(0, 540, 0, 940);
   vignette.addColorStop(0, '#080c1700'); vignette.addColorStop(.65, '#080b1aaa'); vignette.addColorStop(1, '#070a14');
   ctx.fillStyle = vignette; ctx.fillRect(0, 540, WIDTH, 400);
@@ -102,9 +123,11 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
   const names = [nameLines(fighterA), nameLines(fighterB)];
   names.forEach((lines, index) => {
     const x = index ? 810 : 270;
-    ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#000000'; ctx.shadowBlur = 12;
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = index ? '#ac0a19' : '#123daa';
+    ctx.lineWidth = 7; ctx.lineJoin = 'round'; ctx.shadowColor = '#000000'; ctx.shadowBlur = 18;
     lines.forEach((line, n) => {
       fitText(ctx, line, 490, 86, 30);
+      ctx.strokeText(line, x, 720 + n * 77, 490);
       ctx.fillText(line, x, 720 + n * 77, 490);
     });
     ctx.shadowBlur = 0;

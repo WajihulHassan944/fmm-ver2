@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { affiliateHeaders, getAffiliateToken } from '@/Utils/authFetch';
-import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { PUBLIC_API_BASE_URL, fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
-import { formatFightDate } from '@/Utils/fightExperience';
+import { formatFightDate, getFightId, getFighterImage } from '@/Utils/fightExperience';
 import styles from '@/Components/Admin/FightLaunchDesk.module.css';
 
 export default function AffiliateFightLaunch() {
@@ -21,6 +21,17 @@ export default function AffiliateFightLaunch() {
   const [socialBusy, setSocialBusy] = useState('');
   const [poster, setPoster] = useState('');
   const [posterBusy, setPosterBusy] = useState(false);
+  const [fightPhotos, setFightPhotos] = useState(null);
+  useEffect(() => {
+    if (!fightId) return;
+    let active = true;
+    setFightPhotos(null);
+    fetchPublicPredictionFights({ limit: 240 }).then((rows) => {
+      const fight = rows.find((row) => String(getFightId(row)) === fightId);
+      if (active && fight) setFightPhotos({ a: getFighterImage(fight, 'A'), b: getFighterImage(fight, 'B') });
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [fightId]);
   const loadSocial = async () => {
     try {
       const response = await fetch(`${PUBLIC_API_BASE_URL}/api/affiliates/me/social/status?fightId=${encodeURIComponent(fightId)}`, { headers: affiliateHeaders() });
@@ -49,13 +60,13 @@ export default function AffiliateFightLaunch() {
     setPoster('');
     buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
-      fighterAImage: creative.fighterAImage, fighterBImage: creative.fighterBImage,
+      fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
       sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
       url: kit.fightLink })
       .then((image) => { if (active) setPoster(image); })
       .catch(() => { if (active) setPoster(''); });
     return () => { active = false; };
-  }, [kit]);
+  }, [kit, fightPhotos]);
 
   const downloadPoster = async () => {
     if (!kit?.fightLink || posterBusy) return;
@@ -64,7 +75,7 @@ export default function AffiliateFightLaunch() {
       const creative = kit.creative || {};
       const image = poster || await buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
         fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
-        fighterAImage: creative.fighterAImage, fighterBImage: creative.fighterBImage,
+        fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
         sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
         url: kit.fightLink });
       saveFightSocialPoster(image, fightId);

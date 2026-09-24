@@ -47,7 +47,7 @@ export default function FightLaunchDesk() {
 
   useEffect(() => {
     let live = true;
-    fetchPublicPredictionFights({ limit: 240, hydrateImages: false })
+    fetchPublicPredictionFights({ limit: 240 })
       .then((rows) => { if (live) setFights(rows); })
       .catch((err) => { if (live) setError(err.message || 'Could not load open fights.'); })
       .finally(() => { if (live) setLoading(false); });
