@@ -8,6 +8,7 @@
 .uploadPanel label { font-size: 20px; font-weight: 800; color: #ffbd4d; }
 .uploadPanel p { margin: 0; line-height: 1.45; color: #e0d8e8; }
 .uploadPanel input { max-width: 100%; font: inherit; }
+.uploadPanel input[type='file']:not(:disabled) { cursor: pointer; }
 .uploadPanel input:disabled { opacity: .6; }
 .uploadPanel small { color: #d8cbe2; }
 .uploadPanel .uploadError { color: #ff9ea8; font-weight: 700; }
@@ -22,6 +23,8 @@
 .share { display: flex; flex-direction: column; gap: 10px; }
 .buttons { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
 .buttons button, .buttons a, .templates button, .affiliate a { border: 1px solid #a667d5; border-radius: 8px; padding: 10px 12px; background: #722da7; color: white; font: inherit; font-weight: bold; cursor: pointer; text-decoration: none; }
+.buttons button:not(:disabled):hover, .buttons a:hover { background: #9346c6; }
+.buttons button:not(:disabled), .buttons a { cursor: pointer !important; }
 .buttons button:disabled { opacity: .6; cursor: wait; }
 .templates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .templates article > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
