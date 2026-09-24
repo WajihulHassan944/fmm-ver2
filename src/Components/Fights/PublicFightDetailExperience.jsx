@@ -79,6 +79,7 @@ const mergeFightForDetail = (base = {}, candidate = {}) => {
     ...candidate,
     matchDescription: candidate.matchDescription || base.matchDescription,
     matchVideoUrl: candidate.matchVideoUrl || base.matchVideoUrl,
+    fightPosterImage: candidate.fightPosterImage || base.fightPosterImage,
     promotionBackground: candidate.promotionBackground || base.promotionBackground,
     BoxingMatch: candidate.BoxingMatch || base.BoxingMatch,
     MMAMatch: candidate.MMAMatch || base.MMAMatch,
@@ -137,7 +138,7 @@ const hasUserSubmittedFight = (fight, userId) => {
 };
 
 const getFightHeroImage = (fight) => (
-  fight?.promotionBackground || getFighterImage(fight, 'A', 0) || '/images/hero-fight-original.webp'
+  fight?.fightPosterImage || fight?.promotionBackground || getFighterImage(fight, 'A', 0) || '/images/hero-fight-original.webp'
 );
 
 const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = [] }) => {
