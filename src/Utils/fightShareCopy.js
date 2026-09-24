@@ -1,15 +1,19 @@
 // Keep email copy and the affiliate's live share kit identical.
-export const affiliateFightPosts = (title, link, league = 'my league', prize = 0) => {
+export const affiliateFightPosts = (title, link, league = 'my league', prize = 0, entryCoins = 0) => {
   const name = String(title || 'this fight').trim();
-  const shortName = name.slice(0, 65);
   const disclosure = 'I’m a FANTASY MMADNESS affiliate and may earn from eligible entries through my link.';
-  const invitation = `Join ${league} for ${name}. Predict what happens round by round, score points, and climb our leaderboard.${Number(prize) > 0 ? ` This fight has a ${Number(prize).toLocaleString()} FM prize pool.` : ''} Check the fight page for entry details and prize rules.`;
-  const xPrefix = `${disclosure} Join ${String(league).slice(0, 30)} for `;
-  const xSuffix = `. Predict rounds, score points${Number(prize) > 0 ? `, compete for ${Number(prize).toLocaleString()} FM` : ''}. ${link} #FANTASYMMADNESS`;
+  const reward = Number(entryCoins) > 0 && Number(prize) > 0
+    ? `Compete for a ${Number(prize).toLocaleString()} FM prize pool and eligible cash winnings.`
+    : Number(prize) > 0
+      ? `Compete for a ${Number(prize).toLocaleString()} FM prize pool and other rewards.`
+      : 'Compete for available prizes and bragging rights.';
+  const invitation = `I’m inviting you to join ${league} on FANTASY MMADNESS for ${name}. Make your picks before the fight and see how you stack up against other fans. ${reward} Open the fight page for entry details, eligibility, and prize rules.`;
+  const xPrefix = `Join ${String(league).slice(0, 30)} for `;
+  const xSuffix = `. Make your picks and compete for prizes where eligible. ${link} Affiliate link; I may earn from entries.`;
   return {
-    facebook: `${disclosure}\n\n${invitation}\n\nJoin here: ${link}\n\n#FANTASYMMADNESS #CombatSports #FightNight`,
-    instagram: `${disclosure}\n\n${invitation}\n\nScan my QR on the poster to join. Fight link in bio.\n\n#FANTASYMMADNESS #CombatSports #FightNight`,
-    tiktok: `${disclosure}\n\n${invitation}\n\nScan my QR on the poster to join the league.\n\n#FANTASYMMADNESS #FightTok #CombatSports`,
-    x: `${xPrefix}${shortName.slice(0, Math.max(0, 280 - xPrefix.length - xSuffix.length))}${xSuffix}`,
+    facebook: `${invitation}\n\nJoin my league through my personal fight link: ${link}\n\n${disclosure}\n#FANTASYMMADNESS #FightNight`,
+    instagram: `${invitation}\n\nScan my personal QR on the poster to join my league.\n\n${disclosure}\n#FANTASYMMADNESS #FightNight`,
+    tiktok: `${invitation}\n\nScan my personal QR to join and play with me.\n\n${disclosure}\n#FANTASYMMADNESS #FightTok`,
+    x: `${xPrefix}${name.slice(0, Math.max(0, 280 - xPrefix.length - xSuffix.length))}${xSuffix}`,
   };
 };

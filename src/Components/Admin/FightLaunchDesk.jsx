@@ -6,6 +6,7 @@ import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
+import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
 import styles from './FightLaunchDesk.module.css';
 
 const titleFor = (fight) => `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`;
@@ -24,16 +25,20 @@ export default function FightLaunchDesk() {
   const [poster, setPoster] = useState('');
   const [posterError, setPosterError] = useState('');
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [uploadedPosters, setUploadedPosters] = useState({});
   const open = useMemo(() => getOpenFights(fights), [fights]);
   const fight = open.find((row) => String(getFightId(row)) === selected) || open[0];
   const id = fight ? String(getFightId(fight)) : '';
   const url = id ? `https://www.fantasymmadness.com/fight/${encodeURIComponent(id)}?play=1&utm_source=owner&utm_medium=social&utm_campaign=fight_launch` : '';
   const title = fight ? titleFor(fight) : '';
-  const facebook = `Think you know ${title}? Predict the action, score points, and climb the FANTASY MMADNESS leaderboard. Play this fight: ${url}\n\nKnow a fight fan? Send this to them. #FantasyMMadness #CombatSports`;
-  const instagram = `Think you know ${title}? Predict the action. Score points. Climb the leaderboard.\n\nScan the QR in this post or visit FANTASYMMADNESS.COM to play.\n\n#FantasyMMadness #FightNight #CombatSports`;
-  const tiktok = `Think you can predict ${title}? Make your picks, score points, and climb the board. Scan the QR on this fight poster or visit FANTASYMMADNESS.COM to play.\n\n#FANTASYMMADNESS #FightTok #CombatSports #FightNight`;
-  const xPost = `Think you know ${title.slice(0, 65)}? Predict the action with FANTASY MMADNESS. Play: ${url} #FANTASYMMADNESS`;
+  const prizeLine = Number(fight?.matchTokens) > 0 && Number(fight?.pot) > 0
+    ? 'Compete for cash prizes where eligible. See the fight page for entry details, prize rules, and availability.'
+    : 'Play for prizes and bragging rights. See the fight page for the rewards and entry rules.';
+  const facebook = `Fight fans: join FANTASY MMADNESS for ${title}! Make your picks before the fight, follow the action, and see how you stack up. ${prizeLine}\n\nHave an affiliate invitation? Use their personal link so you can play with their league. Fight details: ${url}\n\n#FANTASYMMADNESS #FightNight`;
+  const instagram = `Join the fight for ${title}! Make your picks, follow the action, and compete with other fight fans. ${prizeLine}\n\nScan the poster QR to get started. If an affiliate invited you, use their personal link to join their league.\n\n#FANTASYMMADNESS #FightNight`;
+  const tiktok = `Join FANTASY MMADNESS for ${title}. Make your picks and compete with fight fans. ${prizeLine} Scan the poster QR to play, or use your affiliate's personal link to join their league. #FANTASYMMADNESS #FightTok`;
+  const xPost = `Join the fight: ${title.slice(0, 40)}. Make your picks and compete for prizes where eligible. Check rules and join: ${url}`;
   const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. The owner has already set up the fight and its economics. Open your personal kit to download the social poster with your tracked QR, then share it with your ready-made Facebook, Instagram, TikTok, or X caption. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds under the existing affiliate split. Review your recipients before sending.`;
 
   useEffect(() => {
@@ -44,7 +49,7 @@ export default function FightLaunchDesk() {
     buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
       fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
       basePoster: uploadedPosters[id] || fight.fightPosterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
-      date: formatFightDate(fight), url })
+      date: formatFightDate(fight), url, prize: fight.pot, entryCoins: fight.matchTokens })
       .then((image) => { if (active) setPoster(image); })
       .catch((err) => { if (active) setPosterError(err.message || 'Could not make this poster. Check the fighter photos.'); });
     return () => { active = false; };
@@ -56,14 +61,18 @@ export default function FightLaunchDesk() {
       toast.error('Choose a PNG, JPEG, or WebP image under 8 MB.'); return;
     }
     setUploadBusy(true);
+    setUploadError('');
     try {
-      const body = new FormData(); body.append('poster', file);
+      const prepared = await prepareFightPosterUpload(file);
+      const body = new FormData(); body.append('poster', prepared);
       const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/fights/${encodeURIComponent(id)}/social-poster`, { method: 'POST', headers: adminHeaders(), body });
-      const result = await response.json();
-      if (!response.ok || !result.poster) throw new Error(result.message || 'Could not upload the poster.');
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) throw new Error('Your admin session has expired. Sign in again, then retry the upload.');
+      if (response.status === 413) throw new Error('The poster is too large for the server. Try a smaller image.');
+      if (!response.ok || !result.poster) throw new Error(result.message || `Could not save the poster (HTTP ${response.status}).`);
       setUploadedPosters((current) => ({ ...current, [id]: result.poster }));
       toast.success('Poster saved. Each affiliate kit will add its own tracked QR.');
-    } catch (error) { toast.error(error.message); }
+    } catch (error) { setUploadError(error.message || 'Could not upload the poster.'); toast.error(error.message || 'Could not upload the poster.'); }
     finally { setUploadBusy(false); }
   };
 
@@ -88,7 +97,7 @@ export default function FightLaunchDesk() {
       const image = poster || await buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
         fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
         basePoster: uploadedPosters[id] || fight.fightPosterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
-        date: formatFightDate(fight), url });
+        date: formatFightDate(fight), url, prize: fight.pot, entryCoins: fight.matchTokens });
       saveFightSocialPoster(image, id);
       toast.success('Fight post image downloaded.');
     } catch (err) { toast.error(err.message || 'Could not save the post image. Check the fighter photos.'); }
@@ -108,6 +117,7 @@ export default function FightLaunchDesk() {
       <p>Select a fight above, then choose a PNG, JPEG, or WebP image (up to 8 MB). Each affiliate kit adds that affiliate's tracked link and QR code to your artwork.</p>
       <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp" disabled={!fight || uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} />
       <small>{uploadBusy ? 'Uploading poster…' : fight && (uploadedPosters[id] || fight.fightPosterImage) ? 'Poster saved for this fight. Choose another image to replace it.' : fight ? 'No poster uploaded for this fight yet.' : 'Choose an open fight to enable upload.'}</small>
+      {uploadError && <p role="alert" className={styles.uploadError}>{uploadError}</p>}
     </div>
     {loading ? <p>Loading fights…</p> : !fight ? <p>No fights are open for entry right now. Publish one in the Fight Registry first.</p> : <>
       <div className={styles.layout}>

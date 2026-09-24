@@ -64,7 +64,7 @@ export default function AffiliateFightLaunch() {
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
       fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
       basePoster: creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
-      url: kit.fightLink })
+      url: kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins })
       .then((image) => { if (active) setPoster(image); })
       .catch((err) => { if (active) setPosterError(err.message || 'Could not make your fight poster. Check the saved fighter photos.'); });
     return () => { active = false; };
@@ -79,7 +79,7 @@ export default function AffiliateFightLaunch() {
         fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
         fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
         basePoster: creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
-        url: kit.fightLink });
+        url: kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins });
       saveFightSocialPoster(image, fightId);
       toast.success('Your fight poster is ready with your tracked QR.');
     } catch (err) { toast.error(err.message || 'Could not prepare your poster. Check the saved fighter photos.'); }
@@ -127,7 +127,7 @@ export default function AffiliateFightLaunch() {
   };
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
-  const copyByPlatform = affiliateFightPosts(name, link, kit?.attribution?.leagueName || 'my league', kit?.creative?.prizeCoins);
+  const copyByPlatform = affiliateFightPosts(name, link, kit?.attribution?.leagueName || 'my league', kit?.creative?.prizeCoins, kit?.creative?.entryCoins);
   const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['TikTok', copyByPlatform.tiktok], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
     <Head><title>Your fight share kit | FANTASY MMADNESS</title></Head>

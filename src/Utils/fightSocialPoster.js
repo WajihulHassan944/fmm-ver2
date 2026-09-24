@@ -79,8 +79,10 @@ const arenaLight = (ctx, x, color) => {
 };
 
 /** Produce the same portrait social poster for owner links and affiliate links. */
-export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, basePoster, sport, event, date, url }) {
+export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, basePoster, sport, event, date, url, league, prize, entryCoins }) {
   if (!url) throw new Error('A fight link is required.');
+  const rewardsLine = Number(entryCoins) > 0 && Number(prize) > 0 ? 'CASH PRIZES WHERE ELIGIBLE' : 'COMPETE FOR PRIZES';
+  const joinLine = league ? `JOIN ${String(league).toUpperCase()}` : 'JOIN THE FIGHT';
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH; canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
@@ -93,9 +95,10 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     ctx.fillStyle = '#10172c'; ctx.fillRect(0, 1080, WIDTH, 270);
     ctx.fillStyle = '#ed263b'; ctx.fillRect(0, 1080, WIDTH, 7);
     ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
-    ctx.font = '900 54px Impact, Arial Black, sans-serif'; ctx.fillText('PREDICT THE FIGHT', 36, 1160, 810);
-    ctx.font = 'bold 27px Arial, sans-serif'; ctx.fillText('SCAN TO JOIN THIS LEAGUE', 36, 1210, 790);
-    ctx.font = 'bold 26px Arial, sans-serif'; ctx.fillText('FANTASYMMADNESS.COM', 36, 1290, 790);
+    ctx.font = '900 54px Impact, Arial Black, sans-serif'; ctx.fillText(joinLine, 36, 1155, 790);
+    ctx.font = 'bold 31px Arial, sans-serif'; ctx.fillText(rewardsLine, 36, 1205, 790);
+    ctx.font = 'bold 24px Arial, sans-serif'; ctx.fillText('MAKE YOUR PICKS • SCAN TO PLAY', 36, 1251, 790);
+    ctx.font = '20px Arial, sans-serif'; ctx.fillText('See fight page for entry details and prize rules.', 36, 1313, 790);
     if (qr) { ctx.fillStyle = '#fff'; ctx.fillRect(850, 1100, 200, 200); ctx.drawImage(qr, 860, 1110, 180, 180); }
     return canvas.toDataURL('image/png');
   }
@@ -158,20 +161,17 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
   ctx.fillText(String(event || labelForSport(sport)).toUpperCase(), 540, 940, 950);
   ctx.fillStyle = '#ffca51'; ctx.font = 'bold 33px Arial, sans-serif';
   ctx.fillText(String(date || 'FIGHT DATE TO BE ANNOUNCED').toUpperCase(), 540, 997, 950);
-  ctx.font = '900 81px Impact, Arial Black, sans-serif';
-  const predictWidth = ctx.measureText('PREDICT').width;
-  const restWidth = ctx.measureText(' THE FIGHT').width;
-  const phraseScale = Math.min(1, 842 / (predictWidth + restWidth));
-  ctx.save(); ctx.translate(540 - (predictWidth + restWidth) * phraseScale / 2, 1135); ctx.scale(phraseScale, 1);
-  ctx.fillStyle = '#ed263b'; ctx.fillText('PREDICT', predictWidth / 2, 0);
-  ctx.fillStyle = '#ffffff'; ctx.fillText(' THE FIGHT', predictWidth + restWidth / 2, 0);
-  ctx.restore();
+  ctx.fillStyle = '#ffffff'; fitText(ctx, joinLine, 820, 78, 34);
+  ctx.fillText(joinLine, 440, 1120, 820);
+  ctx.fillStyle = '#ffca51'; ctx.font = 'bold 37px Arial, sans-serif';
+  ctx.fillText(rewardsLine, 440, 1190, 820);
   if (qr) {
     ctx.fillStyle = '#fff'; ctx.fillRect(882, 1150, 171, 171);
     ctx.drawImage(qr, 891, 1159, 153, 153);
   }
   ctx.fillStyle = '#fff';
-  ctx.font = '900 34px Arial, sans-serif'; ctx.fillText('FANTASYMMADNESS.COM', 435, 1260, 800);
+  ctx.font = 'bold 27px Arial, sans-serif'; ctx.fillText('MAKE YOUR PICKS • SCAN TO PLAY', 435, 1250, 800);
+  ctx.font = '20px Arial, sans-serif'; ctx.fillText('See fight page for entry details and prize rules.', 435, 1300, 800);
   return canvas.toDataURL('image/png');
 }
 
