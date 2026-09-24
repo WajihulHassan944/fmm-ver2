@@ -127,7 +127,7 @@ const WeeklyFightGrowth = () => {
                 : <p>Checking existing drafts…</p>}
             <div className={styles.actions}>
               <Link href={`/administration/swarm?tab=artifacts&fightId=${encodeURIComponent(id)}`}>Review drafts</Link>
-              <button type="button" onClick={() => requestDraft({ id, fight })} disabled={busyId === id || !queue || Boolean(ready.length || queue.campaigns?.length)}><FaRobot /> {busyId === id ? 'Requesting…' : ready.length ? 'Drafts ready' : queue.campaigns?.length ? 'Campaign on record' : 'Prepare drafts'}</button>
+              <button type="button" onClick={() => requestDraft({ id, fight })} disabled={busyId === id || !queue || Boolean(ready.length || queue?.campaigns?.length)}><FaRobot /> {busyId === id ? 'Requesting…' : ready.length ? 'Drafts ready' : queue?.campaigns?.length ? 'Campaign on record' : 'Prepare drafts'}</button>
             </div>
           </section>
           <div className={styles.actions}><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank" rel="noopener noreferrer"><FaExternalLinkAlt /> View player page</Link><button type="button" onClick={() => copyLink(id)}><FaCopy /> Copy fight link</button></div>
