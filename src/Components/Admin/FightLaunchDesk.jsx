@@ -11,9 +11,9 @@ import styles from './FightLaunchDesk.module.css';
 const titleFor = (fight) => `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`;
 const getOpenFights = (rows) => (Array.isArray(rows) ? rows : []).filter((fight) => {
   const lock = fight.lockAt ? new Date(fight.lockAt).getTime() : parseFightDate(fight)?.getTime();
-  return getFightId(fight) && lock > Date.now() && fight.entryOpen !== false
+  return getFightId(fight) && (!Number.isFinite(lock) || lock > Date.now()) && fight.entryOpen !== false
     && !/draft|closed|finished|complete|cancel/.test(String(fight.matchStatus || fight.status || '').toLowerCase());
-}).sort((a, b) => (parseFightDate(a)?.getTime() || 0) - (parseFightDate(b)?.getTime() || 0));
+}).sort((a, b) => (parseFightDate(a)?.getTime() ?? Infinity) - (parseFightDate(b)?.getTime() ?? Infinity));
 
 export default function FightLaunchDesk() {
   const [fights, setFights] = useState([]);
@@ -103,9 +103,15 @@ export default function FightLaunchDesk() {
         {open.map((row) => <option key={getFightId(row)} value={getFightId(row)}>{titleFor(row)} · {formatFightDate(row)}</option>)}
       </select>
     </label>
+    <div className={styles.uploadPanel}>
+      <label htmlFor="fight-launch-poster">Upload your finished fight poster</label>
+      <p>Select a fight above, then choose a PNG, JPEG, or WebP image (up to 8 MB). Each affiliate kit adds that affiliate's tracked link and QR code to your artwork.</p>
+      <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp" disabled={!fight || uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} />
+      <small>{uploadBusy ? 'Uploading poster…' : fight && (uploadedPosters[id] || fight.fightPosterImage) ? 'Poster saved for this fight. Choose another image to replace it.' : fight ? 'No poster uploaded for this fight yet.' : 'Choose an open fight to enable upload.'}</small>
+    </div>
     {loading ? <p>Loading fights…</p> : !fight ? <p>No fights are open for entry right now. Publish one in the Fight Registry first.</p> : <>
       <div className={styles.layout}>
-        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing the fight poster…</p>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link><label style={{ display: 'block', marginTop: 16 }}>Upload your finished poster for this fight<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} /></label><small>{uploadBusy ? 'Uploading poster…' : 'Your artwork is saved to this fight. Each affiliate receives a version with their own link and QR code.'}</small></div>
+        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing the fight poster…</p>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
         <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy}>{busy ? 'Preparing image…' : 'Download social poster PNG'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster uses this owner link. Affiliate posters use each affiliate’s own tracked link and QR in their personal kit. Include a clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
