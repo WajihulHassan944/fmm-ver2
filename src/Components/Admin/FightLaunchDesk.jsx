@@ -39,7 +39,7 @@ export default function FightLaunchDesk() {
     buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
       fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
       sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
-      date: formatFightDate(fight), prizeCoins: fight.pot, entryCoins: fight.matchTokens, url })
+      date: formatFightDate(fight), url })
       .then((image) => { if (active) setPoster(image); })
       .catch(() => { if (active) setPoster(''); });
     return () => { active = false; };
@@ -66,7 +66,7 @@ export default function FightLaunchDesk() {
       const image = poster || await buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
         fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
         sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
-        date: formatFightDate(fight), prizeCoins: fight.pot, entryCoins: fight.matchTokens, url });
+        date: formatFightDate(fight), url });
       saveFightSocialPoster(image, id);
       toast.success('Fight post image downloaded.');
     } catch (_err) { toast.error('Could not save the post image. Download the QR separately and copy the link.'); }

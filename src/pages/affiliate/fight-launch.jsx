@@ -51,7 +51,7 @@ export default function AffiliateFightLaunch() {
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
       fighterAImage: creative.fighterAImage, fighterBImage: creative.fighterBImage,
       sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
-      prizeCoins: creative.prizeCoins, entryCoins: creative.entryCoins, url: kit.fightLink })
+      url: kit.fightLink })
       .then((image) => { if (active) setPoster(image); })
       .catch(() => { if (active) setPoster(''); });
     return () => { active = false; };
@@ -66,7 +66,7 @@ export default function AffiliateFightLaunch() {
         fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
         fighterAImage: creative.fighterAImage, fighterBImage: creative.fighterBImage,
         sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
-        prizeCoins: creative.prizeCoins, entryCoins: creative.entryCoins, url: kit.fightLink });
+        url: kit.fightLink });
       saveFightSocialPoster(image, fightId);
       toast.success('Your fight poster is ready with your tracked QR.');
     } catch { toast.error('Could not prepare your poster. Try downloading the QR separately.'); }
