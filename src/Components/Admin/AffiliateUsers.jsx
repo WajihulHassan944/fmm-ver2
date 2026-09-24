@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import modalStyles from './AffiliateEmailModal.module.css';
 import { adminHeaders } from '@/Utils/authFetch';
 import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
@@ -235,6 +237,11 @@ const AffiliateUsers = () => {
   const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedAffiliateIds.includes(id));
   const launchFightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
   const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email) && (!launchFightId || user.verified));
+  const eligibleRecipients = affiliateUsers.filter((user) => isValidEmail(user.email) && (!launchFightId || user.verified));
+  const selectFirstAffiliates = (count) => {
+    const amount = Math.min(eligibleRecipients.length, Math.max(0, Math.floor(Number(count) || 0)));
+    setSelectedAffiliateIds(eligibleRecipients.slice(0, amount).map((user) => user._id));
+  };
   const posterFight = posterFights.find((fight) => String(getFightId(fight)) === posterFightId);
   const posterUrl = posterUrls[posterFightId] || posterFight?.fightPosterImage || posterFight?.promotionBackground || posterFight?.fightPosterMobileImage || '';
 
@@ -564,14 +571,29 @@ const AffiliateUsers = () => {
         </div>
       </section>
 
-      {bulkEmailOpen && (
-        <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !bulkSending) setBulkEmailOpen(false); }}>
-          <section className="admin-inspector-modal admin-bulk-email-modal">
+      {bulkEmailOpen && typeof document !== 'undefined' && createPortal(
+        <div className={`admin-modal-backdrop ${modalStyles.backdrop}`} onMouseDown={(event) => { if (event.target === event.currentTarget && !bulkSending) setBulkEmailOpen(false); }}>
+          <section className={`admin-inspector-modal admin-bulk-email-modal ${modalStyles.modal}`} role="dialog" aria-modal="true" aria-label="Choose affiliates and send fight poster">
             <header>
               <div><span>Affiliate communications</span><h3>Email {selectedRecipients.length} affiliates</h3></div>
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
-            <div className="admin-modal-form-body admin-stacked-form">
+            <div className={`admin-modal-form-body admin-stacked-form ${modalStyles.body}`}>
+              <div className={modalStyles.recipientPicker}>
+                <strong>Choose affiliates to email ({selectedRecipients.length} of {eligibleRecipients.length})</strong>
+                <div className={modalStyles.actions}>
+                  <button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds(eligibleRecipients.map((user) => user._id))}>Select all</button>
+                  <button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds([])}>Clear selection</button>
+                  <label>Send to first <input type="number" min="0" max={eligibleRecipients.length} value={selectedRecipients.length} disabled={bulkSending} onChange={(event) => selectFirstAffiliates(event.target.value)} /> affiliates</label>
+                </div>
+                <div className={modalStyles.recipientList} aria-label="Available affiliates">
+                  {eligibleRecipients.map((user) => <label key={user._id} className={modalStyles.recipientRow}>
+                    <input type="checkbox" checked={selectedAffiliateIds.includes(user._id)} disabled={bulkSending} onChange={() => toggleAffiliate(user._id)} />
+                    <span>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.playerName || 'Affiliate'} <small>{user.email}</small></span>
+                  </label>)}
+                  {!eligibleRecipients.length && <p>No affiliates with an email address are available for this fight.</p>}
+                </div>
+              </div>
               {launchFightId && <div className="admin-bulk-email-note"><strong>Fight poster for these affiliates</strong><p>Upload your finished poster here before sending. Each affiliate’s kit will add their own tracked QR.</p><input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading || bulkSending} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0], launchFightId); event.target.value = ''; }} />{posterUploading ? <p>Saving poster…</p> : (posterUrls[launchFightId] || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.fightPosterImage) ? <p>Poster saved for this fight.</p> : <p>The kit will use fighter photos until you upload a poster.</p>}</div>}
               <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. {launchFightId ? 'Each approved affiliate receives their own tracked fight link, QR download, and ready-to-copy posts.' : <>Use <strong>{'{firstName}'}</strong> to personalize each greeting.</>}</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
@@ -586,7 +608,7 @@ const AffiliateUsers = () => {
               <button type="button" className="admin-action-secondary" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)}>Close</button>
             </footer>
           </section>
-        </div>
+        </div>, document.body
       )}
 
       {showDistinctionPopup && (
