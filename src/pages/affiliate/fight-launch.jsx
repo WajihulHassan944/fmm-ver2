@@ -20,6 +20,7 @@ export default function AffiliateFightLaunch() {
   const [social, setSocial] = useState(null);
   const [socialBusy, setSocialBusy] = useState('');
   const [poster, setPoster] = useState('');
+  const [posterError, setPosterError] = useState('');
   const [posterBusy, setPosterBusy] = useState(false);
   const [fightPhotos, setFightPhotos] = useState(null);
   useEffect(() => {
@@ -58,13 +59,14 @@ export default function AffiliateFightLaunch() {
     if (!creative || !kit.fightLink) return;
     let active = true;
     setPoster('');
+    setPosterError('');
     buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
       fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
       sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
       url: kit.fightLink })
       .then((image) => { if (active) setPoster(image); })
-      .catch(() => { if (active) setPoster(''); });
+      .catch((err) => { if (active) setPosterError(err.message || 'Could not make your fight poster. Check the saved fighter photos.'); });
     return () => { active = false; };
   }, [kit, fightPhotos]);
 
@@ -80,7 +82,7 @@ export default function AffiliateFightLaunch() {
         url: kit.fightLink });
       saveFightSocialPoster(image, fightId);
       toast.success('Your fight poster is ready with your tracked QR.');
-    } catch { toast.error('Could not prepare your poster. Try downloading the QR separately.'); }
+    } catch (err) { toast.error(err.message || 'Could not prepare your poster. Check the saved fighter photos.'); }
     finally { setPosterBusy(false); }
   };
 
@@ -136,8 +138,7 @@ export default function AffiliateFightLaunch() {
     {kit && <>
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>
-          {poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} style={{ width: '100%', maxHeight: 460, objectFit: 'contain' }} /> : kit.creative?.fightPoster ? <img src={kit.creative.fightPoster} alt={name} style={{ width: '100%', maxHeight: 320, objectFit: 'contain' }} />
-            : <div className={styles.photos}><img src={kit.creative?.fighterAImage} alt="First fighter" /><strong>VS</strong><img src={kit.creative?.fighterBImage} alt="Second fighter" /></div>}
+          {poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} style={{ width: '100%', maxHeight: 460, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing your personal fight poster…</p>}
           <h3>{name}</h3><p>Promoted by {kit.creative?.promotedBy || kit.attribution?.leagueName}</p>
         </div>
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Download my fight poster PNG'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>The poster QR contains your personal link. Test it before posting, and include the clickable link in Facebook and X posts too.</small></div>

@@ -21,6 +21,7 @@ export default function FightLaunchDesk() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [poster, setPoster] = useState('');
+  const [posterError, setPosterError] = useState('');
   const open = useMemo(() => getOpenFights(fights), [fights]);
   const fight = open.find((row) => String(getFightId(row)) === selected) || open[0];
   const id = fight ? String(getFightId(fight)) : '';
@@ -36,12 +37,13 @@ export default function FightLaunchDesk() {
     if (!fight || !url) { setPoster(''); return; }
     let active = true;
     setPoster('');
+    setPosterError('');
     buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
       fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
       sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
       date: formatFightDate(fight), url })
       .then((image) => { if (active) setPoster(image); })
-      .catch(() => { if (active) setPoster(''); });
+      .catch((err) => { if (active) setPosterError(err.message || 'Could not make this poster. Check the fighter photos.'); });
     return () => { active = false; };
   }, [fight, url]);
 
@@ -69,7 +71,7 @@ export default function FightLaunchDesk() {
         date: formatFightDate(fight), url });
       saveFightSocialPoster(image, id);
       toast.success('Fight post image downloaded.');
-    } catch (_err) { toast.error('Could not save the post image. Download the QR separately and copy the link.'); }
+    } catch (err) { toast.error(err.message || 'Could not save the post image. Check the fighter photos.'); }
     finally { setBusy(false); }
   };
 
@@ -83,7 +85,7 @@ export default function FightLaunchDesk() {
     </label>
     {loading ? <p>Loading fights…</p> : !fight ? <p>No fights are open for entry right now. Publish one in the Fight Registry first.</p> : <>
       <div className={styles.layout}>
-        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={getFighterImage(fight, 'A')} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={getFighterImage(fight, 'B')} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
+        <div className={styles.preview}>{poster ? <img src={poster} alt={`Social fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing the fight poster…</p>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
         <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy}>{busy ? 'Preparing image…' : 'Download social poster PNG'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster uses this owner link. Affiliate posters use each affiliate’s own tracked link and QR in their personal kit. Include a clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
