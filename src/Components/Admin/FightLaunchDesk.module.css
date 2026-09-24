@@ -1,0 +1,31 @@
+.desk { margin: 0 0 32px; border: 1px solid #785098; border-radius: 18px; background: #171825; padding: 24px; color: #f8f8fc; }
+.heading span { color: #ffb83b; font-size: 12px; font-weight: 900; letter-spacing: .12em; }
+.heading h2 { font: 36px Impact, sans-serif; text-transform: uppercase; margin: 8px 0; }
+.heading p, .affiliate p, .share small { color: #c6cbd8; line-height: 1.45; }
+.picker { display: grid; gap: 8px; margin: 20px 0; font-weight: 800; }
+.picker select, .share input, .templates textarea { width: 100%; background: #0e121c; border: 1px solid #525c72; border-radius: 8px; padding: 12px; color: white; font: inherit; box-sizing: border-box; }
+.layout { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(300px, 1fr); gap: 16px; }
+.preview, .share, .templates article, .affiliate { background: #222637; border: 1px solid #444c62; border-radius: 12px; padding: 16px; min-width: 0; }
+.photos { background: #101520; display: flex; justify-content: center; align-items: center; height: 180px; overflow: hidden; border-radius: 8px; }
+.photos img { width: 42%; height: 100%; object-fit: contain; object-position: center bottom; }
+.photos strong { color: #ffb83b; }
+.preview h3 { margin: 13px 0 4px; font-size: 22px; }
+.preview p { margin: 0 0 12px; color: #c6cbd8; }
+.preview a, .affiliate a { color: #ffbd4d; }
+.share { display: flex; flex-direction: column; gap: 10px; }
+.buttons { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.buttons button, .buttons a, .templates button, .affiliate a { border: 1px solid #a667d5; border-radius: 8px; padding: 10px 12px; background: #722da7; color: white; font: inherit; font-weight: bold; cursor: pointer; text-decoration: none; }
+.buttons button:disabled { opacity: .6; cursor: wait; }
+.templates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.templates article > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.templates h3 { margin: 0; }
+.templates textarea { resize: vertical; min-height: 150px; font-size: 13px; line-height: 1.5; }
+.affiliate { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-top: 16px; }
+.affiliate strong { font-size: 18px; }
+.affiliate p { margin: 6px 0 0; }
+.affiliate a { flex: 0 0 auto; }
+.message { margin-top: 15px; color: #d9d3e5; }
+.message summary { cursor: pointer; }
+.message pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 inherit; }
+@media (max-width: 850px) { .layout, .templates { grid-template-columns: 1fr; } .affiliate { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 600px) { .desk { padding: 16px; } .heading h2 { font-size: 28px; } }

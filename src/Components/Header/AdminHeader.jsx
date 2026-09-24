@@ -104,7 +104,7 @@ const navigationGroups = [
     label: 'Automation & social',
     icon: FaRobot,
     items: [
-      { label: 'This week’s fights', href: '/administration/growth', icon: FaChartBar },
+      { label: 'Fight Launch Desk', href: '/administration/growth', icon: FaChartBar },
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
       { label: 'July 10K growth', href: '/administration/july-growth', icon: FaBolt },
       { label: 'SEO growth center', href: '/administration/seo-growth', icon: FaSearch },
