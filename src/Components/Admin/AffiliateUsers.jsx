@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { fetchPublicPredictionFights, PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { fullCardRequest } from '@/Utils/fullCardApi';
 import UserDetails from './UserDetails';
@@ -49,6 +51,12 @@ const AffiliateUsers = () => {
   const [bulkSending, setBulkSending] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
   const [bulkResults, setBulkResults] = useState([]);
+  const [posterFights, setPosterFights] = useState([]);
+  const [posterFightId, setPosterFightId] = useState('');
+  const [posterUrls, setPosterUrls] = useState({});
+  const [posterUploading, setPosterUploading] = useState(false);
+  const [posterLoading, setPosterLoading] = useState(true);
+  const [posterLoadError, setPosterLoadError] = useState('');
   const router = useRouter();
   const preparedLaunch = useRef('');
 
@@ -164,6 +172,22 @@ const AffiliateUsers = () => {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    fetchPublicPredictionFights({ limit: 240 }).then((fights) => {
+      if (!active) return;
+      const available = fights.filter((fight) => getFightId(fight) && !/draft|closed|finished|complete|cancel/i.test(String(fight.matchStatus || fight.status || '')));
+      setPosterFights(available);
+      setPosterFightId((current) => current || String(router.query.launchFight || getFightId(available[0]) || ''));
+    }).catch((error) => { if (active) setPosterLoadError(error.message || 'Could not load fights.'); })
+      .finally(() => { if (active) setPosterLoading(false); });
+    return () => { active = false; };
+  }, [router.query.launchFight]);
+
+  useEffect(() => {
+    if (typeof router.query.launchFight === 'string') setPosterFightId(router.query.launchFight);
+  }, [router.query.launchFight]);
+
+  useEffect(() => {
     const fightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
     const title = typeof router.query.launchTitle === 'string' ? router.query.launchTitle.slice(0, 150) : '';
     if (!router.isReady || !fightId || !affiliateUsers.length || preparedLaunch.current === fightId) return;
@@ -210,6 +234,25 @@ const AffiliateUsers = () => {
   const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedAffiliateIds.includes(id));
   const launchFightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
   const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email) && (!launchFightId || user.verified));
+  const posterFight = posterFights.find((fight) => String(getFightId(fight)) === posterFightId);
+  const posterUrl = posterUrls[posterFightId] || posterFight?.fightPosterImage || '';
+
+  const uploadCampaignPoster = async (file, fightId = posterFightId) => {
+    if (!file || !fightId) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 8 * 1024 * 1024) {
+      toast.error('Choose a PNG, JPEG, or WebP image under 8 MB.'); return;
+    }
+    setPosterUploading(true);
+    try {
+      const form = new FormData(); form.append('poster', file);
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/fights/${encodeURIComponent(fightId)}/social-poster`, { method: 'POST', headers: adminHeaders(), body: form });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.poster) throw new Error(result.message || 'The poster could not be uploaded.');
+      setPosterUrls((current) => ({ ...current, [fightId]: result.poster }));
+      toast.success('Fight poster saved. Each affiliate gets their own tracked QR version.');
+    } catch (error) { toast.error(error.message || 'The poster could not be uploaded.'); }
+    finally { setPosterUploading(false); }
+  };
 
   const affiliateLaunchMessage = (recipient) => {
     const affiliateId = String(recipient._id);
@@ -384,6 +427,28 @@ const AffiliateUsers = () => {
         </div>
       </section>
 
+      <section className="admin-table-panel" aria-label="Fight posters for affiliates" style={{ padding: 22, marginBottom: 22 }}>
+        <span className="admin-page-eyebrow">Fight campaigns</span>
+        <h2 style={{ margin: '8px 0' }}>Fight posters for affiliates</h2>
+        <p>Choose the fight and upload the poster you already made. We save it to that fight. Each affiliate’s share kit adds their own tracked link and QR code.</p>
+        {posterLoadError && <p role="alert">{posterLoadError}</p>}
+        {posterLoading ? <p>Loading fights…</p> : posterFights.length === 0 ? <p>No available fights found. Publish a fight in the Fight Registry first.</p> : <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'start', gap: 20 }}>
+          <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+            <label style={{ display: 'block', marginBottom: 14 }}>Choose a fight
+              <select value={posterFightId} onChange={(event) => setPosterFightId(event.target.value)} style={{ display: 'block', width: '100%', marginTop: 6 }}>
+                {posterFights.map((fight) => <option key={getFightId(fight)} value={getFightId(fight)}>{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')} · {formatFightDate(fight)}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'block', marginBottom: 14 }}>Upload your finished poster
+              <input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0]); event.target.value = ''; }} style={{ display: 'block', marginTop: 6, maxWidth: '100%' }} />
+            </label>
+            <p>{posterUploading ? 'Saving poster…' : posterUrl ? 'Poster saved for this fight. Affiliates will see it with their personal QR.' : 'No uploaded poster yet. The share kit can still make a poster from fighter photos.'}</p>
+            <button type="button" className="admin-action-primary" disabled={!posterFight || posterUploading} onClick={() => router.push({ pathname: '/administration/AffiliateUsers', query: { launchFight: posterFightId, launchTitle: `${getFighterName(posterFight, 'A')} vs ${getFighterName(posterFight, 'B')}` } })}>Prepare affiliate announcement →</button>
+          </div>
+          {posterUrl && <img src={resolvePublicMediaUrl(posterUrl)} alt="Saved fight poster artwork" style={{ width: 150, maxHeight: 210, objectFit: 'contain', borderRadius: 10 }} />}
+        </div>}
+      </section>
+
       <section className="admin-invitation-paths" aria-label="Pre-approved invitation tools">
         <article>
           <span>Affiliate access</span>
@@ -503,6 +568,7 @@ const AffiliateUsers = () => {
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
             <div className="admin-modal-form-body admin-stacked-form">
+              {launchFightId && <div className="admin-bulk-email-note"><strong>Fight poster for these affiliates</strong><p>Upload your finished poster here before sending. Each affiliate’s kit will add their own tracked QR.</p><input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading || bulkSending} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0], launchFightId); event.target.value = ''; }} />{posterUploading ? <p>Saving poster…</p> : (posterUrls[launchFightId] || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.fightPosterImage) ? <p>Poster saved for this fight.</p> : <p>The kit will use fighter photos until you upload a poster.</p>}</div>}
               <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. {launchFightId ? 'Each approved affiliate receives their own tracked fight link, QR download, and ready-to-copy posts.' : <>Use <strong>{'{firstName}'}</strong> to personalize each greeting.</>}</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
@@ -512,7 +578,7 @@ const AffiliateUsers = () => {
               {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors">{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}</div>}
             </div>
             <footer>
-              <button type="button" className="admin-action-primary" disabled={bulkSending || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : `Send ${selectedRecipients.length} emails`}</button>
+              <button type="button" className="admin-action-primary" disabled={bulkSending || posterUploading || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : `Send ${selectedRecipients.length} emails`}</button>
               <button type="button" className="admin-action-secondary" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)}>Close</button>
             </footer>
           </section>
