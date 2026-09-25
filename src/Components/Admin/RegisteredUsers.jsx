@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
@@ -189,14 +190,14 @@ const RegisteredUsers = () => {
     if (!isValidEmail(user.email) || resendingId) return;
     setResendingId(user._id);
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/resend-verification', {
+      const response = await fetch(buildPublicApiUrl('/resend-verification'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email.trim() }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || 'Could not send verification email.');
-      toast.success(`Verification email requested for ${user.email}. Ask them to check their inbox and spam folder.`);
+      toast.success(`Resend requested for ${user.email}. Ask them to check their inbox and spam folder.`);
     } catch (error) {
       toast.error(error.message || 'Could not send verification email.');
     } finally {
@@ -319,7 +320,7 @@ const RegisteredUsers = () => {
                   <td>
                     <div className="admin-row-actions">
                       <button type="button" title="View user" onClick={() => handleView(user)}><FaEye /></button>
-                      {!user.verified && isValidEmail(user.email) && <button type="button" title="Resend verification email" aria-label={`Resend verification email to ${user.email}`} disabled={Boolean(resendingId)} onClick={() => resendVerification(user)}><FaEnvelope /></button>}
+                      {!user.verified && isValidEmail(user.email) && <button type="button" title="Resend verification email" aria-label={`Resend verification email to ${user.email}`} disabled={Boolean(resendingId)} onClick={() => resendVerification(user)}><FaEnvelope /> {resendingId === user._id ? 'Sending…' : 'Resend'}</button>}
                       <button type="button" className="is-danger" title="Delete user" onClick={() => handleDelete(user._id)}><FaTrash /></button>
                     </div>
                   </td>
