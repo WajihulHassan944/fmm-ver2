@@ -6,8 +6,14 @@ export default function FightDetailPage({ fight, relatedBlogs }) {
   return <PublicFightDetailExperience fight={fight || {}} relatedBlogs={relatedBlogs || []} />;
 }
 
-export const getServerSideProps = async ({ params, res }) => {
+export const getServerSideProps = async ({ params, query, res }) => {
   try {
+    // Older affiliate posters and Facebook posts already point to the fight
+    // URL. Bring those visitors to the affiliate's league first. Entry links
+    // that explicitly request play and links from the league keep their flow.
+    if (/^[a-f\d]{24}$/i.test(String(query?.ref || '')) && String(query?.play || '') !== '1' && String(query?.fromLeague || '') !== '1') {
+      return { redirect: { destination: `/league/${encodeURIComponent(query.ref)}?fightId=${encodeURIComponent(params.matchId)}`, permanent: false } };
+    }
     res?.setHeader?.('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     const fight = normalizePublicFightRow(await fetchPublicFightById(params?.matchId));
     if (!fight) return { notFound: true };

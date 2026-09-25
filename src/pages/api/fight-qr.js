@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'A valid fight and affiliate are required.' });
   }
   try {
-    const link = `https://www.fantasymmadness.com/fight/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}`;
+    const link = `https://www.fantasymmadness.com/league/${encodeURIComponent(affiliateId)}?fightId=${encodeURIComponent(fightId)}`;
     const png = await QRCode.toBuffer(link, { type: 'png', width: 900, margin: 4, errorCorrectionLevel: 'M' });
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=3600');
