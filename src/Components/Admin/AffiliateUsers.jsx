@@ -65,6 +65,7 @@ const AffiliateUsers = () => {
   const [launchRequested, setLaunchRequested] = useState(0);
   const router = useRouter();
   const preparedLaunch = useRef('');
+  const launchSelectionPending = useRef(false);
   const bulkEmailBodyRef = useRef(null);
 
   const requireFreshAdminSession = (response) => {
@@ -200,13 +201,20 @@ const AffiliateUsers = () => {
     const requestKey = `${fightId}:${launchRequested}`;
     if (!router.isReady || !fightId || (!affiliateUsers.length && !manualLaunch) || preparedLaunch.current === requestKey) return;
     preparedLaunch.current = requestKey;
+    launchSelectionPending.current = loading || !affiliateUsers.length;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`FANTASY MMADNESS Owner Office: ${title || 'A new fight'} is ready to share`);
     setBulkMessage(`From the FANTASY MMADNESS Owner Office\n\nHello {firstName},\n\n${title || 'A new fight'} is live for promotion. The owner has already created the fight and set its entry and prize amounts. You only need to share it with your audience.\n\n1. OPEN YOUR PERSONAL FIGHT POSTER: {shareKit}\n2. Click Download my fight poster PNG. The fight artwork includes YOUR tracked QR.\n3. Copy the ready-made Facebook, Instagram, TikTok, or X caption and post the poster yourself. Include your clickable fight link wherever links work.\n4. Track your signups and estimated share on your Earnings page. Settled earnings become available for payout under your existing terms.\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE (separate download): {qrLink}\n\nFACEBOOK CAPTION:\n{facebookPost}\n\nINSTAGRAM CAPTION (upload your personal fight poster):\n{instagramPost}\n\nTIKTOK CAPTION (upload your personal fight poster):\n{tiktokPost}\n\nX CAPTION:\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
     setMailLimitReached(false);
     setBulkEmailOpen(true);
-  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers, manualLaunch, launchRequested]);
+  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers, manualLaunch, launchRequested, loading]);
+
+  useEffect(() => {
+    if (!bulkEmailOpen || !launchSelectionPending.current || loading || !affiliateUsers.length) return;
+    setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
+    launchSelectionPending.current = false;
+  }, [bulkEmailOpen, loading, affiliateUsers]);
 
   useEffect(() => {
     const filtered = affiliateUsers.filter((user) => {
@@ -245,6 +253,7 @@ const AffiliateUsers = () => {
   const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email) && (!launchFightId || user.verified));
   const eligibleRecipients = affiliateUsers.filter((user) => isValidEmail(user.email) && (!launchFightId || user.verified));
   const selectFirstAffiliates = (count) => {
+    launchSelectionPending.current = false;
     const amount = Math.min(eligibleRecipients.length, Math.max(0, Math.floor(Number(count) || 0)));
     setSelectedAffiliateIds(eligibleRecipients.slice(0, amount).map((user) => user._id));
   };
@@ -288,10 +297,12 @@ const AffiliateUsers = () => {
   };
 
   const toggleAffiliate = (id) => {
+    launchSelectionPending.current = false;
     setSelectedAffiliateIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
   };
 
   const toggleVisibleAffiliates = () => {
+    launchSelectionPending.current = false;
     setSelectedAffiliateIds((current) => allVisibleSelected
       ? current.filter((id) => !visibleEmailIds.includes(id))
       : [...new Set([...current, ...visibleEmailIds])]);
@@ -598,16 +609,17 @@ const AffiliateUsers = () => {
         <div className={`admin-modal-backdrop ${modalStyles.backdrop}`} onMouseDown={(event) => { if (event.target === event.currentTarget && !bulkSending) setBulkEmailOpen(false); }}>
           <section className={`admin-inspector-modal admin-bulk-email-modal ${modalStyles.modal}`} role="dialog" aria-modal="true" aria-label="Choose affiliates and send fight poster">
             <header>
-              <div><span>Affiliate communications</span><h3>Email {selectedRecipients.length} affiliates</h3></div>
+              <div><span>Affiliate communications</span><h3>{loading ? 'Loading affiliates…' : `Email ${selectedRecipients.length} affiliates`}</h3></div>
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
             <div ref={bulkEmailBodyRef} className={`admin-modal-form-body admin-stacked-form ${modalStyles.body}`}>
               {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors" role="alert"><strong>{bulkProgress.failed} failed{bulkProgress.skipped ? ` · ${bulkProgress.skipped} not attempted` : ''}</strong>{mailLimitReached && <span>Gmail has paused this sending account. Retry after Gmail restores sending, or configure a verified email provider.</span>}{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}<button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds(bulkResults.filter((result) => !result.ok).map((result) => result.id))}>Select unsent recipients</button></div>}
               <div className={modalStyles.recipientPicker}>
+                {loadError && <div role="alert"><strong>Affiliate list did not load.</strong> {loadError} <button type="button" disabled={loading} onClick={fetchData}>Retry loading affiliates</button></div>}
                 <strong>Choose affiliates to email ({selectedRecipients.length} of {eligibleRecipients.length})</strong>
                 <div className={modalStyles.actions}>
-                  <button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds(eligibleRecipients.map((user) => user._id))}>Select all</button>
-                  <button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds([])}>Clear selection</button>
+                  <button type="button" disabled={bulkSending} onClick={() => { launchSelectionPending.current = false; setSelectedAffiliateIds(eligibleRecipients.map((user) => user._id)); }}>Select all</button>
+                  <button type="button" disabled={bulkSending} onClick={() => { launchSelectionPending.current = false; setSelectedAffiliateIds([]); }}>Clear selection</button>
                   <label>Send to first <input type="number" min="0" max={eligibleRecipients.length} value={selectedRecipients.length} disabled={bulkSending} onChange={(event) => selectFirstAffiliates(event.target.value)} /> affiliates</label>
                 </div>
                 <div className={modalStyles.recipientList} aria-label="Available affiliates">
@@ -615,7 +627,7 @@ const AffiliateUsers = () => {
                     <input type="checkbox" checked={selectedAffiliateIds.includes(user._id)} disabled={bulkSending} onChange={() => toggleAffiliate(user._id)} />
                     <span>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.playerName || 'Affiliate'} <small>{user.email}</small></span>
                   </label>)}
-                  {!eligibleRecipients.length && <p>No affiliates with an email address are available for this fight.</p>}
+                  {!eligibleRecipients.length && !loadError && <p>{loading ? 'Loading affiliate accounts…' : affiliateUsers.length ? 'No approved affiliates with a valid email address are available for this fight.' : <>No affiliate accounts were returned. <button type="button" onClick={fetchData}>Retry loading affiliates</button></>}</p>}
                 </div>
               </div>
               {launchFightId && <div className="admin-bulk-email-note"><strong>Fight poster for these affiliates</strong><p>Upload your finished poster here before sending. Each affiliate’s kit will add their own tracked QR.</p><input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading || bulkSending} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0], launchFightId); event.target.value = ''; }} />{posterUploading ? <p>Saving poster…</p> : (posterUrls[launchFightId] || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.fightPosterImage) ? <p>Poster saved for this fight.</p> : <p>The kit will use fighter photos until you upload a poster.</p>}</div>}
