@@ -204,7 +204,7 @@ const AffiliateUsers = () => {
     launchSelectionPending.current = loading || !affiliateUsers.length;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`FANTASY MMADNESS Owner Office: ${title || 'A new fight'} is ready to share`);
-    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is ready to share. Open your personal fight share kit on your phone to find your QR poster, tracked fight link, and ready-to-copy Facebook, Instagram, TikTok, and X captions.\n\nOPEN YOUR FIGHT SHARE KIT: {shareKit}\n\nSign in as an affiliate if prompted. Your personal link tracks the players you bring to this fight.\n\nFANTASY MMADNESS Owner Office`);
+    setBulkMessage(`Hello {firstName},\n\n${title || 'A new fight'} is ready for you to promote. The FANTASY MMADNESS Owner Office has already set up the fight, including its entry and prize amounts. Your job is to invite your audience to join.\n\nOPEN YOUR FIGHT SHARE KIT: {shareKit}\n\nSign in as an affiliate if prompted. Your kit shows the fight poster with YOUR personal QR code, your tracked fight link, and ready-to-copy captions for Facebook, Instagram, TikTok, and X. Choose a platform, share the poster, and use the matching caption.\n\nYour personal link and poster QR track the players you bring to this fight. You can follow your signups and estimated share on your Earnings page; settled earnings are available for payout under your affiliate terms.\n\nFANTASY MMADNESS Owner Office`);
     setBulkResults([]);
     setMailLimitReached(false);
     setBulkEmailOpen(true);
