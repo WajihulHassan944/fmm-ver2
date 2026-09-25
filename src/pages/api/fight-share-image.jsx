@@ -48,7 +48,8 @@ export default async function handler(req, res) {
     const link = `https://www.fantasymmadness.com/league/${affiliateId}?fightId=${fightId}`;
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
     const response = new ImageResponse(
-      <div style={{ display: 'flex', justifyContent: 'center', width: 1200, height: 630, background: '#090c17' }}>
+      <div style={{ display: 'flex', position: 'relative', justifyContent: 'center', width: 1200, height: 630, background: '#090c17', overflow: 'hidden' }}>
+        {poster && <img src={poster} alt="" width={1200} height={630} style={{ position: 'absolute', top: 0, left: 0, objectFit: 'cover', opacity: 0.45 }} />}
         <div style={{ display: 'flex', position: 'relative', width: 630, height: 630, overflow: 'hidden' }}>
           {poster && <img src={poster} alt="" width={630} height={630} style={{ objectFit: 'contain' }} />}
           <div style={{ display: 'flex', position: 'absolute', right: 18, bottom: 18, padding: 3, background: 'white' }}>
