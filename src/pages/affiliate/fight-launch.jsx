@@ -194,7 +194,7 @@ export default function AffiliateFightLaunch() {
       </div>
       <div className={styles.templates}>{posts.map(([platform, value]) => { const key = platform.toLowerCase(); const account = social?.[key]; return <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
         <div className={styles.buttons}>
-          {platform === 'Facebook' && <button type="button" onClick={() => postPhotoToFacebook(value)}>Save full poster · copy caption · open Facebook</button>}
+          {platform === 'Facebook' && <button type="button" style={{ background: '#ed253e', borderColor: '#ff6478', color: '#fff', cursor: 'pointer' }} onClick={() => postPhotoToFacebook(value)}>Post the full photo on Facebook</button>}
           {platform === 'Instagram' && <a href="https://www.instagram.com/create/select/" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'Instagram caption')}>Open Instagram create · copy caption</a>}
           {platform === 'TikTok' && <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'TikTok caption')}>Open TikTok upload · copy caption</a>}
           {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post with text</a>}
