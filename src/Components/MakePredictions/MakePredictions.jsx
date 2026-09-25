@@ -313,7 +313,8 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           </div>
           <button type="button" onClick={() => leaveConfirmation(`/upcomingfights?category=${nextSport}`)} style={{ width: '100%', minHeight: 50, border: 0, borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 1000, cursor: 'pointer' }}>NOW TRY {nextLabel} ›</button>
           <p style={{ margin: '7px 0 12px', color: 'rgba(255,255,255,.4)', fontSize: 11, fontWeight: 700 }}>Players entering more than one sport can build a broader season score.</p>
-          <button type="button" onClick={() => leaveConfirmation('/YourFights')} style={{ width: '100%', minHeight: 46, borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)', color: '#fff', fontWeight: 900, cursor: 'pointer' }}>VIEW MY ENTRIES</button>
+          <button type="button" onClick={() => leaveConfirmation(`/fight/${matchId}#fight-leaderboard`)} style={{ width: '100%', minHeight: 46, borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)', color: '#fff', fontWeight: 900, cursor: 'pointer' }}>VIEW FIGHT LEADERBOARD</button>
+          <button type="button" onClick={() => leaveConfirmation('/YourFights')} style={{ marginTop: 10, border: 0, background: 'transparent', color: '#fff', fontWeight: 800, cursor: 'pointer' }}>VIEW MY ENTRIES</button>
           <button type="button" onClick={() => leaveConfirmation('/')} style={{ marginTop: 10, border: 0, background: 'transparent', color: 'rgba(255,255,255,.55)', fontWeight: 800, cursor: 'pointer' }}>RETURN HOME</button>
         </div>
       </section>
@@ -459,7 +460,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                   </section>
 
                   {!isWrestling && <section>
-                    <header><span>Finish call</span><strong>Pick KO or score path</strong></header>
+                    <header><span>Finish call</span><strong>Pick a KO, or survival points (SP) if the fight continues</strong></header>
                     <div>
                       <button
                         type="button"
@@ -468,7 +469,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         aria-pressed={finishSide === 'A'}
                       >
                         <img src={fighterAImage} alt="" />
-                        <span><small>{getFighterName(match, 'A')}</small><strong>{finishSide === 'B' ? 'SP' : 'KO'}</strong><em>{finishSide === 'A' ? 'Knockout pick' : finishSide === 'B' ? 'Score path' : 'Select corner'}</em></span>
+                        <span><small>{getFighterName(match, 'A')}</small><strong>{finishSide === 'B' ? 'SP' : 'KO'}</strong><em>{finishSide === 'A' ? 'Knockout pick' : finishSide === 'B' ? 'Survival points' : 'Select corner'}</em></span>
                         {finishSide === 'A' && <FaCheck />}
                       </button>
                       <button
@@ -478,7 +479,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         aria-pressed={finishSide === 'B'}
                       >
                         <img src={fighterBImage} alt="" />
-                        <span><small>{getFighterName(match, 'B')}</small><strong>{finishSide === 'A' ? 'SP' : 'KO'}</strong><em>{finishSide === 'B' ? 'Knockout pick' : finishSide === 'A' ? 'Score path' : 'Select corner'}</em></span>
+                        <span><small>{getFighterName(match, 'B')}</small><strong>{finishSide === 'A' ? 'SP' : 'KO'}</strong><em>{finishSide === 'B' ? 'Knockout pick' : finishSide === 'A' ? 'Survival points' : 'Select corner'}</em></span>
                         {finishSide === 'B' && <FaCheck />}
                       </button>
                     </div>
@@ -491,7 +492,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
         <div className="xp-prediction-submit-panel">
           {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError}</p>}
-          <div><FaShieldAlt /><span>Your entries remain editable until the fight locks.</span></div>
+          <div><FaShieldAlt /><span>Review your picks. Submit once to pay the fight entry and save your predictions.</span></div>
           <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting}>
             <FaTrophy /> {buttonText}
           </button>
