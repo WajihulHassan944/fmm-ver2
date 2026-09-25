@@ -18,6 +18,11 @@
 .photos img { width: 42%; height: 100%; object-fit: contain; object-position: center bottom; }
 .photos strong { color: #ffb83b; }
 .preview h3 { margin: 13px 0 4px; font-size: 22px; }
+.posterFrame { position: relative; width: 100%; }
+.posterFrame img { display: block; width: 100%; height: auto; object-fit: contain; }
+.copyPoster { position: absolute; top: 12px; right: 12px; z-index: 1; border: 2px solid white; border-radius: 8px; padding: 10px 15px; background: #ed253e; color: white; font: inherit; font-weight: 900; cursor: pointer; box-shadow: 0 4px 18px #0009; }
+.copyPoster:hover { background: #ff3851; }
+.preview small { display: block; margin-top: 10px; color: #d5d9e5; line-height: 1.45; }
 .preview p { margin: 0 0 12px; color: #c6cbd8; }
 .preview a, .affiliate a { color: #ffbd4d; }
 .share { display: flex; flex-direction: column; gap: 10px; }

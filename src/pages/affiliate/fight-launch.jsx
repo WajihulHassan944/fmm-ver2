@@ -128,25 +128,21 @@ export default function AffiliateFightLaunch() {
     try { await navigator.clipboard.writeText(value); toast.success(`${name} copied.`); }
     catch { toast.error('Copy failed. Select the text and copy manually.'); }
   };
-  const postPhotoToFacebook = async (caption) => {
-    const affiliateId = kit?.attribution?.affiliateId;
-    if (!affiliateId || !fightId) { toast.error('Your fight kit is still loading.'); return; }
-    copy(caption, 'Facebook caption');
-    window.open('https://www.facebook.com/', '_blank', 'noopener,noreferrer');
+  const copyPosterImage = async () => {
+    const image = squarePosterUrl && !squarePosterFailed ? squarePosterUrl : poster;
+    if (!image) { toast.error('The poster is still loading.'); return; }
+    if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+      toast.info('Press and hold the poster to copy or save it to Photos.');
+      return;
+    }
     try {
-      const url = `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=9`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Could not download your full fight poster.');
-      const imageUrl = URL.createObjectURL(await response.blob());
-      const anchor = document.createElement('a');
-      anchor.href = imageUrl;
-      anchor.download = `fantasy-mmadness-${fightId}.png`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.setTimeout(() => URL.revokeObjectURL(imageUrl), 30000);
-      toast.info('Select the saved square poster as a Facebook photo, then paste your caption. The QR and caption link open your league.');
-    } catch (error) { toast.error(error.message); }
+      const png = fetch(image).then(async (response) => {
+        if (!response.ok) throw new Error('The poster could not be loaded.');
+        return response.blob();
+      });
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+      toast.success('Full poster copied. Paste it into your post, then copy your Facebook caption below.');
+    } catch { toast.info('Press and hold the poster to copy or save it to Photos.'); }
   };
   const sharePoster = async (caption) => {
     if (shareInProgress.current) return;
@@ -187,14 +183,18 @@ export default function AffiliateFightLaunch() {
     {kit && <>
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>
-          {squarePosterUrl && !squarePosterFailed ? <img src={squarePosterUrl} onError={() => setSquarePosterFailed(true)} alt={`Full ${name} fight poster with your QR`} style={{ display: 'block', width: '100%', height: 'auto', objectFit: 'contain' }} /> : poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} style={{ display: 'block', width: '100%', height: 'auto', objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing your personal fight poster…</p>}
+          <div className={styles.posterFrame}>
+            {squarePosterUrl && !squarePosterFailed ? <img src={squarePosterUrl} onError={() => setSquarePosterFailed(true)} alt={`Full ${name} fight poster with your QR`} /> : poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing your personal fight poster…</p>}
+            {(squarePosterUrl && !squarePosterFailed || poster) && <button className={styles.copyPoster} type="button" onClick={copyPosterImage}>Copy poster</button>}
+          </div>
+          <small>Copy the full photo here, then use it in Facebook. On a phone, you can also press and hold the poster to copy or save it.</small>
           <h3>{name}</h3><p>Promoted by {kit.creative?.promotedBy || kit.attribution?.leagueName}</p>
         </div>
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><details><summary>Other ways to save or copy</summary><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Save poster to Downloads'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Downloads appear in your phone’s Files or Downloads app, usually not Photos. You can also long press the poster preview to save the image to Photos if your phone offers that option.</small></details></div>
       </div>
       <div className={styles.templates}>{posts.map(([platform, value]) => { const key = platform.toLowerCase(); const account = social?.[key]; return <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
         <div className={styles.buttons}>
-          {platform === 'Facebook' && <button type="button" style={{ background: '#ed253e', borderColor: '#ff6478', color: '#fff', cursor: 'pointer' }} onClick={() => postPhotoToFacebook(value)}>Post the full photo on Facebook</button>}
+          {platform === 'Facebook' && <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Open Facebook</a>}
           {platform === 'Instagram' && <a href="https://www.instagram.com/create/select/" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'Instagram caption')}>Open Instagram create · copy caption</a>}
           {platform === 'TikTok' && <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'TikTok caption')}>Open TikTok upload · copy caption</a>}
           {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post with text</a>}
@@ -205,7 +205,7 @@ export default function AffiliateFightLaunch() {
           <button type="button" disabled={!account?.configured || Boolean(socialBusy)} onClick={() => connect(key)}>{account?.connected ? 'Reconnect account' : 'Connect account'}</button>
           <button type="button" disabled={!account?.connected || (key !== 'x' && !poster) || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
         </div>}
-        {platform === 'Facebook' && <small>Post the saved square poster as a photo in Facebook, then paste the caption. Your personal league link is in the caption, and the QR on the photo opens the same league. Facebook may save the poster in Files or Downloads; you can also long press the preview to save it to Photos.</small>}
+        {platform === 'Facebook' && <small>Copy the full poster above or press and hold it on your phone. Post it as a Facebook photo, then copy and paste this caption. The caption link and poster QR open your league.</small>}
         {platform === 'Instagram' && <small>Instagram opens its create page when available. Choose the QR poster from Downloads or Photos, then paste the caption. A connected professional account can use Publish to send both directly. Caption links display as text.</small>}
         {platform === 'TikTok' && <small>TikTok opens its upload page when available. Select the QR poster from Downloads or Photos and paste the caption.</small>}
         {platform === 'X' && <small>X opens with the prepared text and tracked link. Attach your saved QR poster if you want the image in the post.</small>}
