@@ -177,7 +177,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
         <section className="player-fight-entry-action-bar">
           <div>
             <FaShieldAlt />
-            <span><strong>Secure fight entry</strong><small>Your entry is confirmed before the scorecard opens.</small></span>
+            <span><strong>Secure fight entry</strong><small>Complete your picks, then submit once to pay and enter.</small></span>
           </div>
           <button type="button" onClick={handleMatchClick} disabled={submittedPrediction}>
             {submittedPrediction ? 'Predictions already submitted' : 'Make predictions'} <FaArrowRight />
