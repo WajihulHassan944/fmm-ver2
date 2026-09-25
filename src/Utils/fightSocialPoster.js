@@ -95,8 +95,8 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     // The owner's uploaded square artwork reserves its lower-right box for
     // each affiliate's tracked QR. Keep the surrounding gold border visible.
     if (qr) {
-      ctx.fillStyle = '#fff'; ctx.fillRect(828, 838, 210, 210);
-      ctx.drawImage(qr, 834, 844, 198, 198);
+      ctx.fillStyle = '#fff'; ctx.fillRect(795, 820, 260, 260);
+      ctx.drawImage(qr, 800, 825, 250, 250);
     }
     return canvas.toDataURL('image/png');
   }
