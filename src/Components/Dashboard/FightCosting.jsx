@@ -14,7 +14,6 @@ import {
 } from 'react-icons/fa';
 import MakePredictions from '../MakePredictions/MakePredictions';
 import { getFightCategory, getFighterImage, getFighterName } from '@/Utils/fightExperience';
-import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 
 const isSameId = (left, right) => String(left || '') === String(right || '');
@@ -41,7 +40,6 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     hasStarted: false,
   });
   const [showPredictions, setShowPredictions] = useState(false);
-  const [isEntering, setIsEntering] = useState(false);
   const [entryStatus, setEntryStatus] = useState('');
   const autoOpenAttempted = useRef(false);
 
@@ -71,31 +69,9 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
     autoOpenAttempted.current = true;
     const userId = user?._id || user?.id;
     if (!userId || hasSubmittedFightPrediction(match, userId)) return;
-    const tokenCost = Number(match.matchTokens || 0);
-    const walletTokens = Number(user?.tokens || 0);
-    if (walletTokens < tokenCost) {
-      const currentPick = ['a', 'b'].includes(String(router.query?.pick || '').toLowerCase()) ? `&pick=${String(router.query.pick).toLowerCase()}` : '';
-      router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${currentPick}${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`)}`);
-      return;
-    }
-    let active = true;
-    setIsEntering(true);
-    fetch(buildPublicApiUrl('/api/deduct-tokens'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(typeof window !== 'undefined' && window.localStorage.getItem('authToken') ? { Authorization: `Bearer ${window.localStorage.getItem('authToken')}` } : {}) },
-      body: JSON.stringify({ userId, matchTokens: match.matchTokens }),
-    })
-      .then(async (response) => ({ response, data: await response.json().catch(() => ({})) }))
-      .then(({ response, data }) => {
-        if (!active) return;
-        if (response.ok) setShowPredictions(true);
-        else if (response.status === 402 || /insufficient/i.test(String(data.message || ''))) {
-          router.replace(`/checkout?product=fm-coins&returnTo=${encodeURIComponent(`/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`)}`);
-        } else setEntryStatus(data.message || 'Could not open this scorecard. Please try again.');
-      })
-      .catch(() => { if (active) setEntryStatus('The scorecard could not be opened. Please try again.'); })
-      .finally(() => { if (active) setIsEntering(false); });
-    return () => { active = false; };
+    // Opening the scorecard is free. The atomic entry request charges coins
+    // together with saving predictions when the player presses Submit.
+    setShowPredictions(true);
   }, [match, matchId, router, router.isReady, router.query?.pick, router.query?.play, user?._id, user?.id, user?.tokens]);
 
   if (!match) {
@@ -119,36 +95,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
       setEntryStatus('You have already submitted predictions for this fight.');
       return;
     }
-    if (!enoughTokens) {
-      openCoinCheckout();
-      return;
-    }
-    setIsEntering(true);
-    try {
-      const response = await fetch(buildPublicApiUrl('/api/deduct-tokens'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(typeof window !== 'undefined' && window.localStorage.getItem('authToken') ? { Authorization: `Bearer ${window.localStorage.getItem('authToken')}` } : {}) },
-        body: JSON.stringify({
-          matchTokens: match.matchTokens,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setShowPredictions(true);
-      } else {
-        if (response.status === 402 || /insufficient/i.test(String(data.message || ''))) {
-          openCoinCheckout();
-          return;
-        }
-        setEntryStatus(data.message || 'Could not open this scorecard. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error in deducting tokens:', error);
-      setEntryStatus('The scorecard could not be opened. Please try again.');
-    } finally {
-      setIsEntering(false);
-    }
+    setShowPredictions(true);
   };
 
   if (showPredictions) {
@@ -232,8 +179,8 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
             <FaShieldAlt />
             <span><strong>Secure fight entry</strong><small>Your entry is confirmed before the scorecard opens.</small></span>
           </div>
-          <button type="button" onClick={handleMatchClick} disabled={isEntering || submittedPrediction}>
-            {submittedPrediction ? 'Predictions already submitted' : isEntering ? 'Opening scorecard…' : enoughTokens ? 'Make predictions' : 'Add FM COINS to enter'} <FaArrowRight />
+          <button type="button" onClick={handleMatchClick} disabled={submittedPrediction}>
+            {submittedPrediction ? 'Predictions already submitted' : 'Make predictions'} <FaArrowRight />
           </button>
         </section>
         {entryStatus ? <p role="alert" style={{ margin: '10px 0 0', color: '#ff8a8a', fontWeight: 800, textAlign: 'center' }}>{entryStatus}</p> : null}
