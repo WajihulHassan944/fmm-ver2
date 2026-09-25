@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       }
     }
 
-    const link = `https://www.fantasymmadness.com/fight/${fightId}?ref=${affiliateId}`;
+    const link = `https://www.fantasymmadness.com/league/${affiliateId}?fightId=${fightId}`;
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
     const league = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate').trim().slice(0, 42);
     const title = `${fight.matchFighterA || 'Fight'} vs ${fight.matchFighterB || 'Fight'}`.slice(0, 70);
