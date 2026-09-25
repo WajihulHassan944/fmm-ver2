@@ -47,29 +47,14 @@ export default async function handler(req, res) {
 
     const link = `https://www.fantasymmadness.com/league/${affiliateId}?fightId=${fightId}`;
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
-    const league = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate').trim().slice(0, 42);
-    const title = `${fight.matchFighterA || 'Fight'} vs ${fight.matchFighterB || 'Fight'}`.slice(0, 70);
     const response = new ImageResponse(
-      <div style={{ display: 'flex', width: '100%', height: '100%', background: '#101421', color: 'white', fontFamily: 'sans-serif' }}>
-        <div style={{ display: 'flex', position: 'relative', width: 630, height: 630, background: '#090c17', overflow: 'hidden' }}>
-          {poster && <img src={poster} alt="" width={630} height={630} style={{ objectFit: 'contain' }} />}
-          <div style={{ display: 'flex', position: 'absolute', right: 23, bottom: 21, padding: 4, background: 'white' }}>
-            <img src={qr} alt="Affiliate fight QR" width={110} height={110} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: 570, padding: '55px 40px', borderLeft: '9px solid #e21e35' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', color: '#ffcb56', fontSize: 25, fontWeight: 700 }}>FANTASY MMADNESS</div>
-            <div style={{ display: 'flex', fontSize: 50, fontWeight: 800, marginTop: 32, lineHeight: 1.12 }}>Join my league</div>
-            <div style={{ display: 'flex', fontSize: 32, marginTop: 22, lineHeight: 1.25 }}>{title}</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', fontSize: 29, color: '#ffcb56', fontWeight: 700 }}>{league}</div>
-            <div style={{ display: 'flex', fontSize: 23, marginTop: 12 }}>Scan my QR or tap this post to join</div>
-          </div>
+      <div style={{ display: 'flex', position: 'relative', width: 1200, height: 1200, background: '#090c17', overflow: 'hidden' }}>
+        {poster && <img src={poster} alt="" width={1200} height={1200} style={{ objectFit: 'contain' }} />}
+        <div style={{ display: 'flex', position: 'absolute', right: 35, bottom: 35, padding: 6, background: 'white' }}>
+          <img src={qr} alt="Affiliate fight QR" width={170} height={170} />
         </div>
       </div>,
-      { width: 1200, height: 630 },
+      { width: 1200, height: 1200 },
     );
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
