@@ -182,6 +182,10 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   const title = getFightName(resolvedFight);
   const category = getFightCategory(resolvedFight);
   const heroImage = getFightHeroImage(resolvedFight);
+  const affiliateShareImage = /^[a-f\d]{24}$/i.test(String(router.query.ref || '')) && /^[a-f\d]{24}$/i.test(String(matchId || ''))
+    ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(matchId)}&affiliateId=${encodeURIComponent(router.query.ref)}&v=3`
+    : '';
+  const socialImage = affiliateShareImage || (heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`);
   const playerCount = getFightPlayerCount(resolvedFight);
 
   useEffect(() => {
@@ -238,8 +242,9 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
         <meta key="og:title" property="og:title" content={`${title} | Fantasy MMAdness`} />
         <meta key="og:description" property="og:description" content={`Open ${title}, view the leaderboard, and enter the prediction flow.`} />
         {router.query.ref && <meta key="og:url" property="og:url" content={`${SITE_URL}${router.asPath.split('#')[0]}`} />}
-        <meta key="og:image" property="og:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
-        <meta key="twitter:image" name="twitter:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
+        <meta key="og:image" property="og:image" content={socialImage} />
+        <meta key="og:image:alt" property="og:image:alt" content={affiliateShareImage ? 'Personal fight poster with affiliate QR and league invitation' : `${title} fight poster`} />
+        <meta key="twitter:image" name="twitter:image" content={socialImage} />
       </Head>
 
       <section className="public-fight-detail-hero">
