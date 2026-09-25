@@ -15,7 +15,7 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
   const fightUrl = `/fight/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&fromLeague=1`;
-  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=4`;
+  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=5`;
 
   const join = async () => {
     if (!getUserToken()) {
@@ -48,6 +48,8 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
       <meta key="og:description" property="og:description" content={`Join ${leagueName}'s Fantasy MMAdness league and make your picks for ${title}.`} />
       <meta key="og:url" property="og:url" content={`${SITE_URL}${router.asPath.split('#')[0]}`} />
       <meta key="og:image" property="og:image" content={shareImage} />
+      <meta key="og:image:width" property="og:image:width" content="1200" />
+      <meta key="og:image:height" property="og:image:height" content="630" />
       <meta key="og:image:alt" property="og:image:alt" content={`${leagueName}'s fight poster with personal QR`} />
       <meta key="twitter:image" name="twitter:image" content={shareImage} />
     </Head>
