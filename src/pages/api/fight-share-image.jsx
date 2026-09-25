@@ -48,14 +48,13 @@ export default async function handler(req, res) {
     const link = `https://www.fantasymmadness.com/league/${affiliateId}?fightId=${fightId}`;
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
     const response = new ImageResponse(
-      <div style={{ display: 'flex', position: 'relative', width: 1200, height: 630, background: '#090c17', overflow: 'hidden' }}>
-        {poster && <img src={poster} alt="" width={1200} height={630} style={{ objectFit: 'fill' }} />}
-        <div style={{ display: 'flex', position: 'absolute', right: 255, bottom: 35, width: 60, height: 60, alignItems: 'center', justifyContent: 'center', border: '3px solid #ffe979', borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%, #fff9c7 0%, #ffd94a 23%, #f7b51b 52%, #b76d00 78%, #6d3d00 100%)', color: '#4b2900', fontSize: 23, fontWeight: 900, boxShadow: '0 0 12px #f7b51b' }}>FM</div>
-        <div style={{ display: 'flex', position: 'absolute', right: 16, bottom: 9, padding: 4, background: 'white' }}>
-          <img src={qr} alt="Affiliate fight QR" width={140} height={140} />
+      <div style={{ display: 'flex', position: 'relative', width: 1200, height: 1200, background: '#090c17', overflow: 'hidden' }}>
+        {poster && <img src={poster} alt="" width={1200} height={1200} style={{ objectFit: 'contain' }} />}
+        <div style={{ display: 'flex', position: 'absolute', right: 17, bottom: 17, padding: 4, background: 'white' }}>
+          <img src={qr} alt="Affiliate fight QR" width={270} height={270} />
         </div>
       </div>,
-      { width: 1200, height: 630 },
+      { width: 1200, height: 1200 },
     );
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
