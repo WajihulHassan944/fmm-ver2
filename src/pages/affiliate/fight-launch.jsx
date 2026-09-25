@@ -173,7 +173,7 @@ export default function AffiliateFightLaunch() {
           <button type="button" disabled={!account?.connected || (key !== 'x' && !poster) || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
         </div>}
         <div className={styles.buttons} style={{ marginTop: 10 }}>
-          {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open Facebook share</a>}
+          {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${link}&share=poster-2`)}`} onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open Facebook share</a>}
           {platform === 'Instagram' && <a href="https://www.instagram.com/" onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open Instagram</a>}
           {platform === 'TikTok' && <a href="https://www.tiktok.com/upload" onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open TikTok upload</a>}
           {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster &amp; open X post</a>}
