@@ -237,6 +237,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
         <meta key="description" name="description" content={`${title} fight details, category, schedule, leaderboard, and prediction entry on Fantasy MMAdness.`} />
         <meta key="og:title" property="og:title" content={`${title} | Fantasy MMAdness`} />
         <meta key="og:description" property="og:description" content={`Open ${title}, view the leaderboard, and enter the prediction flow.`} />
+        {router.query.ref && <meta key="og:url" property="og:url" content={`${SITE_URL}${router.asPath.split('#')[0]}`} />}
         <meta key="og:image" property="og:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
         <meta key="twitter:image" name="twitter:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
       </Head>
