@@ -21,6 +21,7 @@ export default function AffiliateFightLaunch() {
   const [socialBusy, setSocialBusy] = useState('');
   const [poster, setPoster] = useState('');
   const [posterError, setPosterError] = useState('');
+  const [squarePosterFailed, setSquarePosterFailed] = useState(false);
   const [posterBusy, setPosterBusy] = useState(false);
   const shareInProgress = useRef(false);
   const [shareBusy, setShareBusy] = useState(false);
@@ -31,7 +32,7 @@ export default function AffiliateFightLaunch() {
     setFightPhotos(null);
     fetchPublicPredictionFights({ limit: 240 }).then((rows) => {
       const fight = rows.find((row) => String(getFightId(row)) === fightId);
-      if (active && fight) setFightPhotos({ a: getFighterImage(fight, 'A'), b: getFighterImage(fight, 'B') });
+      if (active && fight) setFightPhotos({ a: getFighterImage(fight, 'A'), b: getFighterImage(fight, 'B'), poster: fight.fightPosterImage || fight.promotionBackground || '' });
     }).catch(() => {});
     return () => { active = false; };
   }, [fightId]);
@@ -65,7 +66,7 @@ export default function AffiliateFightLaunch() {
     buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
       fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
-      basePoster: creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
+      basePoster: fightPhotos?.poster || creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
       url: kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins })
       .then((image) => { if (active) setPoster(image); })
       .catch((err) => { if (active) setPosterError(err.message || 'Could not make your fight poster. Check the saved fighter photos.'); });
@@ -80,7 +81,7 @@ export default function AffiliateFightLaunch() {
       const image = poster || await buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
         fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
         fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
-        basePoster: creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
+        basePoster: fightPhotos?.poster || creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
         url: kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins });
       saveFightSocialPoster(image, fightId);
       toast.success('Your fight poster is ready with your tracked QR.');
@@ -127,12 +128,25 @@ export default function AffiliateFightLaunch() {
     try { await navigator.clipboard.writeText(value); toast.success(`${name} copied.`); }
     catch { toast.error('Copy failed. Select the text and copy manually.'); }
   };
-  const postPhotoToFacebook = (caption) => {
-    if (!poster) { toast.error('Wait for your full poster to finish preparing.'); return; }
-    saveFightSocialPoster(poster, fightId);
+  const postPhotoToFacebook = async (caption) => {
+    const affiliateId = kit?.attribution?.affiliateId;
+    if (!affiliateId || !fightId) { toast.error('Your fight kit is still loading.'); return; }
     copy(caption, 'Facebook caption');
     window.open('https://www.facebook.com/', '_blank', 'noopener,noreferrer');
-    toast.info('Select the saved poster as a Facebook photo, then paste your caption. Your tracked league link is in the caption and QR.');
+    try {
+      const url = `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=9`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Could not download your full fight poster.');
+      const imageUrl = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement('a');
+      anchor.href = imageUrl;
+      anchor.download = `fantasy-mmadness-${fightId}.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(imageUrl), 30000);
+      toast.info('Select the saved square poster as a Facebook photo, then paste your caption. The QR and caption link open your league.');
+    } catch (error) { toast.error(error.message); }
   };
   const sharePoster = async (caption) => {
     if (shareInProgress.current) return;
@@ -159,6 +173,9 @@ export default function AffiliateFightLaunch() {
   };
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
+  const squarePosterUrl = kit?.attribution?.affiliateId && fightId
+    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&v=9`
+    : '';
   const copyByPlatform = affiliateFightPosts(name, link, kit?.attribution?.leagueName || 'my league', kit?.creative?.prizeCoins, kit?.creative?.entryCoins);
   const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['TikTok', copyByPlatform.tiktok], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
@@ -170,14 +187,14 @@ export default function AffiliateFightLaunch() {
     {kit && <>
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>
-          {poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} style={{ width: '100%', maxHeight: 460, objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing your personal fight poster…</p>}
+          {squarePosterUrl && !squarePosterFailed ? <img src={squarePosterUrl} onError={() => setSquarePosterFailed(true)} alt={`Full ${name} fight poster with your QR`} style={{ display: 'block', width: '100%', height: 'auto', objectFit: 'contain' }} /> : poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} style={{ display: 'block', width: '100%', height: 'auto', objectFit: 'contain' }} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing your personal fight poster…</p>}
           <h3>{name}</h3><p>Promoted by {kit.creative?.promotedBy || kit.attribution?.leagueName}</p>
         </div>
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><details><summary>Other ways to save or copy</summary><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Save poster to Downloads'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Downloads appear in your phone’s Files or Downloads app, usually not Photos. You can also long press the poster preview to save the image to Photos if your phone offers that option.</small></details></div>
       </div>
       <div className={styles.templates}>{posts.map(([platform, value]) => { const key = platform.toLowerCase(); const account = social?.[key]; return <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
         <div className={styles.buttons}>
-          {platform === 'Facebook' && <button type="button" disabled={!poster} onClick={() => postPhotoToFacebook(value)}>Save full poster · copy caption · open Facebook</button>}
+          {platform === 'Facebook' && <button type="button" onClick={() => postPhotoToFacebook(value)}>Save full poster · copy caption · open Facebook</button>}
           {platform === 'Instagram' && <a href="https://www.instagram.com/create/select/" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'Instagram caption')}>Open Instagram create · copy caption</a>}
           {platform === 'TikTok' && <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'TikTok caption')}>Open TikTok upload · copy caption</a>}
           {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post with text</a>}
