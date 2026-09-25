@@ -15,7 +15,7 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
   const fightUrl = `/fight/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&fromLeague=1`;
-  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=7`;
+  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=8`;
 
   const join = async () => {
     if (!getUserToken()) {

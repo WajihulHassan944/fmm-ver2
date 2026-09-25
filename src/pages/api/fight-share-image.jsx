@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     const response = new ImageResponse(
       <div style={{ display: 'flex', position: 'relative', width: 1200, height: 630, background: '#090c17', overflow: 'hidden' }}>
         {poster && <img src={poster} alt="" width={1200} height={630} style={{ objectFit: 'fill' }} />}
-        <div style={{ display: 'flex', position: 'absolute', left: 25, bottom: 20, width: 60, height: 60, alignItems: 'center', justifyContent: 'center', border: '3px solid #ffe979', borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%, #fff9c7 0%, #ffd94a 23%, #f7b51b 52%, #b76d00 78%, #6d3d00 100%)', color: '#4b2900', fontSize: 23, fontWeight: 900, boxShadow: '0 0 12px #f7b51b' }}>FM</div>
+        <div style={{ display: 'flex', position: 'absolute', right: 255, bottom: 35, width: 60, height: 60, alignItems: 'center', justifyContent: 'center', border: '3px solid #ffe979', borderRadius: '50%', background: 'radial-gradient(circle at 32% 26%, #fff9c7 0%, #ffd94a 23%, #f7b51b 52%, #b76d00 78%, #6d3d00 100%)', color: '#4b2900', fontSize: 23, fontWeight: 900, boxShadow: '0 0 12px #f7b51b' }}>FM</div>
         <div style={{ display: 'flex', position: 'absolute', right: 16, bottom: 9, padding: 4, background: 'white' }}>
           <img src={qr} alt="Affiliate fight QR" width={140} height={140} />
         </div>
