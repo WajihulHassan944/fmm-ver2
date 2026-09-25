@@ -320,7 +320,10 @@ const AffiliateUsers = () => {
         });
         if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data?.message || 'Email was rejected.');
+        if (!response.ok) {
+          const detail = [data?.message || `Email request failed (HTTP ${response.status}).`, data?.code, data?.responseCode && `SMTP ${data.responseCode}`].filter(Boolean).join(' · ');
+          throw new Error(detail);
+        }
         sent += 1;
         results.push({ id: recipient._id, email: recipient.email, ok: true });
       } catch (error) {
@@ -332,7 +335,10 @@ const AffiliateUsers = () => {
     }
     setBulkSending(false);
     bulkEmailBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-    if (failed) toast.warning(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed.`);
+    if (failed) {
+      const firstError = results.find((result) => !result.ok)?.message;
+      toast.error(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed. ${firstError || 'Open the email window for details.'}`, { autoClose: 15000 });
+    }
     else toast.success(`${sent} affiliate email${sent === 1 ? '' : 's'} sent.`);
   };
 
