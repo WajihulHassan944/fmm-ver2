@@ -70,38 +70,6 @@ export default function Document() {
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <meta
-          property="og:title"
-          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
-        />
-        <meta
-          property="og:description"
-          content="Play fantasy MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests."
-        />
-        <meta
-          property="og:image"
-          content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg"
-        />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:url" content="https://www.fantasymmadness.com" />
-        <meta property="og:type" content="website" />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@FMmadness2024" />
-        <meta
-          name="twitter:title"
-          content="Fantasy MMAdness | Fantasy Combat Sports, MMA, Boxing"
-        />
-        <meta
-          name="twitter:description"
-          content="Play fantasy MMA, Boxing, Kickboxing, Bare-Knuckle, and Pro Wrestling prediction contests."
-        />
-        <meta
-          name="twitter:image"
-          content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg"
-        />
-
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
