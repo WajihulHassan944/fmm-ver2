@@ -60,6 +60,8 @@ const AffiliateUsers = () => {
   const [posterUploading, setPosterUploading] = useState(false);
   const [posterLoading, setPosterLoading] = useState(true);
   const [posterLoadError, setPosterLoadError] = useState('');
+  const [manualLaunch, setManualLaunch] = useState(null);
+  const [launchRequested, setLaunchRequested] = useState(0);
   const router = useRouter();
   const preparedLaunch = useRef('');
   const bulkEmailBodyRef = useRef(null);
@@ -192,16 +194,17 @@ const AffiliateUsers = () => {
   }, [router.query.launchFight]);
 
   useEffect(() => {
-    const fightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
-    const title = typeof router.query.launchTitle === 'string' ? router.query.launchTitle.slice(0, 150) : '';
-    if (!router.isReady || !fightId || !affiliateUsers.length || preparedLaunch.current === fightId) return;
-    preparedLaunch.current = fightId;
+    const fightId = manualLaunch?.id || (typeof router.query.launchFight === 'string' ? router.query.launchFight : '');
+    const title = manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle.slice(0, 150) : '');
+    const requestKey = `${fightId}:${launchRequested}`;
+    if (!router.isReady || !fightId || (!affiliateUsers.length && !manualLaunch) || preparedLaunch.current === requestKey) return;
+    preparedLaunch.current = requestKey;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`FANTASY MMADNESS Owner Office: ${title || 'A new fight'} is ready to share`);
     setBulkMessage(`From the FANTASY MMADNESS Owner Office\n\nHello {firstName},\n\n${title || 'A new fight'} is live for promotion. The owner has already created the fight and set its entry and prize amounts. You only need to share it with your audience.\n\n1. OPEN YOUR PERSONAL FIGHT POSTER: {shareKit}\n2. Click Download my fight poster PNG. The fight artwork includes YOUR tracked QR.\n3. Copy the ready-made Facebook, Instagram, TikTok, or X caption and post the poster yourself. Include your clickable fight link wherever links work.\n4. Track your signups and estimated share on your Earnings page. Settled earnings become available for payout under your existing terms.\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE (separate download): {qrLink}\n\nFACEBOOK CAPTION:\n{facebookPost}\n\nINSTAGRAM CAPTION (upload your personal fight poster):\n{instagramPost}\n\nTIKTOK CAPTION (upload your personal fight poster):\n{tiktokPost}\n\nX CAPTION:\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
     setBulkEmailOpen(true);
-  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers]);
+  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers, manualLaunch, launchRequested]);
 
   useEffect(() => {
     const filtered = affiliateUsers.filter((user) => {
@@ -236,7 +239,7 @@ const AffiliateUsers = () => {
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   const visibleEmailIds = filteredUsers.filter((user) => isValidEmail(user.email)).map((user) => user._id);
   const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedAffiliateIds.includes(id));
-  const launchFightId = typeof router.query.launchFight === 'string' ? router.query.launchFight : '';
+  const launchFightId = manualLaunch?.id || (typeof router.query.launchFight === 'string' ? router.query.launchFight : '');
   const selectedRecipients = affiliateUsers.filter((user) => selectedAffiliateIds.includes(user._id) && isValidEmail(user.email) && (!launchFightId || user.verified));
   const eligibleRecipients = affiliateUsers.filter((user) => isValidEmail(user.email) && (!launchFightId || user.verified));
   const selectFirstAffiliates = (count) => {
@@ -270,7 +273,7 @@ const AffiliateUsers = () => {
     const fightLink = `https://www.fantasymmadness.com/fight/${encodeURIComponent(launchFightId)}?ref=${encodeURIComponent(affiliateId)}`;
     const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
-    const title = (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight').slice(0, 150);
+    const title = (manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight')).slice(0, 150);
     const campaignFight = posterFights.find((fight) => String(getFightId(fight)) === launchFightId);
     const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens);
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
@@ -456,7 +459,10 @@ const AffiliateUsers = () => {
               <input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0]); event.target.value = ''; }} style={{ display: 'block', marginTop: 6, maxWidth: '100%' }} />
             </label>
             <p>{posterUploading ? 'Saving poster…' : (posterUrls[posterFightId] || posterFight?.fightPosterImage) ? 'Poster saved for this fight. Affiliates will see it with their personal QR.' : posterUrl ? 'Showing the fight poster. Upload your finished version to replace it.' : 'No fight poster yet. Upload your finished version above.'}</p>
-            <button type="button" className="admin-action-primary" disabled={!posterFight || posterUploading} onClick={() => router.push({ pathname: '/administration/AffiliateUsers', query: { launchFight: posterFightId, launchTitle: `${getFighterName(posterFight, 'A')} vs ${getFighterName(posterFight, 'B')}` } })}>Prepare affiliate announcement →</button>
+            <button type="button" className="admin-action-primary" disabled={!posterFight || posterUploading} onClick={() => {
+              setManualLaunch({ id: posterFightId, title: `${getFighterName(posterFight, 'A')} vs ${getFighterName(posterFight, 'B')}` });
+              setLaunchRequested((count) => count + 1);
+            }}>Prepare affiliate announcement →</button>
           </div>
           {posterUrl && <img src={resolvePublicMediaUrl(posterUrl)} alt="Saved fight poster artwork" style={{ width: 150, maxHeight: 210, objectFit: 'contain', borderRadius: 10 }} />}
         </div>}
