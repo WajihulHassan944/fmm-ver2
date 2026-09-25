@@ -26,6 +26,8 @@
 .buttons button:not(:disabled):hover, .buttons a:hover { background: #9346c6; }
 .buttons button:not(:disabled), .buttons a { cursor: pointer !important; }
 .buttons button:disabled { opacity: .6; cursor: wait; }
+.templates details { margin: 10px 0; }
+.templates details summary { cursor: pointer; }
 .templates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .templates article > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
 .templates h3 { margin: 0; }

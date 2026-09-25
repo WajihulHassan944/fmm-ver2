@@ -156,7 +156,7 @@ export default function AffiliateFightLaunch() {
   const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['TikTok', copyByPlatform.tiktok], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
     <Head><title>Your fight share kit | FANTASY MMADNESS</title></Head>
-    <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>On your phone, tap Share poster below, choose your app, paste the copied caption, and post once. The poster carries your tracked QR.</p></div>
+    <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Choose a platform below to open its posting page. Your caption is copied for pasting. Instagram and TikTok require you to select your poster from your phone.</p></div>
     {busy && <p>Preparing your personal fight link…</p>}
     {!busy && !getAffiliateToken() && <p><Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate to see your personal kit →</Link></p>}
     {error && <p role="alert">{error} <Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate →</Link></p>}
@@ -169,16 +169,22 @@ export default function AffiliateFightLaunch() {
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><details><summary>Other ways to save or copy</summary><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Save poster to Downloads'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Downloads appear in your phone’s Files or Downloads app, usually not Photos. You can also long press the poster preview to save the image to Photos if your phone offers that option.</small></details></div>
       </div>
       <div className={styles.templates}>{posts.map(([platform, value]) => { const key = platform.toLowerCase(); const account = social?.[key]; return <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
-        <div className={styles.buttons}><button type="button" disabled={!poster || shareBusy} onClick={() => sharePoster(value)}>{shareBusy ? 'Opening share menu…' : 'Share poster once · copy caption'}</button></div>
+        <div className={styles.buttons}>
+          {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${link}&share=poster-2`)}`} target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'Facebook caption')}>Open Facebook share · copy caption</a>}
+          {platform === 'Instagram' && <a href="https://www.instagram.com/create/select/" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'Instagram caption')}>Open Instagram create · copy caption</a>}
+          {platform === 'TikTok' && <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener noreferrer" onClick={() => copy(value, 'TikTok caption')}>Open TikTok upload · copy caption</a>}
+          {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post with text</a>}
+        </div>
+        <details><summary>Want to share the poster through your phone instead?</summary><div className={styles.buttons}><button type="button" disabled={!poster || shareBusy} onClick={() => sharePoster(value)}>{shareBusy ? 'Opening share menu…' : 'Share poster once · copy caption'}</button></div></details>
         <p className={styles.socialStatus}>{platform === 'TikTok' ? 'Ready to post manually with your personal QR poster' : account?.connected ? `Connected: ${account.label}` : account?.configured ? 'Account not connected' : 'Direct publishing awaiting platform setup'}{account?.status === 'published' ? ' · Published for this fight' : account?.status === 'review' ? ' · Check your account before retrying' : ''}</p>
         {platform !== 'TikTok' && account?.configured && <div className={styles.buttons}>
           <button type="button" disabled={!account?.configured || Boolean(socialBusy)} onClick={() => connect(key)}>{account?.connected ? 'Reconnect account' : 'Connect account'}</button>
           <button type="button" disabled={!account?.connected || (key !== 'x' && !poster) || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
         </div>}
-        {platform === 'Facebook' && <small>Choose Facebook from your phone’s share menu, then paste the copied caption. A connected Facebook Page can use Publish.</small>}
-        {platform === 'Instagram' && <small>Publish sends the personal poster above with your tracked QR to your connected professional Instagram account. Instagram caption links are not clickable.</small>}
-        {platform === 'TikTok' && <small>Download your fight poster above, upload it as a photo post in TikTok, and paste this caption. Put your tracked link in your bio where available; viewers can scan the QR in the post.</small>}
-        {platform === 'X' && <small>Publish posts the prepared text and tracked link to your connected X account.</small>}
+        {platform === 'Facebook' && <small>Facebook opens with your tracked fight link and artwork preview. Paste the copied caption. To attach the QR poster as a photo, save it using “Other ways to save or copy” above and add it in Facebook.</small>}
+        {platform === 'Instagram' && <small>Instagram opens its create page when available. Choose the QR poster from Downloads or Photos, then paste the caption. A connected professional account can use Publish to send both directly. Caption links display as text.</small>}
+        {platform === 'TikTok' && <small>TikTok opens its upload page when available. Select the QR poster from Downloads or Photos and paste the caption.</small>}
+        {platform === 'X' && <small>X opens with the prepared text and tracked link. Attach your saved QR poster if you want the image in the post.</small>}
       </article>; })}</div>
     </>}
   </main>;
