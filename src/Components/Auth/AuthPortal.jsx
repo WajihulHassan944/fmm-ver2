@@ -102,6 +102,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const [forgotPassword, setForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [playerRegistration, setPlayerRegistration] = useState({ state: 'idle', email: '' });
+  const [resendingVerification, setResendingVerification] = useState(false);
   const [affiliateRegistered, setAffiliateRegistered] = useState(false);
   const [affiliateInstantApproved, setAffiliateInstantApproved] = useState(false);
   const [promoterInstantApproved, setPromoterInstantApproved] = useState(false);
@@ -233,6 +234,16 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     }
   };
 
+  const resendPlayerVerification = async (email) => {
+    if (!String(email || '').trim()) { toast.error('Enter your email address first.'); return; }
+    setResendingVerification(true);
+    try {
+      await apiRequest('/resend-verification', { method: 'POST', token: null, body: { email: String(email).trim() } });
+      toast.success('If this account still needs verification, a new link is on its way. Check your inbox and spam folder.');
+    } catch (error) { toast.error(error.message || 'Could not resend the verification email.'); }
+    finally { setResendingVerification(false); }
+  };
+
   const handlePlayerSignup = async (event) => {
     event.preventDefault();
     if (!requireRecaptcha()) return;
@@ -249,13 +260,14 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     setIsSubmitting(true);
     try {
       const referrerId = queryValue(router.query.referrer);
-      await apiRequest('/register', {
+      const registration = await apiRequest('/register', {
         method: 'POST',
         token: null,
         body: { ...playerForm, ...(referrerId ? { referrerId, referredFightId: queryValue(router.query.fight) } : {}), recaptchaToken },
       });
-      setPlayerRegistration({ state: 'polling', email: playerForm.email });
-      toast.success('Account created. Check your email to verify it.');
+      setPlayerRegistration({ state: registration?.emailFailed ? 'email-failed' : 'polling', email: playerForm.email });
+      if (registration?.emailFailed) toast.error('Account saved, but the verification email could not be sent. Use Resend verification email.');
+      else toast.success('Account created. Check your email to verify it.');
     } catch (error) {
       toast.error(error.message || 'Unable to create the account.');
     } finally {
@@ -381,6 +393,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
 
   const completionCard = (() => {
     if (playerRegistration.state === 'polling') return { title: 'Verify your email', copy: `We sent a verification link to ${playerRegistration.email}. Open it, then return here and continue to the new login.`, icon: FaEnvelope };
+    if (playerRegistration.state === 'email-failed') return { title: 'Verification email not sent', copy: `Your account is saved as Pending, but the email to ${playerRegistration.email} could not be delivered. Use Resend verification email below.`, icon: FaEnvelope };
     if (playerRegistration.state === 'timed-out') return { title: 'Verification window ended', copy: 'The account was created, but verification was not detected within two minutes. Open the email link, then sign in.', icon: FaShieldAlt };
     if (affiliateRegistered && promoterInstantApproved) return { title: 'Promoter access approved!', copy: 'Your affiliate and Full Card Promoter tools are ready. Sign in to build and share your fight card.', icon: FaUserFriends };
     if (affiliateRegistered) return affiliateInstantApproved
@@ -438,13 +451,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                   <h3>{completionCard.title}</h3>
                   <p>{completionCard.copy}</p>
                   {playerRegistration.state === 'polling' && <div className="xp-auth-pulse"><i /><span>Waiting for verification</span></div>}
-                  {(playerRegistration.state === 'polling' || playerRegistration.state === 'timed-out') && (
-                    <button type="button" className="xp-auth-inline-action" onClick={async () => {
-                      try {
-                        await apiRequest('/resend-verification', { method: 'POST', token: null, body: { email: playerRegistration.email } });
-                        toast.success('Verification email resent — check your inbox (and spam folder).');
-                      } catch (error) { toast.error(error.message || 'Could not resend the email.'); }
-                    }}>Resend verification email</button>
+                  {['polling', 'timed-out', 'email-failed'].includes(playerRegistration.state) && (
+                    <button type="button" className="xp-auth-inline-action" disabled={resendingVerification} onClick={() => resendPlayerVerification(playerRegistration.email)}>{resendingVerification ? 'Sending…' : 'Resend verification email'}</button>
                   )}
                   {playerRegistration.state === 'polling' && (
                     <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
@@ -469,6 +477,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                   )}
                   <div className="xp-auth-recaptcha"><ReCAPTCHA key={`${mode}-${role}`} sitekey={RECAPTCHA_SITE_KEY} onChange={setRecaptchaToken} theme="dark" /></div>
                   {role !== 'sponsor' && <button type="button" className="xp-auth-inline-action" onClick={() => setForgotPassword(true)}>Forgot password?</button>}
+                  {role === 'player' && <button type="button" className="xp-auth-inline-action" disabled={resendingVerification} onClick={() => resendPlayerVerification(loginForm.email)}>{resendingVerification ? 'Sending…' : 'Need a new verification email?'}</button>}
                   <button type="submit" className="theme-btn theme-btn-primary xp-auth-submit" disabled={isSubmitting}>{isSubmitting ? 'Opening your corner...' : role === 'sponsor' ? 'Open sponsor profile' : `Login as ${selectedRole.label}`} <FaArrowRight /></button>
                   {role !== 'sponsor' && (
                     <div className="xp-auth-google"><span>or continue with Google</span><GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google authentication was cancelled.')} theme="filled_black" shape="rectangular" width="100%" /></div>
