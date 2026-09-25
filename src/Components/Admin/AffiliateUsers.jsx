@@ -324,8 +324,8 @@ const AffiliateUsers = () => {
         if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          const detail = [data?.message || `Email request failed (HTTP ${response.status}).`, data?.code, data?.responseCode && `SMTP ${data.responseCode}`].filter(Boolean).join(' · ');
-          providerLimit = /sending account has reached a provider sending limit|daily (user |smtp relay )?sending limit exceeded/i.test(`${data?.message || ''} ${data?.providerResponse || ''}`);
+          const detail = [data?.message || `Email request failed (HTTP ${response.status}).`, data?.code, data?.responseCode && `SMTP ${data.responseCode}`, data?.providerResponse && `Provider: ${data.providerResponse}`].filter(Boolean).join(' · ');
+          providerLimit = /sending account has reached a provider sending limit/i.test(data?.message || '');
           throw new Error(detail);
         }
         sent += 1;
