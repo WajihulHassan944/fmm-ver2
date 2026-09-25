@@ -281,7 +281,7 @@ const AffiliateUsers = () => {
 
   const affiliateLaunchMessage = (recipient) => {
     const affiliateId = String(recipient._id);
-    const fightLink = `https://www.fantasymmadness.com/fight/${encodeURIComponent(launchFightId)}?ref=${encodeURIComponent(affiliateId)}`;
+    const fightLink = `https://www.fantasymmadness.com/league/${encodeURIComponent(affiliateId)}?fightId=${encodeURIComponent(launchFightId)}`;
     const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight')).slice(0, 150);
