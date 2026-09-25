@@ -9,7 +9,7 @@ import {
   FaShieldAlt,
   FaTrophy,
 } from 'react-icons/fa';
-import { FMM_ASSET_BASE, getFighterImage, getFighterName } from '@/Utils/fightExperience';
+import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 
@@ -45,8 +45,6 @@ const buildRound = (round) => ({
   spText: 'SP',
 });
 
-const metricIcon = `${FMM_ASSET_BASE}/fight-slashes.svg`;
-
 const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const router = useRouter();
   const user = useSelector((state) => state.user);
@@ -67,6 +65,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [buttonText, setButtonText] = useState('Submit Predictions');
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
+  const [submitError, setSubmitError] = useState('');
   const quickPickApplied = useRef('');
   // Stable per submit attempt so a double-tap or retry cannot double-charge.
   const idempotencyKeyRef = useRef('');
@@ -208,6 +207,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     }
     setSubmitting(true);
     setButtonText('Saving!');
+    setSubmitError('');
 
     try {
       const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
@@ -258,7 +258,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           return;
         }
         if (entryPayload?.code === 'ALREADY_ENTERED' || entryPayload?.alreadyEntered) {
-          alert('You have already entered this fight.');
+          setSubmitError('This fight already has an entry for your account. Check My Entries before trying again.');
           setSubmitting(false);
           return;
         }
@@ -275,7 +275,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       });
     } catch (error) {
       console.error('Error saving predictions:', error);
-      alert('Failed to save predictions.');
+      setSubmitError(error?.message || 'Could not submit predictions. Your picks are still here; please try again.');
     } finally {
       setSubmitting(false);
       setButtonText('Submit Predictions');
@@ -413,7 +413,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         <small>{getFighterName(match, 'A')}</small>
                       </label>
                       <div>
-                        <img src={metricIcon} alt="" aria-hidden="true" />
+                        <FaFistRaised aria-hidden="true" className="player-round-metric-icon" />
                         <span><b>{metric.code}</b><strong>{metric.title}</strong></span>
                       </div>
                       <label className="is-b">
@@ -490,6 +490,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         </div>
 
         <div className="xp-prediction-submit-panel">
+          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError}</p>}
           <div><FaShieldAlt /><span>Your entries remain editable until the fight locks.</span></div>
           <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting}>
             <FaTrophy /> {buttonText}
