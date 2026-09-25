@@ -208,7 +208,7 @@ const AffiliateUsers = () => {
     setBulkResults([]);
     setMailLimitReached(false);
     setBulkEmailOpen(true);
-  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers, manualLaunch, launchRequested]);
+  }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers, manualLaunch, launchRequested, loading]);
 
   useEffect(() => {
     if (!bulkEmailOpen || !launchSelectionPending.current || loading || !affiliateUsers.length) return;
