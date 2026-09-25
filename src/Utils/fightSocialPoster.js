@@ -92,14 +92,19 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     ctx.fillStyle = '#080b18'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
     const scale = Math.min(WIDTH / art.width, 1080 / art.height);
     ctx.drawImage(art, (WIDTH - art.width * scale) / 2, (1080 - art.height * scale) / 2, art.width * scale, art.height * scale);
+    // The owner's uploaded square artwork reserves its lower-right box for
+    // each affiliate's tracked QR. Keep the surrounding gold border visible.
+    if (qr) {
+      ctx.fillStyle = '#fff'; ctx.fillRect(828, 838, 210, 210);
+      ctx.drawImage(qr, 834, 844, 198, 198);
+    }
     ctx.fillStyle = '#10172c'; ctx.fillRect(0, 1080, WIDTH, 270);
     ctx.fillStyle = '#ed263b'; ctx.fillRect(0, 1080, WIDTH, 7);
     ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
-    ctx.font = '900 54px Impact, Arial Black, sans-serif'; ctx.fillText(joinLine, 36, 1155, 790);
-    ctx.font = 'bold 31px Arial, sans-serif'; ctx.fillText(rewardsLine, 36, 1205, 790);
-    ctx.font = 'bold 24px Arial, sans-serif'; ctx.fillText('MAKE YOUR PICKS • SCAN TO PLAY', 36, 1251, 790);
-    ctx.font = '20px Arial, sans-serif'; ctx.fillText('See fight page for entry details and prize rules.', 36, 1313, 790);
-    if (qr) { ctx.fillStyle = '#fff'; ctx.fillRect(850, 1100, 200, 200); ctx.drawImage(qr, 860, 1110, 180, 180); }
+    ctx.font = '900 54px Impact, Arial Black, sans-serif'; ctx.fillText(joinLine, 36, 1155, 1000);
+    ctx.font = 'bold 31px Arial, sans-serif'; ctx.fillText(rewardsLine, 36, 1205, 1000);
+    ctx.font = 'bold 24px Arial, sans-serif'; ctx.fillText('MAKE YOUR PICKS • SCAN THE POSTER TO PLAY', 36, 1251, 1000);
+    ctx.font = '20px Arial, sans-serif'; ctx.fillText('See fight page for entry details and prize rules.', 36, 1313, 1000);
     return canvas.toDataURL('image/png');
   }
   const background = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
