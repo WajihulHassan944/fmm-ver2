@@ -8,7 +8,7 @@ export const affiliateFightPosts = (title, link, league = 'my league', prize = 0
   const invitation = `I’m inviting you to join ${league} on FANTASY MMADNESS for ${name}. Make your picks before the fight and see how you stack up against other fans.\n\n${reward}\n\nOpen my league link for entry details, eligibility, and prize rules.`;
   // Give Facebook a fresh preview URL after the fight-specific artwork update.
   // The existing ref parameter remains intact for affiliate attribution.
-  const facebookLink = `${link}${link.includes('?') ? '&' : '?'}share=affiliate-qr-7`;
+  const facebookLink = `${link}${link.includes('?') ? '&' : '?'}share=affiliate-qr-8`;
   const xPrefix = `Join ${String(league).slice(0, 30)} for `;
   const xPrize = Number(prize) > 0 ? ` ${Number(prize).toLocaleString()} FM COINS PRIZE POOL${Number(entryCoins) > 0 ? ' + eligible cash winnings' : ''}.` : ' Compete for prizes where eligible.';
   const xSuffix = `.${xPrize} ${link} Affiliate link; I may earn from entries.`;
