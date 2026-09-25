@@ -52,8 +52,8 @@ export default async function handler(req, res) {
         {poster && <img src={poster} alt="" width={1200} height={630} style={{ position: 'absolute', top: 0, left: 0, objectFit: 'cover', opacity: 0.45 }} />}
         <div style={{ display: 'flex', position: 'relative', width: 630, height: 630, overflow: 'hidden' }}>
           {poster && <img src={poster} alt="" width={630} height={630} style={{ objectFit: 'contain' }} />}
-          <div style={{ display: 'flex', position: 'absolute', right: 18, bottom: 18, padding: 3, background: 'white' }}>
-            <img src={qr} alt="Affiliate fight QR" width={90} height={90} />
+          <div style={{ display: 'flex', position: 'absolute', right: 11, bottom: 11, padding: 4, background: 'white' }}>
+            <img src={qr} alt="Affiliate fight QR" width={140} height={140} />
           </div>
         </div>
       </div>,
