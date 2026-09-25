@@ -1,0 +1,12 @@
+.page { min-height: 85vh; background: #090c15; color: #f7f8ff; padding: 44px 20px; }
+.shell { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr); gap: 32px; align-items: center; }
+.poster { display: block; width: 100%; height: auto; border: 1px solid #393d50; border-radius: 14px; }
+.content { padding: 20px; }
+.eyebrow { color: #ffca53; font-size: 13px; font-weight: 800; letter-spacing: .12em; }
+.content h1 { font-size: clamp(32px, 5vw, 58px); line-height: 1.08; margin: 20px 0; }
+.content p { font-size: 19px; line-height: 1.5; color: #d7dbe8; }
+.content button { display: inline-block; border: 0; border-radius: 9px; background: #ed253e; color: white; padding: 16px 25px; font: inherit; font-weight: 800; cursor: pointer; }
+.content button:disabled { opacity: .65; cursor: wait; }
+.content .hint { font-size: 14px; }
+.content a { display: inline-block; margin-top: 10px; color: #ffd273; font-weight: 700; }
+@media (max-width: 750px) { .shell { grid-template-columns: 1fr; gap: 12px; } .content { padding: 10px 0; } }
