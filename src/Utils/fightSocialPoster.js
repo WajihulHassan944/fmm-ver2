@@ -84,7 +84,7 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
   const rewardsLine = Number(entryCoins) > 0 && Number(prize) > 0 ? 'CASH PRIZES WHERE ELIGIBLE' : 'COMPETE FOR PRIZES';
   const joinLine = league ? `JOIN ${String(league).toUpperCase()}` : 'JOIN THE FIGHT';
   const canvas = document.createElement('canvas');
-  canvas.width = WIDTH; canvas.height = HEIGHT;
+  canvas.width = WIDTH; canvas.height = basePoster ? WIDTH : HEIGHT;
   const ctx = canvas.getContext('2d');
   if (basePoster) {
     const [art, qr] = await Promise.all([loadImage(basePoster), QRCode.toDataURL(url, { width: 420, margin: 3, errorCorrectionLevel: 'H' }).then(loadImage)]);
@@ -98,13 +98,6 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
       ctx.fillStyle = '#fff'; ctx.fillRect(828, 838, 210, 210);
       ctx.drawImage(qr, 834, 844, 198, 198);
     }
-    ctx.fillStyle = '#10172c'; ctx.fillRect(0, 1080, WIDTH, 270);
-    ctx.fillStyle = '#ed263b'; ctx.fillRect(0, 1080, WIDTH, 7);
-    ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
-    ctx.font = '900 54px Impact, Arial Black, sans-serif'; ctx.fillText(joinLine, 36, 1155, 1000);
-    ctx.font = 'bold 31px Arial, sans-serif'; ctx.fillText(rewardsLine, 36, 1205, 1000);
-    ctx.font = 'bold 24px Arial, sans-serif'; ctx.fillText('MAKE YOUR PICKS • SCAN THE POSTER TO PLAY', 36, 1251, 1000);
-    ctx.font = '20px Arial, sans-serif'; ctx.fillText('See fight page for entry details and prize rules.', 36, 1313, 1000);
     return canvas.toDataURL('image/png');
   }
   const background = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
