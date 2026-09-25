@@ -30,6 +30,7 @@ const RegisteredUsers = () => {
   const [bulkSending, setBulkSending] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
   const [bulkResults, setBulkResults] = useState([]);
+  const [resendingId, setResendingId] = useState('');
   const router = useRouter();
 
   const requireFreshAdminSession = (response) => {
@@ -176,12 +177,32 @@ const RegisteredUsers = () => {
 
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   const canReceiveBulkEmail = (user) => isValidEmail(user?.email)
+    && user?.verified === true
     && !user?.selfExcluded
     && !user?.emailOptOut
     && !user?.unsubscribed;
   const visibleEmailIds = filteredUsers.filter(canReceiveBulkEmail).map((user) => user._id);
   const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedUserIds.includes(id));
   const selectedRecipients = users.filter((user) => selectedUserIds.includes(user._id) && canReceiveBulkEmail(user));
+
+  const resendVerification = async (user) => {
+    if (!isValidEmail(user.email) || resendingId) return;
+    setResendingId(user._id);
+    try {
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email.trim() }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Could not send verification email.');
+      toast.success(`Verification email requested for ${user.email}. Ask them to check their inbox and spam folder.`);
+    } catch (error) {
+      toast.error(error.message || 'Could not send verification email.');
+    } finally {
+      setResendingId('');
+    }
+  };
 
   const toggleUser = (id) => {
     setSelectedUserIds((current) => current.includes(id)
@@ -244,6 +265,7 @@ const RegisteredUsers = () => {
           <p className="admin-page-eyebrow">People &amp; finance</p>
           <h1>Registered users</h1>
           <p>Review player accounts, plans, verification details, wallet balances, and moderation actions.</p>
+          <p>Pending means the player signed up but has not verified their email. They cannot sign in yet. Use the resend action to send a fresh link.</p>
         </div>
         <div className="admin-page-actions">
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
@@ -292,11 +314,12 @@ const RegisteredUsers = () => {
                   </td>
                   <td><span className="admin-status-badge is-draft">{user.currentPlan || 'None'}</span></td>
                   <td>{Number(user.tokens || 0).toLocaleString()}</td>
-                  <td><span className={`admin-status-badge ${user.verified ? 'is-success' : 'is-warning'}`}>{user.verified ? 'Verified' : 'Pending'}</span></td>
+                  <td><span className={`admin-status-badge ${user.verified ? 'is-success' : 'is-warning'}`}>{user.verified ? 'Verified' : 'Pending email verification'}</span></td>
                   <td><span className="admin-cell-stack"><strong>{user.email || '—'}</strong><small>{user.phone || 'No phone'}</small></span></td>
                   <td>
                     <div className="admin-row-actions">
                       <button type="button" title="View user" onClick={() => handleView(user)}><FaEye /></button>
+                      {!user.verified && isValidEmail(user.email) && <button type="button" title="Resend verification email" aria-label={`Resend verification email to ${user.email}`} disabled={Boolean(resendingId)} onClick={() => resendVerification(user)}><FaEnvelope /></button>}
                       <button type="button" className="is-danger" title="Delete user" onClick={() => handleDelete(user._id)}><FaTrash /></button>
                     </div>
                   </td>

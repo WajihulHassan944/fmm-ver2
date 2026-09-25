@@ -21,7 +21,8 @@ export default function FullCardPromoterDesk() {
   const [form, setForm] = useState(emptyCard); const [editingId, setEditingId] = useState('');
   const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [message, setMessage] = useState('');
   const [qr, setQr] = useState('');
-  const load = async () => { setLoading(true); setMessage(''); try { const data = await fullCardRequest('/api/affiliates/me/full-cards', { kind: 'affiliate' }); setCards(data.cards || []); setPermission(data.permission || {}); } catch (e) { setMessage(e.message); } finally { setLoading(false); } };
+  const [publishedCard, setPublishedCard] = useState(null);
+  const load = async ({ preserveMessage = false } = {}) => { setLoading(true); if (!preserveMessage) setMessage(''); try { const data = await fullCardRequest('/api/affiliates/me/full-cards', { kind: 'affiliate' }); setCards(data.cards || []); setPermission(data.permission || {}); } catch (e) { setMessage(e.message); } finally { setLoading(false); } };
   useEffect(() => { load(); }, []);
   const updateBout = (index, key, value) => setForm((old) => ({ ...old, bouts: old.bouts.map((bout, i) => {
     if (i !== index) return bout;
@@ -45,8 +46,9 @@ export default function FullCardPromoterDesk() {
         ? await fullCardRequest(`/api/affiliates/me/full-cards/${editingId}`, { method: 'PUT', kind: 'affiliate', body: persistedForm })
         : await fullCardRequest('/api/affiliates/me/full-cards', { method: 'POST', kind: 'affiliate', body: persistedForm });
       const id = data.card.id; setEditingId(id);
-      if (publish) await fullCardRequest(`/api/affiliates/me/full-cards/${id}/publish`, { method: 'POST', kind: 'affiliate' });
-      setMessage(publish ? 'Full Card published. One link is ready to share.' : 'Draft saved.'); await load();
+      const published = publish ? await fullCardRequest(`/api/affiliates/me/full-cards/${id}/publish`, { method: 'POST', kind: 'affiliate' }) : null;
+      setPublishedCard(published?.card?.shareUrl ? published.card : null);
+      setMessage(publish ? 'Full Card published. Your promotional link is below.' : 'Draft saved.'); await load({ preserveMessage: true });
     } catch (e) { setMessage(e.message); } finally { setSaving(false); }
   };
   const edit = (card) => {
@@ -65,12 +67,15 @@ export default function FullCardPromoterDesk() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const showQr = async (url) => { try { setQr(await QRCode.toDataURL(url, { width: 900, margin: 4, color: { dark: '#07101aff', light: '#ffffffff' } })); } catch (_error) { setMessage('Could not create this QR code. Copy the link instead.'); } };
+  const copyLink = async (url) => { try { await navigator.clipboard.writeText(url); setMessage('Promotional link copied.'); } catch (_error) { setMessage('Select the link and copy it manually.'); } };
+  const isPublished = (card) => ['UPCOMING', 'LIVE', 'COMPLETED'].includes(card.status) && card.shareUrl;
 
   return <div className="full-card-shell">
     <Head><title>Full Card Promotions | FANTASY MMADNESS</title></Head><AffiliateExperienceNav />
     <main className="full-card-container">
       <header className="full-card-hero"><p>VERIFIED PROMOTER OPERATIONS</p><h1>Full Card Promotions</h1><span>You build the fight card. FANTASY MMADNESS makes the entire card interactive.</span></header>
       {message && <div className="full-card-notice">{message}</div>}
+      {publishedCard && <section className="full-card-notice" aria-live="polite"><h2>{publishedCard.eventName} is published</h2><p>Share this link with fans. It opens your full card and includes your promoter code.</p><input aria-label="Your full card promotional link" readOnly value={publishedCard.shareUrl} onFocus={(event) => event.target.select()} style={{ width: '100%', padding: 12 }} /><button type="button" onClick={() => copyLink(publishedCard.shareUrl)}><FaCopy /> Copy promotional link</button> <a href={publishedCard.shareUrl} target="_blank" rel="noopener noreferrer">Open full card</a></section>}
       {!loading && !permission && <section className="full-card-locked"><h2>Promoter access</h2><p>Full Card tools are available to approved FANTASY MMADNESS promoters through a private invitation.</p></section>}
       {permission && <>
         <section className="full-card-builder">
@@ -122,7 +127,7 @@ export default function FullCardPromoterDesk() {
           </article>)}</div>
         </section>
         <div className="full-card-publish-bar"><div><strong>Scoring</strong><span>We handle the scoring. You build the fight card.</span></div><button disabled={saving} onClick={() => save(false)}><FaSave /> Save draft</button><button disabled={saving} className="is-primary" onClick={() => save(true)}>Publish Full Card</button></div>
-        <section className="full-card-library"><header><p>MY FIGHT CARDS</p><h2>Manage & Share</h2></header><div className="full-card-grid">{cards.map((card) => <article key={card.id}><span>{card.status}</span>{card.eventPoster && <img src={card.eventPoster} alt="" />}<h3>{card.eventName}</h3><p>{card.bouts?.length || 0} fights · {new Date(card.eventDate).toLocaleDateString()}</p><div><button onClick={() => edit(card)}>Edit</button>{card.shareUrl && <><button onClick={() => navigator.clipboard.writeText(card.shareUrl)}><FaCopy /> Link</button><button onClick={() => showQr(card.shareUrl)}><FaQrcode /> QR</button><Link href={`/card/${card.slug}/${card.promoterCode}`}><FaShareAlt /> Open</Link></>}</div></article>)}</div></section>
+        <section className="full-card-library"><header><p>MY FIGHT CARDS</p><h2>Manage & Share</h2></header><div className="full-card-grid">{cards.map((card) => <article key={card.id}><span>{card.status}</span>{card.eventPoster && <img src={card.eventPoster} alt="" />}<h3>{card.eventName}</h3><p>{card.bouts?.length || 0} fights · {new Date(card.eventDate).toLocaleDateString()}</p>{isPublished(card) && <label>Promotional link<input aria-label={`${card.eventName} promotional link`} readOnly value={card.shareUrl} onFocus={(event) => event.target.select()} style={{ width: '100%' }} /></label>}<div><button onClick={() => edit(card)}>Edit</button>{isPublished(card) && <><button onClick={() => copyLink(card.shareUrl)}><FaCopy /> Copy link</button><button onClick={() => showQr(card.shareUrl)}><FaQrcode /> QR</button><Link href={`/card/${card.slug}/${card.promoterCode}`}><FaShareAlt /> Open</Link></>}</div></article>)}</div></section>
       </>}
       {qr && <div className="full-card-qr-modal" onClick={() => setQr('')}><div onClick={(e) => e.stopPropagation()}><h2>Full Card QR Code</h2><img src={qr} alt="Full Card QR code" /><p>Fans scan this to open your full card.</p><a href={qr} download="fantasy-mmadness-full-card.png" style={{ display: 'inline-block', padding: '10px 16px', marginRight: 12, borderRadius: 8, background: '#ffbd22', color: '#080d14', fontWeight: 800 }}>Download PNG</a><button onClick={() => setQr('')}>Close</button></div></div>}
     </main>
