@@ -52,7 +52,8 @@ const AffiliateUsers = () => {
   const [bulkSubject, setBulkSubject] = useState('Fantasy MMAdness affiliate update');
   const [bulkMessage, setBulkMessage] = useState('Hello {firstName},\n\n');
   const [bulkSending, setBulkSending] = useState(false);
-  const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
+  const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, skipped: 0, total: 0 });
+  const [mailLimitReached, setMailLimitReached] = useState(false);
   const [bulkResults, setBulkResults] = useState([]);
   const [posterFights, setPosterFights] = useState([]);
   const [posterFightId, setPosterFightId] = useState('');
@@ -203,6 +204,7 @@ const AffiliateUsers = () => {
     setBulkSubject(`FANTASY MMADNESS Owner Office: ${title || 'A new fight'} is ready to share`);
     setBulkMessage(`From the FANTASY MMADNESS Owner Office\n\nHello {firstName},\n\n${title || 'A new fight'} is live for promotion. The owner has already created the fight and set its entry and prize amounts. You only need to share it with your audience.\n\n1. OPEN YOUR PERSONAL FIGHT POSTER: {shareKit}\n2. Click Download my fight poster PNG. The fight artwork includes YOUR tracked QR.\n3. Copy the ready-made Facebook, Instagram, TikTok, or X caption and post the poster yourself. Include your clickable fight link wherever links work.\n4. Track your signups and estimated share on your Earnings page. Settled earnings become available for payout under your existing terms.\n\nYOUR FIGHT LINK: {fightLink}\nYOUR QR IMAGE (separate download): {qrLink}\n\nFACEBOOK CAPTION:\n{facebookPost}\n\nINSTAGRAM CAPTION (upload your personal fight poster):\n{instagramPost}\n\nTIKTOK CAPTION (upload your personal fight poster):\n{tiktokPost}\n\nX CAPTION:\n{xPost}\n\nYour fight link carries your affiliate attribution. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds from this fight under the existing affiliate split.\n\nFANTASY MMADNESS`);
     setBulkResults([]);
+    setMailLimitReached(false);
     setBulkEmailOpen(true);
   }, [router.isReady, router.query.launchFight, router.query.launchTitle, affiliateUsers, manualLaunch, launchRequested]);
 
@@ -302,11 +304,12 @@ const AffiliateUsers = () => {
     }
     setBulkSending(true);
     setBulkResults([]);
-    setBulkProgress({ sent: 0, failed: 0, total: selectedRecipients.length });
+    setBulkProgress({ sent: 0, failed: 0, skipped: 0, total: selectedRecipients.length });
     const results = [];
     let sent = 0;
     let failed = 0;
-    for (const recipient of selectedRecipients) {
+    for (const [index, recipient] of selectedRecipients.entries()) {
+      let providerLimit = false;
       try {
         const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
           method: 'POST',
@@ -322,6 +325,7 @@ const AffiliateUsers = () => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
           const detail = [data?.message || `Email request failed (HTTP ${response.status}).`, data?.code, data?.responseCode && `SMTP ${data.responseCode}`].filter(Boolean).join(' · ');
+          providerLimit = /sending account has reached a provider sending limit|daily (user |smtp relay )?sending limit exceeded/i.test(`${data?.message || ''} ${data?.providerResponse || ''}`);
           throw new Error(detail);
         }
         sent += 1;
@@ -330,14 +334,19 @@ const AffiliateUsers = () => {
         failed += 1;
         results.push({ id: recipient._id, email: recipient.email, ok: false, message: error.message || 'Failed to send.' });
       }
-      setBulkProgress({ sent, failed, total: selectedRecipients.length });
+      if (providerLimit) {
+        setMailLimitReached(true);
+        selectedRecipients.slice(index + 1).forEach((pending) => results.push({ id: pending._id, email: pending.email, ok: false, skipped: true, message: 'Not attempted: sending account has reached its provider limit.' }));
+      }
+      setBulkProgress({ sent, failed, skipped: results.filter((result) => result.skipped).length, total: selectedRecipients.length });
       setBulkResults([...results]);
+      if (providerLimit) break;
     }
     setBulkSending(false);
     bulkEmailBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     if (failed) {
       const firstError = results.find((result) => !result.ok)?.message;
-      toast.error(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed. ${firstError || 'Open the email window for details.'}`, { autoClose: 15000 });
+      toast.error(`${sent} email${sent === 1 ? '' : 's'} sent; ${failed} failed. ${firstError || 'Open the email window for details.'}${results.some((result) => result.skipped) ? ' Remaining emails were not attempted.' : ''}`, { autoClose: 15000 });
     }
     else toast.success(`${sent} affiliate email${sent === 1 ? '' : 's'} sent.`);
   };
@@ -593,7 +602,7 @@ const AffiliateUsers = () => {
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
             <div ref={bulkEmailBodyRef} className={`admin-modal-form-body admin-stacked-form ${modalStyles.body}`}>
-              {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors" role="alert"><strong>{bulkResults.filter((result) => !result.ok).length} email failed</strong>{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}<button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds(bulkResults.filter((result) => !result.ok).map((result) => result.id))}>Select failed recipients to retry</button></div>}
+              {bulkResults.some((result) => !result.ok) && <div className="admin-bulk-email-errors" role="alert"><strong>{bulkProgress.failed} failed{bulkProgress.skipped ? ` · ${bulkProgress.skipped} not attempted` : ''}</strong>{mailLimitReached && <span>Gmail has paused this sending account. Retry after Gmail restores sending, or configure a verified email provider.</span>}{bulkResults.filter((result) => !result.ok).map((result) => <span key={result.id}>{result.email}: {result.message}</span>)}<button type="button" disabled={bulkSending} onClick={() => setSelectedAffiliateIds(bulkResults.filter((result) => !result.ok).map((result) => result.id))}>Select unsent recipients</button></div>}
               <div className={modalStyles.recipientPicker}>
                 <strong>Choose affiliates to email ({selectedRecipients.length} of {eligibleRecipients.length})</strong>
                 <div className={modalStyles.actions}>
@@ -615,10 +624,10 @@ const AffiliateUsers = () => {
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
               {launchFightId && selectedRecipients.length > 0 && <details className="admin-bulk-email-note"><summary>Preview the first affiliate’s actual message</summary><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{affiliateLaunchMessage(selectedRecipients[0])}</pre></details>}
               <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
-              {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.total} total</span></div>}
+              {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.skipped} not attempted · {bulkProgress.total} total</span></div>}
             </div>
             <footer>
-              <button type="button" className="admin-action-primary" disabled={bulkSending || posterUploading || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : `Send ${selectedRecipients.length} emails`}</button>
+              <button type="button" className="admin-action-primary" disabled={bulkSending || mailLimitReached || posterUploading || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : mailLimitReached ? 'Sending paused by Gmail' : `Send ${selectedRecipients.length} emails`}</button>
               <button type="button" className="admin-action-secondary" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)}>Close</button>
             </footer>
           </section>
