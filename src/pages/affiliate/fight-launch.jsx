@@ -125,6 +125,28 @@ export default function AffiliateFightLaunch() {
     try { await navigator.clipboard.writeText(value); toast.success(`${name} copied.`); }
     catch { toast.error('Copy failed. Select the text and copy manually.'); }
   };
+  const prepareManualShare = (caption, platform) => {
+    if (poster) saveFightSocialPoster(poster, fightId);
+    navigator.clipboard?.writeText(caption).then(() => {
+      toast.info(`${platform} caption copied and QR poster downloaded. Upload the PNG and paste the caption in your post.`);
+    }).catch(() => toast.info('QR poster downloaded. Select and copy the caption above to post it.'));
+  };
+  const sharePoster = async (caption) => {
+    if (!poster) { toast.error('Wait for your QR poster to finish preparing.'); return; }
+    try {
+      const blob = await (await fetch(poster)).blob();
+      const file = new File([blob], `fantasy-mmadness-${fightId}.png`, { type: 'image/png' });
+      if (!navigator.canShare?.({ files: [file] })) {
+        saveFightSocialPoster(poster, fightId);
+        await copy(caption, 'Caption');
+        toast.info('Poster downloaded. Open your social app, upload the PNG, and paste the caption.');
+        return;
+      }
+      await navigator.share({ files: [file], text: caption, title: name });
+    } catch (error) {
+      if (error?.name !== 'AbortError') toast.error('Could not open your phone’s share menu. Download the poster and copy the caption instead.');
+    }
+  };
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
   const copyByPlatform = affiliateFightPosts(name, link, kit?.attribution?.leagueName || 'my league', kit?.creative?.prizeCoins, kit?.creative?.entryCoins);
@@ -144,16 +166,17 @@ export default function AffiliateFightLaunch() {
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Download my fight poster PNG'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>The poster QR contains your personal link. Test it before posting, and include the clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{posts.map(([platform, value]) => { const key = platform.toLowerCase(); const account = social?.[key]; return <article key={platform}><div><h3>{platform} post</h3><button type="button" onClick={() => copy(value, platform)}>Copy</button></div><textarea aria-label={`${platform} post`} readOnly rows={5} value={value} onFocus={(e) => e.target.select()} />
+        <div className={styles.buttons}><button type="button" disabled={!poster} onClick={() => sharePoster(value)}>Share poster and caption with phone apps</button></div>
         <p className={styles.socialStatus}>{platform === 'TikTok' ? 'Ready to post manually with your personal QR poster' : account?.connected ? `Connected: ${account.label}` : account?.configured ? 'Account not connected' : 'Direct publishing awaiting platform setup'}{account?.status === 'published' ? ' · Published for this fight' : account?.status === 'review' ? ' · Check your account before retrying' : ''}</p>
         {platform !== 'TikTok' && <div className={styles.buttons}>
           <button type="button" disabled={!account?.configured || Boolean(socialBusy)} onClick={() => connect(key)}>{account?.connected ? 'Reconnect account' : 'Connect account'}</button>
           <button type="button" disabled={!account?.connected || (key !== 'x' && !poster) || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
         </div>}
         <div className={styles.buttons} style={{ marginTop: 10 }}>
-          {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} target="_blank" rel="noopener noreferrer">Open Facebook share</a>}
-          {platform === 'Instagram' && <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Open Instagram</a>}
-          {platform === 'TikTok' && <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">Open TikTok</a>}
-          {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} target="_blank" rel="noopener noreferrer">Open X post</a>}
+          {platform === 'Facebook' && <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open Facebook share</a>}
+          {platform === 'Instagram' && <a href="https://www.instagram.com/" onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open Instagram</a>}
+          {platform === 'TikTok' && <a href="https://www.tiktok.com/upload" onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster, copy caption &amp; open TikTok upload</a>}
+          {platform === 'X' && <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(value)}`} onClick={() => prepareManualShare(value, platform)} target="_blank" rel="noopener noreferrer">Download poster &amp; open X post</a>}
         </div>
         {platform === 'Facebook' && <small>Connect a Facebook Page you manage. Publishing to personal profiles is unavailable. The manual share option opens Facebook with your tracked link.</small>}
         {platform === 'Instagram' && <small>Publish sends the personal poster above with your tracked QR to your connected professional Instagram account. Instagram caption links are not clickable.</small>}
