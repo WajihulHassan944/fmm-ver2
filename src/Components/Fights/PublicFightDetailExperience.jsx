@@ -234,10 +234,11 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
     <main className="public-fight-detail-page">
       <Head>
         <title>{title} | Fantasy MMAdness Fight Details</title>
-        <meta name="description" content={`${title} fight details, category, schedule, leaderboard, and prediction entry on Fantasy MMAdness.`} />
-        <meta property="og:title" content={`${title} | Fantasy MMAdness`} />
-        <meta property="og:description" content={`Open ${title}, view the leaderboard, and enter the prediction flow.`} />
-        <meta property="og:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
+        <meta key="description" name="description" content={`${title} fight details, category, schedule, leaderboard, and prediction entry on Fantasy MMAdness.`} />
+        <meta key="og:title" property="og:title" content={`${title} | Fantasy MMAdness`} />
+        <meta key="og:description" property="og:description" content={`Open ${title}, view the leaderboard, and enter the prediction flow.`} />
+        <meta key="og:image" property="og:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
+        <meta key="twitter:image" name="twitter:image" content={heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`} />
       </Head>
 
       <section className="public-fight-detail-hero">
