@@ -6,7 +6,12 @@ import { fullCardRequest, getStoredToken } from '@/Utils/fullCardApi';
 export default function PublicFullCard() {
   const router = useRouter(); const { slug, promoterCode } = router.query;
   const [card, setCard] = useState(null); const [leaderboard, setLeaderboard] = useState([]); const [progress, setProgress] = useState(null); const [error, setError] = useState('');
-  useEffect(() => { if (!slug || !promoterCode) return; const visitor = localStorage.getItem('fmmVisitorId') || `${Date.now()}-${Math.random()}`; localStorage.setItem('fmmVisitorId', visitor); fullCardRequest(`/api/full-cards/${slug}/${promoterCode}`, { headers: { 'x-fmm-visitor': visitor } }).then(({ card: value }) => { setCard(value); return Promise.all([fullCardRequest(`/api/full-cards/${value.id}/leaderboard`).then((x) => setLeaderboard(x.leaderboard || [])), getStoredToken('player') ? fullCardRequest(`/api/full-cards/${value.id}/progress`, { kind: 'player' }).then(setProgress) : null]); }).catch((e) => setError(e.message)); }, [slug, promoterCode]);
+  useEffect(() => { if (!slug || !promoterCode) return; const visitor = localStorage.getItem('fmmVisitorId') || `${Date.now()}-${Math.random()}`; localStorage.setItem('fmmVisitorId', visitor); fullCardRequest(`/api/full-cards/${slug}/${promoterCode}`, { headers: { 'x-fmm-visitor': visitor } }).then(({ card: value }) => {
+    setCard(value);
+    // The event is still shareable if leaderboard or account progress is unavailable.
+    fullCardRequest(`/api/full-cards/${value.id}/leaderboard`).then((x) => setLeaderboard(x.leaderboard || [])).catch(() => {});
+    if (getStoredToken('player')) fullCardRequest(`/api/full-cards/${value.id}/progress`, { kind: 'player' }).then(setProgress).catch(() => {});
+  }).catch((e) => setError(e.message)); }, [slug, promoterCode]);
   const active = useMemo(() => (card?.bouts || []).filter((b) => !['CANCELLED', 'REMOVED'].includes(b.status)), [card]);
   const share = async () => { const url = location.href; await fullCardRequest(`/api/full-cards/${card.id}/track`, { method: 'POST', body: { type: 'share' } }).catch(() => {}); if (navigator.share) navigator.share({ title: card.eventName, url }); else navigator.clipboard.writeText(url); };
   if (error) return <main className="public-card-state"><h1>Full Card unavailable</h1><p>{error}</p></main>;
@@ -19,4 +24,3 @@ export default function PublicFullCard() {
       <aside className="public-card-leaderboard"><header><FaTrophy /><div><p>FULL CARD LEADERBOARD</p><h2>Across the entire event</h2></div></header>{leaderboard.length ? leaderboard.slice(0, 10).map((row) => <div key={row.userId}><b>#{row.rank}</b>{row.profileUrl && <img src={row.profileUrl} alt="" />}<span><strong>{row.name}</strong><small>{row.fightsScored} fights scored</small></span><em>{row.totalPoints.toLocaleString()}</em></div>) : <p>No scored predictions yet.</p>}</aside></div>
     </main></div>;
 }
-
