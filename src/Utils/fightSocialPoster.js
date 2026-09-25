@@ -98,16 +98,6 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
       ctx.fillStyle = '#fff'; ctx.fillRect(795, 820, 260, 260);
       ctx.drawImage(qr, 800, 825, 250, 250);
     }
-    // Match the gold FM coin used throughout the game; one coin per poster.
-    ctx.save();
-    const coin = ctx.createRadialGradient(732, 983, 3, 744, 1008, 38);
-    coin.addColorStop(0, '#fff9c7'); coin.addColorStop(.25, '#ffd94a');
-    coin.addColorStop(.65, '#f7b51b'); coin.addColorStop(1, '#9a5b00');
-    ctx.beginPath(); ctx.arc(744, 1008, 36, 0, Math.PI * 2);
-    ctx.fillStyle = coin; ctx.fill(); ctx.strokeStyle = '#ffe979'; ctx.lineWidth = 5; ctx.stroke();
-    ctx.fillStyle = '#4b2900'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '900 28px Impact, Arial Black, sans-serif'; ctx.fillText('FM', 744, 1009);
-    ctx.restore();
     return canvas.toDataURL('image/png');
   }
   const background = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
