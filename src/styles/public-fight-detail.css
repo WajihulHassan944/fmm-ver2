@@ -521,3 +521,22 @@
 .public-fight-related-stories p {
   font-family: var(--fmm-font-body, Inter, Roboto, Arial, sans-serif) !important;
 }
+
+/* Make the main entry action visible above the secondary leaderboard link. */
+.public-fight-detail-actions .theme-btn-primary:not(:disabled) {
+  background: #e51d32 !important;
+  border: 2px solid #ff6976 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 28px rgba(229, 29, 50, .45) !important;
+  font-weight: 900;
+  min-height: 54px;
+  padding-inline: 26px;
+}
+.public-fight-detail-actions .theme-btn-primary:not(:disabled):hover,
+.public-fight-detail-actions .theme-btn-primary:not(:disabled):focus-visible {
+  background: #ff2941 !important;
+  box-shadow: 0 10px 34px rgba(229, 29, 50, .65) !important;
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.public-fight-detail-actions .theme-btn-primary svg { color: currentColor; }
