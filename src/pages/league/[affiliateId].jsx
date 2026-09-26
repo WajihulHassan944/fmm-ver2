@@ -72,13 +72,12 @@ export async function getServerSideProps({ params, query, res }) {
   const fightId = String(query?.fightId || '');
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
   try {
-    const [affiliatesResponse, fightResponse] = await Promise.all([
-      fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates?limit=200`),
+    const [affiliateResponse, fightResponse] = await Promise.all([
+      fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${encodeURIComponent(affiliateId)}`),
       fetch(`${PUBLIC_API_BASE_URL}/api/public/fights/${fightId}`),
     ]);
-    if (!affiliatesResponse.ok || !fightResponse.ok) return { notFound: true };
-    const [affiliates, payload] = await Promise.all([affiliatesResponse.json(), fightResponse.json()]);
-    const affiliate = Array.isArray(affiliates) && affiliates.find((item) => String(item._id) === affiliateId && item.verified);
+    if (!affiliateResponse.ok || !fightResponse.ok) return { notFound: true };
+    const [affiliate, payload] = await Promise.all([affiliateResponse.json(), fightResponse.json()]);
     const fight = payload.fight || payload.data || payload;
     if (!affiliate || !fight?._id) return { notFound: true };
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
