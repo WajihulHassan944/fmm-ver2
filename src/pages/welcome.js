@@ -954,9 +954,12 @@ export async function getServerSideProps({ res }) {
 }
 
 async function buildWelcomeProps() {
-  const [fightData, boardData, apparelData] = await Promise.all([
+  const [fightData, promotedData, boardData, apparelData] = await Promise.all([
     // prediction-fights, not fights — the latter does not exist and 404'd silently.
-    fetchJson('/api/public/prediction-fights?limit=24'),
+    fetchJson('/api/public/prediction-fights?limit=100'),
+    // Explicit owner selections must remain available even when newer
+    // promoter fights fill the ordinary recent-fights feed.
+    fetchJson('/api/public/homepage/promoted-fights?limit=24'),
     fetchJson('/api/public/leaderboard?limit=8'),
     // The live Etsy catalogue. Falls through to STORE_ITEMS when the shop is
     // unreachable or the Etsy keys are not configured.
@@ -972,8 +975,14 @@ async function buildWelcomeProps() {
       : Array.isArray(fightData?.matches) ? fightData.matches
         : Array.isArray(fightData) ? fightData : [];
 
+  const promotedFights = Array.isArray(promotedData?.items) ? promotedData.items : [];
+  const byId = new Map();
+  [...rawFights, ...promotedFights].forEach((fight) => {
+    const id = String(fight?._id || fight?.id || '');
+    if (id) byId.set(id, { ...(byId.get(id) || {}), ...fight });
+  });
   const now = Date.now();
-  const eligible = rawFights
+  const eligible = [...byId.values()]
     .filter((f) => f && resolveFightName(f, 'A') && resolveFightName(f, 'B'))
     // Was matchDate > now, which dropped a fight off the site the instant its
     // scheduled start time passed — even while the admin still had it marked
@@ -994,14 +1003,24 @@ async function buildWelcomeProps() {
   // Fights with no explicit slot fill whatever windows are left, in the old
   // rank/weight/date order.
   const slots = new Array(5).fill(null);
-  eligible.forEach((f) => {
+  const promoterId = (fight) => String(fight.affiliateId || '').trim();
+  const usedPromoters = new Set();
+  // Explicit admin placements stay put, including fights linked to affiliates.
+  // When old data assigns the same slot twice, the owner's selection wins.
+  [...eligible].sort((a, b) => Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b)))).forEach((f) => {
     const slot = Number(f.homepageSlot);
-    if (f.homepagePromoted && slot >= 1 && slot <= 5 && !slots[slot - 1]) slots[slot - 1] = f;
+    const promoter = promoterId(f);
+    if (f.homepagePromoted && slot >= 1 && slot <= 5 && !slots[slot - 1]) {
+      slots[slot - 1] = f;
+      if (promoter) usedPromoters.add(promoter);
+    }
   });
   const placedIds = new Set(slots.filter(Boolean).map((f) => f._id || f.id));
   const remaining = eligible
     .filter((f) => !placedIds.has(f._id || f.id))
     .sort((a, b) => {
+      const ownerDiff = Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b)));
+      if (ownerDiff) return ownerDiff;
       const liveDiff = Number(isLiveFight(b)) - Number(isLiveFight(a));
       if (liveDiff) return liveDiff;
       const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
@@ -1010,9 +1029,13 @@ async function buildWelcomeProps() {
       const diff = weight(b) - weight(a);
       return diff !== 0 ? diff : new Date(a.matchDate || 0) - new Date(b.matchDate || 0);
     });
-  let ri = 0;
-  for (let i = 0; i < 5 && ri < remaining.length; i++) {
-    if (!slots[i]) { slots[i] = remaining[ri]; ri += 1; }
+  for (const fight of remaining) {
+    const emptySlot = slots.findIndex((item) => !item);
+    if (emptySlot < 0) break;
+    const promoter = promoterId(fight);
+    if (promoter && usedPromoters.has(promoter)) continue;
+    slots[emptySlot] = fight;
+    if (promoter) usedPromoters.add(promoter);
   }
   const open = slots.filter(Boolean);
 
