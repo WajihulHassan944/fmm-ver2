@@ -451,7 +451,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     explicit.forEach((f) => {
       const slot = Number(f.homepageSlot);
       const promoter = promoterId(f);
-      if (takenSlots.has(slot) || (promoter && usedPromoters.has(promoter))) return;
+      if (takenSlots.has(slot)) return;
       map[String(getId(f))] = slot;
       takenSlots.add(slot);
       if (promoter) usedPromoters.add(promoter);
