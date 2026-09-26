@@ -14,9 +14,9 @@
 .uploadPanel .uploadError { color: #ff9ea8; font-weight: 700; }
 .layout { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(300px, 1fr); gap: 16px; }
 .preview, .share, .templates article, .affiliate { background: #222637; border: 1px solid #444c62; border-radius: 12px; padding: 16px; min-width: 0; }
-.photos { background: #101520; display: flex; justify-content: center; align-items: center; height: 180px; overflow: hidden; border-radius: 8px; }
-.photos img { width: 42%; height: 100%; object-fit: contain; object-position: center bottom; }
-.photos strong { color: #ffb83b; }
+.photos { background: #101520; display: grid; grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr); align-items: center; height: 180px; overflow: hidden; border-radius: 8px; }
+.photos img { display: block; width: 100%; height: 100%; min-width: 0; object-fit: cover; object-position: center 18%; }
+.photos strong { color: #ffb83b; text-align: center; }
 .preview h3 { margin: 13px 0 4px; font-size: 22px; }
 .posterFrame { position: relative; width: 100%; }
 .posterFrame img { display: block; width: 100%; height: auto; object-fit: contain; }
