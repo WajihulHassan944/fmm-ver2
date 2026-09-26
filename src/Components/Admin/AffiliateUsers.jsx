@@ -46,6 +46,10 @@ const AffiliateUsers = () => {
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const [showInvitePopup, setShowInvitePopup] = useState(false);
+  const [inviteRecipientEmail, setInviteRecipientEmail] = useState('');
+  const [inviteRecipientPhone, setInviteRecipientPhone] = useState('');
+  const [inviteGreeting, setInviteGreeting] = useState('Hi! I’m Kelly from FANTASY MMADNESS. I’d like to invite you to join as an affiliate. Use this private link to create your account; your affiliate access will be approved right away. The link works once and expires in 14 days.');
+  const [inviteSending, setInviteSending] = useState(false);
   const [recentInvites, setRecentInvites] = useState([]);
   const [selectedAffiliateIds, setSelectedAffiliateIds] = useState([]);
   const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
@@ -116,6 +120,46 @@ const AffiliateUsers = () => {
     } catch {
       toast.error('Could not copy — select and copy the link manually.');
     }
+  };
+
+  const inviteMessage = `${inviteGreeting.trim()}\n\nYour private affiliate signup link:\n${inviteLink.trim()}`;
+
+  const copyInviteMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteMessage);
+      toast.success('Greeting and link copied. Paste both into your message.');
+    } catch { toast.error('Could not copy the invitation message.'); }
+  };
+
+  const emailInvite = async () => {
+    const email = inviteRecipientEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !inviteGreeting.trim() || !inviteLink) {
+      toast.error('Enter a valid email and greeting first.');
+      return;
+    }
+    setInviteSending(true);
+    try {
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+        method: 'POST',
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ email, subject: 'Your FANTASY MMADNESS affiliate invitation', message: inviteMessage }),
+      });
+      if (requireFreshAdminSession(response)) return;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || 'The invitation email could not be sent.');
+      toast.success(`Affiliate invitation emailed to ${email}.`);
+    } catch (error) { toast.error(error.message || 'The invitation email could not be sent.'); }
+    finally { setInviteSending(false); }
+  };
+
+  const textInvite = () => {
+    const phone = inviteRecipientPhone.trim();
+    if (!/^\+?[\d\s().-]{7,22}$/.test(phone) || phone.replace(/\D/g, '').length < 7) {
+      toast.error('Enter a valid phone number to open a text message.');
+      return;
+    }
+    const separator = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
+    window.location.href = `sms:${phone.replace(/[^\d+]/g, '')}${separator}body=${encodeURIComponent(inviteMessage)}`;
   };
 
   const uploadDistinction = async () => {
@@ -679,11 +723,18 @@ const AffiliateUsers = () => {
               <button type="button" onClick={() => setShowInvitePopup(false)} aria-label="Close invite link">×</button>
             </header>
             <div className="admin-modal-form-body admin-stacked-form">
-              <p style={{ margin: 0, fontSize: 13, opacity: .8 }}>Send this to someone you already trust. When they sign up through it, their affiliate account is approved automatically — no wait, no admin action needed. One-time use, expires in 14 days.</p>
+              <p style={{ margin: 0, fontSize: 13, opacity: .8 }}>Send this to someone you already trust. When they sign up through it, their affiliate account is approved automatically. One-time use, expires in 14 days. Opening the link alone does not use it.</p>
               <label>
                 Link
                 <input type="text" value={inviteLink} readOnly onFocus={(event) => event.target.select()} />
               </label>
+              <a href={inviteLink} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', overflowWrap: 'anywhere' }}>Test the signup page ↗</a>
+              <label>Greeting (you can edit it)<textarea rows="5" value={inviteGreeting} disabled={inviteSending} onChange={(event) => setInviteGreeting(event.target.value)} /></label>
+              <label>Email address<input type="email" value={inviteRecipientEmail} disabled={inviteSending} placeholder="person@example.com" onChange={(event) => setInviteRecipientEmail(event.target.value)} /></label>
+              <button type="button" className="admin-action-secondary" disabled={inviteSending || !inviteRecipientEmail.trim() || !inviteGreeting.trim()} onClick={emailInvite}><FaEnvelope /> {inviteSending ? 'Sending…' : 'Send invitation by email'}</button>
+              <label>Phone number<input type="tel" value={inviteRecipientPhone} placeholder="Phone number for a text draft" onChange={(event) => setInviteRecipientPhone(event.target.value)} /></label>
+              <button type="button" className="admin-action-secondary" disabled={!inviteRecipientPhone.trim() || !inviteGreeting.trim()} onClick={textInvite}>Open text message</button>
+              <small>The text button opens your phone or computer’s messaging app with the greeting and link ready. Review and press Send there. You can also copy the full message below.</small>
               {recentInvites.length > 0 && (
                 <div>
                   <span style={{ fontSize: 12, fontWeight: 700, opacity: .7, display: 'block', marginBottom: 6 }}>Recent invites</span>
@@ -704,6 +755,7 @@ const AffiliateUsers = () => {
             </div>
             <footer>
               <button type="button" className="admin-action-primary" onClick={copyInviteLink}><FaCopy /> Copy link</button>
+              <button type="button" className="admin-action-secondary" onClick={copyInviteMessage}><FaCopy /> Copy greeting + link</button>
               <button type="button" className="admin-action-secondary" onClick={() => setShowInvitePopup(false)}>Close</button>
             </footer>
           </section>
