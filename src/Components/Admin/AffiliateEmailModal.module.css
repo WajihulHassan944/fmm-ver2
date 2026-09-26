@@ -28,6 +28,15 @@
   overscroll-behavior: contain;
 }
 
+.inviteModal {
+  max-width: 720px !important;
+  height: min(800px, calc(100dvh - 32px));
+}
+
+.inviteModal > footer {
+  flex-wrap: wrap;
+}
+
 .recipientPicker {
   display: grid;
   gap: 10px;
@@ -60,4 +69,5 @@
   .recipientList { grid-template-columns: 1fr; }
   .modal > header, .modal > footer { padding: 12px !important; }
   .body { padding: 12px !important; }
+  .inviteModal { height: calc(100dvh - 16px); }
 }

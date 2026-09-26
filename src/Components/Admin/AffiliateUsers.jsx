@@ -50,6 +50,8 @@ const AffiliateUsers = () => {
   const [inviteRecipientPhone, setInviteRecipientPhone] = useState('');
   const [inviteGreeting, setInviteGreeting] = useState('Hi! I’m Kelly from FANTASY MMADNESS. I’d like to invite you to join as an affiliate. Use this private link to create your account; your affiliate access will be approved right away. The link works once and expires in 14 days.');
   const [inviteSending, setInviteSending] = useState(false);
+  const [inviteSharing, setInviteSharing] = useState(false);
+  const [inviteLogoFile, setInviteLogoFile] = useState(null);
   const [recentInvites, setRecentInvites] = useState([]);
   const [selectedAffiliateIds, setSelectedAffiliateIds] = useState([]);
   const [bulkEmailOpen, setBulkEmailOpen] = useState(false);
@@ -71,6 +73,19 @@ const AffiliateUsers = () => {
   const preparedLaunch = useRef('');
   const launchSelectionPending = useRef(false);
   const bulkEmailBodyRef = useRef(null);
+
+  useEffect(() => {
+    if (!showInvitePopup || !navigator.share) return undefined;
+    let active = true;
+    fetch('/images/brand/fantasy-mmadness-main-logo-v23.jpg')
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Logo unavailable.');
+        return new File([await response.blob()], 'fantasy-mmadness-logo.jpg', { type: 'image/jpeg' });
+      })
+      .then((file) => { if (active) setInviteLogoFile(file); })
+      .catch(() => { if (active) setInviteLogoFile(null); });
+    return () => { active = false; };
+  }, [showInvitePopup]);
 
   const requireFreshAdminSession = (response) => {
     if (response.status !== 401 && response.status !== 403) return false;
@@ -160,6 +175,19 @@ const AffiliateUsers = () => {
     }
     const separator = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
     window.location.href = `sms:${phone.replace(/[^\d+]/g, '')}${separator}body=${encodeURIComponent(inviteMessage)}`;
+  };
+
+  const shareInviteWithLogo = async () => {
+    if (!navigator.share || !inviteLogoFile || !navigator.canShare?.({ files: [inviteLogoFile] })) {
+      toast.error('This device cannot attach the logo to a message. Use the text button or copy the greeting and link.');
+      return;
+    }
+    setInviteSharing(true);
+    try {
+      await navigator.share({ files: [inviteLogoFile], title: 'FANTASY MMADNESS affiliate invitation', text: inviteMessage });
+    } catch (error) {
+      if (error.name !== 'AbortError') toast.error(error.message || 'Could not open the share menu.');
+    } finally { setInviteSharing(false); }
   };
 
   const uploadDistinction = async () => {
@@ -715,29 +743,31 @@ const AffiliateUsers = () => {
         </div>
       )}
 
-      {showInvitePopup && (
-        <div className="admin-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowInvitePopup(false); }}>
-          <section className="admin-inspector-modal admin-distinction-modal">
+      {showInvitePopup && typeof document !== 'undefined' && createPortal(
+        <div className={`admin-modal-backdrop ${modalStyles.backdrop}`} onMouseDown={(event) => { if (event.target === event.currentTarget && !inviteSending) setShowInvitePopup(false); }}>
+          <section className={`admin-inspector-modal ${modalStyles.modal} ${modalStyles.inviteModal}`} role="dialog" aria-modal="true" aria-label="Share affiliate invitation">
             <header>
               <div><span>Fast-track a fighter or influencer</span><h3>Instant-approval link</h3></div>
               <button type="button" onClick={() => setShowInvitePopup(false)} aria-label="Close invite link">×</button>
             </header>
-            <div className="admin-modal-form-body admin-stacked-form">
+            <div className={`admin-modal-form-body admin-stacked-form ${modalStyles.body}`}>
+              <img src="/images/brand/fantasy-mmadness-main-logo-v23.jpg" alt="FANTASY MMADNESS logo included in the invitation email" style={{ width: 76, height: 76, objectFit: 'contain', justifySelf: 'center' }} />
               <p style={{ margin: 0, fontSize: 13, opacity: .8 }}>Send this to someone you already trust. When they sign up through it, their affiliate account is approved automatically. One-time use, expires in 14 days. Opening the link alone does not use it.</p>
               <label>
                 Link
-                <input type="text" value={inviteLink} readOnly onFocus={(event) => event.target.select()} />
+                <textarea rows="2" value={inviteLink} readOnly onFocus={(event) => event.target.select()} style={{ overflowWrap: 'anywhere', wordBreak: 'break-all', resize: 'none' }} />
               </label>
               <a href={inviteLink} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', overflowWrap: 'anywhere' }}>Test the signup page ↗</a>
-              <label>Greeting (you can edit it)<textarea rows="5" value={inviteGreeting} disabled={inviteSending} onChange={(event) => setInviteGreeting(event.target.value)} /></label>
+              <label>Greeting (you can edit it)<textarea rows="3" value={inviteGreeting} disabled={inviteSending} onChange={(event) => setInviteGreeting(event.target.value)} /></label>
               <label>Email address<input type="email" value={inviteRecipientEmail} disabled={inviteSending} placeholder="person@example.com" onChange={(event) => setInviteRecipientEmail(event.target.value)} /></label>
               <button type="button" className="admin-action-secondary" disabled={inviteSending || !inviteRecipientEmail.trim() || !inviteGreeting.trim()} onClick={emailInvite}><FaEnvelope /> {inviteSending ? 'Sending…' : 'Send invitation by email'}</button>
               <label>Phone number<input type="tel" value={inviteRecipientPhone} placeholder="Phone number for a text draft" onChange={(event) => setInviteRecipientPhone(event.target.value)} /></label>
               <button type="button" className="admin-action-secondary" disabled={!inviteRecipientPhone.trim() || !inviteGreeting.trim()} onClick={textInvite}>Open text message</button>
-              <small>The text button opens your phone or computer’s messaging app with the greeting and link ready. Review and press Send there. You can also copy the full message below.</small>
+              <button type="button" className="admin-action-secondary" disabled={inviteSharing || !inviteLogoFile || !inviteGreeting.trim()} onClick={shareInviteWithLogo}>{inviteSharing ? 'Opening share menu…' : inviteLogoFile ? 'Share with logo (phone)' : 'Logo share unavailable on this device'}</button>
+              <small>Email includes the FANTASY MMADNESS logo and a clickable link. “Open text message” fills the number, greeting and link. “Share with logo” attaches the image on supported phones; choose Messages and the recipient there. Review before sending.</small>
               {recentInvites.length > 0 && (
-                <div>
-                  <span style={{ fontSize: 12, fontWeight: 700, opacity: .7, display: 'block', marginBottom: 6 }}>Recent invites</span>
+                <details>
+                  <summary style={{ fontSize: 12, fontWeight: 700, opacity: .7, marginBottom: 6, cursor: 'pointer' }}>Recent invites</summary>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 160, overflowY: 'auto' }}>
                     {recentInvites.map((invite) => {
                       const expired = new Date(invite.expiresAt) < new Date();
@@ -750,7 +780,7 @@ const AffiliateUsers = () => {
                       );
                     })}
                   </div>
-                </div>
+                </details>
               )}
             </div>
             <footer>
@@ -759,7 +789,7 @@ const AffiliateUsers = () => {
               <button type="button" className="admin-action-secondary" onClick={() => setShowInvitePopup(false)}>Close</button>
             </footer>
           </section>
-        </div>
+        </div>, document.body
       )}
 
       {addAffiliatePopup && (
