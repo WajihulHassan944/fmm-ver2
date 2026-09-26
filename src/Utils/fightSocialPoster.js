@@ -46,12 +46,12 @@ const drawFighter = (ctx, image, side) => {
   ctx.save();
   ctx.beginPath(); ctx.rect(x, top, width, height); ctx.clip();
   if (image) {
-    // Both fighters get the same panel and scale to its full usable area.
-    // Preserve the entire source image so faces and outstretched hands remain visible.
-    const scale = Math.min(width / image.width, height / image.height);
+    // Each fighter fills the same portrait panel. Containing a wide cutout
+    // beside a tight portrait makes one fighter appear much smaller.
+    const scale = Math.max(width / image.width, height / image.height);
     const w = image.width * scale;
     const h = image.height * scale;
-    ctx.drawImage(image, x + (width - w) / 2, top + 18, w, h);
+    ctx.drawImage(image, x + (width - w) / 2, top, w, h);
   } else {
     ctx.fillStyle = left ? '#13264a' : '#491820';
     ctx.fillRect(x, top, width, height);
