@@ -181,9 +181,8 @@ const RegisteredUsers = () => {
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   const canReceiveBulkEmail = (user) => isValidEmail(user?.email)
     && user?.verified === true
-    && !user?.selfExcluded
-    && !user?.emailOptOut
-    && !user?.unsubscribed;
+    && user?.isNotificationsEnabled !== false;
+  const allEmailRecipients = users.filter(canReceiveBulkEmail);
   const visibleEmailIds = filteredUsers.filter(canReceiveBulkEmail).map((user) => user._id);
   const allVisibleSelected = visibleEmailIds.length > 0 && visibleEmailIds.every((id) => selectedUserIds.includes(id));
   const selectedRecipients = users.filter((user) => selectedUserIds.includes(user._id) && canReceiveBulkEmail(user));
@@ -234,6 +233,12 @@ const RegisteredUsers = () => {
     setSelectedUserIds((current) => allVisibleSelected
       ? current.filter((id) => !visibleEmailIds.includes(id))
       : [...new Set([...current, ...visibleEmailIds])]);
+  };
+
+  const openEmailAll = () => {
+    setSelectedUserIds(allEmailRecipients.map((user) => user._id));
+    setBulkResults([]);
+    setBulkEmailOpen(true);
   };
 
   const sendBulkEmail = async () => {
@@ -291,6 +296,7 @@ const RegisteredUsers = () => {
           <button type="button" className="admin-action-secondary" onClick={() => router.back()}><FaArrowLeft /> Back</button>
           <button type="button" className="admin-action-secondary" onClick={() => router.push('/administration/suspended-accounts')}><FaBan /> Suspended accounts</button>
           <button type="button" className="admin-action-secondary" disabled={!selectedRecipients.length} onClick={() => { setBulkResults([]); setBulkEmailOpen(true); }}><FaEnvelope /> Email selected ({selectedRecipients.length})</button>
+          <button type="button" className="admin-action-secondary" disabled={!allEmailRecipients.length} onClick={openEmailAll}><FaEnvelope /> Email all users ({allEmailRecipients.length})</button>
           <button type="button" className="admin-action-primary" onClick={() => setAddUserPopup(true)}><FaPlus /> Add user</button>
         </div>
       </section>
@@ -361,7 +367,7 @@ const RegisteredUsers = () => {
               <button type="button" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)} aria-label="Close bulk email">×</button>
             </header>
             <div className="admin-modal-form-body admin-stacked-form">
-              <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified Gmail process already used for affiliate email. Use <strong>{'{firstName}'}</strong> to personalize each greeting. Self-excluded and opted-out accounts are not included.</p>
+              <p className="admin-bulk-email-note">Messages are sent individually through the same verified sender used for affiliate email. Use <strong>{'{firstName}'}</strong> to personalize each greeting. Unverified players and players who turned off notifications are excluded. Review the recipients before sending.</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
               <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
