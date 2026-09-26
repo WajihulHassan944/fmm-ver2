@@ -69,6 +69,63 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const quickPickApplied = useRef('');
   // Stable per submit attempt so a double-tap or retry cannot double-charge.
   const idempotencyKeyRef = useRef('');
+  const draftKey = `fmm-scorecard:${user?._id || user?.id || 'guest'}:${matchId}`;
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [eligibility, setEligibility] = useState(null);
+  const [eligibilityBusy, setEligibilityBusy] = useState(false);
+  const [eligibilityError, setEligibilityError] = useState('');
+  const [residenceState, setResidenceState] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const entryFee = Math.max(0, Number(match?.matchTokens) || 0);
+  const returnToFight = `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}${featuredWinner ? `&pick=${featuredWinner}` : ''}`;
+  const checkoutUrl = `/checkout?product=fm-coins&returnTo=${encodeURIComponent(returnToFight)}`;
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+      if (Array.isArray(saved?.rounds) && saved.rounds.length === roundCount) {
+        setRounds(saved.rounds);
+        idempotencyKeyRef.current = saved.idempotencyKey || '';
+        quickPickApplied.current = featuredWinner;
+      }
+    } catch (_) { /* Browsers may disable session storage. */ }
+    setDraftLoaded(true);
+  }, [draftKey, roundCount, featuredWinner]);
+
+  useEffect(() => {
+    if (!draftLoaded || confirmation) return;
+    try { sessionStorage.setItem(draftKey, JSON.stringify({ rounds, idempotencyKey: idempotencyKeyRef.current })); }
+    catch (_) { /* The current page still retains the picks. */ }
+  }, [draftKey, draftLoaded, rounds, confirmation]);
+
+  useEffect(() => {
+    if (!entryFee) return;
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    let active = true;
+    fetch(buildPublicApiUrl('/api/users/me/eligibility'), { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => { if (!response.ok) throw new Error('Could not check entry eligibility.'); return response.json(); })
+      .then((data) => { if (active) { setEligibility(data); setResidenceState(data.residenceState || ''); } })
+      .catch((error) => { if (active) setEligibilityError(error.message); });
+    return () => { active = false; };
+  }, [entryFee]);
+
+  const saveEligibility = async (event) => {
+    event.preventDefault();
+    setEligibilityBusy(true);
+    setEligibilityError('');
+    try {
+      const response = await fetch(buildPublicApiUrl('/api/users/me/eligibility'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken') || ''}` },
+        body: JSON.stringify({ residenceState, ...(dateOfBirth ? { dateOfBirth } : {}) }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Could not save your details.');
+      setEligibility({ ...data, hasDateOfBirth: Boolean(dateOfBirth || eligibility?.hasDateOfBirth), residenceState });
+    } catch (error) { setEligibilityError(error.message); }
+    finally { setEligibilityBusy(false); }
+  };
 
   useEffect(() => {
     setRounds((current) => {
@@ -78,7 +135,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   }, [roundCount]);
 
   useEffect(() => {
-    if (!featuredWinner || quickPickApplied.current === featuredWinner) return;
+    if (!draftLoaded || !featuredWinner || quickPickApplied.current === featuredWinner) return;
     quickPickApplied.current = featuredWinner;
     const fighterAWins = featuredWinner === 'a';
     setRounds((current) => current.map((round) => ({
@@ -90,7 +147,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       rwBorder: fighterAWins ? '2px solid #2f9cff' : '2px solid rgba(255,255,255,.16)',
       rlBorder: fighterAWins ? '2px solid rgba(255,255,255,.16)' : '2px solid #ed1f31',
     })));
-  }, [featuredWinner]);
+  }, [featuredWinner, draftLoaded]);
 
   useEffect(() => {
     const dashboardArrow = document.querySelector('.dashboard-back-arrow');
@@ -150,12 +207,14 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const handlePredictionChange = (event, roundIndex, field) => {
     const { value } = event.target;
+    idempotencyKeyRef.current = '';
     setRounds((current) => current.map((round, index) => (
       index === roundIndex ? { ...round, [field]: value } : round
     )));
   };
 
   const selectRoundWinner = (roundIndex, side) => {
+    idempotencyKeyRef.current = '';
     setRounds((current) => current.map((round, index) => {
       if (index !== roundIndex) return round;
       const fighterAWins = side === 'A';
@@ -172,6 +231,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   };
 
   const selectFinish = (roundIndex, side) => {
+    idempotencyKeyRef.current = '';
     setRounds((current) => current.map((round, index) => {
       if (index !== roundIndex) return round;
       const fighterAFinishes = side === 'A';
@@ -201,6 +261,10 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const handleFinish = async () => {
     if (submitting) return;
+    if (entryFee && !eligibility?.eligible) {
+      setSubmitError(eligibility?.message || eligibilityError || 'Confirm your state and date of birth before entering.');
+      return;
+    }
     if (!rounds.some((round) => getWinnerSide(round))) {
       alert(isWrestling ? 'Pick the match winner before submitting.' : 'Pick at least one round winner before submitting.');
       return;
@@ -247,8 +311,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       if (!entryResponse.ok) {
         if (entryPayload?.code === 'INSUFFICIENT_FUNDS') {
           const shortfall = Number(entryPayload.shortfall || 0);
-          alert(`Not enough FM coins. You need ${shortfall} more to enter this fight.`);
-          router.push('/checkout?product=fm-coins&returnTo=' + encodeURIComponent(router.asPath));
+          setSubmitError(`You need ${shortfall} more FM coins. Your picks are saved here; add coins and return to submit.`);
           return;
         }
         if (entryPayload?.code === 'FIGHT_LOCKED') {
@@ -262,6 +325,11 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           setSubmitting(false);
           return;
         }
+        if (['STATE_UNVERIFIED', 'AGE_UNVERIFIED', 'STATE_BLOCKED', 'UNDERAGE', 'FREE_PLAY_ONLY', 'SELF_EXCLUDED'].includes(entryPayload?.code)) {
+          setEligibility({ ...eligibility, eligible: false, reason: entryPayload.code, message: entryPayload.message });
+          setSubmitError(entryPayload.message);
+          return;
+        }
         throw new Error(entryPayload?.message || `Entry failed with status ${entryResponse.status}`);
       }
 
@@ -273,6 +341,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       setConfirmation({
         pickName: winnerVotes.B > winnerVotes.A ? getFighterName(match, 'B') : winnerVotes.A > winnerVotes.B ? getFighterName(match, 'A') : 'Round-by-round card submitted',
       });
+      try { sessionStorage.removeItem(draftKey); } catch (_) { /* Submission succeeded. */ }
     } catch (error) {
       console.error('Error saving predictions:', error);
       setSubmitError(error?.message || 'Could not submit predictions. Your picks are still here; please try again.');
@@ -334,13 +403,25 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           <p>{match.matchCategoryTwo || match.matchCategory} · {match.matchType}{isWrestling ? ' · full-match scorecard' : ` · ${roundCount} rounds`}</p>
             <div className="xp-prediction-countdown"><FaClock /> {timeRemaining.hasStarted ? 'Fight has started' : `${timeRemaining.diffHrs}h ${timeRemaining.diffMins}m ${timeRemaining.diffSecs}s until lock`}</div>
           </div>
-          <button className="xp-prediction-wallet" type="button" onClick={() => router.push('/checkout')}>
+          <button className="xp-prediction-wallet" type="button" onClick={() => router.push(checkoutUrl)}>
             <FaCoins />
             <span>Fight wallet</span>
             <strong>{user.tokens || 0}</strong>
-            <small>tokens remaining</small>
+            <small>FM coins available</small>
           </button>
         </div>
+
+        {entryFee > 0 && <div style={{ maxWidth: 780, margin: '16px auto', padding: 18, border: '1px solid rgba(255,255,255,.25)', borderRadius: 12, color: '#fff' }}>
+          <strong>Before you enter: {entryFee} FM coins</strong>
+          <p>{eligibility?.eligible ? 'Your paid-entry details are ready.' : eligibility?.message || eligibilityError || 'Checking your paid-entry details…'}</p>
+          {eligibility && !eligibility.eligible && !['STATE_BLOCKED', 'UNDERAGE', 'FREE_PLAY_ONLY', 'SELF_EXCLUDED'].includes(eligibility.reason) && <form onSubmit={saveEligibility}>
+            <label style={{ display: 'block', marginBottom: 8 }}>State of residence (two letters) <input required maxLength={2} pattern="[A-Za-z]{2}" value={residenceState} onChange={(event) => setResidenceState(event.target.value.toUpperCase())} style={{ color: '#111' }} /></label>
+            {!eligibility.hasDateOfBirth && <label style={{ display: 'block', marginBottom: 8 }}>Date of birth <input required type="date" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} style={{ color: '#111' }} /></label>}
+            <button type="submit" disabled={eligibilityBusy}>{eligibilityBusy ? 'Saving…' : 'Confirm details'}</button>
+          </form>}
+          {eligibilityError && <p role="alert">{eligibilityError}</p>}
+          {eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <p>You need {Math.max(0, entryFee - Number(user?.tokens || 0))} more FM coins. <button type="button" onClick={() => router.push(checkoutUrl)}>Add FM coins</button> Your card will be here when you return.</p>}
+        </div>}
 
         {featuredWinner ? <div style={{ margin: '0 auto 14px', width: 'min(780px,calc(100% - 28px))', padding: '11px 14px', borderRadius: 12, border: '1px solid rgba(242,181,68,.45)', background: 'rgba(242,181,68,.09)', color: '#f2b544', fontWeight: 900, textAlign: 'center' }}>YOUR FEATURED PICK: {featuredWinner === 'b' ? getFighterName(match, 'B') : getFighterName(match, 'A')}. Complete the {sport === 'bareknuckle' ? 'Bare Knuckle' : sport === 'kickboxing' ? 'Kickboxing' : sport === 'wrestling' ? 'Pro Wrestling' : sport === 'boxing' ? 'Boxing' : 'MMA'} scorecard below.</div> : null}
 
@@ -491,9 +572,9 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         </div>
 
         <div className="xp-prediction-submit-panel">
-          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError}</p>}
-          <div><FaShieldAlt /><span>Review your picks. Submit once to pay the fight entry and save your predictions.</span></div>
-          <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting}>
+          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError} {entryFee > 0 && eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <button type="button" onClick={() => router.push(checkoutUrl)}>Add FM coins</button>}</p>}
+          <div><FaShieldAlt /><span>Review your picks. {entryFee > 0 ? `Submitting charges ${entryFee} FM coins and saves your predictions.` : 'Submit your free entry and save your predictions.'}</span></div>
+          <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting || (entryFee > 0 && !eligibility?.eligible)}>
             <FaTrophy /> {buttonText}
           </button>
         </div>
