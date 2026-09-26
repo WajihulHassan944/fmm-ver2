@@ -443,12 +443,24 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const eligible = allRows
       .filter((f) => f && getFighterName(f, 'A') && getFighterName(f, 'B'))
       .filter((f) => !f.prizesSettledAt && String(f.matchStatus || '').toLowerCase() !== 'finished');
-    const explicit = eligible.filter((f) => isHomepagePromoted(f) && Number(f.homepageSlot) >= 1 && Number(f.homepageSlot) <= 5);
-    explicit.forEach((f) => { map[String(getId(f))] = Number(f.homepageSlot); });
-    const takenSlots = new Set(Object.values(map));
+    const promoterId = (fight) => String(fight.affiliateId || '').trim();
+    const usedPromoters = new Set();
+    const takenSlots = new Set();
+    const explicit = eligible.filter((f) => isHomepagePromoted(f) && Number(f.homepageSlot) >= 1 && Number(f.homepageSlot) <= 5)
+      .sort((a, b) => Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b))));
+    explicit.forEach((f) => {
+      const slot = Number(f.homepageSlot);
+      const promoter = promoterId(f);
+      if (takenSlots.has(slot) || (promoter && usedPromoters.has(promoter))) return;
+      map[String(getId(f))] = slot;
+      takenSlots.add(slot);
+      if (promoter) usedPromoters.add(promoter);
+    });
     const remaining = eligible
       .filter((f) => !map[String(getId(f))])
       .sort((a, b) => {
+        const ownerDiff = Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b)));
+        if (ownerDiff) return ownerDiff;
         const rankDiff = Number(b.homepagePromotionRank || 0) - Number(a.homepagePromotionRank || 0);
         if (rankDiff) return rankDiff;
         const weight = (f) => (isHomepagePromoted(f) ? 2 : 0) + (f.featuredFight || f.featuredThisWeek ? 1 : 0);
@@ -457,10 +469,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       });
     let nextSlot = 1;
     remaining.forEach((f) => {
+      const promoter = promoterId(f);
+      if (promoter && usedPromoters.has(promoter)) return;
       while (takenSlots.has(nextSlot) && nextSlot <= 5) nextSlot += 1;
       if (nextSlot > 5) return;
       map[String(getId(f))] = nextSlot;
       takenSlots.add(nextSlot);
+      if (promoter) usedPromoters.add(promoter);
       nextSlot += 1;
     });
     return map;
