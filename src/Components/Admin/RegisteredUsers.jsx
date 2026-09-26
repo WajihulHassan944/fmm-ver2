@@ -12,6 +12,7 @@ import {
   FaPlus,
   FaSearch,
   FaTrash,
+  FaUserFriends,
   FaUsers,
 } from 'react-icons/fa';
 
@@ -32,6 +33,7 @@ const RegisteredUsers = () => {
   const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
   const [bulkResults, setBulkResults] = useState([]);
   const [resendingId, setResendingId] = useState('');
+  const [promotingId, setPromotingId] = useState('');
   const router = useRouter();
 
   const requireFreshAdminSession = (response) => {
@@ -205,6 +207,23 @@ const RegisteredUsers = () => {
     }
   };
 
+  const makeAffiliate = async (user) => {
+    if (!user?._id || !user.verified || user.isAffiliate || promotingId) return;
+    setPromotingId(user._id);
+    try {
+      const response = await fetch(buildPublicApiUrl(`/api/admin/users/${encodeURIComponent(user._id)}/promote-affiliate`), {
+        method: 'POST', headers: adminJsonHeaders(),
+      });
+      if (requireFreshAdminSession(response)) return;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || 'Could not enable affiliate access.');
+      setUsers((current) => current.map((row) => row._id === user._id ? { ...row, isAffiliate: true } : row));
+      setSelectedUser((current) => current?._id === user._id ? { ...current, isAffiliate: true } : current);
+      toast.success(result.message || 'Affiliate access is active.');
+    } catch (error) { toast.error(error.message || 'Could not enable affiliate access.'); }
+    finally { setPromotingId(''); }
+  };
+
   const toggleUser = (id) => {
     setSelectedUserIds((current) => current.includes(id)
       ? current.filter((value) => value !== id)
@@ -321,6 +340,7 @@ const RegisteredUsers = () => {
                     <div className="admin-row-actions">
                       <button type="button" title="View user" onClick={() => handleView(user)}><FaEye /></button>
                       {!user.verified && isValidEmail(user.email) && <button type="button" title="Resend verification email" aria-label={`Resend verification email to ${user.email}`} disabled={Boolean(resendingId)} onClick={() => resendVerification(user)}><FaEnvelope /> {resendingId === user._id ? 'Sending…' : 'Resend'}</button>}
+                      {user.isAffiliate ? <span className="admin-status-badge is-success">Affiliate</span> : <button type="button" title={user.verified ? 'Make this player an affiliate' : 'Verify email first'} aria-label={`Make ${user.firstName || user.playerName || 'player'} an affiliate`} disabled={!user.verified || Boolean(promotingId)} onClick={() => makeAffiliate(user)}><FaUserFriends /> {promotingId === user._id ? 'Adding…' : 'Make affiliate'}</button>}
                       <button type="button" className="is-danger" title="Delete user" onClick={() => handleDelete(user._id)}><FaTrash /></button>
                     </div>
                   </td>
@@ -393,6 +413,11 @@ const RegisteredUsers = () => {
                 />
               </label>
               <button type="button" className="admin-action-primary" onClick={() => handleGiveTokens(selectedUser._id)}><FaCoins /> Submit tokens</button>
+            </div>
+
+            <div className="admin-wallet-adjust">
+              {selectedUser.isAffiliate ? <strong>Affiliate access is active.</strong> : <button type="button" className="admin-action-primary" disabled={!selectedUser.verified || Boolean(promotingId)} onClick={() => makeAffiliate(selectedUser)}><FaUserFriends /> {promotingId === selectedUser._id ? 'Adding…' : 'Make this user an affiliate'}</button>}
+              {!selectedUser.verified && <small>Verify the player’s email first.</small>}
             </div>
 
             <footer>
