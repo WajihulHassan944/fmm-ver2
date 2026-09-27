@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "smoke:public": "node scripts/smoke-public-flows.mjs",
     "start": "next start",
     "lint": "eslint ."
   },
