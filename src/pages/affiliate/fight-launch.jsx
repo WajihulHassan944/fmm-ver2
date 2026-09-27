@@ -171,10 +171,10 @@ export default function AffiliateFightLaunch() {
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
   const squarePosterUrl = kit?.attribution?.affiliateId && fightId
-    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&v=9`
+    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&v=10`
     : '';
   const facebookLeagueUrl = kit?.attribution?.affiliateId && fightId
-    ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}`
+    ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-10`
     : link;
   const facebookShareUrl = facebookLeagueUrl
     ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookLeagueUrl)}`
@@ -183,7 +183,7 @@ export default function AffiliateFightLaunch() {
   const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['TikTok', copyByPlatform.tiktok], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
     <Head><title>Your fight share kit | FANTASY MMADNESS</title></Head>
-    <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Facebook opens a share preview with your fight image and tracked league link. Instagram and TikTok let you select your poster from your phone.</p></div>
+    <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Facebook and X open a post with your tracked fight link and image preview. Instagram and TikTok require you to select the poster and paste your copied caption.</p></div>
     {busy && <p>Preparing your personal fight link…</p>}
     {!busy && !getAffiliateToken() && <p><Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate to see your personal kit →</Link></p>}
     {error && <p role="alert">{error} <Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate →</Link></p>}
