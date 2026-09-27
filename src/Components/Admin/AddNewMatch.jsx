@@ -51,6 +51,7 @@ const TOKEN_PACK_SIZE = 5000;
 const TOKEN_PACK_USD = 3.99;
 const TOKEN_USD_RATE = TOKEN_PACK_USD / TOKEN_PACK_SIZE;
 const usdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / TOKEN_USD_RATE)));
+const normalizeFightText = (value) => String(value || '').trim().toLowerCase();
 const MAX_FIGHT_UPLOAD_BYTES = 3 * 1024 * 1024;
 
 const prepareFightImage = async (file) => {
@@ -294,10 +295,6 @@ export default function AddNewMatch() {
         : `Publishing failed (HTTP ${response.status}). Your fight details are still here.`));
 
       const matchId = payload?.matchId || payload?.data?._id || payload?._id || payload?.match?._id;
-      if (payload?.publishVerified === false) {
-        setError(`${payload.message || 'Fight saved but needs attention.'} ${(payload.problems || []).join(' ')} Fight Registry ID: ${matchId || 'unavailable'}. Do not publish it again.`);
-        return;
-      }
 
       if (form.matchType === 'LIVE' && form.addToShadowTemplates) {
         // Isolated: a drop here must never mislabel the primary create above
@@ -320,7 +317,6 @@ export default function AddNewMatch() {
         fighterA: form.matchFighterA,
         fighterB: form.matchFighterB,
       });
-      if (payload?.publishWarning) setError(payload.publishWarning);
       if (form.matchType === 'SHADOW' && matchId) {
         setCreatedShadowId(matchId);
         setShowShadowPredictionChoice(true);
@@ -334,22 +330,26 @@ export default function AddNewMatch() {
       // what created duplicates before. Say so explicitly instead of just
       // "failed", so the reflex is to check the registry, not click again.
       const isNetworkDrop = requestError instanceof TypeError;
-      if (isNetworkDrop && form.matchType === 'LIVE') {
+      if (isNetworkDrop) {
         try {
-          for (let attempt = 0; attempt < 3; attempt += 1) {
-            if (attempt) await new Promise((resolve) => setTimeout(resolve, 1200));
-            const statusResponse = await fetch(`${API_BASE}/api/admin/fights/publish-status/${encodeURIComponent(publishRequestIdRef.current)}`, {
-              cache: 'no-store', headers: adminHeaders({ Accept: 'application/json' }),
-            });
-            if (!statusResponse.ok) throw new Error(`Publish status returned ${statusResponse.status}`);
-            const status = await statusResponse.json();
-            if (!status.found) continue;
-            if (!status.ready) {
-              setError(`Fight saved, but needs attention: ${(status.problems || []).join(' ')} Fight Registry ID: ${status.matchId}. Do not publish it again.`);
-              return;
-            }
+          const registryResponse = await fetch(`${API_BASE}/api/admin/fights?source=all&limit=500&includeDrafts=true&_=${Date.now()}`, {
+            cache: 'no-store',
+            headers: adminHeaders({ Accept: 'application/json', 'Cache-Control': 'no-cache' }),
+          });
+          if (!registryResponse.ok) throw new Error(`Registry returned ${registryResponse.status}`);
+          const registryPayload = await registryResponse.json().catch(() => ({}));
+          const registryRows = Array.isArray(registryPayload)
+            ? registryPayload
+            : registryPayload?.items || registryPayload?.data?.items || registryPayload?.data || registryPayload?.rows || [];
+          const savedFight = registryRows.find((fight) => (
+            normalizeFightText(fight.matchName || fight.title) === normalizeFightText(form.matchName)
+            && normalizeFightText(fight.matchFighterA || fight.fighterA?.name) === normalizeFightText(form.matchFighterA)
+            && normalizeFightText(fight.matchFighterB || fight.fighterB?.name) === normalizeFightText(form.matchFighterB)
+            && String(fight.matchDate || fight.date || '').slice(0, 10) === String(form.matchDate || '').slice(0, 10)
+          ));
+          if (savedFight) {
             setCreated({
-              id: status.matchId,
+              id: savedFight._id || savedFight.id,
               type: form.matchType,
               name: form.matchName,
               category: displayCategory,
@@ -366,7 +366,7 @@ export default function AddNewMatch() {
         }
       }
       setError(isNetworkDrop
-        ? 'Connection lost. Publication could not be confirmed. Keep this form open and retry with the same details; the request ID prevents duplicate fights.'
+        ? 'Lost connection while publishing. The fight may have already been created — check Fight registry before publishing again.'
         : (requestError.message || 'Unable to create the fight card.'));
     } finally {
       setSaving(false);
