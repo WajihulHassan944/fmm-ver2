@@ -36,20 +36,31 @@ export default async function handler(req, res) {
     if (artUrl) {
       const source = new URL(artUrl);
       if (source.protocol === 'https:' && source.hostname === 'res.cloudinary.com') {
-        const image = await fetch(source.toString(), { signal: AbortSignal.timeout(8000), redirect: 'error' });
-        const mime = (image.headers.get('content-type') || '').split(';')[0];
-        if (image.ok && ['image/png', 'image/jpeg', 'image/webp'].includes(mime) && Number(image.headers.get('content-length') || 0) < 8_000_000) {
-          const bytes = Buffer.from(await image.arrayBuffer());
-          if (bytes.length < 8_000_000) poster = `data:${mime};base64,${bytes.toString('base64')}`;
-        }
+        // The OG renderer can fail on uploaded WebP posters. Ask Cloudinary for
+        // JPEG so both the affiliate landing and login pages render reliably.
+        const jpegUrl = source.toString().replace('/image/upload/', '/image/upload/f_jpg,q_85/');
+        try {
+          const image = await fetch(jpegUrl, { signal: AbortSignal.timeout(8000), redirect: 'error' });
+          if (image.ok && (image.headers.get('content-type') || '').startsWith('image/jpeg') && Number(image.headers.get('content-length') || 0) < 8_000_000) {
+            const bytes = Buffer.from(await image.arrayBuffer());
+            if (bytes.length < 8_000_000) poster = `data:image/jpeg;base64,${bytes.toString('base64')}`;
+          }
+        } catch (error) { console.error('Could not load fight artwork:', error); }
       }
     }
 
     const link = `https://www.fantasymmadness.com/league/${affiliateId}?fightId=${fightId}`;
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
-    const response = new ImageResponse(
+    const render = (art) => new ImageResponse(
       <div style={{ display: 'flex', position: 'relative', width: 1200, height: 1200, background: '#090c17', overflow: 'hidden' }}>
-        {poster && <img src={poster} alt="" width={1200} height={1200} style={{ objectFit: 'contain' }} />}
+        {art ? <img src={art} alt="" width={1200} height={1200} style={{ objectFit: 'contain' }} /> :
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 90, width: 1200, height: 1200, background: 'linear-gradient(135deg,#24050a,#111a30)', color: 'white' }}>
+            <div style={{ display: 'flex', color: '#ff3349', fontSize: 42, fontWeight: 800 }}>FANTASY MMADNESS</div>
+            <div style={{ display: 'flex', marginTop: 70, fontSize: 72, fontWeight: 800, textTransform: 'uppercase', lineHeight: 1.1 }}>{String(fight.matchFighterA || 'FIGHT NIGHT').slice(0, 36)}</div>
+            <div style={{ display: 'flex', color: '#ffd273', fontSize: 42, fontWeight: 800, marginTop: 20 }}>VS</div>
+            <div style={{ display: 'flex', fontSize: 72, fontWeight: 800, textTransform: 'uppercase', lineHeight: 1.1 }}>{String(fight.matchFighterB || '').slice(0, 36)}</div>
+            <div style={{ display: 'flex', marginTop: 70, fontSize: 32, fontWeight: 700 }}>PREDICT THE FIGHT · JOIN MY LEAGUE</div>
+          </div>}
         <div style={{ display: 'flex', position: 'absolute', right: 17, bottom: 17, padding: 4, background: 'white' }}>
           <img src={qr} alt="Affiliate fight QR" width={270} height={270} />
         </div>
@@ -58,7 +69,13 @@ export default async function handler(req, res) {
     );
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
-    return res.status(200).send(Buffer.from(await response.arrayBuffer()));
+    let bytes;
+    try { bytes = await render(poster).arrayBuffer(); }
+    catch (error) {
+      console.error('Could not render uploaded fight poster, using fight title:', error);
+      bytes = await render('').arrayBuffer();
+    }
+    return res.status(200).send(Buffer.from(bytes));
   } catch (error) {
     console.error('Affiliate fight share image failed:', error);
     return res.status(502).end();
