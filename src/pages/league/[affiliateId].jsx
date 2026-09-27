@@ -15,7 +15,9 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
   const fightUrl = `/fight/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&fromLeague=1`;
-  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=9`;
+  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=10`;
+  const shareTitle = `Join ${leagueName}'s league for ${title} | FANTASY MMADNESS`;
+  const shareDescription = `${title}: make your picks in ${leagueName}'s league${Number(fight?.pot) > 0 ? ` for a ${Number(fight.pot).toLocaleString()} FM COINS prize pool` : ''}. Open the fight to see entry details, eligibility, and rules.`;
 
   const join = async () => {
     if (!getUserToken()) {
@@ -44,14 +46,18 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   return <main className={styles.page}>
     <Head>
       <title>Join {leagueName}&apos;s league | FANTASY MMADNESS</title>
-      <meta key="og:title" property="og:title" content={`Join ${leagueName}'s league for ${title}`} />
-      <meta key="og:description" property="og:description" content={`Join ${leagueName}'s Fantasy MMAdness league and make your picks for ${title}.`} />
+      <meta key="og:title" property="og:title" content={shareTitle} />
+      <meta key="og:description" property="og:description" content={shareDescription} />
+      <meta key="og:type" property="og:type" content="website" />
       <meta key="og:url" property="og:url" content={`${SITE_URL}${router.asPath.split('#')[0]}`} />
       <meta key="og:image" property="og:image" content={shareImage} />
       <meta key="og:image:width" property="og:image:width" content="1200" />
       <meta key="og:image:height" property="og:image:height" content="1200" />
       <meta key="og:image:alt" property="og:image:alt" content={`${leagueName}'s fight poster with personal QR`} />
       <meta key="twitter:image" name="twitter:image" content={shareImage} />
+      <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
+      <meta key="twitter:title" name="twitter:title" content={shareTitle} />
+      <meta key="twitter:description" name="twitter:description" content={shareDescription} />
     </Head>
     <div className={styles.shell}>
       <img className={styles.poster} src={shareImage} alt={`${title} poster with ${leagueName}'s tracked QR`} />
@@ -81,7 +87,7 @@ export async function getServerSideProps({ params, query, res }) {
     const fight = payload.fight || payload.data || payload;
     if (!affiliate || !fight?._id) return { notFound: true };
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    return { props: { affiliate, fight: { matchFighterA: fight.matchFighterA || '', matchFighterB: fight.matchFighterB || '' }, fightId } };
+    return { props: { affiliate, fight: { matchFighterA: fight.matchFighterA || '', matchFighterB: fight.matchFighterB || '', pot: fight.pot || 0 }, fightId } };
   } catch (error) {
     console.error('Affiliate league landing failed:', error);
     return { notFound: true };
