@@ -276,7 +276,7 @@ const AffiliateUsers = () => {
     launchSelectionPending.current = loading || !affiliateUsers.length;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`${title || 'A new fight'} · your FANTASY MMADNESS share kit`);
-    setBulkMessage(`Hi {firstName},\n\n${title || 'A new fight'} is ready for your league. We have prepared your personal fight link and poster.\n\nOpen your share kit: {shareKit}\n\nSign in if asked, then choose Facebook to review the post and share it. Your kit also has your QR poster and captions for other platforms.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadness.com.\n\nFANTASY MMADNESS Owner Office`);
+    setBulkMessage(`Hi {firstName},\n\n${title || 'A new fight'} is ready for your league. The fight entry is {entryCoins} and the advertised prize pool is {prizeCoins}. We have prepared your personal fight link, QR poster, and captions.\n\nOpen your share kit: {shareKit}\n\nSign in with your FANTASY MMADNESS affiliate account if asked. Your own tracked link and QR code are in the kit. When someone joins and enters through your link, their eligible paid entry remains attributed to you; your affiliate share of the platform proceeds is credited under the existing payout terms after the fight is settled. Refunds are excluded. You can review your referrals and earnings in your affiliate back office.\n\nChoose Facebook to review your post, or use the ready-made captions for the other platforms. The fight entry and prize pool are already set; you do not need to set them again.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadness.com.\n\nFANTASY MMADNESS Owner Office`);
     setBulkResults([]);
     setMailLimitReached(false);
     setBulkEmailOpen(true);
@@ -358,10 +358,15 @@ const AffiliateUsers = () => {
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight')).slice(0, 150);
     const campaignFight = posterFights.find((fight) => String(getFightId(fight)) === launchFightId);
+    const coins = (value) => value === undefined || value === null || value === ''
+      ? 'shown in your share kit'
+      : `${Math.max(0, Math.round(Number(value) || 0)).toLocaleString()} FM COINS`;
     const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens);
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
+      .replaceAll('{entryCoins}', coins(campaignFight?.matchTokens))
+      .replaceAll('{prizeCoins}', coins(campaignFight?.pot))
       .replaceAll('{facebookPost}', posts.facebook)
       .replaceAll('{instagramPost}', posts.instagram)
       .replaceAll('{tiktokPost}', posts.tiktok)
