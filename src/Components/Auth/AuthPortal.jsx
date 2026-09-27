@@ -27,6 +27,7 @@ import UploadAvatar from '@/Components/CreateAccount/UploadAvatar';
 import Membership from '@/Components/CreateAccount/Membership';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { SITE_URL } from '@/Utils/seoConfig';
 
 
 const API_BASE_URL = PUBLIC_API_BASE_URL;
@@ -134,6 +135,24 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   }, [router.isReady, router.query.verification, router.query.verified]);
 
   const selectedRole = useMemo(() => roles.find((item) => item.id === role) || roles[0], [role]);
+  const referredFightId = String(queryValue(router.query.fight) || '');
+  const referredAffiliateId = String(queryValue(router.query.referrer) || '');
+  const hasReferredFight = role === 'player' && /^[a-f\d]{24}$/i.test(referredFightId) && /^[a-f\d]{24}$/i.test(referredAffiliateId);
+  const [referredFightTitle, setReferredFightTitle] = useState('');
+  useEffect(() => {
+    if (!hasReferredFight) return;
+    let active = true;
+    fetch(`${PUBLIC_API_BASE_URL}/api/public/fights/${encodeURIComponent(referredFightId)}`)
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        const fight = payload?.fight || payload?.data || payload;
+        if (active && fight) setReferredFightTitle([fight.matchFighterA, fight.matchFighterB].filter(Boolean).join(' vs '));
+      }).catch(() => {});
+    return () => { active = false; };
+  }, [hasReferredFight, referredFightId]);
+  const referredPoster = hasReferredFight
+    ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(referredFightId)}&affiliateId=${encodeURIComponent(referredAffiliateId)}&v=10`
+    : '';
 
   const updateRouteState = (nextMode, nextRole = role) => {
     setMode(nextMode);
@@ -157,7 +176,10 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       params.set('play', '1');
       router.push(`${path}?${params.toString()}`);
     } else {
-      router.push(Object.keys(query).length ? { pathname, query } : pathname);
+      const [path, search] = pathname.split('?');
+      const params = new URLSearchParams(search || '');
+      Object.entries(query).forEach(([key, value]) => params.set(key, value));
+      router.push(`${path}${params.size ? `?${params.toString()}` : ''}`);
     }
     onSuccess?.();
   };
@@ -414,6 +436,10 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         <div className="xp-auth-shell">
           <aside className="xp-auth-art">
             <div className="xp-auth-art-grid" />
+            {hasReferredFight && <div className="xp-auth-referred-fight">
+              <img src={referredPoster} alt={`${referredFightTitle || 'Your fight'} poster with your affiliate's QR code`} />
+              <p>{referredFightTitle || 'Your selected fight'} · Sign in or create an account to join this league and play.</p>
+            </div>}
             <div className="xp-auth-art-copy">
               <Link href="/" className="xp-auth-logo"><img src="/images/brand/fantasy-mmadness-main-logo-v23.jpg" alt="Fantasy MMAdness" /></Link>
               <p className="xp-eyebrow">One account portal</p>
