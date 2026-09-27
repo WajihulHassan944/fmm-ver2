@@ -34,6 +34,38 @@
 .auth-experience-page .xp-auth-logo img{height:62px!important;width:auto!important;max-width:150px!important;object-fit:contain!important}
 .auth-experience-page .xp-auth-panel{min-height:calc(100svh - var(--auth-header-clearance))!important}
 
+/* Keep the selected affiliate fight visible throughout sign-in and signup. */
+.auth-experience-page .xp-auth-art:has(.xp-auth-referred-fight){
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:center;
+  gap:16px;
+  padding:20px;
+}
+.auth-experience-page .xp-auth-referred-fight{
+  position:relative;
+  z-index:5;
+  width:min(100%,390px);
+  text-align:center;
+}
+.auth-experience-page .xp-auth-referred-fight img{
+  display:block;
+  width:100%;
+  max-height:48svh;
+  object-fit:contain;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:12px;
+  background:#090c17;
+}
+.auth-experience-page .xp-auth-referred-fight p{color:#fff;font-weight:700;margin:8px 0 0}
+.auth-experience-page .xp-auth-art:has(.xp-auth-referred-fight) .xp-auth-art-copy{
+  position:relative;
+  inset:auto!important;
+  width:100%;
+  margin:auto 0 0;
+}
+
 /* SHARED DESK CANVAS */
 .admin-operations-v3{
   --desk-red:#f21b32;
