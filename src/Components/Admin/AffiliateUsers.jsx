@@ -358,15 +358,15 @@ const AffiliateUsers = () => {
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight')).slice(0, 150);
     const campaignFight = posterFights.find((fight) => String(getFightId(fight)) === launchFightId);
-    const coins = (value, label) => value === undefined || value === null || value === ''
-      ? `${label} shown in your share kit`
+    const coins = (value) => value === undefined || value === null || value === ''
+      ? 'shown in your share kit'
       : `${Math.max(0, Math.round(Number(value) || 0)).toLocaleString()} FM COINS`;
     const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens);
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
-      .replaceAll('{entryCoins}', coins(campaignFight?.matchTokens, 'Entry'))
-      .replaceAll('{prizeCoins}', coins(campaignFight?.pot, 'Prize pool'))
+      .replaceAll('{entryCoins}', coins(campaignFight?.matchTokens))
+      .replaceAll('{prizeCoins}', coins(campaignFight?.pot))
       .replaceAll('{facebookPost}', posts.facebook)
       .replaceAll('{instagramPost}', posts.instagram)
       .replaceAll('{tiktokPost}', posts.tiktok)
