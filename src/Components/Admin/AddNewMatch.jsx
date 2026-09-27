@@ -52,6 +52,24 @@ const TOKEN_PACK_USD = 3.99;
 const TOKEN_USD_RATE = TOKEN_PACK_USD / TOKEN_PACK_SIZE;
 const usdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / TOKEN_USD_RATE)));
 const normalizeFightText = (value) => String(value || '').trim().toLowerCase();
+const MAX_FIGHT_UPLOAD_BYTES = 3 * 1024 * 1024;
+
+const prepareFightImage = async (file) => {
+  if (!file || file.size <= 900 * 1024) return file;
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.84));
+    if (!blob) throw new Error('Could not prepare a fighter picture. Try a JPG or PNG.');
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.webp`, { type: 'image/webp' });
+  } finally {
+    bitmap.close();
+  }
+};
 
 const UniformFighterPreview = ({ src, fallbackSrc, alt }) => {
   const [trimmedSrc, setTrimmedSrc] = useState(src);
@@ -258,13 +276,23 @@ export default function AddNewMatch() {
       if (form.fighterAId && form.fighterBId && form.fighterAId === form.fighterBId) throw new Error('Fighter A and Fighter B must be different fighters.');
       if (form.matchType === 'LIVE' && (!form.matchDate || !form.matchTime)) throw new Error('Date and time are required for a live fight card.');
 
+      const preparedImages = await Promise.all([
+        prepareFightImage(form.fighterAImage),
+        prepareFightImage(form.fighterBImage),
+        prepareFightImage(form.promotionBackground),
+      ]);
+      const preparedForm = { ...form, fighterAImage: preparedImages[0], fighterBImage: preparedImages[1], promotionBackground: preparedImages[2] };
+      const uploadBytes = preparedImages.reduce((total, file) => total + (file?.size || 0), 0);
+      if (uploadBytes > MAX_FIGHT_UPLOAD_BYTES) throw new Error('The fighter pictures are too large to publish together. Upload smaller JPG pictures and try again. Your fight details are still here.');
       const data = new FormData();
-      appendLegacyFight(data, form);
+      appendLegacyFight(data, preparedForm);
       data.append('publishRequestId', publishRequestIdRef.current);
       const endpoint = form.matchType === 'SHADOW' ? `${API_BASE}/addShadow` : `${API_BASE}/addMatch`;
       const response = await fetch(endpoint, { headers: adminHeaders({ 'Idempotency-Key': publishRequestIdRef.current }), method: 'POST', body: data });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload?.message || 'Failed to add match.');
+      if (!response.ok) throw new Error(payload?.message || (response.status === 413
+        ? 'The pictures exceeded the upload limit. Choose smaller JPG pictures; your fight details are still here.'
+        : `Publishing failed (HTTP ${response.status}). Your fight details are still here.`));
 
       const matchId = payload?.matchId || payload?.data?._id || payload?._id || payload?.match?._id;
 
@@ -273,7 +301,7 @@ export default function AddNewMatch() {
         // as failed/lost — the fight already saved by this point.
         try {
           const shadow = new FormData();
-          appendLegacyFight(shadow, form, { shadow: true });
+          appendLegacyFight(shadow, preparedForm, { shadow: true });
           const shadowResponse = await fetch(`${API_BASE}/addShadow`, { headers: adminHeaders(), method: 'POST', body: shadow });
           if (!shadowResponse.ok) console.warn('Failed to add fight to shadow templates.');
         } catch (shadowError) {
@@ -304,14 +332,15 @@ export default function AddNewMatch() {
       const isNetworkDrop = requestError instanceof TypeError;
       if (isNetworkDrop) {
         try {
-          const registryResponse = await fetch(`${API_BASE}/api/public/fights?limit=500&includeDrafts=true&_=${Date.now()}`, {
+          const registryResponse = await fetch(`${API_BASE}/api/admin/fights?source=all&limit=500&includeDrafts=true&_=${Date.now()}`, {
             cache: 'no-store',
-            headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+            headers: adminHeaders({ Accept: 'application/json', 'Cache-Control': 'no-cache' }),
           });
+          if (!registryResponse.ok) throw new Error(`Registry returned ${registryResponse.status}`);
           const registryPayload = await registryResponse.json().catch(() => ({}));
           const registryRows = Array.isArray(registryPayload)
             ? registryPayload
-            : registryPayload?.items || registryPayload?.data || registryPayload?.rows || [];
+            : registryPayload?.items || registryPayload?.data?.items || registryPayload?.data || registryPayload?.rows || [];
           const savedFight = registryRows.find((fight) => (
             normalizeFightText(fight.matchName || fight.title) === normalizeFightText(form.matchName)
             && normalizeFightText(fight.matchFighterA || fight.fighterA?.name) === normalizeFightText(form.matchFighterA)
