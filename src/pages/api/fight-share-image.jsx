@@ -12,15 +12,15 @@ export default async function handler(req, res) {
   if (!validId(fightId) || !validId(affiliateId)) return res.status(400).end();
 
   try {
-    const [fightResponse, affiliatesResponse] = await Promise.all([
+    const [fightResponse, affiliateResponse] = await Promise.all([
       fetch(`${PUBLIC_API_BASE_URL}/api/public/fights/${fightId}`, { signal: AbortSignal.timeout(8000) }),
-      fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates?limit=200`, { signal: AbortSignal.timeout(8000) }),
+      fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${affiliateId}`, { signal: AbortSignal.timeout(8000) }),
     ]);
-    if (!fightResponse.ok || !affiliatesResponse.ok) return res.status(502).end();
-    const [fightPayload, affiliates] = await Promise.all([fightResponse.json(), affiliatesResponse.json()]);
+    if (affiliateResponse.status === 404 || fightResponse.status === 404) return res.status(404).end();
+    if (!fightResponse.ok || !affiliateResponse.ok) return res.status(502).end();
+    const [fightPayload, affiliate] = await Promise.all([fightResponse.json(), affiliateResponse.json()]);
     const fight = fightPayload.fight || fightPayload.data || fightPayload;
-    const affiliate = Array.isArray(affiliates) && affiliates.find((item) => String(item._id) === affiliateId && item.verified);
-    if (!fight || !affiliate) return res.status(404).end();
+    if (!fight || !affiliate || String(affiliate._id) !== affiliateId || !affiliate.verified) return res.status(404).end();
 
     let artUrl = fight.fightPosterImage || '';
     if (!artUrl) {
