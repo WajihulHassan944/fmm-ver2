@@ -361,7 +361,7 @@ const AffiliateUsers = () => {
     const coins = (value) => value === undefined || value === null || value === ''
       ? 'shown in your share kit'
       : `${Math.max(0, Math.round(Number(value) || 0)).toLocaleString()} FM COINS`;
-    const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens);
+    const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens, campaignFight && getFighterName(campaignFight, 'A'), campaignFight && getFighterName(campaignFight, 'B'));
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
