@@ -179,7 +179,7 @@ export default function AffiliateFightLaunch() {
   const facebookShareUrl = facebookLeagueUrl
     ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookLeagueUrl)}`
     : '';
-  const copyByPlatform = affiliateFightPosts(name, link, kit?.attribution?.leagueName || 'my league', kit?.creative?.prizeCoins, kit?.creative?.entryCoins);
+  const copyByPlatform = affiliateFightPosts(name, link, kit?.attribution?.leagueName || 'my league', kit?.creative?.prizeCoins, kit?.creative?.entryCoins, kit?.creative?.fighterA, kit?.creative?.fighterB);
   const posts = kit ? [['Facebook', copyByPlatform.facebook], ['Instagram', copyByPlatform.instagram], ['TikTok', copyByPlatform.tiktok], ['X', copyByPlatform.x]] : [];
   return <main className={styles.desk} style={{ maxWidth: 1050, margin: '36px auto', minHeight: 400 }}>
     <Head><title>Your fight share kit | FANTASY MMADNESS</title></Head>
