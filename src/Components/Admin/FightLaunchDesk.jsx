@@ -7,6 +7,7 @@ import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFigh
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
+import { fighterNameHashtags } from '@/Utils/fightShareCopy';
 import styles from './FightLaunchDesk.module.css';
 
 const titleFor = (fight) => `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`;
@@ -30,14 +31,16 @@ export default function FightLaunchDesk() {
   const id = fight ? String(getFightId(fight)) : '';
   const url = id ? `https://www.fantasymmadness.com/fight/${encodeURIComponent(id)}?play=1&utm_source=owner&utm_medium=social&utm_campaign=fight_launch` : '';
   const title = fight ? titleFor(fight) : '';
+  const fighterTags = fight ? fighterNameHashtags(getFighterName(fight, 'A'), getFighterName(fight, 'B')).join(' ') : '';
   const posterImage = uploadedPosters[id] || fight?.fightPosterImage || fight?.promotionBackground || fight?.fightPosterMobileImage || '';
   const prizeLine = Number(fight?.matchTokens) > 0 && Number(fight?.pot) > 0
     ? 'Compete for cash prizes where eligible. See the fight page for entry details, prize rules, and availability.'
     : 'Play for prizes and bragging rights. See the fight page for the rewards and entry rules.';
-  const facebook = `Fight fans: join FANTASY MMADNESS for ${title}! Make your picks before the fight, follow the action, and see how you stack up. ${prizeLine}\n\nHave an affiliate invitation? Use their personal link so you can play with their league. Fight details: ${url}\n\n#FANTASYMMADNESS #FightNight`;
-  const instagram = `Join the fight for ${title}! Make your picks, follow the action, and compete with other fight fans. ${prizeLine}\n\nScan the poster QR to get started. If an affiliate invited you, use their personal link to join their league.\n\n#FANTASYMMADNESS #FightNight`;
-  const tiktok = `Join FANTASY MMADNESS for ${title}. Make your picks and compete with fight fans. ${prizeLine} Scan the poster QR to play, or use your affiliate's personal link to join their league. #FANTASYMMADNESS #FightTok`;
-  const xPost = `Join the fight: ${title.slice(0, 40)}. Make your picks and compete for prizes where eligible. Check rules and join: ${url}`;
+  const facebook = `Fight fans: join FANTASY MMADNESS for ${title}! Make your picks before the fight, follow the action, and see how you stack up. ${prizeLine}\n\nHave an affiliate invitation? Use their personal link so you can play with their league. Fight details: ${url}\n\n#FANTASYMMADNESS #FightNight${fighterTags ? ` ${fighterTags}` : ''}`;
+  const instagram = `Join the fight for ${title}! Make your picks, follow the action, and compete with other fight fans. ${prizeLine}\n\nScan the poster QR to get started. If an affiliate invited you, use their personal link to join their league.\n\n#FANTASYMMADNESS #FightNight${fighterTags ? ` ${fighterTags}` : ''}`;
+  const tiktok = `Join FANTASY MMADNESS for ${title}. Make your picks and compete with fight fans. ${prizeLine} Scan the poster QR to play, or use your affiliate's personal link to join their league. #FANTASYMMADNESS #FightTok${fighterTags ? ` ${fighterTags}` : ''}`;
+  const xEnding = `. Make your picks and compete for prizes where eligible. Join: ${url}${fighterTags ? ` ${fighterTags}` : ''}`;
+  const xPost = `Join the fight: ${title.slice(0, Math.max(0, 280 - 'Join the fight: '.length - xEnding.length))}${xEnding}`;
   const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. The owner has already set up the fight and its economics. Open your personal kit to download the social poster with your tracked QR, then share it with your ready-made Facebook, Instagram, TikTok, or X caption. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds under the existing affiliate split. Review your recipients before sending.`;
 
   const uploadPoster = async (file) => {
