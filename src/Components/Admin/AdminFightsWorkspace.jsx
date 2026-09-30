@@ -136,7 +136,7 @@ const renderEntrantsCell = (fight) => {
     label = 'Covered';
   } else {
     badgeClass = 'is-warning';
-    label = 'Short';
+    label = 'Needs funding';
   }
   return (
     <span className="admin-cell-stack">
