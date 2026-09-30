@@ -247,7 +247,7 @@ const Admin = () => {
           </div>
           <div className="admin-quick-actions">
             {quickActions.map(({ title, copy, href, icon: Icon }) => (
-              <Link className="admin-quick-action" href={href} key={title}>
+              <Link className="admin-quick-action" href={href} key={title} style={title === 'Fighter Affiliates' ? { background: '#d71920', borderColor: '#ff4d55', color: '#fff', boxShadow: '0 12px 28px rgba(215,25,32,.28)' } : undefined}>
                 <span><Icon /></span>
                 <div><strong>{title}</strong><small>{copy}</small></div>
                 <FaArrowRight />
