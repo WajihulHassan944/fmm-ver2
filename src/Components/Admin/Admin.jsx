@@ -123,6 +123,7 @@ const Admin = () => {
 
   const quickActions = [
     { title: 'Fight Launch Desk', copy: 'Prepare fight posts, QR images, and an affiliate announcement from open fights.', href: '/administration/growth', icon: FaBolt },
+    { title: 'Fighter Affiliates', copy: 'Create and manage fighter affiliates, promoter access, tracked fight links, QR/share assets, and affiliate outreach.', href: '/administration/AffiliateUsers', icon: FaUserFriends },
     { title: 'Homepage posters', copy: 'Promote fight posters and shadow-fight videos to the homepage mobile funnel.', href: '/administration/homepage-content', icon: FaBullhorn },
     { title: 'Create a match', copy: 'Build a new fight card and prediction setup.', href: '/administration/AddNewMatch', icon: FaPlus },
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },
