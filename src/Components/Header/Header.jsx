@@ -74,7 +74,7 @@ const publicNav = [
   { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
   { label: 'FM COINS', href: '/fights-rewards', icon: FaCoins },
-  { label: 'How To Play', href: '/guides', icon: FaQuestionCircle },
+  { label: 'How To Play', href: '/how-to-play', icon: FaQuestionCircle },
   {
     label: 'Affiliates',
     href: '/affiliate-create-account',
