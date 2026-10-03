@@ -55,7 +55,7 @@ const fightLinks = [
 const contestLinks = [
   { label: 'Active Contests', href: '/upcomingfights', icon: FaBullseye },
   { label: 'Fantasy Leagues', href: '/FantasyLeagues', icon: FaTrophy },
-  { label: 'Play For Free', href: '/playforfree', icon: FaCoins },
+  { label: 'Play For Free', href: '/free-demo', icon: FaCoins },
   { label: 'Rewards', href: '/fights-rewards', icon: FaMedal },
   { label: 'Pro Wrestling Contests', href: '/pro-wrestling', icon: FaCrown },
 ];
@@ -124,7 +124,7 @@ const affiliateNav = [
   { label: 'Dashboard', href: '/AffiliateDashboard', icon: FaHome },
   { label: 'Earnings', href: '/affiliate-money', icon: FaCoins },
   { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
-  { label: 'How It Works', href: '/HowItWorks', icon: FaQuestionCircle },
+  { label: 'How It Works', href: '/how-to-play', icon: FaQuestionCircle },
   { label: 'League', href: '/affiliate-league', icon: FaTrophy },
   { label: 'Promotions', href: '/past-promotions', icon: FaMedal },
   { label: 'Guides', href: '/affiliate-guides', icon: FaNewspaper },
@@ -397,7 +397,7 @@ const Header = () => {
 
   const mobileLinks = [
     { label: 'Contests', href: '/upcomingfights', icon: FaTrophy },
-    { label: 'Make Predictions', href: '/home', icon: FaBullseye },
+    { label: 'Make Predictions', href: '/play', icon: FaBullseye },
     { label: 'Leaderboard', href: '/leaderboard', icon: FaCrown },
     { label: 'Leagues', href: '/FantasyLeagues', icon: FaTrophy },
     { label: 'Apparel', href: '/apparel', icon: FaGift },
