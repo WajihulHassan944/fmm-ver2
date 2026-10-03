@@ -240,7 +240,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
 
             <div data-fmm="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '26px', fontSize: '14.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase' }}>
               <a href="/play" style={{ color: 'rgba(255,255,255,.82)' }}>Play Now</a>
-              <a href="#contests" style={{ color: 'rgba(255,255,255,.82)' }}>How to Play</a>
+              <a href="/how-to-play" style={{ color: 'rgba(255,255,255,.82)' }}>How to Play</a>
               <a href="#leagues" style={{ color: 'rgba(255,255,255,.82)' }}>Leagues</a>
               <a href="#board" style={{ color: 'rgba(255,255,255,.82)' }}>Leaderboard</a>
               <a href="#store" style={{ color: 'rgba(255,255,255,.82)' }}>Store</a>
@@ -271,7 +271,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               which the phone header drops for room. Tapping any of them closes it. */}
           {menuOpen ? (
             <div data-fmm="mobile-menu" style={{ borderTop: '1px solid rgba(216,220,228,.14)', background: 'rgba(7,9,15,.99)', padding: '6px 14px 14px' }}>
-              {[['#fights', 'Fight Cards'], ['#contests', 'How to Play'], ['#leagues', 'Leagues'], ['#board', 'Leaderboard'], ['#store', 'Store'], ['#apply', 'Apply as an Affiliate'], ['#signup', 'Sign in']].map(([href, label]) => (
+              {[['#fights', 'Fight Cards'], ['/how-to-play', 'How to Play'], ['#leagues', 'Leagues'], ['#board', 'Leaderboard'], ['#store', 'Store'], ['#apply', 'Apply as an Affiliate'], ['#signup', 'Sign in']].map(([href, label]) => (
                 <a
                   key={href + label}
                   href={href}
@@ -325,7 +325,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               </div>
               <div data-fmm="hero-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <a href="/play" style={{ display: 'inline-flex', alignItems: 'center', height: '52px', padding: '0 30px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.06em', boxShadow: '0 8px 26px rgba(225,29,46,.42)' }}>PLAY A FIGHT</a>
-                <a href="#contests" style={{ display: 'inline-flex', alignItems: 'center', height: '52px', padding: '0 28px', borderRadius: '999px', background: 'rgba(255,255,255,.08)', border: '1.5px solid rgba(216,220,228,.42)', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.06em' }}>TRY A DEMO FIGHT</a>
+                <a href="/free-demo" style={{ display: 'inline-flex', alignItems: 'center', height: '52px', padding: '0 28px', borderRadius: '999px', background: 'rgba(255,255,255,.08)', border: '1.5px solid rgba(216,220,228,.42)', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.06em' }}>TRY A DEMO FIGHT</a>
               </div>
             </div>
           </div>
