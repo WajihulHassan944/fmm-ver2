@@ -241,14 +241,14 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             <div data-fmm="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '26px', fontSize: '14.5px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase' }}>
               <a href="/play" style={{ color: 'rgba(255,255,255,.82)' }}>Play Now</a>
               <a href="/how-to-play" style={{ color: 'rgba(255,255,255,.82)' }}>How to Play</a>
-              <a href="#leagues" style={{ color: 'rgba(255,255,255,.82)' }}>Leagues</a>
-              <a href="#board" style={{ color: 'rgba(255,255,255,.82)' }}>Leaderboard</a>
-              <a href="#store" style={{ color: 'rgba(255,255,255,.82)' }}>Store</a>
+              <a href="/FantasyLeagues" style={{ color: 'rgba(255,255,255,.82)' }}>Leagues</a>
+              <a href="/leaderboard" style={{ color: 'rgba(255,255,255,.82)' }}>Leaderboard</a>
+              <a href="/apparel" style={{ color: 'rgba(255,255,255,.82)' }}>Store</a>
             </div>
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <a data-fmm="nav-signin" href="/auth" style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: 'rgba(255,255,255,.72)', padding: '10px 4px' }}>Sign in</a>
-              <a data-fmm="nav-join" href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: '44px', padding: '0 22px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '14px', letterSpacing: '.04em', whiteSpace: 'nowrap' }}>JOIN FREE</a>
+              <a data-fmm="nav-join" href="/auth?mode=signup&role=player" style={{ display: 'inline-flex', alignItems: 'center', height: '44px', padding: '0 22px', borderRadius: '999px', background: 'linear-gradient(96deg,#f5a623,#e11d2e)', color: '#17070a', fontFamily: '"Anton", sans-serif', fontSize: '14px', letterSpacing: '.04em', whiteSpace: 'nowrap' }}>JOIN FREE</a>
               {/* Phone only. 44px square so it is a comfortable thumb target. */}
               <button
                 type="button"
@@ -271,7 +271,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               which the phone header drops for room. Tapping any of them closes it. */}
           {menuOpen ? (
             <div data-fmm="mobile-menu" style={{ borderTop: '1px solid rgba(216,220,228,.14)', background: 'rgba(7,9,15,.99)', padding: '6px 14px 14px' }}>
-              {[['#fights', 'Fight Cards'], ['/how-to-play', 'How to Play'], ['#leagues', 'Leagues'], ['#board', 'Leaderboard'], ['#store', 'Store'], ['#apply', 'Apply as an Affiliate'], ['#signup', 'Sign in']].map(([href, label]) => (
+              {[['#fights', 'Fight Cards'], ['/how-to-play', 'How to Play'], ['/FantasyLeagues', 'Leagues'], ['/leaderboard', 'Leaderboard'], ['/apparel', 'Store'], ['#apply', 'Apply as an Affiliate'], ['/auth', 'Sign in']].map(([href, label]) => (
                 <a
                   key={href + label}
                   href={href}
@@ -379,7 +379,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   <p style={{ fontSize: 14.5, fontWeight: 600, color: 'rgba(255,255,255,.6)', margin: '0 auto 18px', maxWidth: '34em' }}>
                     Create your account now and you will hear the moment the next card opens for predictions.
                   </p>
-                  <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: 46, padding: '0 24px', borderRadius: 999, background: '#f5a623', color: '#17070a', fontFamily: "'Anton', sans-serif", fontSize: 14, letterSpacing: '.05em' }}>GET NOTIFIED</a>
+                  <a href="/auth?mode=signup&role=player" style={{ display: 'inline-flex', alignItems: 'center', height: 46, padding: '0 24px', borderRadius: 999, background: '#f5a623', color: '#17070a', fontFamily: "'Anton', sans-serif", fontSize: 14, letterSpacing: '.05em' }}>GET NOTIFIED</a>
                 </div>
               ) : visibleFights.length === 0 ? (
                 <div style={{ gridColumn: '1 / -1', border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, padding: '30px 26px', textAlign: 'center', background: 'rgba(255,255,255,.03)', color: 'rgba(255,255,255,.6)', fontWeight: 600, fontSize: 14.5 }}>
@@ -511,7 +511,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                 ))}
               </div>
 
-              <a href="/home" style={{ display: 'block', padding: '13px 18px', borderTop: '1px solid rgba(216,220,228,.14)', fontSize: '12px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#f5a623' }}>Full standings →</a>
+              <a href="/leaderboard" style={{ display: 'block', padding: '13px 18px', borderTop: '1px solid rgba(216,220,228,.14)', fontSize: '12px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#f5a623' }}>Full standings →</a>
             </div>
 
             <div id="season" style={{ border: '1px solid rgba(192,57,159,.4)', borderRadius: '14px', padding: '18px', background: 'linear-gradient(168deg,rgba(192,57,159,.12),rgba(11,14,24,.6))' }}>
@@ -520,7 +520,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <p style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.72)', margin: '0 0 15px' }}>
                 Draft one fighter from boxing, MMA, bare knuckle, kickboxing and pro wrestling. They compete on their own schedules all season — every round they throw lands on your card.
               </p>
-              <a href="#signup" style={{ display: 'inline-flex', alignItems: 'center', height: '42px', padding: '0 20px', borderRadius: '999px', background: '#c0399f', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em' }}>DRAFT FREE</a>
+              <a href="/auth?mode=signup&role=player" style={{ display: 'inline-flex', alignItems: 'center', height: '42px', padding: '0 20px', borderRadius: '999px', background: '#c0399f', color: '#fff', fontFamily: '"Anton", sans-serif', fontSize: '13.5px', letterSpacing: '.05em' }}>DRAFT FREE</a>
             </div>
 
             <div style={{ border: '1px solid rgba(216,220,228,.18)', borderRadius: '14px', padding: '18px', background: 'rgba(255,255,255,.03)' }}>
@@ -721,7 +721,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.42)', marginBottom: '11px' }}>Play</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
                 <a href="/play" style={{ color: 'rgba(255,255,255,.72)' }}>Play Now</a>
-                <a href="#board" style={{ color: 'rgba(255,255,255,.72)' }}>Leaderboard</a>
+                <a href="/leaderboard" style={{ color: 'rgba(255,255,255,.72)' }}>Leaderboard</a>
                 <a href="/auth?mode=signup&role=affiliate" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
               </div>
             </div>
