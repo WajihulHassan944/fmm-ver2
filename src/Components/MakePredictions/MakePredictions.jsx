@@ -6,12 +6,22 @@ import {
   FaClock,
   FaCoins,
   FaFistRaised,
+  FaShoePrints,
+  FaBullseye,
   FaShieldAlt,
   FaTrophy,
 } from 'react-icons/fa';
 import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
+
+const MetricIcon = ({ code }) => {
+  if (code === 'KI') return <FaShoePrints aria-hidden="true" className="player-round-metric-icon is-kick" />;
+  if (code === 'KN') return <span aria-hidden="true" className="player-round-metric-symbol is-knee">KN</span>;
+  if (code === 'EL') return <span aria-hidden="true" className="player-round-metric-symbol is-elbow">EL</span>;
+  if (code === 'TP') return <FaBullseye aria-hidden="true" className="player-round-metric-icon is-total" />;
+  return <FaFistRaised aria-hidden="true" className="player-round-metric-icon is-punch" />;
+};
 
 const buildRound = (round) => ({
   round,
@@ -311,7 +321,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       if (!entryResponse.ok) {
         if (entryPayload?.code === 'INSUFFICIENT_FUNDS') {
           const shortfall = Number(entryPayload.shortfall || 0);
-          setSubmitError(`You need ${shortfall} more FM coins. Your picks are saved here; add coins and return to submit.`);
+          setSubmitError(`You need ${shortfall} more FM COINS. Your picks are saved here; add coins and return to submit.`);
           return;
         }
         if (entryPayload?.code === 'FIGHT_LOCKED') {
@@ -407,7 +417,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
             <FaCoins />
             <span>Fight wallet</span>
             <strong>{user.tokens || 0}</strong>
-            <small>FM coins available</small>
+            <small>FM COINS available</small>
           </button>
         </div>
 
@@ -506,7 +516,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         <small>{getFighterName(match, 'A')}</small>
                       </label>
                       <div>
-                        <FaFistRaised aria-hidden="true" className="player-round-metric-icon" />
+                        <MetricIcon code={metric.code} />
                         <span><b>{metric.code}</b><strong>{metric.title}</strong></span>
                       </div>
                       <label className="is-b">
@@ -583,8 +593,8 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         </div>
 
         <div className="xp-prediction-submit-panel">
-          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError} {entryFee > 0 && eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <button type="button" onClick={() => router.push(checkoutUrl)}>Add FM coins</button>}</p>}
-          <div><FaShieldAlt /><span>Review your picks. {entryFee > 0 ? `Submitting charges ${entryFee} FM coins and saves your predictions.` : 'Submit your free entry and save your predictions.'}</span></div>
+          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError} {entryFee > 0 && eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS</button>}</p>}
+          <div><FaShieldAlt /><span>Review your picks. {entryFee > 0 ? `Submitting charges ${entryFee} FM COINS and saves your predictions.` : 'Submit your free entry and save your predictions.'}</span></div>
           <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting || (entryFee > 0 && !eligibility?.eligible)}>
             <FaTrophy /> {buttonText}
           </button>
