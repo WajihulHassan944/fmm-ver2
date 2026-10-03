@@ -36,6 +36,7 @@ import {
 } from '@/Utils/fightExperience';
 import { fetchPublicPredictionFights, normalizePublicFightRow } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
+import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 
 const sameId = (left, right) => String(left || '') === String(right || '');
 
@@ -288,7 +289,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
       <section className="theme-container public-fight-data-strip" aria-label="Fight data">
         <article><FaUsers /><span><strong>{playerCount > 0 ? playerCount : 'Open'}</strong><small>{playerCount > 0 ? 'Players' : 'Entries'}</small></span></article>
-        <article><FaCoins /><span><strong>{getFightPrize(resolvedFight)}</strong><small>Prize pool</small></span></article>
+        <article className="public-fight-fm-coins"><FMCoin size="lg" motion="shine" /><span><strong><FMCoinAmount amount={getFightPrize(resolvedFight)} size="md" motion="shine" /></strong><small>FM COINS PRIZE POOL</small></span></article>
         <article><FaShieldAlt /><span><strong>{resolvedFight?.matchType || 'Public'}</strong><small>Fight type</small></span></article>
         <article><FaClock /><span><strong>{resolvedFight?.matchStatus || 'Open'}</strong><small>Status</small></span></article>
       </section>
