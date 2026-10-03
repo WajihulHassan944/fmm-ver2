@@ -1,15 +1,4 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
-
-const HowItWorks = dynamic(
-  () => import('@/Components/Affiliates/HowItWorks'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <HowItWorks />
+export async function getServerSideProps() {
+  return { redirect: { destination: '/how-to-play', permanent: false } };
 }
-
-export default index
+export default function HowItWorksRedirect(){ return null; }
