@@ -645,7 +645,7 @@ const FinalHomeV35 = ({
           <span /><span /><span />
         </button>
         <button type="button" className="fmm-v35-wallet" onClick={() => setCoinModalOpen(true)} aria-label="Open FM coin wallet">
-          <b>FM</b><strong>{tokenBalance.toLocaleString()}</strong><i><FaPlus /></i>
+          <b><FaCoins /> FM COINS</b><strong>{tokenBalance.toLocaleString()}</strong><i><FaPlus /></i>
         </button>
         <Link href={isLoggedIn ? "/profile" : "/login?next=/profile"} className="fmm-v35-notify" aria-label={`Notifications and profile: ${notificationCount} unread`}>
           <FaBell /><span className="fmm-v42-sr-only">Notifications</span>{notificationCount > 0 ? <em>{notificationCount}</em> : null}
@@ -664,6 +664,8 @@ const FinalHomeV35 = ({
               {[
                 ["/", "Home"],
                 ["/upcomingfights", "Contests"],
+                ["/play", "Play Now"],
+                ["/how-to-play", "How to Play"],
                 [predictionHref, "Make Predictions"],
                 ["/leaderboard", "Leaderboard"],
                 ["/FantasyLeagues", "Leagues"],
@@ -701,13 +703,13 @@ const FinalHomeV35 = ({
           <header><span>NEW PLAYER GUIDE</span><h2 id="fmm-how-to-play-title">HOW TO PLAY</h2><p>Follow the fight from entry to the leaderboard. We guide you through every step.</p></header>
           <div className="fmm-v35-how-steps">
             <Link href="/upcomingfights"><b>1</b><strong>PICK A FIGHT</strong><small>Choose the matchup you want to play.</small></Link>
-            <Link href={predictionHref}><b>2</b><strong>ENTER</strong><small>See the entry and prize before you commit.</small></Link>
-            <Link href={predictionHref}><b>3</b><strong>PREDICT</strong><small>Make your fight-stat predictions.</small></Link>
+            <Link href="/play"><b>2</b><strong>ENTER</strong><small>Choose an open contest and see the entry before you commit.</small></Link>
+            <Link href="/play"><b>3</b><strong>PREDICT</strong><small>Enter a fight and make your fight-stat predictions.</small></Link>
             <span><b>4</b><strong>WATCH</strong><small>Follow the fight as it happens.</small></span>
             <span><b>5</b><strong>SCORE POINTS</strong><small>Your predictions become fantasy points.</small></span>
             <Link href="/leaderboard"><b>6</b><strong>CLIMB & WIN</strong><small>Track your place on the leaderboard.</small></Link>
           </div>
-          <Link href="/upcomingfights" className="fmm-v35-how-cta">PICK A FIGHT & START →</Link>
+          <div className="fmm-v35-how-actions"><Link href="/how-to-play" className="fmm-v35-how-secondary">FULL HOW TO PLAY →</Link><Link href="/play" className="fmm-v35-how-cta">PLAY NOW →</Link></div>
         </section>
 
         <section className="fmm-v35-ticker" aria-label="Live ticker">
@@ -761,7 +763,7 @@ const FinalHomeV35 = ({
               <strong className="is-fm-coins"><FaCoins /> {weeklyEntry}<small> ENTRY FEE</small></strong>
               <strong>{weeklyEntriesLabel}<small> ENTRIES</small></strong>
             </div>
-            <Link href={weeklyHref}>STEP 1 — ENTER THIS FIGHT</Link>
+            <Link href="/play">PLAY NOW — CHOOSE A FIGHT</Link>
           </div>
         </section>
 
@@ -785,7 +787,7 @@ const FinalHomeV35 = ({
                   <strong className="is-fm-coins"><FaCoins /> {event.prize}</strong>
                 </Link>
                 <div><Link href={event.href}>⚡ {firstName(event.f1)}</Link><Link href={event.href}>⚡ {firstName(event.f2)}</Link></div>
-                <Link href={event.href} className="fmm-v35-enter">ENTER NOW</Link>
+                <Link href="/play" className="fmm-v35-enter">ENTER NOW</Link>
               </article>
             )) : <div className="fmm-v41-leader-empty"><span>New fight cards will appear here as soon as they are published.</span></div>}
           </div>
