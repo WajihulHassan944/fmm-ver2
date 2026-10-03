@@ -525,3 +525,27 @@ body:has(.fmm-home-v35-final) .fmm-home-main {
 @media (min-width: 1180px) {
   .fmm-v35-shell { max-width: 1120px; }
 }
+
+
+/* Guided player journey: keep the core FANTASY MMADNESS flow obvious on every screen size. */
+.fmm-v35-how-to-play{margin:18px 0 22px;padding:22px;border:1px solid rgba(223,17,27,.48);border-radius:18px;background:linear-gradient(135deg,rgba(18,20,25,.98),rgba(7,8,11,.98));box-shadow:0 18px 42px rgba(0,0,0,.24);text-align:center}
+.fmm-v35-how-to-play header>span{display:inline-block;padding:5px 10px;border-radius:999px;background:#df111b;color:#fff;font-size:10px;font-weight:900;letter-spacing:1.5px}
+.fmm-v35-how-to-play h2{margin:8px 0 3px;color:#fff;font-size:30px;letter-spacing:2px}
+.fmm-v35-how-to-play header p{margin:0 auto 17px;max-width:650px;color:rgba(255,255,255,.72);font-size:13px}
+.fmm-v35-how-steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.fmm-v35-how-steps>a,.fmm-v35-how-steps>span{position:relative;display:flex;min-height:118px;padding:13px 8px 11px;align-items:center;justify-content:flex-start;flex-direction:column;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:rgba(255,255,255,.045);color:#fff;text-decoration:none}
+.fmm-v35-how-steps b{display:grid;width:29px;height:29px;margin-bottom:8px;place-items:center;border-radius:50%;background:#df111b;font-size:13px}
+.fmm-v35-how-steps strong{font-size:11px;letter-spacing:.7px}
+.fmm-v35-how-steps small{margin-top:5px;color:rgba(255,255,255,.62);font-size:9px;line-height:1.35}
+.fmm-v35-how-steps>a:hover{border-color:#df111b;background:rgba(223,17,27,.12)}
+.fmm-v35-how-cta{display:inline-flex;margin-top:16px;min-height:45px;padding:0 24px;align-items:center;justify-content:center;border-radius:9px;background:#df111b;color:#fff!important;font-size:12px;font-weight:900;letter-spacing:1px;text-decoration:none}
+@media(max-width:767px){
+ .fmm-v35-how-to-play{margin:12px 10px 16px;padding:16px 10px;border-radius:15px}
+ .fmm-v35-how-to-play h2{font-size:24px}
+ .fmm-v35-how-to-play header p{font-size:11px}
+ .fmm-v35-how-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .fmm-v35-how-steps>a,.fmm-v35-how-steps>span{min-height:108px;padding:10px 5px}
+ .fmm-v35-how-steps strong{font-size:9px}
+ .fmm-v35-how-steps small{font-size:8px}
+ .fmm-v35-how-cta{width:100%;margin-top:12px}
+}
