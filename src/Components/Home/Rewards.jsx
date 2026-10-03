@@ -22,7 +22,7 @@ const REWARDS = [
     icon: FaTrophy,
     eyebrow: 'Bonus challenges',
     value: 'Event-based rewards',
-    copy: 'Selected events can include bonus token or prize challenges configured by the platform team.',
+    copy: 'Selected events can include bonus FM COINS or prize challenges configured by the platform team.',
     image: 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743522401/home/t5vvnlqqu57vgpeumtj2.png',
     accent: 'red',
   },
@@ -54,7 +54,7 @@ const Rewards = () => (
           <FaTrophy />
           <span>Member advantage</span>
           <strong>Compete. Predict. Win.</strong>
-          <p>Use the same account, token, and prize flows already available across Fantasy MMAdness.</p>
+          <p>Use the same account, FM COINS, and prize flows already available across Fantasy MMAdness.</p>
         </aside>
       </div>
     </section>
@@ -82,7 +82,7 @@ const Rewards = () => (
 
       <section className="user-rewards-cta">
         <div><p>Ready for the next card?</p><h2>Put your fight knowledge into play.</h2><span>Browse eligible fights, practice in the mock game, or top up your existing fight wallet.</span></div>
-        <div><Link href="/mock-game">Practice free <FaArrowRight /></Link><Link href="/checkout" className="is-secondary">Add wallet tokens</Link></div>
+        <div><Link href="/mock-game">Practice free <FaArrowRight /></Link><Link href="/checkout" className="is-secondary">Add FM COINS</Link></div>
       </section>
     </main>
   </div>
