@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { FaCoins, FaTrophy, FaArrowRight, FaFistRaised } from 'react-icons/fa';
 import { fetchPublicPredictionFights } from '@/Utils/publicApi';
 import { formatFightDate, getFightCategory, getFightId, getFightName, getFighterImage, getFightPrize } from '@/Utils/fightExperience';
 
@@ -14,27 +15,46 @@ const entryIsOpen = (fight) => {
 };
 
 export default function PlayPage({ fights = [] }) {
-  return <main style={{ minHeight: '100vh', background: '#080b13', color: '#fff', padding: '30px max(18px, 5vw) 90px' }}>
+  return <main className="fmm-play-page">
     <Head><title>Play Now | FANTASY MMADNESS</title><meta name="description" content="Choose an open combat sports fight, make predictions, and join the leaderboard." /></Head>
-    <div style={{ maxWidth: 1200, margin: 'auto' }}>
-      <Link href="/" style={{ color: '#f5a623' }}>← FANTASY MMADNESS</Link>
-      <h1 style={{ fontSize: 'clamp(36px, 6vw, 68px)', marginBottom: 8 }}>PLAY NOW</h1>
-      <p style={{ color: '#bec7d7', maxWidth: 680 }}>Pick an open fight. Sign in or create a player account, make your predictions, and compete on its leaderboard. You can join directly without an affiliate link.</p>
-      {fights.length ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 18, marginTop: 30 }}>
-        {fights.map((fight) => <article key={getFightId(fight)} style={{ border: '1px solid #46526b', borderRadius: 16, overflow: 'hidden', background: '#111827' }}>
-          <div style={{ display: 'flex', height: 'clamp(230px, 25vw, 300px)', background: 'radial-gradient(ellipse at center bottom, #1c263b, #080b13 75%)' }}>
-            <img src={getFighterImage(fight, 'A', 0)} alt="" style={{ display: 'block', width: '50%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom' }} />
-            <img src={getFighterImage(fight, 'B', 1)} alt="" style={{ display: 'block', width: '50%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom' }} />
+    <section className="fmm-play-hero">
+      <div className="fmm-play-shell">
+        <Link href="/" className="fmm-play-back">← FANTASY MMADNESS</Link>
+        <span className="fmm-play-kicker"><FaFistRaised /> LIVE PLAYER LOBBY</span>
+        <h1>PICK A FIGHT.<br/><em>PREDICT THE ACTION.</em></h1>
+        <p>Choose an open matchup below. We guide you from entry through your predictions and straight to the leaderboard.</p>
+        <div className="fmm-play-journey" aria-label="How to play">
+          <span><b>1</b><strong>PICK</strong><small>Choose a fight</small></span>
+          <span><b>2</b><strong>ENTER</strong><small>See FM COINS entry</small></span>
+          <span><b>3</b><strong>PREDICT</strong><small>Call the action</small></span>
+          <span><b>4</b><strong>SUBMIT</strong><small>Lock your picks</small></span>
+          <span><b>5</b><strong>CLIMB</strong><small>Track leaderboard</small></span>
+        </div>
+      </div>
+    </section>
+    <section className="fmm-play-shell fmm-play-open">
+      <header><div><span>OPEN CONTESTS</span><h2>PLAY NOW</h2></div><p>Select a fight to enter the prediction room.</p></header>
+      {fights.length ? <div className="fmm-play-grid">
+        {fights.map((fight) => <article className="fmm-play-card" key={getFightId(fight)}>
+          <div className="fmm-play-card-visual">
+            <img src={getFighterImage(fight, 'A', 0)} alt="" />
+            <b>VS</b>
+            <img src={getFighterImage(fight, 'B', 1)} alt="" />
+            <span>{getFightCategory(fight)}</span>
           </div>
-          <div style={{ padding: 20 }}>
-            <small style={{ color: '#f5a623' }}>{getFightCategory(fight)} · {formatFightDate(fight)}</small>
-            <h2 style={{ fontSize: 24, margin: '12px 0' }}>{getFightName(fight)}</h2>
-            <p>Entry: {Number(fight.matchTokens || 0).toLocaleString()} FM coins · Prize: {getFightPrize(fight)}</p>
-            <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} style={{ display: 'inline-block', padding: '12px 20px', borderRadius: 8, background: '#f5a623', color: '#150b08', fontWeight: 800 }}>PLAY THIS FIGHT →</Link>
+          <div className="fmm-play-card-copy">
+            <small>{formatFightDate(fight)}</small>
+            <h2>{getFightName(fight)}</h2>
+            <div className="fmm-play-money">
+              <span><FaCoins/><small>ENTRY</small><strong>{Number(fight.matchTokens || 0).toLocaleString()}</strong><b>FM COINS</b></span>
+              <span><FaTrophy/><small>PRIZE</small><strong>{getFightPrize(fight)}</strong></span>
+            </div>
+            <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button">PLAY THIS FIGHT <FaArrowRight /></Link>
+            <p>Next: verify eligibility, make your predictions, then submit your card.</p>
           </div>
         </article>)}
-      </div> : <div style={{ padding: 32, border: '1px solid #46526b', borderRadius: 12, marginTop: 30 }}>No fights are open for new predictions right now. Check back for the next card.</div>}
-    </div>
+      </div> : <div className="fmm-play-empty">No fights are open for new predictions right now. Check back for the next card.</div>}
+    </section>
   </main>;
 }
 
