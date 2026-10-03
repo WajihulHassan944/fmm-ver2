@@ -414,9 +414,9 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
             <div className="xp-prediction-countdown"><FaClock /> {timeRemaining.hasStarted ? 'Fight has started' : `${timeRemaining.diffHrs}h ${timeRemaining.diffMins}m ${timeRemaining.diffSecs}s until lock`}</div>
           </div>
           <button className="xp-prediction-wallet" type="button" onClick={() => router.push(checkoutUrl)}>
-            <FaCoins />
+            <FMCoin size="lg" motion="shine" />
             <span>Fight wallet</span>
-            <strong>{user.tokens || 0}</strong>
+            <strong>{Number(user.tokens || 0).toLocaleString()}</strong>
             <small>FM COINS available</small>
           </button>
         </div>
@@ -425,8 +425,8 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           <div className="player-paid-entry-value">
             <span>STEP 1 · VERIFY & ENTER</span>
             <small>Fight entry</small>
-            <strong><FaCoins /> {Number(entryFee).toLocaleString()}</strong>
-            <b>FM COINS</b>
+            <strong className="player-paid-entry-coin-amount"><FMCoinAmount amount={entryFee} size="lg" motion="shine" /></strong>
+            <b>FM COINS ENTRY</b>
             <p>Your entry is charged only when you submit your completed prediction card.</p>
           </div>
           <div className="player-paid-entry-verify">
