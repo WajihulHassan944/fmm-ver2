@@ -549,3 +549,15 @@ body:has(.fmm-home-v35-final) .fmm-home-main {
  .fmm-v35-how-steps small{font-size:8px}
  .fmm-v35-how-cta{width:100%;margin-top:12px}
 }
+
+
+/* FM COINS value treatment: premium gold, high-contrast, cash-prize visual hierarchy. */
+.fmm-v35-home .is-fm-coins,.fmm-home-v35-final .is-fm-coins{position:relative;color:#ffd85a!important;text-shadow:0 0 8px rgba(255,195,42,.42),0 2px 1px rgba(0,0,0,.75);font-weight:950}
+.fmm-v35-home .is-fm-coins svg,.fmm-home-v35-final .is-fm-coins svg{color:#ffd24a;filter:drop-shadow(0 0 5px rgba(255,190,24,.62));animation:fmmCoinGlint 2.8s ease-in-out infinite}
+.fmm-v35-detail-money p:first-child{border-color:rgba(255,199,52,.5);background:linear-gradient(180deg,rgba(255,197,44,.12),rgba(255,197,44,.025));box-shadow:inset 0 0 18px rgba(255,190,24,.06)}
+.fmm-v35-detail-money p:first-child strong{font-size:clamp(20px,2.2vw,30px)!important;letter-spacing:.3px}
+.fmm-v35-detail-money p:first-child small{color:#ffe7a0;font-weight:900;letter-spacing:1.2px}
+.fmm-v35-event-rail time small{display:block;margin-top:3px;color:rgba(255,255,255,.72);font-size:9px;font-weight:800;letter-spacing:.7px}
+@keyframes fmmCoinGlint{0%,72%,100%{filter:drop-shadow(0 0 4px rgba(255,190,24,.48));transform:scale(1)}80%{filter:drop-shadow(0 0 10px rgba(255,220,94,.95));transform:scale(1.1)}88%{filter:drop-shadow(0 0 5px rgba(255,190,24,.58));transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.fmm-v35-home .is-fm-coins svg,.fmm-home-v35-final .is-fm-coins svg{animation:none}}
+.admin-time-tba{display:flex!important;align-items:center;gap:7px;margin-top:8px;font-weight:900;letter-spacing:.5px}.admin-time-tba input{width:auto!important;margin:0!important}
