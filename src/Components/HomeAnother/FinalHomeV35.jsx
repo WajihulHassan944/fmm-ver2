@@ -344,7 +344,7 @@ const buildUpcomingEvent = (fight = {}, index = 0) => {
     f2: getFighterName(fight, "B"),
     tag: cleanText(pick(fight?.tag, fight?.league, fight?.promotion, sportAssets[key]?.longLabel), sportAssets[key]?.longLabel).toUpperCase(),
     color: sportAssets[key]?.color || "#ef4444",
-    date: getDateLabel(fight),
+    date: getDateLabel(fight),\n    time: getFightTimeLabel(fight),
     prize: getPrize(fight),
     image: explicitPoster,
     fighterAImage,
@@ -390,7 +390,7 @@ const getDateLabel = (fight = {}, fallback = "TBA · LIVE NOW") => {
   return `${month} ${date.getDate()} · ${days}D : ${String(hours).padStart(2, "0")}H`;
 };
 
-const getShortDate = (fight = {}) => {
+const getFightTimeLabel = (fight = {}) => {\n  if (fight?.timeTba === true || String(fight?.timeTba).toLowerCase() === "true") return "TIME TBA";\n  const raw = String(fight?.matchTime || fight?.time || fight?.fightTime || "").trim();\n  if (!raw || raw === "00:00" || /^12:00\\s*AM$/i.test(raw)) return "TIME TBA";\n  return cleanText(raw);\n};\n\nconst getShortDate = (fight = {}) => {
   const label = getDateLabel(fight, "DATE TBA");
   return label.split("·")[0].trim();
 };
@@ -773,7 +773,7 @@ const FinalHomeV35 = ({
                   </figure>
                   <span className="fmm-v35-event-tag">{event.tag}</span>
                   <h3>{event.f1} <em>VS</em> {event.f2}</h3>
-                  <time>{event.date}</time>
+                  <time>{event.date}<small>{event.time}</small></time>
                   <strong className="is-fm-coins"><FaCoins /> {event.prize}</strong>
                 </Link>
                 <div><Link href={event.href}>⚡ {firstName(event.f1)}</Link><Link href={event.href}>⚡ {firstName(event.f2)}</Link></div>
@@ -790,7 +790,7 @@ const FinalHomeV35 = ({
           <div className="fmm-v35-detail-copy">
             <span>FEATURED FIGHT · {featuredSport.longLabel}</span>
             <h2 id="fmm-v35-detail-title">{fighterA} <em>VS</em> {fighterB}</h2>
-            <div className="fmm-v35-detail-meta"><b>{getShortDate(featuredFight)}</b><b>{cleanText(featuredFight?.matchTime || featuredFight?.time || "TIME TBA")}</b><b>{cleanText(featuredFight?.venue || "VENUE TBA")}</b></div>
+            <div className="fmm-v35-detail-meta"><b>{getShortDate(featuredFight)}</b><b>{getFightTimeLabel(featuredFight)}</b><b>{cleanText(featuredFight?.venue || "VENUE TBA")}</b></div>
             <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong className="is-fm-coins"><FaCoins /> {featuredPrize}</strong></p><p><small>FM COINS ENTRY FEE</small><strong className="is-fm-coins"><FaCoins /> {featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
             <Link href={predictionHref} className="fmm-v35-red-btn">STEP 2 — MAKE YOUR PREDICTIONS</Link>
