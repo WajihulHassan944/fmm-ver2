@@ -14,6 +14,7 @@ import {
 import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
+import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 
 const MetricIcon = ({ code }) => {
   if (code === 'KI') return <FaShoePrints aria-hidden="true" className="player-round-metric-icon is-kick" />;
