@@ -37,11 +37,11 @@ const GUIDE_ITEMS = [
   {
     id: 'wallet',
     icon: FaCoins,
-    title: 'Use tokens and wallet',
+    title: 'Use FM COINS and wallet',
     label: 'Account',
     steps: [
-      'Add tokens from the wallet area when needed.',
-      'Use available tokens to enter active fights or contests.',
+      'Add FM COINS from the wallet area when needed.',
+      'Use available FM COINS to enter active fights or contests.',
       'Review wallet activity from your profile/account area.',
     ],
   },
@@ -115,7 +115,7 @@ const Guide = () => {
             <h2>Play smarter, move faster, and stay ready for fight night.</h2>
             <p>
               This guide is now simplified into short action cards so users can quickly learn how to join fights,
-              submit predictions, use tokens, follow fresh opportunities, and manage their account.
+              submit predictions, use FM COINS, follow fresh opportunities, and manage their account.
             </p>
           </div>
           <div className="xp-guide-principles">
