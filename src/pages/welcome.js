@@ -834,9 +834,9 @@ const toFightCard = (f, index) => {
         : guaranteed > 0 ? 'Guaranteed pot'
           : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
       cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee) + ' FM COINS',
-      ctaBg: '#22c55e',
-      ctaBorder: '0',
-      ctaColor: '#052e14',
+      ctaBg: 'linear-gradient(96deg,#e11d2e,#b90f1b)',
+      ctaBorder: '1px solid rgba(255,92,102,.5)',
+      ctaColor: '#ffffff',
     };
 };
 
