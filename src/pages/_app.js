@@ -433,6 +433,7 @@ function AppContent({ children }) {
     || isPlayerWorkspaceRoute
     || isStandaloneAccountRoute;
   const isStandaloneDemoRoute = ["/free-demo", "/mock-game", "/playforfree"].includes(router.pathname);
+  const isModernFightDetailRoute = router.pathname === "/fight/[matchId]";
   // Keep the global site header hidden for admin and the standalone demo app.
   // The homepage still needs the normal desktop/laptop navbar, while CSS hides
   // it on phone so the standalone mobile app topbar remains clean.
@@ -442,7 +443,7 @@ function AppContent({ children }) {
   const forcePrototypeExperience = Boolean(exactMobileTab);
   const hideLayout = isAdministrationRoute || isStandaloneDemoRoute
     || router.pathname.startsWith("/score")
-    || router.pathname === "/" || router.pathname === "/welcome" || forcePrototypeExperience;
+    || router.pathname === "/" || router.pathname === "/welcome" || isModernFightDetailRoute || forcePrototypeExperience;
   const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
