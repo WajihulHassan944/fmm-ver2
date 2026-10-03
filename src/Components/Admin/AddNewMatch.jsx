@@ -21,6 +21,7 @@ const EMPTY = {
   fighterBImage: null,
   matchDate: '',
   matchTime: '',
+  timeTba: false,
   matchTokens: '0',
   matchTokensUsd: '',
   pot: '0',
@@ -175,7 +176,8 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
       : form.matchTime;
     const matchDate = form.matchDate ? form.matchDate.split('T')[0] : '';
     data.append('matchDate', matchDate);
-    data.append('matchTime', matchTimeEST);
+    data.append('matchTime', form.timeTba ? '' : matchTimeEST);
+    data.append('timeTba', String(Boolean(form.timeTba)));
     data.append('eventTimeZone', 'America/New_York');
     data.append('matchTokens', form.matchTokens);
     data.append('pot', form.pot);
@@ -274,7 +276,8 @@ export default function AddNewMatch() {
       const hasFighterB = form.fighterBId || (form.matchFighterB.trim() && form.fighterBImage);
       if (!hasFighterA || !hasFighterB) throw new Error('Pick both fighters from the library, or type a name and attach a photo directly for each.');
       if (form.fighterAId && form.fighterBId && form.fighterAId === form.fighterBId) throw new Error('Fighter A and Fighter B must be different fighters.');
-      if (form.matchType === 'LIVE' && (!form.matchDate || !form.matchTime)) throw new Error('Date and time are required for a live fight card.');
+      if (form.matchType === 'LIVE' && !form.matchDate) throw new Error('A date is required for a live fight card.');
+      if (form.matchType === 'LIVE' && !form.timeTba && !form.matchTime) throw new Error('Enter the fight time or choose TIME TBA.');
 
       const preparedImages = await Promise.all([
         prepareFightImage(form.fighterAImage),
@@ -477,7 +480,7 @@ export default function AddNewMatch() {
               <header><span>02</span><div><h3>Schedule and economy</h3><p>Configure lock timing, entry cost and the advertised prize pool. Declare upfront — the pot never grows with entries.</p></div></header>
               <div className="admin-form-grid">
                 <label><span>Fight date</span><input type="date" name="matchDate" value={form.matchDate} onChange={change} required /></label>
-                <label><span>Fight time (ET)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} required /></label>
+                <label><span>Fight time (ET)</span><input type="time" name="matchTime" value={form.matchTime} onChange={change} disabled={form.timeTba} required={!form.timeTba} /><span className="admin-time-tba"><input type="checkbox" name="timeTba" checked={form.timeTba} onChange={(event) => setForm((current) => ({ ...current, timeTba: event.target.checked, matchTime: event.target.checked ? '' : current.matchTime }))} /> TIME TBA</span><small>{form.timeTba ? 'Players will see TIME TBA until you enter the official start time.' : 'Enter the official event time.'}</small></label>
                 <label className="admin-money-conversion-field">
                   <span>Player entry fee (USD)</span>
                   <div className="admin-money-input"><b>$</b><input type="number" min="0" step="0.01" name="matchTokensUsd" value={form.matchTokensUsd} onChange={change} placeholder="0.00" /></div>
@@ -512,7 +515,7 @@ export default function AddNewMatch() {
               <b>VS</b>
               <article><UniformFighterPreview src={previews.fighterBImage} fallbackSrc={FALLBACK_B} alt="Fighter B preview" /><strong>{form.matchFighterB || 'Fighter B'}</strong></article>
             </div>
-            <small><FaCalendarAlt /> {form.matchDate || 'Schedule pending'} · {form.matchTime || 'TBA'} ET</small>
+            <small><FaCalendarAlt /> {form.matchDate || 'Schedule pending'} · {form.timeTba ? 'TIME TBA' : (form.matchTime || 'TIME TBA')} {form.timeTba ? '' : 'ET'}</small>
           </section>
           <section className="admin-upload-stack">
             <label><FaCloudUploadAlt /><span><strong>Fight background</strong><small>{form.promotionBackground?.name || 'Select a high-resolution promotion image'}</small></span><input hidden type="file" accept="image/*" name="promotionBackground" onChange={change} /></label>
