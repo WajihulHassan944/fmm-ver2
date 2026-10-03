@@ -187,6 +187,9 @@ export const formatFightDate = (match, options = {}) => {
     : { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
   const datePart = date.toLocaleDateString('en-US', base);
   if (options.dateOnly) return datePart;
+  const rawTime = String(match?.matchTime || match?.time || '').trim();
+  const timeIsTba = match?.timeTba === true || !rawTime || /^00:00(?::00)?$/.test(rawTime) || /^12:00\s*AM$/i.test(rawTime);
+  if (timeIsTba) return `${datePart} · TIME TBA`;
   const timePart = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   return `${datePart} · ${timePart}`;
 };
