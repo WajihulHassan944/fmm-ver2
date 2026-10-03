@@ -1,15 +1,2 @@
-import dynamic from 'next/dynamic';
-import React from 'react';
-
-const Guide = dynamic(
-  () => import('@/Components/Dashboard/Guide'),
-  {
-    loading: () => <p>Loading...</p>,
-  }
-);
-
-const index = () => {
-  return <Guide />
-}
-
-export default index
+export async function getServerSideProps(){ return { redirect:{ destination:'/how-to-play', permanent:false } }; }
+export default function GuidesRedirect(){ return null; }
