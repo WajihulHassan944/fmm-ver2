@@ -390,7 +390,14 @@ const getDateLabel = (fight = {}, fallback = "TBA · LIVE NOW") => {
   return `${month} ${date.getDate()} · ${days}D : ${String(hours).padStart(2, "0")}H`;
 };
 
-const getFightTimeLabel = (fight = {}) => {\n  if (fight?.timeTba === true || String(fight?.timeTba).toLowerCase() === "true") return "TIME TBA";\n  const raw = String(fight?.matchTime || fight?.time || fight?.fightTime || "").trim();\n  if (!raw || raw === "00:00" || /^12:00\\s*AM$/i.test(raw)) return "TIME TBA";\n  return cleanText(raw);\n};\n\nconst getShortDate = (fight = {}) => {
+const getFightTimeLabel = (fight = {}) => {
+  if (fight?.timeTba === true || String(fight?.timeTba).toLowerCase() === "true") return "TIME TBA";
+  const raw = String(fight?.matchTime || fight?.time || fight?.fightTime || "").trim();
+  if (!raw || raw === "00:00" || /^12:00\s*AM$/i.test(raw)) return "TIME TBA";
+  return cleanText(raw);
+};
+
+const getShortDate = (fight = {}) => {
   const label = getDateLabel(fight, "DATE TBA");
   return label.split("·")[0].trim();
 };
