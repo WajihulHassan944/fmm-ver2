@@ -689,6 +689,19 @@ const FinalHomeV35 = ({
           <Link href={isLoggedIn ? predictionHref : SIGNUP_HREF} className="fmm-v35-hero-hit" aria-label={isLoggedIn ? "Make predictions" : "Join free"} />
         </section>
 
+        <section className="fmm-v35-how-to-play" aria-labelledby="fmm-how-to-play-title">
+          <header><span>NEW PLAYER GUIDE</span><h2 id="fmm-how-to-play-title">HOW TO PLAY</h2><p>Follow the fight from entry to the leaderboard. We guide you through every step.</p></header>
+          <div className="fmm-v35-how-steps">
+            <Link href="/upcomingfights"><b>1</b><strong>PICK A FIGHT</strong><small>Choose the matchup you want to play.</small></Link>
+            <Link href={predictionHref}><b>2</b><strong>ENTER</strong><small>See the entry and prize before you commit.</small></Link>
+            <Link href={predictionHref}><b>3</b><strong>PREDICT</strong><small>Make your fight-stat predictions.</small></Link>
+            <span><b>4</b><strong>WATCH</strong><small>Follow the fight as it happens.</small></span>
+            <span><b>5</b><strong>SCORE POINTS</strong><small>Your predictions become fantasy points.</small></span>
+            <Link href="/leaderboard"><b>6</b><strong>CLIMB & WIN</strong><small>Track your place on the leaderboard.</small></Link>
+          </div>
+          <Link href="/upcomingfights" className="fmm-v35-how-cta">PICK A FIGHT & START →</Link>
+        </section>
+
         <section className="fmm-v35-ticker" aria-label="Live ticker">
           <div>
             {liveTickerItems.concat(liveTickerItems).map(([icon, copy, color], index) => (
@@ -740,7 +753,7 @@ const FinalHomeV35 = ({
               <strong className="is-fm-coins"><FaCoins /> {weeklyEntry}<small> ENTRY FEE</small></strong>
               <strong>{weeklyEntriesLabel}<small> ENTRIES</small></strong>
             </div>
-            <Link href={weeklyHref}>MAKE PREDICTIONS</Link>
+            <Link href={weeklyHref}>STEP 1 — ENTER THIS FIGHT</Link>
           </div>
         </section>
 
@@ -780,7 +793,7 @@ const FinalHomeV35 = ({
             <div className="fmm-v35-detail-meta"><b>{getShortDate(featuredFight)}</b><b>{cleanText(featuredFight?.matchTime || featuredFight?.time || "TIME TBA")}</b><b>{cleanText(featuredFight?.venue || "VENUE TBA")}</b></div>
             <div className="fmm-v35-detail-money"><p><small>PRIZE POOL</small><strong className="is-fm-coins"><FaCoins /> {featuredPrize}</strong></p><p><small>FM COINS ENTRY FEE</small><strong className="is-fm-coins"><FaCoins /> {featuredEntry}</strong></p><p><small>ENTRIES</small><strong>{featuredEntriesLabel}</strong></p></div>
             <button type="button" className="fmm-v35-ai" onClick={() => setAiScoutOpen(true)}>🤖 AI SCOUTING REPORT — NEW FOR THIS FIGHT</button>
-            <Link href={predictionHref} className="fmm-v35-red-btn">MAKE PREDICTIONS</Link>
+            <Link href={predictionHref} className="fmm-v35-red-btn">STEP 2 — MAKE YOUR PREDICTIONS</Link>
           </div>
         </section>
 
