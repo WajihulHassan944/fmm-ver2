@@ -894,15 +894,15 @@ const FinalHomeV35 = ({
           <button type="button" className="fmm-v35-modal-backdrop" aria-label="Close coin modal" onClick={() => setCoinModalOpen(false)} />
           <section>
             <button type="button" className="fmm-v35-modal-close" aria-label="Close coin modal" onClick={() => setCoinModalOpen(false)}><FaTimes /></button>
-            <img src={`${ASSET_BASE}/chest-transparent.png`} alt="FM coin chest" />
-            <span>FM COINS</span>
-            <h2>Power your next picks</h2>
-            <p>Buy FM coins for scorecards, fantasy cards, streak saves, and high-intent fight entries.</p>
+            <div className="fmm-v35-coin-mark"><FaCoins /><b>FM</b></div>
+            <span>FM COINS WALLET</span>
+            <h2>ADD FM COINS</h2>
+            <p>Your balance: <strong>{tokenBalance.toLocaleString()} FM COINS</strong>. Choose a package below. You will review the purchase before completing checkout.</p>
             <div>{[
-              ["1,000 FM", "$0.99", "Starter"],
-              ["5,000 FM", "$3.99", "Most Popular"],
-              ["15,000 FM", "$9.99", "Power Pack"],
-            ].map(([amount, price, label]) => <Link href={`${coinCheckoutHref}&amount=${encodeURIComponent(amount.replace(/[^0-9]/g, ""))}`} key={amount}><small>{label}</small><strong>{amount}</strong><b>{price}</b></Link>)}</div>
+              ["1,000 FM COINS", "$0.99", "STARTER"],
+              ["5,000 FM COINS", "$3.99", "MOST POPULAR"],
+              ["15,000 FM COINS", "$9.99", "POWER PACK"],
+            ].map(([amount, price, label]) => <Link href={`${coinCheckoutHref}&amount=${encodeURIComponent(amount.replace(/[^0-9]/g, ""))}`} key={amount}><small>{label}</small><strong><FaCoins /> {amount}</strong><b>{price}</b><em>SELECT →</em></Link>)}</div>
           </section>
         </div>
       )}
