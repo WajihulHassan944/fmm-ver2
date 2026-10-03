@@ -411,17 +411,27 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           </button>
         </div>
 
-        {entryFee > 0 && <div style={{ maxWidth: 780, margin: '16px auto', padding: 18, border: '1px solid rgba(255,255,255,.25)', borderRadius: 12, color: '#fff' }}>
-          <strong>Before you enter: {entryFee} FM coins</strong>
-          <p>{eligibility?.eligible ? 'Your paid-entry details are ready.' : eligibility?.message || eligibilityError || 'Checking your paid-entry details…'}</p>
-          {eligibility && !eligibility.eligible && !['STATE_BLOCKED', 'UNDERAGE', 'FREE_PLAY_ONLY', 'SELF_EXCLUDED'].includes(eligibility.reason) && <form onSubmit={saveEligibility}>
-            <label style={{ display: 'block', marginBottom: 8 }}>State of residence (two letters) <input required maxLength={2} pattern="[A-Za-z]{2}" value={residenceState} onChange={(event) => setResidenceState(event.target.value.toUpperCase())} style={{ color: '#111' }} /></label>
-            {!eligibility.hasDateOfBirth && <label style={{ display: 'block', marginBottom: 8 }}>Date of birth <input required type="date" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} style={{ color: '#111' }} /></label>}
-            <button type="submit" disabled={eligibilityBusy}>{eligibilityBusy ? 'Saving…' : 'Confirm details'}</button>
-          </form>}
-          {eligibilityError && <p role="alert">{eligibilityError}</p>}
-          {eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <p>You need {Math.max(0, entryFee - Number(user?.tokens || 0))} more FM coins. <button type="button" onClick={() => router.push(checkoutUrl)}>Add FM coins</button> Your card will be here when you return.</p>}
-        </div>}
+        {entryFee > 0 && <section className="player-paid-entry-gate">
+          <div className="player-paid-entry-value">
+            <span>STEP 1 · VERIFY & ENTER</span>
+            <small>Fight entry</small>
+            <strong><FaCoins /> {Number(entryFee).toLocaleString()}</strong>
+            <b>FM COINS</b>
+            <p>Your entry is charged only when you submit your completed prediction card.</p>
+          </div>
+          <div className="player-paid-entry-verify">
+            <header><b>{eligibility?.eligible ? '✓' : '1'}</b><span><strong>{eligibility?.eligible ? 'ELIGIBILITY CONFIRMED' : 'VERIFY ELIGIBILITY'}</strong><small>{eligibility?.eligible ? 'You are cleared for this paid contest.' : 'Confirm your state and age before entering.'}</small></span></header>
+            {!eligibility ? <p>Checking your paid-entry details…</p> : null}
+            {eligibility && !eligibility.eligible && !['STATE_BLOCKED', 'UNDERAGE', 'FREE_PLAY_ONLY', 'SELF_EXCLUDED'].includes(eligibility.reason) && <form onSubmit={saveEligibility}>
+              <label><span>State of residence</span><small>2-letter state code</small><input required maxLength={2} pattern="[A-Za-z]{2}" value={residenceState} onChange={(event) => setResidenceState(event.target.value.toUpperCase())} placeholder="GA" /></label>
+              {!eligibility.hasDateOfBirth && <label><span>Date of birth</span><small>Required for paid-contest eligibility</small><input required type="date" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} /></label>}
+              <button type="submit" disabled={eligibilityBusy}>{eligibilityBusy ? 'VERIFYING…' : 'CONFIRM & CONTINUE →'}</button>
+            </form>}
+            {eligibility?.message && !eligibility?.eligible ? <p>{eligibility.message}</p> : null}
+            {eligibilityError && <p className="player-paid-entry-error" role="alert">{eligibilityError}</p>}
+            {eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <div className="player-paid-entry-low"><strong>You need {Math.max(0, entryFee - Number(user?.tokens || 0)).toLocaleString()} more FM COINS.</strong><button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS →</button><small>Your prediction card will be waiting when you return.</small></div>}
+          </div>
+        </section>}
 
         {featuredWinner ? <div style={{ margin: '0 auto 14px', width: 'min(780px,calc(100% - 28px))', padding: '11px 14px', borderRadius: 12, border: '1px solid rgba(242,181,68,.45)', background: 'rgba(242,181,68,.09)', color: '#f2b544', fontWeight: 900, textAlign: 'center' }}>YOUR FEATURED PICK: {featuredWinner === 'b' ? getFighterName(match, 'B') : getFighterName(match, 'A')}. Complete the {sport === 'bareknuckle' ? 'Bare Knuckle' : sport === 'kickboxing' ? 'Kickboxing' : sport === 'wrestling' ? 'Pro Wrestling' : sport === 'boxing' ? 'Boxing' : 'MMA'} scorecard below.</div> : null}
 
@@ -444,12 +454,13 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           <div><span>Prediction type</span><strong>{isWrestling ? 'Pro Wrestling metrics' : isBoxing ? `${sport === 'bareknuckle' ? 'Bare Knuckle' : 'Boxing'} metrics` : `${sport === 'kickboxing' ? 'Kickboxing' : 'MMA'} metrics`}</strong></div>
         </div>
 
-        <div className="player-prediction-flow-strip" aria-label="Prediction workflow">
-          <span><b>1</b><strong>Review the card</strong><small>Confirm fighters and rules</small></span>
-          <i aria-hidden="true" />
-          <span><b>2</b><strong>{isWrestling ? 'Score the full match' : 'Call every round'}</strong><small>Enter all available metrics</small></span>
-          <i aria-hidden="true" />
-          <span><b>3</b><strong>Submit picks</strong><small>Lock the existing score payload</small></span>
+        <div className="player-prediction-flow-strip player-prediction-flow-six" aria-label="Prediction workflow">
+          <span><b>1</b><strong>VERIFY</strong><small>State + age</small></span><i aria-hidden="true" />
+          <span><b>2</b><strong>ENTER</strong><small>{Number(entryFee || 0).toLocaleString()} FM COINS</small></span><i aria-hidden="true" />
+          <span><b>3</b><strong>PREDICT</strong><small>{isWrestling ? 'Score the match' : 'Call every round'}</small></span><i aria-hidden="true" />
+          <span><b>4</b><strong>SUBMIT</strong><small>Lock your picks</small></span><i aria-hidden="true" />
+          <span><b>5</b><strong>WATCH & SCORE</strong><small>Follow the fight</small></span><i aria-hidden="true" />
+          <span><b>6</b><strong>LEADERBOARD</strong><small>Track your rank</small></span>
         </div>
 
         <div className="player-round-board-v2">
