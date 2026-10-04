@@ -266,13 +266,12 @@ const MOBILE_APP_ROUTE_TABS = {
   // "/" is deliberately NOT here. It used to map to the app, which made _app.js
   // render the phone experience on the homepage — stretched across a laptop, with
   // the real website underneath it. The homepage is the website; the app lives at
-  // /home and the routes below.
-  "/home": "home",
+  // The authenticated player app starts at the current dashboard route.
+  "/UserDashboard": "home",
   "/fights": "contests",
   "/upcomingfights": "contests",
   "/YourFights": "contests",
   "/leaderboard": "leaderboard",
-  "/global-leaderboard": "leaderboard",
   "/FantasyLeagues": "leagues",
   "/myLeagueRecords": "leagues",
   "/watch-party": "watch",
@@ -280,7 +279,6 @@ const MOBILE_APP_ROUTE_TABS = {
   "/account-settings": "settings",
   "/free-demo": "demo",
   "/mock-game": "demo",
-  "/playforfree": "demo",
   "/blogs": "blogs",
   "/fights-news": "blogs",
 };
@@ -288,7 +286,6 @@ const MOBILE_APP_ROUTE_TABS = {
 const EXACT_MOBILE_QUERY = "(max-width: 767px)";
 const FULLSCREEN_PROTOTYPE_ROUTES = new Set([
   "/leaderboard",
-  "/global-leaderboard",
   "/FantasyLeagues",
   "/watch-party",
 ]);
