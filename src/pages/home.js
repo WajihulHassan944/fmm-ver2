@@ -1,6 +1,5 @@
-import React from "react";
-import HomeAnother from "@/Components/HomeAnother/HomeAnother";
+export async function getServerSideProps() {
+  return { redirect: { destination: '/UserDashboard', permanent: false } };
+}
 
-const HomePage = () => <HomeAnother />;
-
-export default HomePage;
+export default function LegacyHomeRedirect() { return null; }
