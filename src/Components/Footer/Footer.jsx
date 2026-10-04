@@ -39,7 +39,7 @@ const quickLinks = [
   ['Fantasy Tips', '/fantasy-tips'],
   ['Contests', '/FantasyLeagues'],
   ['Leaderboard', '/leaderboard'],
-  ['How To Play', '/guides'],
+  ['How To Play', '/how-to-play'],
   ['Rewards', '/fights-rewards'],
   ['FAQs', '/faqs'],
   ['Contact', '/contact'],
@@ -60,8 +60,8 @@ const Footer = () => {
     : isSponsorAuthenticated
       ? '/sponsor-dashboard'
       : isAuthenticated
-        ? '/home'
-        : '/home';
+        ? '/UserDashboard'
+        : '/UserDashboard';
 
   const handleNewsletterSubmit = (event) => {
     event.preventDefault();
