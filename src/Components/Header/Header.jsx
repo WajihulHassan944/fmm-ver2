@@ -111,7 +111,7 @@ const playerNav = [
     href: '#',
     icon: FaEllipsisH,
     children: [
-      { label: 'Dashboard', href: '/home', icon: FaHome },
+      { label: 'Dashboard', href: '/UserDashboard', icon: FaHome },
       { label: 'Leagues', href: '/myLeagueRecords', icon: FaTrophy },
       { label: 'Profile', href: '/profile', icon: FaUserCircle },
       { label: 'Account Settings', href: '/account-settings', icon: FaCog },
@@ -264,7 +264,7 @@ const Header = () => {
   const dashboardHomeHref = useMemo(() => {
     if (isAuthenticatedAffiliate) return '/AffiliateDashboard';
     if (authStatusSponsor) return '/sponsor-dashboard';
-    if (isAuthenticated) return '/home';
+    if (isAuthenticated) return '/UserDashboard';
     return '/';
   }, [authStatusSponsor, isAuthenticated, isAuthenticatedAffiliate]);
 
@@ -465,7 +465,7 @@ const Header = () => {
           {playerNotifications.length ? playerNotifications.slice(0, 20).map((item) => (
             <Link
               key={item.id}
-              href={item.fightId ? `/upcomingfights?fight=${encodeURIComponent(item.fightId)}` : '/home'}
+              href={item.fightId ? `/upcomingfights?fight=${encodeURIComponent(item.fightId)}` : '/UserDashboard'}
               style={{ display: 'block', padding: '10px 8px', marginBottom: 6, borderRadius: 8, color: '#fff', textDecoration: 'none', background: item.unread ? 'rgba(242,181,68,.18)' : 'rgba(255,255,255,.06)' }}
             >
               <strong style={{ display: 'block' }}>{item.title || 'Fantasy MMAdness update'}</strong>
