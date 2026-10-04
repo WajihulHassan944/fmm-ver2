@@ -116,7 +116,7 @@ console.log(user);
           
         <div className='fightWallet' data-aos="zoom-in">
         <h1><i className="fa fa-shopping-bag" aria-hidden="true"></i> Fight Wallet</h1>
-        <h2>Tokens Remaining: <span>{user.tokens}</span></h2>
+        <h2>FM COINS: <span>{user.tokens}</span></h2>
     </div>
 </div>
 
