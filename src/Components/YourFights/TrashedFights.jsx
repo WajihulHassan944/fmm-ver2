@@ -1,258 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { userHeaders } from '@/Utils/authFetch';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
+import { FaArrowLeft, FaShoppingBag, FaTrashRestore, FaUsers } from 'react-icons/fa';
+import { fetchMatches } from '../../Redux/matchSlice';
+import { userHeaders } from '@/Utils/authFetch';
+import { FMCoinAmount } from '@/Components/Common/FMCoin';
 
-const TrashedFights = () => {
-  const router = useRouter();
-  
-    const dispatch = useDispatch();
-  const matches = useSelector((state) => state.matches.data);
-  const matchStatus = useSelector((state) => state.matches.status);
-  const [hoveredMatch, setHoveredMatch] = useState(null); 
-  const [removedMatches, setRemovedMatches] = useState([]);
-  const user = useSelector((state) => state.user); 
-console.log(user);
+const API='https://fantasymmadness-game-server-three.vercel.app';
 
-  useEffect(() => {
-    if (matchStatus === 'idle') {
-      dispatch(fetchMatches());
-    }
-  }, [matchStatus, dispatch]);
+export default function TrashedFights(){
+ const router=useRouter(); const dispatch=useDispatch();
+ const matches=useSelector((s)=>s.matches.data)||[]; const status=useSelector((s)=>s.matches.status);
+ const user=useSelector((s)=>s.user); const [removed,setRemoved]=useState([]); const [busy,setBusy]=useState(''); const [error,setError]=useState('');
 
+ useEffect(()=>{if(status==='idle') dispatch(fetchMatches());},[status,dispatch]);
+ useEffect(()=>{if(!user?._id)return; let active=true;(async()=>{try{const res=await fetch(API+'/users/removed-matches',{headers:userHeaders()});if(!res.ok)throw new Error();const data=await res.json();const row=(Array.isArray(data)?data:[]).find(x=>x.userId===user._id);if(active)setRemoved(row?.removedMatchesIds||[]);}catch{if(active)setError('Unable to load trashed fights.');}})();return()=>{active=false};},[user?._id]);
+ const trashed=useMemo(()=>matches.filter(m=>removed.includes(m._id)),[matches,removed]);
 
+ const restore=async(matchId)=>{setBusy(matchId);setError('');try{const res=await fetch(API+'/remove-match-from-my-dashboard',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:user._id,matchId})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.message||'Unable to restore fight.');setRemoved(ids=>ids.filter(id=>id!==matchId));}catch(e){setError(e.message);}finally{setBusy('');}};
 
-  useEffect(() => {
-    const fetchRemovedMatches = async () => {
-      try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches', { headers: userHeaders() });
-        const data = await response.json();
-        
-        // Filter the data for the current user's userId
-        const userMatches = data.filter(item => item.userId === user._id);
-        
-        // Assuming you want to store the removedMatchesIds array for the matched user
-        if (userMatches.length > 0) {
-          setRemovedMatches(userMatches[0].removedMatchesIds);
-        }
-      } catch (error) {
-        console.error('Error fetching removed matches:', error);
-      }
-    };
+ if(!user?._id)return <main className="experience-page"><div className="theme-container player-dynamic-empty"><h2>Loading your fight center…</h2></div></main>;
 
-    fetchRemovedMatches();
-  }, [user?._id]); // Run the effect when user._id changes
-
-
-
-  if (!user || !user.firstName) {
-    return <div>Loading...</div>;
-  }
-
-
-  const getRemainingTime = (matchDate, matchTime) => {
-    const [year, month, day] = matchDate.split('T')[0].split('-');
-    const [hours, minutes] = matchTime.split(':');
-    const matchDateTime = new Date(`${year}-${month}-${day}T${hours}:${minutes}`);
-    const now = new Date();
-    const diffMs = matchDateTime - now;
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const hasStarted = diffMs <= 0;
-
-    return {
-      diffHrs: hasStarted ? 0 : diffHrs,
-      diffMins: hasStarted ? 0 : diffMins,
-      hasStarted,
-    };
-  };
-
-  const handleRemoveMatch = async (matchId) => {
-    try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user._id, // Assuming user._id is available
-          matchId,
-        }),
-      });
-  
-      const data = await response.json();
-      if (response.ok) {
-        alert('Match removed from trash successfully');
-        // Optionally, refresh or update the UI
-        window.location.reload();
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-  
-
-  return (
-    <div className='userdashboard yourFightsWrapper premium-dashboard-list premium-trashed-list'>
-    <i
-        className="fa fa-arrow-circle-left dashboard-arrow-circle"
-        aria-hidden="true"
-        onClick={() => router.push(-1)} // Go back to the previous page
-      ></i>
-      <div className='member-header'>
-        <div className='member-header-image'>
-          <img src={user.profileUrl} alt="Logo" data-aos="zoom-in" />
-        </div>
-        <h3 data-aos="zoom-in"><span className='toRemove'>Member Name:</span> {user.firstName} {user.lastName}</h3>
-        <h3 data-aos="zoom-in"><span className='toRemove'>Current </span>Plan: {user.currentPlan}</h3>
-      </div>
-    
-      <div className='fightwalletWrap' onClick={() => router.push('/checkout')}>
-        <div className='totalPoints' data-aos="zoom-in">
-        </div>
-          
-        <div className='fightWallet' data-aos="zoom-in">
-        <h1><i className="fa fa-shopping-bag" aria-hidden="true"></i> Fight Wallet</h1>
-        <h2>FM COINS: <span>{user.tokens}</span></h2>
+ return <main className="experience-page">
+  <section className="theme-container player-command-hero" style={{marginTop:'28px'}}><div className="player-command-hero-copy">
+   <button type="button" className="premium-forum-back" onClick={()=>router.push('/YourFights')}><FaArrowLeft/> Your Fights</button>
+   <p className="xp-eyebrow">FANTASY MMADNESS FIGHT CENTER</p><h1>Trashed Fights</h1><p>Restore any fight you removed from your dashboard. Your prediction history stays connected to your account.</p>
+   <div className="player-command-hero-actions"><button type="button" onClick={()=>router.push('/checkout')}><FaShoppingBag/> Add FM COINS</button></div>
+  </div><div className="player-command-hero-stats"><div><span>FM COINS</span><strong><FMCoinAmount amount={Number(user.tokens||0)} /></strong></div><div><span>TRASHED</span><strong>{trashed.length}</strong></div></div></section>
+  <section className="theme-container" style={{paddingTop:'32px',paddingBottom:'60px'}}>
+   {error?<p role="alert">{error}</p>:null}
+   {trashed.length?<div className="user-reward-card-grid">{trashed.map(match=><article className="user-reward-card" key={match._id}>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',minHeight:'190px'}}>
+     <img src={match.fighterAImage||'/Assets/default-avatar.png'} alt={match.matchFighterA||'Fighter A'} style={{width:'100%',height:'190px',objectFit:'cover',borderRadius:'12px'}}/>
+     <img src={match.fighterBImage||'/Assets/default-avatar.png'} alt={match.matchFighterB||'Fighter B'} style={{width:'100%',height:'190px',objectFit:'cover',borderRadius:'12px'}}/>
     </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-<div className='fightsWrap'>
-
-
-<div className='completedFights fightscontainer'>
-  <h1 className='fightsheadingtwo'>YOUR TRASHED FIGHTS</h1>
-
-  {matches.length > 0 ? (
-    matches.filter(match => removedMatches.includes(match._id)).length > 0 ? (
-      matches.map((match) => {
-        if (removedMatches.includes(match._id)) { // Check if match._id is NOT in removedMatches
-          const { diffHrs, diffMins, hasStarted } = getRemainingTime(match.matchDate, match.matchTime);
-
-          return (
-            <div className="fightItem" key={match._id}  onMouseEnter={() => setHoveredMatch(match._id)} onMouseLeave={() => setHoveredMatch(null)}>
-              {hoveredMatch === match._id && (
-                <button className="removeButton" onClick={(e) => {
-                  e.stopPropagation(); // Prevent the parent div's onClick from firing
-                  handleRemoveMatch(match._id);
-                }}>
-                  Remove from Trash
-                </button>
-              )}
-              <div className='fightersImages'>
-                <div className='fighterOne'>
-                  <img src={match.fighterAImage} alt="Fighter One" />
-                </div>
-                <div className='fighterTwo'>
-                  <img src={match.fighterBImage} alt="Fighter Two" />
-                </div>
-              </div>
-              <div className='fightItemOne'>
-                <div className="transformed-div">
-                  <h1>{match.matchFighterA} -VS- {match.matchFighterB}</h1>
-                </div>
-                <div className="transformed-div-two">
-                  <div className='transformed-div-two-partOne'>
-                    <h1>{new Date(`1970-01-01T${match.matchTime}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} est</h1>
-                  </div>
-                  <div className='transformed-div-two-partTwo'>
-                    <p style={{marginLeft:'-15px'}}>
-                      {hasStarted
-                        ? "Fight has started"
-                        : `Begins in ${diffHrs} hours ${diffMins} mins`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className='fightItemTwo'>
-                <div className="transformed-three">
-                  {match.matchCategory === "boxing" ? (
-                    <>
-                      <div className='transformedDivBox'>HP</div>
-                      <div className='transformedDivBox'>BP</div>
-                      <div className='transformedDivBox'>TP</div>
-                      <div className='transformedDivBox'>RW</div>
-                      <div className='transformedDivBox'>KO</div>
-                      <div className='transformedDivBox'>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory} {match.matchStatus}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className='transformedDivBox'>ST</div>
-                      <div className='transformedDivBox'>KI</div>
-                      <div className='transformedDivBox'>KN</div>
-                      <div className='transformedDivBox'>RW</div>
-                      <div className='transformedDivBox'>KO</div>
-                      <div className='transformedDivBox'>{match.matchCategoryTwo ? match.matchCategoryTwo : match.matchCategory} {match.matchStatus}</div>
-                    </>
-                  )}
-                </div>
-                <div className="transformed-div-four">
-                  <h1>Players</h1>
-                  <p>{match.userPredictions.length}</p>
-                </div>
-              </div>
-
-              <div className="transformed-five">
-                {match.matchCategory === "boxing" ? (
-                  <>
-                    <div className='transformedDivBox'>HP</div>
-                    <div className='transformedDivBox'>BP</div>
-                    <div className='transformedDivBox'>TP</div>
-                    <div className='transformedDivBox'>RW</div>
-                    <div className='transformedDivBox'>KO</div>
-                  </>
-                ) : (
-                  <>
-                    <div className='transformedDivBox'>ST</div>
-                    <div className='transformedDivBox'>KI</div>
-                    <div className='transformedDivBox'>KN</div>
-                    <div className='transformedDivBox'>RW</div>
-                    <div className='transformedDivBox'>KO</div>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        }
-        return null; // If the match is removed, do not render it
-      })
-    ) : (
-      <p className='noMatch'>No fights</p> // Message when no completed fights are available
-    )
-  ) : (
-    <p className='noMatch'>No completed matches</p>
-  )}
-</div>
-
-
-
-
-
-
-
-
-
-
-
-</div>
-    </div>
-
-  )
+    <div className="user-reward-card-copy"><p className="xp-eyebrow">{match.matchCategoryTwo||match.matchCategory||'FIGHT'}</p><h2>{match.matchFighterA} <span>vs</span> {match.matchFighterB}</h2><p><FaUsers/> {(match.userPredictions||[]).length} players</p><button type="button" className="theme-btn theme-btn-primary" disabled={busy===match._id} onClick={()=>restore(match._id)}><FaTrashRestore/> {busy===match._id?'Restoring…':'Restore to Your Fights'}</button></div>
+   </article>)}</div>:<div className="player-dynamic-empty"><FaTrashRestore/><h2>Your trash is clear.</h2><p>Fights you remove from Your Fights will appear here so you can restore them later.</p></div>}
+  </section>
+ </main>;
 }
-
-
-export default TrashedFights
