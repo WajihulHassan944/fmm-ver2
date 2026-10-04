@@ -1,19 +1,6 @@
-import React from 'react'
-import Dashboard from './Dashboard'
+import React from 'react';
+import Dashboard from './Dashboard';
 
-const DashboardMain = () => {
-  return (
-    <div>
-   <Dashboard /> 
-   
-  {/* <FinishedFightUserBoard />   */}
-   {/* <FightDetails /> */}
-   {/* <PurchaseTokensIntimation />  */}
-  {/*  <MakePredictions />  */}
-  {/*  <FightLeaderboard />  */}
+const DashboardMain = () => <Dashboard />;
 
-    </div>
-  )
-}
-
-export default DashboardMain
+export default DashboardMain;
