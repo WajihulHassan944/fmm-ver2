@@ -874,6 +874,26 @@ export const fetchPublicFightById = async (matchId) => {
   let hydratedFight = detailFight || {};
   if (predictionFight) hydratedFight = mergeFightDetailWithListRow(hydratedFight, predictionFight);
   if (promotedFight) hydratedFight = mergeFightDetailWithListRow(hydratedFight, normalizePublicFightRow(promotedFight));
+
+  // Last-mile fighter library hydration: if a fight record only has names,
+  // resolve the actual fighter photos by name before allowing generic art.
+  const needsA = !pickUsableString(hydratedFight.fighterAPrimaryImage, hydratedFight.resolvedFighterAImage, hydratedFight.fighterAImage);
+  const needsB = !pickUsableString(hydratedFight.fighterBPrimaryImage, hydratedFight.resolvedFighterBImage, hydratedFight.fighterBImage);
+  if (needsA || needsB) {
+    try {
+      const fighters = await fetchPublicFighters({ limit: 240 });
+      const key = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const nameA = key(hydratedFight.matchFighterA || hydratedFight.fighterAName);
+      const nameB = key(hydratedFight.matchFighterB || hydratedFight.fighterBName);
+      const fighterA = needsA ? fighters.find((fighter) => key(fighter.displayName || fighter.name) === nameA) : null;
+      const fighterB = needsB ? fighters.find((fighter) => key(fighter.displayName || fighter.name) === nameB) : null;
+      if (fighterA) hydratedFight = mergeFightDetailWithListRow(hydratedFight, { fighterAPrimaryImage: fighterA.primaryImage || fighterA.image, fighterAImage: fighterA.primaryImage || fighterA.image });
+      if (fighterB) hydratedFight = mergeFightDetailWithListRow(hydratedFight, { fighterBPrimaryImage: fighterB.primaryImage || fighterB.image, fighterBImage: fighterB.primaryImage || fighterB.image });
+    } catch (error) {
+      console.warn('Fighter library hydration unavailable for detail page:', error.message);
+    }
+  }
+
   if (detailFight || predictionFight || promotedFight) return normalizePublicFightRow(hydratedFight);
 
   const fights = await fetchPublicFights({ limit: 240 });
