@@ -288,8 +288,8 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
       <section className="theme-container public-fight-data-strip" aria-label="Fight data">
         <article><FaUsers /><span><strong>{playerCount > 0 ? playerCount : 'Open'}</strong><small>{playerCount > 0 ? 'Players' : 'Entries'}</small></span></article>
-        <article className="public-fight-fm-coins"><FMCoin size="lg" motion="shine" /><span><strong><FMCoinAmount amount={getFightPrize(resolvedFight)} size="md" motion="shine" /></strong><small>FM COINS PRIZE POOL</small></span></article>
-        <article className="public-fight-fm-coins"><FMCoin size="lg" motion="shine" /><span><strong>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMCoinAmount amount={Number(resolvedFight.matchTokens)} size="md" motion="shine" /> : 'FREE'}</strong><small>BUY-IN</small></span></article>
+        <article className="public-fight-fm-coins"><span><strong><FMCoinAmount amount={getFightPrize(resolvedFight)} size="lg" motion="shine" /></strong><small>FM COINS PRIZE POOL</small></span></article>
+        <article className="public-fight-fm-coins"><span><strong>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMCoinAmount amount={Number(resolvedFight.matchTokens)} size="lg" motion="shine" /> : 'FREE'}</strong><small>BUY-IN</small></span></article>
         <article><FaShieldAlt /><span><strong>{resolvedFight?.matchType || 'Public'}</strong><small>Fight type</small></span></article>
         <article><FaClock /><span><strong>{resolvedFight?.matchStatus || 'Open'}</strong><small>Status</small></span></article>
       </section>
