@@ -782,8 +782,19 @@ export const fetchPublicProWrestlingMatches = async (query = {}) => {
   }
 };
 
-const sameFightIdentity = (fight = {}, matchId = '') =>
-  String(fight._id || fight.id || fight.matchId || '') === String(matchId || '');
+const normalizedFightNames = (fight = {}) => {
+  const fromName = String(fight.matchName || fight.name || '').split(/\s+(?:vs\.?|v\.?|versus)\s+/i);
+  const a = String(fight.matchFighterA || fight.fighterAName || fight.fighterOneName || fromName[0] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const b = String(fight.matchFighterB || fight.fighterBName || fight.fighterTwoName || fromName[1] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  return [a, b].filter(Boolean).sort().join('|');
+};
+const sameFightIdentity = (fight = {}, matchId = '', referenceFight = null) => {
+  if (String(fight._id || fight.id || fight.matchId || '') === String(matchId || '')) return true;
+  if (!referenceFight) return false;
+  const left = normalizedFightNames(fight);
+  const right = normalizedFightNames(referenceFight);
+  return Boolean(left && right && left === right);
+};
 
 const mergeFightDetailWithListRow = (detailFight = {}, listFight = {}) => {
   if (!listFight) return normalizePublicFightRow(detailFight);
@@ -843,7 +854,7 @@ export const fetchPublicFightById = async (matchId) => {
   let predictionFight = null;
   try {
     const predictionRows = await fetchPublicPredictionFights({ limit: 240 });
-    predictionFight = predictionRows.find((fight) => sameFightIdentity(fight, matchId)) || null;
+    predictionFight = predictionRows.find((fight) => sameFightIdentity(fight, matchId, detailFight)) || null;
   } catch (error) {
     console.warn('Prediction fight hydration unavailable for detail page:', error.message);
   }
@@ -855,7 +866,7 @@ export const fetchPublicFightById = async (matchId) => {
   try {
     const promotedPayload = await safeFetchJson('/api/public/homepage/promoted-fights', { limit: 240 });
     const promotedRows = normalizeListPayload(promotedPayload);
-    promotedFight = promotedRows.find((fight) => sameFightIdentity(fight, matchId)) || null;
+    promotedFight = promotedRows.find((fight) => sameFightIdentity(fight, matchId, detailFight || predictionFight)) || null;
   } catch (error) {
     console.warn('Promoted fight hydration unavailable for detail page:', error.message);
   }
