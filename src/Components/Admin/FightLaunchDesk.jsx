@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { buildPublicApiUrl, fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
@@ -53,7 +53,7 @@ export default function FightLaunchDesk() {
     try {
       const prepared = await prepareFightPosterUpload(file);
       const body = new FormData(); body.append('poster', prepared);
-      const response = await fetch(`/api/admin/fights/${encodeURIComponent(id)}/social-poster`, { method: 'POST', headers: adminHeaders(), body });
+      const response = await fetch(buildPublicApiUrl(`/api/admin/fights/${encodeURIComponent(id)}/social-poster`), { method: 'POST', headers: adminHeaders(), body });
       const result = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) throw new Error('Your admin session has expired. Sign in again, then retry the upload.');
       if (response.status === 413) throw new Error('The poster is too large for the server. Try a smaller image.');
