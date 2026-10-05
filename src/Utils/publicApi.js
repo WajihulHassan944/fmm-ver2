@@ -788,9 +788,27 @@ const sameFightIdentity = (fight = {}, matchId = '') =>
 const mergeFightDetailWithListRow = (detailFight = {}, listFight = {}) => {
   if (!listFight) return normalizePublicFightRow(detailFight);
 
+  const positiveNumber = (...values) => {
+    for (const value of values) {
+      if (value === undefined || value === null || value === '') continue;
+      const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+    return 0;
+  };
+
   return normalizePublicFightRow({
     ...detailFight,
     ...listFight,
+    // List/prediction feeds can legitimately omit economics and fighter media.
+    // Never let those empty/zero values erase richer detail data.
+    pot: positiveNumber(listFight.pot, listFight.currentPot, listFight.prizePool, detailFight.pot, detailFight.currentPot, detailFight.prizePool, detailFight.potTarget),
+    prizePool: positiveNumber(listFight.prizePool, listFight.pot, detailFight.prizePool, detailFight.pot, detailFight.potTarget),
+    matchTokens: positiveNumber(listFight.matchTokens, listFight.entryTokens, listFight.entryFee, detailFight.matchTokens, detailFight.entryTokens, detailFight.entryFee),
+    fighterAImage: pickUsableString(listFight.fighterAImage, listFight.fighterAPrimaryImage, listFight.resolvedFighterAImage, detailFight.fighterAImage, detailFight.fighterAPrimaryImage, detailFight.resolvedFighterAImage),
+    fighterBImage: pickUsableString(listFight.fighterBImage, listFight.fighterBPrimaryImage, listFight.resolvedFighterBImage, detailFight.fighterBImage, detailFight.fighterBPrimaryImage, detailFight.resolvedFighterBImage),
+    fighterAPrimaryImage: pickUsableString(listFight.fighterAPrimaryImage, listFight.fighterAImage, detailFight.fighterAPrimaryImage, detailFight.fighterAImage),
+    fighterBPrimaryImage: pickUsableString(listFight.fighterBPrimaryImage, listFight.fighterBImage, detailFight.fighterBPrimaryImage, detailFight.fighterBImage),
     matchDescription: pickUsableString(listFight.matchDescription, detailFight.matchDescription),
     matchVideoUrl: pickUsableString(listFight.matchVideoUrl, detailFight.matchVideoUrl),
     fightPosterImage: pickUsableString(listFight.fightPosterImage, detailFight.fightPosterImage),
