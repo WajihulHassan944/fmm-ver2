@@ -398,6 +398,16 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       onSubmitted?.();
       router.push(href);
     };
+    const challengeFriend = async () => {
+      const affiliateRef = String(router.query.ref || '');
+      const url = `${window.location.origin}/fight/${matchId}${affiliateRef ? `?ref=${encodeURIComponent(affiliateRef)}` : ''}`;
+      trackRevenueEvent(REVENUE_EVENTS.CHALLENGE_SHARE, { fightId: String(matchId), affiliateRef });
+      const shareData = { title: 'Can you predict this fight better than me?', text: `${getFighterName(match, 'A')} vs ${getFighterName(match, 'B')} — make your picks on FANTASY MMADNESS.`, url };
+      if (navigator.share) {
+        try { await navigator.share(shareData); return; } catch (_) { /* Fall back to copy. */ }
+      }
+      try { await navigator.clipboard.writeText(url); alert('Challenge link copied. Send it to a friend.'); } catch (_) { window.prompt('Copy this challenge link:', url); }
+    };
     return (
       <section style={{ minHeight: '100dvh', padding: 'max(28px, env(safe-area-inset-top)) 14px max(32px, env(safe-area-inset-bottom))', display: 'grid', placeItems: 'center', background: 'radial-gradient(circle at 50% 0%,rgba(34,197,94,.18),transparent 35rem),#05060a', color: '#fff', fontFamily: 'Rajdhani,sans-serif' }}>
         <div style={{ width: 'min(480px,100%)', boxSizing: 'border-box', padding: '24px 18px', borderRadius: 22, border: '1px solid rgba(34,197,94,.45)', background: 'linear-gradient(160deg,rgba(34,197,94,.12),rgba(255,255,255,.035))', boxShadow: '0 0 32px rgba(34,197,94,.16)', textAlign: 'center' }}>
@@ -409,6 +419,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
             <strong style={{ display: 'block', marginTop: 3, color: '#f2b544', overflowWrap: 'anywhere' }}>{confirmation.pickName}</strong>
             <span style={{ display: 'block', marginTop: 4, color: 'rgba(255,255,255,.55)', fontSize: 12 }}>Live scoring starts from official fight data. Your saved values will not be replaced with samples.</span>
           </div>
+          <button type="button" onClick={challengeFriend} style={{ width: '100%', minHeight: 52, border: 0, borderRadius: 999, background: 'linear-gradient(90deg,#e11d2e,#b90f1b)', color: '#fff', fontWeight: 1000, cursor: 'pointer', marginBottom: 10 }}>CHALLENGE A FRIEND ›</button>
           <button type="button" onClick={() => leaveConfirmation(`/upcomingfights?category=${nextSport}`)} style={{ width: '100%', minHeight: 50, border: 0, borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 1000, cursor: 'pointer' }}>NOW TRY {nextLabel} ›</button>
           <p style={{ margin: '7px 0 12px', color: 'rgba(255,255,255,.4)', fontSize: 11, fontWeight: 700 }}>Players entering more than one sport can build a broader season score.</p>
           <button type="button" onClick={() => leaveConfirmation(`/fight/${matchId}#fight-leaderboard`)} style={{ width: '100%', minHeight: 46, borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.04)', color: '#fff', fontWeight: 900, cursor: 'pointer' }}>VIEW FIGHT LEADERBOARD</button>
