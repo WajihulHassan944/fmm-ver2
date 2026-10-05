@@ -171,7 +171,7 @@ export const normalizePublicFightRow = (fight = {}) => {
     }
     return 0;
   };
-  const normalizedEntryCoins = firstNumber(fight.matchTokens, fight.entryTokens, fight.entryCoins, fight.entryFee, fight.buyIn, fight.buyInCoins, fight.costToEnter);
+  const normalizedEntryCoins = firstNumber(fight.matchTokens, fight.entryTokens, fight.entryCoins, fight.entryFee, fight.entryFeeCoins, fight.buyIn, fight.buyInCoins, fight.buyInTokens, fight.costToEnter, fight.cost, fight.fee, fight.tokens);
   const normalizedPrizePool = firstNumber(fight.pot, fight.currentPot, fight.prizePool, fight.prize, fight.rewardAmount, fight.entryPrize);
 
 
