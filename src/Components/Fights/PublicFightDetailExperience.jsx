@@ -260,6 +260,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
               <span><FaMapMarkerAlt /> {resolvedFight?.location || resolvedFight?.venue || 'Online fight card'}</span>
               <span><FaTrophy /> {getFightStatusLabel(resolvedFight)}</span>
             </div>
+            {playable && <div style={{display:'inline-flex',alignItems:'center',gap:8,margin:'0 0 12px',padding:'8px 12px',borderRadius:999,background:'rgba(225,29,46,.14)',border:'1px solid rgba(225,29,46,.45)',fontWeight:900,fontSize:12,letterSpacing:'.06em'}}>● FIGHT NIGHT MODE · PICKS OPEN</div>}
             <div className="public-fight-detail-actions">
               <button type="button" className="theme-btn theme-btn-primary" onClick={handleEnterFight} disabled={!playable}>
                 {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : 'PREDICT THIS FIGHT'} <FaArrowRight />
