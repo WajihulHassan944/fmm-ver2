@@ -720,7 +720,7 @@ const filterByText = (items, terms = []) => {
 const normalizePublicFighter = (fighter = {}) => {
   const id = fighter.id || fighter._id || fighter.slug || fighter.normalizedName || fighter.displayName || fighter.name;
   const name = fighter.displayName || fighter.name || fighter.fighterName || 'Unnamed fighter';
-  const image = fighter.primaryImage || fighter.image || fighter.fighterImage || '';
+  const image = pickUsableString(fighter.primaryImage, fighter.image, fighter.fighterImage, fighter.photo, fighter.photoUrl, fighter.imageUrl, fighter.profileImage, fighter.profileImageUrl, fighter.headshot, fighter.avatar, fighter.picture);
   const category = fighter.category || fighter.discipline || 'Combat sports';
   return {
     ...fighter,
@@ -879,8 +879,15 @@ export const fetchPublicFightById = async (matchId) => {
       const key = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const nameA = key(hydratedFight.matchFighterA || hydratedFight.fighterAName);
       const nameB = key(hydratedFight.matchFighterB || hydratedFight.fighterBName);
-      const fighterA = needsA ? fighters.find((fighter) => key(fighter.displayName || fighter.name) === nameA) : null;
-      const fighterB = needsB ? fighters.find((fighter) => key(fighter.displayName || fighter.name) === nameB) : null;
+      const fighterNameKeys = (fighter) => [
+        fighter.displayName, fighter.name, fighter.fighterName, fighter.fullName,
+        fighter.normalizedName, fighter.slug,
+      ].map(key).filter(Boolean);
+      const matchesName = (fighter, target) => target && fighterNameKeys(fighter).some((candidate) =>
+        candidate === target || candidate.includes(target) || target.includes(candidate)
+      );
+      const fighterA = needsA ? fighters.find((fighter) => matchesName(fighter, nameA)) : null;
+      const fighterB = needsB ? fighters.find((fighter) => matchesName(fighter, nameB)) : null;
       if (fighterA) hydratedFight = mergeFightDetailWithListRow(hydratedFight, { fighterAPrimaryImage: fighterA.primaryImage || fighterA.image, fighterAImage: fighterA.primaryImage || fighterA.image });
       if (fighterB) hydratedFight = mergeFightDetailWithListRow(hydratedFight, { fighterBPrimaryImage: fighterB.primaryImage || fighterB.image, fighterBImage: fighterB.primaryImage || fighterB.image });
     } catch (error) {
