@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'fmm-revenue-events-v1';
 const SESSION_KEY = 'fmm-revenue-session-v1';
 
+import { buildPublicApiUrl } from '@/Utils/publicApi';
+
 const canUseBrowser = () => typeof window !== 'undefined';
 
 const getSessionId = () => {
@@ -28,6 +30,12 @@ export const trackRevenueEvent = (event, data = {}) => {
     const next = [...(Array.isArray(current) ? current : []), row].slice(-500);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     window.dispatchEvent(new CustomEvent('fmm:revenue-event', { detail: row }));
+    const payload = { event: row.event, sessionId: row.sessionId, fightId: row.fightId || '', affiliateRef: row.affiliateRef || '', path: row.path, referrer: row.referrer, entryFee: Number(row.entryFee || 0), signedIn: Boolean(row.signedIn), metadata: Object.fromEntries(Object.entries(data).filter(([key]) => !['fightId','affiliateRef','entryFee','signedIn'].includes(key))) };
+    try {
+      const url = buildPublicApiUrl('/api/revenue/events');
+      if (navigator.sendBeacon) navigator.sendBeacon(url, new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+      else fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }).catch(() => {});
+    } catch (_) { /* Remote analytics must never block play. */ }
   } catch (_) { /* Analytics must never block play. */ }
 };
 
