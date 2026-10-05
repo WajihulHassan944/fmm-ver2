@@ -15,6 +15,7 @@ import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
+import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
 
 const MetricIcon = ({ code }) => {
   if (code === 'KI') return <FaShoePrints aria-hidden="true" className="player-round-metric-icon is-kick" />;
@@ -88,6 +89,13 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [residenceState, setResidenceState] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const entryFee = Math.max(0, Number(match?.matchTokens) || 0);
+  const predictionStartTracked = useRef(false);
+
+  useEffect(() => {
+    if (!matchId || predictionStartTracked.current) return;
+    predictionStartTracked.current = true;
+    trackRevenueEvent(REVENUE_EVENTS.PREDICTION_START, { fightId: String(matchId), entryFee, signedIn: Boolean(user?._id || user?.id), affiliateRef: String(router.query.ref || '') });
+  }, [entryFee, matchId, router.query.ref, user?._id, user?.id]);
   const returnToFight = `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}${featuredWinner ? `&pick=${featuredWinner}` : ''}`;
   const checkoutUrl = `/checkout?product=fm-coins&returnTo=${encodeURIComponent(returnToFight)}`;
 
@@ -275,6 +283,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
     if (!authToken || !(user?._id || user?.id)) {
       try { sessionStorage.setItem(draftKey, JSON.stringify(rounds)); } catch (_) { /* Best-effort guest draft. */ }
+      trackRevenueEvent(REVENUE_EVENTS.SIGNUP_GATE, { fightId: String(matchId), entryFee, affiliateRef: String(router.query.ref || '') });
       const returnTo = `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`;
       router.push({
         pathname: '/auth',
@@ -357,6 +366,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         if (side) counts[side] += 1;
         return counts;
       }, { A: 0, B: 0 });
+      trackRevenueEvent(entryFee > 0 ? REVENUE_EVENTS.PAID_ENTRY : REVENUE_EVENTS.FREE_ENTRY, { fightId: String(matchId), entryFee, affiliateRef: String(router.query.ref || '') });
       setConfirmation({
         pickName: winnerVotes.B > winnerVotes.A ? getFighterName(match, 'B') : winnerVotes.A > winnerVotes.B ? getFighterName(match, 'A') : 'Round-by-round card submitted',
       });
