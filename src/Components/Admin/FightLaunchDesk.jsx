@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { buildPublicApiUrl, fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { buildPublicApiUrl, normalizePublicFightRows, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
@@ -13,7 +13,7 @@ import styles from './FightLaunchDesk.module.css';
 const titleFor = (fight) => `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`;
 const getOpenFights = (rows) => (Array.isArray(rows) ? rows : []).filter((fight) => {
   const lock = fight.lockAt ? new Date(fight.lockAt).getTime() : parseFightDate(fight)?.getTime();
-  return getFightId(fight) && (!Number.isFinite(lock) || lock > Date.now()) && fight.entryOpen !== false
+  return getFightId(fight) && (!Number.isFinite(lock) || lock > Date.now())
     && !/draft|closed|finished|complete|cancel/.test(String(fight.matchStatus || fight.status || '').toLowerCase());
 }).sort((a, b) => (parseFightDate(a)?.getTime() ?? Infinity) - (parseFightDate(b)?.getTime() ?? Infinity));
 
@@ -66,9 +66,14 @@ export default function FightLaunchDesk() {
 
   useEffect(() => {
     let live = true;
-    fetchPublicPredictionFights({ limit: 240 })
-      .then((rows) => { if (live) setFights(rows); })
-      .catch((err) => { if (live) setError(err.message || 'Could not load open fights.'); })
+    fetch(buildPublicApiUrl('/api/admin/fights', { limit: 240, includeShadow: true, source: 'all' }), { headers: adminHeaders() })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.message || `Could not load Fight Registry (HTTP ${response.status}).`);
+        const rows = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload?.data) ? payload.data : [];
+        if (live) setFights(normalizePublicFightRows(rows));
+      })
+      .catch((err) => { if (live) setError(err.message || 'Could not load Fight Registry.'); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
   }, []);
@@ -108,7 +113,7 @@ export default function FightLaunchDesk() {
       <small>{uploadBusy ? 'Uploading poster…' : fight && (uploadedPosters[id] || fight.fightPosterImage) ? 'Poster saved for this fight. Choose another image to replace it.' : fight ? 'The fight poster is shown below. Upload your own to replace it for affiliate kits.' : 'Choose an open fight to enable upload.'}</small>
       {uploadError && <p role="alert" className={styles.uploadError}>{uploadError}</p>}
     </div>
-    {loading ? <p>Loading fights…</p> : !fight ? <p>No fights are open for entry right now. Publish one in the Fight Registry first.</p> : <>
+    {loading ? <p>Loading fights…</p> : !fight ? <p>No upcoming published fights were found in the Fight Registry. Publish or schedule a fight there first.</p> : <>
       <div className={styles.layout}>
         <div className={styles.preview}>{posterImage ? <img src={resolvePublicMediaUrl(posterImage)} alt={`Fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={resolvePublicMediaUrl(getFighterImage(fight, 'A'))} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={resolvePublicMediaUrl(getFighterImage(fight, 'B'))} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
         <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
