@@ -37,6 +37,7 @@ import {
 import { fetchPublicPredictionFights, normalizePublicFightRow } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
 import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
+import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
 
 const sameId = (left, right) => String(left || '') === String(right || '');
 
@@ -164,6 +165,11 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
     if (matchStatus === 'idle') dispatch(fetchMatches({ limit: 200 }));
   }, [dispatch, matchStatus]);
 
+  useEffect(() => {
+    if (!matchId) return;
+    trackRevenueEvent(REVENUE_EVENTS.FIGHT_VIEW, { fightId: String(matchId), affiliateRef: String(router.query.ref || '') });
+  }, [matchId, router.query.ref]);
+
 
   useEffect(() => {
     if (!userId || !matchId) return undefined;
@@ -202,6 +208,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
   const handleEnterFight = () => {
     if (!playable) return;
+    trackRevenueEvent(REVENUE_EVENTS.PLAY_CLICK, { fightId: String(matchId), affiliateRef: String(router.query.ref || ''), signedIn: Boolean(userId) });
     // Let visitors enter the prediction experience before asking for an account.
     // Submission/payment remains protected inside the prediction flow.
     setShowEntryRoom(true);
