@@ -163,9 +163,26 @@ export const normalizePublicFightRow = (fight = {}) => {
     fight.matchFighterBImage,
     fight.fighterBImage,
   );
+  const firstNumber = (...values) => {
+    for (const value of values) {
+      if (value === undefined || value === null || value === '') continue;
+      const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
+      if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+    }
+    return 0;
+  };
+  const normalizedEntryCoins = firstNumber(fight.matchTokens, fight.entryTokens, fight.entryCoins, fight.entryFee, fight.buyIn, fight.buyInCoins, fight.costToEnter);
+  const normalizedPrizePool = firstNumber(fight.pot, fight.currentPot, fight.prizePool, fight.prize, fight.rewardAmount, fight.entryPrize);
+
 
   return {
     ...fight,
+    matchTokens: normalizedEntryCoins,
+    entryTokens: normalizedEntryCoins,
+    entryFee: normalizedEntryCoins,
+    buyIn: normalizedEntryCoins,
+    pot: normalizedPrizePool,
+    prizePool: normalizedPrizePool,
     matchFighterA: fighterAName,
     matchFighterB: fighterBName,
     // Keep explicit normalized image aliases so all public cards/banners can
