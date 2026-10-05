@@ -272,6 +272,22 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const handleFinish = async () => {
     if (submitting) return;
+    const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
+    if (!authToken || !(user?._id || user?.id)) {
+      try { sessionStorage.setItem(draftKey, JSON.stringify(rounds)); } catch (_) { /* Best-effort guest draft. */ }
+      const returnTo = `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`;
+      router.push({
+        pathname: '/auth',
+        query: {
+          mode: 'signup',
+          role: 'player',
+          next: returnTo,
+          fight: matchId,
+          ...(router.query.ref ? { referrer: String(router.query.ref) } : {}),
+        },
+      });
+      return;
+    }
     if (entryFee && !eligibility?.eligible) {
       setSubmitError(eligibility?.message || eligibilityError || 'Confirm your state and date of birth before entering.');
       return;
@@ -285,14 +301,6 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     setSubmitError('');
 
     try {
-      const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
-      if (!authToken) {
-        alert('Please sign in again to submit your predictions.');
-        setSubmitting(false);
-        setButtonText('Submit Predictions');
-        return;
-      }
-
       // Single atomic call: charges the entry fee and saves the prediction together.
       // The server reads the fee from the fight record — we never send a price.
       // The idempotency key is stable per (fight, attempt) so a double-tap or a
