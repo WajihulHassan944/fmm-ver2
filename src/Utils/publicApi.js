@@ -866,8 +866,13 @@ export const fetchPublicFightById = async (matchId) => {
 
   // Last-mile fighter library hydration: if a fight record only has names,
   // resolve the actual fighter photos by name before allowing generic art.
-  const needsA = !pickUsableString(hydratedFight.fighterAPrimaryImage, hydratedFight.resolvedFighterAImage, hydratedFight.fighterAImage);
-  const needsB = !pickUsableString(hydratedFight.fighterBPrimaryImage, hydratedFight.resolvedFighterBImage, hydratedFight.fighterBImage);
+  const isGenericFighterArt = (value) => /\/images\/fmm-experience\/fighter-action-(?:blue|red)\.webp(?:\?|$)/i.test(String(value || ''));
+  const realImage = (...values) => {
+    const value = pickUsableString(...values);
+    return value && !isGenericFighterArt(value) ? value : '';
+  };
+  const needsA = !realImage(hydratedFight.fighterAPrimaryImage, hydratedFight.resolvedFighterAImage, hydratedFight.fighterAImage, hydratedFight.featuredFightFighterAImage);
+  const needsB = !realImage(hydratedFight.fighterBPrimaryImage, hydratedFight.resolvedFighterBImage, hydratedFight.fighterBImage, hydratedFight.featuredFightFighterBImage);
   if (needsA || needsB) {
     try {
       const fighters = await fetchPublicFighters({ limit: 240 });
