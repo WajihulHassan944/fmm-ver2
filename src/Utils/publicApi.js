@@ -840,15 +840,30 @@ export const fetchPublicFightById = async (matchId) => {
     detailFight = null;
   }
 
+  let predictionFight = null;
   try {
     const predictionRows = await fetchPublicPredictionFights({ limit: 240 });
-    const listFight = predictionRows.find((fight) => sameFightIdentity(fight, matchId));
-    if (listFight) return mergeFightDetailWithListRow(detailFight || {}, listFight);
+    predictionFight = predictionRows.find((fight) => sameFightIdentity(fight, matchId)) || null;
   } catch (error) {
     console.warn('Prediction fight hydration unavailable for detail page:', error.message);
   }
 
-  if (detailFight) return detailFight;
+  // Homepage-promoted rows often carry the owner-selected pot and fighter
+  // media even when the prediction/detail feed is sparse. Hydrate from the
+  // same source the homepage uses so page two cannot lose those values.
+  let promotedFight = null;
+  try {
+    const promotedPayload = await safeFetchJson('/api/public/homepage/promoted-fights', { limit: 240 });
+    const promotedRows = normalizeListPayload(promotedPayload);
+    promotedFight = promotedRows.find((fight) => sameFightIdentity(fight, matchId)) || null;
+  } catch (error) {
+    console.warn('Promoted fight hydration unavailable for detail page:', error.message);
+  }
+
+  let hydratedFight = detailFight || {};
+  if (predictionFight) hydratedFight = mergeFightDetailWithListRow(hydratedFight, predictionFight);
+  if (promotedFight) hydratedFight = mergeFightDetailWithListRow(hydratedFight, normalizePublicFightRow(promotedFight));
+  if (detailFight || predictionFight || promotedFight) return normalizePublicFightRow(hydratedFight);
 
   const fights = await fetchPublicFights({ limit: 240 });
   return fights.find((fight) => sameFightIdentity(fight, matchId)) || null;
