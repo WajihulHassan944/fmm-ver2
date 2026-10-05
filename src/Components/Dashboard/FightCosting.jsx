@@ -123,15 +123,15 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
           <div className="player-fight-entry-member">
             <img src={user?.profileUrl || '/images/fmm-experience/avatar-placeholder.svg'} alt={user?.firstName || 'Player'} />
             <span>
-              <small>Player corner</small>
-              <strong>{user?.firstName} {user?.lastName}</strong>
-              <em>{user?.currentPlan || 'Member'} plan</em>
+              <small>{user?._id || user?.id ? 'Player corner' : 'Guest prediction card'}</small>
+              <strong>{user?._id || user?.id ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Player' : 'Make your picks first'}</strong>
+              <em>{user?._id || user?.id ? `${user?.currentPlan || 'Member'} plan` : 'Create your free account when you lock them in'}</em>
             </span>
           </div>
-          <button type="button" className="player-fight-entry-wallet" onClick={openCoinCheckout}>
+          {user?._id || user?.id ? <button type="button" className="player-fight-entry-wallet" onClick={openCoinCheckout}>
             <FMCoin size="lg" motion="shine" />
             <span><small>Fight wallet</small><strong>{walletTokens.toLocaleString()}</strong><em>FM COINS available</em></span>
-          </button>
+          </button> : <div className="player-fight-entry-wallet"><FaShieldAlt /><span><small>No signup yet</small><strong>START FREE</strong><em>Your picks stay on this device</em></span></div>}
         </header>
 
         <section className="player-fight-entry-hero">
@@ -158,7 +158,7 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
             <span>Entry requirement</span>
             {tokenCost === 0 ? <strong>Free</strong> : <FMCoinAmount amount={tokenCost} size="sm" motion="flip" />}
             <small>{tokenCost === 0 ? 'No FM COINS required' : 'to enter'}</small>
-            <i className={enoughTokens ? 'is-ready' : 'is-low'}>{enoughTokens ? 'Wallet ready' : 'Add FM COINS'}</i>
+            <i className={user?._id || user?.id ? (enoughTokens ? 'is-ready' : 'is-low') : 'is-ready'}>{user?._id || user?.id ? (enoughTokens ? 'Wallet ready' : 'Add FM COINS') : 'Pay only when you lock in'}</i>
           </div>
         </section>
 
