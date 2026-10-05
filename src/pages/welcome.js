@@ -405,6 +405,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: "'Anton', sans-serif", fontSize: 21, color: fight.potColor, fontVariantNumeric: 'tabular-nums', textShadow: '0 0 12px rgba(242,181,68,.5)' }}><FMCoin size="sm" motion="shine" />{fight.potLabel}</div>
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', letterSpacing: '.06em', textTransform: 'uppercase' }}>{fight.potNote}</div>
+                        <div style={{ marginTop: 7, fontSize: 12, fontWeight: 900, color: '#fff', letterSpacing: '.06em', textTransform: 'uppercase' }}>BUY-IN · {fight.buyInLabel}</div>
                       </div>
                       <a href={fight.id ? `/fight/${encodeURIComponent(fight.id)}${fight.entryOpen ? '?play=1' : ''}` : '/play'} style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.entryOpen ? fight.cta : 'VIEW FIGHT'}</a>
                     </div>
@@ -828,11 +829,12 @@ const toFightCard = (f, index) => {
       badge: guaranteed > 0 ? 'Guaranteed pot' : index === 0 ? 'Main event' : '',
       badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : 'rgba(225,29,46,.94)',
       badgeText: '#fff',
-      potLabel: fee === 0 ? 'BADGES' : pot > 0 ? money(pot) + ' FM COINS' : money(fee) + ' FM COINS',
+      potLabel: pot > 0 ? money(pot) + ' FM COINS' : 'PRIZE TERMS PENDING',
       potColor: '#f2b544',
       potNote: fee === 0 ? 'Titles & sponsor prizes'
         : guaranteed > 0 ? 'Guaranteed pot'
           : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
+      buyInLabel: fee > 0 ? money(fee) + ' FM COINS' : 'FREE',
       cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee) + ' FM COINS',
       ctaBg: 'linear-gradient(96deg,#e11d2e,#b90f1b)',
       ctaBorder: '1px solid rgba(255,92,102,.5)',
