@@ -202,19 +202,8 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
   const handleEnterFight = () => {
     if (!playable) return;
-    if (!userId) {
-      router.push({
-        pathname: '/auth',
-        query: {
-          mode: 'signup',
-          role: 'player',
-          next: `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`,
-          fight: matchId,
-          ...(router.query.ref ? { referrer: String(router.query.ref) } : {}),
-        },
-      });
-      return;
-    }
+    // Let visitors enter the prediction experience before asking for an account.
+    // Submission/payment remains protected inside the prediction flow.
     setShowEntryRoom(true);
     setTimeout(() => {
       document.getElementById('fight-entry-room')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -266,7 +255,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
             </div>
             <div className="public-fight-detail-actions">
               <button type="button" className="theme-btn theme-btn-primary" onClick={handleEnterFight} disabled={!playable}>
-                {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : userId ? 'Play this fight' : 'Sign up to play this fight'} <FaArrowRight />
+                {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : 'PREDICT THIS FIGHT'} <FaArrowRight />
               </button>
               <a href="#fight-leaderboard" className="theme-btn theme-btn-secondary">View leaderboard <FaTrophy /></a>
             </div>
@@ -310,10 +299,10 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
         <article className="public-fight-info-card public-fight-entry-card-mini">
           <p className="public-fight-eyebrow"><FaShieldAlt /> Prediction access</p>
-          <h2>{hasSubmitted ? 'Entry already confirmed' : playable ? 'Ready to participate' : 'Entry not available'}</h2>
-          <p>{hasSubmitted ? 'Your prediction card is already submitted for this fight.' : playable ? 'Create a free player account or continue as a player to open the fight entry room and make predictions.' : 'This card is no longer open for new predictions.'}</p>
+          <h2>{hasSubmitted ? 'Entry already confirmed' : playable ? 'Start your picks now' : 'Entry not available'}</h2>
+          <p>{hasSubmitted ? 'Your prediction card is already submitted for this fight.' : playable ? 'Make your picks first. You will create or sign in to your player account before locking an official entry.' : 'This card is no longer open for new predictions.'}</p>
           <button type="button" onClick={handleEnterFight} disabled={!playable}>
-            {hasSubmitted ? 'Already played' : !playable ? 'Entry closed' : userId ? 'Start predictions' : 'Sign up and play'} <FaArrowRight />
+            {hasSubmitted ? 'Already played' : !playable ? 'Entry closed' : 'START PREDICTING'} <FaArrowRight />
           </button>
         </article>
       </section>
