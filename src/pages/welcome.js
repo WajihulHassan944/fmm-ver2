@@ -1061,8 +1061,16 @@ async function buildWelcomeProps() {
   // there is nothing else — filler beside live results reads as a broken feed.
   const ticker = [];
   if (board[0]) ticker.push({ text: `\ud83d\udc51 ${board[0].name} leads the board \u2014 ${board[0].points} pts`, color: '#f5a623' });
+  const tickerGenreColor = (fight = {}) => {
+    const genre = String(fight.category || fight.sport || fight.matchCategory || '').toUpperCase();
+    if (genre.includes('BARE') || genre.includes('BKFC')) return '#c9772e';
+    if (genre.includes('KICK') || genre.includes('MUAY')) return '#22c55e';
+    if (genre.includes('WREST')) return '#c0399f';
+    if (genre.includes('MMA') || genre.includes('UFC')) return '#2b6fe8';
+    return '#e11d2e';
+  };
   fights.slice(0, 3).forEach((f) => {
-    ticker.push({ text: `\ud83e\ude99 ${f.f1} vs ${f.f2} \u2014 ${f.potLabel}`, color: '#f2b544' });
+    ticker.push({ text: `🪙 ${f.f1} vs ${f.f2} — ${f.potLabel}`, color: tickerGenreColor(f) });
   });
   if (fights.length) ticker.push({ text: `\u26a1 ${fights.length} card${fights.length === 1 ? '' : 's'} open for predictions`, color: '#2b6fe8' });
   if (ticker.length < 3) {
