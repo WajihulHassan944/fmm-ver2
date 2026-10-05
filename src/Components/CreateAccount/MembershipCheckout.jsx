@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { FaArrowLeft, FaCheck, FaCoins, FaLock, FaMinus, FaPlus, FaShieldAlt } from 'react-icons/fa';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
 
 const PACKS = [
   { sku: 'fm-1000', coins: 1000, priceCents: 99, label: 'Starter' },
@@ -67,6 +68,7 @@ export default function MembershipCheckout() {
 
   useEffect(() => {
     if (!router.isReady) return;
+    if (!isFmPlus) trackRevenueEvent(REVENUE_EVENTS.COIN_CHECKOUT, { requestedAmount: Number(router.query.amount || 0), returnTo: String(router.query.returnTo || '') });
     if (isFmPlus) {
       const requestedPlan = String(router.query.plan || '').toLowerCase();
       if (['pass', 'monthly'].includes(requestedPlan)) setFmPlusPlan(requestedPlan);
