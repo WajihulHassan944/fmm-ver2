@@ -814,6 +814,9 @@ const toFightCard = (f, index) => {
     const category = String(f.matchCategory || '').toUpperCase();
     return {
       id: String(f._id || index),
+      category,
+      sport: category,
+      matchCategory: category,
       entryOpen: typeof f.entryOpen === 'boolean' ? f.entryOpen : !isTerminalFight(f) && getFightTimestamp(f) > Date.now(),
       slot: index + 1,
       f1: resolveFightName(f, 'A').toUpperCase(),
