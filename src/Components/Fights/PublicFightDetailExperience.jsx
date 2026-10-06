@@ -17,7 +17,7 @@ import {
   FaTrophy,
   FaUsers,
 } from 'react-icons/fa';
-import FightCosting from '@/Components/Dashboard/FightCosting';
+import MakePredictions from '@/Components/MakePredictions/MakePredictions';
 import FightLeaderboard from '@/Components/GlobalLeaderboard/FightLeaderboard';
 import { fetchMatches } from '@/Redux/matchSlice';
 import {
@@ -249,8 +249,8 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   const handleEnterFight = () => {
     if (!playable) return;
     trackRevenueEvent(REVENUE_EVENTS.PLAY_CLICK, { fightId: String(matchId), affiliateRef: String(router.query.ref || ''), signedIn: Boolean(userId) });
-    // Let visitors enter the prediction experience before asking for an account.
-    // Submission/payment remains protected inside the prediction flow.
+    // One conversion click only: go straight from the fight CTA into the
+    // scorecard. Signup, eligibility and FM COINS/payment remain at lock-in.
     setShowEntryRoom(true);
     setTimeout(() => {
       document.getElementById('fight-entry-room')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -267,7 +267,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
           <span>{title}</span>
         </div>
         <div id="fight-entry-room">
-          <FightCosting matchId={matchId} matchOverride={resolvedFight} onSubmitted={() => setSubmittedOverride(true)} />
+          <MakePredictions matchId={matchId} matchOverride={resolvedFight} onSubmitted={() => setSubmittedOverride(true)} />
         </div>
       </main>
     );
