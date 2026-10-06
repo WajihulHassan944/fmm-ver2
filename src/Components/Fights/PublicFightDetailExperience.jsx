@@ -43,12 +43,32 @@ const sameId = (left, right) => String(left || '') === String(right || '');
 
 const entryOpen = (fight) => {
   const status = `${fight?.matchStatus || ''} ${fight?.matchShadowOpenStatus || ''}`.toLowerCase();
-  const date = String(fight?.matchDate || '').slice(0, 10);
-  const rawTime = String(fight?.matchTime || '').trim();
+  const rawDate = fight?.matchDate || fight?.date || '';
+  const rawTime = String(fight?.matchTime || fight?.time || '').trim();
   const isTimeTba = fight?.timeTba === true || fight?.matchTimeTba === true || !rawTime || rawTime === '00:00' || rawTime.toUpperCase() === '12:00 AM';
-  const time = isTimeTba ? '23:59' : rawTime.slice(0, 5);
   const explicitLock = fight?.lockAt ? new Date(fight.lockAt).getTime() : NaN;
-  const scheduledLock = date ? new Date(`${date}T${time}:00`).getTime() : NaN;
+  let scheduledLock = NaN;
+  if (rawDate) {
+    const parsedDate = new Date(rawDate);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      if (isTimeTba) {
+        parsedDate.setHours(23, 59, 59, 999);
+      } else {
+        const twelveHour = rawTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+        const twentyFour = rawTime.match(/^(\d{1,2}):(\d{2})/);
+        if (twelveHour) {
+          let hours = Number(twelveHour[1]) % 12;
+          if (twelveHour[3].toUpperCase() === 'PM') hours += 12;
+          parsedDate.setHours(hours, Number(twelveHour[2]), 0, 0);
+        } else if (twentyFour) {
+          parsedDate.setHours(Number(twentyFour[1]), Number(twentyFour[2]), 0, 0);
+        } else {
+          parsedDate.setHours(23, 59, 59, 999);
+        }
+      }
+      scheduledLock = parsedDate.getTime();
+    }
+  }
   const lock = Number.isFinite(explicitLock) ? explicitLock : scheduledLock;
 
   // The actual schedule is authoritative. A future published fight must stay
