@@ -97,6 +97,7 @@ const EditMatch = ({ matchId, isShadow }) => {
     matchShadowOpenStatus: '',
     matchDate: '',
     matchTime: '',
+    timeTba: false,
     matchTokens: '',
     pot: '',
     addToShadowTemplates: false,
@@ -156,7 +157,8 @@ const EditMatch = ({ matchId, isShadow }) => {
       matchShadowStatus: match.matchShadowStatus || '',
       matchShadowOpenStatus: match.matchShadowOpenStatus || '',
       matchDate: match.matchDate ? String(match.matchDate).slice(0, 10) : current.matchDate,
-      matchTime: match.matchTime || current.matchTime,
+      matchTime: match.matchTime || '',
+      timeTba: match.timeTba === true || String(match.timeTba).toLowerCase() === 'true' || !match.matchTime,
       matchTokens: match.matchTokens ?? current.matchTokens,
       pot: match.pot ?? current.pot,
       fighterAImage: match.fighterAImage || null,
@@ -251,8 +253,7 @@ const EditMatch = ({ matchId, isShadow }) => {
     event.preventDefault();
 
     const url = isShadow ? `${API_BASE}/editShadow` : `${API_BASE}/editMatch`;
-    const localDateTime = new Date(`${formData.matchDate}T${formData.matchTime}:00`);
-    const matchTimeEST = localDateTime.toTimeString().substring(0, 5);
+    const matchTimeEST = formData.timeTba ? '' : formData.matchTime;
     const matchDate = formData.matchDate?.split('T')[0];
 
     let parsedBoxingMatch = null;
@@ -291,6 +292,7 @@ const EditMatch = ({ matchId, isShadow }) => {
     if (!isShadow) {
       data.append('matchDate', matchDate);
       data.append('matchTime', matchTimeEST);
+      data.append('timeTba', String(formData.timeTba));
       data.append('matchTokens', formData.matchTokens);
       data.append('pot', formData.pot);
     }
@@ -448,7 +450,7 @@ const EditMatch = ({ matchId, isShadow }) => {
             <header><span><FaCalendarAlt /></span><div><small>Schedule & finance</small><h4>Event configuration</h4><p>Maintain the existing date, time, entry token, and prize-pot values.</p></div></header>
             <div className="admin-edit-form-grid">
               <label><span><FaCalendarAlt /> Match date</span><input type="date" name="matchDate" value={formData.matchDate} onChange={handleChange} /></label>
-              <label><span><FaClock /> Match time</span><input type="time" name="matchTime" value={formData.matchTime} onChange={handleChange} /></label>
+              <label><span><FaClock /> Match time</span><input type="time" name="matchTime" value={formData.matchTime} onChange={handleChange} disabled={formData.timeTba} /><span className="admin-time-tba"><input type="checkbox" checked={formData.timeTba} onChange={(event) => setFormData((current) => ({ ...current, timeTba: event.target.checked, matchTime: event.target.checked ? '' : current.matchTime }))} /> TIME TBA</span></label>
               <label><span><FaCoins /> Match tokens</span><input type="number" name="matchTokens" value={formData.matchTokens} onChange={handleChange} /></label>
               <label><span><FaTrophy /> Pot</span><input type="number" name="pot" value={formData.pot} onChange={handleChange} /></label>
             </div>
