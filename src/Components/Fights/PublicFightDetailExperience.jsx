@@ -275,12 +275,23 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
               <span><FaTrophy /> {getFightStatusLabel(resolvedFight)}</span>
             </div>
             {playable && <div style={{display:'inline-flex',alignItems:'center',gap:8,margin:'0 0 12px',padding:'8px 12px',borderRadius:999,background:'rgba(225,29,46,.14)',border:'1px solid rgba(225,29,46,.45)',fontWeight:900,fontSize:12,letterSpacing:'.06em'}}>● FIGHT NIGHT MODE · PICKS OPEN</div>}
+            <div style={{display:'flex',flexWrap:'wrap',gap:10,margin:'0 0 14px'}}>
+              <div style={{minWidth:150,padding:'12px 14px',borderRadius:12,background:'rgba(242,181,68,.10)',border:'1px solid rgba(242,181,68,.45)'}}>
+                <small style={{display:'block',opacity:.72,fontWeight:800,letterSpacing:'.06em'}}>PRIZE POOL</small>
+                <strong style={{display:'block',marginTop:3,fontSize:20,color:'#f2b544'}}><FMCoinAmount amount={Number(resolvedFight?.pot || resolvedFight?.currentPot || resolvedFight?.prizePool || resolvedFight?.potTarget || 0)} size="sm" motion="shine" /></strong>
+              </div>
+              <div style={{minWidth:135,padding:'12px 14px',borderRadius:12,background:'rgba(242,181,68,.10)',border:'1px solid rgba(242,181,68,.30)'}}>
+                <small style={{display:'block',opacity:.72,fontWeight:800,letterSpacing:'.06em'}}>BUY-IN</small>
+                <strong style={{display:'block',marginTop:3,fontSize:20,color:'#f2b544'}}>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMCoinAmount amount={Number(resolvedFight.matchTokens)} size="sm" motion="shine" /> : 'FREE'}</strong>
+              </div>
+            </div>
             <div className="public-fight-detail-actions">
               <button type="button" className="theme-btn theme-btn-primary" onClick={handleEnterFight} disabled={!playable}>
-                {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : 'PREDICT THIS FIGHT'} <FaArrowRight />
+                {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : 'START YOUR PREDICTIONS'} <FaArrowRight />
               </button>
               <a href="#fight-leaderboard" className="theme-btn theme-btn-secondary">View leaderboard <FaTrophy /></a>
             </div>
+            {playable && <p style={{margin:'10px 0 0',fontSize:13,fontWeight:700,opacity:.82}}>Make your picks first. Create or sign in to your account only when you are ready to lock in your official entry.</p>}
             {hasSubmitted && (
               <div className="public-fight-submitted-note"><FaCheckCircle /> You have already submitted predictions for this fight.</div>
             )}
