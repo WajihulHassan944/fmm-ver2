@@ -540,3 +540,43 @@
   outline-offset: 3px;
 }
 .public-fight-detail-actions .theme-btn-primary svg { color: currentColor; }
+
+
+/* Conversion lock: the primary prediction action must read as the obvious
+   next step before hover. Keep the pulse on the box-shadow only so the label
+   remains stable and easy to read. */
+@keyframes fmm-predict-cta-glow {
+  0%, 100% {
+    box-shadow: 0 8px 26px rgba(237, 31, 49, .48), 0 0 0 0 rgba(255, 38, 55, .34) !important;
+  }
+  50% {
+    box-shadow: 0 10px 38px rgba(237, 31, 49, .78), 0 0 22px 7px rgba(255, 38, 55, .28) !important;
+  }
+}
+
+.public-fight-detail-actions .public-fight-predict-cta:not(:disabled) {
+  background: linear-gradient(180deg, #ff3045 0%, #e50924 100%) !important;
+  border: 2px solid #ff7180 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 26px rgba(237, 31, 49, .58) !important;
+  font-weight: 950 !important;
+  letter-spacing: .035em;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  animation: fmm-predict-cta-glow 1.7s ease-in-out infinite;
+  transform: translateZ(0);
+}
+
+.public-fight-detail-actions .public-fight-predict-cta:not(:disabled):hover,
+.public-fight-detail-actions .public-fight-predict-cta:not(:disabled):focus-visible {
+  background: linear-gradient(180deg, #ff4960 0%, #ff102f 100%) !important;
+  border-color: #fff !important;
+  box-shadow: 0 12px 44px rgba(237, 31, 49, .9), 0 0 30px 9px rgba(255, 38, 55, .36) !important;
+  animation-play-state: paused;
+  transform: translateY(-2px) scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-fight-detail-actions .public-fight-predict-cta:not(:disabled) {
+    animation: none;
+  }
+}
