@@ -43,9 +43,6 @@ const sameId = (left, right) => String(left || '') === String(right || '');
 
 const entryOpen = (fight) => {
   const status = `${fight?.matchStatus || ''} ${fight?.matchShadowOpenStatus || ''}`.toLowerCase();
-  // Terminal fight states always win. A stale entryOpen=false flag must NOT
-  // close a published fight whose real lock time is still in the future.
-  if (/finished|closed|completed|cancelled/.test(status)) return false;
   const date = String(fight?.matchDate || '').slice(0, 10);
   const rawTime = String(fight?.matchTime || '').trim();
   const isTimeTba = fight?.timeTba === true || fight?.matchTimeTba === true || !rawTime || rawTime === '00:00' || rawTime.toUpperCase() === '12:00 AM';
@@ -53,10 +50,13 @@ const entryOpen = (fight) => {
   const explicitLock = fight?.lockAt ? new Date(fight.lockAt).getTime() : NaN;
   const scheduledLock = date ? new Date(`${date}T${time}:00`).getTime() : NaN;
   const lock = Number.isFinite(explicitLock) ? explicitLock : scheduledLock;
+
+  // The actual schedule is authoritative. A future published fight must stay
+  // playable even if an older registry/shadow status still says "closed".
   if (Number.isFinite(lock)) return lock > Date.now();
-  // Only fall back to the feed flag when there is no usable schedule at all.
+  if (/finished|completed|cancelled/.test(status)) return false;
   if (typeof fight?.entryOpen === 'boolean') return fight.entryOpen;
-  return !/draft/.test(status);
+  return !/closed|draft/.test(status);
 };
 
 const hasUsableDetailImage = (value) => {
