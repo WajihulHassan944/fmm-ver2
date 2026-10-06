@@ -33,6 +33,20 @@ const previewSource = (value, fallback) => {
   return value || fallback;
 };
 
+const usePhotoPreview = (value, fallback) => {
+  const [preview, setPreview] = useState('');
+  useEffect(() => {
+    if (typeof File === 'undefined' || !(value instanceof File)) {
+      setPreview(value || fallback);
+      return;
+    }
+    const url = URL.createObjectURL(value);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [value, fallback]);
+  return preview || fallback;
+};
+
 const stringifyScoreConfig = (value) => {
   if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return '';
   try { return JSON.stringify(value, null, 2); } catch { return ''; }
@@ -117,10 +131,10 @@ const EditMatch = ({ matchId, isShadow }) => {
     const name = getCombatFighterName(fighter);
     if (side === 'A') {
       setSelectedFighterA(fighter);
-      setFormData((current) => ({ ...current, fighterAId: id, matchFighterA: name }));
+      setFormData((current) => ({ ...current, fighterAId: id, matchFighterA: name, fighterAImage: getCombatFighterImage(fighter) || null }));
     } else {
       setSelectedFighterB(fighter);
-      setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name }));
+      setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null }));
     }
   };
 
@@ -211,6 +225,7 @@ const EditMatch = ({ matchId, isShadow }) => {
 
   const handleChange = (event) => {
     const { name, value, files } = event.target;
+    if (files && !files[0]) return;
     if (name === 'matchCategory') {
       let categoryOne = value;
       let categoryTwo = '';
@@ -349,8 +364,8 @@ const EditMatch = ({ matchId, isShadow }) => {
     }
   };
 
-  const fighterAPreview = getCombatFighterImage(selectedFighterA) || previewSource(formData.fighterAImage, FALLBACK_A);
-  const fighterBPreview = getCombatFighterImage(selectedFighterB) || previewSource(formData.fighterBImage, FALLBACK_B);
+  const fighterAPreview = usePhotoPreview(formData.fighterAImage, getCombatFighterImage(selectedFighterA) || FALLBACK_A);
+  const fighterBPreview = usePhotoPreview(formData.fighterBImage, getCombatFighterImage(selectedFighterB) || FALLBACK_B);
 
   // Never let the form render as if it's a real record until we've actually
   // matched matchId to a fight — that blank/default state is what silently
@@ -392,6 +407,16 @@ const EditMatch = ({ matchId, isShadow }) => {
               <CombatFighterSelect label="Fighter A" side="A" value={formData.fighterAId} category={normalizeCombatCategory(formData.matchCategory)} onChange={(fighter) => chooseFighter('A', fighter)} />
               <CombatFighterSelect label="Fighter B" side="B" value={formData.fighterBId} category={normalizeCombatCategory(formData.matchCategory)} onChange={(fighter) => chooseFighter('B', fighter)} />
             </div>
+            <label className="admin-edit-promotion-upload">
+              <img src={fighterAPreview} alt="Fighter A photo preview" style={{ objectFit: 'contain' }} />
+              <div><strong><FaImage /> Replace Fighter A photo</strong><small>Choose a photo, then save the fight.</small></div>
+              <input type="file" accept="image/*" name="fighterAImage" onChange={handleChange} />
+            </label>
+            <label className="admin-edit-promotion-upload">
+              <img src={fighterBPreview} alt="Fighter B photo preview" style={{ objectFit: 'contain' }} />
+              <div><strong><FaImage /> Replace Fighter B photo</strong><small>Choose a photo, then save the fight.</small></div>
+              <input type="file" accept="image/*" name="fighterBImage" onChange={handleChange} />
+            </label>
             <label><span>Legacy fighter A name</span><input type="text" name="matchFighterA" value={formData.matchFighterA} onChange={handleChange} /></label>
             <label><span>Legacy fighter B name</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
             <label className="is-wide"><span>Match description</span><textarea name="matchDescription" value={formData.matchDescription} onChange={handleChange} rows="5" /></label>
