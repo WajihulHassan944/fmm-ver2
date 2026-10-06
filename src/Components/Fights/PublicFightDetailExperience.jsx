@@ -78,9 +78,23 @@ const pickDetailImage = (...values) => values.find(hasUsableDetailImage) || '';
 const mergeFightForDetail = (base = {}, candidate = {}) => {
   if (!candidate || typeof candidate !== 'object') return normalizePublicFightRow(base || {});
 
+  const positiveNumber = (...values) => {
+    for (const value of values) {
+      if (value === undefined || value === null || value === '') continue;
+      const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+    return 0;
+  };
+
   const merged = {
     ...base,
     ...candidate,
+    // Never let a sparse list/feed row erase economics already loaded for
+    // this exact fight.
+    pot: positiveNumber(candidate.pot, candidate.currentPot, candidate.prizePool, base.pot, base.currentPot, base.prizePool, base.potTarget),
+    prizePool: positiveNumber(candidate.prizePool, candidate.pot, candidate.currentPot, base.prizePool, base.pot, base.currentPot, base.potTarget),
+    matchTokens: positiveNumber(candidate.matchTokens, candidate.entryTokens, candidate.entryFee, base.matchTokens, base.entryTokens, base.entryFee),
     matchDescription: candidate.matchDescription || base.matchDescription,
     matchVideoUrl: candidate.matchVideoUrl || base.matchVideoUrl,
     fightPosterImage: candidate.fightPosterImage || base.fightPosterImage,
@@ -288,7 +302,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
       <section className="theme-container public-fight-data-strip" aria-label="Fight data">
         <article><FaUsers /><span><strong>{playerCount > 0 ? playerCount : 'Open'}</strong><small>{playerCount > 0 ? 'Players' : 'Entries'}</small></span></article>
-        <article className="public-fight-fm-coins"><span><strong><FMCoinAmount amount={getFightPrize(resolvedFight)} size="lg" motion="shine" /></strong><small>FM COINS PRIZE POOL</small></span></article>
+        <article className="public-fight-fm-coins"><span><strong><FMCoinAmount amount={Number(resolvedFight?.pot || resolvedFight?.currentPot || resolvedFight?.prizePool || resolvedFight?.potTarget || 0)} size="lg" motion="shine" /></strong><small>FM COINS PRIZE POOL</small></span></article>
         <article className="public-fight-fm-coins"><span><strong>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMCoinAmount amount={Number(resolvedFight.matchTokens)} size="lg" motion="shine" /> : 'FREE'}</strong><small>BUY-IN</small></span></article>
         <article><FaShieldAlt /><span><strong>{resolvedFight?.matchType || 'Public'}</strong><small>Fight type</small></span></article>
         <article><FaClock /><span><strong>{resolvedFight?.matchStatus || 'Open'}</strong><small>Status</small></span></article>
