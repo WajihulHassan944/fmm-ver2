@@ -290,10 +290,24 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const handleFinish = async () => {
     if (submitting) return;
+
+    // A card only counts as finished after it passes the same prediction
+    // validation required to continue toward an official entry.
+    if (!rounds.some((round) => getWinnerSide(round))) {
+      alert(isWrestling ? 'Pick the match winner before submitting.' : 'Pick at least one round winner before submitting.');
+      return;
+    }
+
     if (!predictionCompleteTracked.current) {
       predictionCompleteTracked.current = true;
-      trackRevenueEvent(REVENUE_EVENTS.PREDICTION_COMPLETE, { fightId: String(matchId), entryFee, signedIn: Boolean(user?._id || user?.id), affiliateRef: String(router.query.ref || '') });
+      trackRevenueEvent(REVENUE_EVENTS.PREDICTION_COMPLETE, {
+        fightId: String(matchId),
+        entryFee,
+        signedIn: Boolean(user?._id || user?.id),
+        affiliateRef: String(router.query.ref || '')
+      });
     }
+
     const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
     if (!authToken || !(user?._id || user?.id)) {
       try { sessionStorage.setItem(draftKey, JSON.stringify(rounds)); } catch (_) { /* Best-effort guest draft. */ }
@@ -311,12 +325,9 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       });
       return;
     }
+
     if (entryFee && !eligibility?.eligible) {
       setSubmitError(eligibility?.message || eligibilityError || 'Confirm your state and date of birth before entering.');
-      return;
-    }
-    if (!rounds.some((round) => getWinnerSide(round))) {
-      alert(isWrestling ? 'Pick the match winner before submitting.' : 'Pick at least one round winner before submitting.');
       return;
     }
     setSubmitting(true);
