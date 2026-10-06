@@ -312,7 +312,21 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
               </div>
             </div>
             <div className="public-fight-detail-actions">
-              <button type="button" className="theme-btn theme-btn-primary public-fight-predict-cta" onClick={handleEnterFight} disabled={!playable}>
+              <button
+                type="button"
+                className="theme-btn theme-btn-primary public-fight-predict-cta"
+                onClick={handleEnterFight}
+                disabled={!playable}
+                style={playable ? {
+                  background: 'linear-gradient(180deg, #ff3045 0%, #e50924 100%)',
+                  border: '2px solid #ff7180',
+                  color: '#fff',
+                  boxShadow: '0 10px 34px rgba(237,31,49,.68), 0 0 18px rgba(255,38,55,.30)',
+                  fontWeight: 950,
+                  minHeight: 56,
+                  paddingInline: 28,
+                } : undefined}
+              >
                 {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : 'START YOUR PREDICTIONS'} <FaArrowRight />
               </button>
               <a href="#fight-leaderboard" className="theme-btn theme-btn-secondary">View leaderboard <FaTrophy /></a>
