@@ -43,6 +43,13 @@ function RevenueCommandCenter(){
     <Link className="admin-quick-action" href="/administration/full-cards"><span><FaTrophy/></span><div><strong>Promotion / Broadcaster Package</strong><small>Use full cards as an interactive second-screen product for partners.</small></div><FaArrowRight/></Link>
    </div></aside>
   </section>
+  <section className="admin-dashboard-panel" style={{marginTop:18}}>
+   <div className="admin-dashboard-panel-heading"><h2>Fight-by-fight revenue</h2><span>Last 30 days</span></div>
+   <p style={{opacity:.72,marginTop:0}}>See which fights are attracting attention and which ones are turning viewers into paid players.</p>
+   <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Fight</th><th>Views</th><th>Play clicks</th><th>Prediction starts</th><th>Paid entries</th><th>Conversion</th><th>FM COINS</th></tr></thead><tbody>
+    {(serverSummary?.fights||[]).length ? serverSummary.fights.map(row=><tr key={row.fightId}><td><strong>{row.fightName||`Fight …${String(row.fightId||'').slice(-6)}`}</strong></td><td>{Number(row.views||0).toLocaleString()}</td><td>{Number(row.playClicks||0).toLocaleString()}</td><td>{Number(row.predictionStarts||0).toLocaleString()}</td><td>{Number(row.paidEntries||0).toLocaleString()}</td><td>{Number(row.conversionRate||0).toFixed(1)}%</td><td>{Number(row.fmCoinsCommitted||0).toLocaleString()}</td></tr>) : <tr><td colSpan="7" style={{opacity:.65}}>Per-fight activity will appear here as fight traffic is recorded.</td></tr>}
+   </tbody></table></div>
+  </section>
  </div>;
 }
 export default function RevenuePage(){return <AdminPrivateRoute><RevenueCommandCenter/></AdminPrivateRoute>}
