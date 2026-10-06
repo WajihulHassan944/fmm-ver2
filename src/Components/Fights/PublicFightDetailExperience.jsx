@@ -42,15 +42,21 @@ import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
 const sameId = (left, right) => String(left || '') === String(right || '');
 
 const entryOpen = (fight) => {
-  if (typeof fight?.entryOpen === 'boolean') return fight.entryOpen;
   const status = `${fight?.matchStatus || ''} ${fight?.matchShadowOpenStatus || ''}`.toLowerCase();
-  if (/finished|closed|draft|completed|cancelled/.test(status)) return false;
+  // Terminal fight states always win. A stale entryOpen=false flag must NOT
+  // close a published fight whose real lock time is still in the future.
+  if (/finished|closed|completed|cancelled/.test(status)) return false;
   const date = String(fight?.matchDate || '').slice(0, 10);
   const rawTime = String(fight?.matchTime || '').trim();
   const isTimeTba = fight?.timeTba === true || fight?.matchTimeTba === true || !rawTime || rawTime === '00:00' || rawTime.toUpperCase() === '12:00 AM';
   const time = isTimeTba ? '23:59' : rawTime.slice(0, 5);
-  const lock = fight?.lockAt ? new Date(fight.lockAt).getTime() : date ? new Date(`${date}T${time}:00`).getTime() : NaN;
-  return Number.isFinite(lock) && lock > Date.now();
+  const explicitLock = fight?.lockAt ? new Date(fight.lockAt).getTime() : NaN;
+  const scheduledLock = date ? new Date(`${date}T${time}:00`).getTime() : NaN;
+  const lock = Number.isFinite(explicitLock) ? explicitLock : scheduledLock;
+  if (Number.isFinite(lock)) return lock > Date.now();
+  // Only fall back to the feed flag when there is no usable schedule at all.
+  if (typeof fight?.entryOpen === 'boolean') return fight.entryOpen;
+  return !/draft/.test(status);
 };
 
 const hasUsableDetailImage = (value) => {
