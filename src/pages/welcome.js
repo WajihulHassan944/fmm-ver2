@@ -780,9 +780,11 @@ const formatFightWhen = (f = {}, options = {}) => {
   const rawDate = String(f.matchDate || '').split('T')[0];
   if (!rawDate) return options.fallback || '';
   const timeMatch = String(f.matchTime || '').trim().match(/^(\d{1,2}):(\d{2})/);
-  const time = timeMatch ? `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}` : '00:00';
+  const timeTba = f.timeTba === true || String(f.timeTba).toLowerCase() === 'true' || !timeMatch;
+  const time = timeMatch && !timeTba ? `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}` : '12:00';
   const date = new Date(`${rawDate}T${time}:00`);
   if (Number.isNaN(date.getTime())) return options.fallback || '';
+  if (timeTba) return `${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · TIME TBA`;
   return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 };
 
