@@ -314,7 +314,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
             <div className="public-fight-detail-actions">
               <button
                 type="button"
-                className="theme-btn theme-btn-primary public-fight-predict-cta"
+                className="public-fight-predict-cta"
                 onClick={handleEnterFight}
                 disabled={!playable}
                 style={playable ? {
