@@ -179,7 +179,19 @@ const FightCosting = ({ matchId, matchOverride = null, onSubmitted }) => {
             <FaShieldAlt />
             <span><strong>Secure fight entry</strong><small>Complete your picks, then submit once to pay and enter.</small></span>
           </div>
-          <button type="button" onClick={handleMatchClick} disabled={submittedPrediction}>
+          <button
+            type="button"
+            className="player-make-predictions-cta"
+            onClick={handleMatchClick}
+            disabled={submittedPrediction}
+            style={!submittedPrediction ? {
+              background: 'linear-gradient(180deg, #ff3045 0%, #e50924 100%)',
+              border: '2px solid #ff7180',
+              color: '#fff',
+              boxShadow: '0 10px 34px rgba(237,31,49,.68), 0 0 18px rgba(255,38,55,.30)',
+              fontWeight: 950,
+            } : undefined}
+          >
             {submittedPrediction ? 'Predictions already submitted' : 'Make predictions'} <FaArrowRight />
           </button>
         </section>
