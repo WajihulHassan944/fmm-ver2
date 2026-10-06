@@ -11,6 +11,8 @@ const LABELS = {
   [REVENUE_EVENTS.FIGHT_VIEW]: 'Fight views',
   [REVENUE_EVENTS.PLAY_CLICK]: 'Play clicks',
   [REVENUE_EVENTS.PREDICTION_START]: 'Prediction starts',
+  [REVENUE_EVENTS.FIRST_PREDICTION]: 'First picks',
+  [REVENUE_EVENTS.PREDICTION_COMPLETE]: 'Cards completed',
   [REVENUE_EVENTS.SIGNUP_GATE]: 'Signup gates',
   [REVENUE_EVENTS.PAID_ENTRY]: 'Paid entries',
   [REVENUE_EVENTS.FREE_ENTRY]: 'Free entries',
@@ -46,8 +48,8 @@ function RevenueCommandCenter(){
   <section className="admin-dashboard-panel" style={{marginTop:18}}>
    <div className="admin-dashboard-panel-heading"><h2>Fight-by-fight revenue</h2><span>Last 30 days</span></div>
    <p style={{opacity:.72,marginTop:0}}>See which fights are attracting attention and which ones are turning viewers into paid players.</p>
-   <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Fight</th><th>Views</th><th>Unique visitors</th><th>Play clicks</th><th>Prediction starts</th><th>Paid entries</th><th>Conversion</th><th>FM COINS</th></tr></thead><tbody>
-    {(serverSummary?.fights||[]).length ? serverSummary.fights.map(row=><tr key={row.fightId}><td><Link href={`/fight/${encodeURIComponent(row.fightId)}`} style={{color:'inherit',textDecoration:'none',display:'inline-block'}}><strong style={{textDecoration:'underline',textUnderlineOffset:3}}>{row.fightName||`Fight …${String(row.fightId||'').slice(-6)}`}</strong><small style={{display:'block',opacity:.62,marginTop:4}}>{[row.category,row.matchDate ? new Date(row.matchDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''].filter(Boolean).join(' · ')}{(row.category||row.matchDate) ? ' · ' : ''}View Fight →</small></Link></td><td>{Number(row.views||0).toLocaleString()}</td><td>{Number(row.uniqueVisitors||0).toLocaleString()}</td><td>{Number(row.playClicks||0).toLocaleString()}</td><td>{Number(row.predictionStarts||0).toLocaleString()}</td><td>{Number(row.paidEntries||0).toLocaleString()}</td><td>{Number(row.conversionRate||0).toFixed(1)}%</td><td>{Number(row.fmCoinsCommitted||0).toLocaleString()}</td></tr>) : <tr><td colSpan="8" style={{opacity:.65}}>Per-fight activity will appear here as fight traffic is recorded.</td></tr>}
+   <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Fight</th><th>Views</th><th>Visitors</th><th>Play</th><th>Opened picks</th><th>First pick</th><th>Card finished</th><th>Signup</th><th>Checkout</th><th>Paid</th><th>Conversion</th><th>FM COINS</th></tr></thead><tbody>
+    {(serverSummary?.fights||[]).length ? serverSummary.fights.map(row=><tr key={row.fightId}><td><Link href={`/fight/${encodeURIComponent(row.fightId)}`} style={{color:'inherit',textDecoration:'none',display:'inline-block'}}><strong style={{textDecoration:'underline',textUnderlineOffset:3}}>{row.fightName||`Fight …${String(row.fightId||'').slice(-6)}`}</strong><small style={{display:'block',opacity:.62,marginTop:4}}>{[row.category,row.matchDate ? new Date(row.matchDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''].filter(Boolean).join(' · ')}{(row.category||row.matchDate) ? ' · ' : ''}View Fight →</small></Link></td><td>{Number(row.views||0).toLocaleString()}</td><td>{Number(row.uniqueVisitors||0).toLocaleString()}</td><td>{Number(row.playClicks||0).toLocaleString()}</td><td>{Number(row.predictionStarts||0).toLocaleString()}</td><td>{Number(row.firstPredictions||0).toLocaleString()}</td><td>{Number(row.predictionCompletes||0).toLocaleString()}</td><td>{Number(row.signupGates||0).toLocaleString()}</td><td>{Number(row.checkoutStarts||0).toLocaleString()}</td><td>{Number(row.paidEntries||0).toLocaleString()}</td><td>{Number(row.conversionRate||0).toFixed(1)}%</td><td>{Number(row.fmCoinsCommitted||0).toLocaleString()}</td></tr>) : <tr><td colSpan="12" style={{opacity:.65}}>Per-fight activity will appear here as fight traffic is recorded.</td></tr>}
    </tbody></table></div>
   </section>
  </div>;
