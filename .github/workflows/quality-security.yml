@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Verify fight registry regressions
+        run: node scripts/fight-registry-regression.test.cjs
       - run: npm ci --ignore-scripts
       - run: npm run lint
       - run: npm run build
