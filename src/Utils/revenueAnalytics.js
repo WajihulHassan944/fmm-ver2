@@ -51,6 +51,8 @@ export const REVENUE_EVENTS = Object.freeze({
   FIGHT_VIEW: 'fight_view',
   PLAY_CLICK: 'play_click',
   PREDICTION_START: 'prediction_start',
+  FIRST_PREDICTION: 'first_prediction',
+  PREDICTION_COMPLETE: 'prediction_complete',
   SIGNUP_GATE: 'signup_gate',
   COIN_CHECKOUT: 'coin_checkout',
   PAID_ENTRY: 'paid_entry',
