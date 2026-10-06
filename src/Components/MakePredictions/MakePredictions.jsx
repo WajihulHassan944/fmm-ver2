@@ -90,6 +90,13 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const entryFee = Math.max(0, Number(match?.matchTokens) || 0);
   const predictionStartTracked = useRef(false);
+  const firstPredictionTracked = useRef(false);
+  const predictionCompleteTracked = useRef(false);
+  const trackFirstPrediction = () => {
+    if (firstPredictionTracked.current || !matchId) return;
+    firstPredictionTracked.current = true;
+    trackRevenueEvent(REVENUE_EVENTS.FIRST_PREDICTION, { fightId: String(matchId), entryFee, signedIn: Boolean(user?._id || user?.id), affiliateRef: String(router.query.ref || '') });
+  };
 
   useEffect(() => {
     if (!matchId || predictionStartTracked.current) return;
@@ -226,6 +233,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const handlePredictionChange = (event, roundIndex, field) => {
     const { value } = event.target;
+    if (String(value).trim() !== '') trackFirstPrediction();
     idempotencyKeyRef.current = '';
     setRounds((current) => current.map((round, index) => (
       index === roundIndex ? { ...round, [field]: value } : round
@@ -233,6 +241,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   };
 
   const selectRoundWinner = (roundIndex, side) => {
+    trackFirstPrediction();
     idempotencyKeyRef.current = '';
     setRounds((current) => current.map((round, index) => {
       if (index !== roundIndex) return round;
@@ -250,6 +259,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   };
 
   const selectFinish = (roundIndex, side) => {
+    trackFirstPrediction();
     idempotencyKeyRef.current = '';
     setRounds((current) => current.map((round, index) => {
       if (index !== roundIndex) return round;
@@ -280,6 +290,10 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   const handleFinish = async () => {
     if (submitting) return;
+    if (!predictionCompleteTracked.current) {
+      predictionCompleteTracked.current = true;
+      trackRevenueEvent(REVENUE_EVENTS.PREDICTION_COMPLETE, { fightId: String(matchId), entryFee, signedIn: Boolean(user?._id || user?.id), affiliateRef: String(router.query.ref || '') });
+    }
     const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
     if (!authToken || !(user?._id || user?.id)) {
       try { sessionStorage.setItem(draftKey, JSON.stringify(rounds)); } catch (_) { /* Best-effort guest draft. */ }
