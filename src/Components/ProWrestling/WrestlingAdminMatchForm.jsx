@@ -17,6 +17,7 @@ import {
   nextStatusOptions,
   safeWrestlingArray,
   wrestlingRequest,
+  WRESTLING_TIME_RANGES,
 } from '@/Utils/proWrestling';
 
 const toLocalInput = (value) => {
@@ -231,7 +232,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           <Link href="/administration/pro-wrestling"><FaArrowLeft /> Wrestling registry</Link>
           <p>{isEdit ? 'Contest configuration' : 'New game-mode card'}</p>
           <h1>{isEdit ? 'Edit wrestling contest' : 'Create wrestling contest'}</h1>
-          <span>Configure the complete wrestling contest while keeping every existing combat-sports model and route isolated.</span>
+          <span>Set up the wrestlers, match schedule, prediction cutoff, and match-time scoring.</span>
         </div>
         {error && <div className="pw-admin-error">{error}</div>}
 
@@ -277,6 +278,12 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Minimum participants</span><input type="number" min="0" value={form.minimumParticipants} onChange={(event) => update('minimumParticipants', event.target.value)} /></label>
               <label><span>Maximum participants</span><input type="number" min="0" value={form.maximumParticipants} onChange={(event) => update('maximumParticipants', event.target.value)} /></label>
             </div>
+          </section>
+
+          <section className="pw-admin-form-section">
+            <header><span>Match timing</span><div><h2>Match time ranges instead of rounds</h2><p>Players predict when the match will finish. These six ranges apply to every wrestling contest.</p></div></header>
+            <ul>{WRESTLING_TIME_RANGES.map((range) => <li key={range.value}>{range.label}</li>)}</ul>
+            <p>The scheduled start and prediction lock above control entry. In the Scoring Desk, start the live match timer and enter the official duration as MM:SS before finalizing the scores.</p>
           </section>
 
           <section className="pw-admin-form-section">
