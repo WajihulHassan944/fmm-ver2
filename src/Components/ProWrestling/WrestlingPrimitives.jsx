@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FaArrowRight, FaBolt, FaCalendarAlt, FaCrown, FaFistRaised, FaLock, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
+  canEditWrestlingPrediction,
   WRESTLING_STATUS_CLASS,
   WRESTLING_STATUS_COPY,
   formatTokenAmount,
@@ -80,7 +81,7 @@ export const WrestlingHero = ({
 
 export const WrestlingMatchCard = ({ match, actionLabel, actionHref, onAction, compact = false }) => {
   const href = actionHref || getWrestlingMatchHref(match);
-  const locked = new Date(match?.lockAt).getTime() <= Date.now() || match?.status !== 'OPEN';
+  const locked = !canEditWrestlingPrediction(match);
   return (
     <article className={`pw-match-card ${compact ? 'is-compact' : ''}`}>
       <div className="pw-match-card-media">
