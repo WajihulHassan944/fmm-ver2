@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FaBolt, FaCalendarAlt, FaCloudUploadAlt, FaPlus, FaSave, FaTrophy, FaUsers } from 'react-icons/fa';
 import AdminPredictions from './AdminPredictions';
+import WrestlingAdminMatchForm from '@/Components/ProWrestling/WrestlingAdminMatchForm';
 import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
@@ -220,6 +221,7 @@ export default function AddNewMatch() {
     const { name, type, checked, value, files } = event.target;
     if (name === 'matchCategory') {
       setDisplayCategory(value);
+      if (value === 'pro-wrestling') return;
       setForm((current) => ({
         ...current,
         ...normaliseCategory(value),
@@ -381,6 +383,15 @@ export default function AddNewMatch() {
     return <AdminPredictions matchId={createdShadowId} filter="shadowTemplate" />;
   }
 
+  if (displayCategory === 'pro-wrestling') {
+    return (
+      <>
+        <button type="button" className="pw-admin-secondary" onClick={() => setDisplayCategory(form.matchCategoryTwo || form.matchCategory || '')}>Back to sport selection</button>
+        <WrestlingAdminMatchForm />
+      </>
+    );
+  }
+
   return (
     <div className="admin-workspace admin-create-fight-page admin-economics-desk admin-operations-v3 admin-operations-v4" data-desk-ui="operations-v4">
       <section className="admin-page-heading admin-operations-hero">
@@ -440,7 +451,7 @@ export default function AddNewMatch() {
                 <button type="button" className={form.matchType === 'LIVE' ? 'is-active' : ''} onClick={() => setForm((current) => ({ ...current, matchType: 'LIVE' }))}><strong>Live production fight</strong><span>Carries a schedule, player economy and publishing controls.</span></button>
                 <button type="button" className={form.matchType === 'SHADOW' ? 'is-active' : ''} onClick={() => setForm((current) => ({ ...current, matchType: 'SHADOW' }))}><strong>Shadow template</strong><span>Reusable inventory for affiliate-created promotions.</span></button>
               </div>
-              <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option></select></label>
+              <label><span>Combat sport</span><select name="matchCategory" value={displayCategory} onChange={change} required><option value="" disabled>Choose sport&hellip;</option><option value="boxing">Boxing</option><option value="mma">MMA</option><option value="kickboxing">Kickboxing</option><option value="Bare-knuckle">Bare-knuckle</option><option value="pro-wrestling">Pro Wrestling</option></select></label>
               <label className="is-wide"><span>Fight/card name</span><input name="matchName" value={form.matchName} onChange={change} placeholder="UFC 310 main event" required /></label>
               <div className="admin-fighter-select-grid is-wide">
                 <CombatFighterSelect label="Fighter A" side="A" value={form.fighterAId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('A', fighter)} required={!form.fighterAImage} />
