@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import DirectFighterEntry from '@/Components/Admin/DirectFighterEntry';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import {
@@ -66,6 +67,13 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const router = useRouter();
   const isEdit = Boolean(matchId);
   const [form, setForm] = useState(INITIAL);
+  const [cornerUploads, setCornerUploads] = useState({ A: { name: '', file: null }, B: { name: '', file: null } });
+  const [cornerPreviews, setCornerPreviews] = useState({ A: '', B: '' });
+  useEffect(() => {
+    const previews = Object.fromEntries(['A', 'B'].map((side) => [side, cornerUploads[side].file ? URL.createObjectURL(cornerUploads[side].file) : '']));
+    setCornerPreviews(previews);
+    return () => Object.values(previews).forEach((url) => { if (url) URL.revokeObjectURL(url); });
+  }, [cornerUploads]);
   const [cashAmounts, setCashAmounts] = useState({ entry: '', pot: '' });
   const [wrestlers, setWrestlers] = useState([]);
   const [affiliates, setAffiliates] = useState([]);
@@ -76,6 +84,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const [bannerFile, setBannerFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const submitLock = useRef(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -175,11 +184,22 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!form.competitorAId || !form.competitorBId || form.competitorAId === form.competitorBId) {
+    if (submitLock.current) return;
+    if (!form.competitorAId || !form.competitorBId || (form.competitorAId !== '__upload__' && form.competitorAId === form.competitorBId)) {
       toast.error('Select two different wrestlers.');
       return;
     }
 
+    for (const side of ['A', 'B']) {
+      if (form[`competitor${side}Id`] === '__upload__' && (!cornerUploads[side].name.trim() || !cornerUploads[side].file)) {
+        toast.error(`Enter a name and upload a photo for Wrestler ${side}.`);
+        return;
+      }
+    }
+    if (form.competitorAId === '__upload__' && form.competitorBId === '__upload__' && cornerUploads.A.name.trim().toLowerCase() === cornerUploads.B.name.trim().toLowerCase()) {
+      toast.error('Select two different wrestlers.');
+      return;
+    }
     const matchDate = new Date(form.matchDate);
     const lockAt = new Date(form.lockAt);
     if (Number.isNaN(matchDate.getTime()) || Number.isNaN(lockAt.getTime()) || lockAt >= matchDate) {
@@ -191,10 +211,26 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
       return;
     }
 
+    submitLock.current = true;
     setSaving(true);
     try {
+      const resolvedCorners = {};
+      for (const side of ['A', 'B']) {
+        const key = `competitor${side}Id`;
+        resolvedCorners[key] = form[key];
+        if (form[key] !== '__upload__') continue;
+        const uploadBody = new FormData();
+        uploadBody.append('displayName', cornerUploads[side].name.trim());
+        uploadBody.append('profileImage', cornerUploads[side].file);
+        uploadBody.append('promotion', form.promotionName);
+        const wrestler = await wrestlingRequest('/api/admin/wrestling/wrestlers', { admin: true, method: 'POST', body: uploadBody });
+        if (!wrestler?._id) throw new Error(`Wrestler ${side} upload did not return a saved profile.`);
+        resolvedCorners[key] = String(wrestler._id);
+        setWrestlers((current) => [...current, wrestler]);
+        update(key, String(wrestler._id));
+      }
       const body = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
+      Object.entries({ ...form, ...resolvedCorners }).forEach(([key, value]) => {
         if (['seoTitle', 'seoDescription', 'seoKeywords'].includes(key)) return;
         body.append(key, typeof value === 'boolean' ? String(value) : value ?? '');
       });
@@ -229,6 +265,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
     } catch (requestError) {
       toast.error(requestError.message || 'The wrestling contest could not be saved.');
     } finally {
+      submitLock.current = false;
       setSaving(false);
     }
   };
@@ -276,16 +313,19 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           </section>
 
           <section className="admin-form-card admin-desk-section">
-            <header><span>02</span><div><h3>Wrestling corners</h3><p>Select the two roster profiles competing in this card.</p></div></header>
+            <header><span>02</span><div><h3>Wrestling corners</h3><p>Choose a saved wrestler or add a name and photo directly in each corner.</p></div></header>
             <div className="admin-form-grid">
-              <label>
-                <span>Competitor A *</span>
-                <select required value={form.competitorAId} disabled={identityLocked} onChange={(event) => update('competitorAId', event.target.value)}><option value="">Select wrestler</option>{wrestlers.map((item) => <option key={item._id} value={item._id}>{item.displayName} · {item.promotion || 'Pro Wrestling'}</option>)}</select>
-              </label>
-              <label>
-                <span>Competitor B *</span>
-                <select required value={form.competitorBId} disabled={identityLocked} onChange={(event) => update('competitorBId', event.target.value)}><option value="">Select wrestler</option>{wrestlers.map((item) => <option key={item._id} value={item._id}>{item.displayName} · {item.promotion || 'Pro Wrestling'}</option>)}</select>
-              </label>
+              {['A', 'B'].map((side) => (
+                <div key={side}>
+                  <label><span>Wrestler {side} *</span><select required={form[`competitor${side}Id`] !== '__upload__'} value={form[`competitor${side}Id`] === '__upload__' ? '' : form[`competitor${side}Id`]} disabled={identityLocked || saving} onChange={(event) => update(`competitor${side}Id`, event.target.value)}>
+                    <option value="">Select wrestler</option>
+                    {wrestlers.map((item) => <option key={item._id} value={item._id}>{item.displayName} · {item.promotion || 'Pro Wrestling'}</option>)}
+                  </select></label>
+                  <DirectFighterEntry side={side} name={cornerUploads[side].name} image={cornerUploads[side].file} preview={cornerPreviews[side]} disabled={identityLocked || saving}
+                    onNameChange={(name) => { setCornerUploads((current) => ({ ...current, [side]: { ...current[side], name } })); update(`competitor${side}Id`, '__upload__'); }}
+                    onImageChange={(file) => { setCornerUploads((current) => ({ ...current, [side]: { ...current[side], file } })); if (file) update(`competitor${side}Id`, '__upload__'); }} />
+                </div>
+              ))}
             </div>
           </section>
 
@@ -344,8 +384,8 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
             <section className="admin-fight-visual-card" style={{ backgroundImage: `linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.95)),url(${form.bannerImageUrl || '/images/fmm-pages/admin-command-hd.webp'})` }}>
               <span>Live preview · Pro Wrestling</span><h3>{form.matchTitle || 'Untitled match card'}</h3>
               <div>
-                <article><img src={selectedA?.profileImage || getWrestlerImage(null, 'A')} alt="Wrestler A preview" /><strong>{selectedA?.displayName || 'Wrestler A'}</strong></article>
-                  <article><img src={selectedB?.profileImage || getWrestlerImage(null, 'B')} alt="Wrestler B preview" /><strong>{selectedB?.displayName || 'Wrestler B'}</strong></article>
+                <article><img src={(form.competitorAId === '__upload__' ? cornerPreviews.A : selectedA?.profileImage) || getWrestlerImage(null, 'A')} alt="Wrestler A preview" /><strong>{(form.competitorAId === '__upload__' ? cornerUploads.A.name : selectedA?.displayName) || 'Wrestler A'}</strong></article>
+                  <article><img src={(form.competitorBId === '__upload__' ? cornerPreviews.B : selectedB?.profileImage) || getWrestlerImage(null, 'B')} alt="Wrestler B preview" /><strong>{(form.competitorBId === '__upload__' ? cornerUploads.B.name : selectedB?.displayName) || 'Wrestler B'}</strong></article>
               </div>
               <small>{form.matchDate ? form.matchDate.replace('T', ' · ') : 'Schedule pending'} · {form.matchTime || 'Display time pending'}</small>
             </section>
