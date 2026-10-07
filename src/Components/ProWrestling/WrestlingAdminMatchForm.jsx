@@ -55,9 +55,6 @@ const INITIAL = {
   featured: false,
   publicVisible: true,
   autoCancelIfMinimumNotMet: true,
-  affiliateId: '',
-  affiliateCommissionPercentage: 0,
-  referralCode: '',
   seoTitle: '',
   seoDescription: '',
   seoKeywords: '',
@@ -76,7 +73,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   }, [cornerUploads]);
   const [cashAmounts, setCashAmounts] = useState({ entry: '', pot: '' });
   const [wrestlers, setWrestlers] = useState([]);
-  const [affiliates, setAffiliates] = useState([]);
   const [scoringRules, setScoringRules] = useState([]);
   const [payoutRules, setPayoutRules] = useState([]);
   const [matchCounts, setMatchCounts] = useState({ entries: 0, predictions: 0 });
@@ -100,7 +96,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           wrestlingRequest('/api/admin/wrestling/payout-rules', { admin: true }),
         ]);
         const [wrestlerPayload, scoringPayload, payoutPayload] = baseRequests;
-        const affiliateResult = await wrestlingRequest('/affiliates', { admin: true }).catch(() => []);
         const matchPayload = isEdit
           ? await wrestlingRequest(`/api/admin/wrestling/matches/${matchId}`, { admin: true })
           : null;
@@ -112,7 +107,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
         const match = matchPayload?.match || null;
 
         setWrestlers(roster);
-        setAffiliates(safeWrestlingArray(affiliateResult?.data || affiliateResult));
         setScoringRules(scoring);
         setPayoutRules(payouts);
         setMatchCounts(matchPayload?.counts || { entries: 0, predictions: 0 });
@@ -142,9 +136,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
             featured: Boolean(match.featured),
             publicVisible: match.publicVisible !== false,
             autoCancelIfMinimumNotMet: match.autoCancelIfMinimumNotMet !== false,
-            affiliateId: String(match.affiliateId || ''),
-            affiliateCommissionPercentage: match.affiliateCommissionPercentage ?? 0,
-            referralCode: match.referralCode || '',
             seoTitle: match.seo?.title || '',
             seoDescription: match.seo?.description || '',
             seoKeywords: safeWrestlingArray(match.seo?.keywords).join(', '),
@@ -175,7 +166,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   };
   const selectedA = useMemo(() => wrestlers.find((item) => String(item._id) === String(form.competitorAId)), [form.competitorAId, wrestlers]);
   const selectedB = useMemo(() => wrestlers.find((item) => String(item._id) === String(form.competitorBId)), [form.competitorBId, wrestlers]);
-  const selectedAffiliate = useMemo(() => affiliates.find((item) => String(item._id) === String(form.affiliateId)), [affiliates, form.affiliateId]);
   const identityLocked = isEdit && (originalStatus !== 'DRAFT' || Number(matchCounts.entries || 0) > 0);
   const statusOptions = useMemo(() => {
     if (!isEdit) return ['DRAFT', 'OPEN'];
@@ -350,17 +340,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           </section>
 
           <section className="admin-form-card admin-desk-section">
-            <header><span>04</span><div><h3>Affiliate attribution</h3><p>Optionally assign a creator campaign and commission.</p></div></header>
-            <div className="admin-form-grid">
-              <label className="is-wide"><span>Assigned affiliate</span><select value={form.affiliateId} onChange={(event) => update('affiliateId', event.target.value)}><option value="">No affiliate assigned</option>{affiliates.map((affiliate) => <option key={affiliate._id} value={affiliate._id}>{affiliate.playerName || `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() || affiliate.email}</option>)}</select></label>
-              <label><span>Affiliate commission %</span><input type="number" min="0" max="100" value={form.affiliateCommissionPercentage} onChange={(event) => update('affiliateCommissionPercentage', event.target.value)} /></label>
-              <label><span>Referral code</span><input value={form.referralCode} onChange={(event) => update('referralCode', event.target.value)} /></label>
-              {selectedAffiliate && <div className="pw-admin-affiliate-preview is-wide"><FaUsers /><span><small>Assigned creator</small><strong>{selectedAffiliate.playerName || `${selectedAffiliate.firstName || ''} ${selectedAffiliate.lastName || ''}`.trim()}</strong><em>{selectedAffiliate.email || 'Affiliate account'}</em></span></div>}
-            </div>
-          </section>
-
-          <section className="admin-form-card admin-desk-section">
-            <header><span>05</span><div><h3>Rules and publishing</h3><p>Choose versioned rules, visibility, cancellation behavior, and media.</p></div></header>
+            <header><span>04</span><div><h3>Rules and publishing</h3><p>Choose versioned rules, visibility, cancellation behavior, and media.</p></div></header>
             <div className="admin-form-grid">
               <label><span>Scoring ruleset</span><select value={form.scoringRuleVersion} disabled={identityLocked} onChange={(event) => update('scoringRuleVersion', event.target.value)}>{scoringRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
               <label><span>Payout ruleset</span><select value={form.payoutRuleVersion} disabled={identityLocked} onChange={(event) => update('payoutRuleVersion', event.target.value)}>{payoutRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
