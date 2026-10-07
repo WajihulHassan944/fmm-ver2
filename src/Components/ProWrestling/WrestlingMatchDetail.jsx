@@ -4,20 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBolt,
-  FaCalendarAlt,
-  FaCheckCircle,
-  FaCoins,
-  FaCrown,
-  FaFistRaised,
-  FaLock,
-  FaShieldAlt,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaBolt, FaCalendarAlt, FaCheckCircle, FaCrown, FaFistRaised, FaLock, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   WrestlingEmptyState,
   WrestlingModeNav,
@@ -135,7 +123,7 @@ const WrestlingMatchDetail = () => {
 
   return (
     <>
-      <Head><title>{match.matchTitle} | Pro Wrestling | Fantasy MMAdness</title></Head>
+      <Head><title>{match.seo?.title || `${match.matchTitle} | Pro Wrestling Predictions | FANTASY MMADNESS`}</title><meta name="description" content={match.seo?.description || match.description || `Make your predictions for ${match.matchTitle} at ${match.eventName}. Predict the action, score points, and climb the FANTASY MMADNESS leaderboard.`} /></Head>
       <div className="pw-page pw-match-detail-page">
         <section className="pw-detail-hero" style={{ '--pw-detail-bg': `url(${match.bannerImage || '/images/pro-wrestling/wrestling-match-premium.webp'})` }}>
           <div className="pw-detail-hero-grid" />

@@ -323,12 +323,12 @@ const AdminPredictions = ({ matchId, filter, onBack }) => {
               body: JSON.stringify({ tokens: matchTokens, matchId }),
             });
             const rewardData = await rewardResponse.json();
-            if (rewardData.success) toast.success('Tokens rewarded successfully!');
-            else toast.error('Failed to reward tokens.');
+            if (rewardData.success) toast.success('FM COINS rewarded successfully!');
+            else toast.error('Failed to reward FM COINS.');
           }
         } catch (error) {
-          console.error('Error rewarding tokens:', error);
-          toast.error('Failed to reward tokens due to an error.');
+          console.error('Error rewarding FM COINS:', error);
+          toast.error('Failed to reward FM COINS due to an error.');
         }
       }
       window.location.reload();

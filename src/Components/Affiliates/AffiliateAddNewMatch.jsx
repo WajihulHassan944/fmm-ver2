@@ -2,16 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import { fetchPublicFights, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
-import {
-  FaBullhorn,
-  FaCalendarAlt,
-  FaCoins,
-  FaDollarSign,
-  FaInfoCircle,
-  FaSave,
-  FaShieldAlt,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaBullhorn, FaCalendarAlt, FaDollarSign, FaInfoCircle, FaSave, FaShieldAlt, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   AFFILIATE_AVATAR_FALLBACK,
   getFightCategory,

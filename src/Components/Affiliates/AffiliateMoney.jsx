@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  FaArrowRight, FaBolt, FaCheckCircle, FaClock, FaCoins, FaExclamationTriangle,
-  FaHistory, FaTimesCircle, FaUsers,
-} from 'react-icons/fa';
+import { FaArrowRight, FaBolt, FaCheckCircle, FaClock, FaExclamationTriangle, FaHistory, FaTimesCircle, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
@@ -152,7 +150,7 @@ const AffiliateMoney = () => {
               <p className="xp-eyebrow">Cash out</p>
               <h2>Request a payout</h2>
               <p>
-                Requests come off your balance immediately so the same coins cannot be requested
+                Requests come off your balance immediately so the same FM COINS cannot be requested
                 twice. {requestable > 0
                   ? `You have ${coins(requestable)} clear right now.`
                   : 'Nothing is clear to request at the moment.'}

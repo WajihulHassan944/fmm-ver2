@@ -167,13 +167,13 @@ export default function FreeDemoFight() {
     <>
       <Head>
         <title>Free Demo Fight | Fantasy MMAdness</title>
-        <meta name="description" content="Try the Fantasy MMAdness scorecard flow with no coins needed." />
+        <meta name="description" content="Try the Fantasy MMAdness scorecard flow with no FM COINS needed." />
       </Head>
       <main className="fmm-demo-page">
         <section className="fmm-demo-phone">
           <header className="fmm-demo-topbar">
             <Link href="/" aria-label="Back to home"><FaChevronLeft /></Link>
-            <div><strong>FREE DEMO</strong><span>No coins needed</span></div>
+            <div><strong>FREE DEMO</strong><span>No FM COINS needed</span></div>
             <Link href="/leaderboard" aria-label="Leaderboard"><FaTrophy /></Link>
           </header>
 

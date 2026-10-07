@@ -4,13 +4,14 @@ import { getWinnerDetails } from '../../CustomFunctions/winnerUtils';
 import { useDispatch } from 'react-redux';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import { useRouter } from 'next/router';
-import { FaCoins, FaDownload, FaFistRaised, FaMedal, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FaDownload, FaFistRaised, FaMedal, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const FinishedFightUserBoard = ({ matchId }) => {
      const router = useRouter();
-    
+
     const [scores, setScores] = useState([]);
     const [winner, setWinner] = useState({
         firstName: '',
@@ -19,7 +20,7 @@ const FinishedFightUserBoard = ({ matchId }) => {
         totalPoints: 0,
         matchId: '' // Initialize matchId in the state
     });
-    
+
     const user = useSelector((state) => state.user);
     const matches = useSelector((state) => state.matches.data);
     const match = matches.find((m) => m._id === matchId);
@@ -55,16 +56,16 @@ const FinishedFightUserBoard = ({ matchId }) => {
             console.error('Fighter round data is missing in calculateRoundPoints',roundPrediction, fighterOneRound, fighterTwoRound);
             return 0;
         }
-    
+
         let roundPoints = 0;
-    
+
         // Helper function to add points based on prediction and fighter stats
         const addPoints = (prediction, stat, points) => {
             if (prediction !== null && prediction <= stat) {
                 roundPoints += points;
             }
         };
-    
+
         // For boxing
         if (match.matchCategory === 'boxing') {
             // Fighter One
@@ -77,7 +78,7 @@ const FinishedFightUserBoard = ({ matchId }) => {
             if (roundPrediction.koPrediction1 !== null) {
                 roundPoints += roundPrediction.koPrediction1 === fighterOneRound.KO ? fighterOneRound.KO : 0;
             }
-    
+
             // Fighter Two
             addPoints(roundPrediction.hpPrediction2, fighterTwoRound.HP, roundPrediction.hpPrediction2);
             addPoints(roundPrediction.bpPrediction2, fighterTwoRound.BP, roundPrediction.bpPrediction2);
@@ -88,7 +89,7 @@ const FinishedFightUserBoard = ({ matchId }) => {
             if (roundPrediction.koPrediction2 !== null) {
                 roundPoints += roundPrediction.koPrediction2 === fighterTwoRound.KO ? fighterTwoRound.KO : 0;
             }
-    
+
         } else if (match.matchCategory === 'mma') {
             // For MMA
             // Fighter One
@@ -104,7 +105,7 @@ const FinishedFightUserBoard = ({ matchId }) => {
             if (roundPrediction.elPrediction1 !== null) {
                 roundPoints += roundPrediction.elPrediction1 <= fighterOneRound.EL ? roundPrediction.elPrediction1 : 0;
             }
-    
+
             // Fighter Two
             addPoints(roundPrediction.hpPrediction2, fighterTwoRound.ST, roundPrediction.hpPrediction2);
             addPoints(roundPrediction.bpPrediction2, fighterTwoRound.KI, roundPrediction.bpPrediction2);
@@ -119,22 +120,22 @@ const FinishedFightUserBoard = ({ matchId }) => {
                 roundPoints += roundPrediction.elPrediction2 <= fighterTwoRound.EL ? roundPrediction.elPrediction2 : 0;
             }
         }
-    
+
         return roundPoints;
     };
-        
 
-    
+
+
 
     const calculatePoints = (userPrediction, fighterOneStats, fighterTwoStats) => {
         let totalScore = 0;
-    
+
         userPrediction.forEach((roundPrediction, index) => {
             const fighterOneRound = fighterOneStats[index];
             const fighterTwoRound = fighterTwoStats[index];
-    
+
             if (!fighterOneRound || !fighterTwoRound || !roundPrediction) return;
-    
+
             // For Boxing
             if (match.matchCategory === 'boxing') {
                 // Fighter One Predictions
@@ -142,53 +143,53 @@ const FinishedFightUserBoard = ({ matchId }) => {
                 if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.HP) {
                     totalScore += roundPrediction.hpPrediction1;
                 }
-    
+
                 // Body Punches (BP)
                 if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.BP) {
                     totalScore += roundPrediction.bpPrediction1;
                 }
-    
+
                 // Total Punches (TP)
                 if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.TP) {
                     totalScore += roundPrediction.tpPrediction1;
                 }
-    
+
                 // Round Winner (RW)
                 if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) {
                     totalScore += roundPrediction.rwPrediction1;
                 }
-    
+
                 // Knock Out (KO)
                 if (roundPrediction.koPrediction1 !== null && roundPrediction.koPrediction1 === fighterOneRound.KO) {
                     totalScore += fighterOneRound.KO;
                 }
-    
+
                 // Fighter Two Predictions
                 // Head Punches (HP)
                 if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.HP) {
                     totalScore += roundPrediction.hpPrediction2;
                 }
-    
+
                 // Body Punches (BP)
                 if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.BP) {
                     totalScore += roundPrediction.bpPrediction2;
                 }
-    
+
                 // Total Punches (TP)
                 if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.TP) {
                     totalScore += roundPrediction.tpPrediction2;
                 }
-    
+
                 // Round Winner (RW)
                 if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) {
                     totalScore += roundPrediction.rwPrediction2;
                 }
-    
+
                 // Knock Out (KO)
                 if (roundPrediction.koPrediction2 !== null && roundPrediction.koPrediction2 === fighterTwoRound.KO) {
                     totalScore += fighterTwoRound.KO;
                 }
-    
+
             // For MMA
             } else if (match.matchCategory === 'mma') {
                 // Fighter One Predictions
@@ -196,75 +197,75 @@ const FinishedFightUserBoard = ({ matchId }) => {
                 if (roundPrediction.hpPrediction1 !== null && roundPrediction.hpPrediction1 <= fighterOneRound.ST) {
                     totalScore += roundPrediction.hpPrediction1;
                 }
-    
+
                 // Kicks (KI)
                 if (roundPrediction.bpPrediction1 !== null && roundPrediction.bpPrediction1 <= fighterOneRound.KI) {
                     totalScore += roundPrediction.bpPrediction1;
                 }
-    
+
                 // Knockdowns (KN)
                 if (roundPrediction.tpPrediction1 !== null && roundPrediction.tpPrediction1 <= fighterOneRound.KN) {
                     totalScore += roundPrediction.tpPrediction1;
                 }
-    
+
                 // Elbow Strikes (EL)
                 if (roundPrediction.elPrediction1 !== null && roundPrediction.elPrediction1 <= fighterOneRound.EL) {
                     totalScore += roundPrediction.elPrediction1;
                 }
-    
+
                 // Round Winner (RW)
                 if (roundPrediction.rwPrediction1 !== null && roundPrediction.rwPrediction1 === fighterOneRound.RW) {
                     totalScore += roundPrediction.rwPrediction1;
                 }
-    
+
                 // Knock Out (KO)
                 if (roundPrediction.koPrediction1 !== null && roundPrediction.koPrediction1 === fighterOneRound.KO) {
                     totalScore += fighterOneRound.KO;
                 }
-    
+
                 // Fighter Two Predictions
                 // Strikes (ST)
                 if (roundPrediction.hpPrediction2 !== null && roundPrediction.hpPrediction2 <= fighterTwoRound.ST) {
                     totalScore += roundPrediction.hpPrediction2;
                 }
-    
+
                 // Kicks (KI)
                 if (roundPrediction.bpPrediction2 !== null && roundPrediction.bpPrediction2 <= fighterTwoRound.KI) {
                     totalScore += roundPrediction.bpPrediction2;
                 }
-    
+
                 // Knockdowns (KN)
                 if (roundPrediction.tpPrediction2 !== null && roundPrediction.tpPrediction2 <= fighterTwoRound.KN) {
                     totalScore += roundPrediction.tpPrediction2;
                 }
-    
+
                 // Elbow Strikes (EL)
                 if (roundPrediction.elPrediction2 !== null && roundPrediction.elPrediction2 <= fighterTwoRound.EL) {
                     totalScore += roundPrediction.elPrediction2;
                 }
-    
+
                 // Round Winner (RW)
                 if (roundPrediction.rwPrediction2 !== null && roundPrediction.rwPrediction2 === fighterTwoRound.RW) {
                     totalScore += roundPrediction.rwPrediction2;
                 }
-    
+
                 // Knock Out (KO)
                 if (roundPrediction.koPrediction2 !== null && roundPrediction.koPrediction2 === fighterTwoRound.KO) {
                     totalScore += fighterTwoRound.KO;
                 }
             }
         });
-    
+
         return totalScore;
     };
-    
+
     const getYouTubeEmbedUrl = (url = '') => {
         if (url.includes('youtu.be/')) return `https://www.youtube.com/embed/${url.split('youtu.be/')[1]?.split('?')[0] || ''}`;
         if (url.includes('watch?v=')) return `https://www.youtube.com/embed/${url.split('watch?v=')[1]?.split('&')[0] || ''}`;
         if (url.includes('/embed/')) return url;
         return '';
       };
-      
+
   const renderRoundResults = (predictions) => {
     const isBoxing = match.matchCategory === 'boxing';
     const scoreLabels = isBoxing
@@ -330,7 +331,7 @@ const FinishedFightUserBoard = ({ matchId }) => {
 
     const userScore = scores.length > 0 ? scores[0] : null;
 
-    
+
 const downloadPredictionPDF = async () => {
   const input = document.getElementById('pdfContent');
   if (!input) return;
@@ -410,7 +411,7 @@ const downloadPredictionPDF = async () => {
               </div>
             </div>
             <button type="button" onClick={() => router.push('/checkout')}>
-              <FaCoins /><span><small>Fight wallet</small><strong>{user.tokens || 0}</strong><em>tokens remaining</em></span>
+              <FaCoins /><span><small>Fight wallet</small><strong>{user.tokens || 0}</strong><em>FM COINS remaining</em></span>
             </button>
           </header>
 

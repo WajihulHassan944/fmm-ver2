@@ -3,20 +3,8 @@ import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaCalendarAlt,
-  FaCheckCircle,
-  FaClock,
-  FaCoins,
-  FaFistRaised,
-  FaMapMarkerAlt,
-  FaPlay,
-  FaShieldAlt,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaCalendarAlt, FaCheckCircle, FaClock, FaFistRaised, FaMapMarkerAlt, FaPlay, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import MakePredictions from '@/Components/MakePredictions/MakePredictions';
 import FightLeaderboard from '@/Components/GlobalLeaderboard/FightLeaderboard';
 import { fetchMatches } from '@/Redux/matchSlice';

@@ -1,14 +1,7 @@
 import React from 'react';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
-import {
-  FaCalendarAlt,
-  FaClock,
-  FaCoins,
-  FaMapMarkerAlt,
-  FaPlay,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   formatFightDate,
   getFightCategory,

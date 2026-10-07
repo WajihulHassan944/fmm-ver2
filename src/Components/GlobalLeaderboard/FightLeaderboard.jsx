@@ -1,16 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  FaChartLine,
-  FaClock,
-  FaCoins,
-  FaCrown,
-  FaFistRaised,
-  FaMedal,
-  FaRedoAlt,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaChartLine, FaClock, FaCrown, FaFistRaised, FaMedal, FaRedoAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { getFightCategory, getFighterImage } from '@/Utils/fightExperience';

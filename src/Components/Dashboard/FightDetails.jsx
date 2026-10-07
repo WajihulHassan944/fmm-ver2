@@ -2,11 +2,11 @@ import { useRouter } from 'next/router';
 import React from 'react'
 const FightDetails = () => {
    const router = useRouter();
-  
+
   return (
     <div className='fightDetails'>
-      
-      
+
+
       <div className='member-header'>
         <div className='member-header-image'>
           <img src="https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp" alt="Logo" />
@@ -18,7 +18,7 @@ const FightDetails = () => {
       <div className='fightwalletWrap' onClick={() => router.push('/checkout')}>
         <div className='fightWallet'>
         <h1><i className="fa fa-shopping-bag" aria-hidden="true"></i> Fight Wallet</h1>
-        <h2>Tokens Remaining: <span>35</span></h2>
+        <h2>FM COINS Remaining: <span>35</span></h2>
     </div>
 </div>
 

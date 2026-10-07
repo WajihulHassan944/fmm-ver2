@@ -4,20 +4,8 @@ import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaCamera,
-  FaCoins,
-  FaCopy,
-  FaIdBadge,
-  FaLink,
-  FaShieldAlt,
-  FaTrashAlt,
-  FaTrophy,
-  FaUserCog,
-  FaUserFriends,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaCamera, FaCopy, FaIdBadge, FaLink, FaShieldAlt, FaTrashAlt, FaTrophy, FaUserCog, FaUserFriends } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import UserWorkspaceNav from './UserWorkspaceNav';
 
 function ReferFriendModal({ userId, onClose }) {
@@ -38,7 +26,7 @@ function ReferFriendModal({ userId, onClose }) {
     <div className="referrer-modal__overlay player-profile-modal-overlay">
       <div className="referrer-modal__content player-profile-modal">
         <FaUserFriends />
-        <h3 className="referrer-modal__title">Refer a friend and earn 3 tokens free</h3>
+        <h3 className="referrer-modal__title">Refer a friend and earn 3 FM COINS free</h3>
         <p className="referrer-modal__link">{referralLink}</p>
         <div className="referrer-modal__buttons">
           <button className="referrer-modal__button" type="button" onClick={handleCopy}><FaCopy /> Copy link</button>

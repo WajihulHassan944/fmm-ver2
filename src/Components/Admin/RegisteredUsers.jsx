@@ -3,18 +3,8 @@ import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
-import {
-  FaArrowLeft,
-  FaBan,
-  FaCoins,
-  FaEnvelope,
-  FaEye,
-  FaPlus,
-  FaSearch,
-  FaTrash,
-  FaUserFriends,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaBan, FaEnvelope, FaEye, FaPlus, FaSearch, FaTrash, FaUserFriends, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
@@ -85,15 +75,15 @@ const RegisteredUsers = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to reward tokens.');
+        throw new Error(data.message || 'Failed to reward FM COINS.');
       }
 
       setTokensToGive('');
-      alert('Tokens rewarded successfully!');
+      alert('FM COINS rewarded successfully!');
       window.location.reload();
     } catch (error) {
-      console.error('Error rewarding tokens:', error);
-      alert('Error rewarding tokens. Please try again.');
+      console.error('Error rewarding FM COINS:', error);
+      alert('Error rewarding FM COINS. Please try again.');
     }
   };
 
@@ -322,7 +312,7 @@ const RegisteredUsers = () => {
                 <th className="admin-select-column"><input type="checkbox" aria-label="Select all visible registered users with eligible email addresses" checked={allVisibleSelected} onChange={toggleVisibleUsers} /></th>
                 <th>Player</th>
                 <th>Plan</th>
-                <th>Tokens</th>
+                <th>FM COINS</th>
                 <th>Verification</th>
                 <th>Contact</th>
                 <th>Actions</th>
@@ -394,7 +384,7 @@ const RegisteredUsers = () => {
               <img src={selectedUser.profileUrl || FALLBACK_AVATAR} alt={`${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || 'Player'} />
               <div>
                 <strong>{`${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || 'Player'}</strong>
-                <span>{selectedUser.currentPlan || 'None'} plan · {Number(selectedUser.tokens || 0).toLocaleString()} tokens</span>
+                <span>{selectedUser.currentPlan || 'None'} plan · {Number(selectedUser.tokens || 0).toLocaleString()} FM COINS</span>
                 <p>{selectedUser.email || 'No email provided'}</p>
               </div>
             </div>
@@ -405,7 +395,7 @@ const RegisteredUsers = () => {
               <div><dt>Verified</dt><dd>{selectedUser.verified ? 'Yes' : 'No'}</dd></div>
               <div><dt>Payment method</dt><dd>{selectedUser.preferredPaymentMethod || '—'}</dd></div>
               <div><dt>Payment ID</dt><dd>{selectedUser.preferredPaymentMethodValue || '—'}</dd></div>
-              <div><dt>Tokens</dt><dd>{Number(selectedUser.tokens || 0).toLocaleString()}</dd></div>
+              <div><dt>FM COINS</dt><dd>{Number(selectedUser.tokens || 0).toLocaleString()}</dd></div>
             </dl>
 
             <div className="admin-wallet-adjust">
@@ -418,7 +408,7 @@ const RegisteredUsers = () => {
                   placeholder="Enter token amount"
                 />
               </label>
-              <button type="button" className="admin-action-primary" onClick={() => handleGiveTokens(selectedUser._id)}><FaCoins /> Submit tokens</button>
+              <button type="button" className="admin-action-primary" onClick={() => handleGiveTokens(selectedUser._id)}><FaCoins /> Submit FM COINS</button>
             </div>
 
             <div className="admin-wallet-adjust">

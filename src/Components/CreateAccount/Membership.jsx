@@ -8,7 +8,7 @@ const Membership = ({ email }) => {
   const [memberName, setMemberName] = useState('');
   const [memberAvatar, setMemberAvatar] = useState('');
   const [id, setId] = useState('');
- 
+
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
@@ -50,8 +50,8 @@ const handleSelectPlan = async (plan) => {
             if (response.ok) {
                 toast.success('You have successfully subscribed to the Free membership plan.');
                 router.push('/home');
-                router.refresh(); 
-             
+                router.refresh();
+
               } else {
                 toast.error('Failed to subscribe to the Free membership plan');
                 console.error('Failed to subscribe to the Free membership plan');
@@ -90,7 +90,7 @@ const handleSelectPlan = async (plan) => {
           <h1 className='cardHeading'>Standard membership</h1>
           <div className='cardprice'>
             <div className="ribbon">
-              <span>Tokens</span>
+              <span>FM COINS</span>
             </div>
             <p>$</p>
             <div className='cardprice-two'>
@@ -102,7 +102,7 @@ const handleSelectPlan = async (plan) => {
 
           <div className='card-features'>
             <li>Access to dashboard</li>
-            <li>Tokens can accumulate</li>
+            <li>FM COINS can accumulate</li>
             <li>Play and win prizes</li>
             <li>Share fight portfolio</li>
             <li>Get on the FMMA Leaderboard</li>

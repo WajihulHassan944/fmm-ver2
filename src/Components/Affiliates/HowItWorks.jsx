@@ -2,20 +2,8 @@ import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBullhorn,
-  FaCheckCircle,
-  FaCoins,
-  FaComments,
-  FaLink,
-  FaMoneyCheckAlt,
-  FaShieldAlt,
-  FaTrophy,
-  FaUserCheck,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaBullhorn, FaCheckCircle, FaComments, FaLink, FaMoneyCheckAlt, FaShieldAlt, FaTrophy, FaUserCheck, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
@@ -117,7 +105,7 @@ const HowItWorks = () => {
                   The platform keeps the existing campaign rules visible so creators can communicate them clearly before asking their audience to enter a fight.
                 </p>
                 <ul>
-                  <li><FaCheckCircle /> If the required fight budget is not met, the fight is cancelled and participant tokens are returned.</li>
+                  <li><FaCheckCircle /> If the required fight budget is not met, the fight is cancelled and participant FM COINS are returned.</li>
                   <li><FaCheckCircle /> When the campaign reaches its required budget, eligible profit beyond the configured amount contributes to the affiliate wallet under the existing split.</li>
                   <li><FaCheckCircle /> Affiliates promote and manage the event but do not participate in their own promoted fight.</li>
                   <li><FaCheckCircle /> Fight chat keeps the creator connected with members while predictions and results remain handled by the existing platform.</li>

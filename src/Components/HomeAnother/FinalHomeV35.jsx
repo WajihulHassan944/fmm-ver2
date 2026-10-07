@@ -2,24 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { buildPublicApiUrl } from "@/Utils/publicApi";
 import { dateOnlyToLocalDate, getDateOnlyKey } from "@/Utils/dateOnly";
-import {
-  FaBell,
-  FaBullseye,
-  FaChartLine,
-  FaCheck,
-  FaCoins,
-  FaCrown,
-  FaFistRaised,
-  FaGift,
-  FaHome,
-  FaPlus,
-  FaShieldAlt,
-  FaSignal,
-  FaTimes,
-  FaTrophy,
-  FaUserAlt,
-  FaUsers,
-} from "react-icons/fa";
+import { FaBell, FaBullseye, FaChartLine, FaCheck, FaCrown, FaFistRaised, FaGift, FaHome, FaPlus, FaShieldAlt, FaSignal, FaTimes, FaTrophy, FaUserAlt, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const ASSET_BASE = "/images/mobile-home/final-v35";
 const SIGNUP_HREF = "/CreateAccount";
@@ -644,7 +628,7 @@ const FinalHomeV35 = ({
         <button type="button" className="fmm-v35-icon-button" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
           <span /><span /><span />
         </button>
-        <button type="button" className="fmm-v35-wallet" onClick={() => setCoinModalOpen(true)} aria-label="Open FM coin wallet">
+        <button type="button" className="fmm-v35-wallet" onClick={() => setCoinModalOpen(true)} aria-label="Open FM COINS wallet">
           <b><FaCoins /> FM COINS</b><strong>{tokenBalance.toLocaleString()}</strong><i><FaPlus /></i>
         </button>
         <Link href={isLoggedIn ? "/profile" : "/login?next=/profile"} className="fmm-v35-notify" aria-label={`Notifications and profile: ${notificationCount} unread`}>
@@ -812,7 +796,7 @@ const FinalHomeV35 = ({
           <Link href={leaguesHref}><img src={`${ASSET_BASE}/pasted-1785012202182-0.png`} alt="" /><span>⚔ COMPETE</span><strong>LEAGUES · H2H</strong><small>Private leagues & wagers</small></Link>
         </section>
 
-        <Link href={demoHref} className="fmm-v35-demo"><b>NEW HERE?</b><span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span></Link>
+        <Link href={demoHref} className="fmm-v35-demo"><b>NEW HERE?</b><span>TRY A FREE DEMO FIGHT — NO FM COINS NEEDED</span></Link>
 
         <section className="fmm-v35-dashboard" aria-label="Predictions and progression">
           <article className="fmm-v35-dash-card fmm-v35-community">
@@ -835,7 +819,7 @@ const FinalHomeV35 = ({
 
         <section className="fmm-v35-wallet-grid" aria-label="Rewards and wallet">
           <button type="button" className="fmm-v35-mini-card is-daily-reward" onClick={() => setCoinModalOpen(true)}><span>DAILY REWARD</span><FaGift className="fmm-v49-reward-icon" aria-hidden="true" /><small>COME BACK EVERY DAY & BUILD YOUR STREAK!</small><strong>CLAIM REWARD</strong></button>
-          <button type="button" className="fmm-v35-mini-card is-coins" onClick={() => setCoinModalOpen(true)}><span>COINS WALLET</span><FaCoins /><b>{tokenBalance.toLocaleString()}</b><small>COINS</small><strong>ADD COINS <FaPlus /></strong></button>
+          <button type="button" className="fmm-v35-mini-card is-coins" onClick={() => setCoinModalOpen(true)}><span>FM COINS WALLET</span><FaCoins /><b>{tokenBalance.toLocaleString()}</b><small>FM COINS</small><strong>ADD FM COINS <FaPlus /></strong></button>
         </section>
 
         <section className="fmm-v35-apparel" aria-labelledby="fmm-v35-apparel-title">

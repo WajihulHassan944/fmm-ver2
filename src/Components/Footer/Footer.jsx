@@ -92,7 +92,7 @@ const Footer = () => {
             <OptimizedImage className="fmm-footer-card-art" src="/images/hero-fight.webp" alt="" width={420} height={260} sizes="(max-width: 768px) 100vw, 25vw" aria-hidden="true" />
             <div className="fmm-footer-feature-icon"><FaUserFriends aria-hidden="true" /></div>
             <h3>Affiliates &amp; Creators</h3>
-            <p>Earn tokens and cash by referring players. Join our affiliate program today.</p>
+            <p>Earn FM COINS and cash by referring players. Join our affiliate program today.</p>
             <Link href="/affiliate-create-account" className="fmm-footer-action">
               Learn More <FaArrowRight aria-hidden="true" />
             </Link>

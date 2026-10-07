@@ -649,7 +649,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     // creating a second one.
     const idempotencyKey = payload.idempotencyKey || (() => {
       const cart = (payload.items || []).map((i) => `${i.sku}x${i.quantity}`).join('|');
-      return `coins-${cart}-${Math.floor(Date.now() / 60000)}`.slice(0, 150);
+      return `FM COINS-${cart}-${Math.floor(Date.now() / 60000)}`.slice(0, 150);
     })();
 
     const result = await playerRequest('/api/checkout/coin-orders', {
@@ -660,10 +660,10 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
 
     // The gateway is not configured yet — say so plainly instead of failing quietly.
     if (result?.code === 'AUTHORIZE_NET_NOT_CONFIGURED') {
-      return { ok: false, message: 'Card payments are not switched on yet. Ask an admin to add coins to your wallet for now.' };
+      return { ok: false, message: 'Card payments are not switched on yet. Ask an admin to add FM COINS to your wallet for now.' };
     }
     if (result?.code === 'SIGN_IN_REQUIRED') {
-      return { ok: false, message: 'That email already has an account — sign in before buying coins.' };
+      return { ok: false, message: 'That email already has an account — sign in before buying FM COINS.' };
     }
 
     // Hand off to Authorize.net. The token must be POSTed as a form field, so a
@@ -1274,7 +1274,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
 
             <div style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>WHERE?</div>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 13 }}>
-              {[['signup', 'Sign up'], ['signin', 'Sign in'], ['scorecard', 'Scorecard'], ['entry-fee', 'Coins / fee'], ['team-card', 'Team Card'], ['season-card', 'Season Card'], ['standings', 'Standings'], ['leagues', 'Leagues'], ['promoter-tools', 'League tools'], ['notifications', 'Bell'], ['coins-purchase', 'Buying coins'], ['rewards', 'Chest / wheel'], ['looks-wrong', 'Looks wrong'], ['slow', 'Too slow'], ['other', 'Something else']].map(([key, label]) => (
+              {[['signup', 'Sign up'], ['signin', 'Sign in'], ['scorecard', 'Scorecard'], ['entry-fee', 'Coins / fee'], ['team-card', 'Team Card'], ['season-card', 'Season Card'], ['standings', 'Standings'], ['leagues', 'Leagues'], ['promoter-tools', 'League tools'], ['notifications', 'Bell'], ['coins-purchase', 'Buying FM COINS'], ['rewards', 'Chest / wheel'], ['looks-wrong', 'Looks wrong'], ['slow', 'Too slow'], ['other', 'Something else']].map(([key, label]) => (
                 <div
                   key={key}
                   role="button"

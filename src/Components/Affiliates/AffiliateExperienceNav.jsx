@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FaBullhorn, FaCog, FaCoins, FaCrown, FaHistory, FaIdBadge, FaInfoCircle, FaLayerGroup, FaUsers } from 'react-icons/fa';
+import { FaBullhorn, FaCog, FaCrown, FaHistory, FaIdBadge, FaInfoCircle, FaLayerGroup, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const ITEMS = [
   { href: '/AffiliateDashboard', label: 'Dashboard', icon: FaBullhorn },

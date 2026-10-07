@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaArrowRight, FaBolt, FaCheckCircle, FaCoins, FaLock, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FaArrowRight, FaBolt, FaCheckCircle, FaLock, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { WrestlingHero, WrestlingModeNav, WrestlingSectionHeading } from './WrestlingPrimitives';
 import { WRESTLING_STATS, wrestlingRequest } from '@/Utils/proWrestling';
 
@@ -16,7 +17,7 @@ const WrestlingHowToPlayPage = () => {
     <main className="theme-container pw-main">
       <section className="pw-section"><WrestlingSectionHeading eyebrow="Six-stage game flow" title="From contest lobby to payout" description="The wrestling mode uses the same Fantasy MMAdness account and fight wallet while applying a dedicated full-match scoring engine." /><div className="pw-how-flow-grid">{[
         ['01', FaUsers, 'Enter a contest', 'Review the pot, entry fee, participant limits, and prediction lock time.'],
-        ['02', FaCoins, 'Commit wallet tokens', 'Your entry fee is deducted once through the existing fight wallet.'],
+        ['02', FaCoins, 'Commit wallet FM COINS', 'Your entry fee is deducted once through the existing fight wallet.'],
         ['03', FaBolt, 'Predict both wrestlers', 'Forecast HP, BP, K, PM, and FM totals for each competitor.'],
         ['04', FaTrophy, 'Pick the winner', 'Choose Wrestler A or Wrestler B only. There is no public draw pick.'],
         ['05', FaLock, 'Predictions lock', 'The backend closes scorecard editing at the published lock time.'],

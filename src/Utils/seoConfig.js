@@ -127,8 +127,8 @@ export const SEO_ROUTE_MAP = {
     image: `${SITE_URL}/images/fmm-pages/league-arena-hd.webp`,
   },
   '/guides': {
-    title: 'How To Play Fantasy MMAdness | Rules, Tokens & Scoring Guide',
-    description: 'Learn how to play Fantasy MMAdness, submit fight predictions, understand scoring, use tokens, and climb the leaderboard.',
+    title: 'How To Play Fantasy MMAdness | Rules, FM COINS & Scoring Guide',
+    description: 'Learn how to play Fantasy MMAdness, submit fight predictions, understand scoring, use FM COINS, and climb the leaderboard.',
     keywords: 'how to play fantasy MMA, fight scoring guide, Fantasy MMAdness rules, prediction contest guide',
     image: `${SITE_URL}/images/fmm-pages/rewards-arena-hd.webp`,
   },
@@ -194,7 +194,7 @@ export const SEO_ROUTE_MAP = {
   },
   '/free-demo': {
     title: 'Free Demo Fight | Try Fantasy MMAdness',
-    description: 'Try the Fantasy MMAdness demo fight flow with no coins required before entering real fight cards.',
+    description: 'Try the Fantasy MMAdness demo fight flow with no FM COINS required before entering real fight cards.',
     keywords: 'free demo fight, fantasy fight demo, try Fantasy MMAdness',
     image: `${SITE_URL}/images/fmm-pages/player-fight-night-premium.webp`,
   },

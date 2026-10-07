@@ -8,34 +8,8 @@ import { FMCoin } from '@/Components/Common/FMCoin';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import { userHeaders } from '@/Utils/authFetch';
-import {
-  FaBars,
-  FaBell,
-  FaBullseye,
-  FaCalendarAlt,
-  FaChartLine,
-  FaChevronDown,
-  FaCoins,
-  FaCrown,
-  FaComments,
-  FaCog,
-  FaEllipsisH,
-  FaFire,
-  FaFistRaised,
-  FaGift,
-  FaHandshake,
-  FaHome,
-  FaMedal,
-  FaNewspaper,
-  FaQuestionCircle,
-  FaPlus,
-  FaSignOutAlt,
-  FaTimes,
-  FaTrophy,
-  FaUserCircle,
-  FaUsers,
-  FaVideo,
-} from 'react-icons/fa';
+import { FaBars, FaBell, FaBullseye, FaCalendarAlt, FaChartLine, FaChevronDown, FaCrown, FaComments, FaCog, FaEllipsisH, FaFire, FaFistRaised, FaGift, FaHandshake, FaHome, FaMedal, FaNewspaper, FaQuestionCircle, FaPlus, FaSignOutAlt, FaTimes, FaTrophy, FaUserCircle, FaUsers, FaVideo } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';

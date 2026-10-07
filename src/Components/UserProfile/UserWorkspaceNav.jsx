@@ -1,15 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {
-  FaCoins,
-  FaFistRaised,
-  FaIdBadge,
-  FaTachometerAlt,
-  FaTrophy,
-  FaCrown,
-  FaUserCog,
-} from 'react-icons/fa';
+import { FaFistRaised, FaIdBadge, FaTachometerAlt, FaTrophy, FaCrown, FaUserCog } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const NAV_ITEMS = [
   { href: '/UserDashboard', label: 'Fight Center', icon: FaTachometerAlt },

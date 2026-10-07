@@ -1,13 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBullhorn,
-  FaCoins,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 

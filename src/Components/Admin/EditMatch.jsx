@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FaCalendarAlt,
-  FaCheck,
-  FaClock,
-  FaCoins,
-  FaFistRaised,
-  FaFilm,
-  FaImage,
-  FaSlidersH,
-  FaLayerGroup,
-  FaSave,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaCalendarAlt, FaCheck, FaClock, FaFistRaised, FaFilm, FaImage, FaSlidersH, FaLayerGroup, FaSave, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
@@ -451,7 +439,7 @@ const EditMatch = ({ matchId, isShadow }) => {
             <div className="admin-edit-form-grid">
               <label><span><FaCalendarAlt /> Match date</span><input type="date" name="matchDate" value={formData.matchDate} onChange={handleChange} /></label>
               <label><span><FaClock /> Match time</span><input type="time" name="matchTime" value={formData.matchTime} onChange={handleChange} disabled={formData.timeTba} /><span className="admin-time-tba"><input type="checkbox" checked={formData.timeTba} onChange={(event) => setFormData((current) => ({ ...current, timeTba: event.target.checked, matchTime: event.target.checked ? '' : current.matchTime }))} /> TIME TBA</span></label>
-              <label><span><FaCoins /> Match tokens</span><input type="number" name="matchTokens" value={formData.matchTokens} onChange={handleChange} /></label>
+              <label><span><FaCoins /> Match FM COINS</span><input type="number" name="matchTokens" value={formData.matchTokens} onChange={handleChange} /></label>
               <label><span><FaTrophy /> Pot</span><input type="number" name="pot" value={formData.pot} onChange={handleChange} /></label>
             </div>
           </section>

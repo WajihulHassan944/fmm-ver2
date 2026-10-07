@@ -4,27 +4,8 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBolt,
-  FaCalendarAlt,
-  FaChartLine,
-  FaCoins,
-  FaCrown,
-  FaFire,
-  FaFistRaised,
-  FaGlobe,
-  FaHistory,
-  FaMedal,
-  FaShieldAlt,
-  FaStar,
-  FaTimes,
-  FaTrophy,
-  FaUserCircle,
-  FaUserCog,
-  FaUsers,
-} from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaBolt, FaCalendarAlt, FaChartLine, FaCrown, FaFire, FaFistRaised, FaGlobe, FaHistory, FaMedal, FaShieldAlt, FaStar, FaTimes, FaTrophy, FaUserCircle, FaUserCog, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchMatches } from "../../Redux/matchSlice";
 import { fetchPublicPredictionFights } from "@/Utils/publicApi";
 import FightCosting from "./FightCosting";
@@ -150,7 +131,7 @@ const getDashboardMobilePlayerCount = (match = {}) => {
 const getDashboardMobileEntry = (match = {}) => {
   if (match?.entryFee != null) {
     const entry = Number(match.entryFee);
-    return entry > 0 ? `$${entry.toLocaleString()}` : "Free";
+    return entry > 0 ? `${entry.toLocaleString()} FM COINS` : "Free";
   }
 
   if (match?.matchTokens == null) return "Free";

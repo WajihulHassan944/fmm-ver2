@@ -1,15 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import {
-  FaBell,
-  FaCoins,
-  FaComments,
-  FaFistRaised,
-  FaMedal,
-  FaRegCheckCircle,
-  FaShieldAlt,
-  FaTrophy,
-  FaUserCircle,
-} from 'react-icons/fa';
+import { FaBell, FaComments, FaFistRaised, FaMedal, FaRegCheckCircle, FaShieldAlt, FaTrophy, FaUserCircle } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const GUIDE_ITEMS = [
   {

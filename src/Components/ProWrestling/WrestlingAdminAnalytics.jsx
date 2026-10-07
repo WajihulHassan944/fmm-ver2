@@ -1,19 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import { toast } from 'react-toastify';
-import {
-  FaChartLine,
-  FaCheckCircle,
-  FaCoins,
-  FaDatabase,
-  FaExchangeAlt,
-  FaExclamationTriangle,
-  FaHistory,
-  FaPlay,
-  FaShieldAlt,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaChartLine, FaCheckCircle, FaDatabase, FaExchangeAlt, FaExclamationTriangle, FaHistory, FaPlay, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   formatTokenAmount,
   formatWrestlingDate,

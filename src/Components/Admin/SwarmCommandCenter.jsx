@@ -1076,7 +1076,7 @@ const SwarmCommandCenter = () => {
               <p><strong>Social publishing</strong><span>{config?.socialPublishEnabled && globalSettings.socialPublishEnabled ? 'Enabled' : 'Draft only'}</span></p>
             </div>
             <label className="admin-swarm-refresh-toggle"><input type="checkbox" checked={autoRefresh} onChange={(event) => setAutoRefresh(event.target.checked)} /><span>Auto refresh every 12 seconds</span></label>
-            <small className="admin-swarm-note">Invalid or expired admin tokens now redirect to login instead of leaving this page stuck.</small>
+            <small className="admin-swarm-note">Invalid or expired admin login credentials now redirect to login instead of leaving this page stuck.</small>
           </aside>
 
           <section className="admin-swarm-panel">

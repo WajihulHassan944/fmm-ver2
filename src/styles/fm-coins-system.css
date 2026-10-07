@@ -97,3 +97,9 @@
 @media (prefers-reduced-motion: reduce) {
   .fm-coin-spinner, .fm-coin-face::after { animation: none !important; }
 }
+
+/* One gold FM currency treatment across public, app, and admin displays. */
+.fm-coin .fm-coin-face { color: #4b2900 !important; border-color: #ffe979 !important; }
+.fm-coin { color: #f7b51b !important; }
+.is-fm-coins, .fm-coins-text { color: var(--fm-gold-main) !important; }
+.fm-coin-amount { max-width: 100%; flex-wrap: wrap; white-space: normal; }

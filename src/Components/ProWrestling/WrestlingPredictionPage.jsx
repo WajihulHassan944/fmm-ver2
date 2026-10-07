@@ -4,18 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBolt,
-  FaCheck,
-  FaCoins,
-  FaExclamationTriangle,
-  FaLock,
-  FaSave,
-  FaShieldAlt,
-  FaTrophy,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaBolt, FaCheck, FaExclamationTriangle, FaLock, FaSave, FaShieldAlt, FaTrophy } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { WrestlingModeNav, WrestlingStatusBadge } from './WrestlingPrimitives';
 import {
   EMPTY_WRESTLING_STATS,

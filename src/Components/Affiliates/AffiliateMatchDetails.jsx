@@ -5,7 +5,7 @@ import { useEffect, useState, useRef }  from 'react';
 import AffiliateFightLeaderboard from './AffiliateFightLeaderboard';
 import ShareQrCode from '../Common/ShareQrCode';
 import { fetchMatches } from '../../Redux/matchSlice';
-import QRCode from 'qrcode'; 
+import QRCode from 'qrcode';
 import dynamic from "next/dynamic";
 const ReactMediaRecorder = dynamic(
   () => import("react-media-recorder").then((mod) => mod.ReactMediaRecorder),
@@ -16,26 +16,8 @@ import { toast } from 'react-toastify';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import UsersPlayed from './UsersPlayed/UsersPlayed';
 import { affiliateHeaders } from '@/Utils/authFetch';
-import {
-  FaArrowLeft,
-  FaBullhorn,
-  FaChartLine,
-  FaCheckCircle,
-  FaClock,
-  FaCoins,
-  FaCopy,
-  FaDownload,
-  FaInfoCircle,
-  FaMicrophone,
-  FaPause,
-  FaPlay,
-  FaShareAlt,
-  FaTimes,
-  FaTrash,
-  FaTrophy,
-  FaUsers,
-  FaVideo,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaBullhorn, FaChartLine, FaCheckCircle, FaClock, FaCopy, FaDownload, FaInfoCircle, FaMicrophone, FaPause, FaPlay, FaShareAlt, FaTimes, FaTrash, FaTrophy, FaUsers, FaVideo } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   formatFightDate,
   getFightCategory,
@@ -99,7 +81,7 @@ const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null }) =>
   const fightCategory = getFightCategory(match) || 'Fight campaign';
   const fightStatus = match?.matchShadowStatus || 'inactive';
   const scheduledDate = formatFightDate(match, { short: true });
-  
+
   useEffect(() => {
     if (match?.matchTokens > 0) {
       setRequiredUsers(match.pot / match.matchTokens);
@@ -127,13 +109,13 @@ const actualProfit = extraActualProfit / 2;
     // Update background image state based on match data
     if (match && match.promotionBackground) {
         setBackgroundImgVar(match.promotionBackground);
-       } 
+       }
 }, [match]);
 
 
   useEffect(() => {
     dispatch(stopMusic());
-   
+
     return () => dispatch(playMusic());
 }, [matchId,  dispatch]);
 
@@ -190,7 +172,7 @@ const actualProfit = extraActualProfit / 2;
 
   useEffect(() => {
     if (!match) return; // Exit if match is not available yet
-   
+
     const canvas = canvasRef.current;
     if (!canvas) return; // Check if canvas is available
     const ctx = canvas.getContext('2d');
@@ -333,7 +315,7 @@ const actualProfit = extraActualProfit / 2;
       </div>
     );
   }
-  
+
   if (!affiliate) {
     return <div className="affiliate-campaign-loading">Loading affiliate profile…</div>;
   }
@@ -344,7 +326,7 @@ const actualProfit = extraActualProfit / 2;
         method: 'DELETE',
         headers: affiliateHeaders(),
       });
-  
+
       if (response.ok) {
         alert("Promotion Deleted");
         window.location.reload();
@@ -355,7 +337,7 @@ const actualProfit = extraActualProfit / 2;
       console.error('Error deleting match:', error);
     }
   };
-  
+
   const handleDashboardOpening = (id) => {
     setNavigateToDash(id);
   };
@@ -369,16 +351,16 @@ const actualProfit = extraActualProfit / 2;
       </div>
     );
   }
-  
+
 
   const copyToClipboard = () => {
     if (match && affiliate) {
       const fullName = `${affiliate.firstName} ${affiliate.lastName}`; // Combine first and last name
       const encodedMatchName = encodeURIComponent(match.matchName);  // Encode matchName
       const encodedFullName = encodeURIComponent(fullName);  // Encode fullName
-      
+
       const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
-      
+
       navigator.clipboard.writeText(url)
         .then(() => {
           alert("URL copied to clipboard!");
@@ -394,11 +376,11 @@ const actualProfit = extraActualProfit / 2;
     setIsModalOpen(true);
   };
 
-  
+
   const openPodcastRecorder = () => {
     setOpenPodcast(true);
   };
-  
+
 
   // Function to close the modal
   const closeModal = () => {
@@ -460,8 +442,8 @@ const handleSave = async (blobUrl) => {
   });
 };
 
-  
-  
+
+
   const saveVideoUrlToDatabase = (videoUrl) => {
     fetch(`${API_BASE}/api/matches/${campaignMatchId}/promotional-video`, {
       method: 'POST', // Change to POST
@@ -481,7 +463,7 @@ const handleSave = async (blobUrl) => {
       })
       .catch((error) => console.error('Error saving video URL:', error));
   };
- 
+
   const handleActiveFight = async (id) => {
     try {
       const response = await fetch(`${API_BASE}/activate-match/${id}`, {
@@ -490,9 +472,9 @@ const handleSave = async (blobUrl) => {
           "Content-Type": "application/json",
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         toast.success(`Fight activated successfully!`);
         dispatch(fetchMatches());
@@ -507,7 +489,7 @@ const handleSave = async (blobUrl) => {
   const handleToggleFightStatus = async (matchId, currentStatus) => {
     const newStatus = currentStatus === "inactive" ? "active" : "inactive";
     toast.loading("Updating match status...");
-  
+
     try {
       const response = await fetch(`${API_BASE}/update-match-status-shadow/${matchId}`, {
         method: "POST",
@@ -516,7 +498,7 @@ const handleSave = async (blobUrl) => {
         }),
         body: JSON.stringify({ status: newStatus }),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         toast.dismiss();
