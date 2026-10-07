@@ -102,7 +102,7 @@ const WrestlingLivePage = () => {
         <section className="pw-live-hero">
           <div className="theme-container pw-live-hero-inner">
             <Link href={`/pro-wrestling/matches/${match._id}`} className="pw-inline-back"><FaArrowLeft /> Contest overview</Link>
-            <div className="pw-live-headline"><div><p><FaFire /> Live Pro Wrestling score room</p><h1>{match.matchTitle}</h1><span>{match.eventName} · {formatWrestlingDate(match.matchDate)}</span></div><div><WrestlingStatusBadge status={match.status} /><button type="button" onClick={() => load(true)} disabled={refreshing}><FaSyncAlt className={refreshing ? 'is-spinning' : ''} /> Refresh</button></div></div>
+            <div className="pw-live-headline"><div><p><FaFire /> Live Pro Wrestling score room</p><h1>{match.matchTitle}</h1><span>{match.eventName} · {formatWrestlingDate(match)}</span></div><div><WrestlingStatusBadge status={match.status} /><button type="button" onClick={() => load(true)} disabled={refreshing}><FaSyncAlt className={refreshing ? 'is-spinning' : ''} /> Refresh</button></div></div>
             <div className="pw-live-fight-stage">
               <article><img src={getWrestlerImage(match.competitorA, 'A')} alt={match.competitorA.displayName} /><span><small>Competitor A</small><strong>{match.competitorA.displayName}</strong><em>{winnerLabel(match.officialWinner, match) === match.competitorA.displayName ? 'Official winner' : 'Live action'}</em></span></article>
               <div><small>Stats version {live.statsVersion || 0}</small><b>LIVE</b><span>{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : 'Connecting…'}</span></div>

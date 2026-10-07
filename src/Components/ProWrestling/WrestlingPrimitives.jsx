@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FaArrowRight, FaBolt, FaCalendarAlt, FaCrown, FaFistRaised, FaLock, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
+  canEditWrestlingPrediction,
   WRESTLING_STATUS_CLASS,
   WRESTLING_STATUS_COPY,
   formatTokenAmount,
@@ -80,7 +81,7 @@ export const WrestlingHero = ({
 
 export const WrestlingMatchCard = ({ match, actionLabel, actionHref, onAction, compact = false }) => {
   const href = actionHref || getWrestlingMatchHref(match);
-  const locked = new Date(match?.lockAt).getTime() <= Date.now() || match?.status !== 'OPEN';
+  const locked = !canEditWrestlingPrediction(match);
   return (
     <article className={`pw-match-card ${compact ? 'is-compact' : ''}`}>
       <div className="pw-match-card-media">
@@ -94,12 +95,12 @@ export const WrestlingMatchCard = ({ match, actionLabel, actionHref, onAction, c
         <p>{match?.eventName || 'Pro Wrestling event'}</p>
         <h3>{match?.matchTitle || `${match?.competitorA?.displayName || 'Wrestler A'} vs ${match?.competitorB?.displayName || 'Wrestler B'}`}</h3>
         <div className="pw-match-card-meta">
-          <span><FaCalendarAlt /> {formatWrestlingDate(match?.matchDate)}</span>
+          <span><FaCalendarAlt /> {formatWrestlingDate(match)}</span>
           <span><FaUsers /> {formatTokenAmount(match?.participantCount)} players</span>
           <span><FaCoins /> {formatTokenAmount(match?.currentPot)} FM COINS pot</span>
         </div>
         <div className="pw-match-card-bottom">
-          <span>{locked ? <FaLock /> : <FaBolt />} {locked ? WRESTLING_STATUS_COPY[match?.status] || 'Locked' : `Locks in ${formatWrestlingCountdown(match?.lockAt)}`}</span>
+          <span>{locked ? <FaLock /> : <FaBolt />} {locked ? WRESTLING_STATUS_COPY[match?.status] || 'Locked' : match?.timeTba ? 'Closes at match start' : `Locks in ${formatWrestlingCountdown(match?.lockAt)}`}</span>
           {onAction ? (
             <button type="button" onClick={() => onAction(match)}>{actionLabel || 'Open contest'} <FaArrowRight /></button>
           ) : (

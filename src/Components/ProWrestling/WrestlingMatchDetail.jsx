@@ -116,7 +116,7 @@ const WrestlingMatchDetail = () => {
   if (loading) return <div className="pw-page pw-state-page"><div className="pw-state-card"><FaBolt /><h1>Loading wrestling contest…</h1></div></div>;
   if (error || !match) return <div className="pw-page pw-state-page"><WrestlingEmptyState title="Contest unavailable" description={error} action={{ href: '/pro-wrestling', label: 'Return to wrestling lobby' }} /></div>;
 
-  const canJoin = match.status === 'OPEN' && new Date(match.lockAt).getTime() > now;
+  const canJoin = canEditWrestlingPrediction(match, now);
   const competitorA = match.competitorA || {};
   const competitorB = match.competitorB || {};
   const ActionIcon = action?.icon || FaArrowRight;
@@ -130,12 +130,12 @@ const WrestlingMatchDetail = () => {
           <div className="theme-container pw-detail-hero-inner">
             <Link href="/pro-wrestling" className="pw-inline-back"><FaArrowLeft /> Wrestling lobby</Link>
             <div className="pw-detail-title-row">
-              <div><p>{match.promotionName || 'Fantasy MMAdness Wrestling'} · {match.eventName}</p><h1>{match.matchTitle}</h1><span>{match.description || 'Predict the full action across both competitors and lock in the official winner.'}</span></div>
+              <div><p>{match.eventName}</p><h1>{match.matchTitle}</h1><span>{match.description || 'Predict the full action across both competitors and lock in the official winner.'}</span></div>
               <WrestlingStatusBadge status={match.status} />
             </div>
             <div className="pw-detail-fight-stage">
               <article className="is-a"><img src={getWrestlerImage(competitorA, 'A')} alt={competitorA.displayName} /><span><small>Red corner</small><strong>{competitorA.displayName}</strong><em>{competitorA.promotion || match.promotionName || 'Pro Wrestling'}</em></span></article>
-              <div><small>{match.matchFormat?.replaceAll?.('_', ' ') || 'Singles match'}</small><b>VS</b><span>{formatWrestlingDate(match.matchDate)}</span></div>
+              <div><small>{match.matchFormat?.replaceAll?.('_', ' ') || 'Singles match'}</small><b>VS</b><span>{formatWrestlingDate(match)}</span></div>
               <article className="is-b"><img src={getWrestlerImage(competitorB, 'B')} alt={competitorB.displayName} /><span><small>Blue corner</small><strong>{competitorB.displayName}</strong><em>{competitorB.promotion || match.promotionName || 'Pro Wrestling'}</em></span></article>
             </div>
           </div>
@@ -149,7 +149,7 @@ const WrestlingMatchDetail = () => {
               <article><FaCoins /><span><small>Entry fee</small><strong>{formatTokenAmount(match.entryFeeTokens)} FM COINS</strong></span></article>
               <article><FaTrophy /><span><small>Current pot</small><strong>{formatTokenAmount(match.currentPot)} FM COINS</strong></span></article>
               <article><FaUsers /><span><small>Players entered</small><strong>{formatTokenAmount(match.participantCount)}</strong></span></article>
-              <article><FaLock /><span><small>Prediction lock</small><strong>{formatWrestlingCountdown(match.lockAt, now)}</strong></span></article>
+              <article><FaLock /><span><small>Prediction lock</small><strong>{canEditWrestlingPrediction(match, now) ? formatWrestlingCountdown(match.lockAt, now) : 'Closed'}</strong></span></article>
             </div>
             <div className="pw-contest-command-action">
               {entry ? (

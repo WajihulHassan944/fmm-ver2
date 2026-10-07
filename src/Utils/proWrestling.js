@@ -116,6 +116,13 @@ export const wrestlingRequest = async (path, options = {}) => {
 };
 
 export const formatWrestlingDate = (value, options = {}) => {
+  if (value && typeof value === 'object' && !(value instanceof Date)) {
+    if (value.timeTba) {
+      const day = value.eventDate;
+      return day ? `${new Date(`${day}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })} · TIME TBA` : 'DATE & TIME TBA';
+    }
+    value = value.matchDate;
+  }
   if (!value) return 'Schedule TBA';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Schedule TBA';
@@ -140,7 +147,7 @@ export const timeUntil = (value, now = new Date()) => {
   const label = days > 0 ? `${days}d ${hours}h` : hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m ${seconds}s`;
   return { expired: false, label, totalMs: diff, days, hours, minutes, seconds };
 };
-export const formatWrestlingCountdown = (value, now = new Date()) => timeUntil(value, now).label;
+export const formatWrestlingCountdown = (value, now = new Date()) => value ? timeUntil(value, now).label : 'At match start';
 
 export const getWrestlingImage = (competitor, fallbackSide = 'A') => (
   competitor?.image || competitor?.profileImage || "/images/pro-wrestling/wrestler-placeholder-a.webp"
