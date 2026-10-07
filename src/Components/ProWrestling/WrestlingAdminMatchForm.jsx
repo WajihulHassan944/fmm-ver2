@@ -79,6 +79,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const [saving, setSaving] = useState(false);
   const submitLock = useRef(false);
   const [error, setError] = useState('');
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -152,7 +153,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
 
     load();
     return () => { active = false; };
-  }, [isEdit, matchId]);
+  }, [isEdit, matchId, loadAttempt]);
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
   const updateCash = (key, value) => {
@@ -279,7 +280,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           <Link href="/administration/pro-wrestling">Results</Link>
           <Link href="/administration/full-cards">Promotion</Link>
         </nav>
-        {error && <div className="admin-inline-notice is-error">{error}</div>}
+        {error && <div className="admin-inline-notice is-error" role="alert"><span>{error}</span><button type="button" className="admin-action-secondary" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Retry loading</button></div>}
         <form className="admin-create-fight-layout" onSubmit={submit}>
           <main>
           <section className="admin-form-card admin-desk-section">

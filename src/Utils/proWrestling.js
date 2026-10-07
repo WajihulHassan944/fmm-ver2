@@ -1,4 +1,4 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+export const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three.vercel.app').trim().replace(/\/+$/, '');
 
 export const WRESTLING_STATS = [
   { key: 'HP', code: 'HP', short: 'HP', label: 'Head Punches', description: 'Punches, forearms, elbows, and strikes directed at the head.', weight: 1 },
@@ -98,7 +98,16 @@ export const wrestlingRequest = async (path, options = {}) => {
   }
   if (accessToken) requestHeaders.Authorization = `Bearer ${accessToken}`;
 
-  const response = await fetch(`${API_BASE}${path}`, { method, headers: requestHeaders, body: requestBody, signal });
+  // Admin reads use the website's origin, avoiding cross-origin browser failures.
+  // Uploads and mutations keep their existing direct request contract.
+  const sameOriginAdminRead = typeof window !== 'undefined' && admin && method.toUpperCase() === 'GET' && path.startsWith('/api/admin/wrestling/');
+  let response;
+  try {
+    response = await fetch(sameOriginAdminRead ? path : `${API_BASE}${path}`, { method, headers: requestHeaders, body: requestBody, signal });
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    throw new WrestlingApiError('The wrestling service could not be reached. Please retry in a moment.', { status: 0, code: 'WRESTLING_NETWORK_UNAVAILABLE' });
+  }
   const contentType = response.headers.get('content-type') || '';
   const payload = contentType.includes('application/json')
     ? await response.json().catch(() => null)
