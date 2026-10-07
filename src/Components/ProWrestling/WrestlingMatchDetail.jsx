@@ -123,7 +123,7 @@ const WrestlingMatchDetail = () => {
 
   return (
     <>
-      <Head><title>{match.matchTitle} | Pro Wrestling | Fantasy MMAdness</title></Head>
+      <Head><title>{match.seo?.title || `${match.matchTitle} | Pro Wrestling Predictions | FANTASY MMADNESS`}</title><meta name="description" content={match.seo?.description || match.description || `Make your predictions for ${match.matchTitle} at ${match.eventName}. Predict the action, score points, and climb the FANTASY MMADNESS leaderboard.`} /></Head>
       <div className="pw-page pw-match-detail-page">
         <section className="pw-detail-hero" style={{ '--pw-detail-bg': `url(${match.bannerImage || '/images/pro-wrestling/wrestling-match-premium.webp'})` }}>
           <div className="pw-detail-hero-grid" />
