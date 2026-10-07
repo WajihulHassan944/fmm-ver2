@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FaBolt, FaCalendarAlt, FaCloudUploadAlt, FaPlus, FaSave, FaTrophy, FaUsers } from 'react-icons/fa';
 import AdminPredictions from './AdminPredictions';
+import DirectFighterEntry from './DirectFighterEntry';
 import WrestlingAdminMatchForm from '@/Components/ProWrestling/WrestlingAdminMatchForm';
 import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
@@ -130,26 +131,6 @@ const UniformFighterPreview = ({ src, fallbackSrc, alt }) => {
   );
 };
 
-const DirectFighterEntry = ({ side, name, image, preview, onNameChange, onImageChange }) => (
-  <section className="admin-direct-fighter-card" aria-label={`Create Fighter ${side} with a photo`}>
-    <div className="admin-direct-fighter-heading">
-      <span>New fighter {side}</span>
-      <small>Not in the library? Add them here.</small>
-    </div>
-    <div className="admin-direct-fighter-fields">
-      <input type="text" aria-label={`Fighter ${side} name`} placeholder={`Fighter ${side} name`} value={name} onChange={(event) => onNameChange(event.target.value)} />
-      <label className={`admin-direct-fighter-upload ${image ? 'has-image' : ''}`}>
-        <OptimizedImage src={image ? preview : (side === 'A' ? FALLBACK_A : FALLBACK_B)} fallbackSrc={side === 'A' ? FALLBACK_A : FALLBACK_B} alt={image ? `${name || `Fighter ${side}`} upload preview` : ''} width={54} height={54} sizes="54px" />
-        <span>
-          <strong><FaCloudUploadAlt /> {image ? 'Change picture' : 'Upload fighter picture'}</strong>
-          <small>{image?.name || 'JPG, PNG or WEBP'}</small>
-        </span>
-        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => onImageChange(event.target.files?.[0] || null)} />
-      </label>
-    </div>
-    <small className="admin-direct-fighter-note">The fighter and original picture will be saved to the fighter library when this fight is published.</small>
-  </section>
-);
 
 const appendLegacyFight = (data, form, { shadow = false } = {}) => {
   data.append('matchCategory', form.matchCategory);
