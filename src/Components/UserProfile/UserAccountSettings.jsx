@@ -4,20 +4,8 @@ import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBell,
-  FaCheckCircle,
-  FaCoins,
-  FaCreditCard,
-  FaEnvelope,
-  FaGlobeAmericas,
-  FaIdBadge,
-  FaMoneyCheckAlt,
-  FaShieldAlt,
-  FaUserCog,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaBell, FaCheckCircle, FaCreditCard, FaEnvelope, FaGlobeAmericas, FaIdBadge, FaMoneyCheckAlt, FaShieldAlt, FaUserCog } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AddTokensToWallet from './AddTokensToWallet';
 import MembershipCheckout from '../CreateAccount/MembershipCheckout';
 import UserWorkspaceNav from './UserWorkspaceNav';
@@ -187,7 +175,7 @@ const UserAccountSettings = () => {
 
       <main className="theme-container player-account-main">
         <section className="player-account-summary-grid">
-          <article><FaCoins /><span><small>Wallet balance</small><strong>{user.tokens || 0} tokens</strong></span><button type="button" onClick={() => setActiveView('tokens')}>Add tokens</button></article>
+          <article><FaCoins /><span><small>Wallet balance</small><strong>{user.tokens || 0} FM COINS</strong></span><button type="button" onClick={() => setActiveView('tokens')}>Add FM COINS</button></article>
           <article><FaCreditCard /><span><small>Billing workspace</small><strong>Payment details</strong></span><button type="button" onClick={() => setActiveView('billing')}>Open billing</button></article>
           <article><FaShieldAlt /><span><small>Profile status</small><strong>{user.verified ? 'Verified' : 'Active'}</strong></span><Link href="/profile">View profile</Link></article>
         </section>

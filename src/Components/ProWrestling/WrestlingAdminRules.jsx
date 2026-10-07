@@ -1,16 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import { toast } from 'react-toastify';
-import {
-  FaCheck,
-  FaClone,
-  FaCoins,
-  FaPlus,
-  FaSave,
-  FaShieldAlt,
-  FaSlidersH,
-  FaTrophy,
-} from 'react-icons/fa';
+import { FaCheck, FaClone, FaPlus, FaSave, FaShieldAlt, FaSlidersH, FaTrophy } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { WRESTLING_STATS, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const asNumber = (value, fallback = 0) => {

@@ -1,20 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import {
-  FaArrowRight,
-  FaBullhorn,
-  FaChartLine,
-  FaCheckCircle,
-  FaCoins,
-  FaFistRaised,
-  FaGift,
-  FaMicrophone,
-  FaQrcode,
-  FaShareAlt,
-  FaShieldAlt,
-  FaUserCircle,
-  FaWallet,
-} from 'react-icons/fa';
+import { FaArrowRight, FaBullhorn, FaChartLine, FaCheckCircle, FaFistRaised, FaGift, FaMicrophone, FaQrcode, FaShareAlt, FaShieldAlt, FaUserCircle, FaWallet } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const quickSteps = [
   {
@@ -25,7 +12,7 @@ const quickSteps = [
   {
     icon: FaFistRaised,
     title: 'Create or promote a fight',
-    copy: 'Choose the fight, confirm the entry tokens, set the reward structure, and publish the promotion when it is ready.',
+    copy: 'Choose the fight, confirm the entry FM COINS, set the reward structure, and publish the promotion when it is ready.',
   },
   {
     icon: FaShareAlt,
@@ -52,7 +39,7 @@ const guideCards = [
   },
   {
     icon: FaCoins,
-    title: 'Tokens and rewards',
+    title: 'FM COINS and rewards',
     points: ['Check entry-token requirements', 'Confirm the reward/pot setup', 'Make sure enough players join before lock time', 'Review final outcome after scoring'],
   },
   {

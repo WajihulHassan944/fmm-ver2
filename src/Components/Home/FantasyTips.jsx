@@ -1,33 +1,23 @@
 import React from 'react';
 import Link from 'next/link';
-import {
-  FaArrowRight,
-  FaBolt,
-  FaCoins,
-  FaCrosshairs,
-  FaFistRaised,
-  FaGift,
-  FaLayerGroup,
-  FaSearch,
-  FaShieldAlt,
-  FaTrophy,
-} from 'react-icons/fa';
+import { FaArrowRight, FaBolt, FaCrosshairs, FaFistRaised, FaGift, FaLayerGroup, FaSearch, FaShieldAlt, FaTrophy } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const TIPS = [
   {
     icon: FaCoins,
-    title: 'Maximize Your Free Signup Tokens',
-    copy: 'Start strong by using your 20 free tokens wisely. Test different games, explore various fantasy formats, and familiarize yourself with the platform before spending real money.',
+    title: 'Maximize Your Free Signup FM COINS',
+    copy: 'Start strong by using your 20 free FM COINS wisely. Test different games, explore various fantasy formats, and familiarize yourself with the platform before spending real money.',
   },
   {
     icon: FaGift,
     title: 'Use the Spin Wheel',
-    copy: 'Spin the wheel for a free shot at earning bonus tokens or exclusive perks. It’s a quick, risk-free way to keep your token stash growing.',
+    copy: 'Spin the wheel for a free shot at earning bonus FM COINS or exclusive perks. It’s a quick, risk-free way to keep your token stash growing.',
   },
   {
     icon: FaTrophy,
-    title: 'Try the Slot Machine for Bonus Tokens',
-    copy: 'The slot machine isn’t just for fun — it’s a great chance to win extra tokens you can reinvest in your fantasy picks. Take a shot when you have extras!',
+    title: 'Try the Slot Machine for Bonus FM COINS',
+    copy: 'The slot machine isn’t just for fun — it’s a great chance to win extra FM COINS you can reinvest in your fantasy picks. Take a shot when you have extras!',
   },
   {
     icon: FaSearch,
@@ -47,11 +37,11 @@ const TIPS = [
   {
     icon: FaShieldAlt,
     title: 'Join Low-Entry Games to Learn',
-    copy: 'If you’re new, start with low-stake fantasy games to test strategies without burning through tokens. Practice smart and grow with confidence.',
+    copy: 'If you’re new, start with low-stake fantasy games to test strategies without burning through FM COINS. Practice smart and grow with confidence.',
   },
   {
     icon: FaBolt,
-    title: 'Watch for Token Multipliers',
+    title: 'Watch for FM COINS Multipliers',
     copy: 'Keep an eye out for token multiplier events. Playing during these windows can double your rewards and help you climb the ranks faster.',
   },
   {
@@ -62,7 +52,7 @@ const TIPS = [
   {
     icon: FaTrophy,
     title: 'Use Fantasy for Fun, Not Just Profit',
-    copy: 'Fantasy gaming is about fun, community, and clever strategy. Use your free and earned tokens to enjoy the experience while sharpening your game sense.',
+    copy: 'Fantasy gaming is about fun, community, and clever strategy. Use your free and earned FM COINS to enjoy the experience while sharpening your game sense.',
   },
 ];
 

@@ -2,25 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaBell,
-  FaBolt,
-  FaCalculator,
-  FaCheck,
-  FaCoins,
-  FaEdit,
-  FaExclamationTriangle,
-  FaFlagCheckered,
-  FaListAlt,
-  FaLock,
-  FaSave,
-  FaTimes,
-  FaTimesCircle,
-  FaTrophy,
-  FaUser,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaBell, FaBolt, FaCalculator, FaCheck, FaEdit, FaExclamationTriangle, FaFlagCheckered, FaListAlt, FaLock, FaSave, FaTimes, FaTimesCircle, FaTrophy, FaUser, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { WrestlingStatusBadge } from './WrestlingPrimitives';
 import {
   EMPTY_WRESTLING_STATS,
@@ -292,7 +275,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
             <WrestlingStatusBadge status={match.status} />
             <span><FaUsers /><strong>{entries.length}</strong><small>Entries</small></span>
             <span><FaCheck /><strong>{submittedCount}</strong><small>Predictions</small></span>
-            <span><FaCoins /><strong>{formatTokenAmount(match.currentPot)}</strong><small>Token pot</small></span>
+            <span><FaCoins /><strong>{formatTokenAmount(match.currentPot)}</strong><small>FM COINS pot</small></span>
           </div>
         </section>
 
@@ -340,11 +323,11 @@ const WrestlingAdminScoring = ({ matchId }) => {
           </nav>
 
           {activeTable === 'leaderboard' && (
-            <div className="pw-admin-table-wrap"><table className="pw-admin-table"><thead><tr><th>Rank</th><th>Player</th><th>Status</th><th>Exact picks</th><th>Score</th><th>Payout</th></tr></thead><tbody>{leaderboard.length ? leaderboard.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td>{row.playerName}</td><td>{match.status}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td><td>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} tokens` : 'Pending'}</td></tr>) : <tr><td colSpan="6">No ranked predictions are available yet.</td></tr>}</tbody></table></div>
+            <div className="pw-admin-table-wrap"><table className="pw-admin-table"><thead><tr><th>Rank</th><th>Player</th><th>Status</th><th>Exact picks</th><th>Score</th><th>Payout</th></tr></thead><tbody>{leaderboard.length ? leaderboard.map((row) => <tr key={row.playerId}><td><strong>#{row.rank}</strong></td><td>{row.playerName}</td><td>{match.status}</td><td>{row.exactPredictionCount || 0}</td><td>{Number(row.score || 0).toLocaleString()}</td><td>{row.payoutAmount !== undefined ? `${formatTokenAmount(row.payoutAmount)} FM COINS` : 'Pending'}</td></tr>) : <tr><td colSpan="6">No ranked predictions are available yet.</td></tr>}</tbody></table></div>
           )}
 
           {activeTable === 'entries' && (
-            <div className="pw-admin-table-wrap"><table className="pw-admin-table"><thead><tr><th>Player</th><th>Email</th><th>Entry status</th><th>Fee</th><th>Affiliate</th><th>Joined</th></tr></thead><tbody>{entries.length ? entries.map((entry) => <tr key={entry._id}><td><div className="pw-admin-player-cell">{entry.user?.profileUrl ? <img src={entry.user.profileUrl} alt="" /> : <i><FaUser /></i>}<span><strong>{getPlayerName(entry)}</strong><small>{entry.userId}</small></span></div></td><td>{entry.user?.email || '—'}</td><td>{entry.status}</td><td>{formatTokenAmount(entry.entryFeeTokens)} tokens</td><td>{entry.affiliateId || 'Direct'}</td><td>{formatWrestlingDate(entry.joinedAt || entry.createdAt)}</td></tr>) : <tr><td colSpan="6">No users have entered this contest.</td></tr>}</tbody></table></div>
+            <div className="pw-admin-table-wrap"><table className="pw-admin-table"><thead><tr><th>Player</th><th>Email</th><th>Entry status</th><th>Fee</th><th>Affiliate</th><th>Joined</th></tr></thead><tbody>{entries.length ? entries.map((entry) => <tr key={entry._id}><td><div className="pw-admin-player-cell">{entry.user?.profileUrl ? <img src={entry.user.profileUrl} alt="" /> : <i><FaUser /></i>}<span><strong>{getPlayerName(entry)}</strong><small>{entry.userId}</small></span></div></td><td>{entry.user?.email || '—'}</td><td>{entry.status}</td><td>{formatTokenAmount(entry.entryFeeTokens)} FM COINS</td><td>{entry.affiliateId || 'Direct'}</td><td>{formatWrestlingDate(entry.joinedAt || entry.createdAt)}</td></tr>) : <tr><td colSpan="6">No users have entered this contest.</td></tr>}</tbody></table></div>
           )}
 
           {activeTable === 'predictions' && (

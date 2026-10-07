@@ -1127,7 +1127,7 @@ class FantasyMobileAppCore extends React.Component {
   getEventEntryFee = (event = {}) => Math.max(0, toSafeNumber(event.entryFee, event.entryFeeTokens, event.matchTokens));
   getEventEntryLabel = (event = {}) => {
     const fee = this.getEventEntryFee(event);
-    return fee > 0 ? `${fee.toLocaleString()} FM` : 'FREE';
+    return fee > 0 ? `${fee.toLocaleString()} FM COINS` : 'FREE';
   };
   getEventActionLabel = (event = {}, includeEntry = false) => {
     if (!event.playable) return 'VIEW FIGHT DETAILS';
@@ -1154,7 +1154,7 @@ class FantasyMobileAppCore extends React.Component {
     const { winner } = this.state.scorecardDraft;
     const entryFee = this.getEventEntryFee(ev);
     if (!winner) { this.showToast('Pick a winner first'); return; }
-    if (this.state.coins < entryFee) { this.showToast('Not enough FM coins — add more to enter'); this.openModal('addcoins'); return; }
+    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins'); return; }
     if (this.props.onSubmitPrediction) {
       const continueLocally = await this.props.onSubmitPrediction({ type: 'wrestling', event: ev, prediction: this.state.scorecardDraft });
       if (continueLocally === false) return;
@@ -1215,7 +1215,7 @@ class FantasyMobileAppCore extends React.Component {
     const { winner, outcome } = draft;
     const entryFee = this.getEventEntryFee(ev);
     if (!winner) { this.showToast('Pick a winner first'); return; }
-    if (this.state.coins < entryFee) { this.showToast('Not enough FM coins — add more to enter'); this.openModal('addcoins'); return; }
+    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins'); return; }
     if (this.props.onSubmitPrediction) {
       const continueLocally = await this.props.onSubmitPrediction({ type: 'boxing', event: ev, prediction: this.state.boxingDraft });
       if (continueLocally === false) return;
@@ -1265,7 +1265,7 @@ class FantasyMobileAppCore extends React.Component {
     const { winner, outcome } = draft;
     const entryFee = this.getEventEntryFee(ev);
     if (!winner) { this.showToast('Pick a winner first'); return; }
-    if (this.state.coins < entryFee) { this.showToast('Not enough FM coins — add more to enter'); this.openModal('addcoins'); return; }
+    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins'); return; }
     if (this.props.onSubmitPrediction) {
       const continueLocally = await this.props.onSubmitPrediction({ type: 'mma', event: ev, prediction: this.state.mmaDraft });
       if (continueLocally === false) return;
@@ -1344,7 +1344,7 @@ class FantasyMobileAppCore extends React.Component {
       return;
     }
     if (contest.entryFee > 0 && this.state.coins < contest.entryFee) {
-      this.showToast('Not enough FM coins for this contest');
+      this.showToast('Not enough FM COINS for this contest');
       this.openModal('addcoins');
       return;
     }
@@ -1447,7 +1447,7 @@ class FantasyMobileAppCore extends React.Component {
     const missing = required.filter(slot => !draft[slot]?.fighterName);
     if (missing.length) { this.showToast('Pick a fighter for every slot — ' + missing.length + ' still empty'); return; }
     if (campaign.entryFee > 0 && this.state.coins < campaign.entryFee) {
-      this.showToast('Not enough FM coins — add more to draft');
+      this.showToast('Not enough FM COINS — add more to draft');
       this.openModal('addcoins');
       return;
     }
@@ -1705,7 +1705,7 @@ class FantasyMobileAppCore extends React.Component {
     this.setState({ affiliateBusy: true });
     const result = await this.props.onRequestPayout?.({ amount: balance });
     this.safeSetState({ affiliateBusy: false });
-    this.showToast(result?.ok ? 'Payout requested — ' + balance.toLocaleString() + ' FM' : (result?.message || 'Payout request failed'));
+    this.showToast(result?.ok ? 'Payout requested — ' + balance.toLocaleString() + ' FM COINS' : (result?.message || 'Payout request failed'));
     if (result?.ok) this.loadAffiliate();
   };
 
@@ -1818,7 +1818,7 @@ class FantasyMobileAppCore extends React.Component {
     if (!fightId) { this.showToast('Pick the fight you are wagering on'); return; }
     if (!opponent.trim()) { this.showToast('Who are you challenging?'); return; }
     if (amount < (limits.minStake || 1) || amount > (limits.maxStake || 5000)) {
-      this.showToast(`Stake must be ${limits.minStake || 1}–${limits.maxStake || 5000} FM`);
+      this.showToast(`Stake must be ${limits.minStake || 1}–${limits.maxStake || 5000} FM COINS`);
       return;
     }
     this.safeSetState({ challengeBusy: 'create' });
@@ -1929,7 +1929,7 @@ class FantasyMobileAppCore extends React.Component {
     if (this.state.enteredEvents[ev.id]) return;
     const entryFee = this.getEventEntryFee(ev);
     if (this.state.coins < entryFee) {
-      this.showToast(`This contest needs ${entryFee.toLocaleString()} FM — add coins to continue`);
+      this.showToast(`This contest needs ${entryFee.toLocaleString()} FM — add FM COINS to continue`);
       this.openModal('addcoins');
       return;
     }
@@ -1941,12 +1941,12 @@ class FantasyMobileAppCore extends React.Component {
       enteredEvents: { ...s.enteredEvents, [ev.id]: true },
       coins: s.coins - entryFee,
     }));
-    this.showToast(`Entered ${ev.tag}${entryFee ? `! -${entryFee} FM` : '!'}`);
+    this.showToast(`Entered ${ev.tag}${entryFee ? `! -${entryFee} FM COINS` : '!'}`);
   };
 
   saveStreak = async () => {
     const cost = this.state.isSubscribed ? 25 : 50;
-    if (this.state.coins < cost) { this.showToast('Not enough FM coins to save your streak'); this.openModal('addcoins'); return; }
+    if (this.state.coins < cost) { this.showToast('Not enough FM COINS to save your streak'); this.openModal('addcoins'); return; }
     if (!this.props.onSaveStreak) { this.showToast('Streak save is waiting for the server action'); return; }
     const result = await this.props.onSaveStreak({ cost });
     if (!result?.ok) { this.showToast(result?.message || 'Streak save could not be completed'); return; }
@@ -1956,7 +1956,7 @@ class FantasyMobileAppCore extends React.Component {
   };
 
   unlockNextReward = async () => {
-    if (this.state.coins < 75) { this.showToast('Not enough FM coins to skip the wait'); this.openModal('addcoins'); return; }
+    if (this.state.coins < 75) { this.showToast('Not enough FM COINS to skip the wait'); this.openModal('addcoins'); return; }
     if (!this.props.onSkipWait) { this.showToast('Skip-the-wait is waiting for the server action'); return; }
     const result = await this.props.onSkipWait({ cost: 75 });
     if (!result?.ok) { this.showToast(result?.message || 'Skip-the-wait could not be completed'); return; }
@@ -2438,7 +2438,7 @@ class FantasyMobileAppCore extends React.Component {
         ),
         React.createElement('div', {
           onClick: () => this.setTab('cart'),
-          'aria-label': 'Open FM coin cart',
+          'aria-label': 'Open FM COINS cart',
           style: { position: 'relative', width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', animation: this.state.bellWiggle ? 'bellWiggle .6s ease' : 'none' }
         },
           React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: '#f2b544', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
@@ -2522,7 +2522,7 @@ class FantasyMobileAppCore extends React.Component {
         style: { margin: '0 16px 12px', textAlign: 'center', padding: '9px 10px 10px', borderRadius: 10, background: '#16a34a', border: '1.5px solid #22c55e', color: '#fff', fontWeight: 900, fontSize: 10, boxShadow: '0 0 14px rgba(34,197,94,.55)', position: 'relative' }
       },
         React.createElement('div', { style: { position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 900, padding: '3px 10px', borderRadius: 999, animation: 'pulseLive 1s infinite', boxShadow: '0 0 10px rgba(239,68,68,.8)', whiteSpace: 'nowrap' } }, 'NEW HERE?'),
-        React.createElement('div', { style: { color: '#eaffef', marginTop: 2, marginBottom: 8, fontSize: 9.5, letterSpacing: .2 } }, 'NO COINS NEEDED — TRY IT OR JOIN FREE'),
+        React.createElement('div', { style: { color: '#eaffef', marginTop: 2, marginBottom: 8, fontSize: 9.5, letterSpacing: .2 } }, 'NO FM COINS NEEDED — TRY IT OR JOIN FREE'),
         // Two explicit buttons. Both are 46px+ tap targets so neither depends on
         // the panel being tappable, and nothing is discoverable only by guessing.
         React.createElement('div', { style: { display: 'flex', gap: 7 } },
@@ -2616,7 +2616,7 @@ class FantasyMobileAppCore extends React.Component {
     },
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 } },
         React.createElement('div', { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: .8, color: '#f2b544' } }, '🔥 WELCOME BACK'),
-        React.createElement('div', { style: { fontSize: 10.5, fontWeight: 900, color: '#f2b544', fontVariantNumeric: 'tabular-nums' } }, `${s.coins.toLocaleString()} FM`)),
+        React.createElement('div', { style: { fontSize: 10.5, fontWeight: 900, color: '#f2b544', fontVariantNumeric: 'tabular-nums' } }, `${s.coins.toLocaleString()} FM COINS`)),
       mine.length
         ? React.createElement(React.Fragment, null,
             React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 19, lineHeight: 1.15, marginBottom: 4 } }, `${next.f1} vs ${next.f2}`),
@@ -2783,7 +2783,7 @@ class FantasyMobileAppCore extends React.Component {
         onClick: () => this.openModal('wallet'),
         style: { ...glass, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer' }
       },
-        React.createElement('div', { style: { fontSize: 22 } }, '🪙'),
+        React.createElement('div', { style: { fontSize: 22 } }, React.createElement(FMCoin, { size: 'sm' })),
         React.createElement('div', { style: { fontSize: 13, fontWeight: 800 } }, s.coins.toLocaleString()),
         React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.5)' } }, 'FM COINS')
       ),
@@ -2920,7 +2920,7 @@ class FantasyMobileAppCore extends React.Component {
               position: 'absolute', left: (10 + i * 20) + '%', bottom: -22, fontSize: 13, pointerEvents: 'none', zIndex: -1,
               animation: 'coinFloat ' + (1.8 + i * 0.3) + 's ease-in-out ' + (i * 0.4) + 's infinite'
             }
-          }, '🪙')),
+          }, React.createElement(FMCoin, { size: 'sm' }))),
           React.createElement('div', {
             onClick: () => this.openModal('join'),
             style: {
@@ -3123,7 +3123,7 @@ class FantasyMobileAppCore extends React.Component {
       ),
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 17, lineHeight: 1.15, marginBottom: 6 } }, 'CHALLENGE ONE PLAYER, HEAD TO HEAD'),
       React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', lineHeight: 1.5, marginBottom: 12 } },
-        'Pick a friend, pick a fight, stake coins against them alone. We are building it next — tell us you want it and you will be first in when it opens.'
+        'Pick a friend, pick a fight, stake FM COINS against them alone. We are building it next — tell us you want it and you will be first in when it opens.'
       ),
       s.h2hWaitlist.total > 0 && React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#f2b544', marginBottom: 10 } },
         '\ud83d\udd25 ' + s.h2hWaitlist.total.toLocaleString() + (s.h2hWaitlist.total === 1 ? ' player wants this' : ' players want this')
@@ -3163,7 +3163,7 @@ class FantasyMobileAppCore extends React.Component {
       ),
       s.challenges.length === 0
         ? React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', lineHeight: 1.5 } },
-            'No challenges yet. Pick a fight you have already scored, name a player, and stake coins against them one-on-one.'
+            'No challenges yet. Pick a fight you have already scored, name a player, and stake FM COINS against them one-on-one.'
           )
         : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
             s.challenges.map(c => React.createElement('div', {
@@ -3171,7 +3171,7 @@ class FantasyMobileAppCore extends React.Component {
             },
               React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 4 } },
                 React.createElement('div', { style: { fontWeight: 800, fontSize: 13 } }, (c.direction === 'sent' ? 'vs ' : 'from ') + c.opponentName),
-                React.createElement('div', { style: { fontSize: 11, fontWeight: 900, color: '#f2b544' } }, c.stake.toLocaleString() + ' FM')
+                React.createElement('div', { style: { fontSize: 11, fontWeight: 900, color: '#f2b544' } }, c.stake.toLocaleString() + ' FM COINS')
               ),
               c.fight && React.createElement('div', { style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', marginBottom: 4 } },
                 c.fight.fighterA + ' vs ' + c.fight.fighterB
@@ -3179,7 +3179,7 @@ class FantasyMobileAppCore extends React.Component {
               React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: (c.outcome ? outcomeCopy[c.outcome] : statusCopy[c.status] || ['', '#fff'])[1] } },
                 (c.outcome ? outcomeCopy[c.outcome] : statusCopy[c.status] || ['', ''])[0]
                 + (c.status === 'SETTLED' && c.myPoints !== null ? '  \u00b7  ' + c.myPoints + ' vs ' + c.theirPoints + ' pts' : '')
-                + (c.outcome === 'won' && c.payout ? '  \u00b7  +' + c.payout.toLocaleString() + ' FM' : '')
+                + (c.outcome === 'won' && c.payout ? '  \u00b7  +' + c.payout.toLocaleString() + ' FM COINS' : '')
               ),
               c.status === 'PENDING' && c.direction === 'received' && React.createElement('div', { style: { display: 'flex', gap: 8, marginTop: 8 } },
                 React.createElement('div', {
@@ -3332,7 +3332,7 @@ class FantasyMobileAppCore extends React.Component {
     if (!s.demoGenre) {
       return React.createElement('div', { style: { padding: '8px 16px' } },
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 20, color: '#22c55e', marginBottom: 4 } }, '🎓 FREE DEMO WALKTHROUGH'),
-        React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 4 } }, 'No coins, no risk — pick a genre and play its real scorecard format start to finish.'),
+        React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 4 } }, 'No FM COINS, no risk — pick a genre and play its real scorecard format start to finish.'),
         React.createElement('div', { style: { fontSize: 10, fontWeight: 900, color: '#f2b544', marginBottom: 16 } }, doneCount + ' OF 3 CARD TYPES TRIED'),
         React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 } },
           Object.keys(this.demoGenres).map(key => {
@@ -3376,7 +3376,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 18, color: g.color } }, g.emoji + ' ' + g.title + ' DEMO'),
         React.createElement('div', { onClick: () => this.setState({ demoGenre: null }), style: { fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,.5)', cursor: 'pointer' } }, '✕ EXIT')
       ),
-      React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 10 } }, 'No coins, no risk — full walkthrough of exactly how this scorecard is scored.'),
+      React.createElement('div', { style: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 10 } }, 'No FM COINS, no risk — full walkthrough of exactly how this scorecard is scored.'),
       React.createElement('div', { style: { display: 'flex', gap: 4, marginBottom: 16 } },
         steps.map((label, i) => React.createElement('div', { key: i, style: { flex: 1, textAlign: 'center' } },
           React.createElement('div', { style: { height: 4, borderRadius: 2, background: i <= s.demoStep ? g.color : 'rgba(255,255,255,.12)', marginBottom: 3 } }),
@@ -3910,9 +3910,9 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { color: '#3d9bff' } }, 'JUL 12'), React.createElement('div', { style: { color: '#ffce54' } }, '10:00 PM ET'), React.createElement('div', { style: { color: '#2eff6e' } }, 'T-MOBILE ARENA')
       ),
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', marginBottom: 10 } },
-        [['PRIZE POOL', '$100,000', '#2eff6e'], ['ENTRY FEE', '100 FM', '#ffce54'], ['ENTRIES', '22,450', '#3d9bff']].map(([l, v, c], i) => React.createElement('div', { key: i, style: { textAlign: 'center' } },
+        [['PRIZE POOL', '100,000 FM COINS', '#f7b51b'], ['ENTRY FEE', '100 FM COINS', '#ffce54'], ['ENTRIES', '22,450', '#3d9bff']].map(([l, v, c], i) => React.createElement('div', { key: i, style: { textAlign: 'center' } },
           React.createElement('div', { style: { fontSize: l === 'ENTRY FEE' ? 10.5 : 9.5, color: '#ff2020', fontWeight: 900, letterSpacing: .3, textShadow: '0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(255,32,32,.5)' } }, l),
-          React.createElement('div', { style: { fontSize: v === '100 FM' ? 19 : 13, fontWeight: 900, color: c, textShadow: '0 2px 5px rgba(0,0,0,.8), 0 0 12px ' + c + 'cc, 0 0 20px ' + c + '80', animation: (i < 2 ? (i === 0 ? 'moneyPulse' : 'moneyPulseGold') + ' 1.8s ease-in-out infinite' : 'none') } }, v)
+          React.createElement('div', { style: { fontSize: v === '100 FM COINS' ? 19 : 13, fontWeight: 900, color: c, textShadow: '0 2px 5px rgba(0,0,0,.8), 0 0 12px ' + c + 'cc, 0 0 20px ' + c + '80', animation: (i < 2 ? (i === 0 ? 'moneyPulse' : 'moneyPulseGold') + ' 1.8s ease-in-out infinite' : 'none') } }, v)
         ))
       ),
       React.createElement('div', {
@@ -4042,7 +4042,7 @@ class FantasyMobileAppCore extends React.Component {
         s.rewardClaimed && React.createElement('div', {
           onClick: this.unlockNextReward,
           style: { marginTop: 6, textAlign: 'center', padding: '6px 0', borderRadius: 8, fontSize: 9.5, fontWeight: 900, cursor: 'pointer', background: 'rgba(168,85,247,.15)', border: '1px solid rgba(168,85,247,.4)', color: '#c9a3ff' }
-        }, '⚡ SKIP WAIT — 75 FM')
+        }, '⚡ SKIP WAIT — 75 FM COINS')
       ),
       React.createElement('div', { style: { flex: 1, background: 'radial-gradient(circle at 50% -30%, rgba(255,255,255,.18), transparent 55%), radial-gradient(ellipse 80% 60% at 15% 110%, rgba(239,68,68,.22), transparent 60%), radial-gradient(ellipse 80% 60% at 85% 110%, rgba(77,141,255,.22), transparent 60%), rgba(255,255,255,.05)', border: '1px solid #f2b54490', borderRadius: 12, padding: 10, boxShadow: '0 0 18px #f2b54460, inset 0 0 14px #f2b54420' } },
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: '#f7b51b', marginBottom: 4 } }, 'FM COINS WALLET'),
@@ -4082,14 +4082,14 @@ class FantasyMobileAppCore extends React.Component {
             }
           }, d.done ? '✓' : ''))
         ),
-        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, toSafeNumber(this.props.currentUser?.nextDailyRewardFm) > 0 ? `+${toSafeNumber(this.props.currentUser.nextDailyRewardFm)} FM` : 'DAILY REWARD'),
+        React.createElement('div', { style: { fontSize: 11, fontWeight: 800, color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, toSafeNumber(this.props.currentUser?.nextDailyRewardFm) > 0 ? `+${toSafeNumber(this.props.currentUser.nextDailyRewardFm)} FM COINS` : 'DAILY REWARD'),
         !s.rewardClaimed && React.createElement('div', {
           style: { fontSize: 8.5, fontWeight: 900, marginTop: 6, color: s.streakExpiresIn < 3600 ? '#ff2020' : '#ffce54', textShadow: '0 1px 4px rgba(0,0,0,.8)', animation: s.streakExpiresIn < 3600 ? 'pulseLive 1s infinite' : 'none' }
         }, '⏳ Streak expires in ' + Math.floor(s.streakExpiresIn / 3600) + 'h ' + Math.floor((s.streakExpiresIn % 3600) / 60) + 'm'),
         s.streakExpiresIn < 3600 && s.streakExpiresIn > 0 && React.createElement('div', {
           onClick: this.saveStreak,
           style: { marginTop: 6, textAlign: 'center', padding: '6px 0', borderRadius: 8, fontSize: 9.5, fontWeight: 900, cursor: 'pointer', background: '#ef4444', color: '#fff', animation: 'joinGlow 1.4s ease-in-out infinite' }
-        }, `💾 SAVE STREAK — ${s.isSubscribed ? 25 : 50} FM`)
+        }, `💾 SAVE STREAK — ${s.isSubscribed ? 25 : 50} FM COINS`)
         )
       )
     );
@@ -4131,11 +4131,11 @@ class FantasyMobileAppCore extends React.Component {
     const creditedCoins = baseCoins + bonusCoins;
     return React.createElement('div', { style: { padding: '8px 16px 24px' } },
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 4 } },
-        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, color: '#f2b544' } }, '🪙 FM COIN CHECKOUT'),
+        React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, color: '#f2b544' } }, '🪙 FM COINS CHECKOUT'),
         React.createElement('div', { onClick: () => this.setTab('home'), style: { color: '#4d8dff', fontSize: 10, fontWeight: 900, cursor: 'pointer', whiteSpace: 'nowrap' } }, 'CONTINUE SHOPPING')
       ),
       React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.48)', marginBottom: 16 } },
-        s.cart.length ? `${creditedCoins.toLocaleString()} FM coins · secure encrypted checkout` : 'No coin packs selected yet'
+        s.cart.length ? `${creditedCoins.toLocaleString()} FM COINS · secure encrypted checkout` : 'No coin packs selected yet'
       ),
       !s.cart.length && React.createElement('section', { style: { padding: '28px 16px', textAlign: 'center', borderRadius: 14, border: '1px dashed rgba(242,181,68,.35)', background: 'rgba(242,181,68,.06)' } },
         React.createElement('div', { style: { fontSize: 34, marginBottom: 8 } }, '🛒'),
@@ -4146,8 +4146,8 @@ class FantasyMobileAppCore extends React.Component {
       s.cart.map((item) => React.createElement('article', { key: item.sku, style: { display: 'grid', gridTemplateColumns: '52px minmax(0,1fr) auto', gap: 11, alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,.08)' } },
         React.createElement('div', { style: { width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#ffe08a,#a8720f)', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 900, color: '#3a2500' } }, 'FM'),
         React.createElement('div', { style: { minWidth: 0 } },
-          React.createElement('strong', { style: { display: 'block', fontSize: 12 } }, `${item.coins.toLocaleString()} FM COIN PACK`),
-          React.createElement('small', { style: { display: 'block', color: 'rgba(255,255,255,.48)', marginTop: 2 } }, `${(item.coins * item.quantity).toLocaleString()} FM coins`),
+          React.createElement('strong', { style: { display: 'block', fontSize: 12 } }, `${item.coins.toLocaleString()} FM COINS PACK`),
+          React.createElement('small', { style: { display: 'block', color: 'rgba(255,255,255,.48)', marginTop: 2 } }, `${(item.coins * item.quantity).toLocaleString()} FM COINS`),
           React.createElement('b', { style: { display: 'block', color: '#f2b544', fontSize: 12, marginTop: 2 } }, `$${(item.price * item.quantity).toFixed(2)}`),
           React.createElement('span', { role: 'button', tabIndex: 0, onClick: () => this.removeCartItem(item.sku), style: { display: 'inline-block', marginTop: 4, color: 'rgba(255,255,255,.45)', fontSize: 9, textDecoration: 'underline', cursor: 'pointer' } }, 'Remove')
         ),
@@ -4161,13 +4161,13 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('section', { style: { marginTop: 16, padding: 14, borderRadius: 12, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)' } },
           React.createElement('strong', { style: { display: 'block', fontSize: 10, letterSpacing: 1, color: 'rgba(255,255,255,.55)', marginBottom: 8 } }, 'ORDER SUMMARY'),
           React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: 'rgba(255,255,255,.72)', fontSize: 12 } }, React.createElement('span', null, 'Subtotal'), React.createElement('b', null, `$${subtotal.toFixed(2)}`)),
-          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: 'rgba(255,255,255,.72)', fontSize: 12 } }, React.createElement('span', null, 'Coin pack'), React.createElement('b', null, `${baseCoins.toLocaleString()} FM`)),
-          firstPurchaseEligible && React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: '#22c55e', fontSize: 12, fontWeight: 900 } }, React.createElement('span', null, '🎁 First-purchase bonus'), React.createElement('b', null, `+${bonusCoins.toLocaleString()} FM`)),
-          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: '#fff', fontSize: 12, fontWeight: 900 } }, React.createElement('span', null, 'FM coins credited'), React.createElement('b', null, `${creditedCoins.toLocaleString()} FM`)),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: 'rgba(255,255,255,.72)', fontSize: 12 } }, React.createElement('span', null, 'Coin pack'), React.createElement('b', null, `${baseCoins.toLocaleString()} FM COINS`)),
+          firstPurchaseEligible && React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: '#22c55e', fontSize: 12, fontWeight: 900 } }, React.createElement('span', null, '🎁 First-purchase bonus'), React.createElement('b', null, `+${bonusCoins.toLocaleString()} FM COINS`)),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', color: '#fff', fontSize: 12, fontWeight: 900 } }, React.createElement('span', null, 'FM COINS credited'), React.createElement('b', null, `${creditedCoins.toLocaleString()} FM COINS`)),
           React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 12, paddingTop: 10, marginTop: 6, borderTop: '1px solid rgba(255,255,255,.14)', color: '#f2b544', fontSize: 16, fontWeight: 900 } }, React.createElement('span', null, 'Total'), React.createElement('b', null, `$${subtotal.toFixed(2)}`)),
-          React.createElement('small', { style: { display: 'block', marginTop: 8, color: 'rgba(255,255,255,.46)', lineHeight: 1.45 } }, 'Digital purchase — no shipping required. Final eligibility is confirmed securely before coins are credited.')
+          React.createElement('small', { style: { display: 'block', marginTop: 8, color: 'rgba(255,255,255,.46)', lineHeight: 1.45 } }, 'Digital purchase — no shipping required. Final eligibility is confirmed securely before FM COINS are credited.')
         ),
-        React.createElement('div', { role: 'button', tabIndex: 0, onClick: this.continueCartCheckout, style: { width: '100%', minHeight: 50, display: 'grid', placeItems: 'center', marginTop: 16, borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 1000, fontSize: 13, cursor: 'pointer' } }, `CHECKOUT $${subtotal.toFixed(2)} · GET ${creditedCoins.toLocaleString()} FM`),
+        React.createElement('div', { role: 'button', tabIndex: 0, onClick: this.continueCartCheckout, style: { width: '100%', minHeight: 50, display: 'grid', placeItems: 'center', marginTop: 16, borderRadius: 999, background: 'linear-gradient(90deg,#ffd873,#f2b544)', color: '#2b1b00', fontWeight: 1000, fontSize: 13, cursor: 'pointer' } }, `CHECKOUT $${subtotal.toFixed(2)} · GET ${creditedCoins.toLocaleString()} FM COINS`),
         React.createElement('div', { style: { textAlign: 'center', marginTop: 9, color: 'rgba(255,255,255,.45)', fontSize: 9.5 } }, '🔒 Billing and card details continue on the secure payment flow')
       )
     );
@@ -4193,7 +4193,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('img', { src: `${ASSET_BASE}/treasure-chest-sm.png`, alt: 'Fantasy MMAdness treasure chest', style: { width: '113%', height: '113%', objectFit: 'contain', animation: 'chestOpenClose 1.8s ease-in-out infinite', filter: 'drop-shadow(0 0 16px rgba(242,181,68,.7))' } }),
         ['💰', '🪙', '💰'].map((c, i) => React.createElement('div', {
           key: i, style: { position: 'absolute', left: '50%', top: '30%', fontSize: 18, animation: 'coinFly' + (i + 1) + ' 1.6s ease-out ' + (i * 0.35) + 's infinite' }
-        }, c))
+        }, React.createElement(FMCoin, { size: 'sm', motion: 'shine' })))
       )
     );
   }
@@ -4233,7 +4233,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('img', { src: `${ASSET_BASE}/treasure-chest-sm.png`, alt: 'Fantasy MMAdness treasure chest', style: { width: '113%', height: '113%', objectFit: 'contain', animation: s.chestBurst ? 'chestBurstPop .5s ease-out' : 'chestOpenClose 1.8s ease-in-out infinite', filter: 'drop-shadow(0 0 16px rgba(242,181,68,.7))' } }),
         ['💰', '🪙', '💰'].map((c, i) => React.createElement('div', {
           key: i, style: { position: 'absolute', left: '50%', top: '10%', fontSize: 20, animation: 'coinFly' + (i + 1) + ' 1.6s ease-out ' + (i * 0.35) + 's infinite' }
-        }, c)),
+        }, React.createElement(FMCoin, { size: 'sm', motion: 'shine' }))),
         s.chestBurst && [0, 1, 2, 3, 4, 5, 6, 7].map(i => {
           const angle = (i / 8) * Math.PI * 2;
           const dist = 70;
@@ -4243,7 +4243,7 @@ class FantasyMobileAppCore extends React.Component {
               '--burstEnd': 'translate(' + Math.round(Math.cos(angle) * dist) + 'px,' + Math.round(Math.sin(angle) * dist) + 'px)',
               animation: 'chestBurstCoin .55s ease-out forwards'
             }
-          }, i % 2 === 0 ? '🪙' : '💰');
+          }, React.createElement(FMCoin, { size: 'sm', motion: 'shine' }));
         }),
         [[18, 22], [70, 15], [42, 55], [78, 62], [30, 78], [58, 30]].map(([left, top], i) => React.createElement('div', {
           key: 'sparkle' + i, style: {
@@ -4525,7 +4525,7 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' } },
             React.createElement('div', { style: { fontSize: 13, fontWeight: 900 } }, contest.name),
             React.createElement('div', { style: { fontSize: 10.5, fontWeight: 900, color: contest.entryFee > 0 ? '#f2b544' : '#22c55e' } },
-              contest.entryFee > 0 ? Number(contest.entryFee).toLocaleString() + ' FM' : 'FREE')
+              contest.entryFee > 0 ? Number(contest.entryFee).toLocaleString() + ' FM COINS' : 'FREE')
           ),
           React.createElement('div', { style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', marginTop: 3 } },
             'Pick ' + (contest.picksRequired ?? 5) + ' fighters \u00b7 ' + (contest.bouts?.length ?? 0) + ' bouts \u00b7 '
@@ -4779,7 +4779,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 's', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', marginBottom: 14 } }, 'How money moves in and out of your account.'),
         React.createElement('div', { key: 'in', style: { padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', marginBottom: 8 } },
           React.createElement('div', { style: { fontSize: 11, fontWeight: 900, color: '#22c55e', marginBottom: 4 } }, 'BUYING FM COINS'),
-          React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', lineHeight: 1.6 } }, 'Card payments are handled on our processor\u2019s secure page \u2014 we never store your card details. Coins land in your wallet the moment payment clears, and you come straight back to where you were.')
+          React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', lineHeight: 1.6 } }, 'Card payments are handled on our processor\u2019s secure page \u2014 we never store your card details. FM COINS land in your wallet the moment payment clears, and you come straight back to where you were.')
         ),
         React.createElement('div', { key: 'apparel', style: { padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', marginBottom: 8 } },
           React.createElement('div', { style: { fontSize: 11, fontWeight: 900, color: '#4d8dff', marginBottom: 4 } }, 'APPAREL'),
@@ -4859,7 +4859,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { key: 'sub', style: { fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.55)', marginBottom: 14 } },
           s.modalData?.type === 'joinLeague' ? 'Sign in and we\u2019ll drop you straight into that league.'
             : s.modalData?.type === 'enterEvent' ? 'Sign in and your picks go through \u2014 nothing is lost.'
-            : isSignup ? 'Free to join. 500 FM to start.' : 'Sign in to keep your picks and coins.'),
+            : isSignup ? 'Free to join. 500 FM COINS to start.' : 'Sign in to keep your picks and FM COINS.'),
         React.createElement('div', { key: 'tabs', style: { display: 'flex', gap: 6, marginBottom: 14 } },
           [['login', 'SIGN IN'], ['signup', 'CREATE ACCOUNT']].map(([mode, label]) => React.createElement('div', {
             key: mode, onClick: () => this.setAuthMode(mode),
@@ -4964,7 +4964,7 @@ class FantasyMobileAppCore extends React.Component {
         p ? React.createElement('div', {
           key: 'payout', onClick: this.requestPayout,
           style: { textAlign: 'center', padding: '12px 0', borderRadius: 999, background: balance > 0 ? 'linear-gradient(90deg,#22c55e,#15803d)' : 'rgba(255,255,255,.08)', color: '#fff', fontWeight: 900, fontSize: 12, cursor: balance > 0 ? 'pointer' : 'default', marginBottom: 8 }
-        }, balance > 0 ? 'REQUEST PAYOUT \u2014 ' + balance.toLocaleString() + ' FM' : 'NO BALANCE TO PAY OUT YET') : null,
+        }, balance > 0 ? 'REQUEST PAYOUT \u2014 ' + balance.toLocaleString() + ' FM COINS' : 'NO BALANCE TO PAY OUT YET') : null,
         p && payouts.length ? React.createElement('div', { key: 'plast', style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', textAlign: 'center' } }, payouts.length + ' payout' + (payouts.length === 1 ? '' : 's') + ' on record') : null,
         React.createElement('div', {
           key: 'share', onClick: this.copyReferral,
@@ -5023,7 +5023,7 @@ class FantasyMobileAppCore extends React.Component {
         ['signup', 'Sign up'], ['signin', 'Sign in'], ['scorecard', 'Scorecard'],
         ['entry-fee', 'Coins / fee'], ['team-card', 'Team Card'], ['season-card', 'Season Card'],
         ['standings', 'Standings'], ['leagues', 'Leagues'], ['promoter-tools', 'League tools'],
-        ['notifications', 'Bell'], ['coins-purchase', 'Buying coins'], ['rewards', 'Chest / wheel'],
+        ['notifications', 'Bell'], ['coins-purchase', 'Buying FM COINS'], ['rewards', 'Chest / wheel'],
         ['looks-wrong', 'Looks wrong'], ['slow', 'Too slow'], ['other', 'Something else'],
       ];
       return overlay([
@@ -5207,7 +5207,7 @@ class FantasyMobileAppCore extends React.Component {
           },
         },
           React.createElement('span', { style: { fontSize: 10.5, fontWeight: 800, color: 'rgba(255,255,255,.55)' } }, 'WALLET BALANCE'),
-          React.createElement('span', { style: { fontSize: 13, fontWeight: 900, color: low ? '#ef4444' : '#f2b544' } }, Number(s.coins || 0).toLocaleString() + ' FM')
+          React.createElement('span', { style: { fontSize: 13, fontWeight: 900, color: low ? '#ef4444' : '#f2b544' } }, Number(s.coins || 0).toLocaleString() + ' FM COINS')
         ),
         low
           ? React.createElement('div', {
@@ -5474,7 +5474,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { key: 'b', style: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 26, fontWeight: 800, marginBottom: 12, color: '#ffd700', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, React.createElement(FMCoin, { size: 'lg', motion: 'shine' }), s.coins.toLocaleString() + ' FM COINS'),
       React.createElement('div', { key: 'l', style: { fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 8 } }, 'ADD MORE'),
       React.createElement('div', { key: 'p', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
-        !s.hasPurchased && React.createElement('div', { key: 'fb', style: { fontSize: 10.5, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '7px 9px', marginBottom: 2 } }, '🎁 First purchase gets you DOUBLE coins — today only'),
+        !s.hasPurchased && React.createElement('div', { key: 'fb', style: { fontSize: 10.5, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '7px 9px', marginBottom: 2 } }, '🎁 First purchase gets you DOUBLE FM COINS — today only'),
         [[1000, '$0.99', false], [5000, '$3.99', true], [15000, '$9.99', false]].map(([amt, price, popular]) => React.createElement('div', {
           key: amt, onClick: () => this.addCoins(amt, price),
           style: { position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: 10, background: popular ? 'rgba(242,181,68,.1)' : 'rgba(255,255,255,.05)', border: popular ? '1.5px solid #f2b544' : '1px solid rgba(242,181,68,.3)', cursor: 'pointer' }
@@ -5487,7 +5487,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', {
         key: 'fmplus', onClick: () => this.openModal('subscribe'),
         style: { marginTop: 12, textAlign: 'center', padding: '11px 0', borderRadius: 10, background: 'linear-gradient(90deg,#a855f7,#4d8dff)', fontWeight: 900, fontSize: 12, cursor: 'pointer', boxShadow: '0 0 14px rgba(168,85,247,.5)' }
-      }, s.isSubscribed ? '✓ FM+ MEMBER — MANAGE' : '⭐ GO FM+ — BONUS COINS EVERY MONTH')
+      }, s.isSubscribed ? '✓ FM+ MEMBER — MANAGE' : '⭐ GO FM+ — BONUS FM COINS EVERY MONTH')
     ]);
 
     if (s.modal === 'champProfile') {
@@ -5524,7 +5524,7 @@ class FantasyMobileAppCore extends React.Component {
       closeBtn,
       React.createElement('div', { key: 't', style: { fontFamily: "'Anton',sans-serif", fontSize: 20, color: '#f2b544', marginBottom: 4 } }, 'JOIN FANTASY MMAdness'),
       React.createElement('div', { key: 's', style: { fontSize: 11, color: 'rgba(255,255,255,.5)', fontWeight: 700, marginBottom: 8 } }, 'Free to play. Real prizes.'),
-      React.createElement('div', { key: 'bonus', style: { fontSize: 11, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '8px 10px', marginBottom: 14 } }, '🎁 Sign up now — get 500 FM coins free to make your first picks'),
+      React.createElement('div', { key: 'bonus', style: { fontSize: 11, fontWeight: 900, color: '#22c55e', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 8, padding: '8px 10px', marginBottom: 14 } }, '🎁 Sign up now — get 500 FM COINS free to make your first picks'),
       React.createElement('input', { key: 'n', value: s.joinDraft.name, onChange: (event) => this.setState((state) => ({ joinDraft: { ...state.joinDraft, name: event.target.value } })), placeholder: 'Player name', style: { boxSizing: 'border-box', width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
       React.createElement('input', { key: 'e', value: s.joinDraft.email, onChange: (event) => this.setState((state) => ({ joinDraft: { ...state.joinDraft, email: event.target.value } })), placeholder: 'Email address', type: 'email', style: { boxSizing: 'border-box', width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 10, fontFamily: "'Rajdhani',sans-serif" } }),
       React.createElement('input', { key: 'p', type: 'password', placeholder: 'Create password', style: { width: '100%', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.15)', color: '#fff', fontSize: 13, marginBottom: 14, fontFamily: "'Rajdhani',sans-serif" } }),
@@ -5882,7 +5882,7 @@ class FantasyMobileAppCore extends React.Component {
         }, s.teamBusy
           ? 'LOCKING IN…'
           : contest.entryFee > 0
-            ? 'LOCK IN TEAM — ' + Number(contest.entryFee).toLocaleString() + ' FM'
+            ? 'LOCK IN TEAM — ' + Number(contest.entryFee).toLocaleString() + ' FM COINS'
             : 'LOCK IN TEAM — FREE')
       ]);
     }
@@ -5965,7 +5965,7 @@ class FantasyMobileAppCore extends React.Component {
             background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900,
             fontSize: 13, cursor: 'pointer', marginTop: 6, opacity: s.seasonBusy ? .6 : 1,
           },
-        }, s.seasonBusy ? 'LOCKING IN…' : c.entryFee > 0 ? 'LOCK IN CARD — ' + c.entryFee + ' FM' : 'LOCK IN CARD — FREE')
+        }, s.seasonBusy ? 'LOCKING IN…' : c.entryFee > 0 ? 'LOCK IN CARD — ' + c.entryFee + ' FM COINS' : 'LOCK IN CARD — FREE')
       ]);
     }
 
@@ -6027,9 +6027,9 @@ class FantasyMobileAppCore extends React.Component {
             fontSize: 10.5, fontWeight: 800, color: '#f2b544', lineHeight: 1.6,
           },
         },
-          'Pot ' + (stakeAmount * 2).toLocaleString() + ' FM'
-          + (limits.rakePercent ? '  \u00b7  fee ' + Math.floor(stakeAmount * 2 * limits.rakePercent / 100).toLocaleString() + ' FM' : '')
-          + '  \u00b7  winner takes ' + Math.floor(stakeAmount * 2 * (100 - (limits.rakePercent || 0)) / 100).toLocaleString() + ' FM'
+          'Pot ' + (stakeAmount * 2).toLocaleString() + ' FM COINS'
+          + (limits.rakePercent ? '  \u00b7  fee ' + Math.floor(stakeAmount * 2 * limits.rakePercent / 100).toLocaleString() + ' FM COINS' : '')
+          + '  \u00b7  winner takes ' + Math.floor(stakeAmount * 2 * (100 - (limits.rakePercent || 0)) / 100).toLocaleString() + ' FM COINS'
         ),
         React.createElement('div', { key: 'note', style: { fontSize: 9.5, fontWeight: 700, color: 'rgba(255,255,255,.4)', marginBottom: 14, lineHeight: 1.5 } },
           'Your stake is held as soon as you send this. It comes back automatically if they decline or never answer before predictions lock.'
@@ -6199,7 +6199,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', {
         onClick: () => { this.closeModal(); this.openModal('fantasyDraft', s.modalData); },
         style: { textAlign: 'center', padding: '13px 0', borderRadius: 999, background: 'linear-gradient(90deg,#f2b544,#f2c869)', color: '#2b1b00', fontWeight: 900, fontSize: 13, cursor: 'pointer', boxShadow: '0 0 14px rgba(242,181,68,.5)' }
-      }, 'DRAFT THIS FIGHT CARD \u2014 ' + (s.modalData ? s.modalData.entryFee : 150) + ' FM')
+      }, 'DRAFT THIS FIGHT CARD \u2014 ' + (s.modalData ? s.modalData.entryFee : 150) + ' FM COINS')
     ]);
 
     if (s.modal === 'affiliate') {

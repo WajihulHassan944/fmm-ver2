@@ -1,16 +1,8 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {
-  FaCheck,
-  FaClock,
-  FaCoins,
-  FaFistRaised,
-  FaShoePrints,
-  FaBullseye,
-  FaShieldAlt,
-  FaTrophy,
-} from 'react-icons/fa';
+import { FaCheck, FaClock, FaFistRaised, FaShoePrints, FaBullseye, FaShieldAlt, FaTrophy } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
@@ -364,7 +356,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       if (!entryResponse.ok) {
         if (entryPayload?.code === 'INSUFFICIENT_FUNDS') {
           const shortfall = Number(entryPayload.shortfall || 0);
-          setSubmitError(`You need ${shortfall} more FM COINS. Your picks are saved here; add coins and return to submit.`);
+          setSubmitError(`You need ${shortfall} more FM COINS. Your picks are saved here; add FM COINS and return to submit.`);
           return;
         }
         if (entryPayload?.code === 'FIGHT_LOCKED') {

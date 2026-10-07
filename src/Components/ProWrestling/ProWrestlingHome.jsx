@@ -1,18 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import {
-  FaArrowRight,
-  FaBolt,
-  FaChartLine,
-  FaCoins,
-  FaCrown,
-  FaFistRaised,
-  FaLock,
-  FaShieldAlt,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowRight, FaBolt, FaChartLine, FaCrown, FaFistRaised, FaLock, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   WrestlingEmptyState,
   WrestlingHero,

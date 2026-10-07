@@ -1054,7 +1054,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
             <div style={{ border: '1px solid rgba(247,181,27,.42)', borderRadius: 14, background: 'rgba(247,181,27,.06)', padding: 18 }}>
               <div style={{ color: '#f7b51b', fontSize: 10.5, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase' }}>FM COINS conversion</div>
               <div style={{ color: '#fff', fontFamily: display, fontSize: 30, marginTop: 8 }}>{tokenPackSize.toLocaleString()} FM COINS = {usd(tokenPackSize)}</div>
-              <p style={{ color: 'rgba(245,247,251,.62)', fontSize: 12.5, lineHeight: 1.5, margin: '8px 0 0' }}>Standard rate: 1,000 FM COINS = {usd(1000)} · 100 FM COINS = {usd(100)} · 1 FM COIN = ${tokenUsdRate.toFixed(6)}.</p>
+              <p style={{ color: 'rgba(245,247,251,.62)', fontSize: 12.5, lineHeight: 1.5, margin: '8px 0 0' }}>Standard rate: 1,000 FM COINS = {usd(1000)} · 100 FM COINS = {usd(100)} · 1 FM COINS = ${tokenUsdRate.toFixed(6)}.</p>
               <p style={{ color: 'rgba(245,247,251,.42)', fontSize: 11.5, lineHeight: 1.45, margin: '8px 0 0' }}>Every value below is shown in both FM COINS and estimated USD.</p>
             </div>
           </div>

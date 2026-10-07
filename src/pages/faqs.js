@@ -32,7 +32,7 @@ const fallbackFaqs = [
   { title: 'How do live fight predictions work?', description: 'Members submit predictions before the lock time on each fight card. The fight page shows the current schedule, prize pool, entry status, and leaderboard access.' },
   { title: 'How does Fantasy MMAdness scoring work?', description: SCORING_SOURCE_TRUTH_COPY },
   { title: 'Can I play for free?', description: 'Yes. Fantasy MMAdness includes free-to-play and demo experiences so players can learn the prediction flow before entering paid token contests.' },
-  { title: 'What are tokens?', description: 'Tokens are the platform currency used for paid fight entries. Existing backend wallet and refund behavior remains unchanged.' },
+  { title: 'What are FM COINS?', description: 'FM COINS are the platform currency used for paid fight entries. Existing backend wallet and refund behavior remains unchanged.' },
   { title: 'What rewards can I earn?', description: 'Eligible fight cards display their prize pool and entry terms before submission. Players can also earn leaderboard recognition and public profile achievements.' },
 ];
 
@@ -68,7 +68,7 @@ export default function FAQsPage({ faqs = [] }) {
     <>
       <Head>
         <title>FAQs – Fantasy Boxing Game & League | Fantasy MMAdness</title>
-        <meta name="description" content="Answers about Fantasy MMAdness accounts, scoring, fight predictions, tokens, rewards, leagues, and support." />
+        <meta name="description" content="Answers about Fantasy MMAdness accounts, scoring, fight predictions, FM COINS, rewards, leagues, and support." />
         <meta name="keywords" content="fantasy boxing, fantasy boxing game, fantasy boxing league, fantasy sports FAQ, Fantasy MMAdness questions" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       </Head>
@@ -119,7 +119,7 @@ export default function FAQsPage({ faqs = [] }) {
                 <aside className="xp-faq-aside">
                   <FaQuestionCircle aria-hidden="true" />
                   <strong>Quick guidance</strong>
-                  <p>Use this guide to understand accounts, predictions, tokens, rewards, leagues, and official scoring before you enter a fight card.</p>
+                  <p>Use this guide to understand accounts, predictions, FM COINS, rewards, leagues, and official scoring before you enter a fight card.</p>
                   <Link href="/guides">Open player guide</Link>
                   <Link href="/upcomingfights">Explore fight cards</Link>
                 </aside>

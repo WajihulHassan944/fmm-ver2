@@ -10,31 +10,31 @@ const InvitePage = () => {
   return (
     <>
       <Head>
-        <title>Invite & Earn | Get 20 Free Tokens – Fantasy MMAdness</title>
-        <meta 
-          name="description" 
-          content="Invite your friends to Fantasy MMAdness and earn 20 free tokens! Join the fantasy boxing revolution and compete for prizes. Sign up today with your referral!" 
+        <title>Invite & Earn | Get 20 Free FM COINS – Fantasy MMAdness</title>
+        <meta
+          name="description"
+          content="Invite your friends to Fantasy MMAdness and earn 20 free FM COINS! Join the fantasy boxing revolution and compete for prizes. Sign up today with your referral!"
         />
-        <meta 
-          name="keywords" 
-          content="fantasy boxing, fantasy boxing game, fantasy boxing league, invite and earn tokens, referral program fantasy sports" 
+        <meta
+          name="keywords"
+          content="fantasy boxing, fantasy boxing game, fantasy boxing league, invite and earn FM COINS, referral program fantasy sports"
         />
-        <meta property="og:title" content="Join Fantasy MMAdness – Get 20 Free Tokens!" />
-        <meta property="og:description" content="Sign up now using a referral link and earn 20 free tokens to play fantasy boxing and combat sports games!" />
+        <meta property="og:title" content="Join Fantasy MMAdness – Get 20 Free FM COINS!" />
+        <meta property="og:description" content="Sign up now using a referral link and earn 20 free FM COINS to play fantasy boxing and combat sports games!" />
         <meta property="og:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
         <meta property="og:url" content="https://fantasymmadness.com/invite" />
         <meta property="og:type" content="website" />
-        
+
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Join Fantasy MMAdness – Get 20 Free Tokens!" />
-        <meta name="twitter:description" content="Earn tokens by joining through referrals and play our fantasy boxing league for free!" />
+        <meta name="twitter:title" content="Join Fantasy MMAdness – Get 20 Free FM COINS!" />
+        <meta name="twitter:description" content="Earn FM COINS by joining through referrals and play our fantasy boxing league for free!" />
         <meta name="twitter:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
 
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className='invite-container'>
-        <h1>Earn 20 free tokens to play fantasy sports by Signing up</h1>
+        <h1>Earn 20 free FM COINS to play fantasy sports by Signing up</h1>
         <Link href={`/auth?mode=signup&role=player&referrer=${referrerId}`} className='signUpBtnInvite'>
           Sign up now
         </Link>

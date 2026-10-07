@@ -375,7 +375,7 @@ const OwnerCheck = () => {
           <div style={label}>VIEW AS</div>
           <p style={{ fontSize: 13, lineHeight: 1.6, margin: '0 0 14px', color: 'rgba(255,255,255,.7)' }}>
             See the app exactly as a player or affiliate sees it. Read-only — nothing you tap in
-            that view can change their account, spend their coins or enter them into anything.
+            that view can change their account, spend their FM COINS or enter them into anything.
             Opens in a new tab and lasts 20 minutes.
           </p>
           <form onSubmit={searchAccounts} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>

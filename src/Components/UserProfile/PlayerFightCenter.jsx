@@ -2,7 +2,8 @@ import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
-import { FaArrowRight, FaBell, FaCoins, FaCrown, FaFistRaised, FaGift, FaHistory, FaIdBadge, FaMobileAlt, FaShareAlt, FaShieldAlt, FaTrophy, FaUserCog, FaUsers } from 'react-icons/fa';
+import { FaArrowRight, FaBell, FaCrown, FaFistRaised, FaGift, FaHistory, FaIdBadge, FaMobileAlt, FaShareAlt, FaShieldAlt, FaTrophy, FaUserCog, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import UserWorkspaceNav from './UserWorkspaceNav';
 
 const tools = [
@@ -46,7 +47,7 @@ export default function PlayerFightCenter() {
     <UserWorkspaceNav />
     <main className="theme-container player-fight-center-main">
       <section className="player-fight-center-stats" aria-label="Player account summary">
-        <article><FaCoins /><span><strong>{Number(user.tokens || 0).toLocaleString()}</strong><small>Wallet tokens</small></span></article>
+        <article><FaCoins /><span><strong>{Number(user.tokens || 0).toLocaleString()}</strong><small>Wallet FM COINS</small></span></article>
         <article><FaFistRaised /><span><strong>{fightCount}</strong><small>Fight entries</small></span></article>
         <article><FaTrophy /><span><strong>{Number(user.totalPoints || user.points || 0).toLocaleString()}</strong><small>Total points</small></span></article>
         <article><FaUsers /><span><strong>{leagueCount}</strong><small>Joined leagues</small></span></article>

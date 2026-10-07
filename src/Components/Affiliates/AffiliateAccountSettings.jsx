@@ -3,16 +3,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import {
-  FaCheckCircle,
-  FaCoins,
-  FaDollarSign,
-  FaSave,
-  FaShieldAlt,
-  FaTimes,
-  FaUserFriends,
-  FaWallet,
-} from 'react-icons/fa';
+import { FaCheckCircle, FaDollarSign, FaSave, FaShieldAlt, FaTimes, FaUserFriends, FaWallet } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';

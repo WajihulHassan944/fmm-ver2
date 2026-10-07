@@ -1,13 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import {
-  FaArrowRight,
-  FaCoins,
-  FaCrown,
-  FaGift,
-  FaShieldAlt,
-  FaTrophy,
-} from 'react-icons/fa';
+import { FaArrowRight, FaCrown, FaGift, FaShieldAlt, FaTrophy } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const REWARDS = [
   {
@@ -30,7 +24,7 @@ const REWARDS = [
     icon: FaCoins,
     eyebrow: 'Free and demo entries',
     value: 'Marked on card',
-    copy: 'Free-play and demo fight cards are labelled clearly before entry so users know when no coins are needed.',
+    copy: 'Free-play and demo fight cards are labelled clearly before entry so users know when no FM COINS are needed.',
     image: 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743522571/home/hbkim5wxsjmhryavrat0.png',
     accent: 'blue',
   },

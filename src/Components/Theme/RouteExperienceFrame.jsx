@@ -45,7 +45,7 @@ const ROUTE_META = {
   },
   '/faqs': {
     group: 'legal', eyebrow: 'Support center', title: 'Answers before the bell.',
-    description: 'Understand accounts, predictions, scoring, tokens, leagues, and platform operations.',
+    description: 'Understand accounts, predictions, scoring, FM COINS, leagues, and platform operations.',
   },
   '/privacy-policy': {
     group: 'legal', eyebrow: 'Platform standards', title: 'Privacy policy.',

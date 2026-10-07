@@ -1,16 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import {
-  FaArrowRight,
-  FaBolt,
-  FaCalendarAlt,
-  FaCoins,
-  FaCrown,
-  FaFistRaised,
-  FaLock,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowRight, FaBolt, FaCalendarAlt, FaCrown, FaFistRaised, FaLock, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   WRESTLING_STATUS_CLASS,
   WRESTLING_STATUS_COPY,

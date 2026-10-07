@@ -105,7 +105,7 @@ const SpinWheel = () => {
         body: JSON.stringify({ email, deviceId, results: prizeValue }),
       }
     );
-    alert("Tokens successfully claimed!");
+    alert("FM COINS successfully claimed!");
     checkDevice();
     setShowForm(false);
   };
@@ -114,7 +114,7 @@ const SpinWheel = () => {
 <div className="sponsors-wrap" style={{ background: "#fff", paddingTop: "140px", paddingBottom: "0", minHeight: "80vh" }}>
       {showForm && (
         <div className="form-container">
-          <h1>You have {winner} tokens. Please enter your email below.</h1>
+          <h1>You have {winner} FM COINS. Please enter your email below.</h1>
           <form onSubmit={handleSubmit}>
             <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
             <button type="submit">Submit</button>
@@ -150,7 +150,7 @@ const SpinWheel = () => {
               innerBorderWidth={15}
               outerBorderWidth={10}
               fontFamily="UfcSansRegular"
-             
+
             onStopSpinning={() => {
               setMustSpin(false);
               setSpinning(false);

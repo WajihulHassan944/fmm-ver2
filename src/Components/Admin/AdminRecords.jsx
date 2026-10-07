@@ -19,7 +19,7 @@ const AdminRecords = () => {
         const data = await response.json();
         setAdminTokens(data.adminTokens);
       } catch (error) {
-        console.error('Error fetching admin tokens:', error);
+        console.error('Error fetching admin FM COINS:', error);
       }
     };
     if(!matches){
@@ -58,7 +58,7 @@ const AdminRecords = () => {
         onClick={() => router.back()} // Go back to the previous page
         style={{ position: 'absolute', top: '38px', left: '18%', cursor: 'pointer', fontSize: '24px', color: '#007bff', zIndex: '99999' }}
       ></i>
-  
+
       <div className="adminWrapper">
         <div className="homeSecond" style={{ background: 'transparent' }}>
           <h1 className="second-main-heading">Your Profit Records</h1>
@@ -76,13 +76,13 @@ const AdminRecords = () => {
                     <div className="transformed-div-two">
                       <div className="transformed-div-two-partOne">
                       <h1>  Total Profit: {Number(tokenData.tokens) + Number(tokenData.affiliateRewarded)}</h1>
-                        
+
                         <h1>Profit Earned</h1>
                         <h1>${tokenData.tokens}</h1>
                       </div>
                       <div className="transformed-div-two-partTwo">
                         <p>{new Date(tokenData.createdAt).toLocaleDateString()}</p>
-                       
+
                         {match && (
                           <h1>Affiliate: {getAffiliateName(match.affiliateId)} ({tokenData.affiliateRewarded})</h1>
                         )}

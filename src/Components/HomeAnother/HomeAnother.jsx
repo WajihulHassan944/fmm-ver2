@@ -30,37 +30,8 @@ import {
   getFighterName as getResolvedFighterName,
 } from "@/Utils/fightExperience";
 import { SCORE_POINTS, SCORE_LABELS } from "@/Utils/scoringRules";
-import {
-  FaArrowRight,
-  FaBolt,
-  FaBell,
-  FaBullseye,
-  FaCalendarAlt,
-  FaChartLine,
-  FaCheck,
-  FaCoins,
-  FaChevronRight,
-  FaCrown,
-  FaDollarSign,
-  FaFire,
-  FaHandshake,
-  FaNewspaper,
-  FaTshirt,
-  FaFistRaised,
-  FaGift,
-  FaHome,
-  FaPlus,
-  FaPlay,
-  FaShieldAlt,
-  FaSignal,
-  FaStar,
-  FaTimes,
-  FaTrophy,
-  FaUserAlt,
-  FaVolumeMute,
-  FaVolumeUp,
-  FaUsers,
-} from "react-icons/fa";
+import { FaArrowRight, FaBolt, FaBell, FaBullseye, FaCalendarAlt, FaChartLine, FaCheck, FaChevronRight, FaCrown, FaDollarSign, FaFire, FaHandshake, FaNewspaper, FaTshirt, FaFistRaised, FaGift, FaHome, FaPlus, FaPlay, FaShieldAlt, FaSignal, FaStar, FaTimes, FaTrophy, FaUserAlt, FaVolumeMute, FaVolumeUp, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const FALLBACK_FIGHT_IMAGE = "/images/hero-fight.webp";
 const HOME_HERO_IMAGE =
@@ -1630,7 +1601,7 @@ const MobilePhoneHome = ({
   const handleCoinPackageSelect = (amount, price) => {
     onPremiumTap("reward");
     setSelectedCoinPack({ amount, price });
-    setCoinToast(`${amount.toLocaleString()} FM coins selected · ${price}`);
+    setCoinToast(`${amount.toLocaleString()} FM COINS selected · ${price}`);
     setRewardBurst(true);
     if (typeof window !== "undefined") {
       window.setTimeout(() => setRewardBurst(false), 700);
@@ -1642,7 +1613,7 @@ const MobilePhoneHome = ({
     ["/upcomingfights", "Contests", FaTrophy],
     ["/YourFights", "My Picks", FaCheck],
     ["/leaderboard", "Leaderboard", FaCrown],
-    ["/fights-rewards", "Coins & Rewards", FaCoins],
+    ["/fights-rewards", "FM COINS & Rewards", FaCoins],
     ["/blogs", "Latest Blogs", FaNewspaper],
     ["/apparel", "Apparel", FaTshirt],
     ["/affiliate-create-account", "Affiliates", FaHandshake],
@@ -1804,7 +1775,7 @@ const MobilePhoneHome = ({
           <span /><span /><span />
         </button>
         <div className="fmm-app-top-actions">
-          <button type="button" className="fmm-app-wallet" onClick={openCoinFunnel} aria-label={`Open FM coin wallet with ${displayCoinBalance.toLocaleString()} coins`}>
+          <button type="button" className="fmm-app-wallet" onClick={openCoinFunnel} aria-label={`Open FM COINS wallet with ${displayCoinBalance.toLocaleString()} FM COINS`}>
             <b>FM</b><strong>{displayCoinBalance.toLocaleString()}</strong><i><FaPlus aria-hidden="true" /></i>
           </button>
           <Link href={profileHref} className="fmm-app-notify" onClick={() => onPremiumTap()} aria-label="Open profile notifications">
@@ -2017,7 +1988,7 @@ const MobilePhoneHome = ({
 
       <Link href="/upcomingfights" className="fmm-app-demo-cta" onClick={() => onPremiumTap("reward")}>
         <b>NEW HERE?</b>
-        <span>TRY A FREE DEMO FIGHT — NO COINS NEEDED</span>
+        <span>TRY A FREE DEMO FIGHT — NO FM COINS NEEDED</span>
       </Link>
 
       <section className="fmm-app-community fmm-app-dashboard-grid" aria-label="Community predictions, player progression, leaderboard and streak">
@@ -2079,11 +2050,11 @@ const MobilePhoneHome = ({
           <strong>CLAIM REWARD</strong>
         </button>
         <button type="button" className="fmm-app-mini-panel fmm-app-mini-coins" onClick={openCoinFunnel}>
-          <span>COINS WALLET</span>
+          <span>FM COINS WALLET</span>
           <FaCoins aria-hidden="true" />
           <b>{displayCoinBalance.toLocaleString()}</b>
-          <small>COINS</small>
-          <strong>ADD COINS <FaPlus aria-hidden="true" /></strong>
+          <small>FM COINS</small>
+          <strong>ADD FM COINS <FaPlus aria-hidden="true" /></strong>
         </button>
       </section>
 
@@ -2108,7 +2079,7 @@ const MobilePhoneHome = ({
           <small>Promote fights. Build a league. Get players moving.</small>
           <b>BECOME A PARTNER →</b>
         </Link>
-        <button type="button" className="fmm-app-chest fmm-app-coin-chest-trigger" onClick={openCoinFunnel} aria-label="Open FM coin funnel">
+        <button type="button" className="fmm-app-chest fmm-app-coin-chest-trigger" onClick={openCoinFunnel} aria-label="Open FM COINS funnel">
           <img src={`${appAssetBase}/chest-transparent.png`} alt="Treasure chest" loading="lazy" decoding="async" />
           <span>🪙</span><span>💰</span><span>🪙</span>
         </button>
@@ -2135,11 +2106,11 @@ const MobilePhoneHome = ({
               <FaTimes aria-hidden="true" />
             </button>
             <div className="fmm-app-coin-funnel-hero">
-              <img src={`${appAssetBase}/chest-transparent.png`} alt="FM coin treasure chest" />
+              <img src={`${appAssetBase}/chest-transparent.png`} alt="FM COINS treasure chest" />
               <div>
                 <span>FM COINS</span>
                 <h2 id="fmm-app-coin-funnel-title">Power your next picks</h2>
-                <strong>{displayCoinBalance.toLocaleString()} coins</strong>
+                <strong>{displayCoinBalance.toLocaleString()} FM COINS</strong>
               </div>
             </div>
             <p>Choose a coin pack, enter paid cards faster, and keep the fight-night funnel inside the phone app flow.</p>
@@ -2169,7 +2140,7 @@ const MobilePhoneHome = ({
               </Link>
             ) : !isLoggedIn ? (
               <Link href="/CreateAccount" className="fmm-app-coin-signup" onClick={() => onPremiumTap("whoosh")}>
-                🎁 Sign up and start with bonus FM coins
+                🎁 Sign up and start with bonus FM COINS
               </Link>
             ) : (
               <Link href="/checkout" className="fmm-app-coin-signup" onClick={() => onPremiumTap("whoosh")}>

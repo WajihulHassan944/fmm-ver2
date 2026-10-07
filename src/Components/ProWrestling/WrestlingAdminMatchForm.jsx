@@ -4,15 +4,8 @@ import Link from 'next/link';
 import DirectFighterEntry from '@/Components/Admin/DirectFighterEntry';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-import {
-  FaArrowLeft,
-  FaCoins,
-  FaImage,
-  FaSave,
-  FaShieldAlt,
-  FaTrophy,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaImage, FaSave, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
   getWrestlerImage,
   nextStatusOptions,
@@ -47,7 +40,7 @@ const INITIAL = {
   basePot: 0,
   minimumParticipants: 0,
   maximumParticipants: 0,
-  status: 'DRAFT',
+  status: 'OPEN',
   description: '',
   bannerImageUrl: '',
   scoringRuleVersion: '',
@@ -55,9 +48,6 @@ const INITIAL = {
   featured: false,
   publicVisible: true,
   autoCancelIfMinimumNotMet: true,
-  seoTitle: '',
-  seoDescription: '',
-  seoKeywords: '',
 };
 
 const WrestlingAdminMatchForm = ({ matchId }) => {
@@ -142,9 +132,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
             featured: Boolean(match.featured),
             publicVisible: match.publicVisible !== false,
             autoCancelIfMinimumNotMet: match.autoCancelIfMinimumNotMet !== false,
-            seoTitle: match.seo?.title || '',
-            seoDescription: match.seo?.description || '',
-            seoKeywords: safeWrestlingArray(match.seo?.keywords).join(', '),
           });
         } else {
           setOriginalStatus('DRAFT');
@@ -227,16 +214,10 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
       }
       const body = new FormData();
       Object.entries({ ...form, ...resolvedCorners }).forEach(([key, value]) => {
-        if (['seoTitle', 'seoDescription', 'seoKeywords'].includes(key)) return;
         body.append(key, typeof value === 'boolean' ? String(value) : value ?? '');
       });
       body.set('matchDate', matchDate.toISOString());
       body.set('lockAt', lockAt.toISOString());
-      body.set('seo', JSON.stringify({
-        title: form.seoTitle,
-        description: form.seoDescription,
-        keywords: form.seoKeywords.split(',').map((keyword) => keyword.trim()).filter(Boolean),
-      }));
       if (bannerFile) body.append('bannerImage', bannerFile);
 
       let result = await wrestlingRequest(
@@ -302,7 +283,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Promotion name</span><input value={form.promotionName} onChange={(event) => update('promotionName', event.target.value)} /></label>
               <label className="is-wide"><span>Match title *</span><input required value={form.matchTitle} onChange={(event) => update('matchTitle', event.target.value)} placeholder="Wrestler A vs Wrestler B" /></label>
               <label><span>Match format</span><select value={form.matchFormat} disabled={identityLocked} onChange={(event) => update('matchFormat', event.target.value)}>{['SINGLES', 'TAG_TEAM', 'TRIPLE_THREAT', 'FATAL_FOUR_WAY'].map((value) => <option key={value}>{value}</option>)}</select></label>
-              <label><span>{isEdit ? 'Contest status' : 'Initial status'}</span><select value={form.status} onChange={(event) => update('status', event.target.value)}>{statusOptions.map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select>{isEdit && form.status !== originalStatus && <small className="pw-admin-status-change-note">Saving will move this contest from {originalStatus} to {form.status} through the protected lifecycle endpoint.</small>}</label>
+              {isEdit && <label><span>Contest status</span><select value={form.status} onChange={(event) => update('status', event.target.value)}>{statusOptions.map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select>{isEdit && form.status !== originalStatus && <small className="pw-admin-status-change-note">Saving will move this contest from {originalStatus} to {form.status} through the protected lifecycle endpoint.</small>}</label>}
               <label className="is-wide"><span>Description</span><textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows="4" /></label>
               {identityLocked && <div className="pw-admin-field-notice is-wide"><FaShieldAlt /><span><strong>Contest identity is protected.</strong><small>Wrestlers, rules, player entry, and prize pool are locked after publication or first entry.</small></span></div>}
             </div>
@@ -356,9 +337,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
                 <label><input type="checkbox" checked={form.publicVisible} onChange={(event) => update('publicVisible', event.target.checked)} /><span><strong>Publicly visible</strong><small>Allow public contest discovery.</small></span></label>
                 <label><input type="checkbox" checked={form.autoCancelIfMinimumNotMet} onChange={(event) => update('autoCancelIfMinimumNotMet', event.target.checked)} /><span><strong>Auto-cancel below minimum</strong><small>Scheduled maintenance refunds eligible entries.</small></span></label>
               </div>
-              <label><span>SEO title</span><input value={form.seoTitle} onChange={(event) => update('seoTitle', event.target.value)} /></label>
-              <label className="is-wide"><span>SEO description</span><textarea value={form.seoDescription} onChange={(event) => update('seoDescription', event.target.value)} rows="3" /></label>
-              <label className="is-wide"><span>SEO keywords (comma separated)</span><input value={form.seoKeywords} onChange={(event) => update('seoKeywords', event.target.value)} /></label>
             </div>
           </section>
 

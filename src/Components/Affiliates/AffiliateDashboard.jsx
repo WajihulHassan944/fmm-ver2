@@ -2,27 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBullhorn,
-  FaChartLine,
-  FaCheck,
-  FaCopy,
-  FaCoins,
-  FaCrown,
-  FaDollarSign,
-  FaEye,
-  FaHistory,
-  FaIdBadge,
-  FaMoneyCheckAlt,
-  FaQrcode,
-  FaRegPlayCircle,
-  FaTools,
-  FaPlus,
-  FaTrophy,
-  FaUserFriends,
-} from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaBullhorn, FaChartLine, FaCheck, FaCopy, FaCrown, FaDollarSign, FaEye, FaHistory, FaIdBadge, FaMoneyCheckAlt, FaQrcode, FaRegPlayCircle, FaTools, FaPlus, FaTrophy, FaUserFriends } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateAddNewMatch from './AffiliateAddNewMatch';
 import AffiliateMatchDetails from './AffiliateMatchDetails';
 import { fetchMatches } from '../../Redux/matchSlice';

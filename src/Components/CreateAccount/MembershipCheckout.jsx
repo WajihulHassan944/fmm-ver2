@@ -4,7 +4,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
-import { FaArrowLeft, FaCheck, FaCoins, FaLock, FaMinus, FaPlus, FaShieldAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaLock, FaMinus, FaPlus, FaShieldAlt } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
 

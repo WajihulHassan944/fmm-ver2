@@ -6,7 +6,7 @@ const PlayForFree = () => {
   const router = useRouter();
 
   const handlePlayNowClick = () => {
-    router.push('/mock-game'); 
+    router.push('/mock-game');
   };
 
   return (
@@ -29,7 +29,7 @@ const PlayForFree = () => {
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Play for Free – Fantasy Boxing League & Game" />
-        <meta name="twitter:description" content="Join Fantasy MMAdness and enjoy our free fantasy boxing game. Compete, predict fights, and earn tokens – all without spending a dime." />
+        <meta name="twitter:description" content="Join Fantasy MMAdness and enjoy our free fantasy boxing game. Compete, predict fights, and earn FM COINS – all without spending a dime." />
         <meta name="twitter:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
 
         <link rel="icon" href="/favicon.ico" />
@@ -44,8 +44,8 @@ const PlayForFree = () => {
 
         <h1 data-aos="zoom-out" style={{marginTop:'60px'}}>Play Fantasy Boxing for Free</h1>
         <p>
-          Welcome to <strong>Fantasy MMAdness</strong> – the ultimate platform to experience the world of 
-          <strong> fantasy boxing</strong> without spending a single penny! Whether you’re a hardcore MMA fan or 
+          Welcome to <strong>Fantasy MMAdness</strong> – the ultimate platform to experience the world of
+          <strong> fantasy boxing</strong> without spending a single penny! Whether you’re a hardcore MMA fan or
           completely new to fantasy sports, our <strong>free-to-play fantasy boxing game</strong> is built just for you.
         </p>
 
@@ -65,14 +65,14 @@ const PlayForFree = () => {
 
         <h2 data-aos="zoom-out">What Are You Waiting For?</h2>
         <p>
-          There’s no better time to join our <strong>fantasy boxing league</strong>. 
-          Discover what it’s like to play a strategy-based combat sports game that’s free, competitive, and 
+          There’s no better time to join our <strong>fantasy boxing league</strong>.
+          Discover what it’s like to play a strategy-based combat sports game that’s free, competitive, and
           seriously fun. Start your journey today and prove your MMA prediction skills!
         </p>
 
-        <button 
-          className='playForFreeBtns' 
-          onClick={handlePlayNowClick} 
+        <button
+          className='playForFreeBtns'
+          onClick={handlePlayNowClick}
           style={{ cursor: 'pointer' }}
         >
           Try the demo fight

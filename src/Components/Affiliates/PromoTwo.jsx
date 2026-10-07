@@ -1,16 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
-import {
-  FaArrowRight,
-  FaCheckCircle,
-  FaCoins,
-  FaCrown,
-  FaShieldAlt,
-  FaTrophy,
-  FaUserPlus,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaArrowRight, FaCheckCircle, FaCrown, FaShieldAlt, FaTrophy, FaUserPlus, FaUsers } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 import { userHeaders } from '@/Utils/authFetch';

@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaCoins, FaTrophy, FaArrowRight, FaFistRaised } from 'react-icons/fa';
+import { FaTrophy, FaArrowRight, FaFistRaised } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchPublicPredictionFights } from '@/Utils/publicApi';
 import { formatFightDate, getFightCategory, getFightId, getFightName, getFighterImage, getFightPrize } from '@/Utils/fightExperience';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Popup = ({ winnerDetails, onClose, onReward, matchTokens, affiliateTokens }) => {
-    
+
     return (
         <div className="popupwrapped">
             <div className="popup-inner">
@@ -9,11 +9,11 @@ const Popup = ({ winnerDetails, onClose, onReward, matchTokens, affiliateTokens 
                 <img src={winnerDetails.profileUrl} alt={`${winnerDetails.firstName} ${winnerDetails.lastName}`} />
                 <p><strong>Winner Name:</strong> {winnerDetails.firstName} {winnerDetails.lastName}</p>
                 <p><strong>Total Points:</strong> {winnerDetails.totalPoints}</p>
-                <p>Match Tokens: <strong>{matchTokens}</strong> will be added to {winnerDetails.firstName}'s wallet</p>
-                <p><strong>Affiliate Reward:</strong> {affiliateTokens > 0 ? `${affiliateTokens} tokens will be awarded to the affiliate.` : `No tokens for affiliate.`}</p>
+                <p>Match FM COINS: <strong>{matchTokens}</strong> will be added to {winnerDetails.firstName}'s wallet</p>
+                <p><strong>Affiliate Reward:</strong> {affiliateTokens > 0 ? `${affiliateTokens} FM COINS will be awarded to the affiliate.` : `No FM COINS for affiliate.`}</p>
                 <p><strong>Match ID:</strong> {winnerDetails.matchId}</p>
                 <button onClick={onClose} className='cancel'>Cancel</button>
-                <button onClick={onReward}>Reward Tokens</button>
+                <button onClick={onReward}>Reward FM COINS</button>
             </div>
         </div>
     );

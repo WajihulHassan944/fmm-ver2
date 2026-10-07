@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaCoins, FaTrophy, FaBullseye, FaChartLine, FaCheckCircle } from 'react-icons/fa';
+import { FaTrophy, FaBullseye, FaChartLine, FaCheckCircle } from 'react-icons/fa';
+import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const steps = [
   ['1','PICK A FIGHT','Choose an open combat-sports contest and review the matchup, entry, and prize.'],
