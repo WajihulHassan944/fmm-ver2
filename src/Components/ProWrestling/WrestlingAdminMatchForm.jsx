@@ -28,14 +28,15 @@ const coinsToUsd = (value) => ((Number(value) || 0) * USD_PER_PACK / FM_COINS_PE
 
 const INITIAL = {
   eventName: '',
-  promotionName: '',
   matchTitle: '',
   matchFormat: 'SINGLES',
   competitorAId: '',
   competitorBId: '',
   matchDate: '',
   lockAt: '',
-  matchTime: '',
+  startTime: '',
+  timeTba: false,
+  earlyCutoff: false,
   entryFeeTokens: 0,
   basePot: 0,
   minimumParticipants: 0,
@@ -112,14 +113,15 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           setOriginalStatus(match.status || 'DRAFT');
           setForm({
             eventName: match.eventName || '',
-            promotionName: match.promotionName || '',
             matchTitle: match.matchTitle || '',
             matchFormat: match.matchFormat || 'SINGLES',
             competitorAId: String(match.competitorA?.wrestlerId || ''),
             competitorBId: String(match.competitorB?.wrestlerId || ''),
-            matchDate: toLocalInput(match.matchDate),
+            matchDate: match.eventDate || toLocalInput(match.matchDate).slice(0, 10),
             lockAt: toLocalInput(match.lockAt),
-            matchTime: match.matchTime || '',
+            startTime: toLocalInput(match.matchDate).slice(11, 16),
+            timeTba: Boolean(match.timeTba),
+            earlyCutoff: Boolean(match.lockAt && match.matchDate && new Date(match.lockAt) < new Date(match.matchDate)),
             entryFeeTokens: match.entryFeeTokens ?? 0,
             basePot: match.basePot ?? 0,
             minimumParticipants: match.minimumParticipants ?? 0,
@@ -183,10 +185,10 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
       toast.error('Select two different wrestlers.');
       return;
     }
-    const matchDate = new Date(form.matchDate);
-    const lockAt = new Date(form.lockAt);
-    if (Number.isNaN(matchDate.getTime()) || Number.isNaN(lockAt.getTime()) || lockAt >= matchDate) {
-      toast.error('Prediction lock time must occur before the match date and time.');
+    const matchDate = form.timeTba ? null : new Date(`${form.matchDate}T${form.startTime}`);
+    const lockAt = form.timeTba ? null : form.earlyCutoff ? new Date(form.lockAt) : matchDate;
+    if (!form.timeTba && (Number.isNaN(matchDate.getTime()) || Number.isNaN(lockAt.getTime()) || lockAt > matchDate)) {
+      toast.error('Enter the start date and time. An earlier cutoff must be at or before the start.');
       return;
     }
     if (Number(form.maximumParticipants) > 0 && Number(form.minimumParticipants) > Number(form.maximumParticipants)) {
@@ -205,7 +207,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
         const uploadBody = new FormData();
         uploadBody.append('displayName', cornerUploads[side].name.trim());
         uploadBody.append('profileImage', cornerUploads[side].file);
-        uploadBody.append('promotion', form.promotionName);
+        uploadBody.append('promotion', form.eventName);
         const wrestler = await wrestlingRequest('/api/admin/wrestling/wrestlers', { admin: true, method: 'POST', body: uploadBody });
         if (!wrestler?._id) throw new Error(`Wrestler ${side} upload did not return a saved profile.`);
         resolvedCorners[key] = String(wrestler._id);
@@ -216,8 +218,12 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
       Object.entries({ ...form, ...resolvedCorners }).forEach(([key, value]) => {
         body.append(key, typeof value === 'boolean' ? String(value) : value ?? '');
       });
-      body.set('matchDate', matchDate.toISOString());
-      body.set('lockAt', lockAt.toISOString());
+      body.delete('startTime');
+      body.delete('earlyCutoff');
+      body.set('eventDate', form.matchDate);
+      body.set('matchDate', matchDate ? matchDate.toISOString() : '');
+      body.set('lockAt', lockAt ? lockAt.toISOString() : '');
+      body.set('matchTime', form.timeTba ? 'TIME TBA' : matchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }));
       if (bannerFile) body.append('bannerImage', bannerFile);
 
       let result = await wrestlingRequest(
@@ -277,10 +283,9 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
         <form className="admin-create-fight-layout" onSubmit={submit}>
           <main>
           <section className="admin-form-card admin-desk-section">
-            <header><span>01</span><div><h3>Event identity</h3><p>Name the promotion, event, contest, and match format.</p></div></header>
+            <header><span>01</span><div><h3>Event identity</h3><p>Use the event name for the promotion, then name the match and choose its format.</p></div></header>
             <div className="admin-form-grid">
               <label><span>Event name *</span><input required value={form.eventName} onChange={(event) => update('eventName', event.target.value)} /></label>
-              <label><span>Promotion name</span><input value={form.promotionName} onChange={(event) => update('promotionName', event.target.value)} /></label>
               <label className="is-wide"><span>Match title *</span><input required value={form.matchTitle} onChange={(event) => update('matchTitle', event.target.value)} placeholder="Wrestler A vs Wrestler B" /></label>
               <label><span>Match format</span><select value={form.matchFormat} disabled={identityLocked} onChange={(event) => update('matchFormat', event.target.value)}>{['SINGLES', 'TAG_TEAM', 'TRIPLE_THREAT', 'FATAL_FOUR_WAY'].map((value) => <option key={value}>{value}</option>)}</select></label>
               {isEdit && <label><span>Contest status</span><select value={form.status} onChange={(event) => update('status', event.target.value)}>{statusOptions.map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select>{isEdit && form.status !== originalStatus && <small className="pw-admin-status-change-note">Saving will move this contest from {originalStatus} to {form.status} through the protected lifecycle endpoint.</small>}</label>}
@@ -309,9 +314,11 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           <section className="admin-form-card admin-desk-section">
             <header><span>03</span><div><h3>Schedule and player economy</h3><p>Set the entry fee and prize pool in USD. Players see the converted FM COINS amounts.</p></div></header>
             <div className="admin-form-grid">
-              <label><span>Match date/time *</span><input type="datetime-local" required value={form.matchDate} onChange={(event) => update('matchDate', event.target.value)} /></label>
-              <label><span>Prediction lock *</span><input type="datetime-local" required value={form.lockAt} onChange={(event) => update('lockAt', event.target.value)} /></label>
-              <label><span>Display time</span><input value={form.matchTime} onChange={(event) => update('matchTime', event.target.value)} placeholder="8:00 PM EST" /></label>
+              <label><span>Event date{form.timeTba ? ' (optional)' : ' *'}</span><input type="date" required={!form.timeTba} value={form.matchDate} onChange={(event) => update('matchDate', event.target.value)} /></label>
+              <label><span>Start time{form.timeTba ? ' · TIME TBA' : ' *'}</span><input type="time" required={!form.timeTba} disabled={form.timeTba} value={form.timeTba ? '' : form.startTime} onChange={(event) => update('startTime', event.target.value)} /><small>Times use your device’s time zone.</small></label>
+              <div className="admin-toggle-grid is-wide"><label><input type="checkbox" checked={form.timeTba} onChange={(event) => update('timeTba', event.target.checked)} /><span><strong>TIME TBA</strong><small>Use when the start time is unconfirmed. The event date can also be left blank.</small></span></label></div>
+              <div className="admin-inline-notice is-wide">{form.timeTba ? 'Predictions stay open until you select Lock predictions or Match Started in the Scoring Desk. Do this before the action begins.' : 'Predictions close automatically at the scheduled start time.'}</div>
+              {!form.timeTba && <details className="is-wide" open={form.earlyCutoff || undefined}><summary>Optional earlier prediction cutoff</summary><label><input type="checkbox" checked={form.earlyCutoff} onChange={(event) => update('earlyCutoff', event.target.checked)} /> Close predictions before the scheduled start</label>{form.earlyCutoff && <label><span>Earlier cutoff *</span><input type="datetime-local" required value={form.lockAt} onChange={(event) => update('lockAt', event.target.value)} /></label>}</details>}
               <label className="admin-money-conversion-field"><span>Player entry fee (USD)</span><div className="admin-money-input"><b aria-hidden="true">$</b><input type="number" min="0" step="0.01" disabled={identityLocked} value={cashAmounts.entry} onChange={(event) => updateCash('entry', event.target.value)} placeholder="0.00" /></div><small><strong>{Number(form.entryFeeTokens || 0).toLocaleString()} FM COINS</strong> charged to enter</small></label>
               <label className="admin-money-conversion-field"><span>Prize pool (USD)</span><div className="admin-money-input"><b aria-hidden="true">$</b><input type="number" min="0" step="0.01" disabled={identityLocked} value={cashAmounts.pot} onChange={(event) => updateCash('pot', event.target.value)} placeholder="0.00" /></div><small><strong>{Number(form.basePot || 0).toLocaleString()} FM COINS</strong> starting prize pool</small></label>
               <div className="admin-fm-rate-note is-wide"><span>FM COINS conversion</span><strong>$3.99 = 5,000 FM COINS</strong><small>Cash amounts stay in the back office. Player entry uses FM COINS.</small></div>
@@ -323,7 +330,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           <section className="admin-form-card admin-desk-section">
             <header><span>Match timing</span><div><h3>Match time ranges instead of rounds</h3><p>Players predict when the match will finish. These six ranges apply to every wrestling contest.</p></div></header>
             <div className="admin-form-grid">{WRESTLING_TIME_RANGES.map((range) => <div className="admin-inline-notice" key={range.value}>{range.label}</div>)}</div>
-            <p>The scheduled start and prediction lock above control entry. In the Scoring Desk, start the live match timer and enter the official duration as MM:SS before finalizing the scores.</p>
+            <p>Predictions close at the scheduled start, an optional earlier cutoff, or when you start a TIME TBA match. In the Scoring Desk, start the live match timer and enter the official duration as MM:SS before finalizing the scores.</p>
           </section>
 
           <section className="admin-form-card admin-desk-section">
@@ -350,7 +357,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
                 <b style={{ textAlign: 'center' }}>VS</b>
                 <article style={{ minWidth: 0, width: '100%', display: 'grid', gap: 6, textAlign: 'center' }}><div style={{ width: '100%', height: 220, overflow: 'hidden' }}><img src={(form.competitorBId === '__upload__' ? cornerPreviews.B : selectedB?.profileImage) || getWrestlerImage(null, 'B')} alt="Wrestler B preview" style={{ display: 'block', width: '100%', height: '100%', maxHeight: 'none', objectFit: 'contain', objectPosition: 'center' }} /></div><strong>{(form.competitorBId === '__upload__' ? cornerUploads.B.name : selectedB?.displayName) || 'Wrestler B'}</strong></article>
               </div>
-              <small>{form.matchDate ? form.matchDate.replace('T', ' · ') : 'Schedule pending'} · {form.matchTime || 'Display time pending'}</small>
+              <small>{form.matchDate || 'DATE TBA'} · {form.timeTba ? 'TIME TBA' : form.startTime || 'Start time pending'}</small>
             </section>
             <section className="admin-upload-stack">
               <label><FaImage /><span><strong>Upload fight poster</strong><small>{bannerFile?.name || 'Select your finished fight poster'}</small></span><input hidden type="file" accept="image/*" onChange={(event) => setBannerFile(event.target.files?.[0] || null)} /></label>

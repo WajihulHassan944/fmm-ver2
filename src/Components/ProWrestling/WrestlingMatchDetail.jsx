@@ -130,12 +130,12 @@ const WrestlingMatchDetail = () => {
           <div className="theme-container pw-detail-hero-inner">
             <Link href="/pro-wrestling" className="pw-inline-back"><FaArrowLeft /> Wrestling lobby</Link>
             <div className="pw-detail-title-row">
-              <div><p>{match.promotionName || 'Fantasy MMAdness Wrestling'} · {match.eventName}</p><h1>{match.matchTitle}</h1><span>{match.description || 'Predict the full action across both competitors and lock in the official winner.'}</span></div>
+              <div><p>{match.eventName}</p><h1>{match.matchTitle}</h1><span>{match.description || 'Predict the full action across both competitors and lock in the official winner.'}</span></div>
               <WrestlingStatusBadge status={match.status} />
             </div>
             <div className="pw-detail-fight-stage">
               <article className="is-a"><img src={getWrestlerImage(competitorA, 'A')} alt={competitorA.displayName} /><span><small>Red corner</small><strong>{competitorA.displayName}</strong><em>{competitorA.promotion || match.promotionName || 'Pro Wrestling'}</em></span></article>
-              <div><small>{match.matchFormat?.replaceAll?.('_', ' ') || 'Singles match'}</small><b>VS</b><span>{formatWrestlingDate(match.matchDate)}</span></div>
+              <div><small>{match.matchFormat?.replaceAll?.('_', ' ') || 'Singles match'}</small><b>VS</b><span>{formatWrestlingDate(match)}</span></div>
               <article className="is-b"><img src={getWrestlerImage(competitorB, 'B')} alt={competitorB.displayName} /><span><small>Blue corner</small><strong>{competitorB.displayName}</strong><em>{competitorB.promotion || match.promotionName || 'Pro Wrestling'}</em></span></article>
             </div>
           </div>

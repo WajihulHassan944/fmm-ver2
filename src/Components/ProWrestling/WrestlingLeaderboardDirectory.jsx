@@ -95,7 +95,7 @@ const WrestlingLeaderboardDirectory = () => {
                     </div>
                     <div>
                       <WrestlingStatusBadge status={match.status} />
-                      <p>{match.eventName} · {formatWrestlingDate(match.matchDate)}</p>
+                      <p>{match.eventName} · {formatWrestlingDate(match)}</p>
                       <h2>{match.matchTitle}</h2>
                       <dl><span><dt>Players</dt><dd>{match.participantCount || 0}</dd></span><span><dt>Pot</dt><dd>{formatTokenAmount(match.currentPot)}</dd></span></dl>
                       <Link href={`/pro-wrestling/leaderboard/${match._id}`}>{match.status === 'FINALIZED' ? 'View official result' : 'Open live standings'} <FaArrowRight /></Link>

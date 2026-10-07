@@ -261,7 +261,7 @@ const WrestlingAdminScoring = ({ matchId }) => {
           <Link href="/administration/pro-wrestling"><FaArrowLeft /> Wrestling registry</Link>
           <p>Live action and settlement</p>
           <h1>Submit fight scores</h1>
-          <span>{match.matchTitle} · {match.eventName} · {formatWrestlingDate(match.matchDate)}</span>
+          <span>{match.matchTitle} · {match.eventName} · {formatWrestlingDate(match)}</span>
         </div>
         {error && <div className="pw-admin-error">{error}</div>}
 
