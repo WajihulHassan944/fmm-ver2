@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import styles from './WrestlingAdminMatchForm.module.css';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import {
@@ -26,6 +27,11 @@ const toLocalInput = (value) => {
   if (Number.isNaN(date.getTime())) return '';
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
+
+const FM_COINS_PER_PACK = 5000;
+const USD_PER_PACK = 3.99;
+const usdToCoins = (value) => Math.max(0, Math.round((Number(value) || 0) * FM_COINS_PER_PACK / USD_PER_PACK));
+const coinsToUsd = (value) => ((Number(value) || 0) * USD_PER_PACK / FM_COINS_PER_PACK).toFixed(2);
 
 const INITIAL = {
   eventName: '',
@@ -61,6 +67,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const router = useRouter();
   const isEdit = Boolean(matchId);
   const [form, setForm] = useState(INITIAL);
+  const [cashAmounts, setCashAmounts] = useState({ entry: '', pot: '' });
   const [wrestlers, setWrestlers] = useState([]);
   const [affiliates, setAffiliates] = useState([]);
   const [scoringRules, setScoringRules] = useState([]);
@@ -103,6 +110,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
         setMatchCounts(matchPayload?.counts || { entries: 0, predictions: 0 });
 
         if (match) {
+          setCashAmounts({ entry: coinsToUsd(match.entryFeeTokens), pot: coinsToUsd(match.basePot) });
           setOriginalStatus(match.status || 'DRAFT');
           setForm({
             eventName: match.eventName || '',
@@ -153,6 +161,10 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   }, [isEdit, matchId]);
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  const updateCash = (key, value) => {
+    setCashAmounts((current) => ({ ...current, [key]: value }));
+    update(key === 'entry' ? 'entryFeeTokens' : 'basePot', usdToCoins(value));
+  };
   const selectedA = useMemo(() => wrestlers.find((item) => String(item._id) === String(form.competitorAId)), [form.competitorAId, wrestlers]);
   const selectedB = useMemo(() => wrestlers.find((item) => String(item._id) === String(form.competitorBId)), [form.competitorBId, wrestlers]);
   const selectedAffiliate = useMemo(() => affiliates.find((item) => String(item._id) === String(form.affiliateId)), [affiliates, form.affiliateId]);
@@ -227,16 +239,21 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   return (
     <>
       <Head><title>{isEdit ? 'Edit' : 'Create'} Pro Wrestling Contest | FMM Administration</title></Head>
-      <div className="pw-admin-page pw-admin-match-form-page">
-        <div className="pw-admin-form-heading">
+      <div className={`pw-admin-page pw-admin-match-form-page admin-workspace ${styles.workspace}`}>
+        <div className={`pw-admin-form-heading ${styles.hero}`}>
           <Link href="/administration/pro-wrestling"><FaArrowLeft /> Wrestling registry</Link>
-          <p>{isEdit ? 'Contest configuration' : 'New game-mode card'}</p>
+          <p>Pro Wrestling · Economics desk</p>
           <h1>{isEdit ? 'Edit wrestling contest' : 'Create wrestling contest'}</h1>
-          <span>Set up the wrestlers, match schedule, prediction cutoff, and match-time scoring.</span>
+          <span>Set your player entry, prize pool, wrestlers, and match schedule in one place.</span>
         </div>
         {error && <div className="pw-admin-error">{error}</div>}
 
-        <form className="pw-admin-form" onSubmit={submit}>
+        <section className={styles.summary} aria-label="Player economy preview" aria-live="polite">
+          <article><FaCoins aria-hidden="true" /><span><small>Player entry</small><strong>{Number(form.entryFeeTokens || 0).toLocaleString()} FM COINS</strong></span></article>
+          <article><FaTrophy aria-hidden="true" /><span><small>Prize pool</small><strong>{Number(form.basePot || 0).toLocaleString()} FM COINS</strong></span></article>
+          <article><FaUsers aria-hidden="true" /><span><small>Participants</small><strong>{Number(form.minimumParticipants) || 0} minimum · {Number(form.maximumParticipants) || 'No'} limit</strong></span></article>
+        </section>
+        <form className={`pw-admin-form ${styles.form}`} onSubmit={submit}>
           <section className="pw-admin-form-section">
             <header><span>01</span><div><h2>Event identity</h2><p>Name the promotion, event, contest, and match format.</p></div></header>
             <div className="pw-admin-field-grid">
@@ -246,7 +263,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Match format</span><select value={form.matchFormat} disabled={identityLocked} onChange={(event) => update('matchFormat', event.target.value)}>{['SINGLES', 'TAG_TEAM', 'TRIPLE_THREAT', 'FATAL_FOUR_WAY'].map((value) => <option key={value}>{value}</option>)}</select></label>
               <label><span>{isEdit ? 'Contest status' : 'Initial status'}</span><select value={form.status} onChange={(event) => update('status', event.target.value)}>{statusOptions.map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select>{isEdit && form.status !== originalStatus && <small className="pw-admin-status-change-note">Saving will move this contest from {originalStatus} to {form.status} through the protected lifecycle endpoint.</small>}</label>
               <label className="is-wide"><span>Description</span><textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows="4" /></label>
-              {identityLocked && <div className="pw-admin-field-notice is-wide"><FaShieldAlt /><span><strong>Contest identity is protected.</strong><small>Competitors, rules, entry fee, and base pot become immutable after publication or first entry.</small></span></div>}
+              {identityLocked && <div className="pw-admin-field-notice is-wide"><FaShieldAlt /><span><strong>Contest identity is protected.</strong><small>Wrestlers, rules, player entry, and prize pool are locked after publication or first entry.</small></span></div>}
             </div>
           </section>
 
@@ -268,13 +285,14 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           </section>
 
           <section className="pw-admin-form-section">
-            <header><span>03</span><div><h2>Schedule, entry, and pot</h2><p>Configure lock enforcement, wallet cost, and participation thresholds.</p></div></header>
+            <header><span>03</span><div><h2>Schedule and player economy</h2><p>Set the entry fee and prize pool in USD. Players see the converted FM COINS amounts.</p></div></header>
             <div className="pw-admin-field-grid">
               <label><span>Match date/time *</span><input type="datetime-local" required value={form.matchDate} onChange={(event) => update('matchDate', event.target.value)} /></label>
               <label><span>Prediction lock *</span><input type="datetime-local" required value={form.lockAt} onChange={(event) => update('lockAt', event.target.value)} /></label>
               <label><span>Display time</span><input value={form.matchTime} onChange={(event) => update('matchTime', event.target.value)} placeholder="8:00 PM EST" /></label>
-              <label><span>Entry fee tokens</span><input type="number" min="0" disabled={identityLocked} value={form.entryFeeTokens} onChange={(event) => update('entryFeeTokens', event.target.value)} /></label>
-              <label><span>Base pot</span><input type="number" min="0" disabled={identityLocked} value={form.basePot} onChange={(event) => update('basePot', event.target.value)} /></label>
+              <label className={styles.moneyField}><span>Player entry fee (USD)</span><div className={styles.moneyInput}><b aria-hidden="true">$</b><input type="number" min="0" step="0.01" disabled={identityLocked} value={cashAmounts.entry} onChange={(event) => updateCash('entry', event.target.value)} placeholder="0.00" /></div><small><strong>{Number(form.entryFeeTokens || 0).toLocaleString()} FM COINS</strong> charged to enter</small></label>
+              <label className={styles.moneyField}><span>Prize pool (USD)</span><div className={styles.moneyInput}><b aria-hidden="true">$</b><input type="number" min="0" step="0.01" disabled={identityLocked} value={cashAmounts.pot} onChange={(event) => updateCash('pot', event.target.value)} placeholder="0.00" /></div><small><strong>{Number(form.basePot || 0).toLocaleString()} FM COINS</strong> starting prize pool</small></label>
+              <div className={`is-wide ${styles.conversion}`}><FaCoins aria-hidden="true" /><span><strong>$3.99 = 5,000 FM COINS</strong><small>Cash amounts stay in the back office. Player entry uses FM COINS.</small></span></div>
               <label><span>Minimum participants</span><input type="number" min="0" value={form.minimumParticipants} onChange={(event) => update('minimumParticipants', event.target.value)} /></label>
               <label><span>Maximum participants</span><input type="number" min="0" value={form.maximumParticipants} onChange={(event) => update('maximumParticipants', event.target.value)} /></label>
             </div>
@@ -282,7 +300,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
 
           <section className="pw-admin-form-section">
             <header><span>Match timing</span><div><h2>Match time ranges instead of rounds</h2><p>Players predict when the match will finish. These six ranges apply to every wrestling contest.</p></div></header>
-            <ul>{WRESTLING_TIME_RANGES.map((range) => <li key={range.value}>{range.label}</li>)}</ul>
+            <ul className={styles.timeRanges}>{WRESTLING_TIME_RANGES.map((range) => <li key={range.value}>{range.label}</li>)}</ul>
             <p>The scheduled start and prediction lock above control entry. In the Scoring Desk, start the live match timer and enter the official duration as MM:SS before finalizing the scores.</p>
           </section>
 
@@ -302,7 +320,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Scoring ruleset</span><select value={form.scoringRuleVersion} disabled={identityLocked} onChange={(event) => update('scoringRuleVersion', event.target.value)}>{scoringRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
               <label><span>Payout ruleset</span><select value={form.payoutRuleVersion} disabled={identityLocked} onChange={(event) => update('payoutRuleVersion', event.target.value)}>{payoutRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
               <label className="is-wide"><span>Banner image URL</span><input value={form.bannerImageUrl} onChange={(event) => update('bannerImageUrl', event.target.value)} /></label>
-              <label className="pw-file-field"><FaImage /><span>Upload banner image</span><input type="file" accept="image/*" onChange={(event) => setBannerFile(event.target.files?.[0] || null)} /><small>{bannerFile?.name || 'Optional Cloudinary upload'}</small></label>
+              <label className="pw-file-field"><FaImage /><span>Upload banner image</span><input type="file" accept="image/*" onChange={(event) => setBannerFile(event.target.files?.[0] || null)} /><small>{bannerFile?.name || 'Optional match poster upload'}</small></label>
               {(bannerFile || form.bannerImageUrl) && <div className="pw-admin-banner-preview"><img src={bannerFile ? URL.createObjectURL(bannerFile) : form.bannerImageUrl} alt="Contest banner preview" /></div>}
               <div className="pw-admin-toggle-grid is-wide">
                 <label><input type="checkbox" checked={form.featured} onChange={(event) => update('featured', event.target.checked)} /><span><strong>Featured contest</strong><small>Prioritize this card in public discovery.</small></span></label>
@@ -316,7 +334,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           </section>
 
           <footer className="pw-admin-form-footer">
-            <div><FaShieldAlt /><span><strong>Additive game-mode record</strong><small>This form writes only to the Pro Wrestling collections.</small></span></div>
+            <div><FaShieldAlt /><span><strong>Ready to publish?</strong><small>Check your entry, prize pool, and prediction cutoff before saving.</small></span></div>
             <div><Link href="/administration/pro-wrestling" className="pw-admin-secondary">Cancel</Link><button type="submit" className="pw-admin-primary" disabled={saving}><FaSave /> {saving ? 'Saving…' : isEdit ? 'Save contest changes' : 'Create wrestling contest'}</button></div>
           </footer>
         </form>
