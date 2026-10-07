@@ -78,6 +78,12 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
   const [matchCounts, setMatchCounts] = useState({ entries: 0, predictions: 0 });
   const [originalStatus, setOriginalStatus] = useState('DRAFT');
   const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState('');
+  useEffect(() => {
+    const url = bannerFile ? URL.createObjectURL(bannerFile) : '';
+    setBannerPreview(url);
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [bannerFile]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const submitLock = useRef(false);
@@ -345,8 +351,6 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Scoring ruleset</span><select value={form.scoringRuleVersion} disabled={identityLocked} onChange={(event) => update('scoringRuleVersion', event.target.value)}>{scoringRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
               <label><span>Payout ruleset</span><select value={form.payoutRuleVersion} disabled={identityLocked} onChange={(event) => update('payoutRuleVersion', event.target.value)}>{payoutRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
               <label className="is-wide"><span>Banner image URL</span><input value={form.bannerImageUrl} onChange={(event) => update('bannerImageUrl', event.target.value)} /></label>
-              <label className="pw-file-field"><FaImage /><span>Upload banner image</span><input type="file" accept="image/*" onChange={(event) => setBannerFile(event.target.files?.[0] || null)} /><small>{bannerFile?.name || 'Optional match poster upload'}</small></label>
-              {(bannerFile || form.bannerImageUrl) && <div className="pw-admin-banner-preview"><img src={bannerFile ? URL.createObjectURL(bannerFile) : form.bannerImageUrl} alt="Contest banner preview" /></div>}
               <div className="admin-toggle-grid is-wide">
                 <label><input type="checkbox" checked={form.featured} onChange={(event) => update('featured', event.target.checked)} /><span><strong>Featured contest</strong><small>Prioritize this card in public discovery.</small></span></label>
                 <label><input type="checkbox" checked={form.publicVisible} onChange={(event) => update('publicVisible', event.target.checked)} /><span><strong>Publicly visible</strong><small>Allow public contest discovery.</small></span></label>
@@ -361,7 +365,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           </main>
           <aside className="admin-economics-control-rail">
             <div className="admin-control-rail-heading"><span>Live control rail</span><strong>What players will see</strong><small>Updates as this card is configured.</small></div>
-            <section className="admin-fight-visual-card" style={{ backgroundImage: `linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.95)),url(${form.bannerImageUrl || '/images/fmm-pages/admin-command-hd.webp'})` }}>
+            <section className="admin-fight-visual-card" style={{ backgroundImage: `linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.95)),url(${bannerPreview || form.bannerImageUrl || '/images/fmm-pages/admin-command-hd.webp'})` }}>
               <span>Live preview · Pro Wrestling</span><h3>{form.matchTitle || 'Untitled match card'}</h3>
               <div>
                 <article><img src={(form.competitorAId === '__upload__' ? cornerPreviews.A : selectedA?.profileImage) || getWrestlerImage(null, 'A')} alt="Wrestler A preview" /><strong>{(form.competitorAId === '__upload__' ? cornerUploads.A.name : selectedA?.displayName) || 'Wrestler A'}</strong></article>
@@ -369,6 +373,10 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               </div>
               <small>{form.matchDate ? form.matchDate.replace('T', ' · ') : 'Schedule pending'} · {form.matchTime || 'Display time pending'}</small>
             </section>
+            <section className="admin-upload-stack">
+              <label><FaImage /><span><strong>Upload fight poster</strong><small>{bannerFile?.name || 'Select your finished fight poster'}</small></span><input hidden type="file" accept="image/*" onChange={(event) => setBannerFile(event.target.files?.[0] || null)} /></label>
+            </section>
+            {(bannerPreview || form.bannerImageUrl) && <section className="admin-form-card" aria-label="Fight poster preview"><h3>Fight poster</h3><img src={bannerPreview || form.bannerImageUrl} alt="Uploaded fight poster" style={{ display: 'block', width: '100%', height: 'auto', objectFit: 'contain' }} /></section>}
             <section className="admin-form-card" aria-label="Player economy preview" aria-live="polite">
               <p><FaCoins /> Player entry</p><h3>{Number(form.entryFeeTokens || 0).toLocaleString()} FM COINS</h3>
               <p><FaTrophy /> Prize pool</p><h3>{Number(form.basePot || 0).toLocaleString()} FM COINS</h3>
