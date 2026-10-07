@@ -1,0 +1,59 @@
+.workspace {
+  background: radial-gradient(ellipse at top right, #183047 0, transparent 45%), #070d15;
+  color: #f6f8fc;
+  padding: 28px clamp(16px, 3vw, 44px) 70px;
+}
+.hero {
+  background: linear-gradient(120deg, #14273c, #0c1522 65%);
+  border: 1px solid #30465d;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.hero > a { color: #c8d9eb; }
+.hero > p { color: #71bdff; letter-spacing: .08em; text-transform: uppercase; margin-top: 24px; }
+.hero h1 { font-size: clamp(28px, 4vw, 48px); margin: 10px 0; line-height: 1.1; }
+.hero > span { color: #bac8d8; line-height: 1.6; }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+.summary article { display: flex; align-items: center; gap: 14px; padding: 20px; border: 1px solid #304056; border-radius: 16px; background: #101c2a; min-width: 0; }
+.summary svg { color: #ffd166; font-size: 24px; flex-shrink: 0; }
+.summary span { display: grid; gap: 6px; min-width: 0; }
+.summary small { color: #9fb3cb; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.summary strong { font-size: clamp(15px, 1.7vw, 23px); overflow-wrap: anywhere; }
+.form :global(.pw-admin-form-section) { background: #101a28; border: 1px solid #2d4057; border-radius: 18px; margin-bottom: 20px; padding: 24px; }
+.form :global(.pw-admin-form-section) > header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+.form :global(.pw-admin-form-section) > header > span { background: #173751; color: #8eceff; border: 1px solid #356287; border-radius: 10px; padding: 10px; font-weight: 700; }
+.form h2 { font-size: 24px; margin: 0 0 8px; }
+.form p { color: #b4c4d7; line-height: 1.6; }
+.form :global(.pw-admin-field-grid) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.form :global(.is-wide) { grid-column: 1 / -1; }
+.form label { display: grid; gap: 9px; color: #dce5f1; min-width: 0; }
+.form input:not([type=checkbox]), .form select, .form textarea { width: 100%; min-height: 46px; padding: 12px; background: #08121f; color: #f6f8fc; border: 1px solid #3b506a; border-radius: 10px; box-sizing: border-box; font: inherit; }
+.form input:focus-visible, .form select:focus-visible, .form textarea:focus-visible { outline: 2px solid #79c6ff; outline-offset: 2px; }
+.form input:disabled, .form select:disabled { opacity: .65; cursor: not-allowed; }
+.form :global(.pw-admin-competitor-picker) { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; }
+.form :global(.pw-admin-competitor-picker) img { height: 180px; max-width: 100%; object-fit: contain; }
+.form .moneyField { padding: 18px; background: #15243a; border: 1px solid #42617c; border-radius: 14px; }
+.moneyInput { display: flex; align-items: center; gap: 10px; }
+.moneyInput b { color: #ffd166; font-size: 24px; }
+.moneyField small { color: #adbed2; }
+.moneyField small strong { color: #ffd166; }
+.conversion { display: flex; align-items: center; gap: 14px; padding: 17px; background: #102b30; border: 1px solid #2d5e63; border-radius: 12px; }
+.conversion svg { color: #ffd166; font-size: 24px; }
+.conversion span { display: grid; gap: 5px; }
+.conversion small { color: #b4c4d7; }
+.timeRanges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0; list-style: none; }
+.timeRanges li { padding: 14px; border: 1px solid #385a78; border-radius: 10px; background: #122b41; color: #cae9ff; text-align: center; }
+.form :global(.pw-admin-form-footer) { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 22px; background: #101c2a; border: 1px solid #30465d; border-radius: 16px; }
+.form :global(.pw-admin-form-footer) > div { display: flex; align-items: center; gap: 12px; }
+.form :global(.pw-admin-form-footer) span { display: grid; gap: 6px; }
+.form :global(.pw-admin-form-footer) small { color: #adbed2; }
+.form :global(.pw-admin-primary) { background: #d92035; border: 1px solid #ef5263; }
+@media (max-width: 760px) {
+  .summary { grid-template-columns: 1fr; }
+  .hero, .form :global(.pw-admin-form-section) { padding: 20px; }
+  .form :global(.pw-admin-field-grid), .form :global(.pw-admin-competitor-picker) { grid-template-columns: 1fr; }
+  .form :global(.pw-admin-competitor-picker) > b { text-align: center; }
+  .timeRanges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form :global(.pw-admin-form-footer) > div { flex-wrap: wrap; }
+}
