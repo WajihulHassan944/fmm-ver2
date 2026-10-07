@@ -116,7 +116,7 @@ const WrestlingMatchDetail = () => {
   if (loading) return <div className="pw-page pw-state-page"><div className="pw-state-card"><FaBolt /><h1>Loading wrestling contest…</h1></div></div>;
   if (error || !match) return <div className="pw-page pw-state-page"><WrestlingEmptyState title="Contest unavailable" description={error} action={{ href: '/pro-wrestling', label: 'Return to wrestling lobby' }} /></div>;
 
-  const canJoin = match.status === 'OPEN' && new Date(match.lockAt).getTime() > now;
+  const canJoin = canEditWrestlingPrediction(match, now);
   const competitorA = match.competitorA || {};
   const competitorB = match.competitorB || {};
   const ActionIcon = action?.icon || FaArrowRight;
@@ -149,7 +149,7 @@ const WrestlingMatchDetail = () => {
               <article><FaCoins /><span><small>Entry fee</small><strong>{formatTokenAmount(match.entryFeeTokens)} FM COINS</strong></span></article>
               <article><FaTrophy /><span><small>Current pot</small><strong>{formatTokenAmount(match.currentPot)} FM COINS</strong></span></article>
               <article><FaUsers /><span><small>Players entered</small><strong>{formatTokenAmount(match.participantCount)}</strong></span></article>
-              <article><FaLock /><span><small>Prediction lock</small><strong>{formatWrestlingCountdown(match.lockAt, now)}</strong></span></article>
+              <article><FaLock /><span><small>Prediction lock</small><strong>{canEditWrestlingPrediction(match, now) ? formatWrestlingCountdown(match.lockAt, now) : 'Closed'}</strong></span></article>
             </div>
             <div className="pw-contest-command-action">
               {entry ? (
