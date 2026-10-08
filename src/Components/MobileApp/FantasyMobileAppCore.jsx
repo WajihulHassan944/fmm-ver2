@@ -3826,8 +3826,8 @@ class FantasyMobileAppCore extends React.Component {
       return React.createElement('div', {
         key: side,
         className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--' + (isA ? 'left' : 'right'),
-        style: { position: 'absolute', [isA ? 'left' : 'right']: 0, top: 0, height: 150, width: '39%', pointerEvents: 'none' },
-      }, React.createElement(MobileImageSlot, { id: prefix + '-' + side.toLowerCase() + '-' + event.id, shape: 'rect', placeholder: isA ? event.f1 : event.f2, fit: 'contain', src: image, fallbackSrc: event.fallbackImage }));
+        style: { position: 'absolute', [isA ? 'left' : 'right']: 0, top: 0, height: 150, width: '39%', overflow: 'hidden', pointerEvents: 'none' },
+      }, React.createElement(MobileImageSlot, { id: prefix + '-' + side.toLowerCase() + '-' + event.id, shape: 'rect', placeholder: isA ? event.f1 : event.f2, fit: 'cover', position: 'center top', src: image, fallbackSrc: event.fallbackImage }));
     });
   }
 
