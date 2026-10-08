@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { wrestlingRequest, nextStatusOptions } from '@/Utils/proWrestling';
 
-export default function WrestlingRegistryActions({ match, onUpdated }) {
+export default function WrestlingRegistryActions({ match, onUpdated, placementOnly = false }) {
   const [busy, setBusy] = useState(false);
   const [invite, setInvite] = useState(false);
   const [name, setName] = useState('');
@@ -43,19 +43,25 @@ export default function WrestlingRegistryActions({ match, onUpdated }) {
     const history = await wrestlingRequest(`/api/admin/fights/${id}/scorers`, { admin: true }).catch(() => null);
     if (history) setAssignments(history.assignments || []);
   };
-  return <details style={{ minWidth: 210 }}>
-    <summary>Actions</summary>
+  if (placementOnly) return <div style={{ display: 'grid', gap: 8, minWidth: 190 }}>
+      <label htmlFor={`wrestling-slot-${id}`}>Shown on homepage</label>
+      <select id={`wrestling-slot-${id}`} value={match.homepagePromoted ? match.homepageSlot || 0 : 0} disabled={busy} onChange={(event) => promote(Number(event.target.value))}>
+        <option value={0}>Not shown</option>
+        {[1,2,3,4,5].map((slot) => <option key={slot} value={slot}>Homepage {slot}</option>)}
+      </select>
+      <button type="button" disabled={busy} onClick={() => place('featured-this-week', 'featuredThisWeek')}>{match.featuredThisWeek ? 'Remove from' : 'Show in'} Featured This Week</button>
+      <button type="button" disabled={busy} onClick={() => place('featured-fight', 'featuredFight')}>{match.featuredFight ? 'Remove from' : 'Show in'} Featured Fight</button>
+      <small>{match.homepagePromoted && match.homepageSlot ? `Shown: Homepage ${match.homepageSlot}` : 'Not shown in homepage banner'}</small>
+      {(!match.publicVisible || match.status === 'DRAFT') && <small>Publish the match to make its placement visible to players.</small>}
+    </div>;
+  return <div style={{ display: 'grid', gap: 8, minWidth: 200 }}>
+    <div className="pw-admin-row-actions"><Link href={`/administration/pro-wrestling/${id}`}>Economics</Link><Link href={`/administration/pro-wrestling/${id}/scoring`}>{match.status === 'FINALIZED' ? 'Scores' : 'Score'}</Link></div>
+    <details>
+    <summary>More actions</summary>
     <div style={{ display: 'grid', gap: 8, padding: '12px 0' }}>
       <Link href={`/administration/pro-wrestling/${id}`}>Edit match / economics</Link>
       <Link href={`/administration/pro-wrestling/${id}/scoring`}>Score / results / entries / payouts</Link>
       <Link href={`/administration/growth?fightId=${id}`}>Promote / poster / affiliate outreach</Link>
-      <label htmlFor={`wrestling-slot-${id}`}>Homepage banner section</label>
-      <select id={`wrestling-slot-${id}`} value={match.homepagePromoted ? match.homepageSlot || 0 : 0} disabled={busy} onChange={(event) => promote(Number(event.target.value))}>
-        <option value={0}>Not pinned</option>
-        {[1,2,3,4,5].map((slot) => <option key={slot} value={slot}>Homepage section {slot}</option>)}
-      </select>
-      <button type="button" disabled={busy} onClick={() => place('featured-this-week', 'featuredThisWeek')}>{match.featuredThisWeek ? 'Remove from' : 'Show in'} Featured This Week</button>
-      <button type="button" disabled={busy} onClick={() => place('featured-fight', 'featuredFight')}>{match.featuredFight ? 'Remove from' : 'Show in'} Featured Fight</button>
       {nextStatusOptions(match.status).map((status) => <button key={status} type="button" disabled={busy} onClick={() => run(`/api/admin/wrestling/matches/${id}/status`, { status }, 'PUT')}>{status === 'LOCKED' ? 'Close entries now' : `Set ${status.toLowerCase()}`}</button>)}
       <button type="button" disabled={busy} onClick={showInvite}>Send to employee scorer</button>
       {invite && <section aria-label="Scorer assignment">
@@ -69,5 +75,5 @@ export default function WrestlingRegistryActions({ match, onUpdated }) {
       </section>}
       <Link href={`/administration/swarm?tab=jobs&fightId=${id}&scopeLabel=${encodeURIComponent(match.matchTitle)}`}>Swarm jobs</Link>
     </div>
-  </details>;
+  </details></div>;
 }
