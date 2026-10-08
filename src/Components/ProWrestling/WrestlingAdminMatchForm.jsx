@@ -46,6 +46,7 @@ const INITIAL = {
   bannerImageUrl: '',
   scoringRuleVersion: '',
   payoutRuleVersion: '',
+  notify: false,
   featured: false,
   publicVisible: true,
   autoCancelIfMinimumNotMet: true,
@@ -132,6 +133,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
             bannerImageUrl: match.bannerImage || '',
             scoringRuleVersion: match.scoringRuleVersion || '',
             payoutRuleVersion: match.payoutRuleVersion || '',
+            notify: Boolean(match.notify),
             featured: Boolean(match.featured),
             publicVisible: match.publicVisible !== false,
             autoCancelIfMinimumNotMet: match.autoCancelIfMinimumNotMet !== false,
@@ -245,6 +247,8 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
       }
 
       toast.success(isEdit ? 'Wrestling contest updated.' : 'Wrestling contest created.');
+      if (result?.memberNotification?.state === 'queued') toast.info('Member emails queued. Delivery status will appear in the registry.');
+      if (result?.memberNotification?.state === 'failed') toast.error('Contest saved, but member email delivery failed.');
       router.push(`/administration/pro-wrestling/${result?._id || matchId}`);
     } catch (requestError) {
       toast.error(requestError.message || 'The wrestling contest could not be saved.');
@@ -341,6 +345,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
               <label><span>Payout ruleset</span><select value={form.payoutRuleVersion} disabled={identityLocked} onChange={(event) => update('payoutRuleVersion', event.target.value)}>{payoutRules.map((rule) => <option key={rule.ruleId} value={rule.ruleId}>{rule.name} ({rule.ruleId})</option>)}</select></label>
               <label className="is-wide"><span>Banner image URL</span><input value={form.bannerImageUrl} onChange={(event) => update('bannerImageUrl', event.target.value)} /></label>
               <div className="admin-toggle-grid is-wide">
+                <label><input type="checkbox" checked={form.notify} onChange={(event) => update('notify', event.target.checked)} /><span><strong>Notify members</strong><small>Email eligible registered members and show this published contest in the notification bell. Sent once per contest.</small></span></label>
                 <label><input type="checkbox" checked={form.featured} onChange={(event) => update('featured', event.target.checked)} /><span><strong>Featured contest</strong><small>Prioritize this card in public discovery.</small></span></label>
                 <label><input type="checkbox" checked={form.publicVisible} onChange={(event) => update('publicVisible', event.target.checked)} /><span><strong>Publicly visible</strong><small>Allow public contest discovery.</small></span></label>
                 <label><input type="checkbox" checked={form.autoCancelIfMinimumNotMet} onChange={(event) => update('autoCancelIfMinimumNotMet', event.target.checked)} /><span><strong>Auto-cancel below minimum</strong><small>Scheduled maintenance refunds eligible entries.</small></span></label>

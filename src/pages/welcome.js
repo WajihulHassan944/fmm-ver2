@@ -386,11 +386,16 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                 <div style={{ gridColumn: '1 / -1', border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, padding: '30px 26px', textAlign: 'center', background: 'rgba(255,255,255,.03)', color: 'rgba(255,255,255,.6)', fontWeight: 600, fontSize: 14.5 }}>
                   No open {sportFilter.charAt(0) + sportFilter.slice(1).toLowerCase()} cards right now &mdash; check the app for the full slate.
                 </div>
-              ) : visibleFights.map((fight, index) => (
+              ) : visibleFights.map((fight, index) => fight.empty ? (
+                <div key={fight.id} aria-label={`Homepage position ${fight.slot}: next fight to be announced`} style={{ border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, minHeight: 300, padding: 26, display: 'grid', placeContent: 'center', textAlign: 'center', background: 'rgba(255,255,255,.03)' }}>
+                  <strong style={{ color: '#f5a623', fontSize: 18 }}>HOMEPAGE {fight.slot}</strong>
+                  <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,.65)' }}>Next fight to be announced</p>
+                </div>
+              ) : (
                 <div key={fight.id} style={{ border: '1px solid ' + (index === 0 ? 'rgba(245,166,35,.4)' : 'rgba(216,220,228,.18)'), borderRadius: 14, overflow: 'hidden', background: index === 0 ? 'linear-gradient(168deg,rgba(245,166,35,.1),rgba(11,14,24,.7))' : 'rgba(255,255,255,.03)' }}>
                   <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#0b0e18', display: 'flex' }}>
-                    <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.fighterAFace || fight.image} alt={fight.f1} style={{ display: 'block', width: '50%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }} />
-                    <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.fighterBFace || fight.image} alt={fight.f2} style={{ display: 'block', width: '50%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }} />
+                    <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.fighterAFace || fight.image} alt={fight.f1} style={{ display: 'block', width: '50%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom', paddingTop: 12, boxSizing: 'border-box' }} />
+                    <img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" src={fight.fighterBFace || fight.image} alt={fight.f2} style={{ display: 'block', width: '50%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom', paddingTop: 12, boxSizing: 'border-box' }} />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 60%,rgba(11,14,24,.55))', pointerEvents: 'none' }} />
                     <div style={{ position: 'absolute', top: 11, right: 11, width: 26, height: 26, borderRadius: '50%', background: 'rgba(11,14,24,.82)', border: '1px solid rgba(255,255,255,.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff' }} title={'Homepage slot ' + fight.slot}>{fight.slot}</div>
                   </div>
@@ -1050,7 +1055,7 @@ async function buildWelcomeProps() {
   }
   const open = slots.filter(Boolean);
 
-  const fights = open.map(toFightCard);
+  const fights = slots.map((fight, index) => fight ? toFightCard(fight, index) : { id: `homepage-empty-${index + 1}`, slot: index + 1, empty: true, sport: '' });
 
   const rawBoard = Array.isArray(boardData?.leaderboard) ? boardData.leaderboard
     : Array.isArray(boardData?.players) ? boardData.players

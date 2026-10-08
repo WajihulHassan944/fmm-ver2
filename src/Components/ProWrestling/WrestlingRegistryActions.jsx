@@ -76,6 +76,7 @@ export default function WrestlingRegistryActions({ match, onUpdated, placementOn
         {[1,2,3,4,5].map((slot) => <option key={slot} value={slot}>Homepage {slot}</option>)}
       </select>
       <small>{match.homepagePromoted && match.homepageSlot ? `Shown: Homepage ${match.homepageSlot}` : 'Not shown in homepage banner'}</small>
+      {match.memberNotification?.state && <small>{match.memberNotification.state === 'queued' ? 'Member emails queued' : `Member emails: ${match.memberNotification.delivered || 0}/${match.memberNotification.attempted || 0} accepted${match.memberNotification.state === 'failed' ? ' — delivery issue' : ''}`}</small>}
       {(match.publicVisible === false || match.status === 'DRAFT') && <small>Publish the match to make its placement visible to players.</small>}
     </div>;
   return <div className={styles.actions}>
@@ -84,7 +85,7 @@ export default function WrestlingRegistryActions({ match, onUpdated, placementOn
       <Link href={`/administration/pro-wrestling/${id}/scoring`}><FaTrophy /> {match.status === 'FINALIZED' ? 'Scores' : 'Score'}</Link>
       <button ref={moreRef} type="button" aria-expanded={Boolean(menuPosition)} aria-controls={`wrestling-actions-${id}`} onClick={toggleMenu}>More ▾</button>
     </div>
-    {menuPosition && createPortal(<div ref={menuRef} id={`wrestling-actions-${id}`} className={styles.menu} style={menuPosition}>
+    {menuPosition && createPortal(<div ref={menuRef} id={`wrestling-actions-${id}`} className={styles.menu} style={{ ...menuPosition, maxHeight: `calc(100vh - ${Math.max(0, menuPosition.top) + 12}px)` }}>
       <button type="button" disabled={busy} onClick={() => place('featured-this-week', 'featuredThisWeek')}>{match.featuredThisWeek ? 'Remove from' : 'Show in'} Featured This Week</button>
       <button type="button" disabled={busy} onClick={() => place('featured-fight', 'featuredFight')}>{match.featuredFight ? 'Remove from' : 'Show in'} Featured Fight</button>
 

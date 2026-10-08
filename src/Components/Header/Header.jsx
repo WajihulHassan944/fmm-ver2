@@ -439,7 +439,7 @@ const Header = () => {
           {playerNotifications.length ? playerNotifications.slice(0, 20).map((item) => (
             <Link
               key={item.id}
-              href={item.fightId ? `/upcomingfights?fight=${encodeURIComponent(item.fightId)}` : '/UserDashboard'}
+              href={item.gameMode === 'PRO_WRESTLING' && item.fightId ? `/pro-wrestling/matches/${encodeURIComponent(item.fightId)}` : item.fightId ? `/upcomingfights?fight=${encodeURIComponent(item.fightId)}` : '/UserDashboard'}
               style={{ display: 'block', padding: '10px 8px', marginBottom: 6, borderRadius: 8, color: '#fff', textDecoration: 'none', background: item.unread ? 'rgba(242,181,68,.18)' : 'rgba(255,255,255,.06)' }}
             >
               <strong style={{ display: 'block' }}>{item.title || 'Fantasy MMAdness update'}</strong>
