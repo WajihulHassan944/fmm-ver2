@@ -562,7 +562,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#f2b544', textDecoration: 'underline' }}>Terms of Use</a>.
                   </p>
                   <button type="submit" className="theme-btn theme-btn-primary xp-auth-submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting application...' : 'Apply as an affiliate'} <FaArrowRight /></button>
-                  <div className="xp-auth-google"><span>or apply with Google</span><GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google authentication was cancelled.')} theme="filled_black" shape="rectangular" width="100%" /></div>
+                  {!queryValue(router.query.invite) && <div className="xp-auth-google"><span>or apply with Google</span><GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google authentication was cancelled.')} theme="filled_black" shape="rectangular" width="100%" /></div>}
                 </form>
               ) : (
                 <form className="xp-auth-form xp-auth-signup-form" onSubmit={handleSponsorSignup}>
