@@ -14,7 +14,7 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const affiliateId = String(affiliate._id);
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
-  const fightUrl = `/fight/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&fromLeague=1`;
+  const fightUrl = `${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&affiliateId=${encodeURIComponent(affiliateId)}&fromLeague=1`;
   const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&v=11`;
   const shareTitle = `Join ${leagueName}'s league for ${title} | FANTASY MMADNESS`;
   const shareDescription = `${title}: make your picks in ${leagueName}'s league${Number(fight?.pot) > 0 ? ` for a ${Number(fight.pot).toLocaleString()} FM COINS prize pool` : ''}. Open the fight to see entry details, eligibility, and rules.`;
@@ -87,7 +87,7 @@ export async function getServerSideProps({ params, query, res }) {
     const fight = payload.fight || payload.data || payload;
     if (!affiliate || !fight?._id) return { notFound: true };
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-    return { props: { affiliate, fight: { matchFighterA: fight.matchFighterA || '', matchFighterB: fight.matchFighterB || '', pot: fight.pot || 0 }, fightId } };
+    return { props: { affiliate, fight: { gameMode: fight.gameMode || '', matchFighterA: fight.matchFighterA || '', matchFighterB: fight.matchFighterB || '', pot: fight.pot || 0 }, fightId } };
   } catch (error) {
     console.error('Affiliate league landing failed:', error);
     return { notFound: true };

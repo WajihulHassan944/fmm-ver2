@@ -563,10 +563,11 @@ const FinalHomeV35 = ({
   // These two placements are controlled independently in the back office.
   // If only one placement has been assigned, keep the second section useful by
   // selecting another published card instead of repeating the same fight.
-  const featuredThisWeekFight = allRealFights.find((fight) => Boolean(fight?.featuredThisWeek))
+  const featuredPool = activeSport === "all" ? allRealFights : realFights;
+  const featuredThisWeekFight = featuredPool.find((fight) => Boolean(fight?.featuredThisWeek))
     || fallbackFeaturedFight;
-  const featuredFight = allRealFights.find((fight) => Boolean(fight?.featuredFight))
-    || allRealFights.find((fight) => String(getFightId(fight)) !== String(getFightId(featuredThisWeekFight)))
+  const featuredFight = featuredPool.find((fight) => Boolean(fight?.featuredFight))
+    || featuredPool.find((fight) => String(getFightId(fight)) !== String(getFightId(featuredThisWeekFight)))
     || featuredThisWeekFight;
 
   const featuredIdentities = new Set([getFightIdentity(featuredThisWeekFight), getFightIdentity(featuredFight)]);

@@ -1,3 +1,4 @@
+import { fetchPublishedWrestlingPromotions } from '@/Utils/affiliatePromotionFights';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
@@ -438,11 +439,11 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     // Wave 1 is only what the opening screen actually renders. Each result is
     // applied the instant it lands rather than at the end of the batch, and the
     // loading flag clears as soon as fights are in.
-    const fightsPromise = track('fights', publicRequest('/api/public/prediction-fights?limit=60'))
-      .then((fightRes) => {
+    const fightsPromise = track('fights', Promise.all([publicRequest('/api/public/prediction-fights?limit=60'), fetchPublishedWrestlingPromotions().catch(() => [])]))
+      .then(([fightRes, wrestling]) => {
         // The endpoint responds with { items: [...] } — fights/matches/predictionFights/data
         // never matched anything, so this always fell through to the single sample fight.
-        const rawFights = asArray(fightRes.items || fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data);
+        const rawFights = [...wrestling, ...asArray(fightRes.items || fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data)];
         // Pass RAW fight documents straight through. FantasyMobileAppCore has its
         // own complete normalizer (matchFighterA, fightPosterImage, homepagePromotion,
         // etc.) — running this file's normalizeFight first stripped those fields
@@ -965,8 +966,9 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   // ------------------------------------------------------------------------
   const onOpenFight = useCallback((fight) => {
     if (typeof window === 'undefined' || !fight) return;
-    const id = fight.backendId || fight.id;
-    if (id) window.location.href = `/fight/${encodeURIComponent(id)}`;
+    const event = fight.event || fight;
+    const id = event.backendId || event.id;
+    if (id) window.location.href = `${event.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(id)}`;
   }, []);
 
   const onOpenApparel = useCallback(() => {

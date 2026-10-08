@@ -86,7 +86,7 @@ const WrestlingMatchDetail = () => {
         method: 'POST',
         headers: { 'Idempotency-Key': `wrestling-ui:${match._id}:${user?._id || 'player'}` },
         body: {
-          affiliateId: typeof router.query.affiliateId === 'string' ? router.query.affiliateId : undefined,
+          affiliateId: typeof router.query.affiliateId === 'string' ? router.query.affiliateId : typeof router.query.ref === 'string' && /^[a-f\d]{24}$/i.test(router.query.ref) ? router.query.ref : undefined,
           referralCode: typeof router.query.referralCode === 'string'
             ? router.query.referralCode
             : typeof router.query.ref === 'string'
