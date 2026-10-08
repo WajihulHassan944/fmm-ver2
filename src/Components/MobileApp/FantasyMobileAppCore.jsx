@@ -309,6 +309,7 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     fight.homepagePromotion?.mobilePosterImage, fight.homepagePromotion?.posterImage,
     fight.homepagePromotion?.image, fight.fightPosterMobileImage, fight.fightPosterImage,
     fight.posterImage, fight.matchPosterImage, fight.bannerImage,
+    fight.promotionPoster, fight.eventPoster, fight.posterMobileImage, fight.promotionBackground,
   );
 
   return {
