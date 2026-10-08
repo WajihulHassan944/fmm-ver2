@@ -41,14 +41,13 @@ const drawFighter = (ctx, image, side) => {
   const left = side === 'A';
   const x = left ? 0 : 540;
   const width = 540;
-  const top = 145;
-  const height = 700;
+  const top = 345;
+  const height = 355;
   ctx.save();
   ctx.beginPath(); ctx.rect(x, top, width, height); ctx.clip();
   if (image) {
-    // Each fighter fills the same portrait panel. Containing a wide cutout
-    // beside a tight portrait makes one fighter appear much smaller.
-    const scale = Math.max(width / image.width, height / image.height);
+    // Keep the entire fighter photo below the logo and above the names.
+    const scale = Math.min(width / image.width, height / image.height);
     const w = image.width * scale;
     const h = image.height * scale;
     ctx.drawImage(image, x + (width - w) / 2, top, w, h);

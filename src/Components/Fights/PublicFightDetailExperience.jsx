@@ -220,7 +220,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   const category = getFightCategory(resolvedFight);
   const heroImage = getFightHeroImage(resolvedFight);
   const affiliateShareImage = /^[a-f\d]{24}$/i.test(String(router.query.ref || '')) && /^[a-f\d]{24}$/i.test(String(matchId || ''))
-    ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(matchId)}&affiliateId=${encodeURIComponent(router.query.ref)}&v=3`
+    ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(matchId)}&affiliateId=${encodeURIComponent(router.query.ref)}&format=facebook&v=12`
     : '';
   const socialImage = affiliateShareImage || (heroImage?.startsWith?.('http') ? heroImage : `${SITE_URL}${heroImage}`);
   const playerCount = getFightPlayerCount(resolvedFight);
