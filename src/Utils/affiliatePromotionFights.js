@@ -16,16 +16,24 @@ export const normalizeWrestlingPromotion = (match) => ({
   fightPosterImage: match.fightPosterImage || match.bannerImage || '', promotionBackground: match.bannerImage || '',
 });
 
+export const isPlaceholderWrestlingPromotion = (fight = {}) => {
+  const category = String(fight.matchCategoryTwo || fight.matchCategory || fight.gameMode || '').toLowerCase();
+  if (!category.includes('wrestl')) return false;
+  const a = String(fight.matchFighterA || fight.competitorA?.displayName || '').trim();
+  const b = String(fight.matchFighterB || fight.competitorB?.displayName || '').trim();
+  return /^(?:test\s+)?wrestler\s*a$/i.test(a) && /^(?:test\s+)?wrestler\s*b$/i.test(b);
+};
+
 export const fetchPublishedWrestlingPromotions = async (status = 'OPEN,LOCKED,LIVE,SCORING') => {
   const payload = await wrestlingRequest(`/api/wrestling/matches?status=${encodeURIComponent(status)}&limit=100`);
-  return safeWrestlingArray(payload?.data).map(normalizeWrestlingPromotion);
+  return safeWrestlingArray(payload?.data).map(normalizeWrestlingPromotion).filter((fight) => !isPlaceholderWrestlingPromotion(fight));
 };
 
 export const fetchHomepagePromotionFights = async (query = {}) => {
   const [fights, wrestling] = await Promise.all([
     fetchPublicPredictionFights(query), fetchPublishedWrestlingPromotions().catch(() => []),
   ]);
-  return [...wrestling, ...fights];
+  return [...wrestling, ...fights].filter((fight) => !isPlaceholderWrestlingPromotion(fight));
 };
 
 export const fetchAffiliatePromotionFights = async (query = {}) => {
@@ -33,5 +41,5 @@ export const fetchAffiliatePromotionFights = async (query = {}) => {
     fetchPublicPredictionFights(query), fetchPublishedWrestlingPromotions('OPEN').catch(() => []),
   ]);
   const eligible = wrestling.filter((match) => match.status === 'OPEN' && (!match.lockAt || new Date(match.lockAt) > new Date()));
-  return [...eligible, ...fights];
+  return [...eligible, ...fights].filter((fight) => !isPlaceholderWrestlingPromotion(fight));
 };

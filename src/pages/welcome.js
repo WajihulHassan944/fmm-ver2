@@ -1,4 +1,4 @@
-import { normalizeWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
+import { normalizeWrestlingPromotion, isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -984,7 +984,7 @@ async function buildWelcomeProps() {
     : Array.isArray(fightData?.fights) ? fightData.fights
       : Array.isArray(fightData?.matches) ? fightData.matches
         : Array.isArray(fightData) ? fightData : [];
-  const rawFights = [...(Array.isArray(wrestlingData?.data) ? wrestlingData.data.map(normalizeWrestlingPromotion) : []), ...combatFights];
+  const rawFights = [...(Array.isArray(wrestlingData?.data) ? wrestlingData.data.map(normalizeWrestlingPromotion) : []), ...combatFights].filter((fight) => !isPlaceholderWrestlingPromotion(fight));
 
   const promotedFights = Array.isArray(promotedData?.items) ? promotedData.items : [];
   const byId = new Map();
