@@ -1,10 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { FaFistRaised, FaTrophy } from 'react-icons/fa';
 import Link from 'next/link';
 import styles from './WrestlingRegistryActions.module.css';
 import { toast } from 'react-toastify';
 import { wrestlingRequest, nextStatusOptions } from '@/Utils/proWrestling';
 
 export default function WrestlingRegistryActions({ match, onUpdated, placementOnly = false, onDelete }) {
+  const [menuPosition, setMenuPosition] = useState(null);
+  const moreRef = useRef(null);
+  const menuRef = useRef(null);
+  useEffect(() => {
+    if (!menuPosition) return;
+    const close = () => setMenuPosition(null);
+    const outside = (event) => {
+      if (!moreRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) close();
+    };
+    const keydown = (event) => { if (event.key === 'Escape') { close(); moreRef.current?.focus(); } };
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('keydown', keydown);
+    window.addEventListener('resize', close);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('keydown', keydown);
+      window.removeEventListener('resize', close);
+    };
+  }, [menuPosition]);
+  const toggleMenu = () => {
+    if (menuPosition) return setMenuPosition(null);
+    const rect = moreRef.current.getBoundingClientRect();
+    setMenuPosition({ top: Math.min(rect.bottom + 6, window.innerHeight - 220), right: Math.max(12, window.innerWidth - rect.right) });
+  };
   const [busy, setBusy] = useState(false);
   const [invite, setInvite] = useState(false);
   const [name, setName] = useState('');
@@ -53,10 +79,12 @@ export default function WrestlingRegistryActions({ match, onUpdated, placementOn
       {(match.publicVisible === false || match.status === 'DRAFT') && <small>Publish the match to make its placement visible to players.</small>}
     </div>;
   return <div className={styles.actions}>
-    <div className={styles.primary}><Link href={`/administration/pro-wrestling/${id}`}>Economics</Link><Link href={`/administration/pro-wrestling/${id}/scoring`}>{match.status === 'FINALIZED' ? 'Scores' : 'Score'}</Link></div>
-    <details className={styles.more}>
-    <summary>More actions</summary>
-    <div className={styles.menu}>
+    <div className={`admin-row-actions admin-table-actions ${styles.primary}`}>
+      <Link href={`/administration/pro-wrestling/${id}`}><FaFistRaised /> Economics</Link>
+      <Link href={`/administration/pro-wrestling/${id}/scoring`}><FaTrophy /> {match.status === 'FINALIZED' ? 'Scores' : 'Score'}</Link>
+      <button ref={moreRef} type="button" aria-expanded={Boolean(menuPosition)} aria-controls={`wrestling-actions-${id}`} onClick={toggleMenu}>More ▾</button>
+    </div>
+    {menuPosition && createPortal(<div ref={menuRef} id={`wrestling-actions-${id}`} className={styles.menu} style={menuPosition}>
       <button type="button" disabled={busy} onClick={() => place('featured-this-week', 'featuredThisWeek')}>{match.featuredThisWeek ? 'Remove from' : 'Show in'} Featured This Week</button>
       <button type="button" disabled={busy} onClick={() => place('featured-fight', 'featuredFight')}>{match.featuredFight ? 'Remove from' : 'Show in'} Featured Fight</button>
 
@@ -77,6 +105,5 @@ export default function WrestlingRegistryActions({ match, onUpdated, placementOn
       <Link href={`/pro-wrestling/matches/${id}`} target="_blank" rel="noopener noreferrer">View on website</Link>
       {onDelete && match.status === 'DRAFT' && Number(match.participantCount || 0) === 0 && <button type="button" onClick={onDelete}>Delete draft</button>}
       <Link href={`/administration/swarm?tab=jobs&fightId=${id}&scopeLabel=${encodeURIComponent(match.matchTitle)}`}>Swarm jobs</Link>
-    </div>
-  </details></div>;
+    </div>, document.body)}</div>;
 }
