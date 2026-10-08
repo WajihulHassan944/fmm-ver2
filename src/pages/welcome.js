@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FMCoin } from '@/Components/Common/FMCoin';
+import HomepageCommercial from '@/Components/Home/HomepageCommercial';
 
 // ==========================================================================
 // The public website — converted from "Fantasy MMAdness Website.dc.html".
@@ -219,6 +220,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
 
   return (
     <>
+      <HomepageCommercial />
       <Head>
         <title>Fantasy MMAdness · Combat sports, now interactive</title>
         <meta name="description" content="Predict the head punches, body punches, takedowns, kicks, knockdowns, round results and finish before they happen. Free to start." />
