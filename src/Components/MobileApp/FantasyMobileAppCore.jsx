@@ -3819,6 +3819,18 @@ class FantasyMobileAppCore extends React.Component {
     );
   }
 
+  renderFeaturedPortraits(event, prefix) {
+    return ['A', 'B'].map((side) => {
+      const isA = side === 'A';
+      const image = isA ? event.featuredFightFighterAImage || event.fighterAImage : event.featuredFightFighterBImage || event.fighterBImage;
+      return React.createElement('div', {
+        key: side,
+        className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--' + (isA ? 'left' : 'right'),
+        style: { position: 'absolute', [isA ? 'left' : 'right']: 0, top: 0, height: 150, width: '39%', pointerEvents: 'none' },
+      }, React.createElement(MobileImageSlot, { id: prefix + '-' + side.toLowerCase() + '-' + event.id, shape: 'rect', placeholder: isA ? event.f1 : event.f2, fit: 'contain', src: image, fallbackSrc: event.fallbackImage }));
+    });
+  }
+
   renderFeaturedBanner(event) {
     if (!event) return null;
     const entry = this.getEventEntryLabel(event);
@@ -3830,8 +3842,7 @@ class FantasyMobileAppCore extends React.Component {
       style: { margin: '0 16px 16px', position: 'relative', borderRadius: 14, overflow: 'hidden', minHeight: 246, border: '1px solid ' + event.tagColor, boxShadow: '0 0 18px ' + event.tagColor + '55', cursor: 'pointer', background: '#080a10' }
     },
       React.createElement('div', { className: 'fmm-unified-arena-bg', style: { position: 'absolute', inset: 0 } }, React.createElement(MobileImageSlot, { id: 'featured-approved-arena-' + event.id, shape: 'rect', placeholder: 'Fantasy MMAdness arena', fit: 'cover', src: 'arena-approved-v62.webp' })),
-      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--left', style: { position: 'absolute', left: 0, top: 0, bottom: 108, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', src: event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.fallbackImage })),
-      React.createElement('div', { className: 'fmm-unified-featured-fighter fmm-unified-featured-fighter--right', style: { position: 'absolute', right: 0, top: 0, bottom: 108, width: '39%', pointerEvents: 'none' } }, React.createElement(MobileImageSlot, { id: 'featured-week-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', src: event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.fallbackImage })),
+      this.renderFeaturedPortraits(event, 'featured-week'),
       React.createElement('div', { className: 'fmm-unified-featured-overlay', style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(5,6,10,.14) 0%,rgba(5,6,10,.03) 30%,rgba(5,6,10,.03) 70%,rgba(5,6,10,.16) 100%),linear-gradient(180deg,rgba(5,6,10,.02),rgba(5,6,10,.6))' } }),
       React.createElement('span', { className: 'fmm-unified-featured-label', style: { position: 'absolute', zIndex: 4, top: 70, left: '50%', transform: 'translateX(-50%)', width: 72, maxWidth: '22%', boxSizing: 'border-box', textAlign: 'center', whiteSpace: 'normal', lineHeight: 1.25, color: '#2b1b00', background: '#f2b544', borderRadius: 999, padding: '5px 9px', fontSize: 8.5, fontWeight: 1000, boxShadow: '0 0 12px rgba(242,181,68,.55)' } }, '★ FEATURED THIS WEEK'),
       React.createElement('div', { className: 'fmm-unified-featured-content', style: { position: 'relative', minHeight: 246, padding: '156px 14px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', textAlign: 'center', background: 'linear-gradient(180deg,transparent 48%,rgba(5,6,10,.9) 64%,rgba(5,6,10,.98) 78%)' } },
@@ -3946,15 +3957,8 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { className: 'fmm-unified-featured-fight-overlay', style: { position: 'absolute', inset: 0, background: 'linear-gradient(90deg,rgba(5,6,10,.5),rgba(5,6,10,.15) 48%,rgba(5,6,10,.5)),linear-gradient(180deg,rgba(5,6,10,.04),rgba(5,6,10,.45))' } }),
       React.createElement('div', { className: 'fmm-unified-featured-fight-content', style: { position: 'relative' } },
         React.createElement('div', { style: { color: '#ffce54', fontSize: 10, fontWeight: 900, marginBottom: 8 } }, 'FEATURED FIGHT · ' + (event.division ? event.division.toUpperCase() : event.tag)),
-        React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 8 } },
-          React.createElement('div', { style: { width: 116, height: 150, flex: '0 0 116px', background: 'transparent', filter: 'brightness(1.22) contrast(1.05) drop-shadow(0 6px 10px rgba(0,0,0,.55))' } }, React.createElement(MobileImageSlot, { id: 'detail-a-' + event.id, shape: 'rect', placeholder: event.f1, fit: 'contain', position: 'bottom center', src: event.fighterACutout || event.featuredFightFighterAImage || event.fighterAImage, fallbackSrc: event.featuredFightFighterAImage || event.fighterAImage || event.fallbackImage })),
-          React.createElement('div', { style: { flex: 1, minWidth: 0, fontFamily: "'Anton',sans-serif", textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,.85)' } },
-            React.createElement('div', { style: { fontSize: 15, lineHeight: 1.15, wordBreak: 'break-word' } }, event.f1),
-            React.createElement('div', { style: { color: '#ef4444', fontSize: 12, margin: '2px 0' } }, 'VS'),
-            React.createElement('div', { style: { fontSize: 15, lineHeight: 1.15, wordBreak: 'break-word' } }, event.f2)
-          ),
-          React.createElement('div', { style: { width: 116, height: 150, flex: '0 0 116px', background: 'transparent', filter: 'brightness(1.22) contrast(1.05) drop-shadow(0 6px 10px rgba(0,0,0,.55))' } }, React.createElement(MobileImageSlot, { id: 'detail-b-' + event.id, shape: 'rect', placeholder: event.f2, fit: 'contain', position: 'bottom center', src: event.fighterBCutout || event.featuredFightFighterBImage || event.fighterBImage, fallbackSrc: event.featuredFightFighterBImage || event.fighterBImage || event.fallbackImage }))
-        ),
+        React.createElement('div', { style: { position: 'relative', height: 150, margin: '0 -12px 8px' } }, this.renderFeaturedPortraits(event, 'featured-detail')),
+        React.createElement('h2', { style: { fontFamily: "'Anton',sans-serif", textAlign: 'center', fontSize: 21, lineHeight: 1.08, margin: '4px 0 10px', textShadow: '0 2px 10px rgba(0,0,0,.85)' } }, event.f1, React.createElement('em', { style: { color: '#ef4444', fontStyle: 'normal' } }, ' VS '), event.f2),
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-around', gap: 6, marginBottom: 9 } },
           [event.date, event.matchTime || 'TIME TBA', event.venue || 'VENUE TBA'].map((text, i) => React.createElement('span', {
             key: i, style: { fontSize: 9.5, fontWeight: 900, color: '#fff', background: 'rgba(0,0,0,.55)', border: '1px solid rgba(255,255,255,.18)', borderRadius: 6, padding: '3px 8px', textShadow: '0 1px 3px rgba(0,0,0,.9)' }
