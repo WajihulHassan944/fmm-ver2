@@ -1,8 +1,9 @@
+import { fetchAffiliatePromotionFights } from '@/Utils/affiliatePromotionFights';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import modalStyles from './AffiliateEmailModal.module.css';
 import { adminHeaders } from '@/Utils/authFetch';
-import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
@@ -253,7 +254,7 @@ const AffiliateUsers = () => {
 
   useEffect(() => {
     let active = true;
-    fetchPublicPredictionFights({ limit: 240 }).then((fights) => {
+    fetchAffiliatePromotionFights({ limit: 240 }).then((fights) => {
       if (!active) return;
       const available = fights.filter((fight) => getFightId(fight) && !/draft|closed|finished|complete|cancel/i.test(String(fight.matchStatus || fight.status || '')));
       setPosterFights(available);
@@ -555,7 +556,7 @@ const AffiliateUsers = () => {
           <div style={{ flex: '1 1 280px', minWidth: 0 }}>
             <label style={{ display: 'block', marginBottom: 14 }}>Choose a fight
               <select value={posterFightId} onChange={(event) => setPosterFightId(event.target.value)} style={{ display: 'block', width: '100%', marginTop: 6 }}>
-                {posterFights.map((fight) => <option key={getFightId(fight)} value={getFightId(fight)}>{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')} · {formatFightDate(fight)}</option>)}
+                {posterFights.map((fight) => <option key={getFightId(fight)} value={getFightId(fight)}>{fight.gameMode === 'PRO_WRESTLING' ? 'Pro Wrestling · ' : ''}{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')} · {formatFightDate(fight)}</option>)}
               </select>
             </label>
             <label style={{ display: 'block', marginBottom: 14 }}>Upload your finished poster

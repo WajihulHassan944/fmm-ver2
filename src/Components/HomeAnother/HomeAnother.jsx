@@ -1,3 +1,4 @@
+import { fetchHomepagePromotionFights } from '@/Utils/affiliatePromotionFights';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { stopMusic, playMusic } from "../../Redux/musicSlice";
@@ -2215,7 +2216,7 @@ const HomeAnother = () => {
               fightLimit: HOME_FIGHT_FEED_LIMIT,
               leaderboardLimit: 5,
             }),
-            fetchPublicPredictionFights({
+            fetchHomepagePromotionFights({
               limit: HOME_FIGHT_FEED_LIMIT,
               status: "upcoming",
               hydrateImages: false,

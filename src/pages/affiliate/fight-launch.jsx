@@ -1,10 +1,11 @@
+import { fetchAffiliatePromotionFights } from '@/Utils/affiliatePromotionFights';
 import React, { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { affiliateHeaders, getAffiliateToken } from '@/Utils/authFetch';
-import { PUBLIC_API_BASE_URL, fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
@@ -31,7 +32,7 @@ export default function AffiliateFightLaunch() {
     if (!fightId) return;
     let active = true;
     setFightPhotos(null);
-    fetchPublicPredictionFights({ limit: 240 }).then((rows) => {
+    fetchAffiliatePromotionFights({ limit: 240 }).then((rows) => {
       const fight = rows.find((row) => String(getFightId(row)) === fightId);
       if (active && fight) setFightPhotos({ a: getFighterImage(fight, 'A'), b: getFighterImage(fight, 'B'), poster: fight.fightPosterImage || fight.promotionBackground || '' });
     }).catch(() => {});

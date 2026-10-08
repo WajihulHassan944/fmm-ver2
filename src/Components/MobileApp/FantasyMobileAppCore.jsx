@@ -307,6 +307,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
   return {
     id: cleanText(fight._id, fight.id, fight.matchId, `live-${index}`),
     backendId: cleanText(fight._id, fight.id, fight.matchId),
+    gameMode: fight.gameMode,
+    timeTba: Boolean(fight.timeTba),
     playable: fight.__playable !== false && !fight.predictionSubmitted && !fight.userPredictionSubmitted,
     homepagePromoted: fight.__homepagePromoted === true,
     featuredThisWeek: Boolean(fight.featuredThisWeek),
@@ -1135,6 +1137,7 @@ class FantasyMobileAppCore extends React.Component {
   };
   openAiScout = (event) => this.openModal('aiScout', event);
   openEvent = (event) => {
+    if (event?.gameMode === 'PRO_WRESTLING') { this.props.onOpenFight?.(event); return; }
     // A preview fight is not a real contest — never let one reach a money path.
     // NB: arrow function, so no `arguments` object — use the parameter.
     if (event && event.isSample) {
@@ -1897,6 +1900,7 @@ class FantasyMobileAppCore extends React.Component {
   });
 
   openFeaturedPick = (event) => {
+    if (event?.gameMode === 'PRO_WRESTLING') { this.props.onOpenFight?.(event); return; }
     if (!event?.playable) {
       if (event) { this.openModal('aiScout', event); return; }
       this.props.onOpenFight?.({ event });
@@ -1912,6 +1916,7 @@ class FantasyMobileAppCore extends React.Component {
   };
 
   enterEvent = async (ev, prediction = null) => {
+    if (ev?.gameMode === 'PRO_WRESTLING') { this.props.onOpenFight?.(ev); return; }
     // Guest with picks in hand: ask in-app and resume this exact entry after,
     // rather than routing out and losing what they built.
     if (!this.props.currentUser) {
@@ -2171,7 +2176,7 @@ class FantasyMobileAppCore extends React.Component {
       return {
         ...ev,
         date: d ? monthNames[d.getMonth()] + ' ' + d.getDate() : 'DATE TBA',
-        countdown: d ? days + 'D : ' + String(hours).padStart(2, '0') + 'H' : 'OPEN',
+        countdown: ev.timeTba ? 'TIME TBA' : d ? days + 'D : ' + String(hours).padStart(2, '0') + 'H' : 'OPEN',
         entered: Boolean(ev.serverEntered || s.enteredEvents[ev.id]),
         picked: cleanText(ev.userEntry?.pickName, s.predictions[ev.id]) || null,
       };
@@ -2490,9 +2495,10 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderHome(sports, filteredEvents, allEvents, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s) {
-    const bannerEvent = allEvents.find((event) => event.featuredThisWeek) || allEvents[0];
-    const detailEvent = allEvents.find((event) => event.featuredFight)
-      || allEvents.find((event) => event.id !== bannerEvent?.id)
+    const featuredPool = s.activeSport === 'all' ? allEvents : filteredEvents;
+    const bannerEvent = featuredPool.find((event) => event.featuredThisWeek) || featuredPool[0];
+    const detailEvent = featuredPool.find((event) => event.featuredFight)
+      || featuredPool.find((event) => event.id !== bannerEvent?.id)
       || bannerEvent;
     const top = s.layout === 'bold'
       ? React.createElement(React.Fragment, null,

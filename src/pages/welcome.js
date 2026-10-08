@@ -1,3 +1,4 @@
+import { normalizeWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -407,7 +408,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', letterSpacing: '.06em', textTransform: 'uppercase' }}>{fight.potNote}</div>
                         <div style={{ marginTop: 7, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, letterSpacing: '.06em', textTransform: 'uppercase' }}><span style={{ color: 'rgba(255,255,255,.72)' }}>BUY-IN ·</span>{fight.buyInLabel === 'FREE' ? <span style={{ color: '#f2b544', textShadow: '0 0 10px rgba(242,181,68,.4)' }}>FREE</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#f2b544', textShadow: '0 0 10px rgba(242,181,68,.4)' }}><FMCoin size="xs" motion="shine" />{fight.buyInLabel}</span>}</div>
                       </div>
-                      <a href={fight.id ? `/fight/${encodeURIComponent(fight.id)}${fight.entryOpen ? '?play=1' : ''}` : '/play'} style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.entryOpen ? fight.cta : 'VIEW FIGHT'}</a>
+                      <a href={fight.id ? `${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fight.id)}${fight.entryOpen ? '?play=1' : ''}` : '/play'} style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.entryOpen ? fight.cta : 'VIEW FIGHT'}</a>
                     </div>
                   </div>
                 </div>
@@ -816,6 +817,7 @@ const toFightCard = (f, index) => {
     const category = String(f.matchCategory || '').toUpperCase();
     return {
       id: String(f._id || index),
+      gameMode: f.gameMode || '',
       category,
       sport: category,
       matchCategory: category,
@@ -961,7 +963,7 @@ export async function getServerSideProps({ res }) {
 }
 
 async function buildWelcomeProps() {
-  const [fightData, promotedData, boardData, apparelData] = await Promise.all([
+  const [fightData, promotedData, boardData, apparelData, wrestlingData] = await Promise.all([
     // prediction-fights, not fights — the latter does not exist and 404'd silently.
     fetchJson('/api/public/prediction-fights?limit=100'),
     // Explicit owner selections must remain available even when newer
@@ -971,16 +973,18 @@ async function buildWelcomeProps() {
     // The live Etsy catalogue. Falls through to STORE_ITEMS when the shop is
     // unreachable or the Etsy keys are not configured.
     fetchJson('/api/public/apparel-products?limit=12'),
+    fetchJson('/api/wrestling/matches?status=OPEN,LOCKED,LIVE,SCORING&limit=100'),
   ]);
 
   // /api/public/prediction-fights responds with { items: [...] }, not
   // { fights } or { matches } — those two never matched anything, so this
   // page has been showing PREVIEW_FIGHTS unconditionally regardless of what
   // was actually published in the back office.
-  const rawFights = Array.isArray(fightData?.items) ? fightData.items
+  const combatFights = Array.isArray(fightData?.items) ? fightData.items
     : Array.isArray(fightData?.fights) ? fightData.fights
       : Array.isArray(fightData?.matches) ? fightData.matches
         : Array.isArray(fightData) ? fightData : [];
+  const rawFights = [...(Array.isArray(wrestlingData?.data) ? wrestlingData.data.map(normalizeWrestlingPromotion) : []), ...combatFights];
 
   const promotedFights = Array.isArray(promotedData?.items) ? promotedData.items : [];
   const byId = new Map();
@@ -999,7 +1003,7 @@ async function buildWelcomeProps() {
     // A card whose scheduled time passed but was never scored belongs in the
     // Back Office review queue. It is not an upcoming card and must not remain
     // on the website/app unless an admin explicitly marks it Live/Ongoing.
-    .filter((f) => isLiveFight(f) || getFightTimestamp(f) >= now);
+    .filter((f) => (f.gameMode === 'PRO_WRESTLING' && f.entryOpen) || isLiveFight(f) || getFightTimestamp(f) >= now);
 
   // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
   // must actually surface here — they used to only flip a flag nothing read,
