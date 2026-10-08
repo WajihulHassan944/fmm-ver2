@@ -82,12 +82,13 @@ const resolveSlotAsset = (id = '', src = '') => {
   return '/images/hero-fight.webp';
 };
 
-const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder, position }) => {
+const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder, position, onImageError }) => {
   const borderRadius = shape === 'circle' ? '50%' : radius ? Number(radius) : 0;
   const isDynamicFightSlot = /^(event|contest|featured-week|detail)-/.test(String(id));
   const resolvedFallback = explicitAsset(fallbackSrc) || (isDynamicFightSlot ? '' : resolveSlotAsset(id));
   return React.createElement('img', {
     id,
+    key: `${id}:${src || ''}:${fallbackSrc || ''}`,
     src: resolveSlotAsset(id, src || fallbackSrc),
     alt: placeholder || '',
     'data-filled': 'true',
@@ -96,10 +97,15 @@ const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, p
     decoding: 'async',
     onError: (event) => {
       const image = event.currentTarget;
-      if (!image || image.dataset.fallbackApplied === 'true') return;
-      image.dataset.fallbackApplied = 'true';
-      if (resolvedFallback) image.src = resolvedFallback;
+      if (!image) return;
+      const original = resolveSlotAsset(id, src || fallbackSrc);
+      const fallbacks = [...new Set([resolvedFallback, isDynamicFightSlot ? '' : resolveSlotAsset(id)])]
+        .filter((candidate) => candidate && candidate !== original);
+      const attempt = Number(image.dataset.fallbackAttempt || 0);
+      image.dataset.fallbackAttempt = String(attempt + 1);
+      if (fallbacks[attempt]) image.src = fallbacks[attempt];
       else image.style.display = 'none';
+      if (attempt === 0 && src) onImageError?.(src);
     },
     style: {
       display: 'block',
@@ -316,8 +322,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     featuredFight: Boolean(fight.featuredFight),
     featuredThisWeekImage: resolveLiveMedia(fight.featuredThisWeekImage),
     featuredFightBackgroundImage: resolveLiveMedia(fight.featuredFightBackgroundImage),
-    featuredFightFighterAImage: resolveExactFighterMedia(fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fighterARecordImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterOneImageUrl, fight.imageA),
-    featuredFightFighterBImage: resolveExactFighterMedia(fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fighterBRecordImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterTwoImageUrl, fight.imageB),
+    featuredFightFighterAImage: resolveExactFighterMedia(fight.fighterAImageOverride ? fight.fighterAImage : null, fight.featuredFightFighterAImage, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fighterARecordImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterOneImageUrl, fight.imageA),
+    featuredFightFighterBImage: resolveExactFighterMedia(fight.fighterBImageOverride ? fight.fighterBImage : null, fight.featuredFightFighterBImage, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fighterBRecordImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterTwoImageUrl, fight.imageB),
     // Transparent-background versions, derived from the same Cloudinary URLs.
     // Screens use these as src and the plain ones as fallbackSrc, so a missing
     // transform degrades to the original photo instead of a broken image.
@@ -348,8 +354,8 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     isShadow: Boolean(fight.isShadow || fight.is_shadow || String(fight.fightType || fight.collection || '').toLowerCase().includes('shadow')),
     serverEntered: Boolean(userEntry || fight.predictionSubmitted || fight.userPredictionSubmitted),
     fallbackImage: getEventFallbackImage(sport),
-    fighterAImage: resolveExactFighterMedia(fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fighterARecordImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterOneImageUrl, fight.imageA),
-    fighterBImage: resolveExactFighterMedia(fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fighterBRecordImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterTwoImageUrl, fight.imageB),
+    fighterAImage: resolveExactFighterMedia(fight.fighterAImageOverride ? fight.fighterAImage : null, fight.resolvedFighterAImage, fight.fighterAPrimaryImage, fighterARecordImage, fight.fighterAImage, fight.fighterAImageUrl, fight.fighter1Image, fight.redCornerImage, fight.cornerAImage, fight.matchFighterAImage, fight.fighterOneImage, fight.fighterOneImageUrl, fight.imageA),
+    fighterBImage: resolveExactFighterMedia(fight.fighterBImageOverride ? fight.fighterBImage : null, fight.resolvedFighterBImage, fight.fighterBPrimaryImage, fighterBRecordImage, fight.fighterBImage, fight.fighterBImageUrl, fight.fighter2Image, fight.blueCornerImage, fight.cornerBImage, fight.matchFighterBImage, fight.fighterTwoImage, fight.fighterTwoImageUrl, fight.imageB),
     image: explicitPoster,
     hasPoster: Boolean(explicitPoster),
   };
@@ -2181,6 +2187,12 @@ class FantasyMobileAppCore extends React.Component {
         entered: Boolean(ev.serverEntered || s.enteredEvents[ev.id]),
         picked: cleanText(ev.userEntry?.pickName, s.predictions[ev.id]) || null,
       };
+    }).sort((a, b) => {
+      // Show the next scheduled card before later cards, with older ongoing
+      // cards and undated cards still available at the end of the rail.
+      const today = getDateOnlyKey(new Date());
+      const group = (event) => !event.iso ? 2 : event.iso < today ? 1 : 0;
+      return group(a) - group(b) || String(a.iso || '').localeCompare(String(b.iso || ''));
     });
     sports.forEach((sport) => {
       const inSport = events.filter((event) => event.sport === sport.id);
@@ -2230,10 +2242,11 @@ class FantasyMobileAppCore extends React.Component {
         if (photo && name && !gallery.some((entry) => entry.photo === photo)) gallery.push({ photo, name });
       });
 
-      sport.gallery = gallery;
+      const availableGallery = gallery.filter((entry) => !s.failedSportPhotos?.[entry.photo]);
+      sport.gallery = availableGallery;
       // The cycle index is one shared counter, so all five circles advance in
       // step and each wraps within its own gallery length.
-      const frame = gallery.length ? gallery[s.sportCycle % gallery.length] : null;
+      const frame = availableGallery.length ? availableGallery[s.sportCycle % availableGallery.length] : null;
       sport.photo = frame ? frame.photo : '';
       sport.nextFighter = frame ? frame.name : (next ? next.f1 : '');
     });
@@ -3763,7 +3776,7 @@ class FantasyMobileAppCore extends React.Component {
           (sp.gallery && sp.gallery.length
             ? React.createElement('div', {
                 key: sp.photo || sp.id, className: 'fmm-sport-cycle-frame', style: { position: 'absolute', inset: 0 }
-              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: sp.photo || undefined, shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'cover' }))
+              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: resolveSlotAsset('sport-' + sp.id + '-0'), onImageError: (photo) => this.setState((state) => ({ failedSportPhotos: { ...state.failedSportPhotos, [photo]: true } })), shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'cover' }))
             : React.createElement(MobileImageSlot, { id: 'sport-' + sp.id + '-0', shape: 'rect', placeholder: sp.name + ' — fighter photo', fit: 'cover' })),
           React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 5, pointerEvents: 'none' } },
             React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, letterSpacing: .2, lineHeight: 1.1, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, sp.name),
