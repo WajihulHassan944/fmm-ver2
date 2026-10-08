@@ -1,3 +1,4 @@
+import WrestlingScorerDesk from './WrestlingScorerDesk';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaExclamationTriangle, FaLock, FaMinus, FaPlus, FaSyncAlt } from 'react-icons/fa';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
@@ -32,7 +33,7 @@ const readStat = (rows, round, code) => {
 };
 
 const ScorerDesk = ({ token: initialToken }) => {
-  const [token, setToken] = useState(initialToken || '');
+  const [token, setToken] = useState('');
   const [fight, setFight] = useState(null);
   const [round, setRound] = useState(1);
   const [draft, setDraft] = useState({ a: {}, b: {} });
@@ -48,7 +49,7 @@ const ScorerDesk = ({ token: initialToken }) => {
   useEffect(() => {
     let cancelled = false;
     const start = async () => {
-      const stored = typeof window !== 'undefined' ? window.sessionStorage.getItem(SCORER_TOKEN_KEY) : '';
+      const stored = typeof window !== 'undefined' ? window.sessionStorage.getItem(`${SCORER_TOKEN_KEY}:${initialToken || 'account'}`) : '';
       if (stored) { if (!cancelled) setToken(stored); return; }
       if (!initialToken) { setStatus('error'); setError('No scoring link was provided.'); return; }
       try {
@@ -60,7 +61,7 @@ const ScorerDesk = ({ token: initialToken }) => {
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload?.message || 'This scoring link is not valid.');
         if (cancelled) return;
-        window.sessionStorage.setItem(SCORER_TOKEN_KEY, payload.token);
+        window.sessionStorage.setItem(`${SCORER_TOKEN_KEY}:${initialToken || 'account'}`, payload.token);
         setToken(payload.token);
       } catch (claimError) {
         if (!cancelled) { setStatus('error'); setError(claimError.message); }
@@ -179,6 +180,8 @@ const ScorerDesk = ({ token: initialToken }) => {
       </div>
     );
   }
+
+  if (fight?.gameMode === 'PRO_WRESTLING') return <WrestlingScorerDesk fight={fight} token={token} onSaved={setFight} />;
 
   const rounds = Array.from({ length: fight?.maxRounds || 1 }, (_, index) => index + 1);
 

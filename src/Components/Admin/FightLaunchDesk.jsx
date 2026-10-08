@@ -1,4 +1,5 @@
 import { fetchPublishedWrestlingPromotions, isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
+import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -21,8 +22,10 @@ const getOpenFights = (rows) => (Array.isArray(rows) ? rows : []).filter((fight)
 }).sort((a, b) => (parseFightDate(a)?.getTime() ?? Infinity) - (parseFightDate(b)?.getTime() ?? Infinity));
 
 export default function FightLaunchDesk() {
+  const router = useRouter();
   const [fights, setFights] = useState([]);
   const [selected, setSelected] = useState('');
+  useEffect(() => { if (typeof router.query.fightId === 'string') setSelected(router.query.fightId); }, [router.query.fightId]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
