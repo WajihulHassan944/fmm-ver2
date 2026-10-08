@@ -1,3 +1,5 @@
+import { getAdminToken as readAdminToken } from './authFetch';
+
 export const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three.vercel.app').trim().replace(/\/+$/, '');
 
 export const WRESTLING_STATS = [
@@ -58,7 +60,22 @@ export const formatTokenAmount = (value) => safeNumber(value, 0).toLocaleString(
 
 export const getUserToken = () => (typeof window === 'undefined' ? '' : window.localStorage.getItem('authToken') || '');
 export const getPlayerToken = getUserToken;
-export const getAdminToken = () => (typeof window === 'undefined' ? '' : window.localStorage.getItem('adminAuthToken') || '');
+export const getAdminToken = readAdminToken;
+
+let adminLoginRedirectPending = false;
+const recoverAdminSession = (accessToken) => {
+  if (typeof window === 'undefined' || adminLoginRedirectPending) return;
+  // A response for an old session must not clear a newer login.
+  if (getAdminToken() !== (accessToken || '')) return;
+  adminLoginRedirectPending = true;
+  try {
+    window.localStorage.removeItem('adminAuthToken');
+    window.localStorage.removeItem('adminToken');
+    window.sessionStorage.setItem('adminLoginNotice', 'Your admin session expired. Sign in again to load your saved wrestling contests.');
+  } catch (_) { /* Continue to login even when storage is unavailable. */ }
+  const next = window.location.pathname + window.location.search;
+  window.location.assign(`/administration/login?reason=session-expired&next=${encodeURIComponent(next)}`);
+};
 export const getAffiliateToken = () => (typeof window === 'undefined' ? '' : window.localStorage.getItem('affiliateAuthToken') || '');
 
 export class WrestlingApiError extends Error {
@@ -114,6 +131,7 @@ export const wrestlingRequest = async (path, options = {}) => {
     : await response.text().catch(() => '');
 
   if (!response.ok) {
+    if (admin && response.status === 401) recoverAdminSession(accessToken);
     throw new WrestlingApiError(payload?.message || payload?.error || `Request failed with status ${response.status}`, {
       status: response.status,
       code: payload?.code,
