@@ -349,6 +349,7 @@ const normalizeLiveEvent = (fight = {}, index = 0) => {
     liveStrikesA: sumLiveStrikes(fighterOneStats, sport),
     liveStrikesB: sumLiveStrikes(fighterTwoStats, sport),
     userEntry,
+    description: cleanText(fight.description, fight.matchDescription, fight.fightDescription),
     aiScoutingReport: fight.aiScoutingReport && typeof fight.aiScoutingReport === 'object' ? fight.aiScoutingReport : null,
     viewerCount: toSafeNumber(fight.viewerCount, fight.liveViewerCount, fight.watchPartyViewers),
     isLive: Boolean(fight.isLive || fight.live || String(fight.status || '').toLowerCase() === 'live'),
@@ -3881,7 +3882,7 @@ class FantasyMobileAppCore extends React.Component {
             style: { flex: 1, display: 'grid', placeItems: 'center', background: '#f2b544', color: '#2b1b00', borderRadius: 8, padding: '9px 10px', fontSize: 11 }
           }, this.getEventActionLabel(event))
         ),
-        React.createElement('span', { style: { marginTop: 5, color: '#9bbcff', fontSize: 8, fontWeight: 900, letterSpacing: .35 } }, event.aiScoutingReport ? 'AI SCOUTING REPORT' : 'AI SCOUT · REPORT STATUS')
+        React.createElement('span', { style: { marginTop: 5, color: '#9bbcff', fontSize: 8, fontWeight: 900, letterSpacing: .35 } }, event.aiScoutingReport ? 'AI SCOUTING REPORT' : event.description ? 'MATCH DESCRIPTION' : 'AI SCOUT · REPORT STATUS')
       )
     );
   }
@@ -3918,7 +3919,7 @@ class FantasyMobileAppCore extends React.Component {
               role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${ev.f1} versus ${ev.f2}`,
               onClick: () => this.openAiScout(ev),
               style: { textAlign: 'center', padding: '6px 0', borderRadius: 7, fontSize: 8.5, fontWeight: 900, background: 'linear-gradient(90deg,rgba(77,141,255,.22),rgba(168,85,247,.22))', border: '1px solid rgba(77,141,255,.45)', color: '#b9cbff', cursor: 'pointer' }
-            }, 'AI SCOUTING'),
+            }, !ev.aiScoutingReport && ev.description ? 'MATCH DESCRIPTION' : 'AI SCOUTING'),
             React.createElement('div', {
               role: 'button', tabIndex: 0, 'aria-label': `${this.getEventActionLabel(ev)} for ${ev.f1} versus ${ev.f2}`,
               onClick: () => this.openEvent(ev),
@@ -3988,7 +3989,7 @@ class FantasyMobileAppCore extends React.Component {
           role: 'button', tabIndex: 0, 'aria-label': `Open AI scouting report for ${event.f1} versus ${event.f2}`,
           onClick: () => this.openAiScout(event),
           style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, textAlign: 'center', padding: '10px 0', borderRadius: 10, marginBottom: 8, background: 'linear-gradient(90deg,#4d8dff,#a855f7)', fontWeight: 900, fontSize: 11.5, color: '#fff', cursor: 'pointer', boxShadow: '0 0 16px rgba(77,141,255,.5)' }
-        }, event.aiScoutingReport ? 'AI SCOUTING REPORT' : 'AI SCOUT · CHECK REPORT'),
+        }, event.aiScoutingReport ? 'AI SCOUTING REPORT' : event.description ? 'MATCH DESCRIPTION' : 'AI SCOUT · CHECK REPORT'),
         React.createElement('div', {
           role: 'button', tabIndex: 0, 'aria-label': `${this.getEventActionLabel(event)} for ${event.f1} versus ${event.f2}`,
           onClick: () => this.openFeaturedPick(event),
@@ -4321,7 +4322,7 @@ class FantasyMobileAppCore extends React.Component {
               role: 'button', tabIndex: 0,
               onClick: () => this.openAiScout(ev),
               style: { textAlign: 'center', padding: '8px 0', borderRadius: 8, fontSize: 10, fontWeight: 900, cursor: 'pointer', marginBottom: 7, background: 'linear-gradient(90deg,rgba(77,141,255,.22),rgba(168,85,247,.22))', border: '1px solid rgba(77,141,255,.45)', color: '#b9cbff' }
-            }, ev.aiScoutingReport ? 'AI SCOUTING REPORT' : 'AI SCOUT · CHECK REPORT'),
+            }, ev.aiScoutingReport ? 'AI SCOUTING REPORT' : ev.description ? 'MATCH DESCRIPTION' : 'AI SCOUT · CHECK REPORT'),
             React.createElement('div', {
               role: 'button', tabIndex: 0,
               onClick: () => this.openEvent(ev),
@@ -4467,7 +4468,7 @@ class FantasyMobileAppCore extends React.Component {
             role: 'button', tabIndex: 0,
             onClick: () => this.openAiScout(ev),
             style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, textAlign: 'center', padding: '9px 0', borderRadius: 10, marginBottom: 8, background: 'linear-gradient(90deg,rgba(77,141,255,.22),rgba(168,85,247,.22))', border: '1px solid rgba(77,141,255,.4)', fontSize: 10, fontWeight: 900, color: '#9bbcff', cursor: 'pointer' }
-          }, ev.aiScoutingReport ? '🤖 AI SCOUTING REPORT' : '🤖 AI SCOUT · CHECK REPORT'),
+          }, ev.aiScoutingReport ? '🤖 AI SCOUTING REPORT' : ev.description ? 'MATCH DESCRIPTION' : '🤖 AI SCOUT · CHECK REPORT'),
           React.createElement('div', {
             role: 'button', tabIndex: 0,
             onClick: () => this.openEvent(ev),
@@ -6155,6 +6156,7 @@ class FantasyMobileAppCore extends React.Component {
       const event = s.modalData || events[0] || null;
       if (!event) return null;
       const report = event?.aiScoutingReport || null;
+      const description = event.description || '';
       const votes = report?.pickSplit
         ? { a: Number(report.pickSplit.fighterA) || 0, b: Number(report.pickSplit.fighterB) || 0 }
         : null;
@@ -6171,17 +6173,18 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle at 15% 0%, rgba(77,141,255,.25), transparent 55%), radial-gradient(circle at 85% 100%, rgba(242,181,68,.15), transparent 55%)', pointerEvents: 'none' } }),
           React.createElement('div', { style: { position: 'relative' } },
             React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 } },
-              React.createElement('div', { style: { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#4d8dff,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 1000 } }, 'AI'),
+              React.createElement('div', { style: { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#4d8dff,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 1000 } }, report ? 'AI' : 'INFO'),
               React.createElement('div', null,
-                React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#fff' } }, 'AI SCOUTING ASSISTANT'),
+                React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 15, color: '#fff' } }, report ? 'AI SCOUTING REPORT' : description ? 'MATCH DESCRIPTION' : 'SCOUTING REPORT'),
                 React.createElement('div', { style: { fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.55)', letterSpacing: .5 } }, `${fighterA} vs ${fighterB}${event?.tag ? ` · ${event.tag}` : ''}`)
               )
             ),
+            description && React.createElement('div', { style: { padding: 12, borderRadius: 10, marginBottom: 10, background: 'rgba(77,141,255,.08)', color: 'rgba(255,255,255,.85)', fontSize: 12, lineHeight: 1.6, whiteSpace: 'pre-wrap' } }, description),
             report ? React.createElement('div', { style: { display: 'grid', gap: 8, marginBottom: 10 } },
               [report.summary, report.pickSplitNote, report.underdogAngle].filter(Boolean).map((note, index) => React.createElement('div', { key: `${index}-${note}`, style: { padding: 10, borderRadius: 9, background: 'rgba(255,255,255,.05)', borderLeft: `3px solid ${['#4d8dff', '#f2b544', '#a855f7'][index]}` } },
                 React.createElement('span', { style: { display: 'block', color: 'rgba(255,255,255,.78)', fontSize: 10.5, lineHeight: 1.45 } }, note)
-              ))) : React.createElement('div', { style: { padding: 12, borderRadius: 10, marginBottom: 10, background: 'rgba(77,141,255,.08)', border: '1px solid rgba(77,141,255,.28)', color: 'rgba(255,255,255,.72)', fontSize: 10.5, lineHeight: 1.5 } },
-              'The AI scouting entry point is active, but the back office has not generated a verified scouting report for this fight yet. Predictions remain available without fabricated scouting data.'
+              ))) : !description && React.createElement('div', { style: { padding: 12, borderRadius: 10, marginBottom: 10, background: 'rgba(77,141,255,.08)', border: '1px solid rgba(77,141,255,.28)', color: 'rgba(255,255,255,.72)', fontSize: 10.5, lineHeight: 1.5 } },
+              'A scouting report has not been published for this fight yet.'
             ),
             votes && React.createElement('div', { style: { display: 'flex', gap: 8 } },
               [[`${votes.a}%`, `PICKED ${fighterA}`], [`${votes.b}%`, `PICKED ${fighterB}`]].map(([value, label]) => React.createElement('div', { key: label, style: { flex: 1, minWidth: 0, textAlign: 'center', background: 'rgba(255,255,255,.05)', borderRadius: 8, padding: '8px 4px' } },
@@ -6189,7 +6192,7 @@ class FantasyMobileAppCore extends React.Component {
                 React.createElement('div', { style: { fontSize: 7, fontWeight: 800, color: 'rgba(255,255,255,.5)', overflowWrap: 'anywhere' } }, label)
               ))
             ),
-            React.createElement('div', { style: { marginTop: 9, fontSize: 8, color: 'rgba(255,255,255,.35)', textAlign: 'center' } }, report ? (report.generatedAt ? `Generated for this fight · ${new Date(report.generatedAt).toLocaleDateString()}` : 'Generated for this fight') : 'Awaiting an approved back-office scouting report')
+            React.createElement('div', { style: { marginTop: 9, fontSize: 8, color: 'rgba(255,255,255,.35)', textAlign: 'center' } }, report ? (report.generatedAt ? `Generated for this fight · ${new Date(report.generatedAt).toLocaleDateString()}` : 'Generated for this fight') : description ? 'Match description' : 'Scouting report coming soon')
           )
         ),
         React.createElement('div', {

@@ -4,6 +4,8 @@ import { wrestlingRequest, safeWrestlingArray } from '@/Utils/proWrestling';
 export const normalizeWrestlingPromotion = (match) => ({
   _id: match._id, gameMode: 'PRO_WRESTLING', sourceType: 'PRO_WRESTLING',
   matchName: match.eventName, matchTitle: match.matchTitle,
+  description: match.description || '',
+  aiScoutingReport: match.aiScoutingReport || null,
   matchFighterA: match.competitorA?.displayName || '', matchFighterB: match.competitorB?.displayName || '',
   fighterAImage: match.competitorA?.image || '', fighterBImage: match.competitorB?.image || '',
   matchCategory: 'Pro Wrestling', matchCategoryTwo: 'Pro Wrestling',
