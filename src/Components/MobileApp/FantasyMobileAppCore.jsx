@@ -3776,8 +3776,8 @@ class FantasyMobileAppCore extends React.Component {
           (sp.gallery && sp.gallery.length
             ? React.createElement('div', {
                 key: sp.photo || sp.id, className: 'fmm-sport-cycle-frame', style: { position: 'absolute', inset: 0 }
-              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: resolveSlotAsset('sport-' + sp.id + '-0'), onImageError: (photo) => this.setState((state) => ({ failedSportPhotos: { ...state.failedSportPhotos, [photo]: true } })), shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'cover' }))
-            : React.createElement(MobileImageSlot, { id: 'sport-' + sp.id + '-0', shape: 'rect', placeholder: sp.name + ' — fighter photo', fit: 'cover' })),
+              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: resolveSlotAsset('sport-' + sp.id + '-0'), onImageError: (photo) => this.setState((state) => ({ failedSportPhotos: { ...state.failedSportPhotos, [photo]: true } })), shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'contain', position: 'center top' }))
+            : React.createElement(MobileImageSlot, { id: 'sport-' + sp.id + '-0', shape: 'rect', placeholder: sp.name + ' — fighter photo', fit: 'contain', position: 'center top' })),
           React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 5, pointerEvents: 'none' } },
             React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, letterSpacing: .2, lineHeight: 1.1, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, sp.name),
             React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 3, fontSize: 7, fontWeight: 700, color: sp.color } },
