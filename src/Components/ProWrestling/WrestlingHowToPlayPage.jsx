@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { FaArrowRight, FaBolt, FaCheckCircle, FaLock, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { WrestlingHero, WrestlingModeNav, WrestlingSectionHeading } from './WrestlingPrimitives';
-import { WRESTLING_STATS, wrestlingRequest } from '@/Utils/proWrestling';
+import { WRESTLING_STATS } from '@/Utils/proWrestling';
 
 const WrestlingHowToPlayPage = () => {
-  const [config, setConfig] = useState(null);
-  useEffect(() => { wrestlingRequest('/api/wrestling/config').then(setConfig).catch(console.error); }, []);
-  const categories = config?.categories || {};
-  const categoryWeight = (key) => categories?.[key]?.weight ?? (Array.isArray(categories) ? categories.find((item) => item.key === key)?.weight : null);
   return <><Head><title>How Pro Wrestling Works | Fantasy MMAdness</title></Head><div className="pw-page pw-how-page">
     <WrestlingHero eyebrow="Pro Wrestling player guide" title="Predict the whole match." accent="Not only the winner." description="Learn the finalized Pro Wrestling lifecycle: one 25-minute match, five action categories, two-way winner pick, 100-point winner bonus, 500-point finish market, and 25-point survival result." actions={[{ href: '/pro-wrestling', label: 'Open wrestling lobby', icon: FaArrowRight }, { href: '/pro-wrestling/wrestlers', label: 'Research wrestlers', secondary: true, icon: FaUsers }]} stats={[{ value: '5', label: 'Action categories', icon: FaBolt }, { value: '2', label: 'Competitor scorecards', icon: FaUsers }, { value: '100', label: 'Winner bonus', icon: FaTrophy }]} background="/images/pro-wrestling/prediction-mockup.webp" />
     <WrestlingModeNav active="rules" />
@@ -24,7 +20,7 @@ const WrestlingHowToPlayPage = () => {
         ['06', FaCheckCircle, 'Track and settle', 'Follow live scoring across the 25-minute match, then review final rank and payout.'],
       ].map(([number, Icon, title, copy]) => <article key={number}><span>{number}</span><Icon /><h3>{title}</h3><p>{copy}</p></article>)}</div></section>
 
-      <section className="pw-section"><WrestlingSectionHeading eyebrow="Full-match action categories" title="What you predict" description="Each value represents the predicted total for the complete match—not a round-by-round estimate." /><div className="pw-rule-category-grid">{WRESTLING_STATS.map((stat) => <article key={stat.key}><strong>{stat.short}</strong><div><h3>{stat.label}</h3><p>{stat.description}</p></div><span>{categoryWeight(stat.key) ? `${categoryWeight(stat.key)}× category weight` : 'Weighted accuracy'}</span></article>)}</div></section>
+      <section className="pw-section"><WrestlingSectionHeading eyebrow="Full-match action categories" title="What you predict" description="Each value represents the predicted total for the complete match—not a round-by-round estimate." /><div className="pw-rule-category-grid">{WRESTLING_STATS.map((stat) => <article key={stat.key}><strong>{stat.short}</strong><div><h3>{stat.label}</h3><p>{stat.description}</p></div></article>)}</div></section>
 
       <section className="pw-scoring-explainer"><div><p className="pw-eyebrow"><FaShieldAlt /> Final scoring</p><h2>Finalized scoring is simple and consistent.</h2><p>Wrestling uses the official finalized model: a flat 100-point bonus for the correct match winner, a 500-point bonus for the correctly called pinfall/submission finish market, and a 25-point survival result when the finish market misses. Stats for HP, BP, K, PM, and FM are tracked live through the full 25-minute match.</p><div className="pw-accuracy-bands"><span><strong>100</strong><small>Winner bonus</small></span><span><strong>500</strong><small>Finish market</small></span><span><strong>25</strong><small>Survival result</small></span><span><strong>25:00</strong><small>Full match</small></span></div></div><aside><FaTrophy /><small>Correct winner bonus</small><strong>100 points</strong><p>The public winner pick is two-way only: Wrestler A or Wrestler B. Draw/no-contest handling stays an admin settlement state, not a user winner pick.</p></aside></section>
 

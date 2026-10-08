@@ -169,12 +169,11 @@ const WrestlingMatchDetail = () => {
             <div className="pw-detail-panel">
               <p className="pw-eyebrow"><FaFistRaised /> Prediction scorecard</p>
               <h2>Forecast every major action.</h2>
-              <p>Enter a full-match total for each category on both wrestlers. Your score is based on category accuracy, category weight, and the winner bonus.</p>
+              <p>Enter a full-match total for each category on both wrestlers. Your score is based on prediction accuracy and the winner bonus.</p>
               <div className="pw-detail-category-list">
-                {WRESTLING_STATS.map((stat) => {
-                  const weight = match?.scoringRules?.categories?.[stat.key]?.weight ?? match?.scoringRules?.categories?.find?.((item) => item.key === stat.key)?.weight;
-                  return <article key={stat.key}><strong>{stat.short}</strong><span><b>{stat.label}</b><small>{stat.description}</small></span><em>{weight ? `${weight}× weight` : 'Accuracy scored'}</em></article>;
-                })}
+                {WRESTLING_STATS.map((stat) => (
+                  <article key={stat.key}><strong>{stat.short}</strong><span><b>{stat.label}</b><small>{stat.description}</small></span></article>
+                ))}
               </div>
             </div>
             <aside className="pw-detail-panel is-rules">

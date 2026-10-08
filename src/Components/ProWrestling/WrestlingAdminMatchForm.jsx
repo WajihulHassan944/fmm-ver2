@@ -1,3 +1,4 @@
+import { visibleWrestlers } from '@/Utils/proWrestling';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -100,7 +101,7 @@ const WrestlingAdminMatchForm = ({ matchId }) => {
           : null;
 
         if (!active) return;
-        const roster = safeWrestlingArray(wrestlerPayload?.data);
+        const roster = visibleWrestlers(wrestlerPayload?.data);
         const scoring = safeWrestlingArray(scoringPayload);
         const payouts = safeWrestlingArray(payoutPayload);
         const match = matchPayload?.match || null;

@@ -1,3 +1,4 @@
+import { visibleWrestlingMatches, visibleWrestlers } from '@/Utils/proWrestling';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -7,7 +8,7 @@ import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { WrestlingStatusBadge } from './WrestlingPrimitives';
 import WrestlingRegistryActions from './WrestlingRegistryActions';
 import styles from './WrestlingRegistryActions.module.css';
-import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
+import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, wrestlingRequest } from '@/Utils/proWrestling';
 
 const WrestlingAdminDashboard = () => {
   const [matches, setMatches] = useState([]);
@@ -29,10 +30,10 @@ const WrestlingAdminDashboard = () => {
       ]);
       if (analyticsResult.status === 'fulfilled') setAnalytics(analyticsResult.value);
       if (wrestlerResult.status === 'fulfilled') {
-        setWrestlers(safeWrestlingArray(wrestlerResult.value?.data || wrestlerResult.value));
+        setWrestlers(visibleWrestlers(wrestlerResult.value?.data || wrestlerResult.value));
       }
       if (matchResult.status === 'rejected') throw matchResult.reason;
-      setMatches(safeWrestlingArray(matchResult.value?.data || matchResult.value));
+      setMatches(visibleWrestlingMatches(matchResult.value?.data || matchResult.value));
       if (analyticsResult.status === 'rejected' || wrestlerResult.status === 'rejected') {
         setError('Saved contests are loaded. Some dashboard totals could not be refreshed.');
       }

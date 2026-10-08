@@ -1,9 +1,10 @@
+import { visibleWrestlers } from '@/Utils/proWrestling';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { FaArrowRight, FaFistRaised, FaSearch, FaShieldAlt, FaTrophy } from 'react-icons/fa';
 import { WrestlingEmptyState, WrestlingHero, WrestlingModeNav, WrestlingSectionHeading } from './WrestlingPrimitives';
-import { safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
+import { wrestlingRequest } from '@/Utils/proWrestling';
 
 const WrestlingWrestlersPage = () => {
   const [wrestlers, setWrestlers] = useState([]);
@@ -14,7 +15,7 @@ const WrestlingWrestlersPage = () => {
   useEffect(() => {
     let active = true;
     wrestlingRequest('/api/wrestling/wrestlers?limit=100')
-      .then((payload) => { if (active) setWrestlers(safeWrestlingArray(payload?.data)); })
+      .then((payload) => { if (active) setWrestlers(visibleWrestlers(payload?.data)); })
       .catch((requestError) => { if (active) setError(requestError.message); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };

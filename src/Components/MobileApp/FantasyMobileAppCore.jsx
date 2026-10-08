@@ -82,7 +82,7 @@ const resolveSlotAsset = (id = '', src = '') => {
   return '/images/hero-fight.webp';
 };
 
-const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder, position, onImageError }) => {
+const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder, position, headroom = 0, onImageError }) => {
   const borderRadius = shape === 'circle' ? '50%' : radius ? Number(radius) : 0;
   const isDynamicFightSlot = /^(event|contest|featured-week|detail)-/.test(String(id));
   const resolvedFallback = explicitAsset(fallbackSrc) || (isDynamicFightSlot ? '' : resolveSlotAsset(id));
@@ -112,6 +112,8 @@ const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, p
       width: '100%',
       height: '100%',
       objectFit: fit,
+      paddingTop: headroom,
+      boxSizing: 'border-box',
       objectPosition: position || 'center',
       borderRadius,
     },
@@ -3777,8 +3779,8 @@ class FantasyMobileAppCore extends React.Component {
           (sp.gallery && sp.gallery.length
             ? React.createElement('div', {
                 key: sp.photo || sp.id, className: 'fmm-sport-cycle-frame', style: { position: 'absolute', inset: 0 }
-              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: resolveSlotAsset('sport-' + sp.id + '-0'), onImageError: (photo) => this.setState((state) => ({ failedSportPhotos: { ...state.failedSportPhotos, [photo]: true } })), shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'cover' }))
-            : React.createElement(MobileImageSlot, { id: 'sport-' + sp.id + '-0', shape: 'rect', placeholder: sp.name + ' — fighter photo', fit: 'cover' })),
+              }, React.createElement(MobileImageSlot, { id: 'sport-' + sp.id, src: sp.photo || undefined, fallbackSrc: resolveSlotAsset('sport-' + sp.id + '-0'), onImageError: (photo) => this.setState((state) => ({ failedSportPhotos: { ...state.failedSportPhotos, [photo]: true } })), shape: 'rect', placeholder: sp.nextFighter || sp.name, fit: 'cover', position: 'center top', headroom: 6 }))
+            : React.createElement(MobileImageSlot, { id: 'sport-' + sp.id + '-0', shape: 'rect', placeholder: sp.name + ' — fighter photo', fit: 'cover', position: 'center top', headroom: 6 })),
           React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 5, pointerEvents: 'none' } },
             React.createElement('div', { style: { fontSize: 8.5, fontWeight: 900, letterSpacing: .2, lineHeight: 1.1, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,.9)' } }, sp.name),
             React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 3, fontSize: 7, fontWeight: 700, color: sp.color } },
@@ -4303,8 +4305,8 @@ class FantasyMobileAppCore extends React.Component {
         },
           React.createElement('div', { style: { height: 170, position: 'relative', background: '#000' } },
             (ev.fighterAImage || ev.fighterBImage) ? React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
-              ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'contest-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'cover', src: ev.fighterAImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f1 || '?')[0]),
-              ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'contest-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'cover', src: ev.fighterBImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f2 || '?')[0])
+              ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'contest-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'contain', position: 'center top', headroom: 8, src: ev.fighterAImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f1 || '?')[0]),
+              ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'contest-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'contain', position: 'center top', headroom: 8, src: ev.fighterBImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f2 || '?')[0])
             ) : ev.hasPoster ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image }) : React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42, fontWeight: 900 } }, `${(ev.f1 || '?')[0]}  VS  ${(ev.f2 || '?')[0]}`)
           ),
           React.createElement('div', { style: { padding: 12 } },
@@ -4455,7 +4457,7 @@ class FantasyMobileAppCore extends React.Component {
             [[ev.f1, ev.featuredFightFighterAImage || libraryPhoto(ev.f1)], [ev.f2, ev.featuredFightFighterBImage || libraryPhoto(ev.f2)]].map(([name, photo]) => React.createElement('div', {
               key: name, style: { flex: 1, position: 'relative', height: 130, overflow: 'hidden', borderRadius: 10, border: '1px solid rgba(255,255,255,.15)' }
             },
-              React.createElement(MobileImageSlot, { id: 'predict-fighter-' + ev.id + '-' + name, src: photo, shape: 'rect', fit: 'cover', position: 'center 10%', placeholder: name || 'Fighter' }),
+              React.createElement(MobileImageSlot, { id: 'predict-fighter-' + ev.id + '-' + name, src: photo, shape: 'rect', fit: 'contain', position: 'center top', headroom: 8, placeholder: name || 'Fighter' }),
               React.createElement('div', { style: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 50%,rgba(0,0,0,.8))', pointerEvents: 'none' } }),
               React.createElement('div', { style: { position: 'absolute', left: 0, right: 0, bottom: 6, textAlign: 'center', fontWeight: 900, fontSize: 12, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,.9)' } }, name)
             ))

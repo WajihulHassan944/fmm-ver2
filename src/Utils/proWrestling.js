@@ -52,6 +52,15 @@ export const WRESTLING_STATUS_CLASS = {
 
 export const safeArray = (value) => (Array.isArray(value) ? value : []);
 export const safeWrestlingArray = safeArray;
+
+export const isPlaceholderWrestler = (wrestler = {}) => /^(?:test\s+)?wrestler\s*[ab]$/i.test(String(wrestler.displayName || '').trim());
+export const isPlaceholderWrestlingMatch = (match = {}) => {
+  const a = String(match.matchFighterA || match.competitorA?.displayName || '').trim();
+  const b = String(match.matchFighterB || match.competitorB?.displayName || '').trim();
+  return /^(?:test\s+)?wrestler\s*a$/i.test(a) && /^(?:test\s+)?wrestler\s*b$/i.test(b);
+};
+export const visibleWrestlingMatches = (value) => safeArray(value).filter((match) => !isPlaceholderWrestlingMatch(match));
+export const visibleWrestlers = (value) => safeArray(value).filter((wrestler) => !isPlaceholderWrestler(wrestler));
 export const safeNumber = (value, fallback = 0) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;

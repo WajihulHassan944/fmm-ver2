@@ -1,3 +1,4 @@
+import { visibleWrestlingMatches } from '@/Utils/proWrestling';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -20,7 +21,6 @@ import {
   formatTokenAmount,
   formatWrestlingDate,
   getWrestlerImage,
-  safeWrestlingArray,
   wrestlingRequest,
 } from '@/Utils/proWrestling';
 
@@ -33,7 +33,7 @@ const WrestlingLeaderboardDirectory = () => {
   useEffect(() => {
     let active = true;
     wrestlingRequest('/api/wrestling/matches?limit=100&status=LIVE,SCORING,FINALIZED')
-      .then((payload) => { if (active) setMatches(safeWrestlingArray(payload?.data)); })
+      .then((payload) => { if (active) setMatches(visibleWrestlingMatches(payload?.data)); })
       .catch((requestError) => { if (active) setError(requestError.message || 'Wrestling leaderboards could not be loaded.'); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };

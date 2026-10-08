@@ -1,3 +1,4 @@
+import { visibleWrestlingMatches, visibleWrestlers } from '@/Utils/proWrestling';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -10,7 +11,7 @@ import {
   WrestlingModeNav,
   WrestlingSectionHeading,
 } from './WrestlingPrimitives';
-import { WRESTLING_STATS, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
+import { WRESTLING_STATS, wrestlingRequest } from '@/Utils/proWrestling';
 
 const ProWrestlingHome = () => {
   const [matches, setMatches] = useState([]);
@@ -31,8 +32,8 @@ const ProWrestlingHome = () => {
           wrestlingRequest('/api/wrestling/config'),
         ]);
         if (!active) return;
-        setMatches(safeWrestlingArray(matchPayload?.data));
-        setWrestlers(safeWrestlingArray(wrestlerPayload?.data));
+        setMatches(visibleWrestlingMatches(matchPayload?.data));
+        setWrestlers(visibleWrestlers(wrestlerPayload?.data));
         setConfig(configPayload);
       } catch (requestError) {
         console.error('Unable to load Pro Wrestling game mode:', requestError);

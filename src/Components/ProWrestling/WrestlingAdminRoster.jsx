@@ -1,3 +1,4 @@
+import { visibleWrestlers } from '@/Utils/proWrestling';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import { toast } from 'react-toastify';
@@ -61,7 +62,7 @@ const WrestlingAdminRoster = () => {
     setLoading(true);
     try {
       const payload = await wrestlingRequest('/api/admin/wrestling/wrestlers?limit=100', { admin: true });
-      setWrestlers(safeWrestlingArray(payload?.data || payload));
+      setWrestlers(visibleWrestlers(payload?.data || payload));
     } catch (error) {
       toast.error(error.message || 'The wrestling roster could not be loaded.');
     } finally {
