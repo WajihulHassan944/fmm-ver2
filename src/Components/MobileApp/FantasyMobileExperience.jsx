@@ -1,4 +1,4 @@
-import { fetchPublishedWrestlingPromotions } from '@/Utils/affiliatePromotionFights';
+import { fetchPublishedWrestlingPromotions, isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
@@ -450,7 +450,7 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
         // down to a different shape (f1/f2/sport/poster) that AppCore's normalizer
         // doesn't recognize, so real posters/images fell back to generic stock art
         // and, after the literal-fallback removal, fights could disappear outright.
-        const nameable = rawFights.filter(isPlayableMobileFight);
+        const nameable = rawFights.filter((fight) => isPlayableMobileFight(fight) && !isPlaceholderWrestlingPromotion(fight));
         // Same match can come back twice from the API (re-saved card, paginated
         // overlap) — collapse by id so it never renders as two identical cards.
         const seenIds = new Set();

@@ -1,3 +1,4 @@
+import { isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 /* Derived from the client-approved standalone prototype in the design handoff. */
 import React from 'react';
 import { resolvePublicMediaUrl } from '@/Utils/publicApi';
@@ -2158,7 +2159,7 @@ class FantasyMobileAppCore extends React.Component {
 
     const fighterLibraryImages = buildFighterLibraryImageMap(this.props.fighterLibrary);
     const liveEvents = Array.isArray(this.props.fights)
-      ? this.props.fights.map((fight, index) => normalizeLiveEvent(enrichFightWithLibraryImages(fight, fighterLibraryImages), index)).filter(event => event.f1 && event.f2)
+      ? this.props.fights.filter((fight) => !isPlaceholderWrestlingPromotion(fight)).map((fight, index) => normalizeLiveEvent(enrichFightWithLibraryImages(fight, fighterLibraryImages), index)).filter(event => event.f1 && event.f2)
       : [];
     const eventsRaw = dedupeLiveEvents(liveEvents);
     const now = new Date();

@@ -1,3 +1,4 @@
+import { fetchPublishedWrestlingPromotions, isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -12,6 +13,8 @@ import styles from './FightLaunchDesk.module.css';
 
 const titleFor = (fight) => `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`;
 const getOpenFights = (rows) => (Array.isArray(rows) ? rows : []).filter((fight) => {
+  if (isPlaceholderWrestlingPromotion(fight)) return false;
+  if (fight.gameMode === 'PRO_WRESTLING') return getFightId(fight) && fight.status === 'OPEN' && (!fight.lockAt || new Date(fight.lockAt).getTime() > Date.now());
   const lock = fight.lockAt ? new Date(fight.lockAt).getTime() : parseFightDate(fight)?.getTime();
   return getFightId(fight) && (!Number.isFinite(lock) || lock > Date.now())
     && !/draft|closed|finished|complete|cancel/.test(String(fight.matchStatus || fight.status || '').toLowerCase());
@@ -29,7 +32,7 @@ export default function FightLaunchDesk() {
   const open = useMemo(() => getOpenFights(fights), [fights]);
   const fight = open.find((row) => String(getFightId(row)) === selected) || open[0];
   const id = fight ? String(getFightId(fight)) : '';
-  const url = id ? `https://www.fantasymmadness.com/fight/${encodeURIComponent(id)}?play=1&utm_source=owner&utm_medium=social&utm_campaign=fight_launch` : '';
+  const url = id ? `https://www.fantasymmadness.com${fight?.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(id)}?play=1&utm_source=owner&utm_medium=social&utm_campaign=fight_launch` : '';
   const title = fight ? titleFor(fight) : '';
   const fighterTags = fight ? fighterNameHashtags(getFighterName(fight, 'A'), getFighterName(fight, 'B')).join(' ') : '';
   const posterImage = uploadedPosters[id] || fight?.fightPosterImage || fight?.promotionBackground || fight?.fightPosterMobileImage || '';
@@ -66,12 +69,12 @@ export default function FightLaunchDesk() {
 
   useEffect(() => {
     let live = true;
-    fetch(buildPublicApiUrl('/api/admin/fights', { limit: 240, includeShadow: true, source: 'all' }), { headers: adminHeaders() })
-      .then(async (response) => {
+    Promise.all([fetch(buildPublicApiUrl('/api/admin/fights', { limit: 240, includeShadow: true, source: 'all' }), { headers: adminHeaders() }), fetchPublishedWrestlingPromotions('OPEN')])
+      .then(async ([response, wrestling]) => {
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload.message || `Could not load Fight Registry (HTTP ${response.status}).`);
         const rows = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload?.data) ? payload.data : [];
-        if (live) setFights(normalizePublicFightRows(rows));
+        if (live) setFights([...wrestling, ...normalizePublicFightRows(rows)]);
       })
       .catch((err) => { if (live) setError(err.message || 'Could not load Fight Registry.'); })
       .finally(() => { if (live) setLoading(false); });
