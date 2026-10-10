@@ -11,8 +11,9 @@ export default async function handler(req, res) {
   const affiliateId = String(req.query.affiliateId || '');
   const facebook = req.query.format === 'facebook';
   const height = facebook ? 630 : 1200;
-  const qrSize = facebook ? 142 : 270;
-  const qrInset = facebook ? 294 : 17;
+  const qrSize = facebook ? 100 : 270;
+  const qrInset = facebook ? 546 : 17;
+  const artSize = facebook ? 480 : 1200;
   if (!validId(fightId) || !validId(affiliateId)) return res.status(400).end();
 
   try {
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
     const render = (art) => new ImageResponse(
       <div style={{ display: 'flex', position: 'relative', width: 1200, height, justifyContent: 'center', background: '#090c17', overflow: 'hidden' }}>
-        {art ? <img src={art} alt="" width={height} height={height} style={{ objectFit: 'contain' }} /> :
+        {art ? <img src={art} alt="" width={artSize} height={artSize} style={{ objectFit: 'contain', marginTop: facebook ? 15 : 0 }} /> :
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: facebook ? 35 : 90, width: 1200, height, background: 'linear-gradient(135deg,#24050a,#111a30)', color: 'white' }}>
             <div style={{ display: 'flex', color: '#ff3349', fontSize: 42, fontWeight: 800 }}>FANTASY MMADNESS</div>
             <div style={{ display: 'flex', marginTop: facebook ? 20 : 70, fontSize: facebook ? 48 : 72, fontWeight: 800, textTransform: 'uppercase', lineHeight: 1.1 }}>{String(fight.matchFighterA || 'FIGHT NIGHT').slice(0, 36)}</div>
@@ -65,7 +66,7 @@ export default async function handler(req, res) {
             <div style={{ display: 'flex', fontSize: facebook ? 48 : 72, fontWeight: 800, textTransform: 'uppercase', lineHeight: 1.1 }}>{String(fight.matchFighterB || '').slice(0, 36)}</div>
             <div style={{ display: 'flex', marginTop: facebook ? 20 : 70, fontSize: 32, fontWeight: 700 }}>PREDICT THE FIGHT · JOIN MY LEAGUE</div>
           </div>}
-        <div style={{ display: 'flex', position: 'absolute', right: qrInset, bottom: facebook ? 9 : 17, padding: 4, background: 'white' }}>
+        <div style={{ display: 'flex', position: 'absolute', right: qrInset, bottom: 17, padding: 4, background: 'white' }}>
           <img src={qr} alt="Affiliate fight QR" width={qrSize} height={qrSize} />
         </div>
       </div>,

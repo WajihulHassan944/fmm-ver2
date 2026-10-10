@@ -65,7 +65,7 @@ export default function AffiliateFightLaunch() {
     let active = true;
     setPoster('');
     setPosterError('');
-    buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
+    buildFightSocialPoster({ format: 'facebook', fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
       fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
       basePoster: fightPhotos?.poster || creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
@@ -80,7 +80,7 @@ export default function AffiliateFightLaunch() {
     setPosterBusy(true);
     try {
       const creative = kit.creative || {};
-      const image = poster || await buildFightSocialPoster({ fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
+      const image = poster || await buildFightSocialPoster({ format: 'facebook', fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0],
         fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
         fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
         basePoster: fightPhotos?.poster || creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
@@ -172,10 +172,10 @@ export default function AffiliateFightLaunch() {
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
   const squarePosterUrl = kit?.attribution?.affiliateId && fightId
-    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&v=12`
+    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&format=facebook&v=13`
     : '';
   const facebookLeagueUrl = kit?.attribution?.affiliateId && fightId
-    ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-12`
+    ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-13`
     : link;
   const facebookShareUrl = facebookLeagueUrl
     ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookLeagueUrl)}`
@@ -213,7 +213,7 @@ export default function AffiliateFightLaunch() {
           <button type="button" disabled={!account?.configured || Boolean(socialBusy)} onClick={() => connect(key)}>{account?.connected ? 'Reconnect account' : 'Connect account'}</button>
           <button type="button" disabled={!account?.connected || (key !== 'x' && !poster) || Boolean(socialBusy) || ['published', 'publishing', 'review'].includes(account?.status)} onClick={() => publish(key)}>{socialBusy === key ? 'Working…' : account?.status === 'published' ? 'Published' : 'Publish'}</button>
         </div>}
-        {platform === 'Facebook' && <small>Facebook opens with your league link and fight poster preview. Review the preview and press Share. To add a longer personal message, copy the caption above and paste it into the composer.</small>}
+        {platform === 'Facebook' && <small>Facebook opens with your league link and full poster preview. Review the preview and press Share. To add a longer personal message, copy the caption above and paste it into the composer.</small>}
         {platform === 'Instagram' && <small>Instagram opens its create page when available. Choose the QR poster from Downloads or Photos, then paste the caption. A connected professional account can use Publish to send both directly. Caption links display as text.</small>}
         {platform === 'TikTok' && <small>TikTok opens its upload page when available. Select the QR poster from Downloads or Photos and paste the caption.</small>}
         {platform === 'X' && <small>X opens with the prepared text and tracked link. Attach your saved QR poster if you want the image in the post.</small>}

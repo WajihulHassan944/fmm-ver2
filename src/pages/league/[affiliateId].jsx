@@ -15,7 +15,7 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
   const fightUrl = `${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&affiliateId=${encodeURIComponent(affiliateId)}&fromLeague=1`;
-  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&format=facebook&v=12`;
+  const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&format=facebook&v=13`;
   const shareTitle = `Join ${leagueName}'s league for ${title} | FANTASY MMADNESS`;
   const shareDescription = `${title}: make your picks in ${leagueName}'s league${Number(fight?.pot) > 0 ? ` for a ${Number(fight.pot).toLocaleString()} FM COINS prize pool` : ''}. Open the fight to see entry details, eligibility, and rules.`;
 

@@ -77,13 +77,27 @@ const arenaLight = (ctx, x, color) => {
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, 30, 12, 0, Math.PI * 2); ctx.fill(); ctx.restore();
 };
 
-/** Produce the same portrait social poster for owner links and affiliate links. */
-export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, basePoster, sport, event, date, url, league, prize, entryCoins }) {
+// Keep the complete artwork inside Facebook's landscape preview, with enough
+// inset to remain visible when a receiving app shows a centered square tile.
+export function frameFacebookPoster(canvas) {
+  const output = document.createElement('canvas');
+  output.width = 1200; output.height = 630;
+  const context = output.getContext('2d');
+  context.fillStyle = '#080b18'; context.fillRect(0, 0, 1200, 630);
+  const scale = Math.min(570 / canvas.width, 570 / canvas.height);
+  const width = canvas.width * scale;
+  const height = canvas.height * scale;
+  context.drawImage(canvas, (1200 - width) / 2, (630 - height) / 2, width, height);
+  return output.toDataURL('image/png');
+}
+
+/** Produce tracked artwork for owner links and affiliate links. */
+export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage, fighterBImage, basePoster, sport, event, date, url, league, prize, entryCoins, format }) {
   if (!url) throw new Error('A fight link is required.');
   const rewardsLine = Number(entryCoins) > 0 && Number(prize) > 0 ? 'CASH PRIZES WHERE ELIGIBLE' : 'COMPETE FOR PRIZES';
   const joinLine = league ? `JOIN ${String(league).toUpperCase()}` : 'JOIN THE FIGHT';
   const canvas = document.createElement('canvas');
-  canvas.width = WIDTH; canvas.height = basePoster ? WIDTH : HEIGHT;
+  canvas.width = WIDTH; canvas.height = basePoster && format !== 'facebook' ? WIDTH : HEIGHT;
   const ctx = canvas.getContext('2d');
   if (basePoster) {
     const [art, qr] = await Promise.all([loadImage(basePoster), QRCode.toDataURL(url, { width: 420, margin: 3, errorCorrectionLevel: 'H' }).then(loadImage)]);
@@ -91,13 +105,19 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
     ctx.fillStyle = '#080b18'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
     const scale = Math.min(WIDTH / art.width, 1080 / art.height);
     ctx.drawImage(art, (WIDTH - art.width * scale) / 2, (1080 - art.height * scale) / 2, art.width * scale, art.height * scale);
-    // The owner's uploaded square artwork reserves its lower-right box for
-    // each affiliate's tracked QR. Keep the surrounding gold border visible.
-    if (qr) {
+    // Facebook uses a separate QR footer so no part of the source poster is covered.
+    if (qr && format === 'facebook') {
+      ctx.fillStyle = '#fff'; ctx.fillRect(800, 1105, 220, 220);
+      ctx.drawImage(qr, 805, 1110, 210, 210);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 34px Arial, sans-serif';
+      ctx.fillText('SCAN TO JOIN MY LEAGUE', 40, 1190, 720);
+      ctx.font = '26px Arial, sans-serif';
+      ctx.fillText('FANTASY MMADNESS', 40, 1250, 720);
+    } else if (qr) {
       ctx.fillStyle = '#fff'; ctx.fillRect(795, 820, 260, 260);
       ctx.drawImage(qr, 800, 825, 250, 250);
     }
-    return canvas.toDataURL('image/png');
+    return format === 'facebook' ? frameFacebookPoster(canvas) : canvas.toDataURL('image/png');
   }
   const background = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
   background.addColorStop(0, '#071c43'); background.addColorStop(.49, '#080b18'); background.addColorStop(1, '#420711');
@@ -169,7 +189,7 @@ export async function buildFightSocialPoster({ fighterA, fighterB, fighterAImage
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 27px Arial, sans-serif'; ctx.fillText('MAKE YOUR PICKS • SCAN TO PLAY', 435, 1250, 800);
   ctx.font = '20px Arial, sans-serif'; ctx.fillText('See fight page for entry details and prize rules.', 435, 1300, 800);
-  return canvas.toDataURL('image/png');
+  return format === 'facebook' ? frameFacebookPoster(canvas) : canvas.toDataURL('image/png');
 }
 
 export function saveFightSocialPoster(image, fightId) {
