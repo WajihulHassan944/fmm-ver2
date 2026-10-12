@@ -24,7 +24,7 @@ import {
 } from '@/Utils/fightExperience';
 import { fetchPublicPredictionFights, normalizePublicFightRow } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
-import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
+import { FMCoin, FMContestValue } from '@/Components/Common/FMCoin';
 import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
 
 const sameId = (left, right) => String(left || '') === String(right || '');
@@ -291,12 +291,12 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
             {playable && <div style={{display:'inline-flex',alignItems:'center',gap:8,margin:'0 0 12px',padding:'8px 12px',borderRadius:999,background:'rgba(225,29,46,.14)',border:'1px solid rgba(225,29,46,.45)',fontWeight:900,fontSize:12,letterSpacing:'.06em'}}>● FIGHT NIGHT MODE · PICKS OPEN</div>}
             <div style={{display:'flex',flexWrap:'wrap',gap:10,margin:'0 0 14px'}}>
               <div style={{minWidth:150,padding:'12px 14px',borderRadius:12,background:'rgba(242,181,68,.10)',border:'1px solid rgba(242,181,68,.45)'}}>
-                <small style={{display:'block',opacity:.72,fontWeight:800,letterSpacing:'.06em'}}>PRIZE POOL</small>
-                <strong style={{display:'block',marginTop:3,fontSize:20,color:'#f2b544'}}><FMCoinAmount amount={Number(resolvedFight?.pot || resolvedFight?.currentPot || resolvedFight?.prizePool || resolvedFight?.potTarget || 0)} size="sm" motion="shine" /></strong>
+                <small style={{display:'block',opacity:.72,fontWeight:800,letterSpacing:'.06em'}}>PRIZE POOL VALUE (USD)</small>
+                <strong style={{display:'block',marginTop:3,fontSize:20,color:'#f2b544'}}><FMContestValue amount={Number(resolvedFight?.pot || resolvedFight?.currentPot || resolvedFight?.prizePool || resolvedFight?.potTarget || 0)} size="sm" motion="shine" /></strong>
               </div>
               <div style={{minWidth:135,padding:'12px 14px',borderRadius:12,background:'rgba(242,181,68,.10)',border:'1px solid rgba(242,181,68,.30)'}}>
-                <small style={{display:'block',opacity:.72,fontWeight:800,letterSpacing:'.06em'}}>BUY-IN</small>
-                <strong style={{display:'block',marginTop:3,fontSize:20,color:'#f2b544'}}>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMCoinAmount amount={Number(resolvedFight.matchTokens)} size="sm" motion="shine" /> : 'FREE'}</strong>
+                <small style={{display:'block',opacity:.72,fontWeight:800,letterSpacing:'.06em'}}>ENTRY VALUE (USD)</small>
+                <strong style={{display:'block',marginTop:3,fontSize:20,color:'#f2b544'}}>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMContestValue amount={Number(resolvedFight.matchTokens)} size="sm" motion="shine" /> : 'FREE'}</strong>
               </div>
             </div>
             <div className="public-fight-detail-actions">
@@ -341,12 +341,13 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
       <section className="theme-container public-fight-data-strip" aria-label="Fight data">
         <article><FaUsers /><span><strong>{playerCount > 0 ? playerCount : 'Open'}</strong><small>{playerCount > 0 ? 'Players' : 'Entries'}</small></span></article>
-        <article className="public-fight-fm-coins"><span><strong><FMCoinAmount amount={Number(resolvedFight?.pot || resolvedFight?.currentPot || resolvedFight?.prizePool || resolvedFight?.potTarget || 0)} size="lg" motion="shine" /></strong><small>FM COINS PRIZE POOL</small></span></article>
-        <article className="public-fight-fm-coins"><span><strong>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMCoinAmount amount={Number(resolvedFight.matchTokens)} size="lg" motion="shine" /> : 'FREE'}</strong><small>BUY-IN</small></span></article>
+        <article className="public-fight-fm-coins"><span><strong><FMContestValue amount={Number(resolvedFight?.pot || resolvedFight?.currentPot || resolvedFight?.prizePool || resolvedFight?.potTarget || 0)} size="lg" motion="shine" /></strong><small>PRIZE POOL VALUE (USD)</small></span></article>
+        <article className="public-fight-fm-coins"><span><strong>{Number(resolvedFight?.matchTokens || 0) > 0 ? <FMContestValue amount={Number(resolvedFight.matchTokens)} size="lg" motion="shine" /> : 'FREE'}</strong><small>ENTRY VALUE (USD)</small></span></article>
         <article><FaShieldAlt /><span><strong>{resolvedFight?.matchType || 'Public'}</strong><small>Fight type</small></span></article>
         <article><FaClock /><span><strong>{resolvedFight?.matchStatus || 'Open'}</strong><small>Status</small></span></article>
       </section>
 
+      <p className="theme-container" style={{ fontSize: 12, lineHeight: 1.6, opacity: .75 }}>USD value uses 5,000 FM COINS = $3.99. Entries use FM COINS. The prize pool is shared according to contest rules; eligible cash payouts depend on the contest and your location.</p>
       <section className="theme-container public-fight-detail-content-grid">
         <article className="public-fight-info-card">
           <p className="public-fight-eyebrow"><FaPlay /> Fight overview</p>
