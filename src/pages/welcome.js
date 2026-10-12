@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FMCoin } from '@/Components/Common/FMCoin';
+import { FMCoin, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import HomepageCommercial from '@/Components/Home/HomepageCommercial';
 
 // ==========================================================================
@@ -375,6 +375,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               </div>
             </div>
 
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: 'rgba(255,255,255,.7)', margin: '0 0 16px' }}>Dollar amounts show USD value at 5,000 FM COINS = $3.99. Entries use FM COINS. Prize pools are shared according to contest rules; eligible cash payouts depend on the contest and your location.</p>
             <div data-fmm="fights-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
               {fights.length === 0 ? (
                 <div style={{ gridColumn: '1 / -1', border: '1px dashed rgba(216,220,228,.3)', borderRadius: 14, padding: '38px 26px', textAlign: 'center', background: 'rgba(255,255,255,.03)' }}>
@@ -409,11 +410,13 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                     <div style={{ fontFamily: "'Anton', sans-serif", fontSize: 23, lineHeight: 1.1, marginBottom: 14 }}>
                       {fight.f1} <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 15 }}>vs</span> {fight.f2}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 13, borderTop: '1px solid rgba(216,220,228,.14)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, paddingTop: 13, borderTop: '1px solid rgba(216,220,228,.14)' }}>
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: "'Anton', sans-serif", fontSize: 21, color: fight.potColor, fontVariantNumeric: 'tabular-nums', textShadow: '0 0 12px rgba(242,181,68,.5)' }}><FMCoin size="sm" motion="shine" />{fight.potLabel}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: "'Anton', sans-serif", fontSize: 19, color: fight.potColor, fontVariantNumeric: 'tabular-nums', textShadow: '0 0 12px rgba(242,181,68,.5)' }}>{fight.potLabel}</div>
+                        {fight.potCoinsLabel && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#f2b544', marginTop: 4 }}><FMCoin size="xs" motion="shine" />{fight.potCoinsLabel}</div>}
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', letterSpacing: '.06em', textTransform: 'uppercase' }}>{fight.potNote}</div>
-                        <div style={{ marginTop: 7, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, letterSpacing: '.06em', textTransform: 'uppercase' }}><span style={{ color: 'rgba(255,255,255,.72)' }}>BUY-IN ·</span>{fight.buyInLabel === 'FREE' ? <span style={{ color: '#f2b544', textShadow: '0 0 10px rgba(242,181,68,.4)' }}>FREE</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#f2b544', textShadow: '0 0 10px rgba(242,181,68,.4)' }}><FMCoin size="xs" motion="shine" />{fight.buyInLabel}</span>}</div>
+                        <div style={{ marginTop: 7, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, letterSpacing: '.06em', textTransform: 'uppercase' }}><span style={{ color: 'rgba(255,255,255,.72)' }}>BUY-IN ·</span>{fight.buyInLabel === 'FREE' ? <span style={{ color: '#f2b544', textShadow: '0 0 10px rgba(242,181,68,.4)' }}>FREE</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#f2b544', textShadow: '0 0 10px rgba(242,181,68,.4)' }}>{fight.buyInLabel}</span>}</div>
+                        {fight.buyInCoinsLabel && <div style={{ fontSize: 11, color: '#f2b544', marginTop: 3 }}>{fight.buyInCoinsLabel}</div>}
                       </div>
                       <a href={fight.id ? `${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fight.id)}${fight.entryOpen ? '?play=1' : ''}` : '/play'} style={{ display: 'inline-flex', alignItems: 'center', height: 42, padding: '0 20px', borderRadius: 999, background: fight.ctaBg, border: fight.ctaBorder, color: fight.ctaColor, fontFamily: "'Anton', sans-serif", fontSize: 13.5, letterSpacing: '.05em' }}>{fight.entryOpen ? fight.cta : 'VIEW FIGHT'}</a>
                     </div>
@@ -843,13 +846,15 @@ const toFightCard = (f, index) => {
       badge: guaranteed > 0 ? 'Guaranteed pot' : index === 0 ? 'Main event' : '',
       badgeColor: guaranteed > 0 ? 'rgba(43,111,232,.94)' : 'rgba(225,29,46,.94)',
       badgeText: '#fff',
-      potLabel: pot > 0 ? money(pot) + ' FM COINS' : 'PRIZE TERMS PENDING',
+      potLabel: pot > 0 ? formatFMCoinUsd(pot) + ' PRIZE POOL VALUE' : 'PRIZE TERMS PENDING',
+      potCoinsLabel: pot > 0 ? money(pot) + ' FM COINS' : '',
       potColor: '#f2b544',
       potNote: fee === 0 ? 'Titles & sponsor prizes'
         : guaranteed > 0 ? 'Guaranteed pot'
           : entries > 0 ? `Pot \u00b7 ${entries} ${entries === 1 ? 'entry' : 'entries'} in` : 'Pot builds with entries',
-      buyInLabel: fee > 0 ? money(fee) + ' FM COINS' : 'FREE',
-      cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + money(fee) + ' FM COINS',
+      buyInLabel: fee > 0 ? formatFMCoinUsd(fee) + ' ENTRY VALUE' : 'FREE',
+      buyInCoinsLabel: fee > 0 ? money(fee) + ' FM COINS' : '',
+      cta: fee === 0 ? 'ENTER FREE' : 'ENTER \u00b7 ' + formatFMCoinUsd(fee),
       ctaBg: 'linear-gradient(96deg,#e11d2e,#b90f1b)',
       ctaBorder: '1px solid rgba(255,92,102,.5)',
       ctaColor: '#ffffff',
@@ -1086,7 +1091,7 @@ async function buildWelcomeProps() {
     return '#e11d2e';
   };
   fights.slice(0, 3).forEach((f) => {
-    ticker.push({ text: `🪙 ${f.f1} vs ${f.f2} — ${f.potLabel}`, color: tickerGenreColor(f) });
+    ticker.push({ text: `${f.f1} vs ${f.f2} — ${f.potLabel}`, color: tickerGenreColor(f) });
   });
   if (fights.length) ticker.push({ text: `\u26a1 ${fights.length} card${fights.length === 1 ? '' : 's'} open for predictions`, color: '#2b6fe8' });
   if (ticker.length < 3) {
