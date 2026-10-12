@@ -55,7 +55,7 @@
 .admin-cell-stack { display: grid; gap: 3px; }
 .admin-cell-stack small, .admin-cell-note { color: var(--ff-muted); display: block; font-size: 11px; margin-top: 3px; }
 .admin-fight-cell { align-items:center; display:flex; gap:12px; min-width:280px; }
-.admin-fight-cell img { background:#080d14; border:1px solid rgba(255,255,255,.13); border-radius:50%; height:48px; object-fit:cover; width:48px; }
+.admin-fights-table .admin-fight-cell img { background:transparent; border:0; border-radius:0; height:128px; object-fit:contain; object-position:center bottom; width:96px; flex-shrink:0; }
 .admin-fight-cell > div { display: grid; gap: 3px; }
 .admin-fight-cell strong { color:#fff; display:block; font-family:var(--ff-display,var(--admin-display)); font-size:15px; text-transform:uppercase; }
 .admin-fight-cell small { color:var(--ff-muted,var(--admin-muted)); display:block; font-size:12px; margin-top:3px; }
@@ -141,8 +141,8 @@
 .admin-filter-tabs { align-items:center; display:flex; flex-wrap:wrap; gap:7px; }
 .admin-filter-tab { background:rgba(255,255,255,.045)!important; border:1px solid var(--ff-border,var(--admin-border))!important; border-radius:999px!important; color:rgba(255,255,255,.7)!important; font-family:var(--ff-display,var(--admin-display))!important; font-size:11px!important; font-weight:900!important; min-height:38px!important; padding:0 13px!important; text-transform:uppercase; }
 .admin-filter-tab.is-active { background:linear-gradient(135deg,#b90610,#f32532)!important; border-color:rgba(255,71,82,.58)!important; color:#fff!important; }
-.admin-fight-cell > span { display:flex; flex:0 0 auto; }
-.admin-fight-cell img + img { margin-left:-13px; }
+.admin-fights-table .admin-fight-cell > span { display:flex; flex:0 0 auto; gap:8px; align-items:flex-end; }
+.admin-fights-table .admin-fight-cell img + img { margin-left:0; }
 .admin-fights-workspace .admin-inline-metrics { margin-bottom: 2px; }
 .admin-fights-table th:last-child, .admin-fights-table td:last-child { min-width: 330px; }
 .admin-cell-stack strong { color:#fff; }
