@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FMCoin, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import HomepageCommercial from '@/Components/Home/HomepageCommercial';
+import { getFightCategory } from '@/Utils/fightExperience';
 
 // ==========================================================================
 // The public website — converted from "Fantasy MMAdness Website.dc.html".
@@ -824,7 +825,7 @@ const toFightCard = (f, index) => {
     const pot = Math.max(guaranteed, Math.round(Number(f.pot) || 0));
     const entries = Number(f.entryCount ?? (Array.isArray(f.userPredictions) ? f.userPredictions.length : 0)) || 0;
     const when = formatFightWhen(f);
-    const category = String(f.matchCategory || '').toUpperCase();
+    const category = getFightCategory(f).toUpperCase().replace(/[-_]+/g, ' ');
     return {
       id: String(f._id || index),
       gameMode: f.gameMode || '',
