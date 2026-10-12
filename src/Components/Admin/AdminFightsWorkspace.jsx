@@ -29,10 +29,9 @@ import AdminPredictions from './AdminPredictions';
 import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 import FightDataQualityCenter from './FightDataQualityCenter';
-import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { FMCoin } from '@/Components/Common/FMCoin';
 import { adminHeaders } from '@/Utils/authFetch';
-import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import {
   getFallbackFighterImage,
   getFighterImage,
@@ -199,6 +198,14 @@ const normalizeRows = (matches) => (
   Array.isArray(matches) ? matches.map((fight) => ({ ...fight, __source: 'normal' })) : []
 );
 
+// Admin thumbnails use the saved photo URL, like the public fight page.
+// Retry other real fighter sources before falling back to generic artwork.
+function RegistryFighterImage({ sources, alt }) {
+  const [sourceIndex, setSourceIndex] = useState(0);
+  return <img src={sources[sourceIndex]} alt={alt} width={54} height={54} loading="lazy" decoding="async"
+    onError={() => setSourceIndex((index) => Math.min(index + 1, sources.length - 1))} />;
+}
+
 export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'registry' }) {
   const dispatch = useDispatch();
   const matchStatus = useSelector((state) => state.matches.status);
@@ -304,7 +311,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
       // appears in a fallback feed must stay visible, even when the admin
       // endpoint returns a partial page.
       const rowsById = new Map();
-      const mergeRow = (row) => {
+      const mergeRow = (row, preservePublicImages = false) => {
         const id = String(getId(row) || '');
         if (!id) return;
         const previous = rowsById.get(id);
@@ -318,10 +325,19 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
         Object.keys(previous).forEach((key) => {
           if (row[key] == null || row[key] === '') merged[key] = previous[key];
         });
+        // Sparse admin summaries must not replace populated public fighter photos.
+        if (preservePublicImages) {
+          ['A', 'B'].forEach((side) => {
+            const publicImage = getFighterImage(previous, side);
+            if (isRealFighterImage(publicImage) && !row[`fighter${side}ImageOverride`]) {
+              merged[`fighter${side}PrimaryImage`] = publicImage;
+            }
+          });
+        }
         rowsById.set(id, merged);
       };
-      detailRows.forEach(mergeRow);
-      adminRows.forEach(mergeRow);
+      detailRows.forEach((row) => mergeRow(row));
+      adminRows.forEach((row) => mergeRow(row, true));
       setMatches(Array.from(rowsById.values()));
     } catch (registryError) {
       console.error('Error fetching all fight registry feeds:', registryError);
@@ -332,26 +348,30 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     }
   };
 
-  useEffect(() => {
-    // Always refetch on mount instead of only when status is 'idle' — Redux
-    // status stays 'succeeded' for the rest of the session once loaded once,
-    // so a fight created after that point never showed up here otherwise.
-    dispatch(fetchMatches({ includeDrafts: true }));
-    loadNormalMatches();
+  const loadFighterImages = () => {
     fightDataQualityApi.combatFighters({ limit: 2000 })
       .then((payload) => {
         const rows = normalizeMatchFeedRows(payload);
         const imageMap = {};
         rows.forEach((fighter) => {
-          const image = fighter?.primaryImage || fighter?.image || fighter?.fighterImage || '';
+          const image = [fighter?.primaryImage, fighter?.image, fighter?.fighterImage].find(isRealFighterImage) || '';
           if (!image) return;
-          [fighter?.displayName, fighter?.name, fighter?.normalizedName, ...(Array.isArray(fighter?.aliases) ? fighter.aliases : [])]
+          [fighter?._id, fighter?.id, fighter?.displayName, fighter?.name, fighter?.normalizedName, ...(Array.isArray(fighter?.aliases) ? fighter.aliases : [])]
             .filter(Boolean)
             .forEach((name) => { imageMap[String(name).trim().toLowerCase()] = image; });
         });
         setFighterImageByName(imageMap);
       })
       .catch(() => setFighterImageByName({}));
+  };
+
+  useEffect(() => {
+    // Always refetch on mount instead of only when status is 'idle' — Redux
+    // status stays 'succeeded' for the rest of the session once loaded once,
+    // so a fight created after that point never showed up here otherwise.
+    dispatch(fetchMatches({ includeDrafts: true }));
+    loadNormalMatches();
+    loadFighterImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
@@ -382,13 +402,24 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   }, [allRows]);
 
   const getRegistryFighterMedia = (fight, side) => {
-    const generic = getFallbackFighterImage(side);
-    const stored = getFighterImage(fight, side);
     const nameKey = String(getFighterName(fight, side)).trim().toLowerCase();
-    const recovered = fighterImageByName[nameKey]
-      || fightRecordImageMaps.byName[nameKey]
-      || '';
-    return { src: recovered || stored, fallback: generic };
+    const fighter = fight[`fighter${side}`];
+    const ref = fight[`fighter${side}Id`];
+    const idKey = String(ref?._id || ref?.id || ref || fighter?._id || fighter?.id || '').toLowerCase();
+    const candidates = [
+      fight[`fighter${side}ImageOverride`] ? fight[`fighter${side}Image`] : '',
+      fight[`fighter${side}PrimaryImage`],
+      fight[`resolvedFighter${side}Image`],
+      fighter?.primaryImage,
+      ref?.primaryImage,
+      fight[`fighter${side}Image`],
+      getFighterImage(fight, side),
+      fighterImageByName[idKey],
+      fighterImageByName[nameKey],
+      fightRecordImageMaps.byName[nameKey],
+    ].filter(isRealFighterImage).map(resolvePublicMediaUrl);
+    const sources = [...new Set([...candidates, getFallbackFighterImage(side)])];
+    return { src: sources[0], sources, fallback: sources[sources.length - 1] };
   };
 
   const registryRows = useMemo(() => {
@@ -593,6 +624,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
   };
 
   const refreshFightRows = () => {
+    loadFighterImages();
     dispatch(fetchMatches({ includeDrafts: true }));
     loadNormalMatches();
   };
@@ -1040,7 +1072,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                 {[['A', getFighterName(f, 'A') || f.matchFighterA || 'Fighter A'], ['B', getFighterName(f, 'B') || f.matchFighterB || 'Fighter B']].map(([side, name], index) => (
                   <React.Fragment key={side}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flexDirection: side === 'B' ? 'row-reverse' : 'row', textAlign: side === 'B' ? 'right' : 'left' }}>
-                      <img src={getFighterImage(f, side) || (side === 'A' ? FALLBACK_A : FALLBACK_B)} alt="" style={{ width: 68, height: 68, borderRadius: 12, objectFit: 'cover', border: `1px solid ${side === 'A' ? 'rgba(223,17,27,.55)' : 'rgba(22,143,230,.55)'}` }} />
+                      <img src={getRegistryFighterMedia(f, side).src} alt="" style={{ width: 68, height: 68, borderRadius: 12, objectFit: 'cover', border: `1px solid ${side === 'A' ? 'rgba(223,17,27,.55)' : 'rgba(22,143,230,.55)'}` }} />
                       <div style={{ minWidth: 0 }}><small style={{ color: 'rgba(245,247,251,.42)', fontWeight: 900 }}>FIGHTER {side}</small><strong style={{ display: 'block', color: '#fff', fontFamily: display, fontSize: 20, textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</strong></div>
                     </div>
                     {index === 0 && <strong style={{ color: '#f7b51b', fontFamily: display, fontSize: 18 }}>VS</strong>}
@@ -1095,8 +1127,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
               return (
                 <button key={rowId} type="button" onClick={() => { setSelectedEconomics(row); setEconomicsEdits(null); }} style={{ scrollSnapAlign: 'start', flex: '0 0 270px', cursor: 'pointer', textAlign: 'left', padding: 0, borderRadius: 14, overflow: 'hidden', border: `1px solid ${active ? '#df111b' : 'rgba(255,255,255,.13)'}`, background: active ? 'rgba(223,17,27,.11)' : 'linear-gradient(180deg,rgba(16,24,34,.98),rgba(7,12,18,.99))', color: '#fff' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: 105, background: 'radial-gradient(circle at center,rgba(223,17,27,.18),transparent 65%)' }}>
-                    <img src={getFighterImage(row, 'A') || FALLBACK_A} alt="" style={{ width: '100%', height: 105, objectFit: 'contain', objectPosition: 'bottom center' }} />
-                    <img src={getFighterImage(row, 'B') || FALLBACK_B} alt="" style={{ width: '100%', height: 105, objectFit: 'contain', objectPosition: 'bottom center' }} />
+                    <img src={getRegistryFighterMedia(row, 'A').src} alt="" style={{ width: '100%', height: 105, objectFit: 'contain', objectPosition: 'bottom center' }} />
+                    <img src={getRegistryFighterMedia(row, 'B').src} alt="" style={{ width: '100%', height: 105, objectFit: 'contain', objectPosition: 'bottom center' }} />
                   </div>
                   <div style={{ padding: 13 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 7 }}>
@@ -1421,7 +1453,7 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><OptimizedImage src={fighterAMedia.src || FALLBACK_A} fallbackSrc={fighterAMedia.fallback || FALLBACK_A} alt={`${getFighterName(fight, 'A')} photo`} width={54} height={54} sizes="54px" /><OptimizedImage src={fighterBMedia.src || FALLBACK_B} fallbackSrc={fighterBMedia.fallback || FALLBACK_B} alt={`${getFighterName(fight, 'B')} photo`} width={54} height={54} sizes="54px" /></span>
+                        <span><RegistryFighterImage key={fighterAMedia.sources.join("|")} sources={fighterAMedia.sources} alt={`${getFighterName(fight, 'A')} photo`} /><RegistryFighterImage key={fighterBMedia.sources.join("|")} sources={fighterBMedia.sources} alt={`${getFighterName(fight, 'B')} photo`} /></span>
                         <div><strong>{getTitle(fight)}</strong><small>{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')}</small><small>ID: {id}</small></div>
                       </div>
                     </td>
