@@ -83,7 +83,14 @@ const resolveSlotAsset = (id = '', src = '') => {
 };
 
 const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, placeholder, position, headroom = 0, onImageError }) => {
+  const [unavailable, setUnavailable] = React.useState(false);
+  React.useEffect(() => { setUnavailable(false); }, [id, src, fallbackSrc]);
   const borderRadius = shape === 'circle' ? '50%' : radius ? Number(radius) : 0;
+  if (unavailable) return React.createElement('div', {
+    role: 'img', 'aria-label': (placeholder || 'Contest') + ' — photo unavailable',
+    style: { width: '100%', height: '100%', display: 'grid', placeContent: 'center', textAlign: 'center', padding: 12, boxSizing: 'border-box', background: '#10151f', color: '#b9c3d5', borderRadius },
+  }, React.createElement('strong', { style: { fontSize: 13 } }, placeholder || 'Contest'),
+    React.createElement('small', { style: { fontSize: 10, marginTop: 5 } }, 'PHOTO UNAVAILABLE'));
   const isDynamicFightSlot = /^(event|contest|featured-week|detail)-/.test(String(id));
   const resolvedFallback = explicitAsset(fallbackSrc) || (isDynamicFightSlot ? '' : resolveSlotAsset(id));
   return React.createElement('img', {
@@ -104,7 +111,7 @@ const MobileImageSlot = ({ id, src, fallbackSrc, fit = 'cover', shape, radius, p
       const attempt = Number(image.dataset.fallbackAttempt || 0);
       image.dataset.fallbackAttempt = String(attempt + 1);
       if (fallbacks[attempt]) image.src = fallbacks[attempt];
-      else image.style.display = 'none';
+      else setUnavailable(true);
       if (attempt === 0 && src) onImageError?.(src);
     },
     style: {
@@ -4297,6 +4304,8 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderContests(sports, filteredEvents, s) {
+    const libraryImages = buildFighterLibraryImageMap(this.props.fighterLibrary);
+    const libraryPhoto = (name) => libraryImages.get(normalizeFighterLookupName(name)) || '';
     return React.createElement('div', { style: { padding: '8px 16px' } },
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, marginBottom: 12, color: '#f2b544' } }, 'ALL CONTESTS'),
       this.renderSportSelector(sports, s),
@@ -4306,8 +4315,8 @@ class FantasyMobileAppCore extends React.Component {
         },
           React.createElement('div', { style: { height: 170, position: 'relative', background: '#000' } },
             (ev.fighterAImage || ev.fighterBImage) ? React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
-              ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'contest-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'contain', position: 'center top', headroom: 8, src: ev.fighterAImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f1 || '?')[0]),
-              ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'contest-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'contain', position: 'center top', headroom: 8, src: ev.fighterBImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f2 || '?')[0])
+              ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'contest-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'contain', position: 'center top', headroom: 8, src: ev.fighterAImage, fallbackSrc: libraryPhoto(ev.f1) }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f1 || '?')[0]),
+              ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'contest-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'contain', position: 'center top', headroom: 8, src: ev.fighterBImage, fallbackSrc: libraryPhoto(ev.f2) }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42 } }, (ev.f2 || '?')[0])
             ) : ev.hasPoster ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image }) : React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 42, fontWeight: 900 } }, `${(ev.f1 || '?')[0]}  VS  ${(ev.f2 || '?')[0]}`)
           ),
           React.createElement('div', { style: { padding: 12 } },
