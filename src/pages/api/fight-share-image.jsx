@@ -1,3 +1,4 @@
+import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import React from 'react';
 import { ImageResponse } from 'next/og';
 import QRCode from 'qrcode';
@@ -54,7 +55,7 @@ export default async function handler(req, res) {
       }
     }
 
-    const link = `https://www.fantasymmadness.com/league/${affiliateId}?fightId=${fightId}`;
+    const link = getAffiliateFightShareUrl(affiliate, fightId);
     const qr = await QRCode.toDataURL(link, { width: 360, margin: 3, errorCorrectionLevel: 'M' });
     const render = (art) => new ImageResponse(
       <div style={{ display: 'flex', position: 'relative', width: 1200, height, justifyContent: 'center', background: '#090c17', overflow: 'hidden' }}>
