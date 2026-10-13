@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
+import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
@@ -16,7 +17,7 @@ const matchesAffiliateIdentifier = (affiliate, identifier) => {
   const normalized = normalizeIdentifier(identifier);
   const slug = slugifyIdentifier(identifier);
   const fullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ');
-  const candidates = [affiliate?._id, affiliate?.id, affiliate?.playerName, affiliate?.affiliateName, affiliate?.leagueName, fullName]
+  const candidates = [affiliate?._id, affiliate?.id, affiliate?.playerName, affiliate?.affiliateName, affiliate?.leagueName, fullName, getAffiliateNameSlug(affiliate), `${getAffiliateNameSlug(affiliate)}-${String(affiliate?._id || affiliate?.id || '').slice(-6)}`]
     .filter(Boolean);
   return candidates.some((candidate) => normalizeIdentifier(candidate) === normalized || slugifyIdentifier(candidate) === slug);
 };
@@ -112,7 +113,10 @@ export async function getServerSideProps(context) {
 
     if (publicAffiliatesRes.ok) {
       const publicAffiliates = await publicAffiliatesRes.json();
-      affiliate = safeArray(publicAffiliates).find((row) => matchesAffiliateIdentifier(row, affiliateName)) || null;
+      const rows = Array.isArray(publicAffiliates) ? publicAffiliates : publicAffiliates.items || publicAffiliates.data || [];
+      const matching = safeArray(rows).filter((row) => matchesAffiliateIdentifier(row, affiliateName));
+      affiliate = matching.length === 1 ? matching[0] : null;
+      if (matching.length > 1) return { props: { affiliate: null, promoMatches: [] } };
     }
     // Keep every previously shared full-name URL working during migration.
     if (!affiliate && legacyAffiliateRes.ok) affiliate = await legacyAffiliateRes.json();

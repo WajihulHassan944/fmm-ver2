@@ -523,7 +523,7 @@ const AffiliateUsers = () => {
             </button>
           </div>
         </section>
-        <UserDetails user={selectedUser} />
+        <UserDetails user={selectedUser} affiliates={affiliateUsers} />
       </div>
     );
   }
