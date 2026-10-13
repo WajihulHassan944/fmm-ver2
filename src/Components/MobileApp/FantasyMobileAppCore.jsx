@@ -4,7 +4,7 @@ import React from 'react';
 import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
 import designTokens from './design-tokens.json';
-import { FMCoin } from '@/Components/Common/FMCoin';
+import { FMCoin, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 
 const ASSET_BASE = '/images/mobile-home/final-v35';
@@ -1147,7 +1147,11 @@ class FantasyMobileAppCore extends React.Component {
   getEventEntryFee = (event = {}) => Math.max(0, toSafeNumber(event.entryFee, event.entryFeeTokens, event.matchTokens));
   getEventEntryLabel = (event = {}) => {
     const fee = this.getEventEntryFee(event);
-    return fee > 0 ? `${fee.toLocaleString()} FM COINS` : 'FREE';
+    return fee > 0 ? `${formatFMCoinUsd(fee)} value · ${fee.toLocaleString()} FM COINS` : 'FREE';
+  };
+  getEventPrizeLabel = (event = {}) => {
+    const coins = Number(String(event.prize || '').replace(/[^0-9.]/g, ''));
+    return coins > 0 ? `${formatFMCoinUsd(coins)} pool value · ${coins.toLocaleString()} FM COINS` : event.prize || 'PRIZE TERMS PENDING';
   };
   getEventActionLabel = (event = {}, includeEntry = false) => {
     if (!event.playable) return 'VIEW FIGHT DETAILS';
@@ -2724,7 +2728,7 @@ class FantasyMobileAppCore extends React.Component {
           color: s.layout === l ? '#1a0e00' : 'rgba(255,255,255,.5)', border: '1px solid ' + (s.layout === l ? 'transparent' : 'rgba(255,255,255,.1)')
         }
       }, l === 'classic' ? 'CLASSIC' : '⚡ BOLD')),
-      s.layout === 'bold' && totalPrize > 0 && React.createElement('div', { style: { background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 999, padding: '6px 14px', fontSize: 10, fontWeight: 800, color: '#22c55e', whiteSpace: 'nowrap' } }, `${totalPrize.toLocaleString()} FM COINS PRIZES`)
+      s.layout === 'bold' && totalPrize > 0 && React.createElement('div', { style: { background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.4)', borderRadius: 999, padding: '6px 14px', fontSize: 10, fontWeight: 800, color: '#22c55e', whiteSpace: 'nowrap' } }, `${formatFMCoinUsd(totalPrize)} prize value · ${totalPrize.toLocaleString()} FM COINS`)
     );
   }
 
@@ -2841,7 +2845,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: ev.tagColor, marginBottom: 4 } }, ev.tag),
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 6 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
         React.createElement('div', { style: { display: 'flex', gap: 14, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 10 } },
-          React.createElement('span', null, ev.date), React.createElement('span', null, '⏱ ' + ev.countdown), React.createElement('span', { style: { color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, ev.prize)
+          React.createElement('span', null, ev.date), React.createElement('span', null, '⏱ ' + ev.countdown), React.createElement('span', { style: { color: '#f2b544', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, this.getEventPrizeLabel(ev))
         ),
         React.createElement('div', {
           role: 'button', tabIndex: 0,
@@ -3873,7 +3877,7 @@ class FantasyMobileAppCore extends React.Component {
         React.createElement('span', { style: { color: '#c9d3e8', fontSize: 8, fontWeight: 900 } }, event.date),
         React.createElement('h2', { style: { fontFamily: "'Anton',sans-serif", fontSize: 21, lineHeight: 1.08, margin: '4px 0', textShadow: '0 2px 10px rgba(0,0,0,.85)' } }, event.f1, React.createElement('em', { style: { color: '#ef4444', fontStyle: 'normal' } }, ' VS '), event.f2),
         React.createElement('div', { style: { display: 'flex', gap: 12, fontSize: 10, fontWeight: 900, marginBottom: 9 } },
-          React.createElement('span', { style: { color: '#f2b544' } }, React.createElement(FMCoin, { size: 'sm', motion: 'shine' }), ' ', event.prize || 'PRIZE TERMS PENDING'),
+          React.createElement('span', { style: { color: '#f2b544' } }, React.createElement(FMCoin, { size: 'sm', motion: 'shine' }), ' ', this.getEventPrizeLabel(event)),
           React.createElement('span', { style: { color: '#ffce54' } }, entry),
           React.createElement('span', { style: { color: '#ff4d6d' } }, entryCount)
         ),
@@ -3972,7 +3976,7 @@ class FantasyMobileAppCore extends React.Component {
   renderFeaturedDetail(s, event) {
     if (!event) return null;
     const values = [
-      ['PRIZE POOL', event.prize || 'TERMS PENDING', '#f2b544'],
+      ['PRIZE POOL', this.getEventPrizeLabel(event), '#f2b544'],
       ['ENTRY FEE', this.getEventEntryLabel(event), '#ffce54'],
       ['ENTRIES', event.entries > 0 ? event.entries.toLocaleString() : 'NONE YET', '#3d9bff'],
     ];
@@ -4308,6 +4312,7 @@ class FantasyMobileAppCore extends React.Component {
     const libraryPhoto = (name) => libraryImages.get(normalizeFighterLookupName(name)) || '';
     return React.createElement('div', { style: { padding: '8px 16px' } },
       React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 22, marginBottom: 12, color: '#f2b544' } }, 'ALL CONTESTS'),
+      React.createElement('p', { style: { fontSize: 11, lineHeight: 1.5, color: 'rgba(255,255,255,.65)', margin: '0 0 12px' } }, 'USD value: 5,000 FM COINS = $3.99. Entries use FM COINS; prize payouts depend on contest rules and eligibility.'),
       this.renderSportSelector(sports, s),
       React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 } },
         filteredEvents.length === 0 ? React.createElement('section', { style: { padding: 22, borderRadius: 14, border: '1px solid rgba(77,141,255,.35)', background: 'rgba(77,141,255,.08)', textAlign: 'center', color: 'rgba(255,255,255,.65)', fontSize: 12 } }, 'No published contests match this sport yet.') : filteredEvents.map(ev => React.createElement('div', {
@@ -4322,7 +4327,7 @@ class FantasyMobileAppCore extends React.Component {
           React.createElement('div', { style: { padding: 12 } },
             React.createElement('div', { style: { display: 'inline-flex', marginBottom: 6, background: ev.tagColor, color: '#fff', fontSize: 9, fontWeight: 900, padding: '4px 8px', borderRadius: 6 } }, ev.tag),
             React.createElement('div', { style: { fontSize: 16, fontWeight: 900, marginBottom: 4 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
-            React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.55)', fontWeight: 700, marginBottom: 4 } }, ev.date, ' · ', ev.countdown, ev.prize ? React.createElement(React.Fragment, null, ' · ', React.createElement('span', { style: { color: '#f7b51b', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, ev.prize)) : null),
+            React.createElement('div', { style: { fontSize: 11, color: 'rgba(255,255,255,.55)', fontWeight: 700, marginBottom: 4 } }, ev.date, ' · ', ev.countdown, ev.prize ? React.createElement(React.Fragment, null, ' · ', React.createElement('span', { style: { color: '#f7b51b', animation: 'moneyPulseGold 1.8s ease-in-out infinite' } }, this.getEventPrizeLabel(ev))) : null),
             React.createElement('div', { style: { fontSize: 10, fontWeight: 800, marginBottom: 8 } },
               React.createElement('span', { style: { color: '#ffce54', animation: 'ptsTwinkle 1.6s ease-in-out infinite' } }, this.getEventEntryLabel(ev) + ' ENTRY'), ' · ',
               React.createElement('span', { style: { color: '#ff4d6d', animation: 'ptsTwinkle 1.6s ease-in-out infinite' } }, ev.entries > 0 ? ev.entries.toLocaleString() + ' ENTRIES' : 'NO ENTRIES YET')
@@ -4472,7 +4477,7 @@ class FantasyMobileAppCore extends React.Component {
               React.createElement('div', { style: { position: 'absolute', left: 0, right: 0, bottom: 6, textAlign: 'center', fontWeight: 900, fontSize: 12, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,.9)' } }, name)
             ))
           ),
-          React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.7)', lineHeight: 1.5, marginBottom: 8 } }, `${ev.venue || 'Venue TBA'} · ${ev.maxRounds > 0 ? `${ev.maxRounds} rounds` : 'Rounds TBA'} · ${ev.prize || 'Prize terms pending'} · ${this.getEventEntryLabel(ev)}`),
+          React.createElement('div', { style: { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.7)', lineHeight: 1.5, marginBottom: 8 } }, `${ev.venue || 'Venue TBA'} · ${ev.maxRounds > 0 ? `${ev.maxRounds} rounds` : 'Rounds TBA'} · ${this.getEventPrizeLabel(ev)} · ${this.getEventEntryLabel(ev)}`),
           React.createElement('div', {
             role: 'button', tabIndex: 0,
             onClick: () => this.openAiScout(ev),
