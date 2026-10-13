@@ -1,3 +1,4 @@
+import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useMemo, useState } from 'react';
 import { userHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
@@ -8,8 +9,10 @@ import { FaArrowLeft, FaArrowRight, FaCamera, FaCopy, FaIdBadge, FaLink, FaShiel
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import UserWorkspaceNav from './UserWorkspaceNav';
 
-function ReferFriendModal({ userId, onClose }) {
-  const referralLink = `https://fantasymmadness.com/invite/${userId}`;
+function ReferFriendModal({ user, onClose }) {
+  const userId = user?._id || user?.id || '';
+  const name = getAffiliateNameSlug(user) || 'player';
+  const referralLink = `https://www.fantasymmadness.com/invite/${name}?ref=${encodeURIComponent(userId)}`;
 
   const handleCopy = async () => {
     try {
@@ -197,7 +200,7 @@ const Profile = () => {
         </section>
       </main>
 
-      {showModal && <ReferFriendModal userId={user._id} onClose={() => setShowModal(false)} />}
+      {showModal && <ReferFriendModal user={user} onClose={() => setShowModal(false)} />}
     </div>
   );
 };
