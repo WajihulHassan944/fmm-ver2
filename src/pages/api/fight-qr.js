@@ -1,3 +1,5 @@
+import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import QRCode from 'qrcode';
 
 // Public QR image for an affiliate's specific fight. Only build our own
@@ -9,7 +11,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'A valid fight and affiliate are required.' });
   }
   try {
-    const link = `https://www.fantasymmadness.com/league/${encodeURIComponent(affiliateId)}?fightId=${encodeURIComponent(fightId)}`;
+    const affiliateResponse = await fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${encodeURIComponent(affiliateId)}`, { signal: AbortSignal.timeout(8000) });
+    if (!affiliateResponse.ok) return res.status(404).json({ message: 'Affiliate not found.' });
+    const affiliate = await affiliateResponse.json();
+    const link = getAffiliateFightShareUrl(affiliate, fightId);
     const png = await QRCode.toBuffer(link, { type: 'png', width: 900, margin: 4, errorCorrectionLevel: 'M' });
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=3600');

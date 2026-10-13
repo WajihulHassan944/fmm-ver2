@@ -5,7 +5,7 @@ import Head from 'next/head'
 
 const InvitePage = () => {
   const router = useRouter()
-  const { referrerId } = router.query
+  const referrerId = typeof router.query.ref === 'string' && /^[a-f0-9]{24}$/i.test(router.query.ref) ? router.query.ref : router.query.referrerId
 
   return (
     <>

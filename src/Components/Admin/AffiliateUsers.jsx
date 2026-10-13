@@ -1,3 +1,4 @@
+import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { fetchAffiliatePromotionFights } from '@/Utils/affiliatePromotionFights';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -354,7 +355,7 @@ const AffiliateUsers = () => {
 
   const affiliateLaunchMessage = (recipient) => {
     const affiliateId = String(recipient._id);
-    const fightLink = `https://www.fantasymmadness.com/league/${encodeURIComponent(affiliateId)}?fightId=${encodeURIComponent(launchFightId)}`;
+    const fightLink = getAffiliateFightShareUrl(recipient, launchFightId);
     const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight')).slice(0, 150);
