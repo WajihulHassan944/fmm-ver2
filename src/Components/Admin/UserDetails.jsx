@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
+import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
 
 const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
-const UserDetails = ({ user }) => {
+const UserDetails = ({ user, affiliates = [] }) => {
   const affiliateId = String(user._id || user.id || '');
-  const affiliateUrl = affiliateId ? `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(affiliateId)}` : '';
+  const publicIdentifier = getAffiliatePublicIdentifier(user, affiliates);
+  const affiliateUrl = publicIdentifier ? `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}` : '';
   const [copyStatus, setCopyStatus] = useState('');
   const copyAffiliateValue = async (value, label) => {
     try { await navigator.clipboard.writeText(value); setCopyStatus(label + ' copied.'); }
