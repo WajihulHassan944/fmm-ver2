@@ -1,3 +1,4 @@
+import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useState } from 'react';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import Head from 'next/head';
@@ -73,7 +74,7 @@ const AffiliateProfile = () => {
   const affiliateId = affiliate?._id || affiliate?.id || '';
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || playerName || 'Affiliate creator';
   const memberCount = safeArray(affiliate?.usersJoined).length;
-  const referralUrl = `https://fantasymmadness.com/my-fantasy-team?referenceId=${affiliateId}`;
+  const referralUrl = `https://www.fantasymmadness.com/my-fantasy-team?league=${encodeURIComponent(getAffiliateNameSlug(affiliate) || 'league')}&referenceId=${encodeURIComponent(affiliateId)}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
