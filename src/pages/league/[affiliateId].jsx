@@ -74,7 +74,7 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
 }
 
 export async function getServerSideProps({ params, query, res }) {
-  const affiliateId = String(params?.affiliateId || '');
+  const affiliateId = String(query?.affiliateId || params?.affiliateId || '');
   const fightId = String(query?.fightId || '');
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
   try {
