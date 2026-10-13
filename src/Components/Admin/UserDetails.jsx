@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
+import ShareQrCode from '@/Components/Common/ShareQrCode';
 
 const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
 const UserDetails = ({ user }) => {
+  const affiliateId = String(user._id || user.id || '');
+  const affiliateUrl = affiliateId ? `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(affiliateId)}` : '';
+  const [copyStatus, setCopyStatus] = useState('');
+  const copyAffiliateValue = async (value, label) => {
+    try { await navigator.clipboard.writeText(value); setCopyStatus(label + ' copied.'); }
+    catch { setCopyStatus('Could not copy automatically. Select and copy the value below.'); }
+  };
   const [showEmailTemplate, setShowEmailTemplate] = useState(false);
   const [emailStatus, setEmailStatus] = useState('');
   const [recipientEmail, setRecipientEmail] = useState(user.email || '');
@@ -117,6 +125,26 @@ const UserDetails = ({ user }) => {
             <FaCheck /> Click to approve
           </button>
         )}
+      </section>
+
+      <section className="admin-table-panel" style={{ padding: 20, marginBottom: 20 }}>
+        <h3 style={{ marginTop: 0 }}>Affiliate code, link &amp; QR</h3>
+        <p>Use this affiliate’s personal link or QR code on posters, websites, and social profiles.</p>
+        <label style={{ display: 'block', marginBottom: 12 }}>
+          <strong>Affiliate code (account ID)</strong>
+          <input readOnly value={affiliateId} aria-label="Affiliate code" onFocus={(event) => event.currentTarget.select()} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 6, padding: 10 }} />
+        </label>
+        <button type="button" className="admin-action-secondary" disabled={!affiliateId} onClick={() => copyAffiliateValue(affiliateId, 'Affiliate code')}>Copy affiliate code</button>
+        <label style={{ display: 'block', margin: '16px 0 12px' }}>
+          <strong>Public affiliate link</strong>
+          <input readOnly value={affiliateUrl} aria-label="Public affiliate link" onFocus={(event) => event.currentTarget.select()} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 6, padding: 10 }} />
+        </label>
+        <div className="admin-row-actions">
+          <button type="button" disabled={!affiliateUrl} onClick={() => copyAffiliateValue(affiliateUrl, 'Affiliate link')}>Copy link</button>
+          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">Open affiliate page</a>}
+        </div>
+        <p role="status">{copyStatus}</p>
+        <ShareQrCode key={affiliateId} url={affiliateUrl} label={user.playerName || user.firstName || 'Affiliate'} fileName={`affiliate-${affiliateId}-qr`} />
       </section>
 
       <section className="admin-table-panel admin-affiliate-members-panel">
