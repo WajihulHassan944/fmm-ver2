@@ -65,9 +65,9 @@ export default function About() {
       <section className="hero">
         <div className="wrap hero-grid">
           <div>
-            <p className="eyebrow">Our story · Founder Kelly Davis</p>
-            <h1>BUILT IN THE CORNER. <span className="accent">MADE FOR FIGHT FANS.</span></h1>
-            <p className="lead">FANTASY MMADNESS was born from decades inside combat sports—from the amateur boxing gyms of Reno to a world championship corner. We don't just pick winners. We predict history.</p>
+            <p className="eyebrow">THE FOUNDER'S STORY · KELLY DAVIS</p>
+            <h1>KELLY DAVIS. <span className="accent">A LIFETIME IN THE FIGHT GAME.</span></h1>
+            <p className="lead">Founder and CEO of FANTASY MMADNESS. Trainer, manager, gym owner and lifelong student of combat sports. From Reno's amateur boxing gyms to his brother's IBF world championship, Kelly's story is the foundation of this platform.</p>
             <div className="actions">
               <Link className="action" href="/play">Explore fight cards <FaArrowRight /></Link>
               <Link className="action secondary" href="/how-to-play">How it works</Link>
@@ -85,8 +85,8 @@ export default function About() {
       <section className="section">
         <div className="wrap">
           <p className="eyebrow">The journey</p>
-          <h2 className="section-title">MORE THAN A GAME. A LIFETIME IN THE FIGHT BUSINESS.</h2>
-          <p className="section-intro">This platform wasn't created from the outside looking in. Its foundation is the experience of coaching, preparing for, and studying what happens inside the ring and cage.</p>
+          <h2 className="section-title">THE JOURNEY OF KELLY DAVIS.</h2>
+          <p className="section-intro">Kelly began boxing as a teenager in Reno, Nevada, alongside his brother Kelvin. What started with amateur training became decades of professional coaching, managing fighters and building boxing and mixed martial arts gyms.</p>
           <div className="timeline">
             {milestones.map((item) => <article className="milestone" key={item.year}>
               <span className="date">{item.year}</span>
@@ -106,8 +106,8 @@ export default function About() {
           </div>
           <div>
             <p className="eyebrow"><FaBookOpen /> National boxing media recognition</p>
-            <h2 className="section-title">THE STORY WAS COVERED IN THE RING.</h2>
-            <p className="section-intro"><em>The Ring</em> magazine documented the brothers' journey in its feature “Brothers-In-Arms: How Kelvin & Kelly Davis Took Their Two-Man Bandwagon to the Top,” written by Mike Houser, with photography credited to Tom Casino / Showtime.</p>
+            <h2 className="section-title">A CHAMPIONSHIP STORY DOCUMENTED IN THE RING.</h2>
+            <p className="section-intro"><em>The Ring</em> magazine documented the brothers' journey in its multi-page feature “Brothers-In-Arms: How Kelvin & Kelly Davis Took Their Two-Man Bandwagon to the Top,” written by Mike Houser, with photography credited to Tom Casino / Showtime. The article follows the two brothers from Reno through the world-title breakthrough, including Kelvin's May 1, 2004 victory over Ezra Sellers. It is an independent, contemporary record of Kelly's role as a championship trainer.</p>
             <p className="ring-note">The graphic at left is a typographic tribute to the article, not a reproduction of the original magazine cover.</p>
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function About() {
             <article className="why-card"><FaBullseye size={28} /><h3>PREDICT THE ACTION</h3><p>Make round-by-round predictions across boxing, MMA, kickboxing, bare-knuckle fighting and professional wrestling—not just a pick for who wins.</p></article>
             <article className="why-card"><FaTrophy size={28} /><h3>PROVE YOUR FIGHT IQ</h3><p>Earn points based on scored results and see how your predictions compare with other fans. Standings reflect completed, scored play.</p></article>
             <article className="why-card"><FaFistRaised size={28} /><h3>BUILT FROM REAL EXPERIENCE</h3><p>Founder Kelly Davis brings more than three decades of coaching, gym ownership, management and ringside experience to the idea.</p></article>
-            <article className="why-card"><FaUsers size={28} /><h3>GIVING BACK TO THE SPORT</h3><p>Our longer-term vision includes helping fighters and promoters connect with their audiences and explore new opportunities beyond fight night.</p></article>
+            <article className="why-card"><FaUsers size={28} /><h3>GIVING BACK TO THE SPORT</h3><p>Kelly's longer-term vision includes giving back to active and retired fighters, helping fighters and promoters connect with their audiences and explore opportunities beyond fight night.</p></article>
           </div>
         </div>
       </section>
