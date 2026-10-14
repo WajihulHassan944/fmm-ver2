@@ -1,5 +1,6 @@
 const CORE_ROUTES = new Set([
   '/',
+  '/play',
   '/founder',
   '/about',
   '/home',
