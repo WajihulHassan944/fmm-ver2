@@ -19,7 +19,7 @@ export default function PlayPage({ fights = [] }) {
   return <main className="fmm-play-page">
     <Head><title>Play Now | FANTASY MMADNESS</title><meta name="description" content="Choose an open combat sports fight, make predictions, and join the leaderboard." /></Head>
     <section className="fmm-play-shell fmm-play-open" style={{ paddingTop: 24 }}>
-      <header><div><span>OPEN CONTESTS</span><h1>PICK A FIGHT</h1></div><p>Select a fight to enter the prediction room.</p></header>
+      <header><div><span>OPEN CONTESTS</span><h1 style={{ fontSize: 28, lineHeight: 1.2, margin: 0 }}>PICK A FIGHT</h1></div><p>Select a fight to enter the prediction room.</p></header>
       {fights.length ? <div className="fmm-play-grid">
         {fights.map((fight) => <article className="fmm-play-card" key={getFightId(fight)}>
           <div className="fmm-play-card-visual">
