@@ -43,13 +43,24 @@ const companyLinks = [
 ];
 
 const publicNav = [
-  { label: 'Fights', href: '/upcomingfights', icon: FaFistRaised },
-  { label: 'Make Predictions', href: '/play', icon: FaBullseye },
+  { label: 'Fights', href: '/upcomingfights', icon: FaFistRaised, children: fightLinks },
+  { label: 'Contests', href: '/upcomingfights', icon: FaBullseye, children: contestLinks },
+  { label: 'Pro Wrestling', href: '/pro-wrestling', icon: FaCrown },
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
-  { label: 'How To Play', href: '/how-to-play', icon: FaQuestionCircle },
   { label: 'FM COINS', href: '/fights-rewards', icon: FaCoins },
-  { label: 'Our Story', href: '/about', icon: FaCrown },
-  { label: 'Affiliates', href: '/affiliate-create-account', icon: FaUsers },
+  { label: 'How To Play', href: '/how-to-play', icon: FaQuestionCircle },
+  {
+    label: 'Affiliates',
+    href: '/affiliate-create-account',
+    icon: FaUsers,
+    children: [
+      { label: 'Affiliate Program', href: '/affiliate-create-account', icon: FaUsers },
+      { label: 'Affiliate Guides', href: '/affiliate-guides', icon: FaQuestionCircle },
+      { label: 'Affiliate League', href: '/affiliate-league', icon: FaTrophy },
+      { label: 'Past Promotions', href: '/past-promotions', icon: FaMedal },
+    ],
+  },
+  { label: 'More', href: '#', icon: FaEllipsisH, children: companyLinks },
 ];
 
 const playerNav = [
@@ -365,13 +376,11 @@ const Header = () => {
     { label: 'Leagues', href: '/FantasyLeagues', icon: FaTrophy },
     { label: 'Apparel', href: '/apparel', icon: FaGift },
     { label: 'Fight News', href: '/fights-news', icon: FaNewspaper },
-    { label: 'Our Story', href: '/about', icon: FaCrown },
-    { label: 'Affiliates', href: '/affiliate-create-account', icon: FaUsers },
     { label: 'Profile', href: mobileAccountHref, icon: FaUserCircle },
   ];
 
   return (
-    <header className={`header theme-header fmm-refreshed-nav ${isHomeRoute ? 'is-home-route' : ''}`}>
+    <header className={`header theme-header ${isHomeRoute ? 'is-home-route' : ''}`}>
       {isHomeRoute && (
         <div className="theme-home-mobile-chrome">
           <button
@@ -460,14 +469,6 @@ const Header = () => {
         </span>
       </Link>
 
-      <style jsx global>{`
-        .fmm-refreshed-nav .theme-nav { gap: clamp(5px, .75vw, 14px); }
-        .fmm-refreshed-nav .theme-nav-link { font-weight:800; letter-spacing:.035em; text-transform:uppercase; border-radius:10px; transition:background .18s ease,color .18s ease; }
-        .fmm-refreshed-nav .theme-nav-link:hover,.fmm-refreshed-nav .theme-nav-link.is-open { background:rgba(235,42,54,.15); color:#fff; }
-        .fmm-refreshed-nav .theme-nav-link[href="/play"] { background:#df2634; color:#fff; padding:12px 14px; box-shadow:0 4px 20px rgba(223,38,52,.25); }
-        .fmm-refreshed-nav .theme-nav-link[href="/play"]:hover { background:#ff3443; }
-        @media(max-width:1200px) { .fmm-refreshed-nav .theme-nav-link { font-size:11px; padding:9px 6px; } }
-      `}</style>
       <nav className="theme-nav" aria-label="Primary navigation">
         {currentNav.map(renderNavItem)}
       </nav>
