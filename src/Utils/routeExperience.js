@@ -7,7 +7,6 @@ const CORE_ROUTES = new Set([
   '/AffiliateCreateAccount',
   '/affiliate-create-account',
   '/leaderboard',
-  '/about',
   '/contact',
   '/watch-party',
   '/mock-game',
