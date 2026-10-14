@@ -14,7 +14,7 @@ export default function About() {
             <p className="founder-lead">From the boxing gym to the digital arena, FANTASY MMADNESS was created to give combat sports fans a new way to experience every round.</p>
             <div className="founder-actions"><Link href="/play">START PREDICTING <FaArrowRight /></Link><Link href="/how-to-play" className="founder-outline">HOW IT WORKS</Link></div>
           </div>
-          <aside className="founder-statement"><div className="founder-statement-top">FOUNDER &amp; CREATOR</div><div className="founder-monogram">KD<span>.</span></div><h2>KELLY DAVIS</h2><p>Trainer. Combat sports veteran. Founder of FANTASY MMADNESS.</p><div className="founder-rule"/><strong>THE NEXT ROUND OF FANDOM STARTS HERE.</strong></aside>
+          <aside className="founder-statement"><div className="founder-ring-box"><span>THE RING</span><small>BOXING HISTORY · BROTHERS IN ARMS</small></div><div className="founder-statement-top">FOUNDER &amp; CREATOR</div><div className="founder-monogram">KD<span>.</span></div><h2>KELLY DAVIS</h2><p>Trainer. Combat sports veteran. Founder of FANTASY MMADNESS.</p><div className="founder-rule"/><strong>THE NEXT ROUND OF FANDOM STARTS HERE.</strong></aside>
         </div>
       </section>
       <section className="founder-inner founder-story-grid">
@@ -36,7 +36,7 @@ export default function About() {
         .founder-actions a,.founder-bottom a{display:inline-flex;align-items:center;gap:12px;background:#e7192b;border:1px solid #e7192b;color:white!important;text-decoration:none;padding:16px 24px;font-weight:900;letter-spacing:.6px;border-radius:7px}
         .founder-actions .founder-outline{background:transparent;border-color:#777d87}
         .founder-statement{background:linear-gradient(155deg,#20252d,#101217);border:1px solid #424953;border-top:5px solid #f02536;padding:42px 38px;box-shadow:0 24px 70px #0007}
-        .founder-statement-top{font-size:12px;letter-spacing:2.5px;color:#b4b8c0;font-weight:800}
+        .founder-ring-box{background:#e60012;border:2px solid #ff4655;min-height:170px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;margin-bottom:30px;box-shadow:0 10px 35px #0005}\n        .founder-ring-box span{font-family:Georgia,serif;font-size:clamp(45px,5vw,68px);font-weight:900;letter-spacing:-3px;line-height:1;color:#fff}\n        .founder-ring-box small{font-size:10px;font-weight:900;letter-spacing:1.7px;color:#fff;margin-top:14px}\n        .founder-statement-top{font-size:12px;letter-spacing:2.5px;color:#b4b8c0;font-weight:800}
         .founder-monogram{font-size:clamp(95px,13vw,160px);line-height:1.2;font-weight:950;letter-spacing:-15px;color:#f4f4f4;margin:22px 0 12px}
         .founder-monogram span{color:#ef2436}
         .founder-statement h2{font-size:30px;letter-spacing:2px;margin:0 0 12px}
