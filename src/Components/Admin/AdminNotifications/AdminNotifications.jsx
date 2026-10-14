@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import styles from './AdminNotifications.module.css';
 import { MdNotifications, MdCheckCircle, MdDone } from 'react-icons/md';
@@ -20,6 +21,9 @@ const useIsMobile = () => {
 
 const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [needsLogin, setNeedsLogin] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState(null);
 const isMobile = useIsMobile();
 
@@ -28,36 +32,50 @@ const isMobile = useIsMobile();
   }, []);
 
   const fetchNotifications = async () => {
+    setLoading(true);
+    setError('');
+    setNeedsLogin(false);
     try {
       const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/notifications', { headers: adminHeaders() });
       const data = await res.json();
-      setNotifications(data);
+      if (!res.ok) {
+        const authError = res.status === 401 || res.status === 403;
+        setNeedsLogin(authError);
+        throw new Error(authError ? 'Your admin session has expired. Sign in again to view notifications.' : 'Notifications could not load. Please try again.');
+      }
+      if (!Array.isArray(data)) throw new Error('Notifications returned an unexpected response. Please try again.');
+      setNotifications(data.filter((notification) => notification && typeof notification === 'object' && notification._id));
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+      setNotifications([]);
+      setError(err.message || 'Notifications could not load. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const markAsRead = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}/read`, { headers: adminHeaders(),
+      const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}/read`, { headers: adminHeaders(),
         method: 'PATCH',
       });
+      if (!res.ok) throw new Error('Could not mark notification as read. Please try again.');
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, read: true } : n))
       );
     } catch (err) {
-      console.error('Error marking as read:', err);
+      toast.error(err.message || 'Could not mark notification as read.');
     }
   };
 
   const deleteNotification = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}`, { headers: adminHeaders(),
+      const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}`, { headers: adminHeaders(),
         method: 'DELETE',
       });
+      if (!res.ok) throw new Error('Could not delete notification. Please try again.');
       setNotifications((prev) => prev.filter((n) => n._id !== id));
     } catch (err) {
-      console.error('Error deleting notification:', err);
+      toast.error(err.message || 'Could not delete notification.');
     }
   };
 
@@ -80,6 +98,9 @@ const isMobile = useIsMobile();
       >
         Send test push to my phone
       </button>
+      {loading && <p role="status">Loading notifications…</p>}
+      {error && <div role="alert" className={styles.statusMessage}><p>{error}</p>{needsLogin ? <Link href="/administration/login?reason=session-expired&next=%2Fadministration%2Fnotifications">Sign in to the back office</Link> : <button type="button" onClick={fetchNotifications}>Try again</button>}</div>}
+      {!loading && !error && notifications.length === 0 && <p role="status">No notifications yet.</p>}
       <ul className={styles.notificationList}>
         {notifications.map((notification) => (
           <li key={notification._id} className={styles.notificationItem}>
@@ -89,8 +110,8 @@ const isMobile = useIsMobile();
             <div className={styles.textContent}>
         <span className={styles.title}>
   {isMobile
-    ? `${notification.title.slice(0, 20)}${notification.title.length > 20 ? '...' : ''}`
-    : notification.title}
+    ? `${String(notification.title || 'Notification').slice(0, 20)}${String(notification.title || 'Notification').length > 20 ? '...' : ''}`
+    : String(notification.title || 'Notification')}
 </span>
 
               <span className={styles.timestamp}>
