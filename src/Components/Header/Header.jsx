@@ -48,7 +48,7 @@ const publicNav = [
   { label: 'Leaderboard', href: '/leaderboard', icon: FaTrophy },
   { label: 'How To Play', href: '/how-to-play', icon: FaQuestionCircle },
   { label: 'FM COINS', href: '/fights-rewards', icon: FaCoins },
-  { label: 'Our Story', href: '/about', icon: FaCrown },
+  { label: 'Founder', href: '/founder', icon: FaCrown },
   { label: 'Affiliates', href: '/affiliate-create-account', icon: FaUsers },
 ];
 
@@ -365,7 +365,7 @@ const Header = () => {
     { label: 'Leagues', href: '/FantasyLeagues', icon: FaTrophy },
     { label: 'Apparel', href: '/apparel', icon: FaGift },
     { label: 'Fight News', href: '/fights-news', icon: FaNewspaper },
-    { label: 'Our Story', href: '/about', icon: FaCrown },
+    { label: 'Founder', href: '/founder', icon: FaCrown },
     { label: 'Affiliates', href: '/affiliate-create-account', icon: FaUsers },
     { label: 'Profile', href: mobileAccountHref, icon: FaUserCircle },
   ];
