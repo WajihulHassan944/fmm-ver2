@@ -1,4 +1,10 @@
 import Head from 'next/head';
+import { useState } from 'react';
+
+function FounderPhoto({ src, alt, className, fallback }) {
+  const [failed, setFailed] = useState(false);
+  return failed ? <div className={className} role="img" aria-label={alt}>{fallback}</div> : <img className={className} src={src} alt={alt} onError={() => setFailed(true)} loading="lazy" />;
+}
 import Link from 'next/link';
 import { FaArrowRight, FaBookOpen, FaBullseye, FaFistRaised, FaTrophy, FaUsers } from 'react-icons/fa';
 
@@ -30,6 +36,9 @@ export default function About() {
         .actions { display:flex; flex-wrap:wrap; gap:12px; }
         .action { display:inline-flex; align-items:center; gap:10px; border-radius:8px; background:#e52935; color:#fff; padding:15px 22px; font-size:16px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; text-decoration:none; box-shadow:0 8px 26px rgba(229,41,53,.23); }
         .action.secondary { background:transparent; border:1px solid #737681; box-shadow:none; }
+        .founder-photo { width:100%; max-height:520px; min-height:320px; object-fit:cover; object-position:center 30%; border-radius:14px; border:1px solid rgba(246,170,43,.35); background:linear-gradient(145deg,#2c211d,#10141e); display:flex; align-items:center; justify-content:center; text-align:center; color:#f6aa2b; font-family:'Anton',Impact,sans-serif; font-size:32px; letter-spacing:.05em; }
+        .belt-photo { width:100%; height:360px; object-fit:contain; border-radius:12px; background:radial-gradient(ellipse at center,#30251c,#11141a 70%); display:flex; align-items:center; justify-content:center; text-align:center; color:#f6aa2b; font-family:'Anton',Impact,sans-serif; font-size:28px; }
+        .photo-caption { font-size:14px; color:#b9bfca; margin:10px 0 0; line-height:1.4; }
         .hero-proof { border:1px solid rgba(246,170,43,.5); background:linear-gradient(155deg,rgba(246,170,43,.12),rgba(255,255,255,.02)); border-radius:18px; padding:28px; box-shadow:0 24px 60px rgba(0,0,0,.3); }
         .hero-proof .year { font-family:'Anton',Impact,sans-serif; color:#f6aa2b; font-size:76px; line-height:1; }
         .hero-proof h2 { font-size:28px; line-height:1.2; margin:12px 0; }
@@ -74,6 +83,9 @@ export default function About() {
             </div>
           </div>
           <aside className="hero-proof">
+            <FounderPhoto className="founder-photo" src="/images/founder/kelly-davis-gym.jpg" alt="Kelly Davis, founder of FANTASY MMADNESS, photographed inside a boxing gym" fallback="KELLY DAVIS · FOUNDER & CEO" />
+            <p className="photo-caption">Kelly Davis · Founder & CEO · FANTASY MMADNESS</p>
+            <div style={{height:20}} />
             <p className="eyebrow">A championship foundation</p>
             <div className="year">2004</div>
             <h2>IBF CRUISERWEIGHT WORLD CHAMPIONSHIP</h2>
@@ -99,6 +111,10 @@ export default function About() {
 
       <section className="section ring">
         <div className="wrap ring-grid">
+          <div>
+            <FounderPhoto className="belt-photo" src="/images/founder/kelly-davis-championship-belts.png" alt="Kelly Davis posing with championship boxing belts" fallback="KELLY DAVIS · CHAMPIONSHIP BOXING TRAINER" />
+            <p className="photo-caption">Kelly Davis with championship belts. Kelly trained his brother Kelvin “Koncrete” Davis, the 2004 IBF Cruiserweight World Champion.</p>
+          </div>
           <div className="ring-cover" aria-label="Text presentation of The Ring magazine's Brothers-In-Arms feature">
             <div className="publication">The Ring</div>
             <div className="feature">BROTHERS-IN-ARMS</div>
