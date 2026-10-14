@@ -79,7 +79,7 @@ export default function About() {
         .ring { background:linear-gradient(110deg,#19120f,#11141c); border-top:1px solid #3a2c1c; border-bottom:1px solid #3a2c1c; }
         .ring-details { display:flex; flex-direction:column; gap:20px; } .ring-grid { display:grid; grid-template-columns: .8fr 1.2fr; gap:44px; align-items:center; }
         .ring-cover { box-shadow:12px 12px 0 rgba(0,0,0,.35); transform:rotate(-1deg); padding:34px; background:linear-gradient(135deg,#fa090d,#ba0008 90%); border:1px solid #ff4949; min-height:290px; border:1px solid #c39447; background:linear-gradient(140deg,#302016,#12141a); border-radius:12px; display:flex; flex-direction:column; justify-content:center; }
-        .ring-cover .ring-logo { position:relative; width:min(100%,410px); height:180px; margin:0 auto 26px; color:#fff6e9; text-align:center; }
+        .ring-cover .ring-original-logo { font-family:Georgia,serif; font-weight:900; font-size:clamp(42px,6vw,76px); text-align:center; letter-spacing:-.045em; color:#fff; margin-bottom:20px; }\n        .ring-cover .ring-logo { position:relative; width:min(100%,410px); height:180px; margin:0 auto 26px; color:#fff6e9; text-align:center; }
         .ring-cover .ring-word { position:relative; z-index:1; display:block; font-family:Impact,'Anton',sans-serif; font-size:clamp(92px,11vw,150px); font-weight:900; font-style:italic; letter-spacing:-.095em; line-height:1.2; text-shadow:4px 4px 0 #a20000; }
         .ring-cover .ring-the { position:absolute; z-index:2; left:37%; top:3px; font-size:17px; font-weight:900; letter-spacing:.08em; }
         .ring-cover .ring-swoosh { position:absolute; z-index:2; left:18%; right:1%; bottom:0; height:58px; border-bottom:15px solid #fff6e9; border-radius:0 0 90% 90%; transform:rotate(2deg); }
@@ -145,7 +145,7 @@ export default function About() {
             <p className="photo-caption">Kelly Davis with championship belts. Kelly trained his brother Kelvin “Koncrete” Davis, the 2004 IBF Cruiserweight World Champion.</p>
           </div>
           <div className="ring-details"><div className="ring-cover" aria-label="Text presentation of The Ring magazine's Brothers-In-Arms feature">
-            <div className="ring-logo" aria-label="The Ring"><span className="ring-the">THE</span><span className="ring-word">RING</span><span className="ring-swoosh" aria-hidden="true" /></div>
+            <div className="ring-original-logo" aria-label="The Ring magazine logo">THE RING</div>
             <div className="feature">BROTHERS-IN-ARMS</div>
             <div className="credit">KELVIN & KELLY DAVIS · 2004</div>
           </div>
