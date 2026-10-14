@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { FaTrophy, FaArrowRight, FaFistRaised } from 'react-icons/fa';
+import { FaTrophy, FaArrowRight } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchPublicPredictionFights } from '@/Utils/publicApi';
 import { formatFightDate, getFightCategory, getFightId, getFightName, getFighterImage, getFightPrize } from '@/Utils/fightExperience';
@@ -18,23 +18,8 @@ const entryIsOpen = (fight) => {
 export default function PlayPage({ fights = [] }) {
   return <main className="fmm-play-page">
     <Head><title>Play Now | FANTASY MMADNESS</title><meta name="description" content="Choose an open combat sports fight, make predictions, and join the leaderboard." /></Head>
-    <section className="fmm-play-hero">
-      <div className="fmm-play-shell">
-        <Link href="/" className="fmm-play-back">← FANTASY MMADNESS</Link>
-        <span className="fmm-play-kicker"><FaFistRaised /> LIVE PLAYER LOBBY</span>
-        <h1>PICK A FIGHT.<br/><em>PREDICT THE ACTION.</em></h1>
-        <p>Choose an open matchup below. We guide you from entry through your predictions and straight to the leaderboard.</p>
-        <div className="fmm-play-journey" aria-label="How to play">
-          <span><b>1</b><strong>PICK</strong><small>Choose a fight</small></span>
-          <span><b>2</b><strong>ENTER</strong><small>See FM COINS entry</small></span>
-          <span><b>3</b><strong>PREDICT</strong><small>Call the action</small></span>
-          <span><b>4</b><strong>SUBMIT</strong><small>Lock your picks</small></span>
-          <span><b>5</b><strong>CLIMB</strong><small>Track leaderboard</small></span>
-        </div>
-      </div>
-    </section>
-    <section className="fmm-play-shell fmm-play-open">
-      <header><div><span>OPEN CONTESTS</span><h2>PLAY NOW</h2></div><p>Select a fight to enter the prediction room.</p></header>
+    <section className="fmm-play-shell fmm-play-open" style={{ paddingTop: 24 }}>
+      <header><div><span>OPEN CONTESTS</span><h1>PICK A FIGHT</h1></div><p>Select a fight to enter the prediction room.</p></header>
       {fights.length ? <div className="fmm-play-grid">
         {fights.map((fight) => <article className="fmm-play-card" key={getFightId(fight)}>
           <div className="fmm-play-card-visual">
