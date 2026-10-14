@@ -52,7 +52,7 @@ export default function About() {
         .milestone h3 { font-size:23px; line-height:1.2; margin:16px 0 12px; }
         .milestone p { font-size:16px; line-height:1.55; color:#c4c8d1; margin:0; }
         .ring { background:linear-gradient(110deg,#19120f,#11141c); border-top:1px solid #3a2c1c; border-bottom:1px solid #3a2c1c; }
-        .ring-grid { display:grid; grid-template-columns: .8fr 1.2fr; gap:44px; align-items:center; }
+        .ring-details { display:flex; flex-direction:column; gap:20px; } .ring-grid { display:grid; grid-template-columns: .8fr 1.2fr; gap:44px; align-items:center; }
         .ring-cover { padding:34px; min-height:290px; border:1px solid #c39447; background:linear-gradient(140deg,#302016,#12141a); border-radius:12px; display:flex; flex-direction:column; justify-content:center; }
         .ring-cover .publication { font-family:Georgia,serif; font-style:italic; font-weight:800; font-size:clamp(40px,5vw,72px); color:#fff; line-height:1; border-bottom:3px solid #dba445; padding-bottom:18px; }
         .ring-cover .feature { font-family:'Anton',Impact,sans-serif; font-size:clamp(26px,3vw,38px); margin:20px 0 10px; }
@@ -115,7 +115,7 @@ export default function About() {
             <FounderPhoto className="belt-photo" src="/images/founder/kelly-davis-championship-belts.png" alt="Kelly Davis posing with championship boxing belts" fallback="KELLY DAVIS · CHAMPIONSHIP BOXING TRAINER" />
             <p className="photo-caption">Kelly Davis with championship belts. Kelly trained his brother Kelvin “Koncrete” Davis, the 2004 IBF Cruiserweight World Champion.</p>
           </div>
-          <div className="ring-cover" aria-label="Text presentation of The Ring magazine's Brothers-In-Arms feature">
+          <div className="ring-details"><div className="ring-cover" aria-label="Text presentation of The Ring magazine's Brothers-In-Arms feature">
             <div className="publication">The Ring</div>
             <div className="feature">BROTHERS-IN-ARMS</div>
             <div className="credit">KELVIN & KELLY DAVIS · 2004</div>
@@ -124,8 +124,8 @@ export default function About() {
             <p className="eyebrow"><FaBookOpen /> National boxing media recognition</p>
             <h2 className="section-title">A CHAMPIONSHIP STORY DOCUMENTED IN THE RING.</h2>
             <p className="section-intro"><em>The Ring</em> magazine documented the brothers' journey in its multi-page feature “Brothers-In-Arms: How Kelvin & Kelly Davis Took Their Two-Man Bandwagon to the Top,” written by Mike Houser, with photography credited to Tom Casino / Showtime. The article follows the two brothers from Reno through the world-title breakthrough, including Kelvin's May 1, 2004 victory over Ezra Sellers. It is an independent, contemporary record of Kelly's role as a championship trainer.</p>
-            <p className="ring-note">The graphic at left is a typographic tribute to the article, not a reproduction of the original magazine cover.</p>
-          </div>
+            <p className="ring-note">The article is a six-page original magazine feature. The full-page reader will be enabled when the supplied PDF has been uploaded to the website assets.</p>
+          </div></div>
         </div>
       </section>
 
