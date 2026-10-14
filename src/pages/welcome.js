@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FMCoin, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import HomepageCommercial from '@/Components/Home/HomepageCommercial';
-import FounderHomepageFeature from '@/Components/Home/FounderHomepageFeature';
 import { getFightCategory } from '@/Utils/fightExperience';
 
 // ==========================================================================
@@ -345,7 +344,6 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
             </div>
         </div>
 
-        <FounderHomepageFeature />
 
         <div id="fights" data-fmm="body-grid" style={{ maxWidth: '1320px', margin: '0 auto', padding: '62px 32px 0', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 348px', gap: '40px', alignItems: 'start' }}>
 
