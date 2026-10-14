@@ -438,10 +438,11 @@ function AppContent({ children }) {
   // nav and footer, so the legacy site chrome must not be layered on top of it.
   const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
   const forcePrototypeExperience = Boolean(exactMobileTab);
-  const hideLayout = isAdministrationRoute || isStandaloneDemoRoute
+  const isFounderRoute = ["/founder", "/about"].includes(router.pathname);
+  const hideLayout = isFounderRoute || isAdministrationRoute || isStandaloneDemoRoute
     || router.pathname.startsWith("/score")
     || router.pathname === "/" || router.pathname === "/welcome" || isModernFightDetailRoute || forcePrototypeExperience;
-  const hideFooterChrome = isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
+  const hideFooterChrome = isFounderRoute || isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
   const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
     router.pathname,

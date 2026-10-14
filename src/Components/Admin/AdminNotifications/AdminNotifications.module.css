@@ -60,3 +60,5 @@
   .notificationContainer { padding: 16px; }
   .notificationItem { padding: 12px; gap: 10px; }
 }
+
+.statusMessage{padding:18px;border:1px solid #a86b26;border-radius:8px;background:#211a12;color:#f5f7fb;margin-bottom:20px}.statusMessage p{color:#f5f7fb}.statusMessage a,.statusMessage button{display:inline-block;padding:10px 14px;background:#df111b;border:0;border-radius:6px;color:white;font-weight:700;cursor:pointer}
