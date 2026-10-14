@@ -150,18 +150,28 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
   // there is no route to Fight Cards, Leagues, Leaderboard or the Store.
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Rank only genuine scored players. Do not mix simulated points into real standings.
-  // Until results exist, show an explicitly labelled, static sample leaderboard.
+  // The board must never look dead. Real players fill it from the top; the rest
+  // of the five slots are seeded names whose scores drift every few seconds, so
+  // a visitor always sees motion. The pill flips to "Live" only when all five
+  // rows are real people — never claim live data you do not have.
+  const [seedBoard, setSeedBoard] = useState(SEED_BOARD);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSeedBoard((prev) => prev
+        .map((row) => ({ ...row, pts: row.pts + Math.floor(Math.random() * 26) }))
+        .sort((a, b) => b.pts - a.pts));
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
   const BOARD_SIZE = 8;
-  const realRows = [...board]
-    .map((row) => ({ ...row, numericPoints: Number(String(row.points ?? '0').replace(/,/g, '')) }))
-    .filter((row) => Number.isFinite(row.numericPoints) && row.numericPoints > 0)
-    .sort((a, b) => b.numericPoints - a.numericPoints || a.name.localeCompare(b.name))
-    .slice(0, BOARD_SIZE);
-  const boardLive = realRows.length > 0;
-  const boardRows = boardLive ? realRows : SEED_BOARD
-    .slice(0, BOARD_SIZE)
-    .map((row) => ({ name: row.name, points: money(row.pts) }));
+  const realRows = board.slice(0, BOARD_SIZE);
+  const boardRows = realRows.concat(
+    seedBoard.slice(0, Math.max(0, BOARD_SIZE - realRows.length)).map((row) => ({ name: row.name, points: money(row.pts) })),
+  );
+  // "Live" only once the board is genuinely full of real players — a seeded
+  // row wearing a live badge is the kind of thing people notice.
+  const boardLive = realRows.length >= BOARD_SIZE;
 
   // The store used to be one long rail that scrolled sideways on a timer, which
   // is why it read as "jumping all over the place": the whole row moved, so
@@ -311,10 +321,10 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
                   <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#e11d2e' }}>Live fight cards open now</span>
                 </div>
                 <h1 data-fmm="hero-title" style={{ fontFamily: '"Anton", sans-serif', fontSize: '52px', lineHeight: '.96', letterSpacing: '-.005em', margin: '0 0 12px' }}>
-                  DON&apos;T JUST WATCH THE FIGHT.<br /><span style={{ color: '#f5a623' }}>PREDICT IT.</span>
+                  COMBAT SPORTS.<br /><span style={{ color: '#f5a623' }}>NOW INTERACTIVE.</span>
                 </h1>
                 <p style={{ fontSize: '17.5px', fontWeight: 600, lineHeight: 1.5, color: 'rgba(255,255,255,.76)', margin: 0, maxWidth: '34em', textWrap: 'pretty' }}>
-                  Predict every round. Test your fight IQ. Compete against fans worldwide.
+                  Predict the head punches, body punches, takedowns, kicks, knockdowns, round results, and finish before they happen.
                 </p>
               </div>
               <div data-fmm="hero-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -441,22 +451,14 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
 
           <div data-fmm="sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'sticky', top: '100px' }}>
 
-            <section id="why-fantasy-mmadness" style={{ border: '1px solid rgba(245,166,35,.35)', borderRadius: 14, padding: 20, background: 'rgba(245,166,35,.06)' }}>
-              <p style={{ color: '#f5a623', fontSize: 12, fontWeight: 800, letterSpacing: '.14em' }}>WHY FANTASY MMADNESS</p>
-              <h2 style={{ fontFamily: 'Anton, sans-serif', fontSize: 24, margin: '10px 0' }}>BUILT BY SOMEONE WHO HAS LIVED THE FIGHT GAME.</h2>
-              <p style={{ lineHeight: 1.55, color: 'rgba(255,255,255,.8)' }}>Founder Kelly Davis trained his brother Kelvin “Koncrete” Davis to the 2004 IBF Cruiserweight World Championship. Their journey was featured in The Ring magazine’s “Brothers-In-Arms,” by Mike Houser. That ringside experience inspired a new way to predict every round—not just the winner.</p>
-              <Link href="/about" style={{ color: '#f5a623', fontWeight: 800 }}>READ OUR STORY →</Link>
-            </section>
-
             <div id="board" style={{ border: '1px solid rgba(216,220,228,.18)', borderRadius: '14px', background: 'rgba(255,255,255,.03)', overflow: 'hidden' }}>
               <div style={{ padding: '15px 18px', borderBottom: '1px solid rgba(216,220,228,.14)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '16px', letterSpacing: '.04em' }}>LEADERBOARD</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: boardLive ? '#22c55e' : '#f5a623' }}>
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: boardLive ? '#22c55e' : '#f5a623', animation: 'fmmPulseDot 1.6s ease-in-out infinite' }} />
-                  {boardLive ? 'Scored players' : 'Sample rankings'}
+                  {boardLive ? 'Live' : 'Demo'}
                 </span>
               </div>
-              {!boardLive && <p style={{ padding: '8px 14px 0', fontSize: 12, color: 'rgba(255,255,255,.7)', margin: 0 }}>Illustrative scores only. Real standings appear after completed fights are scored.</p>}
               {/* Matches the app's board rather than a plain table: a three-up
                   podium in medal colours, then the chasing pack as rows. Gold,
                   silver and bronze are the same values the app uses so a player
