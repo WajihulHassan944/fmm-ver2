@@ -2,9 +2,14 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 
 function FounderPhoto({ src, alt, className, fallback }) {
+  const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
-  return failed ? <div className={className} role="img" aria-label={alt}><span>{fallback}</span></div> : <img className={className} src={src} alt={alt} onError={() => setFailed(true)} loading="eager" />;
+  return <div className={className} role="img" aria-label={alt} style={{position:'relative'}}>
+    {!loaded && <span style={{display:'block'}}>{fallback}</span>}
+    {!failed && <img src={src} alt="" loading="eager" onLoad={() => setLoaded(true)} onError={() => setFailed(true)} style={{display:loaded?'block':'none',width:'100%',height:'100%',objectFit:'cover',position:loaded?'absolute':'static',inset:0}} />}
+  </div>;
 }
+
 import Link from 'next/link';
 import { FaArrowRight, FaBookOpen, FaBullseye, FaFistRaised, FaTrophy, FaUsers } from 'react-icons/fa';
 
