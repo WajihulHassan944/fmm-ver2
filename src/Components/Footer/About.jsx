@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import founderPhoto from '@/Utils/founderPhoto';
 import { FaArrowRight, FaFistRaised, FaTrophy, FaGlobeAmericas, FaShieldAlt } from 'react-icons/fa';
 
 const disciplines = ['BOXING', 'MMA', 'KICKBOXING', 'BARE KNUCKLE', 'PRO WRESTLING'];
@@ -10,15 +11,15 @@ export default function About() {
         <div className="founder-inner founder-hero-grid">
           <div>
             <span className="founder-eyebrow">THE STORY BEHIND FANTASY MMADNESS</span>
-            <h1>BUILT IN THE FIGHT GAME.<br/><em>MADE FOR THE FANS.</em></h1>
-            <p className="founder-lead">From the boxing gym to the digital arena, FANTASY MMADNESS was created to give combat sports fans a new way to experience every round.</p>
+            <h1>KELLY DAVIS.<br/><em>BUILT IN THE FIGHT GAME.</em></h1>
+            <p className="founder-role">FOUNDER &amp; CEO · FANTASY MMADNESS</p><p className="founder-lead">From the boxing gym to the digital arena, FANTASY MMADNESS was created to give combat sports fans a new way to experience every round.</p>
             <div className="founder-actions"><Link href="/play">START PREDICTING <FaArrowRight /></Link><Link href="/how-to-play" className="founder-outline">HOW IT WORKS</Link></div>
           </div>
-          <aside className="founder-statement"><div className="founder-ring-box"><span>THE RING</span><small>BOXING HISTORY · BROTHERS IN ARMS</small></div><div className="founder-statement-top">FOUNDER &amp; CREATOR</div><div className="founder-monogram">KD<span>.</span></div><h2>KELLY DAVIS</h2><p>Trainer. Combat sports veteran. Founder of FANTASY MMADNESS.</p><div className="founder-rule"/><strong>THE NEXT ROUND OF FANDOM STARTS HERE.</strong></aside>
+          <aside className="founder-statement"><img className="founder-portrait" src={founderPhoto} alt="Kelly Davis, founder of FANTASY MMADNESS, in the boxing gym" width="750" height="1624"/><h2>KELLY DAVIS</h2><p>Trainer. Combat sports veteran. Founder of FANTASY MMADNESS.</p></aside>
         </div>
       </section>
-      <section className="founder-inner founder-story-grid">
-        <div><span className="founder-eyebrow founder-red">A LIFETIME IN COMBAT SPORTS</span><h2>THE EXPERIENCE BEHIND THE VISION</h2><p>Kelly Davis has spent decades inside the fight world as a trainer, working with athletes and experiencing the intensity of competition firsthand.</p><p>Kelly trained his brother, Kelvin “Concrete” Davis, throughout his boxing career. In 2004, Kelvin became the IBF cruiserweight world champion in Miami, Florida.</p><p>That history shaped a simple idea: fans understand more about a fight than just who wins. They see the punches, momentum shifts, rounds and defining moments.</p></div>
+      <section id="brothers-in-arms" className="founder-inner founder-story-grid">
+        <div><a className="founder-ring-label" href="#brothers-in-arms">THE RING · BROTHERS IN ARMS</a><span className="founder-eyebrow founder-red">A LIFETIME IN COMBAT SPORTS</span><h2>THE EXPERIENCE BEHIND THE VISION</h2><p>Originally from Reno, Nevada, Kelly Davis has been a head trainer since 1998. His experience spans boxing, MMA, kickboxing and bare knuckle, with fights taking him around the world.</p><p>Kelly trained his brother, Kelvin “Concrete” Davis, throughout his boxing career. In 2004, Kelvin became the IBF cruiserweight world champion in Miami, Florida.</p><p>That history shaped a simple idea: fans understand more about a fight than just who wins. They see the punches, momentum shifts, rounds and defining moments.</p></div>
         <div className="founder-milestones"><div><span>1998</span><p>Training and coaching fighters professionally</p></div><div><span>2004</span><p>Kelvin “Concrete” Davis wins the IBF cruiserweight world championship</p></div><div><span>TODAY</span><p>Building a new interactive experience for fight fans worldwide</p></div></div>
       </section>
       <section className="founder-vision"><div className="founder-inner"><span className="founder-eyebrow">THE FANTASY MMADNESS DIFFERENCE</span><h2>WE DON'T PICK WINNERS.<br/><em>WE PREDICT THE GAME.</em></h2><p>Predict what happens inside the fight, earn points for accurate calls and compete on the leaderboard. Built for fans who watch every second—not just the final result.</p><div className="founder-disciplines">{disciplines.map(d => <span key={d}>{d}</span>)}</div></div></section>
@@ -35,8 +36,11 @@ export default function About() {
         .founder-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
         .founder-actions a,.founder-bottom a{display:inline-flex;align-items:center;gap:12px;background:#e7192b;border:1px solid #e7192b;color:white!important;text-decoration:none;padding:16px 24px;font-weight:900;letter-spacing:.6px;border-radius:7px}
         .founder-actions .founder-outline{background:transparent;border-color:#777d87}
-        .founder-statement{background:linear-gradient(155deg,#20252d,#101217);border:1px solid #424953;border-top:5px solid #f02536;padding:42px 38px;box-shadow:0 24px 70px #0007}
-        .founder-ring-box{background:#e60012;border:2px solid #ff4655;min-height:170px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;margin-bottom:30px;box-shadow:0 10px 35px #0005}\n        .founder-ring-box span{font-family:Georgia,serif;font-size:clamp(45px,5vw,68px);font-weight:900;letter-spacing:-3px;line-height:1;color:#fff}\n        .founder-ring-box small{font-size:10px;font-weight:900;letter-spacing:1.7px;color:#fff;margin-top:14px}\n        .founder-statement-top{font-size:12px;letter-spacing:2.5px;color:#b4b8c0;font-weight:800}
+        .founder-role{color:#f5a623;font-size:14px;font-weight:800;letter-spacing:1.5px}.founder-ring-label{display:block;width:fit-content;background:#e60012;color:white!important;padding:14px 20px;margin-bottom:26px;font-weight:900;letter-spacing:1px;text-decoration:none}.founder-portrait{display:block;width:100%;height:auto;max-height:540px;object-fit:contain;margin-bottom:24px}.founder-statement{background:linear-gradient(155deg,#20252d,#101217);border:1px solid #424953;border-top:5px solid #f02536;padding:42px 38px;box-shadow:0 24px 70px #0007}
+        .founder-ring-box{background:#e60012;border:2px solid #ff4655;min-height:170px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;margin-bottom:30px;box-shadow:0 10px 35px #0005}
+        .founder-ring-box span{font-family:Georgia,serif;font-size:clamp(45px,5vw,68px);font-weight:900;letter-spacing:-3px;line-height:1;color:#fff}
+        .founder-ring-box small{font-size:10px;font-weight:900;letter-spacing:1.7px;color:#fff;margin-top:14px}
+        .founder-statement-top{font-size:12px;letter-spacing:2.5px;color:#b4b8c0;font-weight:800}
         .founder-monogram{font-size:clamp(95px,13vw,160px);line-height:1.2;font-weight:950;letter-spacing:-15px;color:#f4f4f4;margin:22px 0 12px}
         .founder-monogram span{color:#ef2436}
         .founder-statement h2{font-size:30px;letter-spacing:2px;margin:0 0 12px}
