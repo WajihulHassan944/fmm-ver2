@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function FounderPhoto({ src, alt, className, fallback }) {
   const [failed, setFailed] = useState(false);
@@ -7,6 +7,26 @@ function FounderPhoto({ src, alt, className, fallback }) {
 }
 import Link from 'next/link';
 import { FaArrowRight, FaBookOpen, FaBullseye, FaFistRaised, FaTrophy, FaUsers } from 'react-icons/fa';
+
+function MagazineReader() {
+  const [available, setAvailable] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    let active = true;
+    fetch('/images/founder/brothers-in-arms-ring-magazine.pdf', { method: 'HEAD' })
+      .then((response) => { if (active) setAvailable(response.ok && (response.headers.get('content-type') || '').includes('pdf')); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  if (!available) return null;
+  return <div style={{ marginTop: 22 }}>
+    <button type="button" onClick={() => setOpen((value) => !value)} style={{ background:'#e52935',color:'#fff',border:0,borderRadius:8,padding:'14px 18px',fontWeight:800,cursor:'pointer' }}>
+      {open ? 'CLOSE MAGAZINE READER' : 'READ THE FULL SIX-PAGE MAGAZINE ARTICLE'}
+    </button>
+    <a href="/images/founder/brothers-in-arms-ring-magazine.pdf" target="_blank" rel="noopener noreferrer" style={{ marginLeft:14,color:'#f6aa2b',fontWeight:800 }}>OPEN ORIGINAL PDF ↗</a>
+    {open && <iframe title="Original The Ring magazine Brothers-In-Arms feature" src="/images/founder/brothers-in-arms-ring-magazine.pdf#view=FitH" style={{ width:'100%',height:'min(78vh,850px)',border:'1px solid #72562e',borderRadius:10,marginTop:18,background:'#fff' }} />}
+  </div>;
+}
 
 const milestones = [
   { year: 'THE BEGINNING', title: 'Built in the boxing gyms of Reno', copy: 'Kelly and Kelvin Davis began their journey in amateur boxing through the Boys & Girls Club and the University of Nevada boxing community.' },
@@ -124,7 +144,7 @@ export default function About() {
             <p className="eyebrow"><FaBookOpen /> National boxing media recognition</p>
             <h2 className="section-title">A CHAMPIONSHIP STORY DOCUMENTED IN THE RING.</h2>
             <p className="section-intro"><em>The Ring</em> magazine documented the brothers' journey in its multi-page feature “Brothers-In-Arms: How Kelvin & Kelly Davis Took Their Two-Man Bandwagon to the Top,” written by Mike Houser, with photography credited to Tom Casino / Showtime. The article follows the two brothers from Reno through the world-title breakthrough, including Kelvin's May 1, 2004 victory over Ezra Sellers. It is an independent, contemporary record of Kelly's role as a championship trainer.</p>
-            <p className="ring-note">The article is a six-page original magazine feature. The full-page reader will be enabled when the supplied PDF has been uploaded to the website assets.</p>
+            <p className="ring-note">This six-page original magazine feature documents the Davis brothers' championship journey.</p><MagazineReader />
           </div></div>
         </div>
       </section>
