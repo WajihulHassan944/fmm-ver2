@@ -12,11 +12,11 @@ export default function About() {
       <main>
         <section className={styles.hero} aria-labelledby="founder-name">
           <div className={styles.intro}>
-            <p className={styles.eyebrow}>THE FOUNDER</p>
+            <p className={styles.eyebrow}>THE STORY BEHIND FANTASY MMADNESS</p>
             <h1 id="founder-name">Kelly<br/><span>Davis.</span></h1>
             <p className={styles.role}>Founder &amp; CEO, FANTASY MMADNESS</p>
             <div className={styles.line}/>
-            <p className={styles.lead}>A lifetime in the corner.<br/>A new way to experience the fight.</p>
+            <p className={styles.lead}>FROM THE CORNER TO THE FUTURE OF COMBAT SPORTS.</p>
             <p className={styles.summary}>From training fighters to building a game for the fans, Kelly brings decades of combat sports experience to every round.</p>
             <a href="#the-story" className={styles.storyLink}>Discover the story <span aria-hidden="true">↓</span></a>
           </div>
@@ -30,11 +30,11 @@ export default function About() {
           <div className={styles.year}><span>A CHAMPIONSHIP CHAPTER</span><strong>2004</strong><span>IBF CRUISERWEIGHT WORLD TITLE</span></div>
           <div><p className={styles.eyebrow}>02 / BROTHERS IN ARMS</p><h2 id="brothers-heading">Family. Dedication.<br/>A world championship.</h2><p>Kelly trained his brother, Kelvin “Concrete” Davis, throughout his boxing career. In 2004, Kelvin became the IBF cruiserweight world champion in Miami, Florida.</p><p>It is a shared history built on trust, discipline and a life spent working toward the next round.</p></div>
         </section>
-        <section className={styles.chapter} aria-labelledby="vision-heading">
+        <section className={styles.ringFeature} aria-labelledby="ring-heading"><div><p className={styles.eyebrow}>FEATURED BOXING HISTORY</p><h2 id="ring-heading">THE <span>RING</span> MAGAZINE</h2><p>The story of Kelvin “Concrete” Davis and the team behind his world championship belongs in the history of the sport. Kelly trained Kelvin throughout his boxing career, including his 2004 IBF cruiserweight title run.</p><p>Original Ring Magazine article and photography will be presented here when the licensed source files are available in the website assets.</p></div><div className={styles.ringMark} aria-label="The Ring Magazine feature">THE <strong>RING</strong><small>BOXING HISTORY · 2004</small></div></section><section className={styles.chapter} aria-labelledby="vision-heading">
           <div><p className={styles.eyebrow}>03 / THE VISION</p><h2 id="vision-heading">For fans who see<br/>every detail.</h2></div>
           <div className={styles.prose}><p>A fight is more than its final result. Fans read the pace, spot momentum shifts and watch the details that make each round different.</p><p>Kelly created FANTASY MMADNESS to turn that knowledge into participation: predict what happens inside the fight, earn points for accurate calls and compete with other fans.</p><p className={styles.disciplines}>BOXING · MMA · KICKBOXING · BARE KNUCKLE · PRO WRESTLING</p></div>
         </section>
-        <section className={styles.closing}><p className={styles.eyebrow}>THE NEXT ROUND STARTS WITH YOU</p><h2>We don’t pick winners.<br/><span>We predict the game.</span></h2><Link href="/play" className={styles.play}>Start predicting ↗</Link></section>
+        <section className={styles.closing}><p className={styles.eyebrow}>THE NEXT ROUND STARTS WITH YOU</p><h2>We don’t pick winners.<br/><span>We predict the game.</span></h2><Link href="/play" className={styles.play}>PLAY THIS FIGHT ↗</Link></section>
       </main>
       <footer className={styles.footer}><Link href="/">FANTASY MMADNESS</Link><span>DON’T JUST WATCH THE FIGHT. PREDICT IT.</span><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></footer>
     </div>
