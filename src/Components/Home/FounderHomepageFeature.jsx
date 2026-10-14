@@ -9,9 +9,9 @@ export default function FounderHomepageFeature() {
           <h2 id="fmm-founder-title">BUILT IN THE FIGHT GAME.<br/><span>MADE FOR THE FANS.</span></h2>
           <p>Founder Kelly Davis has spent decades in combat sports, training fighters and building a new way for fans to experience every round.</p>
           <p>Kelly trained his brother, Kelvin “Concrete” Davis, throughout his boxing career. In 2004, Kelvin became the IBF cruiserweight world champion in Miami, Florida.</p>
-          <div className="fmm-founder-cta"><Link href="/about">MEET THE FOUNDER →</Link><Link href="/play" className="secondary">START PREDICTING →</Link></div>
+          <div className="fmm-founder-cta"><Link href="/founder">MEET THE FOUNDER →</Link><Link href="/play" className="secondary">START PREDICTING →</Link></div>
         </div>
-        <Link href="/about" className="fmm-founder-ring" aria-label="Read the Brothers in Arms founder story">
+        <Link href="/founder#brothers-in-arms" className="fmm-founder-ring" aria-label="Read the Brothers in Arms founder story">
           <span className="fmm-ring-heading">THE RING</span>
           <span className="fmm-ring-divider"/>
           <span className="fmm-ring-story">BROTHERS<br/>IN ARMS</span>

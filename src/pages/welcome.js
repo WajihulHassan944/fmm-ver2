@@ -248,6 +248,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <a href="/how-to-play" style={{ color: 'rgba(255,255,255,.82)' }}>How to Play</a>
               <a href="/FantasyLeagues" style={{ color: 'rgba(255,255,255,.82)' }}>Leagues</a>
               <a href="/leaderboard" style={{ color: 'rgba(255,255,255,.82)' }}>Leaderboard</a>
+              <a href="/founder" style={{ color: 'rgba(255,255,255,.82)' }}>Founder</a>
               <a href="/apparel" style={{ color: 'rgba(255,255,255,.82)' }}>Store</a>
             </div>
 
@@ -276,7 +277,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               which the phone header drops for room. Tapping any of them closes it. */}
           {menuOpen ? (
             <div data-fmm="mobile-menu" style={{ borderTop: '1px solid rgba(216,220,228,.14)', background: 'rgba(7,9,15,.99)', padding: '6px 14px 14px' }}>
-              {[['#fights', 'Fight Cards'], ['/how-to-play', 'How to Play'], ['/FantasyLeagues', 'Leagues'], ['/leaderboard', 'Leaderboard'], ['/apparel', 'Store'], ['#apply', 'Apply as an Affiliate'], ['/auth', 'Sign in']].map(([href, label]) => (
+              {[['#fights', 'Fight Cards'], ['/how-to-play', 'How to Play'], ['/FantasyLeagues', 'Leagues'], ['/leaderboard', 'Leaderboard'], ['/apparel', 'Store'], ['/founder', 'Founder'], ['#apply', 'Apply as an Affiliate'], ['/auth', 'Sign in']].map(([href, label]) => (
                 <a
                   key={href + label}
                   href={href}
@@ -738,6 +739,7 @@ const FantasyMMAdnessSite = ({ fights = [], board = [], ticker = [], upcoming = 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13.5px', fontWeight: 600 }}>
                 <a href="/play" style={{ color: 'rgba(255,255,255,.72)' }}>Play Now</a>
                 <a href="/leaderboard" style={{ color: 'rgba(255,255,255,.72)' }}>Leaderboard</a>
+                <a href="/founder" style={{ color: 'rgba(255,255,255,.72)' }}>Founder</a>
                 <a href="/auth?mode=signup&role=affiliate" style={{ color: 'rgba(255,255,255,.72)' }}>Become an affiliate</a>
               </div>
             </div>
