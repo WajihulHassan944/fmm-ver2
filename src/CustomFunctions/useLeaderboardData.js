@@ -16,7 +16,6 @@ const normalizeLeaderboardRows = (rows = []) =>
           totalPoints: Number(row.totalPoints || row.points || row.totalScore || row.score || row.classicPoints || row.proWrestlingPoints || 0),
         }))
         .filter((row) => Number.isFinite(row.totalPoints) && row.totalPoints >= 0)
-        .sort((a, b) => b.totalPoints - a.totalPoints || String(a.firstName || a.name || '').localeCompare(String(b.firstName || b.name || '')))
     : [];
 
 const useLeaderboardData = (_matches, options = {}) => {
