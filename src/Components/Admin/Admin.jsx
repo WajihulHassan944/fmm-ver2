@@ -125,7 +125,7 @@ const Admin = () => {
     { title: 'Revenue Command Center', copy: 'Track fight views, prediction starts, paid entries, referrals, and bigger-money partner channels.', href: '/administration/revenue', icon: FaChartLine },
     { title: 'Fight Launch Desk', copy: 'Prepare fight posts, QR images, and an affiliate announcement from open fights.', href: '/administration/growth', icon: FaBolt },
     { title: 'Fighter Affiliates', copy: 'Create and manage fighter affiliates, promoter access, tracked fight links, QR/share assets, and affiliate outreach.', href: '/administration/AffiliateUsers', icon: FaUserFriends },
-    { title: 'Founder Media Manager', copy: 'Upload the original Ring Magazine PDF and founder photographs for each section.', href: '/administration/founder-media', icon: FaEye },
+    { title: 'FOUNDER PAGE — UPLOAD PHOTOS & RING PDF', copy: 'Click here to upload the original Ring Magazine article and your Founder page photographs.', href: '/administration/founder-media', icon: FaEye },
     { title: 'Homepage posters', copy: 'Promote fight posters and shadow-fight videos to the homepage mobile funnel.', href: '/administration/homepage-content', icon: FaBullhorn },
     { title: 'Create a match', copy: 'Build a new fight card and prediction setup.', href: '/administration/AddNewMatch', icon: FaPlus },
     { title: 'Submit scores', copy: 'Resolve live or completed fight outcomes.', href: '/administration/upcomingFights', icon: FaTrophy },
@@ -249,7 +249,7 @@ const Admin = () => {
           </div>
           <div className="admin-quick-actions">
             {quickActions.map(({ title, copy, href, icon: Icon }) => (
-              <Link className="admin-quick-action" href={href} key={title} style={title === 'Revenue Command Center' ? { background: '#ffd400', borderColor: '#fff06a', color: '#111', boxShadow: '0 12px 30px rgba(255,212,0,.42)', fontWeight: 800 } : title === 'Fighter Affiliates' ? { background: '#d71920', borderColor: '#ff4d55', color: '#fff', boxShadow: '0 12px 28px rgba(215,25,32,.28)' } : undefined}>
+              <Link className="admin-quick-action" href={href} key={title} style={title.startsWith('FOUNDER PAGE') ? { background: '#c90018', borderColor: '#ff4b5d', color: '#fff', boxShadow: '0 12px 30px rgba(201,0,24,.38)', fontWeight: 900 } : title === 'Revenue Command Center' ? { background: '#ffd400', borderColor: '#fff06a', color: '#111', boxShadow: '0 12px 30px rgba(255,212,0,.42)', fontWeight: 800 } : title === 'Fighter Affiliates' ? { background: '#d71920', borderColor: '#ff4d55', color: '#fff', boxShadow: '0 12px 28px rgba(215,25,32,.28)' } : undefined}>
                 <span><Icon /></span>
                 <div><strong>{title}</strong><small>{copy}</small></div>
                 <FaArrowRight />
