@@ -44,7 +44,7 @@ export default function PlayPage({ fights = [] }) {
             <small>{formatFightDate(fight)}</small>
             <h2>{getFightName(fight)}</h2>
             <div className="fmm-play-money">
-              <span><FaCoins/><small>ENTRY</small><strong>{Number(fight.matchTokens || 0).toLocaleString()}</strong><b>FM COINS</b></span>
+              <span><FaCoins/><small>ENTRY · FM COINS</small><strong>{Number(fight.matchTokens || 0).toLocaleString()}</strong></span>
               <span><FaTrophy/><small>PRIZE</small><strong>{getFightPrize(fight)}</strong></span>
             </div>
             <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button">PLAY THIS FIGHT <FaArrowRight /></Link>
