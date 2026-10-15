@@ -1,5 +1,4 @@
 export async function getServerSideProps() {
-  return { redirect: { destination: '/UserDashboard', permanent: false } };
+  return { redirect: { destination: '/', permanent: false } };
 }
-
-export default function LegacyHomeRedirect() { return null; }
+export default function HomeRedirect() { return null; }
