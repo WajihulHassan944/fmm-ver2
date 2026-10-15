@@ -12,8 +12,20 @@ const steps = [
   ['6','CLIMB THE LEADERBOARD','Track your score against the field and compete for the prizes shown for that contest.'],
 ];
 
+function PlayerNav() {
+  return <nav aria-label="Player navigation" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap',padding:'18px clamp(16px,4vw,48px)',background:'#090b11',borderBottom:'1px solid rgba(239,38,56,.35)',color:'#fff'}}>
+    <Link href="/" style={{fontWeight:900,color:'#fff',textDecoration:'none',letterSpacing:'.06em',fontSize:20}}>FANTASY <span style={{color:'#ed1b2f'}}>MMADNESS</span></Link>
+    <div style={{display:'flex',gap:18,alignItems:'center',flexWrap:'wrap',fontWeight:800,fontSize:13}}>
+      <Link href="/" style={{color:'#fff'}}>HOME</Link>
+      <Link href="/how-to-play" style={{color:'#fff'}}>HOW TO PLAY</Link>
+      <Link href="/play" style={{color:'#fff'}}>OPEN FIGHTS</Link>
+      <Link href="/founder" style={{color:'#fff'}}>OUR STORY</Link>
+    </div>
+  </nav>;
+}
+
 export default function HowToPlayPage(){
-  return <main className="fmm-how-page">
+  return <main className="fmm-how-page"><PlayerNav />
     <Head><title>How to Play | FANTASY MMADNESS</title><meta name="description" content="Learn how to play FANTASY MMADNESS combat sports prediction contests." /></Head>
     <section className="fmm-how-page-hero"><div>
       <span>FANTASY MMADNESS PLAYER GUIDE</span><h1>HOW TO PLAY</h1>
