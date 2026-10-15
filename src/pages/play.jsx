@@ -15,8 +15,20 @@ const entryIsOpen = (fight) => {
   return Number.isFinite(lock) && lock > Date.now();
 };
 
+function PlayerNav() {
+  return <nav aria-label="Player navigation" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap',padding:'18px clamp(16px,4vw,48px)',background:'#090b11',borderBottom:'1px solid rgba(239,38,56,.35)',color:'#fff'}}>
+    <Link href="/" style={{fontWeight:900,color:'#fff',textDecoration:'none',letterSpacing:'.06em',fontSize:20}}>FANTASY <span style={{color:'#ed1b2f'}}>MMADNESS</span></Link>
+    <div style={{display:'flex',gap:18,alignItems:'center',flexWrap:'wrap',fontWeight:800,fontSize:13}}>
+      <Link href="/" style={{color:'#fff'}}>HOME</Link>
+      <Link href="/how-to-play" style={{color:'#fff'}}>HOW TO PLAY</Link>
+      <Link href="/play" style={{color:'#fff'}}>OPEN FIGHTS</Link>
+      <Link href="/founder" style={{color:'#fff'}}>OUR STORY</Link>
+    </div>
+  </nav>;
+}
+
 export default function PlayPage({ fights = [] }) {
-  return <main className="fmm-play-page">
+  return <main className="fmm-play-page"><PlayerNav />
     <Head><title>Play Now | FANTASY MMADNESS</title><meta name="description" content="Choose an open combat sports fight, make predictions, and join the leaderboard." /></Head>
     <section className="fmm-play-shell fmm-play-open" style={{ paddingTop: 24 }}>
       <header><div><span>OPEN CONTESTS</span><h1 style={{ fontSize: 28, lineHeight: 1.2, margin: 0 }}>PICK A FIGHT</h1></div><p>Select a fight to enter the prediction room.</p></header>
@@ -39,7 +51,7 @@ export default function PlayPage({ fights = [] }) {
             <p>Next: verify eligibility, make your predictions, then submit your card.</p>
           </div>
         </article>)}
-      </div> : <div className="fmm-play-empty">No fights are open for new predictions right now. Check back for the next card.</div>}
+      </div> : <div className="fmm-play-empty">No fights are open for new predictions right now. <Link href="/">VIEW UPCOMING FIGHTS →</Link></div>}
     </section>
   </main>;
 }
