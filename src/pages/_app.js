@@ -439,12 +439,13 @@ function AppContent({ children }) {
   const exactMobileTab = MOBILE_APP_ROUTE_TABS[router.pathname] || null;
   const forcePrototypeExperience = Boolean(exactMobileTab);
   const isFounderRoute = ["/founder", "/about"].includes(router.pathname);
-  const hideLayout = isFounderRoute || isAdministrationRoute || isStandaloneDemoRoute
+  const isModernPublicGuide = router.pathname === '/play' || router.pathname === '/how-to-play';
+  const hideLayout = isModernPublicGuide || isFounderRoute || isAdministrationRoute || isStandaloneDemoRoute
     || router.pathname.startsWith("/score")
     || router.pathname === "/" || router.pathname === "/welcome" || isModernFightDetailRoute || forcePrototypeExperience;
-  const hideFooterChrome = isFounderRoute || isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
+  const hideFooterChrome = isModernPublicGuide || isFounderRoute || isAdministrationRoute || isHomeExperienceRoute || isStandaloneDemoRoute || router.pathname.startsWith("/score") || IMMERSIVE_ROUTES.has(router.pathname);
   const showAdminChrome = isAdministrationRoute && !isAdminLoginRoute;
-  const useRouteExperienceFrame = shouldUseRouteExperienceFrame(
+  const useRouteExperienceFrame = !isModernPublicGuide && shouldUseRouteExperienceFrame(
     router.pathname,
   );
   // Product routes are one responsive app now: use the approved app shell on
