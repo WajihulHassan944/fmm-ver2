@@ -1,7 +1,67 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import founderPhoto from '@/Utils/founderPhoto';
 import styles from './Founder.module.css';
+
+function RingPages({ pathname }) {
+  const container = useRef(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    let documentTask;
+    const run = async () => {
+      try {
+        if (!window.pdfjsLib) {
+          await new Promise((resolve, reject) => {
+            const existing = document.querySelector('script[data-ring-pdfjs]');
+            if (existing) {
+              if (window.pdfjsLib) return resolve();
+              existing.addEventListener('load', resolve, { once:true });
+              existing.addEventListener('error', reject, { once:true });
+              return;
+            }
+            const script = document.createElement('script');
+            script.dataset.ringPdfjs = 'true';
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+        if (cancelled) return;
+        const pdfjs = window.pdfjsLib;
+        if (!pdfjs) throw new Error('Magazine viewer could not load.');
+        pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const response = await fetch('/api/founder-pdf?file=' + encodeURIComponent(pathname));
+        if (!response.ok) throw new Error('Magazine file unavailable (HTTP ' + response.status + ').');
+        const bytes = await response.arrayBuffer();
+        if (cancelled) return;
+        documentTask = pdfjs.getDocument({ data: bytes });
+        const pdf = await documentTask.promise;
+        if (!cancelled) setLoading(false);
+        for (let number = 1; number <= pdf.numPages && !cancelled; number++) {
+          const page = await pdf.getPage(number);
+          const base = page.getViewport({ scale: 1 });
+          const width = Math.min(container.current?.clientWidth || 850, 1000);
+          const viewport = page.getViewport({ scale: Math.min(width / base.width, 2) });
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          canvas.style.cssText = 'display:block;width:100%;max-width:100%;height:auto;margin:0 auto 18px;background:white;';
+          canvas.setAttribute('aria-label', 'Ring Magazine page ' + number);
+          container.current?.appendChild(canvas);
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        }
+      } catch (err) {
+        if (!cancelled) { setError(err?.message || 'Magazine viewer unavailable.'); setLoading(false); }
+      }
+    };
+    run();
+    return () => { cancelled = true; documentTask?.destroy(); };
+  }, [pathname]);
+  return <div style={{width:'100%',maxWidth:900,margin:'0 auto'}}>{loading && <p style={{color:'#fff'}}>Loading original magazine pages…</p>}{error && <p role="alert" style={{color:'#fff'}}>The magazine could not be displayed: {error}</p>}<div ref={container} aria-label="Original Ring Magazine pages" /></div>;
+}
 
 export default function About() {
   const [media, setMedia] = useState({});
@@ -35,7 +95,7 @@ export default function About() {
           <div className={styles.year}><span>A CHAMPIONSHIP CHAPTER</span><strong>2004</strong><span>IBF CRUISERWEIGHT WORLD TITLE</span></div>
           <div><p className={styles.eyebrow}>02 / BROTHERS IN ARMS</p><h2 id="brothers-heading">Family. Dedication.<br/>A world championship.</h2><p>Kelly trained his brother, Kelvin “Koncrete” Davis, throughout his boxing career. In 2004, Kelvin became the IBF cruiserweight world champion in Miami, Florida.</p><p>Together, the brothers built their boxing journey out of Reno and Koncrete Gym. Kelvin’s championship was the result of years of dedication, setbacks, sacrifice and trust between fighter and trainer. Their journey received national coverage in The Ring magazine’s “Brothers-In-Arms” feature by Mike Houser, with photography credited to Tom Casino/Showtime.</p></div>
         {photo('championship','Kelly Davis and the championship journey')} </section>
-        <section className={styles.ringFeature} aria-labelledby="ring-heading"><div><p className={styles.eyebrow}>FEATURED BOXING HISTORY</p><h2 id="ring-heading">THE <span>RING</span> MAGAZINE</h2><p>The story of Kelvin “Koncrete” Davis and the team behind his world championship belongs in the history of the sport. Kelly trained Kelvin throughout his boxing career, including his 2004 IBF cruiserweight title run.</p><p>The original six-page “Brothers-In-Arms” feature, published on pages 94–99 of The Ring, follows the Davis brothers from their early years to Kelvin’s May 2004 title victory over Ezra Sellers. The article captures the years of setbacks, persistence and family loyalty behind the world championship.</p><p>Writer Mike Houser describes how Kelly first helped Kelvin pursue a professional boxing career, learned from trainers in Las Vegas, and took on the challenge of coaching his brother himself. Kelvin’s victory brought a historic boxing title home to Reno. The feature includes original ringside photographs of the fight, the brothers celebrating together, and the championship team.</p><details onToggle={e => setRingOpen(e.currentTarget.open)} style={{marginTop:'1.5rem',padding:'1.25rem',border:'1px solid #c52228',borderRadius:'12px',background:'rgba(0,0,0,.25)'}}><summary style={{cursor:'pointer',fontWeight:800,letterSpacing:'.06em',color:'#fff'}}>VIEW ORIGINAL RING MAGAZINE ARTICLE ↓</summary><div style={{paddingTop:'1rem'}}>{media.ring?.url && ringOpen ? <div style={{width:'100%',height:'min(85vh,1000px)',minHeight:520,background:'#fff',borderRadius:8,overflow:'hidden'}}><iframe src={'/api/founder-pdf?file=' + encodeURIComponent(media.ring.pathname) + '#toolbar=0&navpanes=0&view=FitH'} title="Original Ring Magazine Brothers-In-Arms PDF" style={{display:'block',width:'100%',height:'100%',border:0}} /></div> : <p style={{color:'#fff'}}>The original Ring Magazine PDF has not been uploaded yet. Upload it in the back-office Founder Media Manager to display it here.</p>}</div></details></div><div className={styles.ringMark} aria-label="The Ring Magazine feature">THE <strong>RING</strong><small>BOXING HISTORY · 2004</small></div>{photo('ring','The Ring magazine championship feature')}</section><section className={styles.chapter} aria-labelledby="vision-heading"><div><p className={styles.eyebrow}>03 / THE JOURNEY</p><h2 id="vision-heading">From the gym<br/>to the world.</h2></div><div className={styles.prose}><p>Kelly’s boxing journey began at the Boys &amp; Girls Club in Reno, Nevada, and around the University of Nevada boxing program. In 1998, he moved with his brother Kelvin to Las Vegas, learning from experienced trainers while building his own career in the corner.</p><p>Kelly opened Koncrete Boxing in Reno in 2003. He later worked with MMA pioneer Ken Shamrock and coached around the Lion’s Den and International Fight League era. He established additional Koncrete training facilities in Arizona, including his own private gym in Scottsdale, before continuing his coaching work in Atlanta.</p><p>Along the way he worked with boxers Steve “2 Pound” Forbes and Eric Harding; MMA athletes Jamie Varner, Richard Hale, Phil “The Fresh Prince” Rowe and Jared “Nite Train” Gooden; and kickboxing figures Rick “The Jet” Roufus and Warren Thompson. He also honors the memory of the late Sam Young and Jackson Busto.</p><p>Kelly recalls working privately with Muhammad Ali at his Scottsdale gym, helping him stay active with light pad work, movement and balance. He has always been clear: Ali did not need anyone to teach him how to box. Spending that time with him was the privilege.</p><p>As a trainer, manager, cornerman and cutman, Kelly experienced championship nights and difficult setbacks across the United States and overseas. He learned that every fighter’s story extends far beyond the final bell.</p></div>{photo('vision','The origin of FANTASY MMADNESS')}{photo('gyms','Koncrete Boxing gyms')}</section>
+        <section className={styles.ringFeature} aria-labelledby="ring-heading"><div><p className={styles.eyebrow}>FEATURED BOXING HISTORY</p><h2 id="ring-heading">THE <span>RING</span> MAGAZINE</h2><p>The story of Kelvin “Koncrete” Davis and the team behind his world championship belongs in the history of the sport. Kelly trained Kelvin throughout his boxing career, including his 2004 IBF cruiserweight title run.</p><p>The original six-page “Brothers-In-Arms” feature, published on pages 94–99 of The Ring, follows the Davis brothers from their early years to Kelvin’s May 2004 title victory over Ezra Sellers. The article captures the years of setbacks, persistence and family loyalty behind the world championship.</p><p>Writer Mike Houser describes how Kelly first helped Kelvin pursue a professional boxing career, learned from trainers in Las Vegas, and took on the challenge of coaching his brother himself. Kelvin’s victory brought a historic boxing title home to Reno. The feature includes original ringside photographs of the fight, the brothers celebrating together, and the championship team.</p><details onToggle={e => setRingOpen(e.currentTarget.open)} style={{marginTop:'1.5rem',padding:'1.25rem',border:'1px solid #c52228',borderRadius:'12px',background:'rgba(0,0,0,.25)'}}><summary style={{cursor:'pointer',fontWeight:800,letterSpacing:'.06em',color:'#fff'}}>VIEW ORIGINAL RING MAGAZINE ARTICLE ↓</summary><div style={{paddingTop:'1rem'}}>{media.ring?.pathname && ringOpen ? <RingPages pathname={media.ring.pathname} /> : <p style={{color:'#fff'}}>The original Ring Magazine PDF has not been uploaded yet. Upload it in the back-office Founder Media Manager to display it here.</p>}</div></details></div><div className={styles.ringMark} aria-label="The Ring Magazine feature">THE <strong>RING</strong><small>BOXING HISTORY · 2004</small></div></section><section className={styles.chapter} aria-labelledby="vision-heading"><div><p className={styles.eyebrow}>03 / THE JOURNEY</p><h2 id="vision-heading">From the gym<br/>to the world.</h2></div><div className={styles.prose}><p>Kelly’s boxing journey began at the Boys &amp; Girls Club in Reno, Nevada, and around the University of Nevada boxing program. In 1998, he moved with his brother Kelvin to Las Vegas, learning from experienced trainers while building his own career in the corner.</p><p>Kelly opened Koncrete Boxing in Reno in 2003. He later worked with MMA pioneer Ken Shamrock and coached around the Lion’s Den and International Fight League era. He established additional Koncrete training facilities in Arizona, including his own private gym in Scottsdale, before continuing his coaching work in Atlanta.</p><p>Along the way he worked with boxers Steve “2 Pound” Forbes and Eric Harding; MMA athletes Jamie Varner, Richard Hale, Phil “The Fresh Prince” Rowe and Jared “Nite Train” Gooden; and kickboxing figures Rick “The Jet” Roufus and Warren Thompson. He also honors the memory of the late Sam Young and Jackson Busto.</p><p>Kelly recalls working privately with Muhammad Ali at his Scottsdale gym, helping him stay active with light pad work, movement and balance. He has always been clear: Ali did not need anyone to teach him how to box. Spending that time with him was the privilege.</p><p>As a trainer, manager, cornerman and cutman, Kelly experienced championship nights and difficult setbacks across the United States and overseas. He learned that every fighter’s story extends far beyond the final bell.</p></div>{photo('vision','The origin of FANTASY MMADNESS')}{photo('gyms','Koncrete Boxing gyms')}</section>
 <section className={styles.chapter} aria-labelledby="origin-heading"><div><p className={styles.eyebrow}>04 / HOW FANTASY MMADNESS BEGAN</p><h2 id="origin-heading">One flight.<br/>One big idea.</h2></div><div className={styles.prose}><p>Flying from Atlanta to Las Vegas for a fighter’s bout, Kelly sat beside a fantasy baseball player studying statistics. Their conversation lasted much of the flight. It inspired a question: why wasn’t there an experience like this for combat sports?</p><p>Drawing on decades of experience in the corner, Kelly developed a prediction game built around the action inside each round — not simply who wins. FANTASY MMADNESS invites fans to predict the details, earn points and follow every moment in boxing, MMA, kickboxing, bare knuckle and pro wrestling.</p><p><strong>WE DON’T PICK WINNERS. WE PREDICT HISTORY.</strong></p></div></section>
 <section className={styles.chapter} aria-labelledby="mission-heading"><div><p className={styles.eyebrow}>05 / THE MISSION</p><h2 id="mission-heading">For the fighters.<br/>And the fans who ride with them.</h2></div><div className={styles.prose}><p>Combat-sports fans are fiercely loyal. They stand behind their favorite fighters through victories, defeats and years beyond competition. Kelly wanted to give that loyalty a place to live: a fighter’s own affiliate league, where supporters know whose community they are joining.</p><p>Affiliate opportunities can give active and retired athletes another potential source of income, subject to their agreements and qualifying participation. The goal is bigger than the game itself: to create opportunities for the people who gave so much to combat sports.</p><p>Kelly has seen the incredible highs of championship nights — and the painful lows of injuries, financial uncertainty and life after the spotlight. Those experiences are why giving back matters most.</p></div>{photo('mission','A message from the founder')}</section>
 <section className={styles.chapter} aria-labelledby="message-heading"><div><p className={styles.eyebrow}>06 / A PERSONAL MESSAGE</p><h2 id="message-heading">It’s brutal.<br/>It’s beautiful.</h2></div><div className={styles.prose}><p>“I’ve spent most of my life in the fight game. I’ve seen the highest highs, but I’ve also seen the lows — what happens when the lights go out, the crowds go home and fighters are left dealing with everything they gave to the sport.</p><p>“These fighters have loyal fans who ride with them through everything. I want those fans to be able to join their fighter’s league, stand behind their fighter and help create new opportunities.</p><p>“I want to give something back to the young fighters, the veterans and the retired fighters. Fighting is brutal. Fighting is beautiful. I hope people can see what I built, and understand why I built it.”</p><p><strong>— Kelly Davis, Founder &amp; CEO</strong></p></div>{photo('legends','Kelly Davis with fighters and legends')}</section>
