@@ -74,6 +74,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   // Stable per submit attempt so a double-tap or retry cannot double-charge.
   const idempotencyKeyRef = useRef('');
   const draftKey = `fmm-scorecard:${user?._id || user?.id || 'guest'}:${matchId}`;
+  const guestDraftKey = `fmm-scorecard:guest:${matchId}`;
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [eligibility, setEligibility] = useState(null);
   const [eligibilityBusy, setEligibilityBusy] = useState(false);
@@ -100,9 +101,10 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
   useEffect(() => {
     try {
-      const saved = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+      const saved = JSON.parse(sessionStorage.getItem(draftKey) || (draftKey !== guestDraftKey ? sessionStorage.getItem(guestDraftKey) : null) || 'null');
       if (Array.isArray(saved?.rounds) && saved.rounds.length === roundCount) {
         setRounds(saved.rounds);
+        if (draftKey !== guestDraftKey) sessionStorage.setItem(draftKey, JSON.stringify(saved));
         idempotencyKeyRef.current = saved.idempotencyKey || '';
         quickPickApplied.current = featuredWinner;
       }
@@ -302,7 +304,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
     const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : '';
     if (!authToken || !(user?._id || user?.id)) {
-      try { sessionStorage.setItem(draftKey, JSON.stringify(rounds)); } catch (_) { /* Best-effort guest draft. */ }
+      try { sessionStorage.setItem(guestDraftKey, JSON.stringify({ rounds, idempotencyKey: idempotencyKeyRef.current })); } catch (_) { /* Best-effort guest draft. */ }
       trackRevenueEvent(REVENUE_EVENTS.SIGNUP_GATE, { fightId: String(matchId), entryFee, affiliateRef: String(router.query.ref || '') });
       const returnTo = `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}`;
       router.push({
@@ -387,7 +389,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       setConfirmation({
         pickName: winnerVotes.B > winnerVotes.A ? getFighterName(match, 'B') : winnerVotes.A > winnerVotes.B ? getFighterName(match, 'A') : 'Round-by-round card submitted',
       });
-      try { sessionStorage.removeItem(draftKey); } catch (_) { /* Submission succeeded. */ }
+      try { sessionStorage.removeItem(draftKey); sessionStorage.removeItem(guestDraftKey); } catch (_) { /* Submission succeeded. */ }
     } catch (error) {
       console.error('Error saving predictions:', error);
       setSubmitError(error?.message || 'Could not submit predictions. Your picks are still here; please try again.');
