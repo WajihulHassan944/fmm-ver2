@@ -3,12 +3,12 @@ const SLOTS = ['hero','career','championship','gyms','legends','vision','mission
 export default async function handler(req,res) {
   if(req.method!=='GET') return res.status(405).json({message:'Method not allowed'});
   res.setHeader('Cache-Control','public, s-maxage=30, stale-while-revalidate=60');
-  if(!process.env.BLOB_READ_WRITE_TOKEN) return res.status(200).json({slots:{},configured:false});
+  if(!process.env.BLOB_STORE_ID && !process.env.BLOB_READ_WRITE_TOKEN) return res.status(200).json({slots:{},configured:false});
   try {
     const slots={};
     let cursor;
     do {
-      const result=await list({prefix:'founder-media/',limit:1000,cursor,token:process.env.BLOB_READ_WRITE_TOKEN});
+      const result=await list({prefix:'founder-media/',limit:1000,cursor,storeId:process.env.BLOB_STORE_ID});
       for(const blob of result.blobs) {
         const slot=blob.pathname.split('/')[1];
         if(!SLOTS.includes(slot)) continue;
