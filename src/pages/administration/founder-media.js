@@ -1,6 +1,5 @@
 import React,{useEffect,useState} from 'react';
 import Link from 'next/link';
-import { upload } from '@vercel/blob/client';
 import { getAdminToken } from '@/Utils/authFetch';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 const SLOTS=[
@@ -26,10 +25,11 @@ function Editor(){
    try {
      const token=getAdminToken();if(!token)throw new Error('Sign in to the back office again.');
      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'-');
-     await upload('founder-media/'+slot+'/'+Date.now()+'-'+safeName,file,{
-       access:'public',handleUploadUrl:'/api/founder-upload',
-       clientPayload:JSON.stringify({slot,adminToken:token}),
-     });
+     const signedResponse=await fetch('/api/founder-upload',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({slot,fileName:safeName,contentType:file.type,size:file.size})});
+     const signedData=await signedResponse.json();
+     if(!signedResponse.ok)throw new Error(signedData.message||'Could not authorize upload.');
+     const result=await fetch(signedData.presignedUrl,{method:'PUT',body:file,headers:{'Content-Type':file.type}});
+     if(!result.ok)throw new Error('Storage rejected the file ('+result.status+').');
      setMessage('Published '+file.name+'. The public founder page now uses the latest file in this section.');
      await refresh();
    }catch(error){setMessage('Upload failed: '+(error.message||'Please try again.'));}
