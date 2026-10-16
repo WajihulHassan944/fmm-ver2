@@ -14,7 +14,7 @@ const category = (n) => {
   const details = String(n.message || n.description || '').toLowerCase();
   const status = String(n.status || n.incidentStatus || '').toLowerCase();
   if (['resolved','closed','fixed','success','completed'].includes(status)) return 'history';
-  if (/^(new fight|fight added|fight updated|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title) && !/failed|error|problem/.test(title + ' ' + details)) return 'history';
+  if (/^(new fight|fight added|fight updated|fight deleted|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title) && !/failed|error|problem/.test(title + ' ' + details)) return 'history';
   if (['critical','fatal','error'].includes(severity) || /failed|failure|outage|security breach|payment error|payout error|scoring error|publishing error/.test(title)) return 'critical';
   if (['warning','review','action_required'].includes(severity) || /pending approval|requires review|needs review|flagged|dispute|requires action/.test(title)) return 'review';
   // Do not manufacture an alert merely because an activity event exists.
@@ -24,6 +24,8 @@ const category = (n) => {
 const detailsText = (n) => String(n.message || n.description || n.details || '').trim();
 const AdminNotifications = () => {
   const [items, setItems] = useState([]);
+  const [incidents, setIncidents] = useState([]);
+  const [incidentError, setIncidentError] = useState('');
   const [view, setView] = useState('alerts');
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,17 @@ const AdminNotifications = () => {
       const data = await res.json();
       if (!Array.isArray(data)) throw new Error('Notification service returned invalid data.');
       setItems(data.filter((n) => n && n._id));
+      try {
+        const incidentRes = await fetch(API + '/api/admin/incidents', {headers:adminHeaders(),cache:'no-store'});
+        if (!incidentRes.ok) throw new Error('Incident service returned HTTP ' + incidentRes.status);
+        const incidentData = await incidentRes.json();
+        if (!Array.isArray(incidentData.incidents)) throw new Error('Invalid incident response');
+        setIncidents(incidentData.incidents);
+        setIncidentError('');
+      } catch (incidentFailure) {
+        setIncidents([]);
+        setIncidentError(incidentFailure.message || 'Incident service unavailable');
+      }
       setLastChecked(new Date());
       setError('');
       setAuthFailed(false);
@@ -52,7 +65,7 @@ const AdminNotifications = () => {
   useEffect(() => { load(true); const timer = setInterval(() => load(false), 60000); return () => clearInterval(timer); }, [load]);
   const counts = {critical:0,review:0,history:0};
   items.forEach((n) => { counts[category(n)] += 1; });
-  const alerts = counts.critical + counts.review;
+  const alerts = counts.critical + counts.review + incidents.length;
   const shown = items.filter((n) => view === 'alerts' ? category(n) !== 'history' : category(n) === view);
   const markRead = async (n) => {
     try {
@@ -86,6 +99,8 @@ const AdminNotifications = () => {
       )}
       <button type="button" onClick={() => load(false)} disabled={refreshing} style={{padding:'9px 12px',borderRadius:8,background:'#344156',color:'white',border:'1px solid #64748b',cursor:'pointer'}}>{refreshing ? 'Checking…' : 'Check now'}</button>
     </div>
+    {incidentError && <p role="alert" style={{color:'#ffbd71'}}>Structured incident monitoring unavailable: {incidentError}. Legacy notifications may not include direct links.</p>}
+    {incidents.length > 0 && <div style={{marginBottom:20}}><h3>Verified incidents ({incidents.length})</h3>{incidents.map((incident) => <div key={incident._id} style={{padding:14,marginBottom:10,border:'1px solid #d98b31',borderRadius:8,background:'#1a2636'}}><strong>{incident.title}</strong><p>{incident.description}</p><p>Affected {incident.affectedType}: {incident.affectedId} · {incident.status}</p>{safeLink(incident) && <Link href={safeLink(incident)} style={{color:'#fff',background:'#ad1524',padding:'9px 12px',borderRadius:7,display:'inline-block'}}>Open exact affected record →</Link>}</div>)}</div>}
     {lastChecked && <p style={{fontSize:12,color:'#9eafc4'}}>Last checked: {lastChecked.toLocaleString()} · Refreshes every 60 seconds while open</p>}
     {error && <div role="alert" className={styles.statusMessage}><strong>Monitoring unavailable:</strong> {error} {authFailed && <Link href="/administration/login?reason=session-expired&next=%2Fadministration%2Fnotifications">Sign in</Link>}</div>}
     {loading && <p role="status">Checking notification service…</p>}
