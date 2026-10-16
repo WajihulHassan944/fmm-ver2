@@ -38,7 +38,7 @@ const useIsMobile = () => {
 
 const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('attention');
   const [expandedId, setExpandedId] = useState(null);
   const [markingAll, setMarkingAll] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ const isMobile = useIsMobile();
   const unread = notifications.filter((n) => !n.read);
   const counts = { critical: 0, review: 0, activity: 0 };
   notifications.forEach((n) => { counts[classifyNotification(n)] += 1; });
-  const visibleNotifications = notifications.filter((n) => filter === 'all' || classifyNotification(n) === filter);
+  const visibleNotifications = notifications.filter((n) => filter === 'all' || (filter === 'attention' ? classifyNotification(n) !== 'activity' : classifyNotification(n) === filter));
   const markAllRead = async () => {
     if (!unread.length || markingAll) return;
     setMarkingAll(true);
@@ -144,7 +144,7 @@ const isMobile = useIsMobile();
         Send test push to my phone
       </button>
       {!loading && !error && <div style={{display:'flex', flexWrap:'wrap', gap:10, alignItems:'center', marginBottom:18}}>
-        {[['all', 'All', notifications.length], ['critical', 'Critical', counts.critical], ['review', 'Needs review', counts.review], ['activity', 'Activity', counts.activity]].map(([key, label, count]) => (
+        {[['attention', 'Alerts requiring attention', counts.critical + counts.review], ['critical', 'Critical', counts.critical], ['review', 'Needs review', counts.review], ['activity', 'Activity history', counts.activity], ['all', 'All history', notifications.length]].map(([key, label, count]) => (
           <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}
             style={{border:'1px solid #555', borderRadius:8, padding:'9px 12px', cursor:'pointer', color:'#fff', background:filter === key ? '#a90e19' : '#202833'}}>
             {label} ({count})
@@ -159,6 +159,7 @@ const isMobile = useIsMobile();
       {loading && <p role="status">Loading notifications…</p>}
       {error && <div role="alert" className={styles.statusMessage}><p>{error}</p>{needsLogin ? <Link href="/administration/login?reason=session-expired&next=%2Fadministration%2Fnotifications">Sign in to the back office</Link> : <button type="button" onClick={fetchNotifications}>Try again</button>}</div>}
       {!loading && !error && notifications.length === 0 && <p role="status">No notifications yet.</p>}
+      {!loading && !error && visibleNotifications.length === 0 && <p role="status">No alerts requiring attention in this category.</p>}
       <ul className={styles.notificationList}>
         {visibleNotifications.map((notification) => (
           <li key={notification._id} className={styles.notificationItem} style={{borderLeft:`4px solid ${classifyNotification(notification) === 'critical' ? '#e32636' : classifyNotification(notification) === 'review' ? '#e5aa24' : '#348f6a'}`}}>
