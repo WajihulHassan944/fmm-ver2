@@ -25,6 +25,9 @@ const category = (n) => {
 const detailsText = (n) => String(n.message || n.description || n.details || '').trim();
 const AdminNotifications = () => {
   const [etsyState,setEtsyState] = useState('');
+  const [etsyConnected,setEtsyConnected] = useState(false);
+  const [etsyOrders,setEtsyOrders] = useState(null);
+  const [etsyLoading,setEtsyLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [incidentError, setIncidentError] = useState('');
@@ -164,6 +167,23 @@ const AdminNotifications = () => {
       setItems((prev) => prev.map((item) => item._id === n._id ? {...item,read:true} : item));
     } catch (e) { setError(e.message); }
   };
+  const refreshEtsy = async () => {
+    setEtsyLoading(true);
+    try {
+      const response=await fetch(API+'/api/admin/integrations/etsy/status',{headers:adminHeaders(),cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.message||'Etsy status unavailable');
+      setEtsyConnected(!!data.connected);
+      if(!data.connected){setEtsyOrders(null);setEtsyState('Not connected. Authorize your shop below.');return;}
+      const ordersResponse=await fetch(API+'/api/admin/integrations/etsy/orders?limit=50',{headers:adminHeaders(),cache:'no-store'});
+      const ordersData=await ordersResponse.json();
+      if(!ordersResponse.ok)throw new Error(ordersData.message||'Unable to read Etsy orders');
+      setEtsyOrders(ordersData);
+      setEtsyState('Connected to '+ordersData.shopName+' — '+ordersData.count+' Etsy orders.');
+    }catch(e){setEtsyState('Etsy check: '+e.message);}
+    finally{setEtsyLoading(false);}
+  };
+  useEffect(()=>{refreshEtsy();},[]);
   const connectEtsy = async () => {
     setEtsyState('Preparing secure Etsy authorization…');
     try {
@@ -178,9 +198,11 @@ const AdminNotifications = () => {
   return <div className={styles.notificationContainer}>
     <section style={{padding:'14px',marginBottom:'16px',border:'1px solid #555',borderRadius:'10px'}}>
       <strong>Etsy Apparel — Seller Connection</strong>
-      <p>Authorize read-only access to FANTASYMMADNESS shop orders. Etsy handles checkout and payments.</p>
-      <button type="button" onClick={connectEtsy} style={{background:'#bd1625',color:'#fff',padding:'10px 16px',borderRadius:'8px',cursor:'pointer'}}>Connect Etsy Orders</button>
+      <p>Read-only FANTASYMMADNESS shop orders. Etsy handles checkout and payments.</p>
+      <button type="button" onClick={refreshEtsy} disabled={etsyLoading} style={{marginRight:10,padding:'10px 16px',borderRadius:8}}>{etsyLoading?'Checking…':'Check Etsy Orders'}</button>
+      {!etsyConnected && <button type="button" onClick={connectEtsy} style={{background:'#bd1625',color:'#fff',padding:'10px 16px',borderRadius:'8px',cursor:'pointer'}}>Connect Etsy Orders</button>}
       {etsyState && <p role="status">{etsyState}</p>}
+      {etsyOrders && <div style={{overflowX:'auto'}}><p><strong>{etsyOrders.count} total Etsy orders</strong> · latest {etsyOrders.orders.length} shown</p><table style={{width:'100%',textAlign:'left'}}><thead><tr><th>Receipt</th><th>Date</th><th>Amount</th><th>Paid</th><th>Shipped</th></tr></thead><tbody>{etsyOrders.orders.map(o=><tr key={o.receipt_id}><td>{o.receipt_id}</td><td>{o.create_timestamp?new Date(o.create_timestamp*1000).toLocaleDateString():'—'}</td><td>{o.grandtotal?.amount!==undefined?(Number(o.grandtotal.amount)/Number(o.grandtotal.divisor||100)).toFixed(2)+' '+(o.grandtotal.currency_code||'USD'):'—'}</td><td>{o.is_paid?'Yes':'No'}</td><td>{o.is_shipped?'Yes':'No'}</td></tr>)}</tbody></table></div>}
     </section>
     <h2 className={styles.heading}>System Health & Action Center</h2>
     <button type="button" onClick={() => { if (voiceEnabled && typeof window !== 'undefined') window.speechSynthesis?.cancel(); setVoiceEnabled(!voiceEnabled); }} style={{marginBottom:12,padding:'9px 14px',background:voiceEnabled?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{voiceEnabled ? 'Jarvis voice alerts: ON' : 'Enable Jarvis voice alerts'}</button>
