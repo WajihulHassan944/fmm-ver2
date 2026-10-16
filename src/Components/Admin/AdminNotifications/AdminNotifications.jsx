@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import styles from './AdminNotifications.module.css';
 
-const API = 'https://fantasymmadness-game-server-three.vercel.app';
+const API = PUBLIC_API_BASE_URL;
 const safeLink = (n) => {
   const value = n.actionUrl || n.action_url || n.link;
   return typeof value === 'string' && /^\/administration\/[a-zA-Z0-9/_?=&%-]+$/.test(value) && !value.startsWith('//') ? value : null;
