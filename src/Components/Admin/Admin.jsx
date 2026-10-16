@@ -34,7 +34,7 @@ const isActionableNotification = (n) => {
   const status = String(n.status || n.incidentStatus || '').toLowerCase();
   const severity = String(n.severity || n.level || '').toLowerCase();
   if (['resolved','closed','fixed','success','completed'].includes(status)) return false;
-  if (/^(new fight|fight added|fight updated|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title) && !/failed|error|problem/.test(title + ' ' + details)) return false;
+  if (/^(new fight|fight added|fight updated|fight deleted|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title) && !/failed|error|problem/.test(title + ' ' + details)) return false;
   return ['critical','fatal','error','warning','review','action_required'].includes(severity) ||
     /failed|failure|outage|security breach|payment error|payout error|scoring error|publishing error|pending approval|requires review|needs review|flagged|dispute|requires action/.test(title) ||
     (/failed|error/.test(details) && /publish|payment|scor|delivery|security/.test(details));
