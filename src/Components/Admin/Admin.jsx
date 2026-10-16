@@ -45,7 +45,8 @@ const Admin = () => {
   const [dashboardError, setDashboardError] = useState('');
   const [actionableCount, setActionableCount] = useState(null);
   const [alertServiceError, setAlertServiceError] = useState(false);
-  const [dashboardCounts, setDashboardCounts] = useState({
+  const [dashboardCounts, setDashboardCounts] = useState(null);
+  const emptyDashboardCounts = {
     affiliatesCount: 0,
     matchesCount: 0,
     usersCount: 0,
