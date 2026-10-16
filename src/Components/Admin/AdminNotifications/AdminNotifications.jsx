@@ -26,6 +26,8 @@ const AdminNotifications = () => {
   const [items, setItems] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [incidentError, setIncidentError] = useState('');
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [spokenIds, setSpokenIds] = useState([]);
   const [view, setView] = useState('alerts');
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +65,15 @@ const AdminNotifications = () => {
     } finally { setLoading(false); setRefreshing(false); }
   }, []);
   useEffect(() => { load(true); const timer = setInterval(() => load(false), 60000); return () => clearInterval(timer); }, [load]);
+  useEffect(() => {
+    if (!voiceEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    const pending = incidents.filter(i => !spokenIds.includes(i._id));
+    if (!pending.length) return;
+    const next = pending[0];
+    const utterance = new SpeechSynthesisUtterance('Jarvis alert. ' + String(next.title || 'A system problem has been detected') + '. ' + String(next.description || '').slice(0, 180));
+    window.speechSynthesis.speak(utterance);
+    setSpokenIds(prev => [...prev, next._id]);
+  }, [voiceEnabled, incidents, spokenIds]);
   const counts = {critical:0,review:0,history:0};
   items.forEach((n) => { counts[category(n)] += 1; });
   const alerts = counts.critical + counts.review + incidents.length;
@@ -76,6 +87,8 @@ const AdminNotifications = () => {
   };
   return <div className={styles.notificationContainer}>
     <h2 className={styles.heading}>System Health & Action Center</h2>
+    <button type="button" onClick={() => { if (voiceEnabled && typeof window !== 'undefined') window.speechSynthesis?.cancel(); setVoiceEnabled(!voiceEnabled); }} style={{marginBottom:12,padding:'9px 14px',background:voiceEnabled?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{voiceEnabled ? 'Jarvis voice alerts: ON' : 'Enable Jarvis voice alerts'}</button>
+    <p style={{fontSize:12,color:'#aebed0'}}>Voice alerts play for new structured incidents while this page is open and after you enable sound. Background or closed-browser speech is not supported.</p>
     <p style={{color:'#bac6d5',marginBottom:20}}>Only problems and required actions appear in this workspace. Successful events are hidden from alerts and retained in the existing event history.</p>
     <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:18}}>
       <div style={{flex:'1 1 190px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
