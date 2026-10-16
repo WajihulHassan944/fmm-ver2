@@ -145,10 +145,10 @@ const Admin = () => {
 
   const countDisplay = (value) => dashboardError || dashboardCounts === null ? 'Unavailable' : String(value ?? 0);
   const operationRows = [
-    { area: 'Fight operations', metric: `${dashboardCounts.matchesCount || 0} matches`, status: dashboardError ? 'Data unavailable' : 'Active', statusClass: dashboardError ? 'is-warning' : 'is-success', href: '/administration/upcomingFights', action: 'Open score center' },
-    { area: 'Player accounts', metric: `${dashboardCounts.usersCount || 0} registered`, status: dashboardError ? 'Data unavailable' : 'Connected', statusClass: dashboardError ? 'is-warning' : 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
-    { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
-    { area: 'Apparel orders', metric: `${dashboardCounts.apparelOrdersCount || 0} orders`, status: dashboardCounts.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
+    { area: 'Fight operations', metric: `${dashboardCounts?.matchesCount || 0} matches`, status: dashboardError ? 'Data unavailable' : 'Active', statusClass: dashboardError ? 'is-warning' : 'is-success', href: '/administration/upcomingFights', action: 'Open score center' },
+    { area: 'Player accounts', metric: `${dashboardCounts?.usersCount || 0} registered`, status: dashboardError ? 'Data unavailable' : 'Connected', statusClass: dashboardError ? 'is-warning' : 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
+    { area: 'Affiliate network', metric: `${dashboardCounts?.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
+    { area: 'Apparel orders', metric: `${dashboardCounts?.apparelOrdersCount || 0} orders`, status: dashboardCounts?.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts?.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
     { area: 'Community alerts', metric: actionableCount === null ? 'Unavailable' : `${actionableCount} actionable`, status: alertServiceError ? 'Check service' : actionableCount ? 'Attention' : 'No reported alerts', statusClass: alertServiceError ? 'is-warning' : actionableCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'Investigate alerts' },
     { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
     { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
@@ -183,7 +183,7 @@ const Admin = () => {
             <button type="button" className="admin-action-secondary" onClick={() => setShowAnalytics(false)}>Back to dashboard</button>
           </div>
         </div>
-        <VisitorsAnalytics totalClicks={dashboardCounts.totalClicks} onResetStats={handleResetStats} />
+        <VisitorsAnalytics totalClicks={dashboardCounts?.totalClicks} onResetStats={handleResetStats} />
       </div>
     );
   }
