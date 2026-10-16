@@ -24,6 +24,7 @@ const category = (n) => {
 };
 const detailsText = (n) => String(n.message || n.description || n.details || '').trim();
 const AdminNotifications = () => {
+  const [etsyState,setEtsyState] = useState('');
   const [items, setItems] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [incidentError, setIncidentError] = useState('');
@@ -163,7 +164,24 @@ const AdminNotifications = () => {
       setItems((prev) => prev.map((item) => item._id === n._id ? {...item,read:true} : item));
     } catch (e) { setError(e.message); }
   };
+  const connectEtsy = async () => {
+    setEtsyState('Preparing secure Etsy authorization…');
+    try {
+      const response=await fetch(API+'/api/admin/integrations/etsy/connect',{headers:adminHeaders(),cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok||!data.authorizationUrl)throw new Error(data.message||'Authorization unavailable');
+      const destination=new URL(data.authorizationUrl);
+      if(destination.origin!=='https://www.etsy.com'||destination.pathname!=='/oauth/connect')throw new Error('Unexpected authorization destination');
+      window.location.assign(destination.href);
+    } catch(e){setEtsyState('Etsy connection unavailable: '+e.message);}
+  };
   return <div className={styles.notificationContainer}>
+    <section style={{padding:'14px',marginBottom:'16px',border:'1px solid #555',borderRadius:'10px'}}>
+      <strong>Etsy Apparel — Seller Connection</strong>
+      <p>Authorize read-only access to FANTASYMMADNESS shop orders. Etsy handles checkout and payments.</p>
+      <button type="button" onClick={connectEtsy} style={{background:'#bd1625',color:'#fff',padding:'10px 16px',borderRadius:'8px',cursor:'pointer'}}>Connect Etsy Orders</button>
+      {etsyState && <p role="status">{etsyState}</p>}
+    </section>
     <h2 className={styles.heading}>System Health & Action Center</h2>
     <button type="button" onClick={() => { if (voiceEnabled && typeof window !== 'undefined') window.speechSynthesis?.cancel(); setVoiceEnabled(!voiceEnabled); }} style={{marginBottom:12,padding:'9px 14px',background:voiceEnabled?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{voiceEnabled ? 'Jarvis voice alerts: ON' : 'Enable Jarvis voice alerts'}</button>
     <button type="button" onClick={enableDesktopAlerts} style={{marginLeft:8,marginBottom:12,padding:'9px 14px',background:desktopAlerts?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{desktopAlerts?'Desktop alerts: ON':'Enable desktop alerts'}</button>
