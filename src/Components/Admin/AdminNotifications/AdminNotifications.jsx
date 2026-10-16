@@ -13,6 +13,16 @@ const classifyNotification = (notification) => {
   if (['warning', 'review'].includes(explicit) || /deleted|suspended|pending approval|needs review|flagged|dispute/.test(title)) return 'review';
   return 'activity';
 };
+const notificationDestination = (notification) => {
+  const title = String(notification.title || '').toLowerCase();
+  if (/affiliate|promoter/.test(title)) return '/administration/AffiliateUsers';
+  if (/fight|ufc event|match added|match updated/.test(title)) return '/administration/fights';
+  if (/user deleted|user verified|account suspended/.test(title)) return '/administration/RegisteredUsers';
+  if (/scoring/.test(title)) return '/administration/scoring-rules';
+  if (/apparel|order/.test(title)) return '/administration/apparel-orders';
+  if (/support|complaint/.test(title)) return '/administration/support';
+  return null;
+};
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -29,6 +39,7 @@ const useIsMobile = () => {
 const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [expandedId, setExpandedId] = useState(null);
   const [markingAll, setMarkingAll] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -165,6 +176,25 @@ const isMobile = useIsMobile();
               <span className={styles.timestamp}>
                 {new Date(notification.createdAt).toLocaleString()}
               </span>
+              <div style={{marginTop:8,display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+                <button type="button" onClick={() => setExpandedId(expandedId === notification._id ? null : notification._id)}
+                  style={{background:'#26303c',color:'#fff',border:'1px solid #566070',borderRadius:6,padding:'6px 10px',cursor:'pointer'}}>
+                  {expandedId === notification._id ? 'Hide details' : 'View details'}
+                </button>
+                {notificationDestination(notification) && <Link href={notificationDestination(notification)}
+                  style={{color:'#fff',background:'#a90e19',borderRadius:6,padding:'6px 10px',textDecoration:'none'}}>
+                  Open related admin section →
+                </Link>}
+              </div>
+              {expandedId === notification._id && <div style={{marginTop:10,color:'#c7d0da',fontSize:13,overflowWrap:'anywhere'}}>
+                <div><strong>Event:</strong> {String(notification.title || 'Notification')}</div>
+                <div><strong>Category:</strong> {classifyNotification(notification) === 'review' ? 'Needs review' : classifyNotification(notification)}</div>
+                <div><strong>Time:</strong> {new Date(notification.createdAt).toLocaleString()}</div>
+                {notification.message && <div><strong>Message:</strong> {String(notification.message)}</div>}
+                {notification.description && <div><strong>Description:</strong> {String(notification.description)}</div>}
+                {!notificationDestination(notification) && <div>No specific admin destination is available for this event.</div>}
+                {notificationDestination(notification) && <div style={{marginTop:5}}>The link opens the related admin section; this notification does not contain a verified direct record link.</div>}
+              </div>}
             </div>
 </div>
             <div className={styles.actions}>
