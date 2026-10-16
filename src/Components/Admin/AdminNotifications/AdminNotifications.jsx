@@ -1,245 +1,123 @@
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import styles from './AdminNotifications.module.css';
-import { MdNotifications, MdCheckCircle, MdDone } from 'react-icons/md';
-import { BsThreeDotsVertical } from 'react-icons/bs';
+import React, { useCallback, useEffect, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
-import { swarmRequest } from '@/Utils/swarmApi';
-import { toast } from 'react-toastify';
-const classifyNotification = (notification) => {
-  const title = String(notification.title || '').toLowerCase();
-  const explicit = String(notification.severity || notification.level || '').toLowerCase();
-  if (['critical', 'error', 'fatal'].includes(explicit) || /failed|failure|payment error|security alert|unauthorized|outage|scoring error|publishing error/.test(title)) return 'critical';
-  if (['warning', 'review'].includes(explicit) || /pending approval|needs review|flagged|dispute|requires action|manual review/.test(title)) return 'review';
-  return 'activity';
-};
-const notificationDestination = (notification) => {
-  // Do not send users to a generic registry and imply the specific issue is located there.
-  // Only link when the notification provides a safe, verified internal record URL.
-  const url = notification.actionUrl || notification.action_url || notification.link;
-  if (typeof url === 'string' && /^\\/administration\\/[a-zA-Z0-9/_?=&%-]+$/.test(url) && !url.startsWith('//')) return url;
-  return null;
-};
-const legacyNotificationDestination = (notification) => {
-  const title = String(notification.title || '').toLowerCase();
-  if (/affiliate|promoter/.test(title)) return '/administration/AffiliateUsers';
-  if (/fight|ufc event|match added|match updated/.test(title)) return '/administration/fights';
-  if (/user deleted|user verified|account suspended/.test(title)) return '/administration/RegisteredUsers';
-  if (/scoring/.test(title)) return '/administration/scoring-rules';
-  if (/apparel|order/.test(title)) return '/administration/apparel-orders';
-  if (/support|complaint/.test(title)) return '/administration/support';
-  return null;
-};
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
+import styles from './AdminNotifications.module.css';
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  return isMobile;
+const API = 'https://fantasymmadness-game-server-three.vercel.app';
+const safeLink = (n) => {
+  const value = n.actionUrl || n.action_url || n.link;
+  return typeof value === 'string' && /^\/administration\/[a-zA-Z0-9/_?=&%-]+$/.test(value) && !value.startsWith('//') ? value : null;
 };
-
+const category = (n) => {
+  const title = String(n.title || '').toLowerCase();
+  const severity = String(n.severity || n.level || '').toLowerCase();
+  const details = String(n.message || n.description || '').toLowerCase();
+  if (/^(new fight|fight added|fight updated|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title)) return 'history';
+  if (['critical','fatal','error'].includes(severity) || /failed|failure|outage|security breach|payment error|payout error|scoring error|publishing error/.test(title)) return 'critical';
+  if (['warning','review','action_required'].includes(severity) || /pending approval|requires review|needs review|flagged|dispute|requires action/.test(title)) return 'review';
+  // Do not manufacture an alert merely because an activity event exists.
+  if (/failed|error/.test(details) && /publish|payment|scor|delivery|security/.test(details)) return 'review';
+  return 'history';
+};
+const detailsText = (n) => String(n.message || n.description || n.details || '').trim();
 const AdminNotifications = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('attention');
-  const [expandedId, setExpandedId] = useState(null);
-  const [markingAll, setMarkingAll] = useState(false);
+  const [items, setItems] = useState([]);
+  const [view, setView] = useState('alerts');
+  const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
-  const [needsLogin, setNeedsLogin] = useState(false);
-  const [menuOpenId, setMenuOpenId] = useState(null);
-const isMobile = useIsMobile();
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const fetchNotifications = async () => {
-    setLoading(true);
-    setError('');
-    setNeedsLogin(false);
+  const [lastChecked, setLastChecked] = useState(null);
+  const [authFailed, setAuthFailed] = useState(false);
+  const load = useCallback(async (initial = false) => {
+    if (initial) setLoading(true); else setRefreshing(true);
     try {
-      const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/notifications', { headers: adminHeaders() });
-      const data = await res.json();
+      const res = await fetch(API + '/api/notifications', {headers:adminHeaders(),cache:'no-store'});
       if (!res.ok) {
-        const authError = res.status === 401 || res.status === 403;
-        setNeedsLogin(authError);
-        throw new Error(authError ? 'Your admin session has expired. Sign in again to view notifications.' : 'Notifications could not load. Please try again.');
+        setAuthFailed(res.status === 401 || res.status === 403);
+        throw new Error(res.status === 401 || res.status === 403 ? 'Admin session expired. Sign in again.' : 'Notification service returned HTTP ' + res.status);
       }
-      if (!Array.isArray(data)) throw new Error('Notifications returned an unexpected response. Please try again.');
-      setNotifications(data.filter((notification) => notification && typeof notification === 'object' && notification._id));
-    } catch (err) {
-      setNotifications([]);
-      setError(err.message || 'Notifications could not load. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markAsRead = async (id) => {
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('Notification service returned invalid data.');
+      setItems(data.filter((n) => n && n._id));
+      setLastChecked(new Date());
+      setError('');
+      setAuthFailed(false);
+    } catch (e) {
+      setError(e.message || 'Unable to contact notification service.');
+    } finally { setLoading(false); setRefreshing(false); }
+  }, []);
+  useEffect(() => { load(true); const timer = setInterval(() => load(false), 60000); return () => clearInterval(timer); }, [load]);
+  const counts = {critical:0,review:0,history:0};
+  items.forEach((n) => { counts[category(n)] += 1; });
+  const alerts = counts.critical + counts.review;
+  const shown = items.filter((n) => view === 'all' || (view === 'alerts' ? category(n) !== 'history' : category(n) === view));
+  const markRead = async (n) => {
     try {
-      const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}/read`, { headers: adminHeaders(),
-        method: 'PATCH',
-      });
-      if (!res.ok) throw new Error('Could not mark notification as read. Please try again.');
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, read: true } : n))
-      );
-    } catch (err) {
-      toast.error(err.message || 'Could not mark notification as read.');
-    }
+      const res = await fetch(API + '/api/notifications/' + encodeURIComponent(n._id) + '/read', {method:'PATCH',headers:adminHeaders()});
+      if (!res.ok) throw new Error('Server could not mark this event as read.');
+      setItems((prev) => prev.map((item) => item._id === n._id ? {...item,read:true} : item));
+    } catch (e) { setError(e.message); }
   };
-
-  const unread = notifications.filter((n) => !n.read);
-  const counts = { critical: 0, review: 0, activity: 0 };
-  notifications.forEach((n) => { counts[classifyNotification(n)] += 1; });
-  const visibleNotifications = notifications.filter((n) => filter === 'all' || (filter === 'attention' ? classifyNotification(n) !== 'activity' : classifyNotification(n) === filter));
-  const markAllRead = async () => {
-    if (!unread.length || markingAll) return;
-    setMarkingAll(true);
-    let succeeded = 0;
-    try {
-      for (const n of unread) {
-        const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${n._id}/read`, {
-          method: 'PATCH', headers: adminHeaders()
-        });
-        if (res.ok) {
-          succeeded += 1;
-          setNotifications((prev) => prev.map((item) => item._id === n._id ? { ...item, read: true } : item));
-        }
-      }
-      if (succeeded !== unread.length) toast.warning(`Marked ${succeeded} of ${unread.length} as read. Try again for the remainder.`);
-      else toast.success(`Marked ${succeeded} notifications as read.`);
-    } catch (err) {
-      toast.error('Could not finish marking notifications as read.');
-    } finally { setMarkingAll(false); }
-  };
-
-  const deleteNotification = async (id) => {
-    try {
-      const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/notifications/${id}`, { headers: adminHeaders(),
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Could not delete notification. Please try again.');
-      setNotifications((prev) => prev.filter((n) => n._id !== id));
-    } catch (err) {
-      toast.error(err.message || 'Could not delete notification.');
-    }
-  };
-
-  return (
-    <div className={styles.notificationContainer}>
-      <h2 className={styles.heading}>Admin Notifications</h2>
-      <button
-        type="button"
-        style={{ marginBottom: 16, padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(223,17,27,.4)', background: 'transparent', color: '#df111b', fontWeight: 700, cursor: 'pointer' }}
-        onClick={async () => {
-          try {
-            const result = await swarmRequest('/api/admin/push/test', { method: 'POST' });
-            if (result?.skipped) toast.warning('Push not configured yet on the server (VAPID keys missing).');
-            else if (!result?.sent) toast.warning('No installed devices are subscribed yet — open this admin app on your phone and allow notifications.');
-            else toast.success(`Test push sent to ${result.sent} device(s).`);
-          } catch (error) {
-            toast.error(error.message || 'Could not send test push.');
-          }
-        }}
-      >
-        Send test push to my phone
-      </button>
-      {!loading && !error && <div style={{display:'flex', flexWrap:'wrap', gap:10, alignItems:'center', marginBottom:18}}>
-        {[['attention', 'Alerts requiring attention', counts.critical + counts.review], ['critical', 'Critical', counts.critical], ['review', 'Needs review', counts.review], ['activity', 'Activity history', counts.activity], ['all', 'All history', notifications.length]].map(([key, label, count]) => (
-          <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}
-            style={{border:'1px solid #555', borderRadius:8, padding:'9px 12px', cursor:'pointer', color:'#fff', background:filter === key ? '#a90e19' : '#202833'}}>
-            {label} ({count})
-          </button>
-        ))}
-        <span style={{color:'#b8c2ce'}}>{unread.length} unread</span>
-        <button type="button" disabled={!unread.length || markingAll} onClick={markAllRead}
-          style={{padding:'9px 12px', borderRadius:8, border:'1px solid #555', color:'#fff', background:'#26303c', cursor:'pointer', opacity:!unread.length || markingAll ? .5 : 1}}>
-          {markingAll ? 'Marking read…' : 'Mark all read'}
-        </button>
-      </div>}
-      {loading && <p role="status">Loading notifications…</p>}
-      {error && <div role="alert" className={styles.statusMessage}><p>{error}</p>{needsLogin ? <Link href="/administration/login?reason=session-expired&next=%2Fadministration%2Fnotifications">Sign in to the back office</Link> : <button type="button" onClick={fetchNotifications}>Try again</button>}</div>}
-      {!loading && !error && notifications.length === 0 && <p role="status">No notifications yet.</p>}
-      {!loading && !error && visibleNotifications.length === 0 && <p role="status">No alerts requiring attention in this category.</p>}
-      <ul className={styles.notificationList}>
-        {visibleNotifications.map((notification) => (
-          <li key={notification._id} className={styles.notificationItem} style={{borderLeft:`4px solid ${classifyNotification(notification) === 'critical' ? '#e32636' : classifyNotification(notification) === 'review' ? '#e5aa24' : '#348f6a'}`}}>
-          <div style={{display:'flex', gap:'20px', alignItems:'center'}}>  <div className={styles.iconWrapper}>
-              <MdNotifications className={styles.icon} style={{color: classifyNotification(notification) === 'critical' ? '#ff4b57' : classifyNotification(notification) === 'review' ? '#ffcc55' : '#75d5a4'}} />
-            </div>
-            <div className={styles.textContent}>
-        <span className={styles.title}>
-  {isMobile
-    ? `${String(notification.title || 'Notification').slice(0, 20)}${String(notification.title || 'Notification').length > 20 ? '...' : ''}`
-    : String(notification.title || 'Notification')}
-</span>
-
-              <span style={{display:'block',fontSize:11,textTransform:'uppercase',fontWeight:700,color:classifyNotification(notification) === 'critical' ? '#ff6b72' : classifyNotification(notification) === 'review' ? '#f5c657' : '#86d8aa'}}>{classifyNotification(notification) === 'critical' ? 'Critical' : classifyNotification(notification) === 'review' ? 'Needs review' : 'Activity'}</span>
-              <span className={styles.timestamp}>
-                {new Date(notification.createdAt).toLocaleString()}
-              </span>
-              <div style={{marginTop:8,display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
-                <button type="button" onClick={() => setExpandedId(expandedId === notification._id ? null : notification._id)}
-                  style={{background:'#26303c',color:'#fff',border:'1px solid #566070',borderRadius:6,padding:'6px 10px',cursor:'pointer'}}>
-                  {expandedId === notification._id ? 'Hide details' : 'View details'}
-                </button>
-                {notificationDestination(notification) && <Link href={notificationDestination(notification)}
-                  style={{color:'#fff',background:'#a90e19',borderRadius:6,padding:'6px 10px',textDecoration:'none'}}>
-                  Open related admin section →
-                </Link>}
-              </div>
-              {expandedId === notification._id && <div style={{marginTop:10,color:'#c7d0da',fontSize:13,overflowWrap:'anywhere'}}>
-                <div><strong>Event:</strong> {String(notification.title || 'Notification')}</div>
-                <div><strong>Category:</strong> {classifyNotification(notification) === 'review' ? 'Needs review' : classifyNotification(notification)}</div>
-                <div><strong>Time:</strong> {new Date(notification.createdAt).toLocaleString()}</div>
-                {notification.message && <div><strong>Message:</strong> {String(notification.message)}</div>}
-                {notification.description && <div><strong>Description:</strong> {String(notification.description)}</div>}
-                {!notificationDestination(notification) && <div>This event has no linked record or specific required action. It may be historical activity rather than a problem.</div>}
-                {notificationDestination(notification) && <div style={{marginTop:5}}>Open the linked admin record to investigate.</div>}
-              </div>}
-            </div>
-</div>
-            <div className={styles.actions}>
-              {!notification.read ? (
-                <MdDone
-                  className={styles.actionIcon}
-                  title="Mark as Read"
-                  onClick={() => markAsRead(notification._id)}
-                />
-              ) : (
-                <MdCheckCircle className={styles.readIcon} title="Read" />
-              )}
-
-              <div className={styles.menuWrapper}>
-                <BsThreeDotsVertical
-                  className={styles.menuIcon}
-                  onClick={() =>
-                    setMenuOpenId(menuOpenId === notification._id ? null : notification._id)
-                  }
-                />
-                {menuOpenId === notification._id && (
-                  <div className={styles.popupMenu}>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={() => deleteNotification(notification._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+  return <div className={styles.notificationContainer}>
+    <h2 className={styles.heading}>System Health & Action Center</h2>
+    <p style={{color:'#bac6d5',marginBottom:20}}>Confirmed issues and required approvals appear here. Successful operations remain in Activity History.</p>
+    <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:18}}>
+      <div style={{flex:'1 1 190px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
+        <div style={{color:'#cbd5e1',fontSize:13}}>Notification API</div>
+        <strong style={{color:error ? '#ffb65b' : lastChecked ? '#7ce0a2' : '#cbd5e1'}}>{error ? 'Check failed' : lastChecked ? 'Responding' : 'Checking…'}</strong>
+        <div style={{fontSize:12,color:'#aab8cc'}}>Only this service is actively checked</div>
+      </div>
+      <div style={{flex:'1 1 160px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
+        <div style={{color:'#cbd5e1',fontSize:13}}>Critical events</div><strong style={{fontSize:25}}>{error ? '—' : counts.critical}</strong>
+      </div>
+      <div style={{flex:'1 1 160px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
+        <div style={{color:'#cbd5e1',fontSize:13}}>Review events</div><strong style={{fontSize:25}}>{error ? '—' : counts.review}</strong>
+      </div>
+      <div style={{flex:'1 1 160px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
+        <div style={{color:'#cbd5e1',fontSize:13}}>Routine history</div><strong style={{fontSize:25}}>{error ? '—' : counts.history}</strong>
+      </div>
     </div>
-  );
+    <p style={{fontSize:12,color:'#aab8cc',marginBottom:14}}>Fight publishing, scoring, payments, payouts, email and other services are <strong>not yet monitored</strong> by this page. A zero count does not mean every system is healthy.</p>
+    <div style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center',marginBottom:20}}>
+      {[['alerts','Action required',alerts],['critical','Critical',counts.critical],['review','Needs review',counts.review],['history','Activity history',counts.history],['all','All events',items.length]].map(([key,label,count]) =>
+        <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)}
+          style={{border:'1px solid #596474',borderRadius:8,padding:'9px 12px',background:view === key ? '#b71927' : '#202b3a',color:'white',cursor:'pointer'}}>{label} ({count})</button>
+      )}
+      <button type="button" onClick={() => load(false)} disabled={refreshing} style={{padding:'9px 12px',borderRadius:8,background:'#344156',color:'white',border:'1px solid #64748b',cursor:'pointer'}}>{refreshing ? 'Checking…' : 'Check now'}</button>
+    </div>
+    {lastChecked && <p style={{fontSize:12,color:'#9eafc4'}}>Last checked: {lastChecked.toLocaleString()} · Refreshes every 60 seconds while open</p>}
+    {error && <div role="alert" className={styles.statusMessage}><strong>Monitoring unavailable:</strong> {error} {authFailed && <Link href="/administration/login?reason=session-expired&next=%2Fadministration%2Fnotifications">Sign in</Link>}</div>}
+    {loading && <p role="status">Checking notification service…</p>}
+    {!loading && !error && shown.length === 0 && <p role="status" style={{padding:24,background:'#172131',borderRadius:10}}>No events in this category. This does not confirm that unmonitored services are healthy.</p>}
+    <ul className={styles.notificationList}>
+      {!loading && shown.map((n) => {
+        const type = category(n);
+        const action = safeLink(n);
+        const message = detailsText(n);
+        const hasAction = Boolean(action && message);
+        return <li key={n._id} className={styles.notificationItem} style={{borderLeft:'4px solid ' + (type === 'critical' ? '#e52e40' : type === 'review' ? '#f0b43b' : '#3e9c79'),alignItems:'stretch',flexDirection:'column'}}>
+          <div style={{display:'flex',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+            <div style={{minWidth:0}}>
+              <div style={{fontSize:11,fontWeight:800,letterSpacing:'.06em',color:type === 'critical' ? '#ff7882' : type === 'review' ? '#f5c45a' : '#8bdbad'}}>{type === 'critical' ? 'CRITICAL EVENT' : type === 'review' ? 'REVIEW EVENT' : 'ACTIVITY HISTORY'}</div>
+              <div style={{fontWeight:800,overflowWrap:'anywhere'}}>{String(n.title || 'Untitled event')}</div>
+              <div style={{fontSize:12,color:'#b3c0d0'}}>{n.createdAt ? new Date(n.createdAt).toLocaleString() : 'Time unavailable'} · {n.read ? 'Read' : 'Unread'}</div>
+            </div>
+            <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+              <button type="button" onClick={() => setExpanded(expanded === n._id ? null : n._id)} style={{background:'#2a394d',color:'white',border:'1px solid #64748b',borderRadius:7,padding:'8px 12px',cursor:'pointer'}}>{expanded === n._id ? 'Hide investigation' : 'Investigate'}</button>
+              {!n.read && <button type="button" onClick={() => markRead(n)} style={{background:'transparent',color:'#d4dfed',border:'1px solid #64748b',borderRadius:7,padding:'8px 12px',cursor:'pointer'}}>Mark read</button>}
+            </div>
+          </div>
+          {expanded === n._id && <div style={{borderTop:'1px solid #455268',paddingTop:12,color:'#dce5ef',fontSize:14}}>
+            <div><strong>Recorded event:</strong> {String(n.title || 'Unknown')}</div>
+            <div style={{marginTop:6}}><strong>Diagnostic details:</strong> {message || 'No diagnostic details were supplied by the server.'}</div>
+            <div style={{marginTop:6}}><strong>Next step:</strong> {type === 'history' ? 'No action required by this event alone.' : hasAction ? 'Open the specific linked record and investigate the reported issue.' : 'This event lacks a verified record link or diagnostic detail. It cannot be resolved from this alert yet.'}</div>
+            {hasAction && <Link href={action} style={{display:'inline-block',marginTop:10,padding:'8px 12px',background:'#b71927',borderRadius:7,color:'white',textDecoration:'none'}}>Open affected record →</Link>}
+            <div style={{marginTop:8,fontSize:12,color:'#aebed0'}}>Mark read only acknowledges the event; it does not resolve a problem.</div>
+          </div>}
+        </li>;
+      })}
+    </ul>
+  </div>;
 };
-
 export default AdminNotifications;
