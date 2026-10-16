@@ -12,7 +12,9 @@ const category = (n) => {
   const title = String(n.title || '').toLowerCase();
   const severity = String(n.severity || n.level || '').toLowerCase();
   const details = String(n.message || n.description || '').toLowerCase();
-  if (/^(new fight|fight added|fight updated|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title)) return 'history';
+  const status = String(n.status || n.incidentStatus || '').toLowerCase();
+  if (['resolved','closed','fixed','success','completed'].includes(status)) return 'history';
+  if (/^(new fight|fight added|fight updated|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title) && !/failed|error|problem/.test(title + ' ' + details)) return 'history';
   if (['critical','fatal','error'].includes(severity) || /failed|failure|outage|security breach|payment error|payout error|scoring error|publishing error/.test(title)) return 'critical';
   if (['warning','review','action_required'].includes(severity) || /pending approval|requires review|needs review|flagged|dispute|requires action/.test(title)) return 'review';
   // Do not manufacture an alert merely because an activity event exists.
@@ -51,7 +53,7 @@ const AdminNotifications = () => {
   const counts = {critical:0,review:0,history:0};
   items.forEach((n) => { counts[category(n)] += 1; });
   const alerts = counts.critical + counts.review;
-  const shown = items.filter((n) => view === 'all' || (view === 'alerts' ? category(n) !== 'history' : category(n) === view));
+  const shown = items.filter((n) => view === 'alerts' ? category(n) !== 'history' : category(n) === view);
   const markRead = async (n) => {
     try {
       const res = await fetch(API + '/api/notifications/' + encodeURIComponent(n._id) + '/read', {method:'PATCH',headers:adminHeaders()});
@@ -61,7 +63,7 @@ const AdminNotifications = () => {
   };
   return <div className={styles.notificationContainer}>
     <h2 className={styles.heading}>System Health & Action Center</h2>
-    <p style={{color:'#bac6d5',marginBottom:20}}>Confirmed issues and required approvals appear here. Successful operations remain in Activity History.</p>
+    <p style={{color:'#bac6d5',marginBottom:20}}>Only problems and required actions appear in this workspace. Successful events are hidden from alerts and retained in the existing event history.</p>
     <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:18}}>
       <div style={{flex:'1 1 190px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
         <div style={{color:'#cbd5e1',fontSize:13}}>Notification API</div>
@@ -74,13 +76,11 @@ const AdminNotifications = () => {
       <div style={{flex:'1 1 160px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
         <div style={{color:'#cbd5e1',fontSize:13}}>Review events</div><strong style={{fontSize:25}}>{error ? '—' : counts.review}</strong>
       </div>
-      <div style={{flex:'1 1 160px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
-        <div style={{color:'#cbd5e1',fontSize:13}}>Routine history</div><strong style={{fontSize:25}}>{error ? '—' : counts.history}</strong>
-      </div>
+
     </div>
-    <p style={{fontSize:12,color:'#aab8cc',marginBottom:14}}>Fight publishing, scoring, payments, payouts, email and other services are <strong>not yet monitored</strong> by this page. A zero count does not mean every system is healthy.</p>
+    <p style={{fontSize:12,color:'#aab8cc',marginBottom:14}}>Routine event history is excluded from this problem-only dashboard. Fight publishing, scoring, payments, payouts, email and other services are <strong>not yet monitored</strong> by this page. A zero count does not mean every system is healthy.</p>
     <div style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center',marginBottom:20}}>
-      {[['alerts','Action required',alerts],['critical','Critical',counts.critical],['review','Needs review',counts.review],['history','Activity history',counts.history],['all','All events',items.length]].map(([key,label,count]) =>
+      {[['alerts','Action required',alerts],['critical','Critical',counts.critical],['review','Needs review',counts.review]].map(([key,label,count]) =>
         <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)}
           style={{border:'1px solid #596474',borderRadius:8,padding:'9px 12px',background:view === key ? '#b71927' : '#202b3a',color:'white',cursor:'pointer'}}>{label} ({count})</button>
       )}
