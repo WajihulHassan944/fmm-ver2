@@ -6,7 +6,10 @@ import styles from './AdminNotifications.module.css';
 
 const API = PUBLIC_API_BASE_URL;
 const safeLink = (n) => {
-  const value = n.actionUrl || n.action_url || n.link;
+  const raw = n.actionUrl || n.action_url || n.link;
+  const value = n.affectedType === 'fight' && /^[a-f0-9]{24}$/i.test(String(n.affectedId||'')) && typeof raw === 'string' && raw.startsWith('/administration/upcomingFights')
+    ? '/administration/upcomingFights?fightId=' + encodeURIComponent(n.affectedId)
+    : raw;
   return typeof value === 'string' && /^\/administration\/[a-zA-Z0-9/_?=&%-]+$/.test(value) && !value.startsWith('//') ? value : null;
 };
 const category = (n) => {
