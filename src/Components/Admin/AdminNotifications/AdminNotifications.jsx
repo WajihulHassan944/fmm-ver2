@@ -10,10 +10,17 @@ const classifyNotification = (notification) => {
   const title = String(notification.title || '').toLowerCase();
   const explicit = String(notification.severity || notification.level || '').toLowerCase();
   if (['critical', 'error', 'fatal'].includes(explicit) || /failed|failure|payment error|security alert|unauthorized|outage|scoring error|publishing error/.test(title)) return 'critical';
-  if (['warning', 'review'].includes(explicit) || /deleted|suspended|pending approval|needs review|flagged|dispute/.test(title)) return 'review';
+  if (['warning', 'review'].includes(explicit) || /pending approval|needs review|flagged|dispute|requires action|manual review/.test(title)) return 'review';
   return 'activity';
 };
 const notificationDestination = (notification) => {
+  // Do not send users to a generic registry and imply the specific issue is located there.
+  // Only link when the notification provides a safe, verified internal record URL.
+  const url = notification.actionUrl || notification.action_url || notification.link;
+  if (typeof url === 'string' && /^\\/administration\\/[a-zA-Z0-9/_?=&%-]+$/.test(url) && !url.startsWith('//')) return url;
+  return null;
+};
+const legacyNotificationDestination = (notification) => {
   const title = String(notification.title || '').toLowerCase();
   if (/affiliate|promoter/.test(title)) return '/administration/AffiliateUsers';
   if (/fight|ufc event|match added|match updated/.test(title)) return '/administration/fights';
@@ -193,8 +200,8 @@ const isMobile = useIsMobile();
                 <div><strong>Time:</strong> {new Date(notification.createdAt).toLocaleString()}</div>
                 {notification.message && <div><strong>Message:</strong> {String(notification.message)}</div>}
                 {notification.description && <div><strong>Description:</strong> {String(notification.description)}</div>}
-                {!notificationDestination(notification) && <div>No specific admin destination is available for this event.</div>}
-                {notificationDestination(notification) && <div style={{marginTop:5}}>The link opens the related admin section; this notification does not contain a verified direct record link.</div>}
+                {!notificationDestination(notification) && <div>This event has no linked record or specific required action. It may be historical activity rather than a problem.</div>}
+                {notificationDestination(notification) && <div style={{marginTop:5}}>Open the linked admin record to investigate.</div>}
               </div>}
             </div>
 </div>
