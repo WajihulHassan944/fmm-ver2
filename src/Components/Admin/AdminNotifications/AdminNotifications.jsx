@@ -89,7 +89,25 @@ const AdminNotifications = () => {
       await load(false);
     } catch(e){setScanState('Readiness scan unavailable: '+e.message);}
   };
-  const markRead = async (n) => {
+  // Automatically inspect fight readiness while the operations console is open.
+  // Avoid re-running a full scan every minute or creating repeated alerts on each poll.
+  useEffect(() => {
+    const scan = async () => {
+      try {
+        const response = await fetch(API + '/api/admin/incidents/scan',{headers:adminHeaders(),cache:'no-store'});
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data.ok) {
+          setScanState('Automatic readiness check: '+data.inspected+' fights inspected; '+data.warnings.length+' need review.'+(data.limited?' First 250 records only.':''));
+          await load(false);
+        }
+      } catch (_) { /* Existing incident-service warning remains visible. */ }
+    };
+    scan();
+    const timer = setInterval(scan, 300000);
+    return () => clearInterval(timer);
+  }, [load]);
+    const markRead = async (n) => {
     try {
       const res = await fetch(API + '/api/notifications/' + encodeURIComponent(n._id) + '/read', {method:'PATCH',headers:adminHeaders()});
       if (!res.ok) throw new Error('Server could not mark this event as read.');
