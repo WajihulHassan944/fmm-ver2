@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import styles from './AdminNotifications.module.css';
@@ -28,6 +28,9 @@ const AdminNotifications = () => {
   const [incidents, setIncidents] = useState([]);
   const [incidentError, setIncidentError] = useState('');
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [desktopAlerts, setDesktopAlerts] = useState(false);
+  const [desktopMessage, setDesktopMessage] = useState('');
+  const seenIncidentIds = useRef(null);
   const [scanState, setScanState] = useState('');
   const [snapshot, setSnapshot] = useState(null);
   const [snapshotError, setSnapshotError] = useState('');
@@ -92,6 +95,35 @@ const AdminNotifications = () => {
     window.speechSynthesis.speak(utterance);
     setSpokenIds(prev => [...prev, next._id]);
   }, [voiceEnabled, incidents, spokenIds]);
+  // Only announce newly appearing incidents; never bombard the operator with
+  // historical incidents when permission is first granted.
+  useEffect(() => {
+    const current = new Set(incidents.map(i=>String(i._id)));
+    if (seenIncidentIds.current === null) {
+      seenIncidentIds.current=current;
+      return;
+    }
+    const fresh=incidents.filter(i=>!seenIncidentIds.current.has(String(i._id)));
+    seenIncidentIds.current=current;
+    if (!desktopAlerts || typeof window==='undefined' || !('Notification' in window) || Notification.permission!=='granted')return;
+    for (const incident of fresh.slice(0,5)) {
+      const notice=new Notification('FANTASY MMADNESS — '+(incident.severity==='critical'?'Critical':'Needs review'),{
+        body:String(incident.title||'New incident').slice(0,140),
+        tag:'fmm-incident-'+incident._id
+      });
+      notice.onclick=()=>{window.focus();window.location.href=safeLink(incident)||'/administration/notifications';};
+    }
+  },[incidents,desktopAlerts]);
+  const enableDesktopAlerts=async()=>{
+    if(typeof window==='undefined'||!('Notification' in window)){
+      setDesktopMessage('This browser does not support desktop notifications.');
+      return;
+    }
+    if(desktopAlerts){setDesktopAlerts(false);setDesktopMessage('Desktop alerts off.');return;}
+    const permission=await Notification.requestPermission();
+    setDesktopAlerts(permission==='granted');
+    setDesktopMessage(permission==='granted'?'Desktop alerts enabled while this page is open.':'Browser notification permission was not granted.');
+  };
   const counts = {critical:0,review:0,history:0};
   items.forEach((n) => { counts[category(n)] += 1; });
   const alerts = counts.critical + counts.review + incidents.length;
@@ -134,6 +166,8 @@ const AdminNotifications = () => {
   return <div className={styles.notificationContainer}>
     <h2 className={styles.heading}>System Health & Action Center</h2>
     <button type="button" onClick={() => { if (voiceEnabled && typeof window !== 'undefined') window.speechSynthesis?.cancel(); setVoiceEnabled(!voiceEnabled); }} style={{marginBottom:12,padding:'9px 14px',background:voiceEnabled?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{voiceEnabled ? 'Jarvis voice alerts: ON' : 'Enable Jarvis voice alerts'}</button>
+    <button type="button" onClick={enableDesktopAlerts} style={{marginLeft:8,marginBottom:12,padding:'9px 14px',background:desktopAlerts?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{desktopAlerts?'Desktop alerts: ON':'Enable desktop alerts'}</button>
+    {desktopMessage && <p role="status">{desktopMessage}</p>}
     <button type="button" onClick={scanFights} style={{marginLeft:8,marginBottom:12,padding:'9px 14px',background:'#314f6c',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>Scan fight readiness</button>
     {scanState && <p role="status" style={{color:'#d5e4f2'}}>{scanState}</p>}
     <p style={{fontSize:12,color:'#aebed0'}}>Voice alerts play for new structured incidents while this page is open and after you enable sound. Background or closed-browser speech is not supported.</p>
