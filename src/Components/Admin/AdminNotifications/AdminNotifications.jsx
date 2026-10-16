@@ -27,6 +27,7 @@ const AdminNotifications = () => {
   const [incidents, setIncidents] = useState([]);
   const [incidentError, setIncidentError] = useState('');
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [scanState, setScanState] = useState('');
   const [spokenIds, setSpokenIds] = useState([]);
   const [view, setView] = useState('alerts');
   const [expanded, setExpanded] = useState(null);
@@ -78,6 +79,16 @@ const AdminNotifications = () => {
   items.forEach((n) => { counts[category(n)] += 1; });
   const alerts = counts.critical + counts.review + incidents.length;
   const shown = items.filter((n) => view === 'alerts' ? category(n) !== 'history' : category(n) === view);
+  const scanFights = async () => {
+    setScanState('Checking the latest 250 unfinished fight records…');
+    try {
+      const response = await fetch(API + '/api/admin/incidents/scan',{headers:adminHeaders(),cache:'no-store'});
+      if(!response.ok)throw new Error('Readiness scan returned HTTP '+response.status);
+      const data = await response.json();
+      setScanState('Checked '+data.inspected+' fights; found '+data.warnings.length+' records needing review.'+(data.limited?' Additional fights were not scanned.':''));
+      await load(false);
+    } catch(e){setScanState('Readiness scan unavailable: '+e.message);}
+  };
   const markRead = async (n) => {
     try {
       const res = await fetch(API + '/api/notifications/' + encodeURIComponent(n._id) + '/read', {method:'PATCH',headers:adminHeaders()});
@@ -88,6 +99,8 @@ const AdminNotifications = () => {
   return <div className={styles.notificationContainer}>
     <h2 className={styles.heading}>System Health & Action Center</h2>
     <button type="button" onClick={() => { if (voiceEnabled && typeof window !== 'undefined') window.speechSynthesis?.cancel(); setVoiceEnabled(!voiceEnabled); }} style={{marginBottom:12,padding:'9px 14px',background:voiceEnabled?'#236b47':'#26374a',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>{voiceEnabled ? 'Jarvis voice alerts: ON' : 'Enable Jarvis voice alerts'}</button>
+    <button type="button" onClick={scanFights} style={{marginLeft:8,marginBottom:12,padding:'9px 14px',background:'#314f6c',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>Scan fight readiness</button>
+    {scanState && <p role="status" style={{color:'#d5e4f2'}}>{scanState}</p>}
     <p style={{fontSize:12,color:'#aebed0'}}>Voice alerts play for new structured incidents while this page is open and after you enable sound. Background or closed-browser speech is not supported.</p>
     <p style={{color:'#bac6d5',marginBottom:20}}>Only problems and required actions appear in this workspace. Successful events are hidden from alerts and retained in the existing event history.</p>
     <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:18}}>
