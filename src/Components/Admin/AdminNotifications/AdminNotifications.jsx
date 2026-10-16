@@ -29,6 +29,8 @@ const AdminNotifications = () => {
   const [incidentError, setIncidentError] = useState('');
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [scanState, setScanState] = useState('');
+  const [snapshot, setSnapshot] = useState(null);
+  const [snapshotError, setSnapshotError] = useState('');
   const [spokenIds, setSpokenIds] = useState([]);
   const [view, setView] = useState('alerts');
   const [expanded, setExpanded] = useState(null);
@@ -67,6 +69,20 @@ const AdminNotifications = () => {
     } finally { setLoading(false); setRefreshing(false); }
   }, []);
   useEffect(() => { load(true); const timer = setInterval(() => load(false), 60000); return () => clearInterval(timer); }, [load]);
+  useEffect(() => {
+    const inspect = async () => {
+      try {
+        const response=await fetch(API+'/api/admin/operations-snapshot',{headers:adminHeaders(),cache:'no-store'});
+        const data=await response.json();
+        if(!data.checks || !Array.isArray(data.checks))throw new Error('Invalid operations response');
+        setSnapshot(data);
+        setSnapshotError(response.ok?'':'One or more system connections are unavailable');
+      } catch(e){setSnapshot(null);setSnapshotError('Operations snapshot unavailable: '+e.message);}
+    };
+    inspect();
+    const timer=setInterval(inspect,60000);
+    return ()=>clearInterval(timer);
+  }, []);
   useEffect(() => {
     if (!voiceEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     const pending = incidents.filter(i => !spokenIds.includes(i._id));
@@ -121,6 +137,16 @@ const AdminNotifications = () => {
     <button type="button" onClick={scanFights} style={{marginLeft:8,marginBottom:12,padding:'9px 14px',background:'#314f6c',color:'white',border:'1px solid #718096',borderRadius:8,cursor:'pointer'}}>Scan fight readiness</button>
     {scanState && <p role="status" style={{color:'#d5e4f2'}}>{scanState}</p>}
     <p style={{fontSize:12,color:'#aebed0'}}>Voice alerts play for new structured incidents while this page is open and after you enable sound. Background or closed-browser speech is not supported.</p>
+    <section aria-label="Company connections" style={{border:'1px solid #485365',padding:14,borderRadius:10,marginBottom:16}}>
+      <strong>Company connections (read-only)</strong>
+      {snapshotError && <p role="alert" style={{color:'#ffb65b'}}>{snapshotError}</p>}
+      {snapshot ? <div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:10}}>
+        {snapshot.checks.map(c=><div key={c.name} style={{padding:10,border:'1px solid #596474',borderRadius:8,minWidth:135}}>
+          <div>{c.name}</div><strong style={{color:c.status==='responding'?'#7ce0a2':'#ffb65b'}}>{c.status==='responding'?c.count+' records':c.status}</strong>
+        </div>)}
+      </div> : <p>{snapshotError?'Connection could not be verified.':'Checking company connections…'}</p>}
+      <p style={{fontSize:12,color:'#aab8cc',marginTop:10}}>These are database connectivity counts, not confirmation that payments, scoring, email, or every company operation is healthy.</p>
+    </section>
     <p style={{color:'#bac6d5',marginBottom:20}}>Only problems and required actions appear in this workspace. Successful events are hidden from alerts and retained in the existing event history.</p>
     <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:18}}>
       <div style={{flex:'1 1 190px',padding:16,border:'1px solid #485365',borderRadius:10,background:'#172131'}}>
