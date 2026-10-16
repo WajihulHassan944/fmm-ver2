@@ -53,7 +53,7 @@ const Admin = () => {
     totalClicks: 0,
     unreadNotificationsCount: 0,
     apparelOrdersCount: 0,
-  });
+  };
 
   // Feature demand. Head-to-Head ships as a waitlist rather than a live
   // feature, so this is the readout that decides whether it gets built.
@@ -83,7 +83,8 @@ const Admin = () => {
         const response = await fetch(buildPublicApiUrl('/dashboard-counts'), { headers: adminHeaders() });
         if (!response.ok) throw new Error(response.status === 401 || response.status === 403 ? 'Admin session expired' : `Backend returned ${response.status}`);
         const data = await response.json();
-        setDashboardCounts(data);
+        if (!data || typeof data !== 'object' || !['matchesCount','usersCount','affiliatesCount'].some(k => typeof data[k] === 'number')) throw new Error('Dashboard returned invalid totals');
+        setDashboardCounts({...emptyDashboardCounts,...data});
         setDashboardError('');
       } catch (error) {
         console.error('Error fetching dashboard counts:', error);
@@ -94,6 +95,7 @@ const Admin = () => {
     };
 
     fetchDashboardCounts();
+    const refreshCounts = setInterval(fetchDashboardCounts, 30000);
     const fetchActionableCount = async () => {
       try {
         const response = await fetch(buildPublicApiUrl('/api/notifications'), {headers:adminHeaders(),cache:'no-store'});
@@ -109,7 +111,7 @@ const Admin = () => {
     };
     fetchActionableCount();
     const interval = setInterval(fetchActionableCount, 60000);
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); clearInterval(refreshCounts); };
   }, []);
 
   const handleResetStats = async () => {
@@ -131,18 +133,19 @@ const Admin = () => {
   };
 
   const metrics = useMemo(() => [
-    { label: 'Total matches', value: dashboardCounts.matchesCount, icon: FaFistRaised, href: '/administration/upcomingFights' },
-    { label: 'Shadow templates', value: dashboardCounts.shadowTemplatesCount, icon: FaClone, href: '/administration/ShadowFightsLibrary' },
-    { label: 'Registered users', value: dashboardCounts.usersCount, icon: FaUsers, href: '/administration/RegisteredUsers' },
-    { label: 'Affiliates', value: dashboardCounts.affiliatesCount, icon: FaUserFriends, href: '/administration/AffiliateUsers' },
+    { label: 'Total matches', value: dashboardCounts?.matchesCount, icon: FaFistRaised, href: '/administration/upcomingFights' },
+    { label: 'Shadow templates', value: dashboardCounts?.shadowTemplatesCount, icon: FaClone, href: '/administration/ShadowFightsLibrary' },
+    { label: 'Registered users', value: dashboardCounts?.usersCount, icon: FaUsers, href: '/administration/RegisteredUsers' },
+    { label: 'Affiliates', value: dashboardCounts?.affiliatesCount, icon: FaUserFriends, href: '/administration/AffiliateUsers' },
     { label: 'Action alerts', value: actionableCount, icon: FaBell, href: '/administration/notifications' },
-    { label: 'Apparel orders', value: dashboardCounts.apparelOrdersCount, icon: FaShoppingBag, href: '/administration/apparel-orders' },
-    { label: 'Tracked visitors', value: dashboardCounts.totalClicks, icon: FaEye, onClick: () => setShowAnalytics(true) },
+    { label: 'Apparel orders', value: dashboardCounts?.apparelOrdersCount, icon: FaShoppingBag, href: '/administration/apparel-orders' },
+    { label: 'Tracked visitors', value: dashboardCounts?.totalClicks, icon: FaEye, onClick: () => setShowAnalytics(true) },
   ], [dashboardCounts, actionableCount]);
 
+  const countDisplay = (value) => dashboardError || dashboardCounts === null ? 'Unavailable' : String(value ?? 0);
   const operationRows = [
-    { area: 'Fight operations', metric: `${dashboardCounts.matchesCount || 0} matches`, status: 'Active', statusClass: 'is-success', href: '/administration/upcomingFights', action: 'Open score center' },
-    { area: 'Player accounts', metric: `${dashboardCounts.usersCount || 0} registered`, status: 'Monitored', statusClass: 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
+    { area: 'Fight operations', metric: `${dashboardCounts.matchesCount || 0} matches`, status: dashboardError ? 'Data unavailable' : 'Active', statusClass: dashboardError ? 'is-warning' : 'is-success', href: '/administration/upcomingFights', action: 'Open score center' },
+    { area: 'Player accounts', metric: `${dashboardCounts.usersCount || 0} registered`, status: dashboardError ? 'Data unavailable' : 'Connected', statusClass: dashboardError ? 'is-warning' : 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
     { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Apparel orders', metric: `${dashboardCounts.apparelOrdersCount || 0} orders`, status: dashboardCounts.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
     { area: 'Community alerts', metric: actionableCount === null ? 'Unavailable' : `${actionableCount} actionable`, status: alertServiceError ? 'Check service' : actionableCount ? 'Attention' : 'No reported alerts', statusClass: alertServiceError ? 'is-warning' : actionableCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'Investigate alerts' },
@@ -195,9 +198,10 @@ const Admin = () => {
         <div className="admin-dashboard-live"><i aria-hidden="true" /><span>{isLoading ? 'Syncing platform data' : dashboardError ? `Needs attention: ${dashboardError}` : 'Platform data connected'}</span></div>
       </section>
 
+      {dashboardError && <div role="alert" style={{padding:16,margin:'16px 0',background:'#3b2025',border:'1px solid #d55',borderRadius:8,color:'white'}}>Dashboard totals could not be loaded: {dashboardError}. Figures are unavailable, not zero. Retrying every 30 seconds. <button type="button" onClick={() => window.location.reload()} style={{marginLeft:12,padding:8}}>Retry now</button></div>}
       <section className="admin-metric-grid" aria-label="Platform totals">
         {metrics.map(({ label, value, icon: Icon, href, onClick }) => {
-          const content = <><Icon aria-hidden="true" /><strong>{isLoading ? '—' : value === null ? '—' : Number(value || 0).toLocaleString()}</strong><span>{label}</span></>;
+          const content = <><Icon aria-hidden="true" /><strong>{isLoading ? '—' : (dashboardError || (dashboardCounts === null && label !== 'Action alerts') || value === null || value === undefined) ? 'Unavailable' : Number(value || 0).toLocaleString()}</strong><span>{label}</span></>;
           return href
             ? <Link className="admin-metric-card" href={href} key={label}>{content}</Link>
             : <button type="button" className="admin-metric-card" onClick={onClick} key={label}>{content}</button>;
