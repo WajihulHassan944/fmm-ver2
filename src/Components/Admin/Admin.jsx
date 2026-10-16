@@ -28,10 +28,23 @@ const VisitorsAnalytics = dynamic(() => import('./VisitorsAnalytics'), {
   loading: () => <p>Loading analytics...</p>,
 });
 
+const isActionableNotification = (n) => {
+  const title = String(n.title || '').toLowerCase();
+  const details = String(n.message || n.description || '').toLowerCase();
+  const status = String(n.status || n.incidentStatus || '').toLowerCase();
+  const severity = String(n.severity || n.level || '').toLowerCase();
+  if (['resolved','closed','fixed','success','completed'].includes(status)) return false;
+  if (/^(new fight|fight added|fight updated|user deleted|shadow fight deleted|new user|user verified|affiliate auto-approved|affiliate approved|match added|match updated)/.test(title) && !/failed|error|problem/.test(title + ' ' + details)) return false;
+  return ['critical','fatal','error','warning','review','action_required'].includes(severity) ||
+    /failed|failure|outage|security breach|payment error|payout error|scoring error|publishing error|pending approval|requires review|needs review|flagged|dispute|requires action/.test(title) ||
+    (/failed|error/.test(details) && /publish|payment|scor|delivery|security/.test(details));
+};
 const Admin = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState('');
+  const [actionableCount, setActionableCount] = useState(null);
+  const [alertServiceError, setAlertServiceError] = useState(false);
   const [dashboardCounts, setDashboardCounts] = useState({
     affiliatesCount: 0,
     matchesCount: 0,
@@ -81,6 +94,22 @@ const Admin = () => {
     };
 
     fetchDashboardCounts();
+    const fetchActionableCount = async () => {
+      try {
+        const response = await fetch(buildPublicApiUrl('/api/notifications'), {headers:adminHeaders(),cache:'no-store'});
+        if (!response.ok) throw new Error('Alert service unavailable');
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error('Invalid alert response');
+        setActionableCount(data.filter(isActionableNotification).length);
+        setAlertServiceError(false);
+      } catch (error) {
+        setActionableCount(null);
+        setAlertServiceError(true);
+      }
+    };
+    fetchActionableCount();
+    const interval = setInterval(fetchActionableCount, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleResetStats = async () => {
@@ -106,17 +135,17 @@ const Admin = () => {
     { label: 'Shadow templates', value: dashboardCounts.shadowTemplatesCount, icon: FaClone, href: '/administration/ShadowFightsLibrary' },
     { label: 'Registered users', value: dashboardCounts.usersCount, icon: FaUsers, href: '/administration/RegisteredUsers' },
     { label: 'Affiliates', value: dashboardCounts.affiliatesCount, icon: FaUserFriends, href: '/administration/AffiliateUsers' },
-    { label: 'Notifications', value: dashboardCounts.unreadNotificationsCount, icon: FaBell, href: '/administration/notifications' },
+    { label: 'Action alerts', value: actionableCount, icon: FaBell, href: '/administration/notifications' },
     { label: 'Apparel orders', value: dashboardCounts.apparelOrdersCount, icon: FaShoppingBag, href: '/administration/apparel-orders' },
     { label: 'Tracked visitors', value: dashboardCounts.totalClicks, icon: FaEye, onClick: () => setShowAnalytics(true) },
-  ], [dashboardCounts]);
+  ], [dashboardCounts, actionableCount]);
 
   const operationRows = [
     { area: 'Fight operations', metric: `${dashboardCounts.matchesCount || 0} matches`, status: 'Active', statusClass: 'is-success', href: '/administration/upcomingFights', action: 'Open score center' },
     { area: 'Player accounts', metric: `${dashboardCounts.usersCount || 0} registered`, status: 'Monitored', statusClass: 'is-success', href: '/administration/RegisteredUsers', action: 'Manage users' },
     { area: 'Affiliate network', metric: `${dashboardCounts.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Apparel orders', metric: `${dashboardCounts.apparelOrdersCount || 0} orders`, status: dashboardCounts.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
-    { area: 'Community alerts', metric: `${dashboardCounts.unreadNotificationsCount || 0} unread`, status: dashboardCounts.unreadNotificationsCount ? 'Attention' : 'Clear', statusClass: dashboardCounts.unreadNotificationsCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'View notifications' },
+    { area: 'Community alerts', metric: actionableCount === null ? 'Unavailable' : `${actionableCount} actionable`, status: alertServiceError ? 'Check service' : actionableCount ? 'Attention' : 'No reported alerts', statusClass: alertServiceError ? 'is-warning' : actionableCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'Investigate alerts' },
     { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
     { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
   ];
@@ -168,7 +197,7 @@ const Admin = () => {
 
       <section className="admin-metric-grid" aria-label="Platform totals">
         {metrics.map(({ label, value, icon: Icon, href, onClick }) => {
-          const content = <><Icon aria-hidden="true" /><strong>{isLoading ? '—' : Number(value || 0).toLocaleString()}</strong><span>{label}</span></>;
+          const content = <><Icon aria-hidden="true" /><strong>{isLoading ? '—' : value === null ? '—' : Number(value || 0).toLocaleString()}</strong><span>{label}</span></>;
           return href
             ? <Link className="admin-metric-card" href={href} key={label}>{content}</Link>
             : <button type="button" className="admin-metric-card" onClick={onClick} key={label}>{content}</button>;
