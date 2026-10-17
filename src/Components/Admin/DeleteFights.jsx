@@ -7,8 +7,9 @@ import { FaEdit, FaPlus, FaSearch, FaSyncAlt, FaTrashAlt } from 'react-icons/fa'
 import { fetchMatches } from '@/Redux/matchSlice';
 import EditMatch from './EditMatch';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 
