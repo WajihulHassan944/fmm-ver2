@@ -5,7 +5,7 @@ import {adminHeaders} from '@/Utils/authFetch';
 import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
 const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
 function Dashboard(){
- const [campaigns,setCampaigns]=useState([]); const [campaignError,setCampaignError]=useState('');
+ const [campaigns,setCampaigns]=useState([]); const [runningAll,setRunningAll]=useState(false); const [campaignError,setCampaignError]=useState('');
  const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
  const load=async(runNow=false)=>{
   setLoading(true);setError('');
@@ -14,6 +14,7 @@ function Dashboard(){
   }catch(e){setError(e.message);}finally{setLoading(false);}
  };
  const refreshCampaigns=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns',{headers:adminHeaders()});if(r.ok)setCampaigns((await r.json()).campaigns||[]);}catch(e){setCampaignError('Campaign queue unavailable');}};
+ const runPipeline=async()=>{setRunningAll(true);setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/run',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Research failed');setData(j);const c=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const v=await c.json();if(!c.ok)throw Error(v.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}finally{setRunningAll(false);}};
  const generate=async()=>{setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}};
  useEffect(()=>{load();refreshCampaigns();},[]);
  return <main style={{minHeight:'100vh',background:'#080b12',color:'#f7f7f7',padding:'32px',fontFamily:'Arial,sans-serif'}}>
@@ -21,12 +22,14 @@ function Dashboard(){
    <a href="/administration" style={{color:'#ddd'}}>← Back to Command Center</a>
    <h1 style={{fontSize:34,marginBottom:8}}>FAN ACQUISITION COMMAND CENTER</h1>
    <p style={{color:'#bbb'}}>Five combat sports research agents. Find public opportunities to reach real fight fans and invite them to FANTASY MMADNESS.</p>
-   <button onClick={()=>load(true)} disabled={loading} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{loading?'Researching…':'Run all five agents now'}</button>
+   <button onClick={runPipeline} disabled={runningAll} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{runningAll?'Running five agents and preparing campaigns…':'RUN ALL FIVE AGENTS + PREPARE CAMPAIGNS'}</button>
    {data?.lastRunAt&&<p style={{color:'#bbb'}}>Last saved research run: {new Date(data.lastRunAt).toLocaleString()}</p>}
    {error&&<p role="alert" style={{color:'#ff9b9b'}}>{error}</p>}
+   <p style={{color:'#aaa'}}>Daily research is scheduled automatically. Use this button for an immediate additional run.</p>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:12,margin:'24px 0'}}>
     {[['Fans reached','Not measured'],['New visitors','Not measured'],['New signups','Not measured'],['New players','Not measured']].map(([label,value])=><div key={label} style={{padding:18,border:'1px solid #394152',borderRadius:12}}><small>{label}</small><h2 style={{marginBottom:0}}>{value}</h2></div>)}
    </div>
+   <section style={{background:'#171d29',borderRadius:12,padding:18,marginBottom:18}}><h2 style={{marginTop:0}}>What has the machine actually done?</h2><p>Latest saved research: {data?.lastRunAt?new Date(data.lastRunAt).toLocaleString():'No saved run confirmed yet'}</p><p>Public opportunities: {data?.agents?.reduce((n,a)=>n+(a.discovered||0),0)??'Unavailable'} · Campaign drafts: {campaigns.length} · Published campaigns: 0 verified</p><p style={{color:'#aaa'}}>Research and drafts do not mean fans have been reached. Publishing and attribution still need to be connected.</p></section>
    <p style={{color:'#bcbcbc'}}>Research results are public articles and possible campaign opportunities—not identified individual fans. No automated posting or messaging is enabled.</p>
    <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}>
     <h2 style={{marginTop:0}}>Today's fan outreach playbook</h2>
@@ -42,7 +45,7 @@ function Dashboard(){
      <strong>{name}</strong>
      <p><a style={{color:'#ffb7b7'}} href={'https://www.reddit.com/r/'+community+'/'} target="_blank" rel="noopener noreferrer">Explore public fan community ↗</a></p>
      <p><a style={{color:'#ffb7b7'}} href={'https://www.google.com/search?q='+encodeURIComponent(query+' fight fan communities podcasts creators')} target="_blank" rel="noopener noreferrer">Find fan pages and creators ↗</a></p>
-     <button type="button" style={{padding:'9px',background:'#b7152a',color:'white',border:0,borderRadius:6}} onClick={()=>navigator.clipboard?.writeText('FIGHT FANS: Your fight IQ has a home. Predict the punches, rounds and finishes with FANTASY MMADNESS. We don\\'t pick winners—we predict history. Join the action at https://www.fantasymmadness.com')}>Copy fan invitation</button>
+     <button type="button" style={{padding:'9px',background:'#b7152a',color:'white',border:0,borderRadius:6}} onClick={()=>navigator.clipboard?.writeText('FIGHT FANS: Your fight IQ has a home. Predict the punches, rounds and finishes with FANTASY MMADNESS. We predict history—we predict history. Join the action at https://www.fantasymmadness.com')}>Copy fan invitation</button>
     </div>)}
     </div>
    </section>
