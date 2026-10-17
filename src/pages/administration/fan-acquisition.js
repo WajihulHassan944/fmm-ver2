@@ -1,0 +1,37 @@
+import React,{useEffect,useState} from 'react';
+import Head from 'next/head';
+import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
+import {adminHeaders} from '@/Utils/authFetch';
+import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
+const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
+function Dashboard(){
+ const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
+ const load=async()=>{
+  setLoading(true);setError('');
+  try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/discover',{headers:adminHeaders(),cache:'no-store'});
+   const j=await r.json();if(!r.ok)throw Error(j.message||'Research unavailable');setData(j);
+  }catch(e){setError(e.message);}finally{setLoading(false);}
+ };
+ useEffect(()=>{load();},[]);
+ return <main style={{minHeight:'100vh',background:'#080b12',color:'#f7f7f7',padding:'32px',fontFamily:'Arial,sans-serif'}}>
+  <div style={{maxWidth:1160,margin:'auto'}}>
+   <a href="/administration" style={{color:'#ddd'}}>← Back to Command Center</a>
+   <h1 style={{fontSize:34,marginBottom:8}}>FAN ACQUISITION COMMAND CENTER</h1>
+   <p style={{color:'#bbb'}}>Five combat sports research agents. Find public opportunities to reach real fight fans and invite them to FANTASY MMADNESS.</p>
+   <button onClick={load} disabled={loading} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{loading?'Researching…':'Refresh all five agents'}</button>
+   {error&&<p role="alert" style={{color:'#ff9b9b'}}>{error}</p>}
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:12,margin:'24px 0'}}>
+    {[['Fans reached','Not measured'],['New visitors','Not measured'],['New signups','Not measured'],['New players','Not measured']].map(([label,value])=><div key={label} style={{padding:18,border:'1px solid #394152',borderRadius:12}}><small>{label}</small><h2 style={{marginBottom:0}}>{value}</h2></div>)}
+   </div>
+   <p style={{color:'#bcbcbc'}}>Research results are public articles and possible campaign opportunities—not identified individual fans. No automated posting or messaging is enabled.</p>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
+   {names.map((name,index)=>{const a=data?.agents?.[index];return <section key={name} style={{padding:20,border:'1px solid #394152',borderRadius:14,background:'#111725'}}>
+    <h2 style={{marginTop:0}}>{name}</h2><p style={{color:'#c5c5c5'}}>{a?.status==='research_ready'?'Public research active':a?.status==='research_unavailable'?'Feed unavailable':'Waiting for research'}</p>
+    <p><strong>{a?.discovered??'—'}</strong> public opportunities found</p>
+    {(a?.opportunities||[]).slice(0,8).map((o,i)=><p key={i} style={{borderTop:'1px solid #333',paddingTop:10}}><a href={o.url} target="_blank" rel="noopener noreferrer" style={{color:'#fff'}}>{o.title}</a><br/><small style={{color:'#a7acb5'}}>{o.publishedAt?new Date(o.publishedAt).toLocaleDateString():''} · Public news research</small></p>)}
+   </section>;})}
+   </div>
+  </div>
+ </main>;
+}
+export default function Page(){return <AdminPrivateRoute><Head><title>Fan Acquisition Command Center | FANTASY MMADNESS</title></Head><Dashboard/></AdminPrivateRoute>;}
