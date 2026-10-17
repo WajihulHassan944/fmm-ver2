@@ -7,6 +7,7 @@ const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro W
 function Dashboard(){
  const [audiences,setAudiences]=useState([]); const [campaigns,setCampaigns]=useState([]); const [runningAll,setRunningAll]=useState(false); const [campaignError,setCampaignError]=useState('');
  const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
+ const [runStatus,setRunStatus]=useState('Ready to run all five agents.'),[lastCompleted,setLastCompleted]=useState(null);
  const load=async(runNow=false)=>{
   setLoading(true);setError('');
   try{const r=await fetch(PUBLIC_API_BASE_URL+(runNow?'/api/admin/fan-acquisition/run':'/api/admin/fan-acquisition/discover'),{method:runNow?'POST':'GET',headers:adminHeaders(),cache:'no-store'});
@@ -15,7 +16,7 @@ function Dashboard(){
  };
  const refreshAudiences=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/audiences',{headers:adminHeaders()});if(r.ok)setAudiences((await r.json()).audiences||[]);}catch(e){}};
  const refreshCampaigns=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns',{headers:adminHeaders()});if(r.ok)setCampaigns((await r.json()).campaigns||[]);}catch(e){setCampaignError('Campaign queue unavailable');}};
- const runPipeline=async()=>{setRunningAll(true);setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/run',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Research failed');setData(j);const c=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const v=await c.json();if(!c.ok)throw Error(v.message||'Campaign generation failed');await refreshCampaigns();await refreshAudiences();}catch(e){setCampaignError(e.message);}finally{setRunningAll(false);}};
+ const runPipeline=async()=>{setRunningAll(true);setCampaignError('');setRunStatus('Running five research agents. Searching public sources and saving results…');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/run',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Research failed');setData(j);setRunStatus('Research complete. Preparing campaign drafts and refreshing saved audiences…');const c=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const v=await c.json();if(!c.ok)throw Error(v.message||'Campaign generation failed');await refreshCampaigns();await refreshAudiences();setLastCompleted(new Date().toLocaleString());setRunStatus('Completed: five agents returned results and campaign drafts were refreshed.');}catch(e){setRunStatus('Run failed. Please review the error below.');setCampaignError(e.message);}finally{setRunningAll(false);}};
  const generate=async()=>{setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}};
  useEffect(()=>{load();refreshCampaigns();refreshAudiences();},[]);
  return <main style={{minHeight:'100vh',background:'#080b12',color:'#f7f7f7',padding:'32px',fontFamily:'Arial,sans-serif'}}>
@@ -24,6 +25,7 @@ function Dashboard(){
    <h1 style={{fontSize:34,marginBottom:8}}>FAN ACQUISITION COMMAND CENTER</h1>
    <p style={{color:'#bbb'}}>Five combat sports research agents. Find public opportunities to reach real fight fans and invite them to FANTASY MMADNESS.</p>
    <button onClick={runPipeline} disabled={runningAll} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{runningAll?'Running five agents and preparing campaigns…':'RUN ALL FIVE AGENTS + PREPARE CAMPAIGNS'}</button>
+   <div role="status" aria-live="polite" style={{marginTop:14,padding:14,border:'1px solid #596174',borderRadius:10,background:'#171d29'}}><strong>{runningAll?'⏳ RUNNING':'AGENT STATUS'}</strong><p style={{margin:'8px 0'}}>{runStatus}</p>{lastCompleted&&<small>Last completed on this screen: {lastCompleted}</small>}{runningAll&&<p style={{color:'#ffb7b7'}}>Please wait. This may take time while the agents search public sources.</p>}</div>
    {data?.lastRunAt&&<p style={{color:'#bbb'}}>Last saved research run: {new Date(data.lastRunAt).toLocaleString()}</p>}
    {error&&<p role="alert" style={{color:'#ff9b9b'}}>{error}</p>}
    <p style={{color:'#aaa'}}>Daily research is scheduled automatically. Use this button for an immediate additional run.</p>
