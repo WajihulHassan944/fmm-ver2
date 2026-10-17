@@ -150,6 +150,7 @@ const Admin = () => {
     { area: 'Affiliate network', metric: `${dashboardCounts?.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Apparel orders', metric: `${dashboardCounts?.apparelOrdersCount || 0} orders`, status: dashboardCounts?.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts?.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
     { area: 'Community alerts', metric: actionableCount === null ? 'Unavailable' : `${actionableCount} actionable`, status: alertServiceError ? 'Check service' : actionableCount ? 'Attention' : 'No reported alerts', statusClass: alertServiceError ? 'is-warning' : actionableCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'Investigate alerts' },
+    { area: 'Fan Acquisition Swarm', metric: 'Five sport agents', status: 'Research and outreach queue', statusClass: 'is-warning', href: '/administration/fan-acquisition', action: 'Open fan acquisition' },
     { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
     { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
   ];
@@ -165,6 +166,7 @@ const Admin = () => {
     { title: 'Review payouts', copy: 'Process affiliate payout requests.', href: '/administration/payouts', icon: FaShieldAlt },
     { title: 'Apparel orders', copy: 'View guest orders, shipping details, and fulfilment status.', href: '/administration/apparel-orders', icon: FaShoppingBag },
     { title: 'Publish content', copy: 'Create editorial and platform news.', href: '/administration/blogs/add-new-blog', icon: FaBolt },
+    { title: 'FAN ACQUISITION COMMAND CENTER', copy: 'Run all five fight-fan agents, discover public audiences, and manage outreach campaigns.', href: '/administration/fan-acquisition', icon: FaBullhorn },
     { title: 'Swarm automation', copy: 'Generate blogs, SEO drafts, social drafts, and review jobs.', href: '/administration/swarm', icon: FaRobot },
     { title: 'SEO growth center', copy: 'Review SEO reports, metadata, links, and growth tasks.', href: '/administration/seo-growth', icon: FaChartLine },
     { title: 'Manage FAQs', copy: 'Add, edit, publish, or remove support answers.', href: '/administration/faqs', icon: FaQuestionCircle },
