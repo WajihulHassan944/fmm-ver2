@@ -6,9 +6,9 @@ import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
 const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
 function Dashboard(){
  const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
- const load=async()=>{
+ const load=async(runNow=false)=>{
   setLoading(true);setError('');
-  try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/discover',{headers:adminHeaders(),cache:'no-store'});
+  try{const r=await fetch(PUBLIC_API_BASE_URL+(runNow?'/api/admin/fan-acquisition/run':'/api/admin/fan-acquisition/discover'),{method:runNow?'POST':'GET',headers:adminHeaders(),cache:'no-store'});
    const j=await r.json();if(!r.ok)throw Error(j.message||'Research unavailable');setData(j);
   }catch(e){setError(e.message);}finally{setLoading(false);}
  };
@@ -18,7 +18,8 @@ function Dashboard(){
    <a href="/administration" style={{color:'#ddd'}}>← Back to Command Center</a>
    <h1 style={{fontSize:34,marginBottom:8}}>FAN ACQUISITION COMMAND CENTER</h1>
    <p style={{color:'#bbb'}}>Five combat sports research agents. Find public opportunities to reach real fight fans and invite them to FANTASY MMADNESS.</p>
-   <button onClick={load} disabled={loading} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{loading?'Researching…':'Refresh all five agents'}</button>
+   <button onClick={()=>load(true)} disabled={loading} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{loading?'Researching…':'Run all five agents now'}</button>
+   {data?.lastRunAt&&<p style={{color:'#bbb'}}>Last saved research run: {new Date(data.lastRunAt).toLocaleString()}</p>}
    {error&&<p role="alert" style={{color:'#ff9b9b'}}>{error}</p>}
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:12,margin:'24px 0'}}>
     {[['Fans reached','Not measured'],['New visitors','Not measured'],['New signups','Not measured'],['New players','Not measured']].map(([label,value])=><div key={label} style={{padding:18,border:'1px solid #394152',borderRadius:12}}><small>{label}</small><h2 style={{marginBottom:0}}>{value}</h2></div>)}
