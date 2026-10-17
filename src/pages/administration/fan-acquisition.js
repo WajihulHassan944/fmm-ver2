@@ -29,7 +29,7 @@ function Dashboard(){
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:12,margin:'24px 0'}}>
     {[['Fans reached','Not measured'],['New visitors','Not measured'],['New signups','Not measured'],['New players','Not measured']].map(([label,value])=><div key={label} style={{padding:18,border:'1px solid #394152',borderRadius:12}}><small>{label}</small><h2 style={{marginBottom:0}}>{value}</h2></div>)}
    </div>
-   <section style={{background:'#171d29',borderRadius:12,padding:18,marginBottom:18}}><h2 style={{marginTop:0}}>What has the machine actually done?</h2><p>Latest saved research: {data?.lastRunAt?new Date(data.lastRunAt).toLocaleString():'No saved run confirmed yet'}</p><p>Public opportunities: {data?.agents?.reduce((n,a)=>n+(a.discovered||0),0)??'Unavailable'} · Campaign drafts: {campaigns.length} · Published campaigns: 0 verified</p><p style={{color:'#aaa'}}>Research and drafts do not mean fans have been reached. Publishing and attribution still need to be connected.</p></section>
+   <section style={{background:'#171d29',borderRadius:12,padding:18,marginBottom:18}}><h2 style={{marginTop:0}}>What has the machine actually done?</h2><p>Latest saved research: {data?.lastRunAt?new Date(data.lastRunAt).toLocaleString():'No saved run confirmed yet'}</p><p>Audience candidates: {data?.agents?.reduce((n,a)=>n+(a.audiencesIdentified||0),0)??'Unavailable'} · Public news leads: {data?.agents?.reduce((n,a)=>n+(a.discovered||0),0)??'Unavailable'} · Campaign drafts: {campaigns.length} · Published campaigns: 0 verified</p><p style={{color:'#aaa'}}>Research and drafts do not mean fans have been reached. Publishing and attribution still need to be connected.</p></section>
    <p style={{color:'#bcbcbc'}}>Research results are public articles and possible campaign opportunities—not identified individual fans. No automated posting or messaging is enabled.</p>
    <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}>
     <h2 style={{marginTop:0}}>Today's fan outreach playbook</h2>
@@ -58,14 +58,15 @@ function Dashboard(){
     {campaigns.slice(0,20).map((c,i)=><div key={c._id||i} style={{padding:12,borderTop:'1px solid #394152'}}>
      <strong>{c.sportName}</strong> · {c.status==='awaiting_review'?'Awaiting review':c.status}
      <p>{c.message}</p>
-     <p><a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" style={{color:'#ffb7b7'}}>Research source ↗</a></p>
+     <p><a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" style={{color:'#ffb7b7'}}>Audience / research source ↗</a></p>
      <button onClick={()=>navigator.clipboard?.writeText(c.message)} style={{padding:8}}>Copy draft</button>
     </div>)}
    </section>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
    {names.map((name,index)=>{const a=data?.agents?.[index];return <section key={name} style={{padding:20,border:'1px solid #394152',borderRadius:14,background:'#111725'}}>
     <h2 style={{marginTop:0}}>{name}</h2><p style={{color:'#c5c5c5'}}>{a?.status==='research_ready'?'Public research active':a?.status==='research_unavailable'?'Feed unavailable':'Waiting for research'}</p>
-    <p><strong>{a?.discovered??'—'}</strong> public opportunities found</p>
+    <p><strong>{a?.audiencesIdentified??'—'}</strong> audience candidates · {a?.discovered??'—'} news leads</p>
+    {(a?.audiences||[]).map((o,i)=><p key={'audience-'+i} style={{borderTop:'1px solid #333',paddingTop:10}}><a href={o.url} target="_blank" rel="noopener noreferrer" style={{color:'#fff'}}>{o.name}</a><br/><small style={{color:'#a7acb5'}}>Candidate only · {o.contactMethod} · No outreach sent</small></p>)}
     {(a?.opportunities||[]).slice(0,8).map((o,i)=><p key={i} style={{borderTop:'1px solid #333',paddingTop:10}}><a href={o.url} target="_blank" rel="noopener noreferrer" style={{color:'#fff'}}>{o.title}</a><br/><small style={{color:'#a7acb5'}}>{o.publishedAt?new Date(o.publishedAt).toLocaleDateString():''} · Public news research</small></p>)}
    </section>;})}
    </div>
