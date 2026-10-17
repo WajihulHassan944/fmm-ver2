@@ -5,6 +5,7 @@ import {adminHeaders} from '@/Utils/authFetch';
 import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
 const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
 function Dashboard(){
+ const [campaigns,setCampaigns]=useState([]); const [campaignError,setCampaignError]=useState('');
  const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
  const load=async(runNow=false)=>{
   setLoading(true);setError('');
@@ -12,7 +13,9 @@ function Dashboard(){
    const j=await r.json();if(!r.ok)throw Error(j.message||'Research unavailable');setData(j);
   }catch(e){setError(e.message);}finally{setLoading(false);}
  };
- useEffect(()=>{load();},[]);
+ const refreshCampaigns=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns',{headers:adminHeaders()});if(r.ok)setCampaigns((await r.json()).campaigns||[]);}catch(e){setCampaignError('Campaign queue unavailable');}};
+ const generate=async()=>{setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}};
+ useEffect(()=>{load();refreshCampaigns();},[]);
  return <main style={{minHeight:'100vh',background:'#080b12',color:'#f7f7f7',padding:'32px',fontFamily:'Arial,sans-serif'}}>
   <div style={{maxWidth:1160,margin:'auto'}}>
    <a href="/administration" style={{color:'#ddd'}}>← Back to Command Center</a>
@@ -42,6 +45,19 @@ function Dashboard(){
      <button type="button" style={{padding:'9px',background:'#b7152a',color:'white',border:0,borderRadius:6}} onClick={()=>navigator.clipboard?.writeText('FIGHT FANS: Your fight IQ has a home. Predict the punches, rounds and finishes with FANTASY MMADNESS. We don\\'t pick winners—we predict history. Join the action at https://www.fantasymmadness.com')}>Copy fan invitation</button>
     </div>)}
     </div>
+   </section>
+   <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}>
+    <h2>Outreach campaign review queue</h2>
+    <p>Generate up to three draft invitations per sport from the latest saved research. These are drafts for review, not published messages.</p>
+    <button onClick={generate} style={{background:'#cb1028',color:'white',padding:'12px 18px',border:0,borderRadius:8}}>Generate campaigns from discoveries</button>
+    {campaignError&&<p role="alert">{campaignError}</p>}
+    <p>{campaigns.length} saved campaign drafts</p>
+    {campaigns.slice(0,20).map((c,i)=><div key={c._id||i} style={{padding:12,borderTop:'1px solid #394152'}}>
+     <strong>{c.sportName}</strong> · {c.status==='awaiting_review'?'Awaiting review':c.status}
+     <p>{c.message}</p>
+     <p><a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" style={{color:'#ffb7b7'}}>Research source ↗</a></p>
+     <button onClick={()=>navigator.clipboard?.writeText(c.message)} style={{padding:8}}>Copy draft</button>
+    </div>)}
    </section>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
    {names.map((name,index)=>{const a=data?.agents?.[index];return <section key={name} style={{padding:20,border:'1px solid #394152',borderRadius:14,background:'#111725'}}>
