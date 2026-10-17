@@ -5,7 +5,7 @@ import {adminHeaders} from '@/Utils/authFetch';
 import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
 const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
 function Dashboard(){
- const [campaigns,setCampaigns]=useState([]); const [runningAll,setRunningAll]=useState(false); const [campaignError,setCampaignError]=useState('');
+ const [audiences,setAudiences]=useState([]); const [campaigns,setCampaigns]=useState([]); const [runningAll,setRunningAll]=useState(false); const [campaignError,setCampaignError]=useState('');
  const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
  const load=async(runNow=false)=>{
   setLoading(true);setError('');
@@ -13,10 +13,11 @@ function Dashboard(){
    const j=await r.json();if(!r.ok)throw Error(j.message||'Research unavailable');setData(j);
   }catch(e){setError(e.message);}finally{setLoading(false);}
  };
+ const refreshAudiences=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/audiences',{headers:adminHeaders()});if(r.ok)setAudiences((await r.json()).audiences||[]);}catch(e){}};
  const refreshCampaigns=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns',{headers:adminHeaders()});if(r.ok)setCampaigns((await r.json()).campaigns||[]);}catch(e){setCampaignError('Campaign queue unavailable');}};
- const runPipeline=async()=>{setRunningAll(true);setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/run',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Research failed');setData(j);const c=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const v=await c.json();if(!c.ok)throw Error(v.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}finally{setRunningAll(false);}};
+ const runPipeline=async()=>{setRunningAll(true);setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/run',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Research failed');setData(j);const c=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const v=await c.json();if(!c.ok)throw Error(v.message||'Campaign generation failed');await refreshCampaigns();await refreshAudiences();}catch(e){setCampaignError(e.message);}finally{setRunningAll(false);}};
  const generate=async()=>{setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}};
- useEffect(()=>{load();refreshCampaigns();},[]);
+ useEffect(()=>{load();refreshCampaigns();refreshAudiences();},[]);
  return <main style={{minHeight:'100vh',background:'#080b12',color:'#f7f7f7',padding:'32px',fontFamily:'Arial,sans-serif'}}>
   <div style={{maxWidth:1160,margin:'auto'}}>
    <a href="/administration" style={{color:'#ddd'}}>← Back to Command Center</a>
@@ -29,6 +30,7 @@ function Dashboard(){
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:12,margin:'24px 0'}}>
     {[['Fans reached','Not measured'],['New visitors','Not measured'],['New signups','Not measured'],['New players','Not measured']].map(([label,value])=><div key={label} style={{padding:18,border:'1px solid #394152',borderRadius:12}}><small>{label}</small><h2 style={{marginBottom:0}}>{value}</h2></div>)}
    </div>
+   <section style={{border:'1px solid #394152',borderRadius:12,padding:18,marginBottom:18}}><h2>Real audience pipeline</h2><p>{audiences.length} saved audience candidates shown. These are public communities or creators, not individual fan identities.</p><p style={{color:'#bbb'}}>YouTube discovery: {data?.agents?.[0]?.videoSearchStatus||'Not yet confirmed'}. Live creator search requires a configured YouTube API key.</p>{audiences.slice(0,30).map((a,i)=><div key={a._id||i} style={{borderTop:'1px solid #394152',padding:'12px 0'}}><strong>{a.sportName} · {a.name}</strong><p><a href={a.url} target="_blank" rel="noopener noreferrer" style={{color:'#ffb7b7'}}>Open audience source ↗</a> · {a.type} · {a.outreachStatus||'Not contacted'}</p><small style={{color:'#aaa'}}>{a.source||'Public directory candidate'} · {a.contactMethod}</small></div>)}</section>
    <section style={{background:'#171d29',borderRadius:12,padding:18,marginBottom:18}}><h2 style={{marginTop:0}}>What has the machine actually done?</h2><p>Latest saved research: {data?.lastRunAt?new Date(data.lastRunAt).toLocaleString():'No saved run confirmed yet'}</p><p>Audience candidates: {data?.agents?.reduce((n,a)=>n+(a.audiencesIdentified||0),0)??'Unavailable'} · Public news leads: {data?.agents?.reduce((n,a)=>n+(a.discovered||0),0)??'Unavailable'} · Campaign drafts: {campaigns.length} · Published campaigns: 0 verified</p><p style={{color:'#aaa'}}>Research and drafts do not mean fans have been reached. Publishing and attribution still need to be connected.</p></section>
    <p style={{color:'#bcbcbc'}}>Research results are public articles and possible campaign opportunities—not identified individual fans. No automated posting or messaging is enabled.</p>
    <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}>
