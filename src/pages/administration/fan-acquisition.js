@@ -24,6 +24,24 @@ function Dashboard(){
     {[['Fans reached','Not measured'],['New visitors','Not measured'],['New signups','Not measured'],['New players','Not measured']].map(([label,value])=><div key={label} style={{padding:18,border:'1px solid #394152',borderRadius:12}}><small>{label}</small><h2 style={{marginBottom:0}}>{value}</h2></div>)}
    </div>
    <p style={{color:'#bcbcbc'}}>Research results are public articles and possible campaign opportunities—not identified individual fans. No automated posting or messaging is enabled.</p>
+   <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}>
+    <h2 style={{marginTop:0}}>Today's fan outreach playbook</h2>
+    <p>Each agent searches public fan conversations, identifies appropriate communities, and prepares a sport-specific invitation. Review community rules before participating. Never mass-message strangers.</p>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
+    {[
+     ['Boxing','boxing','boxing'],
+     ['MMA / UFC','ufc','ufc'],
+     ['Bare Knuckle','bkfc','bareknuckle'],
+     ['Kickboxing / Muay Thai','muay thai','MuayThai'],
+     ['Pro Wrestling','wwe aew','SquaredCircle']
+    ].map(([name,query,community])=><div key={name} style={{background:'#171d29',padding:14,borderRadius:10}}>
+     <strong>{name}</strong>
+     <p><a style={{color:'#ffb7b7'}} href={'https://www.reddit.com/r/'+community+'/'} target="_blank" rel="noopener noreferrer">Explore public fan community ↗</a></p>
+     <p><a style={{color:'#ffb7b7'}} href={'https://www.google.com/search?q='+encodeURIComponent(query+' fight fan communities podcasts creators')} target="_blank" rel="noopener noreferrer">Find fan pages and creators ↗</a></p>
+     <button type="button" style={{padding:'9px',background:'#b7152a',color:'white',border:0,borderRadius:6}} onClick={()=>navigator.clipboard?.writeText('FIGHT FANS: Your fight IQ has a home. Predict the punches, rounds and finishes with FANTASY MMADNESS. We don\\'t pick winners—we predict history. Join the action at https://www.fantasymmadness.com')}>Copy fan invitation</button>
+    </div>)}
+    </div>
+   </section>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
    {names.map((name,index)=>{const a=data?.agents?.[index];return <section key={name} style={{padding:20,border:'1px solid #394152',borderRadius:14,background:'#111725'}}>
     <h2 style={{marginTop:0}}>{name}</h2><p style={{color:'#c5c5c5'}}>{a?.status==='research_ready'?'Public research active':a?.status==='research_unavailable'?'Feed unavailable':'Waiting for research'}</p>
