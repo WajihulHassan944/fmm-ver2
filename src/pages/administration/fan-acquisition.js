@@ -17,6 +17,8 @@ function Dashboard(){
  const refreshAudiences=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/audiences',{headers:adminHeaders()});if(r.ok)setAudiences((await r.json()).audiences||[]);}catch(e){}};
  const refreshCampaigns=async()=>{try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns',{headers:adminHeaders()});if(r.ok)setCampaigns((await r.json()).campaigns||[]);}catch(e){setCampaignError('Campaign queue unavailable');}};
  const runPipeline=async()=>{setRunningAll(true);setCampaignError('');setRunStatus('Running five research agents. Searching public sources and saving results…');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/run',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Research failed');setData(j);setRunStatus('Research complete. Preparing campaign drafts and refreshing saved audiences…');const c=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const v=await c.json();if(!c.ok)throw Error(v.message||'Campaign generation failed');await refreshCampaigns();await refreshAudiences();setLastCompleted(new Date().toLocaleString());setRunStatus('Completed: five agents returned results and campaign drafts were refreshed.');}catch(e){setRunStatus('Run failed. Please review the error below.');setCampaignError(e.message);}finally{setRunningAll(false);}};
+ const updateOutreach=async(c,status)=>{setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/'+encodeURIComponent(c._id)+'/status',{method:'PATCH',headers:{...adminHeaders(),'Content-Type':'application/json'},body:JSON.stringify({status})});const j=await r.json();if(!r.ok)throw Error(j.message||'Status update failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}};
+ const openContact=async(c)=>{const subject='FANTASY MMADNESS partnership invitation';const body=c.message+'\\n\\nSource: '+c.sourceUrl;try{await navigator.clipboard?.writeText(subject+'\\n\\n'+body);}catch(e){}window.open(c.sourceUrl,'_blank','noopener,noreferrer');};
  const generate=async()=>{setCampaignError('');try{const r=await fetch(PUBLIC_API_BASE_URL+'/api/admin/fan-acquisition/campaigns/generate',{method:'POST',headers:adminHeaders()});const j=await r.json();if(!r.ok)throw Error(j.message||'Campaign generation failed');await refreshCampaigns();}catch(e){setCampaignError(e.message);}};
  useEffect(()=>{load();refreshCampaigns();refreshAudiences();},[]);
  return <main style={{minHeight:'100vh',background:'#080b12',color:'#f7f7f7',padding:'32px',fontFamily:'Arial,sans-serif'}}>
@@ -55,7 +57,7 @@ function Dashboard(){
    </section>
    <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}>
     <h2>Outreach campaign review queue</h2>
-    <p>Generate up to three draft invitations per sport from the latest saved research. These are drafts for review, not published messages.</p>
+    <p>Generate up to three draft invitations per sport from the latest saved research. These are drafts for review, not published messages. Open the source to find its official contact channel, copy the invitation, and record outreach status. Nothing is sent automatically.</p>
     <button onClick={generate} style={{background:'#cb1028',color:'white',padding:'12px 18px',border:0,borderRadius:8}}>Generate campaigns from discoveries</button>
     {campaignError&&<p role="alert">{campaignError}</p>}
     <p>{campaigns.length} saved campaign drafts</p>
@@ -63,7 +65,7 @@ function Dashboard(){
      <strong>{c.sportName}</strong> · {c.status==='awaiting_review'?'Awaiting review':c.status}
      <p>{c.message}</p>
      <p><a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" style={{color:'#ffb7b7'}}>Audience / research source ↗</a></p>
-     <button onClick={()=>navigator.clipboard?.writeText(c.message)} style={{padding:8}}>Copy draft</button>
+     <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}><button onClick={()=>navigator.clipboard?.writeText(c.message)} style={{padding:8}}>Copy invitation</button><button onClick={()=>openContact(c)} style={{padding:8,background:'#cb1028',color:'white',border:0,borderRadius:6}}>Open source + copy invitation</button><select aria-label="Outreach status" value={['ready_to_contact','contacted','replied','interested','declined'].includes(c.status)?c.status:'draft'} onChange={e=>updateOutreach(c,e.target.value)} style={{padding:8,background:'#171d29',color:'white'}}><option value="draft" disabled>Draft — not sent</option><option value="ready_to_contact">Ready to contact</option><option value="contacted">Contacted</option><option value="replied">Replied</option><option value="interested">Interested</option><option value="declined">Declined</option></select></div>
     </div>)}
    </section>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
