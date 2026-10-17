@@ -65,6 +65,11 @@ const SwarmStatusPanel = () => {
         <article><small>Enabled automations</small><strong>{Number(dashboard.enabledAutomationCount || 0).toLocaleString()}</strong></article>
       </div>
 
+      <div style={{padding:'16px',border:'2px solid #b91c1c',borderRadius:12,margin:'14px 0',background:'#220d13'}}>
+        <h3 style={{color:'#fff',margin:'0 0 8px'}}>FAN ACQUISITION COMMAND CENTER</h3>
+        <p style={{color:'#eee',margin:'0 0 12px'}}>Five fight-fan research agents, campaign drafts, and outreach opportunities. This is your audience-growth desk; the Swarm panel below is the existing job engine.</p>
+        <Link href="/administration/fan-acquisition" style={{display:'inline-block',padding:'12px 18px',borderRadius:8,background:'#dc142c',color:'#fff',fontWeight:800,textDecoration:'none'}}>OPEN FAN ACQUISITION →</Link>
+      </div>
       <div className="admin-swarm-quick-actions admin-swarm-panel-link">
         <Link href="/administration/swarm" className="admin-action-secondary">
           Open swarm command center <FaArrowRight />
