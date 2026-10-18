@@ -55,19 +55,14 @@ function Dashboard(){
     </div>)}
     </div>
    </details>
-   <details style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22}}><summary style={{cursor:'pointer',fontWeight:'bold'}}>Campaign drafts — {campaigns.length} saved (optional details)</summary>
-    <h2>Outreach campaign review queue</h2>
-    <p>Generate up to three draft invitations per sport from the latest saved research. These are drafts for review, not published messages. Open the source to find its official contact channel, copy the invitation, and record outreach status. Nothing is sent automatically.</p>
-    <button onClick={generate} style={{background:'#cb1028',color:'white',padding:'12px 18px',border:0,borderRadius:8}}>Generate campaigns from discoveries</button>
-    {campaignError&&<p role="alert">{campaignError}</p>}
-    <p>{campaigns.length} saved campaign drafts</p>
-    {campaigns.slice(0,20).map((c,i)=><div key={c._id||i} style={{padding:12,borderTop:'1px solid #394152'}}>
-     <strong>{c.sportName}</strong> · {c.status==='awaiting_review'?'Awaiting review':c.status}
-     <p>{c.message}</p>
-     <p><a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" style={{color:'#ffb7b7'}}>Audience / research source ↗</a></p>
-     <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}><button onClick={()=>navigator.clipboard?.writeText(c.message)} style={{padding:8}}>Copy invitation</button><button onClick={()=>openContact(c)} style={{padding:8,background:'#cb1028',color:'white',border:0,borderRadius:6}}>Open source + copy invitation</button><select aria-label="Outreach status" value={['ready_to_contact','contacted','replied','interested','declined'].includes(c.status)?c.status:'draft'} onChange={e=>updateOutreach(c,e.target.value)} style={{padding:8,background:'#171d29',color:'white'}}><option value="draft" disabled>Draft — not sent</option><option value="ready_to_contact">Ready to contact</option><option value="contacted">Contacted</option><option value="replied">Replied</option><option value="interested">Interested</option><option value="declined">Declined</option></select></div>
-    </div>)}
-   </details>
+   <section style={{border:'1px solid #394152',padding:20,borderRadius:14,marginBottom:22,background:'#111725'}}>
+    <h2 style={{marginTop:0}}>Automated Outreach Center</h2>
+    <p style={{color:'#bbb'}}>The five agents automatically research public audiences and prepare invitations. Message delivery is not active until an authorized sending channel is connected. No manual review queue is required for daily research.</p>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:12}}>
+     {[['Invitations prepared',campaigns.length],['Messages delivered','Not connected'],['Replies received','Not measured'],['New players from outreach','Not measured']].map(([label,value])=><div key={label} style={{background:'#080b12',padding:14,borderRadius:8}}><small style={{color:'#bbb'}}>{label}</small><p style={{fontSize:20,fontWeight:700,margin:'8px 0 0'}}>{value}</p></div>)}
+    </div>
+    {campaignError&&<p role="alert" style={{color:'#ffb7b7'}}>{campaignError}</p>}
+   </section>
    <details style={{marginBottom:20}}><summary style={{cursor:'pointer',fontWeight:'bold',padding:12}}>Five-agent research breakdown (optional details)</summary>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
    {names.map((name,index)=>{const a=data?.agents?.[index];return <section key={name} style={{padding:20,border:'1px solid #394152',borderRadius:14,background:'#111725'}}>
