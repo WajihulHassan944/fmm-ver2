@@ -376,6 +376,23 @@ function AppContent({ children }) {
   const seekPosition = useSelector((state) => state.music.seekPosition);
   const howlerRef = useRef(null);
   const { isAdminAuthenticated } = useSelector((state) => state.adminAuth);
+  // Preserve explicit campaign source on first arrival for subsequent signup-flow
+  // integration. This is browser-side context, not a recorded visit or conversion.
+  useEffect(() => {
+    if (!router.isReady || typeof window === 'undefined') return;
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('utm_source') !== 'fan_acquisition') return;
+    const allowed = ['utm_source','utm_medium','utm_campaign','utm_content'];
+    const attribution = {};
+    for (const key of allowed) {
+      const value = query.get(key);
+      if (value) attribution[key] = value.slice(0, 128);
+    }
+    attribution.landingPath = window.location.pathname.slice(0, 256);
+    attribution.capturedAt = new Date().toISOString();
+    try { window.sessionStorage.setItem('fmm_fan_acquisition_attribution', JSON.stringify(attribution)); }
+    catch (_error) { /* storage may be disabled; browsing must still work */ }
+  }, [router.isReady, router.asPath]);
 
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
