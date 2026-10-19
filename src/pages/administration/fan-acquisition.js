@@ -6,7 +6,7 @@ import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
 const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
 const jobLabels={'content.newsletter-draft':'Newsletter Campaign','seo.audit':'Website SEO Audit','seo.schema-markup':'Search Engine Structured Data','content.article':'Combat Sports Article','social.draft':'Social Media Promotion','seo.metadata':'Search Engine Page Details','seo.sitemap-refresh':'Website Sitemap Check','content.match-preview':'Fight Preview','content.event-recap':'Fight Event Recap','content.fight-publish-blog-draft':'Fight Blog Draft','social.fight-publish-post':'Fight Announcement Post'};
 const jobName=(type)=>jobLabels[type]||String(type||'Swarm task').replace(/^[^.]+\./,'').replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-const jobStatus=(status)=>({awaiting_review:'Waiting for review',completed:'Completed',running:'In progress',queued:'Queued',failed:'Needs attention',approved:'Approved'}[status]||String(status||'Unknown').replace(/_/g,' '));
+const jobStatus=(status)=>({awaiting_review:'Draft ready — approval required (no outreach sent)',completed:'Completed',running:'In progress',queued:'Queued',failed:'Needs attention',approved:'Approved'}[status]||String(status||'Unknown').replace(/_/g,' '));
 function Dashboard(){
  const [freshStart,setFreshStart]=useState(null),[swarmJobs,setSwarmJobs]=useState([]),[swarmError,setSwarmError]=useState(''),[resetting,setResetting]=useState(false);
  const [selectedJob,setSelectedJob]=useState(null),[selectedArtifacts,setSelectedArtifacts]=useState([]),[reviewBusy,setReviewBusy]=useState(false),[reviewNotice,setReviewNotice]=useState(''),[jobDetailLoading,setJobDetailLoading]=useState(false),[jobDetailError,setJobDetailError]=useState('');
@@ -40,6 +40,18 @@ function Dashboard(){
     <p style={{color:'#bbb'}}>Research → Swarm campaign → job completion → verified audience reach → visitors → registrations → players. A draft is not a delivered message or a new player.</p>
     <p>Fresh queue: <strong>{freshStart?('Active since '+new Date(freshStart).toLocaleString()):'Not activated'}</strong> · New jobs visible: <strong>{swarmJobs.length}</strong> {swarmJobs.length===25?'(first 25)':''}</p>
     <p>Latest handoff: <strong>{data?.swarmHandoff?.status||'Not started'}</strong> · Jobs reported created: <strong>{data?.swarmHandoff?.jobsCreated??0}</strong></p>
+    <section style={{padding:14,border:'1px solid #566078',borderRadius:8,background:'#192133',margin:'12px 0'}}>
+      <h3 style={{margin:'0 0 8px'}}>What has actually happened?</h3>
+      <p style={{margin:'0 0 8px'}}>Swarm jobs are research and content preparation. A completed draft is <strong>not</strong> a delivered message, social post, website visit, registration, or paying player.</p>
+      <div style={{display:'flex',gap:18,flexWrap:'wrap'}}>
+        <span>Waiting for approval: <strong>{swarmJobs.filter(j=>String(j.status).toLowerCase()==='awaiting_review').length}</strong></span>
+        <span>In progress: <strong>{swarmJobs.filter(j=>['queued','running'].includes(String(j.status).toLowerCase())).length}</strong></span>
+        <span>Needs attention: <strong>{swarmJobs.filter(j=>['failed','dead_letter'].includes(String(j.status).toLowerCase())).length}</strong></span>
+        <span>Verified campaign signups: <strong>{registrationReport?.ok?registrationReport.groups.reduce((n,g)=>n+g.registrations,0):'Not verified'}</strong></span>
+      </div>
+      <p style={{color:'#d4d9e3',marginBottom:0}}>Outreach deliveries: <strong>Not connected</strong> · Paying players from campaigns: <strong>Not connected</strong>. Review is a manual checkpoint, not a countdown. Select a job to inspect its actual output.</p>
+    </section>
+
     {sessionExpired&&<p role="alert" style={{padding:12,border:'1px solid #b91c1c',borderRadius:8,color:'#fff'}}>Admin sign-in expired. <a href="/administration/login" style={{color:'#fff',fontWeight:700,textDecoration:'underline'}}>Sign in again to restore your jobs</a>. Your saved jobs have not been erased.</p>}
     <div style={{display:'flex',gap:10,flexWrap:'wrap'}}><button onClick={startFresh} disabled={sessionExpired||resetting||!!freshStart} style={{padding:12,background:'#b91c1c',color:'#fff',border:0,borderRadius:7,cursor:'pointer'}}>{resetting?'Activating…':freshStart?'Fresh queue activated':'ACTIVATE FRESH SWARM QUEUE'}</button><button onClick={()=>{load();refreshSwarm();refreshCampaigns();refreshAudiences();refreshRegistrationReport();}} style={{padding:12,background:'#283447',color:'#fff',border:0,borderRadius:7,cursor:'pointer'}}>REFRESH BOTH SYSTEMS</button></div>
     <section style={{padding:14,marginTop:12,border:'1px solid #394152',borderRadius:8}}>
