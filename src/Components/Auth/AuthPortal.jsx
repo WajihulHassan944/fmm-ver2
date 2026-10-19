@@ -285,7 +285,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       const registration = await apiRequest('/register', {
         method: 'POST',
         token: null,
-        body: { ...playerForm, ...(referrerId ? { referrerId, referredFightId: queryValue(router.query.fight) } : {}), recaptchaToken },
+        body: { ...playerForm, ...(referrerId ? { referrerId, referredFightId: queryValue(router.query.fight) } : {}), recaptchaToken, campaignAttribution: (() => { try { return JSON.parse(sessionStorage.getItem('fmm_fan_acquisition_attribution') || 'null'); } catch { return null; } })() },
       });
       setPlayerRegistration({ state: registration?.emailFailed ? 'email-failed' : 'polling', email: playerForm.email });
       if (registration?.emailFailed) toast.error('Account saved, but the verification email could not be sent. Use Resend verification email.');
