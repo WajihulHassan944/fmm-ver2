@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
-import { fetchPublicPredictionFights } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightCategory, getFightId, getFightName, getFightPrize } from '@/Utils/fightExperience';
 
 const entryIsOpen = (fight) => {
@@ -35,17 +35,17 @@ function FightFighterPhoto({ fight, side }) {
     isA ? fight.fighterAResolvedImage : fight.fighterBResolvedImage,
     isA ? fight.resolvedFighterAImage : fight.resolvedFighterBImage,
     isA ? fight.featuredFightFighterAImage : fight.featuredFightFighterBImage,
-    record?.primaryImage, record?.imageUrl, record?.profileImage, record?.image,
-    ref?.primaryImage, ref?.imageUrl, ref?.profileImage, ref?.image,
+    record?.primaryImage, record?.resolvedImage, record?.imageUrl, record?.profileImage, record?.image, record?.imageHealth?.url, record?.imageHealth?.secure_url,
+    ref?.primaryImage, ref?.resolvedImage, ref?.imageUrl, ref?.profileImage, ref?.image, ref?.imageHealth?.url, ref?.imageHealth?.secure_url,
     isA ? fight.fighterAImage : fight.fighterBImage,
     isA ? fight.fighterAImageUrl : fight.fighterBImageUrl,
     isA ? fight.matchFighterAImage : fight.matchFighterBImage,
     isA ? fight.fighterOneImage : fight.fighterTwoImage,
     isA ? fight.imageA : fight.imageB,
   ];
-  const candidates = raw.filter((value, position) => typeof value === 'string' && (value.startsWith('https://') || value.startsWith('http://') || value.startsWith('/')) && raw.indexOf(value) === position);
+  const candidates = [...new Set(raw.filter((value) => typeof value === 'string' && value.trim() && !['null', 'undefined', 'none', 'n/a'].includes(value.trim().toLowerCase())).map((value) => resolvePublicMediaUrl(value)))];
   const [position, setPosition] = useState(0);
-  useEffect(() => setPosition(0), [fight, side]);
+  useEffect(() => setPosition(0), [side, candidates.join('|')]);
   const source = candidates[position];
   return source
     ? <img src={source} alt="" onError={() => setPosition(current => current + 1)} />
