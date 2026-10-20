@@ -1147,11 +1147,11 @@ class FantasyMobileAppCore extends React.Component {
   getEventEntryFee = (event = {}) => Math.max(0, toSafeNumber(event.entryFee, event.entryFeeTokens, event.matchTokens));
   getEventEntryLabel = (event = {}) => {
     const fee = this.getEventEntryFee(event);
-    return fee > 0 ? `${formatFMCoinUsd(fee)} value · ${fee.toLocaleString()} FM COINS` : 'FREE';
+    return fee > 0 ? formatFMCoinUsd(fee) : 'FREE';
   };
   getEventPrizeLabel = (event = {}) => {
     const coins = Number(String(event.prize || '').replace(/[^0-9.]/g, ''));
-    return coins > 0 ? `${formatFMCoinUsd(coins)} pool value · ${coins.toLocaleString()} FM COINS` : event.prize || 'PRIZE TERMS PENDING';
+    return coins > 0 ? formatFMCoinUsd(coins) : 'PRIZE TERMS PENDING';
   };
   getEventActionLabel = (event = {}, includeEntry = false) => {
     if (!event.playable) return 'VIEW FIGHT DETAILS';
@@ -3976,8 +3976,8 @@ class FantasyMobileAppCore extends React.Component {
   renderFeaturedDetail(s, event) {
     if (!event) return null;
     const values = [
-      ['PRIZE POOL', this.getEventPrizeLabel(event), '#f2b544'],
       ['ENTRY FEE', this.getEventEntryLabel(event), '#ffce54'],
+      ['PRIZE POOL', this.getEventPrizeLabel(event), '#f2b544'],
       ['ENTRIES', event.entries > 0 ? event.entries.toLocaleString() : 'NONE YET', '#3d9bff'],
     ];
     return React.createElement('div', { className: 'fmm-unified-featured-fight', 'data-fmm-section': 'featured-fight', style: { margin: '0 16px 16px', position: 'relative', overflow: 'hidden', border: '1px solid ' + event.tagColor, borderRadius: 14, padding: 12, boxShadow: '0 0 18px ' + event.tagColor + '55' } },
