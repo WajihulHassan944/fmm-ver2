@@ -47,7 +47,7 @@ export default function PlayPage({ fights = [] }) {
               <span><FaCoins/><small>ENTRY · FM COINS</small><strong>{Number(fight.matchTokens || 0).toLocaleString()}</strong></span>
               <span><FaTrophy/><small>PRIZE</small><strong>{getFightPrize(fight)}</strong></span>
             </div>
-            <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button">PLAY THIS FIGHT <FaArrowRight /></Link>
+            <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button" onClick={() => { if (typeof window !== "undefined" && typeof window.gtag === "function") window.gtag("event", "select_fight", { fight_id: String(getFightId(fight)).slice(0, 100), fight_category: String(getFightCategory(fight)).slice(0, 40), send_to: "G-TP1C9005WD" }); }}>PLAY THIS FIGHT <FaArrowRight /></Link>
             <p>Next: verify eligibility, make your predictions, then submit your card.</p>
           </div>
         </article>)}
