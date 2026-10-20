@@ -396,6 +396,23 @@ function AppContent({ children }) {
     catch (_error) { /* storage may be disabled; browsing must still work */ }
   }, [router.isReady, router.asPath]);
 
+  // Record client-side Next.js navigation without sending personal data.
+  // Initial page_view is sent by GA4's existing config call.
+  useEffect(() => {
+    const onRouteChange = (url) => {
+      if (typeof window === 'undefined' || url.startsWith('/administration')) return;
+      if (typeof window.gtag !== 'function') return;
+      window.gtag('event', 'page_view', {
+        page_location: window.location.origin + url,
+        page_path: url.split('?')[0].split('#')[0],
+        page_title: document.title,
+        send_to: 'G-TP1C9005WD',
+      });
+    };
+    router.events.on('routeChangeComplete', onRouteChange);
+    return () => router.events.off('routeChangeComplete', onRouteChange);
+  }, [router.events]);
+
   const isAdministrationRoute = router.pathname.startsWith("/administration");
   const isAdminLoginRoute = router.pathname === "/administration/login";
   const isHomeExperienceRoute = router.pathname === "/" || router.pathname === "/home";
