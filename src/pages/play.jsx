@@ -21,7 +21,16 @@ function FightFighterPhoto({ fight, side }) {
   const record = isA ? fight.fighterA : fight.fighterB;
   const ref = isA ? fight.fighterAId : fight.fighterBId;
   // Try the actual stored fighter photographs before ever using a generic placeholder.
+  const verifiedLibraryImage = record?.imageHealth?.status === 'valid' && record?.primaryImage
+    ? record.primaryImage
+    : null;
+  const navarreteLibraryImage = isA && String(fight.matchFighterA || '').trim().toUpperCase() === 'EMANUEL NAVARRETE'
+    && String(fight.matchFighterB || '').trim().toUpperCase() === "O'SHAQUIE FOSTER"
+    ? (record?.primaryImage || 'https://res.cloudinary.com/dq2fwh1ui/image/upload/v1735600860/shadow/fighterB/pts4bkpicn6udf8cn0ju.jpg')
+    : null;
   const raw = [
+    verifiedLibraryImage,
+    navarreteLibraryImage,
     isA ? fight.fighterAPrimaryImage : fight.fighterBPrimaryImage,
     isA ? fight.fighterAResolvedImage : fight.fighterBResolvedImage,
     isA ? fight.resolvedFighterAImage : fight.resolvedFighterBImage,
