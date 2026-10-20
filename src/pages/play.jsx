@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchPublicPredictionFights } from '@/Utils/publicApi';
-import { formatFightDate, getFightCategory, getFightId, getFightName, getFighterImage, getFallbackFighterImage, getFightPrize } from '@/Utils/fightExperience';
+import { formatFightDate, getFightCategory, getFightId, getFightName, getFightPrize } from '@/Utils/fightExperience';
 
 const entryIsOpen = (fight) => {
   if (typeof fight.entryOpen === 'boolean') return fight.entryOpen;
@@ -16,23 +16,31 @@ const entryIsOpen = (fight) => {
   return Number.isFinite(lock) && lock > Date.now();
 };
 
-function FightFighterPhoto({ fight, side, index }) {
-  const primary = getFighterImage(fight, side, index);
+function FightFighterPhoto({ fight, side }) {
   const isA = side === 'A';
   const record = isA ? fight.fighterA : fight.fighterB;
   const ref = isA ? fight.fighterAId : fight.fighterBId;
-  const candidates = [
-    primary,
+  // Try the actual stored fighter photographs before ever using a generic placeholder.
+  const raw = [
     isA ? fight.fighterAPrimaryImage : fight.fighterBPrimaryImage,
+    isA ? fight.fighterAResolvedImage : fight.fighterBResolvedImage,
+    isA ? fight.resolvedFighterAImage : fight.resolvedFighterBImage,
+    isA ? fight.featuredFightFighterAImage : fight.featuredFightFighterBImage,
     record?.primaryImage, record?.imageUrl, record?.profileImage, record?.image,
     ref?.primaryImage, ref?.imageUrl, ref?.profileImage, ref?.image,
     isA ? fight.fighterAImage : fight.fighterBImage,
+    isA ? fight.fighterAImageUrl : fight.fighterBImageUrl,
     isA ? fight.matchFighterAImage : fight.matchFighterBImage,
-    getFallbackFighterImage(side),
-  ].filter((value, position, values) => typeof value === 'string' && value.trim() && values.indexOf(value) === position);
+    isA ? fight.fighterOneImage : fight.fighterTwoImage,
+    isA ? fight.imageA : fight.imageB,
+  ];
+  const candidates = raw.filter((value, position) => typeof value === 'string' && /^https?:\\/\\/|^\\//i.test(value.trim()) && raw.indexOf(value) === position);
   const [position, setPosition] = useState(0);
-  useEffect(() => setPosition(0), [primary, side]);
-  return <img src={candidates[position] || getFallbackFighterImage(side)} alt="" onError={() => setPosition(current => Math.min(current + 1, candidates.length - 1))} />;
+  useEffect(() => setPosition(0), [fight, side]);
+  const source = candidates[position];
+  return source
+    ? <img src={source} alt="" onError={() => setPosition(current => current + 1)} />
+    : <div role="img" aria-label="Fighter photograph unavailable" style={{width:'100%',height:'100%',background:'linear-gradient(140deg,#171e2b,#2c1721)'}} />;
 }
 
 function PlayerNav() {
