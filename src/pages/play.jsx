@@ -2,9 +2,9 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
-import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
+import { formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import { fetchPublicPredictionFights, fetchPublicFights, fetchPublicFighters, resolvePublicMediaUrl } from '@/Utils/publicApi';
-import { formatFightDate, getFightCategory, getFightId, getFightName, getFightPrize } from '@/Utils/fightExperience';
+import { formatFightDate, getFightCategory, getFightId, getFightName } from '@/Utils/fightExperience';
 
 const entryIsOpen = (fight) => {
   if (typeof fight.entryOpen === 'boolean') return fight.entryOpen;
@@ -15,6 +15,10 @@ const entryIsOpen = (fight) => {
   const lock = fight.lockAt ? new Date(fight.lockAt).getTime() : date ? new Date(`${date}T${time}:00`).getTime() : NaN;
   return Number.isFinite(lock) && lock > Date.now();
 };
+
+const contestAmount = (...values) => { for (const value of values) { if (value === null || value === undefined || value === '') continue; const number = Number(String(value).replace(/[^0-9.-]/g, '')); if (Number.isFinite(number) && number >= 0) return number; } return null; };
+const entryUsd = (fight) => { const dollars = contestAmount(fight.entryFeeUsd, fight.entryFeeDollars, fight.buyInUsd); if (dollars !== null) return `${dollars.toLocaleString('en-US', { maximumFractionDigits: 2 })}`; const coins = contestAmount(fight.matchTokens, fight.entryFeeTokens, fight.entryFee); return coins === null ? 'TBA' : formatFMCoinUsd(coins); };
+const prizeUsd = (fight) => { const dollars = contestAmount(fight.prizePoolUsd, fight.prizePoolDollars, fight.potUsd); if (dollars !== null) return `${dollars.toLocaleString('en-US', { maximumFractionDigits: 2 })}`; const coins = contestAmount(fight.pot, fight.currentPot, fight.prizePool, fight.prize, fight.rewardAmount, fight.entryPrize); return coins === null ? 'TBA' : formatFMCoinUsd(coins); };
 
 function FightFighterPhoto({ fight, side }) {
   const isA = side === 'A';
@@ -81,8 +85,8 @@ export default function PlayPage({ fights = [] }) {
             <small>{formatFightDate(fight)}{fight.entryOpen === false ? ' · ENTRY CLOSED' : ''}</small>
             <h2>{getFightName(fight)}</h2>
             <div className="fmm-play-money">
-              <span><FaCoins/><small>ENTRY · FM COINS</small><strong>{Number(fight.matchTokens || 0).toLocaleString()}</strong></span>
-              <span><FaTrophy/><small>PRIZE</small><strong>{getFightPrize(fight)}</strong></span>
+              <span><small>ENTRY FEE</small><strong>{entryUsd(fight)}</strong></span>
+              <span><FaTrophy/><small>PRIZE POOL</small><strong>{prizeUsd(fight)}</strong></span>
             </div>
             <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button" onClick={() => { if (typeof window !== "undefined" && typeof window.gtag === "function") window.gtag("event", "select_fight", { fight_id: String(getFightId(fight)).slice(0, 100), fight_category: String(getFightCategory(fight)).slice(0, 40), send_to: "G-TP1C9005WD" }); }}>{fight.entryOpen === false ? 'VIEW FIGHT' : 'PLAY THIS FIGHT'} <FaArrowRight /></Link>
             <p>Next: verify eligibility, make your predictions, then submit your card.</p>
