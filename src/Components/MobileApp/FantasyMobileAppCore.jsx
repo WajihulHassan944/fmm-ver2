@@ -1147,11 +1147,11 @@ class FantasyMobileAppCore extends React.Component {
   getEventEntryFee = (event = {}) => Math.max(0, toSafeNumber(event.entryFee, event.entryFeeTokens, event.matchTokens));
   getEventEntryLabel = (event = {}) => {
     const fee = this.getEventEntryFee(event);
-    return fee > 0 ? formatFMCoinUsd(fee) : 'FREE';
+    return fee > 0 ? `${formatFMCoinUsd(fee)} · ${fee.toLocaleString()} FM COINS` : 'FREE';
   };
   getEventPrizeLabel = (event = {}) => {
     const coins = Number(String(event.prize || '').replace(/[^0-9.]/g, ''));
-    return coins > 0 ? formatFMCoinUsd(coins) : 'PRIZE TERMS PENDING';
+    return coins > 0 ? `${formatFMCoinUsd(coins)} · ${coins.toLocaleString()} FM COINS` : 'PRIZE TERMS PENDING';
   };
   getEventActionLabel = (event = {}, includeEntry = false) => {
     if (!event.playable) return 'VIEW FIGHT DETAILS';
