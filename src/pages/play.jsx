@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchPublicPredictionFights } from '@/Utils/publicApi';
-import { formatFightDate, getFightCategory, getFightId, getFightName, getFighterImage, getFightPrize } from '@/Utils/fightExperience';
+import { formatFightDate, getFightCategory, getFightId, getFightName, getFighterImage, getFallbackFighterImage, getFightPrize } from '@/Utils/fightExperience';
 
 const entryIsOpen = (fight) => {
   if (typeof fight.entryOpen === 'boolean') return fight.entryOpen;
@@ -35,9 +35,9 @@ export default function PlayPage({ fights = [] }) {
       {fights.length ? <div className="fmm-play-grid">
         {fights.map((fight) => <article className="fmm-play-card" key={getFightId(fight)}>
           <div className="fmm-play-card-visual">
-            <img src={getFighterImage(fight, 'A', 0)} alt="" />
+            <img src={getFighterImage(fight, 'A', 0)} alt="" onError={(event) => { const fallback = getFallbackFighterImage('A'); if (event.currentTarget.getAttribute('src') !== fallback) event.currentTarget.src = fallback; }} />
             <b>VS</b>
-            <img src={getFighterImage(fight, 'B', 1)} alt="" />
+            <img src={getFighterImage(fight, 'B', 1)} alt="" onError={(event) => { const fallback = getFallbackFighterImage('B'); if (event.currentTarget.getAttribute('src') !== fallback) event.currentTarget.src = fallback; }} />
             <span>{getFightCategory(fight)}</span>
           </div>
           <div className="fmm-play-card-copy">
