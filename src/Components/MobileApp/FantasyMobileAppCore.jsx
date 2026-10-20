@@ -2840,7 +2840,7 @@ class FantasyMobileAppCore extends React.Component {
       React.createElement('div', { style: { fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: 'rgba(255,255,255,.7)', marginBottom: 8 } }, 'UPCOMING EVENTS'),
       React.createElement('div', { style: { background: 'linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02))', border: '1px solid ' + ev.tagColor + '66', borderRadius: 18, padding: 16 } },
         React.createElement('div', { style: { height: 140, position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 10, background: '#000' } },
-          React.createElement(MobileImageSlot, { id: 'bold-event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })
+          React.createElement(MobileImageSlot, { id: 'bold-event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage })
         ),
         React.createElement('div', { style: { fontSize: 10, fontWeight: 800, color: ev.tagColor, marginBottom: 4 } }, ev.tag),
         React.createElement('div', { style: { fontFamily: "'Anton',sans-serif", fontSize: 24, marginBottom: 6 } }, ev.f1, React.createElement('span', { style: { color: '#ef4444' } }, ' VS '), ev.f2),
@@ -3914,7 +3914,7 @@ class FantasyMobileAppCore extends React.Component {
           s.flashCard[ev.id] && React.createElement('div', { key: s.flashCard[ev.id], style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle,rgba(242,181,68,.55),transparent 70%)', animation: 'quickFlash .6s ease-out forwards', zIndex: 5, pointerEvents: 'none' } }),
           React.createElement('div', { style: { height: 150, position: 'relative' } },
             ev.hasPoster
-              ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'cover', src: ev.image, fallbackSrc: ev.fallbackImage })
+              ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage })
               : React.createElement('div', { className: 'fmm-unified-upcoming-fighters', style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
                   ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'event-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'cover', src: ev.fighterAImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 34 } }, (ev.f1 || '?')[0]),
                   ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'event-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'cover', src: ev.fighterBImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 34 } }, (ev.f2 || '?')[0])
