@@ -15,6 +15,25 @@ const entryIsOpen = (fight) => {
   return Number.isFinite(lock) && lock > Date.now();
 };
 
+function FightFighterPhoto({ fight, side, index }) {
+  const primary = getFighterImage(fight, side, index);
+  const isA = side === 'A';
+  const record = isA ? fight.fighterA : fight.fighterB;
+  const ref = isA ? fight.fighterAId : fight.fighterBId;
+  const candidates = [
+    primary,
+    isA ? fight.fighterAPrimaryImage : fight.fighterBPrimaryImage,
+    record?.primaryImage, record?.imageUrl, record?.profileImage, record?.image,
+    ref?.primaryImage, ref?.imageUrl, ref?.profileImage, ref?.image,
+    isA ? fight.fighterAImage : fight.fighterBImage,
+    isA ? fight.matchFighterAImage : fight.matchFighterBImage,
+    getFallbackFighterImage(side),
+  ].filter((value, position, values) => typeof value === 'string' && value.trim() && values.indexOf(value) === position);
+  const [position, setPosition] = React.useState(0);
+  React.useEffect(() => setPosition(0), [primary, side]);
+  return <img src={candidates[position] || getFallbackFighterImage(side)} alt="" onError={() => setPosition(current => Math.min(current + 1, candidates.length - 1))} />;
+}
+
 function PlayerNav() {
   return <nav aria-label="Player navigation" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap',padding:'18px clamp(16px,4vw,48px)',background:'#090b11',borderBottom:'1px solid rgba(239,38,56,.35)',color:'#fff'}}>
     <Link href="/" style={{fontWeight:900,color:'#fff',textDecoration:'none',letterSpacing:'.06em',fontSize:20}}>FANTASY <span style={{color:'#ed1b2f'}}>MMADNESS</span></Link>
@@ -35,9 +54,9 @@ export default function PlayPage({ fights = [] }) {
       {fights.length ? <div className="fmm-play-grid">
         {fights.map((fight) => <article className="fmm-play-card" key={getFightId(fight)}>
           <div className="fmm-play-card-visual">
-            <img src={getFighterImage(fight, 'A', 0)} alt="" onError={(event) => { const fallback = getFallbackFighterImage('A'); if (event.currentTarget.getAttribute('src') !== fallback) event.currentTarget.src = fallback; }} />
+            <FightFighterPhoto fight={fight} side="A" index={0} />
             <b>VS</b>
-            <img src={getFighterImage(fight, 'B', 1)} alt="" onError={(event) => { const fallback = getFallbackFighterImage('B'); if (event.currentTarget.getAttribute('src') !== fallback) event.currentTarget.src = fallback; }} />
+            <FightFighterPhoto fight={fight} side="B" index={1} />
             <span>{getFightCategory(fight)}</span>
           </div>
           <div className="fmm-play-card-copy">
