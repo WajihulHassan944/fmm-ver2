@@ -343,6 +343,8 @@ function App({ Component, ...rest }) {
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               gtag('config', 'AW-16787825610');
+              // GA4 website analytics; reuse the existing Google tag loader.
+              gtag('config', 'G-TP1C9005WD');
             `}
           </Script>
         </>
