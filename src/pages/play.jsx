@@ -26,11 +26,11 @@ function FightFighterPhoto({ fight, side }) {
     : null;
   const navarreteLibraryImage = isA && String(fight.matchFighterA || '').trim().toUpperCase() === 'EMANUEL NAVARRETE'
     && String(fight.matchFighterB || '').trim().toUpperCase() === "O'SHAQUIE FOSTER"
-    ? (record?.primaryImage || 'https://res.cloudinary.com/dq2fwh1ui/image/upload/v1735600860/shadow/fighterB/pts4bkpicn6udf8cn0ju.jpg')
+    ? 'https://res.cloudinary.com/dq2fwh1ui/image/upload/v1792512163/fighterAImages/dmpnih4rcp3vb8lk3uxt.png'
     : null;
   const raw = [
-    verifiedLibraryImage,
     navarreteLibraryImage,
+    verifiedLibraryImage,
     isA ? fight.fighterAPrimaryImage : fight.fighterBPrimaryImage,
     isA ? fight.fighterAResolvedImage : fight.fighterBResolvedImage,
     isA ? fight.resolvedFighterAImage : fight.resolvedFighterBImage,
@@ -78,13 +78,13 @@ export default function PlayPage({ fights = [] }) {
             <span>{getFightCategory(fight)}</span>
           </div>
           <div className="fmm-play-card-copy">
-            <small>{formatFightDate(fight)}</small>
+            <small>{formatFightDate(fight)}{fight.entryOpen === false ? ' · ENTRY CLOSED' : ''}</small>
             <h2>{getFightName(fight)}</h2>
             <div className="fmm-play-money">
               <span><FaCoins/><small>ENTRY · FM COINS</small><strong>{Number(fight.matchTokens || 0).toLocaleString()}</strong></span>
               <span><FaTrophy/><small>PRIZE</small><strong>{getFightPrize(fight)}</strong></span>
             </div>
-            <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button" onClick={() => { if (typeof window !== "undefined" && typeof window.gtag === "function") window.gtag("event", "select_fight", { fight_id: String(getFightId(fight)).slice(0, 100), fight_category: String(getFightCategory(fight)).slice(0, 40), send_to: "G-TP1C9005WD" }); }}>PLAY THIS FIGHT <FaArrowRight /></Link>
+            <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button" onClick={() => { if (typeof window !== "undefined" && typeof window.gtag === "function") window.gtag("event", "select_fight", { fight_id: String(getFightId(fight)).slice(0, 100), fight_category: String(getFightCategory(fight)).slice(0, 40), send_to: "G-TP1C9005WD" }); }}>{fight.entryOpen === false ? 'VIEW FIGHT' : 'PLAY THIS FIGHT'} <FaArrowRight /></Link>
             <p>Next: verify eligibility, make your predictions, then submit your card.</p>
           </div>
         </article>)}
@@ -115,6 +115,13 @@ export async function getServerSideProps({ res }) {
       const fighter = fighterLibrary.find((item) => key && [item.displayName, item.name, item.fighterName, item.fullName].some((candidate) => normalizeName(candidate) === key));
       return fighter?.primaryImage || fighter?.imageUrl || fighter?.profileImage || fighter?.image || '';
     };
+    // The fifth homepage fight is a completed BKFC card; preserve it as a
+    // visible historical card without falsely offering a new paid entry.
+    const historicId = '6acd29b83671964e932b55d8';
+    if (!byId.has(historicId)) {
+      const historic = [...registryRows, ...predictionRows].find((fight) => String(getFightId(fight)) === historicId);
+      if (historic) byId.set(historicId, { ...historic, entryOpen: false });
+    }
     const fights = [...byId.values()].map((fight) => {
       const imageA = libraryImageFor(fight.matchFighterA);
       const imageB = libraryImageFor(fight.matchFighterB);
