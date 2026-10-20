@@ -332,19 +332,20 @@ function App({ Component, ...rest }) {
       {loadMarketingScripts && (
         <>
           <Script
-            async
-            src="https://www.googletagmanager.com/gtag/js?id=AW-16787825610"
-            strategy="lazyOnload"
+            src="https://www.googletagmanager.com/gtag/js?id=G-TP1C9005WD"
+            strategy="afterInteractive"
           />
 
-          <Script id="google-analytics" strategy="lazyOnload">
+          <Script id="google-analytics" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
               gtag('js', new Date());
-              gtag('config', 'AW-16787825610');
-              // GA4 website analytics; reuse the existing Google tag loader.
+              // Load website measurement promptly rather than waiting for browser idle.
               gtag('config', 'G-TP1C9005WD');
+              // Preserve the existing Google Ads conversion configuration.
+              gtag('config', 'AW-16787825610');
             `}
           </Script>
         </>
