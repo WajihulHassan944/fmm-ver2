@@ -125,9 +125,13 @@ export async function getServerSideProps({ res }) {
     const fights = [...byId.values()].map((fight) => {
       const imageA = libraryImageFor(fight.matchFighterA);
       const imageB = libraryImageFor(fight.matchFighterB);
+      const isNavarreteFoster = normalizeName(fight.matchFighterA) === 'emanuelnavarrete' && normalizeName(fight.matchFighterB) === 'oshaquiefoster';
+      const actualImageA = isNavarreteFoster
+        ? 'https://res.cloudinary.com/dq2fwh1ui/image/upload/v1792512163/fighterAImages/dmpnih4rcp3vb8lk3uxt.png'
+        : imageA;
       return {
         ...fight,
-        ...(imageA ? { fighterAPrimaryImage: imageA } : {}),
+        ...(actualImageA ? { fighterAPrimaryImage: actualImageA, fighterAImage: actualImageA, resolvedFighterAImage: actualImageA } : {}),
         ...(imageB ? { fighterBPrimaryImage: imageB } : {}),
       };
     });
