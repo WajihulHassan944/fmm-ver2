@@ -37,9 +37,11 @@ const VisitorsAnalytics = () => {
   const [ga4, setGa4] = useState(null);
   const [ga4Days, setGa4Days] = useState(30);
   const [ga4Loading, setGa4Loading] = useState(true);
+  const [showLegacy, setShowLegacy] = useState(false);
   useEffect(() => {
     let active = true;
     setGa4Loading(true);
+    setGa4(null);
     fetch(buildPublicApiUrl('/api/admin/analytics/ga4?days=' + ga4Days), { headers: adminHeaders() })
       .then(async response => {
         const payload = await response.json().catch(() => ({}));
@@ -215,7 +217,7 @@ const VisitorsAnalytics = () => {
         </div>
         <div className="admin-analytics-live-state">
           <i aria-hidden="true" />
-          <span>{loading ? 'Syncing analytics' : 'Analytics online'}</span>
+          <span>{ga4Loading ? 'Checking GA4 connection' : ga4?.ok ? 'GA4 connected' : 'GA4 not connected'}</span>
         </div>
       </header>
 
@@ -224,7 +226,7 @@ const VisitorsAnalytics = () => {
           <div><strong style={{fontSize:20}}>Google Analytics 4 · FANTASY MMADNESS</strong><p style={{margin:'6px 0',opacity:.8}}>Verified Google website traffic · Property 559734194</p></div>
           <label>Reporting period <select value={ga4Days} onChange={e=>setGa4Days(Number(e.target.value))} style={{marginLeft:8,color:'#111',padding:8}}><option value={7}>7 days</option><option value={30}>30 days</option><option value={90}>90 days</option></select></label>
         </div>
-        {ga4Loading ? <p>Loading Google Analytics report…</p> : !ga4?.ok ? <p role="status" style={{color:'#ffd78b'}}>Google Analytics report not yet connected: {ga4?.message || 'No reporting response'}. The legacy visitor counter below is separate.</p> : <>
+        {ga4Loading ? <p>Loading Google Analytics report…</p> : !ga4?.ok ? <p role="status" style={{color:'#ffd78b'}}>GA4 reporting is not connected: {ga4?.message || 'No reporting response'}. Verified traffic metrics are unavailable; old visitor counters are hidden by default.</p> : <>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(145px,1fr))',gap:12,margin:'14px 0'}}>
             {Object.entries({ 'Active users':ga4.summary.activeUsers,'Sessions':ga4.summary.sessions,'Page views':ga4.summary.pageViews,'New users':ga4.summary.newUsers,'Engaged sessions':ga4.summary.engagedSessions }).map(([label,value])=><div key={label} style={{background:'#1d2531',padding:14,borderRadius:9}}><small>{label}</small><div style={{fontSize:26,fontWeight:800}}>{Number(value).toLocaleString()}</div></div>)}
           </div>
@@ -236,6 +238,8 @@ const VisitorsAnalytics = () => {
         </>}
       </section>
 
+      <div style={{display:'flex',alignItems:'center',gap:12,margin:'12px 0',flexWrap:'wrap'}}><button type="button" onClick={() => setShowLegacy(value => !value)} style={{padding:'10px 14px',border:'1px solid #495467',borderRadius:8,background:'#111a27',color:'#fff'}}>{showLegacy ? 'Hide' : 'Show'} legacy visitor counters (not GA4)</button><small style={{color:'#c8cbd1'}}>Legacy counters are internal click records, not verified Google Analytics visitors.</small></div>
+      {showLegacy && <>
       <section className="admin-analytics-controls" aria-label="Visitor analytics controls">
         <label>
           <span>Tracked property</span>
@@ -299,6 +303,7 @@ const VisitorsAnalytics = () => {
           <p className="admin-analytics-warning"><FaShieldAlt /> Reset actions still use the original endpoints and require confirmation.</p>
         </aside>
       </section>
+      </>}
     </section>
   );
 };
