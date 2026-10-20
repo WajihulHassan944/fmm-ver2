@@ -34,6 +34,24 @@ const VisitorsAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [ga4, setGa4] = useState(null);
+  const [ga4Days, setGa4Days] = useState(30);
+  const [ga4Loading, setGa4Loading] = useState(true);
+  useEffect(() => {
+    let active = true;
+    setGa4Loading(true);
+    fetch(buildPublicApiUrl('/api/admin/analytics/ga4?days=' + ga4Days), { headers: adminHeaders() })
+      .then(async response => {
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.message || 'GA4 report unavailable');
+        return payload;
+      })
+      .then(data => { if (active) setGa4(data); })
+      .catch(error => { if (active) setGa4({ ok: false, message: error.message }); })
+      .finally(() => { if (active) setGa4Loading(false); });
+    return () => { active = false; };
+  }, [ga4Days, refreshKey]);
+
 
   useEffect(() => {
     let active = true;
@@ -200,6 +218,23 @@ const VisitorsAnalytics = () => {
           <span>{loading ? 'Syncing analytics' : 'Analytics online'}</span>
         </div>
       </header>
+
+      <section style={{background:'#10151f',border:'1px solid #384150',borderRadius:14,padding:20,margin:'16px 0',color:'#fff'}} aria-label="Google Analytics investor traffic report">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+          <div><strong style={{fontSize:20}}>Google Analytics 4 · FANTASY MMADNESS</strong><p style={{margin:'6px 0',opacity:.8}}>Verified Google website traffic · Property 559734194</p></div>
+          <label>Reporting period <select value={ga4Days} onChange={e=>setGa4Days(Number(e.target.value))} style={{marginLeft:8,color:'#111',padding:8}}><option value={7}>7 days</option><option value={30}>30 days</option><option value={90}>90 days</option></select></label>
+        </div>
+        {ga4Loading ? <p>Loading Google Analytics report…</p> : !ga4?.ok ? <p role="status" style={{color:'#ffd78b'}}>Google Analytics report not yet connected: {ga4?.message || 'No reporting response'}. The legacy visitor counter below is separate.</p> : <>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(145px,1fr))',gap:12,margin:'14px 0'}}>
+            {Object.entries({ 'Active users':ga4.summary.activeUsers,'Sessions':ga4.summary.sessions,'Page views':ga4.summary.pageViews,'New users':ga4.summary.newUsers,'Engaged sessions':ga4.summary.engagedSessions }).map(([label,value])=><div key={label} style={{background:'#1d2531',padding:14,borderRadius:9}}><small>{label}</small><div style={{fontSize:26,fontWeight:800}}>{Number(value).toLocaleString()}</div></div>)}
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:18}}>
+            <div><h3>Traffic sources</h3>{ga4.sources.map(x=><p key={x.name}>{x.name}: <strong>{x.value.toLocaleString()} sessions</strong></p>)}</div>
+            <div><h3>Most visited pages</h3>{ga4.pages.map(x=><p key={x.name} style={{overflowWrap:'anywhere'}}>{x.name}: <strong>{x.value.toLocaleString()} views</strong></p>)}</div>
+          </div>
+          <small>Source: Google Analytics Data API · Fetched {new Date(ga4.fetchedAt).toLocaleString()}. These figures are not verified paid entries or revenue.</small>
+        </>}
+      </section>
 
       <section className="admin-analytics-controls" aria-label="Visitor analytics controls">
         <label>
