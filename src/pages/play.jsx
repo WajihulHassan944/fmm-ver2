@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
-import { fetchPublicPredictionFights, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, fetchPublicFights, fetchPublicFighters, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightCategory, getFightId, getFightName, getFightPrize } from '@/Utils/fightExperience';
 
 const entryIsOpen = (fight) => {
@@ -96,8 +96,34 @@ export default function PlayPage({ fights = [] }) {
 export async function getServerSideProps({ res }) {
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const rows = await fetchPublicPredictionFights({ limit: 100, hydrateImages: true });
-    const fights = rows.filter((fight) => getFightId(fight) && fight.sourceType !== 'shadow' && entryIsOpen(fight));
+    // The prediction feed can omit a newly registered fight even when the public
+    // fight registry already contains it. Reconcile both feeds by immutable ID.
+    const [predictionRows, registryRows, fighterLibrary] = await Promise.all([
+      fetchPublicPredictionFights({ limit: 100, hydrateImages: true }),
+      fetchPublicFights({ limit: 100, hydrateImages: true }),
+      fetchPublicFighters({ limit: 240 }).catch(() => []),
+    ]);
+    const byId = new Map();
+    for (const fight of [...registryRows, ...predictionRows]) {
+      const id = String(getFightId(fight) || '');
+      if (!id || fight.sourceType === 'shadow' || !entryIsOpen(fight)) continue;
+      byId.set(id, { ...(byId.get(id) || {}), ...fight });
+    }
+    const normalizeName = (name) => String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const libraryImageFor = (name) => {
+      const key = normalizeName(name);
+      const fighter = fighterLibrary.find((item) => key && [item.displayName, item.name, item.fighterName, item.fullName].some((candidate) => normalizeName(candidate) === key));
+      return fighter?.primaryImage || fighter?.imageUrl || fighter?.profileImage || fighter?.image || '';
+    };
+    const fights = [...byId.values()].map((fight) => {
+      const imageA = libraryImageFor(fight.matchFighterA);
+      const imageB = libraryImageFor(fight.matchFighterB);
+      return {
+        ...fight,
+        ...(imageA ? { fighterAPrimaryImage: imageA } : {}),
+        ...(imageB ? { fighterBPrimaryImage: imageB } : {}),
+      };
+    });
     return { props: { fights: JSON.parse(JSON.stringify(fights)) } };
   } catch (error) {
     console.error('Play Now fights unavailable:', error);
