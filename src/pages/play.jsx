@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
@@ -29,8 +30,8 @@ function FightFighterPhoto({ fight, side, index }) {
     isA ? fight.matchFighterAImage : fight.matchFighterBImage,
     getFallbackFighterImage(side),
   ].filter((value, position, values) => typeof value === 'string' && value.trim() && values.indexOf(value) === position);
-  const [position, setPosition] = React.useState(0);
-  React.useEffect(() => setPosition(0), [primary, side]);
+  const [position, setPosition] = useState(0);
+  useEffect(() => setPosition(0), [primary, side]);
   return <img src={candidates[position] || getFallbackFighterImage(side)} alt="" onError={() => setPosition(current => Math.min(current + 1, candidates.length - 1))} />;
 }
 
