@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaTrophy, FaArrowRight } from 'react-icons/fa';
-import { formatFMCoinUsd } from '@/Components/Common/FMCoin';
+import { FMCoin as FaCoins, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import { fetchPublicPredictionFights, fetchPublicFights, fetchPublicFighters, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightCategory, getFightId, getFightName } from '@/Utils/fightExperience';
 
@@ -85,8 +85,8 @@ export default function PlayPage({ fights = [] }) {
             <small>{formatFightDate(fight)}{fight.entryOpen === false ? ' · ENTRY CLOSED' : ''}</small>
             <h2>{getFightName(fight)}</h2>
             <div className="fmm-play-money">
-              <span><small>ENTRY FEE</small><strong>{entryUsd(fight)}</strong></span>
-              <span><FaTrophy/><small>PRIZE POOL</small><strong>{prizeUsd(fight)}</strong></span>
+              <span><FaCoins/><small>ENTRY FEE</small><strong>{entryUsd(fight)}</strong><small>{Number(fight.matchTokens || 0).toLocaleString()} FM COINS</small></span>
+              <span><FaTrophy/><small>PRIZE POOL</small><strong>{prizeUsd(fight)}</strong><small>{Number(fight.pot ?? fight.currentPot ?? fight.prizePool ?? fight.prize ?? 0).toLocaleString()} FM COINS</small></span>
             </div>
             <Link href={`/fight/${encodeURIComponent(getFightId(fight))}?play=1`} className="fmm-play-button" onClick={() => { if (typeof window !== "undefined" && typeof window.gtag === "function") window.gtag("event", "select_fight", { fight_id: String(getFightId(fight)).slice(0, 100), fight_category: String(getFightCategory(fight)).slice(0, 40), send_to: "G-TP1C9005WD" }); }}>{fight.entryOpen === false ? 'VIEW FIGHT' : 'PLAY THIS FIGHT'} <FaArrowRight /></Link>
             <p>Next: verify eligibility, make your predictions, then submit your card.</p>
