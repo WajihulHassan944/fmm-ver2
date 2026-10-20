@@ -34,7 +34,7 @@ function FightFighterPhoto({ fight, side }) {
     isA ? fight.fighterOneImage : fight.fighterTwoImage,
     isA ? fight.imageA : fight.imageB,
   ];
-  const candidates = raw.filter((value, position) => typeof value === 'string' && /^https?:\\/\\/|^\\//i.test(value.trim()) && raw.indexOf(value) === position);
+  const candidates = raw.filter((value, position) => typeof value === 'string' && (value.startsWith('https://') || value.startsWith('http://') || value.startsWith('/')) && raw.indexOf(value) === position);
   const [position, setPosition] = useState(0);
   useEffect(() => setPosition(0), [fight, side]);
   const source = candidates[position];
