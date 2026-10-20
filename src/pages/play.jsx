@@ -59,7 +59,7 @@ export default function PlayPage({ fights = [] }) {
 export async function getServerSideProps({ res }) {
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const rows = await fetchPublicPredictionFights({ limit: 100, hydrateImages: false });
+    const rows = await fetchPublicPredictionFights({ limit: 100, hydrateImages: true });
     const fights = rows.filter((fight) => getFightId(fight) && fight.sourceType !== 'shadow' && entryIsOpen(fight));
     return { props: { fights: JSON.parse(JSON.stringify(fights)) } };
   } catch (error) {
