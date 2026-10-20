@@ -287,6 +287,11 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
         token: null,
         body: { ...playerForm, ...(referrerId ? { referrerId, referredFightId: queryValue(router.query.fight) } : {}), recaptchaToken, campaignAttribution: (() => { try { return JSON.parse(sessionStorage.getItem('fmm_fan_acquisition_attribution') || 'null'); } catch { return null; } })() },
       });
+      // Count successfully accepted signup requests, without transmitting PII.
+      // Email verification completion is a separate, server-confirmed milestone.
+      if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+        window.gtag('event', 'sign_up_submitted', { method: 'email', send_to: 'G-TP1C9005WD' });
+      }
       setPlayerRegistration({ state: registration?.emailFailed ? 'email-failed' : 'polling', email: playerForm.email });
       if (registration?.emailFailed) toast.error('Account saved, but the verification email could not be sent. Use Resend verification email.');
       else toast.success('Account created. Check your email to verify it.');
