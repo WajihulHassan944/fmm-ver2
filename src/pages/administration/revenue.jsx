@@ -19,6 +19,23 @@ const LABELS = {
   [REVENUE_EVENTS.CHALLENGE_SHARE]: 'Friend challenges',
 };
 
+const waitForRevenueRetry = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function readAdminRevenue(path) {
+ let lastError;
+ for (let attempt=0;attempt<3;attempt++) {
+  try {
+   const response=await fetch(buildPublicApiUrl(path),{headers:adminHeaders(),cache:'no-store'});
+   if(response.status===401||response.status===403)throw new Error('Admin session expired or access denied ('+response.status+'). Sign in again.');
+   if(!response.ok)throw Object.assign(new Error('Backend HTTP '+response.status),{retryable:response.status>=500||response.status===429});
+   return await response.json();
+  } catch(error) {
+   lastError=error;
+   if(attempt===2||error.retryable===false||/Admin session/.test(error.message))break;
+   await waitForRevenueRetry(350*(attempt+1));
+  }
+ }
+ throw lastError;
+}
 function RevenueCommandCenter(){
  const [events,setEvents]=useState([]);
  const [serverSummary,setServerSummary]=useState(null);
@@ -33,9 +50,26 @@ function RevenueCommandCenter(){
  const refreshMerchantStatements=async()=>{try{const response=await fetch(buildPublicApiUrl('/api/admin/revenue/merchant-statements'),{headers:adminHeaders()});if(!response.ok)throw new Error('Merchant statement service is not available.');const data=await response.json();if(!data?.ok||!Array.isArray(data.statements))throw new Error('Unexpected merchant statement response.');setMerchantStatements(data.statements);setMerchantStatus('connected');return true;}catch{setMerchantStatus('unavailable');return false;}};
  const saveStatement=async(event)=>{event.preventDefault();if(merchantStatus!=='connected')return;setStatementSaving(true);setStatementSave('');try{const body=Object.fromEntries(Object.entries(statementDraft).map(([key,value])=>[key,key==='period'?value:Number(value)]));const response=await fetch(buildPublicApiUrl('/api/admin/revenue/merchant-statements'),{method:'POST',headers:{...adminHeaders(),'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||'Statement could not be saved.');setStatementSave('Statement saved in the protected backend. Bank deposits are not independently verified.');await refreshMerchantStatements();}catch(error){setStatementSave(error.message||'Statement save failed.');}finally{setStatementSaving(false)}};
 
- useEffect(()=>{fetch(buildPublicApiUrl('/api/admin/revenue/merchant-statements'),{headers:adminHeaders()}).then(r=>r.ok?r.json():null).then(data=>{if(data?.ok&&Array.isArray(data.statements)){setMerchantStatements(data.statements);setMerchantStatus('connected')}else setMerchantStatus('unavailable')}).catch(()=>setMerchantStatus('unavailable'))},[]);
- useEffect(()=>{let active=true;fetch(buildPublicApiUrl('/api/admin/affiliate-payouts?status=all'),{headers:adminHeaders()}).then(async r=>{if(!r.ok)throw new Error('Affiliate payouts unavailable');return r.json()}).then(data=>{if(!active)return;if(!Array.isArray(data?.payouts))throw new Error('Invalid payout response');setAffiliatePayouts(data.payouts);setAffiliatePayoutStatus('connected')}).catch(()=>{if(active)setAffiliatePayoutStatus('unavailable')});return()=>{active=false}},[]);
- useEffect(()=>{const load=()=>setEvents(getLocalRevenueEvents());load();window.addEventListener('fmm:revenue-event',load);fetch(buildPublicApiUrl('/api/admin/revenue/summary?days=30'),{headers:adminHeaders()}).then(r=>r.ok?r.json():null).then(data=>{if(data?.ok){setServerSummary(data);setSourceStatus('server')}else setSourceStatus('browser')}).catch(()=>setSourceStatus('browser'));return()=>window.removeEventListener('fmm:revenue-event',load)},[]);
+ useEffect(()=>{
+  let active=true;
+  readAdminRevenue('/api/admin/revenue/merchant-statements').then(data=>{
+   if(!active)return;
+   if(!data?.ok||!Array.isArray(data.statements))throw new Error('Merchant statement response invalid');
+   setMerchantStatements(data.statements);setMerchantStatus('connected');
+  }).catch(()=>{if(active)setMerchantStatus('unavailable')});
+  readAdminRevenue('/api/admin/affiliate-payouts?status=all').then(data=>{
+   if(!active)return;
+   if(!Array.isArray(data?.payouts))throw new Error('Payout response invalid');
+   setAffiliatePayouts(data.payouts);setAffiliatePayoutStatus('connected');
+  }).catch(()=>{if(active)setAffiliatePayoutStatus('unavailable')});
+  const load=()=>setEvents(getLocalRevenueEvents());
+  load();window.addEventListener('fmm:revenue-event',load);
+  readAdminRevenue('/api/admin/revenue/summary?days=30').then(data=>{
+   if(!active)return;
+   if(data?.ok){setServerSummary(data);setSourceStatus('server')}else setSourceStatus('browser');
+  }).catch(()=>{if(active)setSourceStatus('browser')});
+  return()=>{active=false;window.removeEventListener('fmm:revenue-event',load)};
+ },[]);
  const localCounts=useMemo(()=>events.reduce((a,e)=>{a[e.event]=(a[e.event]||0)+1;return a},{}),[events]);
  const counts=serverSummary ? Object.fromEntries(Object.entries(serverSummary.byEvent||{}).map(([key,value])=>[key,Number(value?.count||0)])) : localCounts;
  const views=counts[REVENUE_EVENTS.FIGHT_VIEW]||0, starts=counts[REVENUE_EVENTS.PREDICTION_START]||0, paid=counts[REVENUE_EVENTS.PAID_ENTRY]||0;
