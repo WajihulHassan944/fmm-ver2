@@ -67,60 +67,6 @@ const AffiliatesPayouts = () => {
     }, []);
 
         
-    const handleSearch = (e) => {
-        setSearchQuery(e.target.value);
-    };
-
-    const handleFilter = (status) => {
-        setFilterStatus(status);
-    };
-    
-    const handlePayNow = (user, payout) => {
-        setSelectedUser(user);
-        setSelectedPayout(payout);
-        setPopupVisible(true);
-    };
-
-    const handleClosePopup = () => {
-        setPopupVisible(false);
-        setSelectedPayout(null); // Reset selected payout
-    };
-
-    const handleConfirmPayment = async () => {
-        if (selectedUser && selectedPayout) {
-            try {
-                const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/confirm-payment-affiliate`, {
-                    method: 'POST',
-                    headers: adminHeaders({
-                        'Content-Type': 'application/json',
-                    }),
-                    body: JSON.stringify({
-                        affiliateId: selectedUser._id, // Send affiliate ID
-                        amount: selectedPayout.amount, // Send the payout amount
-                        payoutId: selectedPayout._id, // Send the payout ID
-                    }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to process payment');
-                }
-
-                const responseData = await response.json();
-                console.log('Payment response:', responseData);
-                toast.success('Payment processed successfully!');
-                await fetchData(); // Refresh data after payment
-            } catch (error) {
-                console.error('Error processing payment:', error);
-                toast.error('Error processing payment. Please try again.');
-            }
-        } else {
-            toast.error('No payout available for this affiliate.');
-        }
-
-        setPopupVisible(false);
-    };
-
     if (detailsOpen && selectedUser) {
         return <UserDetails user={selectedUser} />;
     }
