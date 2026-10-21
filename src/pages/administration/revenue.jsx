@@ -44,6 +44,8 @@ function RevenueCommandCenter(){
  const [affiliatePayouts,setAffiliatePayouts]=useState([]);
  const [affiliatePayoutStatus,setAffiliatePayoutStatus]=useState('loading');
  const [merchantStatus,setMerchantStatus]=useState('loading');
+ const [connectionErrors,setConnectionErrors]=useState({});
+ const [connectionCheck,setConnectionCheck]=useState(0);
  const [statementDraft,setStatementDraft]=useState({period:'2026-09',grossSales:'8.94',refunds:'0',adjustments:'0',cardFees:'-2.11',otherFees:'-42.97',reportedNetFunding:'-36.14'});
  const [statementSave,setStatementSave]=useState('');
  const [statementSaving,setStatementSaving]=useState(false);
@@ -52,24 +54,25 @@ function RevenueCommandCenter(){
 
  useEffect(()=>{
   let active=true;
+  setMerchantStatus('loading');setAffiliatePayoutStatus('loading');setSourceStatus('loading');
   readAdminRevenue('/api/admin/revenue/merchant-statements').then(data=>{
    if(!active)return;
    if(!data?.ok||!Array.isArray(data.statements))throw new Error('Merchant statement response invalid');
-   setMerchantStatements(data.statements);setMerchantStatus('connected');
-  }).catch(()=>{if(active)setMerchantStatus('unavailable')});
+   setMerchantStatements(data.statements);setMerchantStatus('connected');setConnectionErrors(prev=>({...prev,merchant:''}));
+  }).catch(error=>{if(active){setMerchantStatus('unavailable');setConnectionErrors(prev=>({...prev,merchant:error.message||'Request failed'}))}});
   readAdminRevenue('/api/admin/affiliate-payouts?status=all').then(data=>{
    if(!active)return;
    if(!Array.isArray(data?.payouts))throw new Error('Payout response invalid');
-   setAffiliatePayouts(data.payouts);setAffiliatePayoutStatus('connected');
-  }).catch(()=>{if(active)setAffiliatePayoutStatus('unavailable')});
+   setAffiliatePayouts(data.payouts);setAffiliatePayoutStatus('connected');setConnectionErrors(prev=>({...prev,affiliate:''}));
+  }).catch(error=>{if(active){setAffiliatePayoutStatus('unavailable');setConnectionErrors(prev=>({...prev,affiliate:error.message||'Request failed'}))}});
   const load=()=>setEvents(getLocalRevenueEvents());
   load();window.addEventListener('fmm:revenue-event',load);
   readAdminRevenue('/api/admin/revenue/summary?days=30').then(data=>{
    if(!active)return;
-   if(data?.ok){setServerSummary(data);setSourceStatus('server')}else setSourceStatus('browser');
-  }).catch(()=>{if(active)setSourceStatus('browser')});
+   if(data?.ok){setServerSummary(data);setSourceStatus('server');setConnectionErrors(prev=>({...prev,events:''}))}else setSourceStatus('browser');
+  }).catch(error=>{if(active){setSourceStatus('browser');setConnectionErrors(prev=>({...prev,events:error.message||'Request failed'}))}});
   return()=>{active=false;window.removeEventListener('fmm:revenue-event',load)};
- },[]);
+ },[connectionCheck]);
  const localCounts=useMemo(()=>events.reduce((a,e)=>{a[e.event]=(a[e.event]||0)+1;return a},{}),[events]);
  const counts=serverSummary ? Object.fromEntries(Object.entries(serverSummary.byEvent||{}).map(([key,value])=>[key,Number(value?.count||0)])) : localCounts;
  const views=counts[REVENUE_EVENTS.FIGHT_VIEW]||0, starts=counts[REVENUE_EVENTS.PREDICTION_START]||0, paid=counts[REVENUE_EVENTS.PAID_ENTRY]||0;
@@ -92,6 +95,17 @@ function RevenueCommandCenter(){
  const cards=[REVENUE_EVENTS.FIGHT_VIEW,REVENUE_EVENTS.PLAY_CLICK,REVENUE_EVENTS.PREDICTION_START,REVENUE_EVENTS.SIGNUP_GATE,REVENUE_EVENTS.PAID_ENTRY,REVENUE_EVENTS.CHALLENGE_SHARE];
  return <div className="admin-dashboard-experience"><Head><title>Revenue Command Center | FANTASY MMADNESS</title></Head>
   <section className="admin-dashboard-hero"><div className="admin-dashboard-hero-copy"><span>FANTASY MMADNESS REVENUE ENGINE</span><h1>Turn fight-night traffic into players, purchases and partners.</h1><p>Track the player funnel, identify the leak, then use fight inventory to create consumer and business revenue. </p></div><div className="admin-dashboard-live"><i/><span>{sourceStatus==='server'?'Server event data':sourceStatus==='loading'?'Checking source':'Browser-only data'}</span></div></section>
+  <section className="admin-dashboard-panel" style={{marginBottom:20}}>
+   <div className="admin-dashboard-panel-heading"><h2>Revenue connections</h2><span>Live authenticated API checks</span></div>
+   <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Service</th><th>Current result</th><th>Detail</th></tr></thead><tbody>
+    {[
+     ['Fight activity',sourceStatus==='server'?'Responding':sourceStatus==='loading'?'Checking':'Failed; local event fallback',connectionErrors.events],
+     ['Affiliate payouts',affiliatePayoutStatus==='connected'?'Responding':affiliatePayoutStatus==='loading'?'Checking':'Failed',connectionErrors.affiliate],
+     ['Merchant statements',merchantStatus==='connected'?'Responding':merchantStatus==='loading'?'Checking':'Failed',connectionErrors.merchant]
+    ].map(([name,status,error])=><tr key={name}><td>{name}</td><td>{status}</td><td>{error||'Authenticated endpoint check'}</td></tr>)}
+   </tbody></table></div>
+   <button type="button" onClick={()=>setConnectionCheck(n=>n+1)} style={{padding:'10px 16px',borderRadius:8,cursor:'pointer'}}>Reconnect and refresh revenue data</button>
+  </section>
   <section className="admin-dashboard-panel" style={{marginBottom:20}}>
     <div className="admin-dashboard-panel-heading"><h2>Affiliate payout ledger</h2><span>{affiliatePayoutStatus==='connected'?'Connected to existing admin ledger':affiliatePayoutStatus==='loading'?'Checking protected ledger':'Backend connection unavailable'}</span></div>
     <p>Read-only payout status from the existing affiliate system. These values are FM units, not verified US-dollar disbursements. Pending requests have already reduced the available affiliate wallet balance; they must not be deducted a second time.</p>
