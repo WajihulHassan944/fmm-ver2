@@ -96,7 +96,7 @@ function RevenueCommandCenter(){
  return <div className="admin-dashboard-experience"><Head><title>Revenue Command Center | FANTASY MMADNESS</title></Head>
   <section className="admin-dashboard-hero"><div className="admin-dashboard-hero-copy"><span>FANTASY MMADNESS REVENUE ENGINE</span><h1>Turn fight-night traffic into players, purchases and partners.</h1><p>Track the player funnel, identify the leak, then use fight inventory to create consumer and business revenue. </p></div><div className="admin-dashboard-live"><i/><span>{sourceStatus==='server'?'Server event data':sourceStatus==='loading'?'Checking source':'Browser-only data'}</span></div></section>
   <section className="admin-dashboard-panel" style={{marginBottom:20}}>
-   <div className="admin-dashboard-panel-heading"><h2>Revenue connections</h2><span>Live authenticated API checks</span></div>
+   <div className="admin-dashboard-panel-heading"><h2>Revenue connections · LIVE CHECK</h2><span>Live authenticated API checks</span></div>
    <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Service</th><th>Current result</th><th>Detail</th></tr></thead><tbody>
     {[
      ['Fight activity',sourceStatus==='server'?'Responding':sourceStatus==='loading'?'Checking':'Failed; local event fallback',connectionErrors.events],
@@ -113,7 +113,7 @@ function RevenueCommandCenter(){
       <article className="admin-metric-card"><strong>{pendingAffiliatePayouts.length}</strong><span>Pending requests</span></article>
       <article className="admin-metric-card"><strong>{payoutTotal(pendingAffiliatePayouts).toLocaleString()} FM</strong><span>Pending payout units</span></article>
       <article className="admin-metric-card"><strong>{payoutTotal(paidAffiliatePayouts).toLocaleString()} FM</strong><span>Marked paid in admin</span></article>
-    </div>:<p>{affiliatePayoutStatus==='loading'?'Checking administrator access…':'Could not read the authenticated payout endpoint. No balance is assumed.'}</p>}
+    </div>:<p>{affiliatePayoutStatus==='loading'?'Checking administrator access…':`Payout endpoint failed: ${connectionErrors.affiliate||'No response'}. Use Reconnect and refresh revenue data above.`}</p>}
     <p><Link href="/administration/payouts">Open affiliate payout administration →</Link></p>
   </section>
   <section className="admin-dashboard-panel" style={{marginBottom:20}}>
@@ -143,7 +143,7 @@ function RevenueCommandCenter(){
   </section>
   <section className="admin-dashboard-panel" style={{marginBottom:18}}>
     <div className="admin-dashboard-panel-heading"><h2>Financial reconciliation · merchant statements</h2><span>Payment-source connection required</span></div>
-    <p>Cash revenue must come from verified payment transactions and settlement reports, not predictions or FM coin commitments. No payment provider has been connected to this reporting view yet.</p>
+    <p>{merchantStatus==='connected'?'The protected merchant statement service is responding. Imported monthly statement totals are separate from transaction-level confirmation and bank deposits.':merchantStatus==='loading'?'Checking the protected merchant statement service…':'Merchant statement service is not responding to the current admin session. Use Revenue connections above to see the specific error and retry.'}</p>
     <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Ledger measure</th><th>Verified value</th><th>Required evidence</th></tr></thead><tbody>
     {[
       ['Gross captured payments',merchantStatements.length?'Monthly statement totals imported; individual charges unverified':'Processor transaction feed unavailable','Statement totals are not transaction-level confirmation'],
