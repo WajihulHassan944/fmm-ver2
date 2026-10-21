@@ -22,7 +22,8 @@ const LABELS = {
 function RevenueCommandCenter(){
  const [events,setEvents]=useState([]);
  const [serverSummary,setServerSummary]=useState(null);
- useEffect(()=>{const load=()=>setEvents(getLocalRevenueEvents());load();window.addEventListener('fmm:revenue-event',load);fetch(buildPublicApiUrl('/api/admin/revenue/summary?days=30'),{headers:adminHeaders()}).then(r=>r.ok?r.json():null).then(data=>{if(data?.ok)setServerSummary(data)}).catch(()=>{});return()=>window.removeEventListener('fmm:revenue-event',load)},[]);
+ const [sourceStatus,setSourceStatus]=useState('loading');
+ useEffect(()=>{const load=()=>setEvents(getLocalRevenueEvents());load();window.addEventListener('fmm:revenue-event',load);fetch(buildPublicApiUrl('/api/admin/revenue/summary?days=30'),{headers:adminHeaders()}).then(r=>r.ok?r.json():null).then(data=>{if(data?.ok){setServerSummary(data);setSourceStatus('server')}else setSourceStatus('browser')}).catch(()=>setSourceStatus('browser'));return()=>window.removeEventListener('fmm:revenue-event',load)},[]);
  const localCounts=useMemo(()=>events.reduce((a,e)=>{a[e.event]=(a[e.event]||0)+1;return a},{}),[events]);
  const counts=serverSummary ? Object.fromEntries(Object.entries(serverSummary.byEvent||{}).map(([key,value])=>[key,Number(value?.count||0)])) : localCounts;
  const views=counts[REVENUE_EVENTS.FIGHT_VIEW]||0, starts=counts[REVENUE_EVENTS.PREDICTION_START]||0, paid=counts[REVENUE_EVENTS.PAID_ENTRY]||0;
@@ -32,7 +33,12 @@ function RevenueCommandCenter(){
  const fightRows=(serverSummary?.fights?.length ? serverSummary.fights : localFightRows);
  const cards=[REVENUE_EVENTS.FIGHT_VIEW,REVENUE_EVENTS.PLAY_CLICK,REVENUE_EVENTS.PREDICTION_START,REVENUE_EVENTS.SIGNUP_GATE,REVENUE_EVENTS.PAID_ENTRY,REVENUE_EVENTS.CHALLENGE_SHARE];
  return <div className="admin-dashboard-experience"><Head><title>Revenue Command Center | FANTASY MMADNESS</title></Head>
-  <section className="admin-dashboard-hero"><div className="admin-dashboard-hero-copy"><span>FANTASY MMADNESS REVENUE ENGINE</span><h1>Turn fight-night traffic into players, purchases and partners.</h1><p>Track the player funnel, identify the leak, then use fight inventory to create consumer and business revenue. </p></div><div className="admin-dashboard-live"><i/><span>Conversion tracking active</span></div></section>
+  <section className="admin-dashboard-hero"><div className="admin-dashboard-hero-copy"><span>FANTASY MMADNESS REVENUE ENGINE</span><h1>Turn fight-night traffic into players, purchases and partners.</h1><p>Track the player funnel, identify the leak, then use fight inventory to create consumer and business revenue. </p></div><div className="admin-dashboard-live"><i/><span>{sourceStatus==='server'?'Server event data':sourceStatus==='loading'?'Checking source':'Browser-only data'}</span></div></section>
+  <section className="admin-dashboard-panel" style={{marginBottom:18}}>
+   <div className="admin-dashboard-panel-heading"><h2>Data source and verification</h2><span>{sourceStatus==='server'?'Server event records':sourceStatus==='loading'?'Checking source…':'Browser-only fallback'}</span></div>
+   <p><strong>{sourceStatus==='server'?'Backend event aggregation connected.':'Financial reporting is not verified.'}</strong> {sourceStatus==='server'?'These figures are collected event counts, not independently reconciled payment transactions.':'Backend event reporting is unavailable. These figures may only reflect activity captured in this browser.'}</p>
+   <p style={{opacity:.8,fontSize:13}}>Paid-entry events and FM coins committed are not confirmed cash receipts. Gross sales, refunds, processing fees, net proceeds, sponsorship invoices and affiliate payouts must be reconciled with payment and contract records before use in financial reports.</p>
+  </section>
   <section className="admin-metric-grid">{cards.map(k=><article className="admin-metric-card" key={k}><FaChartLine/><strong>{Number(counts[k]||0).toLocaleString()}</strong><span>{LABELS[k]}</span></article>)}</section>
   <section className="admin-dashboard-grid">
    <div className="admin-dashboard-panel"><div className="admin-dashboard-panel-heading"><h2>Conversion funnel</h2><span>30-day account-wide funnel</span></div><div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Metric</th><th>Rate</th><th>Why it matters</th></tr></thead><tbody>
