@@ -142,8 +142,8 @@ const appendLegacyFight = (data, form, { shadow = false } = {}) => {
   data.append('fighterBId', form.fighterBId);
   // Direct upload path: no library id yet, but a name + photo is enough —
   // the backend auto-registers this into the fighter library on save.
-  if (!form.fighterAId && form.fighterAImage) data.append('fighterAImage', form.fighterAImage);
-  if (!form.fighterBId && form.fighterBImage) data.append('fighterBImage', form.fighterBImage);
+  if (form.fighterAImage) data.append('fighterAImage', form.fighterAImage);
+  if (form.fighterBImage) data.append('fighterBImage', form.fighterBImage);
   data.append('matchDescription', form.matchDescription);
   data.append('matchVideoUrl', form.matchVideoUrl);
   data.append('maxRounds', form.maxRounds);
@@ -193,8 +193,8 @@ export default function AddNewMatch() {
   }, [created]);
 
   const previews = useMemo(() => ({
-    fighterAImage: getCombatFighterImage(selectedFighterA) || (form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : FALLBACK_A),
-    fighterBImage: getCombatFighterImage(selectedFighterB) || (form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : FALLBACK_B),
+    fighterAImage: form.fighterAImage ? URL.createObjectURL(form.fighterAImage) : (getCombatFighterImage(selectedFighterA) || FALLBACK_A),
+    fighterBImage: form.fighterBImage ? URL.createObjectURL(form.fighterBImage) : (getCombatFighterImage(selectedFighterB) || FALLBACK_B),
     promotionBackground: form.promotionBackground ? URL.createObjectURL(form.promotionBackground) : FALLBACK_PROMOTION,
   }), [form.promotionBackground, form.fighterAImage, form.fighterBImage, selectedFighterA, selectedFighterB]);
 
@@ -439,10 +439,10 @@ export default function AddNewMatch() {
                 <CombatFighterSelect label="Fighter B" side="B" value={form.fighterBId} category={displayCategory.toLowerCase()} onChange={(fighter) => chooseFighter('B', fighter)} required={!form.fighterBImage} />
               </div>
               <div className="admin-direct-fighter-grid is-wide">
-                {!form.fighterAId && (
+                {(
                   <DirectFighterEntry side="A" name={form.matchFighterA} image={form.fighterAImage} preview={previews.fighterAImage} onNameChange={(value) => setForm((current) => ({ ...current, matchFighterA: value }))} onImageChange={(value) => setForm((current) => ({ ...current, fighterAImage: value }))} />
                 )}
-                {!form.fighterBId && (
+                {(
                   <DirectFighterEntry side="B" name={form.matchFighterB} image={form.fighterBImage} preview={previews.fighterBImage} onNameChange={(value) => setForm((current) => ({ ...current, matchFighterB: value }))} onImageChange={(value) => setForm((current) => ({ ...current, fighterBImage: value }))} />
                 )}
               </div>
