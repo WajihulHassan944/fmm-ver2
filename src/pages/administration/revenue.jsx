@@ -23,6 +23,9 @@ function RevenueCommandCenter(){
  const [events,setEvents]=useState([]);
  const [serverSummary,setServerSummary]=useState(null);
  const [sourceStatus,setSourceStatus]=useState('loading');
+ const [merchantStatements,setMerchantStatements]=useState([]);
+ const [merchantStatus,setMerchantStatus]=useState('loading');
+ useEffect(()=>{fetch(buildPublicApiUrl('/api/admin/revenue/merchant-statements'),{headers:adminHeaders()}).then(r=>r.ok?r.json():null).then(data=>{if(data?.ok&&Array.isArray(data.statements)){setMerchantStatements(data.statements);setMerchantStatus('connected')}else setMerchantStatus('unavailable')}).catch(()=>setMerchantStatus('unavailable'))},[]);
  useEffect(()=>{const load=()=>setEvents(getLocalRevenueEvents());load();window.addEventListener('fmm:revenue-event',load);fetch(buildPublicApiUrl('/api/admin/revenue/summary?days=30'),{headers:adminHeaders()}).then(r=>r.ok?r.json():null).then(data=>{if(data?.ok){setServerSummary(data);setSourceStatus('server')}else setSourceStatus('browser')}).catch(()=>setSourceStatus('browser'));return()=>window.removeEventListener('fmm:revenue-event',load)},[]);
  const localCounts=useMemo(()=>events.reduce((a,e)=>{a[e.event]=(a[e.event]||0)+1;return a},{}),[events]);
  const counts=serverSummary ? Object.fromEntries(Object.entries(serverSummary.byEvent||{}).map(([key,value])=>[key,Number(value?.count||0)])) : localCounts;
@@ -36,6 +39,13 @@ function RevenueCommandCenter(){
  const cards=[REVENUE_EVENTS.FIGHT_VIEW,REVENUE_EVENTS.PLAY_CLICK,REVENUE_EVENTS.PREDICTION_START,REVENUE_EVENTS.SIGNUP_GATE,REVENUE_EVENTS.PAID_ENTRY,REVENUE_EVENTS.CHALLENGE_SHARE];
  return <div className="admin-dashboard-experience"><Head><title>Revenue Command Center | FANTASY MMADNESS</title></Head>
   <section className="admin-dashboard-hero"><div className="admin-dashboard-hero-copy"><span>FANTASY MMADNESS REVENUE ENGINE</span><h1>Turn fight-night traffic into players, purchases and partners.</h1><p>Track the player funnel, identify the leak, then use fight inventory to create consumer and business revenue. </p></div><div className="admin-dashboard-live"><i/><span>{sourceStatus==='server'?'Server event data':sourceStatus==='loading'?'Checking source':'Browser-only data'}</span></div></section>
+  <section className="admin-dashboard-panel" style={{marginBottom:20}}>
+    <div className="admin-dashboard-panel-heading"><h2>Merchant statement reconciliation</h2><span>{merchantStatus==='connected'?'Protected backend records':'Integration pending'}</span></div>
+    <p style={{opacity:.75}}>Monthly merchant sales, fees and settlement reconciliation. Figures appear only when provided by the authenticated backend. This is not a live bank deposit verification.</p>
+    <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Month</th><th>Gross sales</th><th>Refunds</th><th>Fees</th><th>Net funded</th><th>Check</th></tr></thead><tbody>
+      {merchantStatements.length?merchantStatements.map(row=><tr key={row.period}><td>{row.period}</td><td>${Number(row.grossSales||0).toFixed(2)}</td><td>${Number(row.refunds||0).toFixed(2)}</td><td>${Number((row.cardFees||0)+(row.otherFees||0)).toFixed(2)}</td><td>${Number(row.reportedNetFunding||0).toFixed(2)}</td><td>{row.status==='STATEMENT_ARITHMETIC_MATCH'?'Statement balances':'Review required'}</td></tr>):<tr><td colSpan="6">{merchantStatus==='loading'?'Loading protected records…':merchantStatus==='unavailable'?'Merchant statement API is not connected yet.':'No imported statements yet.'}</td></tr>}
+    </tbody></table></div>
+  </section>
   <section className="admin-dashboard-panel" style={{marginBottom:18}}>
    <div className="admin-dashboard-panel-heading"><h2>Data source and verification</h2><span>{sourceStatus==='server'?'Server event records':sourceStatus==='loading'?'Checking source…':'Browser-only fallback'}</span></div>
    <p><strong>{sourceStatus==='server'?'Backend event aggregation connected.':'Financial reporting is not verified.'}</strong> {sourceStatus==='server'?'These figures are collected event counts, not independently reconciled payment transactions.':'Backend event reporting is unavailable. These figures may only reflect activity captured in this browser.'}</p>
