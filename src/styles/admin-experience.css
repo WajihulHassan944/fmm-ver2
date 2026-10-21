@@ -1603,3 +1603,47 @@
   color: currentColor;
   margin: 0;
 }
+
+
+/* Fight Registry: keep the full action column visible at desktop widths.
+   Scope to this table only; other administration tables remain unchanged. */
+@media (min-width: 1100px) {
+  .admin-fights-workspace .admin-data-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .admin-fights-workspace .admin-fights-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+  .admin-fights-workspace .admin-fights-table th,
+  .admin-fights-workspace .admin-fights-table td {
+    padding: 10px 7px !important;
+    overflow-wrap: anywhere;
+  }
+  .admin-fights-workspace .admin-fights-table th:nth-child(1) { width: 5%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(2) { width: 23%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(3) { width: 7%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(4) { width: 12%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(5) { width: 8%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(6) { width: 8%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(7) { width: 7%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(8) { width: 8%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(9) { width: 8%; }
+  .admin-fights-workspace .admin-fights-table th:nth-child(10) { width: 14%; }
+  .admin-fights-workspace .admin-fight-cell {
+    min-width: 0;
+  }
+  .admin-fights-workspace .admin-fight-cell img {
+    max-width: 100%;
+  }
+  .admin-fights-workspace .admin-table-actions {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .admin-fights-workspace .admin-table-actions > button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}
