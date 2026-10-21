@@ -48,7 +48,7 @@ function RevenueCommandCenter(){
     <button type="button" onClick={exportAuditCsv} style={{padding:'10px 16px',borderRadius:8,cursor:'pointer'}}>Export event audit CSV</button>
   </section>
   <section className="admin-dashboard-panel" style={{marginBottom:18}}>
-    <div className="admin-dashboard-panel-heading"><h2>Financial reconciliation</h2><span>Payment-source connection required</span></div>
+    <div className="admin-dashboard-panel-heading"><h2>Financial reconciliation · merchant statements</h2><span>Payment-source connection required</span></div>
     <p>Cash revenue must come from verified payment transactions and settlement reports, not predictions or FM coin commitments. No payment provider has been connected to this reporting view yet.</p>
     <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Ledger measure</th><th>Verified value</th><th>Required evidence</th></tr></thead><tbody>
     {[
