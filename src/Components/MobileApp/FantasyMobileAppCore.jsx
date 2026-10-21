@@ -2524,10 +2524,14 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderHome(sports, filteredEvents, allEvents, leaderboardFull, apparel, blogs, streakDays, jonesPct, aspinallPct, dashArray, dashOffset, xpPct, s) {
+    // Admin-selected placements are global: a sport filter must not replace
+    // the selected fight with the first event in that sport.
     const featuredPool = s.activeSport === 'all' ? allEvents : filteredEvents;
-    const bannerEvent = featuredPool.find((event) => event.featuredThisWeek) || featuredPool[0];
-    const detailEvent = featuredPool.find((event) => event.featuredFight)
+    const bannerEvent = allEvents.find((event) => event.featuredThisWeek)
+      || featuredPool[0] || allEvents[0];
+    const detailEvent = allEvents.find((event) => event.featuredFight)
       || featuredPool.find((event) => event.id !== bannerEvent?.id)
+      || allEvents.find((event) => event.id !== bannerEvent?.id)
       || bannerEvent;
     const top = s.layout === 'bold'
       ? React.createElement(React.Fragment, null,
