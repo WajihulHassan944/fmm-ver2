@@ -43,10 +43,12 @@ const AffiliatesPayouts = () => {
     };
     const handleConfirmPayment = async () => {
         if (!selectedPayout || selectedPayout.status !== 'pending') return;
+        const reference = window.prompt('Only mark paid AFTER sending the money. Enter the real payment confirmation/reference (Cancel if unpaid):');
+        if (!reference || !reference.trim()) return;
         try {
             const response = await fetch(
                 `https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-payouts/${encodeURIComponent(selectedPayout.affiliateId)}/${selectedPayout.payoutIndex}/approve`,
-                { method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ reference: 'Admin-confirmed disbursement' }) }
+                { method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ reference: reference.trim().slice(0, 300) }) }
             );
             const result = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(result.message || 'Payout confirmation failed');
