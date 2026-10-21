@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaCheck, FaClock, FaFistRaised, FaFilm, FaImage, FaSlidersH, FaLayerGroup, FaSave, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import CombatFighterSelect from './CombatFighterSelect';
+import { combatFightersApi } from '@/Utils/combatFightersApi';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
 import { adminHeaders } from '@/Utils/authFetch';
@@ -99,6 +100,7 @@ const EditMatch = ({ matchId, isShadow }) => {
   });
 
   const [buttonText, setButtonText] = useState('Edit Match');
+  const [photoSaving, setPhotoSaving] = useState('');
   const [displayCategory, setDisplayCategory] = useState('boxing');
   const [selectedFighterA, setSelectedFighterA] = useState(null);
   const [selectedFighterB, setSelectedFighterB] = useState(null);
@@ -237,6 +239,26 @@ const EditMatch = ({ matchId, isShadow }) => {
     setFormData((current) => ({ ...current, [name]: files ? files[0] : value }));
   };
 
+  // Fighter photos belong to the shared library. Save them through the same
+  // working endpoint as Fighter Library, without calling the broken editMatch upload.
+  const saveLibraryPhoto = async (side) => {
+    const id = side === 'A' ? formData.fighterAId : formData.fighterBId;
+    const file = side === 'A' ? formData.fighterAImage : formData.fighterBImage;
+    if (!id) return alert('Select an existing fighter from the Fighter Library first.');
+    if (!(file instanceof File)) return alert('Choose a new photo first.');
+    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return alert('Choose an image smaller than 5 MB.');
+    setPhotoSaving(side);
+    try {
+      const payload = new FormData();
+      payload.append('image', file);
+      await combatFightersApi.update(id, payload);
+      alert('Fighter Library photo saved. Refresh the fight page to see the updated image.');
+      window.location.reload();
+    } catch (error) {
+      alert('Fighter Library photo could not be saved: ' + (error?.message || 'Unknown error'));
+    } finally { setPhotoSaving(''); }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -273,8 +295,7 @@ const EditMatch = ({ matchId, isShadow }) => {
     if (parsedMMAMatch) data.append('MMAMatch', JSON.stringify(parsedMMAMatch));
     // Only send newly selected image files. Existing URLs are not multipart uploads
     // and must remain untouched when the admin edits other fight fields.
-    if (formData.fighterAImage instanceof File) data.append('fighterAImage', formData.fighterAImage);
-    if (formData.fighterBImage instanceof File) data.append('fighterBImage', formData.fighterBImage);
+    // Photos are saved separately to Fighter Library; never resend them in editMatch.
     data.append('maxRounds', formData.maxRounds);
     if (formData.promotionBackground instanceof File) data.append('promotionBackground', formData.promotionBackground);
     data.append('addToShadow', formData.addToShadowTemplates);
@@ -403,11 +424,13 @@ const EditMatch = ({ matchId, isShadow }) => {
               <img src={fighterAPreview} alt="Fighter A photo preview" style={{ objectFit: 'contain' }} />
               <div><strong><FaImage /> Replace Fighter A photo</strong><small>Choose a photo, then save the fight.</small></div>
               <input type="file" accept="image/*" name="fighterAImage" onChange={handleChange} />
+              <button type="button" disabled={Boolean(photoSaving)} onClick={() => saveLibraryPhoto('A')}>{photoSaving === 'A' ? 'Saving photo…' : 'Save photo to Fighter Library'}</button>
             </label>
             <label className="admin-edit-promotion-upload">
               <img src={fighterBPreview} alt="Fighter B photo preview" style={{ objectFit: 'contain' }} />
               <div><strong><FaImage /> Replace Fighter B photo</strong><small>Choose a photo, then save the fight.</small></div>
               <input type="file" accept="image/*" name="fighterBImage" onChange={handleChange} />
+              <button type="button" disabled={Boolean(photoSaving)} onClick={() => saveLibraryPhoto('B')}>{photoSaving === 'B' ? 'Saving photo…' : 'Save photo to Fighter Library'}</button>
             </label>
             <label><span>Legacy fighter A name</span><input type="text" name="matchFighterA" value={formData.matchFighterA} onChange={handleChange} /></label>
             <label><span>Legacy fighter B name</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
