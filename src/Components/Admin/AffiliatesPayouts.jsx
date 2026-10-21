@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { buildPublicApiUrl } from '@/Utils/publicApi';
 import UserDetails from './UserDetails';
 import PaymentPopup from './PaymentPopup';
 import { toast } from 'react-toastify';
@@ -17,7 +18,7 @@ const AffiliatesPayouts = () => {
     const router = useRouter();    
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-payouts?status=all', { headers: adminHeaders() });
+            const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-payouts?status=all'), { headers: adminHeaders() });
             if (!response.ok) throw new Error('Could not load affiliate payout ledger');
             const data = await response.json();
             const rows = Array.isArray(data.payouts) ? data.payouts : [];
@@ -33,7 +34,7 @@ const AffiliatesPayouts = () => {
     const handleFilter = (status) => setFilterStatus(status);
     const handlePayNow = (payout) => {
         if (payout.status !== 'pending') return;
-        setSelectedUser({ _id: payout.affiliateId, firstName: payout.name, lastName: '', email: payout.email });
+        setSelectedUser({ _id: payout.affiliateId, firstName: payout.name, lastName: '', email: payout.email, preferredPaymentMethod: payout.preferredPaymentMethod || 'Not specified', preferredPaymentMethodValue: '' });
         setSelectedPayout(payout);
         setPopupVisible(true);
     };
@@ -47,7 +48,7 @@ const AffiliatesPayouts = () => {
         if (!reference || !reference.trim()) return;
         try {
             const response = await fetch(
-                `https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-payouts/${encodeURIComponent(selectedPayout.affiliateId)}/${selectedPayout.payoutIndex}/approve`,
+                buildPublicApiUrl(`/api/admin/affiliate-payouts/${encodeURIComponent(selectedPayout.affiliateId)}/${selectedPayout.payoutIndex}/approve`),
                 { method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ reference: reference.trim().slice(0, 300) }) }
             );
             const result = await response.json().catch(() => ({}));
