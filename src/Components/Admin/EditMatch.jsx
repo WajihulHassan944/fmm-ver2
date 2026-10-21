@@ -271,10 +271,12 @@ const EditMatch = ({ matchId, isShadow }) => {
     data.append('matchShadowOpenStatus', formData.matchShadowOpenStatus || '');
     if (parsedBoxingMatch) data.append('BoxingMatch', JSON.stringify(parsedBoxingMatch));
     if (parsedMMAMatch) data.append('MMAMatch', JSON.stringify(parsedMMAMatch));
-    data.append('fighterAImage', formData.fighterAImage ? formData.fighterAImage : match?.fighterAImage);
-    data.append('fighterBImage', formData.fighterBImage ? formData.fighterBImage : match?.fighterBImage);
+    // Only send newly selected image files. Existing URLs are not multipart uploads
+    // and must remain untouched when the admin edits other fight fields.
+    if (formData.fighterAImage instanceof File) data.append('fighterAImage', formData.fighterAImage);
+    if (formData.fighterBImage instanceof File) data.append('fighterBImage', formData.fighterBImage);
     data.append('maxRounds', formData.maxRounds);
-    data.append('promotionBackground', formData.promotionBackground);
+    if (formData.promotionBackground instanceof File) data.append('promotionBackground', formData.promotionBackground);
     data.append('addToShadow', formData.addToShadowTemplates);
 
     if (!isShadow) {
@@ -348,7 +350,7 @@ const EditMatch = ({ matchId, isShadow }) => {
       }
     } catch (error) {
       console.error('Error updating match:', error);
-      alert('Lost connection while saving this edit. Check the Fight Registry to see whether it went through before editing again.');
+      alert(`Lost connection while saving this edit: ${error?.message || 'Network request failed'}. Check the Fight Registry before retrying to avoid duplicate updates.`);
     } finally {
       setButtonText('Edit Match');
     }
