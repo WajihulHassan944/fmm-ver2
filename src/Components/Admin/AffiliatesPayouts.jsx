@@ -17,12 +17,45 @@ const AffiliatesPayouts = () => {
     const router = useRouter();    
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
+            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-payouts?status=all', { headers: adminHeaders() });
+            if (!response.ok) throw new Error('Could not load affiliate payout ledger');
             const data = await response.json();
-            setAffiliateUsers(data);
-            setFilteredUsers(data); // Initially set filtered users to all data
+            const rows = Array.isArray(data.payouts) ? data.payouts : [];
+            setAffiliateUsers(rows);
+            setFilteredUsers(rows);
         } catch (error) {
-            console.error('Error fetching affiliate users:', error);
+            console.error('Error fetching affiliate payout ledger:', error);
+            toast.error('Could not load the payout ledger.');
+        }
+    };
+
+    const handleSearch = (e) => setSearchQuery(e.target.value);
+    const handleFilter = (status) => setFilterStatus(status);
+    const handlePayNow = (payout) => {
+        if (payout.status !== 'pending') return;
+        setSelectedUser({ _id: payout.affiliateId, firstName: payout.name, lastName: '', email: payout.email });
+        setSelectedPayout(payout);
+        setPopupVisible(true);
+    };
+    const handleClosePopup = () => {
+        setPopupVisible(false);
+        setSelectedPayout(null);
+    };
+    const handleConfirmPayment = async () => {
+        if (!selectedPayout || selectedPayout.status !== 'pending') return;
+        try {
+            const response = await fetch(
+                `https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-payouts/${encodeURIComponent(selectedPayout.affiliateId)}/${selectedPayout.payoutIndex}/approve`,
+                { method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ reference: 'Admin-confirmed disbursement' }) }
+            );
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || 'Payout confirmation failed');
+            toast.success(result.message || 'Payout marked paid');
+            await fetchData();
+        } catch (error) {
+            toast.error(error.message || 'Payout confirmation failed');
+        } finally {
+            handleClosePopup();
         }
     };
 
@@ -138,43 +171,24 @@ const AffiliatesPayouts = () => {
                         <h1>Status</h1>
                         <h1>Payment</h1>
                     </div>
-                    {filteredUsers.length > 0 ? (
-    filteredUsers
-        .filter(user => {
-            // Filter users based on search query
-            const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-            return fullName.includes(searchQuery.toLowerCase());
-        })
-        .flatMap(user =>
-            (user.payouts || [])
-                .filter(payout => {
-                    // Apply filter for pending/completed based on filterStatus
-                    if (filterStatus === 'pending') {
-                        return payout.status === 'pending';
-                    } else if (filterStatus === 'completed') {
-                        return payout.status === 'completed';
-                    }
-                    return true; // If 'All', include all payouts
-                })
-                .map(payout => (
-                    <div className='userItem' key={payout._id}>
-                        <img src={user.profileUrl} alt={`${user.firstName} ${user.lastName}`} />
-                        <h1>{user.firstName} {user.lastName}</h1>
-                        <h1>{user.tokens}</h1>
-                        <h1>{payout.amount}</h1> {/* Display payout amount */}
-                        <h1>{payout.status}</h1> {/* Display payout status */}
-                        <button className='viewButton' 
-                            onClick={() => handlePayNow(user, payout)} 
-                            disabled={payout.status === 'completed'} // Disable the button if already paid
-                        >
-                            {payout.status === 'completed' ? 'Paid' : 'Pay Now'}
-                        </button>
-                    </div>
-                ))
-        )
-) : (
-    <div className='noResults'>No users found.</div>
-)}
+                    {filteredUsers.filter(payout => {
+                        const name = String(payout.name || '').toLowerCase();
+                        const matchSearch = name.includes(searchQuery.toLowerCase());
+                        const matchStatus = filterStatus === 'All' || (filterStatus === 'completed' ? payout.status === 'paid' : payout.status === filterStatus);
+                        return matchSearch && matchStatus;
+                    }).map(payout => (
+                        <div className='userItem' key={String(payout.payoutId || payout.affiliateId + ':' + payout.payoutIndex)}>
+                            <div>{payout.name || 'Affiliate'}</div>
+                            <h1>{payout.name || 'Affiliate'}</h1>
+                            <h1>{Number(payout.currentBalance || 0).toLocaleString()} FM</h1>
+                            <h1>{Number(payout.amount || 0).toLocaleString()} FM</h1>
+                            <h1>{payout.status}</h1>
+                            <button className='viewButton' onClick={() => handlePayNow(payout)} disabled={payout.status !== 'pending'}>
+                                {payout.status === 'paid' ? 'Paid' : payout.status === 'pending' ? 'Mark Paid' : 'Closed'}
+                            </button>
+                        </div>
+                    ))}
+                    {!filteredUsers.length && <div className='noResults'>No payout records found.</div>}
 
                 </div>
             </div>
