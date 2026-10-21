@@ -47,7 +47,14 @@ function RevenueCommandCenter(){
  const pendingAffiliatePayouts=affiliatePayouts.filter(row=>row.status==='pending');
  const paidAffiliatePayouts=affiliatePayouts.filter(row=>row.status==='paid');
  const payoutTotal=rows=>rows.reduce((sum,row)=>sum+Number(row.amount||0),0);
- const channels=[['Contest entries','Event tracking available; payment settlement not reconciled'],['Advertising','Contracts, impressions, and invoices not yet connected'],['Sponsorships','Contracts and payment records not yet connected'],['Affiliate partnerships',affiliatePayoutStatus==='connected'?'Existing payout ledger connected; processor disbursements not verified':'Affiliate payout ledger unavailable'],['Promoter partnerships','Agreement and settlement records not yet connected'],['Merchandise and licensing','Sales, refunds, and royalties not yet reconciled']];
+ const channels=[
+ ['Contest entries',sourceStatus==='server'?'Event reporting connected; processor cash settlement unverified':'Event backend unavailable'],
+ ['Advertising','No invoice/payment integration configured'],
+ ['Sponsorships','No contract/payment integration configured'],
+ ['Affiliate partnerships',affiliatePayoutStatus==='connected'?'Affiliate payout ledger connected (FM units); bank transfers unverified':'Affiliate payout ledger unavailable'],
+ ['Promoter partnerships',affiliatePayoutStatus==='connected'?'Payout records available; promoter contracts not reconciled':'Promoter settlement reconciliation pending'],
+ ['Merchandise and licensing','No verified sales/refund feed connected']
+ ];
  const cards=[REVENUE_EVENTS.FIGHT_VIEW,REVENUE_EVENTS.PLAY_CLICK,REVENUE_EVENTS.PREDICTION_START,REVENUE_EVENTS.SIGNUP_GATE,REVENUE_EVENTS.PAID_ENTRY,REVENUE_EVENTS.CHALLENGE_SHARE];
  return <div className="admin-dashboard-experience"><Head><title>Revenue Command Center | FANTASY MMADNESS</title></Head>
   <section className="admin-dashboard-hero"><div className="admin-dashboard-hero-copy"><span>FANTASY MMADNESS REVENUE ENGINE</span><h1>Turn fight-night traffic into players, purchases and partners.</h1><p>Track the player funnel, identify the leak, then use fight inventory to create consumer and business revenue. </p></div><div className="admin-dashboard-live"><i/><span>{sourceStatus==='server'?'Server event data':sourceStatus==='loading'?'Checking source':'Browser-only data'}</span></div></section>
@@ -91,10 +98,10 @@ function RevenueCommandCenter(){
     <p>Cash revenue must come from verified payment transactions and settlement reports, not predictions or FM coin commitments. No payment provider has been connected to this reporting view yet.</p>
     <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Ledger measure</th><th>Verified value</th><th>Required evidence</th></tr></thead><tbody>
     {[
-      ['Gross captured payments','Not connected','Processor transaction IDs and captured amounts'],
-      ['Refunds and chargebacks','Not connected','Processor refund and dispute records'],
-      ['Processing fees','Not connected','Processor balance or settlement records'],
-      ['Net settled proceeds','Not connected','Payout and bank settlement records'],
+      ['Gross captured payments',merchantStatements.length?'Monthly statement totals imported; individual charges unverified':'Processor transaction feed unavailable','Statement totals are not transaction-level confirmation'],
+      ['Refunds and chargebacks',merchantStatements.length?'Statement-level refunds recorded':'Processor refund/dispute feed unavailable','No transaction-level refund IDs verified'],
+      ['Processing fees',merchantStatements.length?'Merchant statement fees recorded':'Merchant statement feed unavailable','Monthly fees do not prove bank settlement'],
+      ['Net settled proceeds',merchantStatements.length?'Statement net calculated; bank deposit unverified':'Bank settlement feed unavailable','Independent bank deposit confirmation required'],
       ['Affiliate commissions',affiliatePayoutStatus==='connected'?'Payout statuses connected (FM units)':'Not connected','Existing affiliate payout ledger; bank transfers not independently verified'],
       ['Sponsorship and advertising','Not reconciled','Signed agreement, invoice, and payment record']
     ].map(([name,value,evidence])=><tr key={name}><td><strong>{name}</strong></td><td>{value}</td><td>{evidence}</td></tr>)}
