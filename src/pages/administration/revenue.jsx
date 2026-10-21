@@ -47,6 +47,21 @@ function RevenueCommandCenter(){
     <p style={{opacity:.7,fontSize:12}}>This is a connectivity and reconciliation checklist, not a ledger or a claim of earned income.</p>
     <button type="button" onClick={exportAuditCsv} style={{padding:'10px 16px',borderRadius:8,cursor:'pointer'}}>Export event audit CSV</button>
   </section>
+  <section className="admin-dashboard-panel" style={{marginBottom:18}}>
+    <div className="admin-dashboard-panel-heading"><h2>Financial reconciliation</h2><span>Payment-source connection required</span></div>
+    <p>Cash revenue must come from verified payment transactions and settlement reports, not predictions or FM coin commitments. No payment provider has been connected to this reporting view yet.</p>
+    <div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Ledger measure</th><th>Verified value</th><th>Required evidence</th></tr></thead><tbody>
+    {[
+      ['Gross captured payments','Not connected','Processor transaction IDs and captured amounts'],
+      ['Refunds and chargebacks','Not connected','Processor refund and dispute records'],
+      ['Processing fees','Not connected','Processor balance or settlement records'],
+      ['Net settled proceeds','Not connected','Payout and bank settlement records'],
+      ['Affiliate commissions','Not reconciled','Attributed paid transaction and approved commission'],
+      ['Sponsorship and advertising','Not reconciled','Signed agreement, invoice, and payment record']
+    ].map(([name,value,evidence])=><tr key={name}><td><strong>{name}</strong></td><td>{value}</td><td>{evidence}</td></tr>)}
+    </tbody></table></div>
+    <p style={{opacity:.75,fontSize:12}}>No amounts are estimated or filled with zeros while the payment source is missing. This section is not a bookkeeping ledger.</p>
+  </section>
   <section className="admin-metric-grid">{cards.map(k=><article className="admin-metric-card" key={k}><FaChartLine/><strong>{Number(counts[k]||0).toLocaleString()}</strong><span>{LABELS[k]}</span></article>)}</section>
   <section className="admin-dashboard-grid">
    <div className="admin-dashboard-panel"><div className="admin-dashboard-panel-heading"><h2>Conversion funnel</h2><span>30-day account-wide funnel</span></div><div className="admin-data-table-scroll"><table className="admin-data-table"><thead><tr><th>Metric</th><th>Rate</th><th>Why it matters</th></tr></thead><tbody>
