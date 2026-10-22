@@ -156,7 +156,7 @@ const AffiliateUsers = () => {
     }
     setInviteSending(true);
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+      const response = await fetch(buildPublicApiUrl('/send-email-affiliate'), {
         method: 'POST',
         headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ email, subject: 'Your FANTASY MMADNESS affiliate invitation', message: inviteMessage }),
@@ -401,7 +401,7 @@ const AffiliateUsers = () => {
     for (const [index, recipient] of selectedRecipients.entries()) {
       let providerLimit = false;
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+        const response = await fetch(buildPublicApiUrl('/send-email-affiliate'), {
           method: 'POST',
           headers: adminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
