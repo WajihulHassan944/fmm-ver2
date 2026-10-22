@@ -22,7 +22,7 @@ import {
   getFighterName,
   safeArray,
 } from '@/Utils/fightExperience';
-import { fetchPublicPredictionFights, normalizePublicFightRow } from '@/Utils/publicApi';
+import { fetchPublicPredictionFights, normalizePublicFightRow, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
 import { FMCoin, FMContestValue } from '@/Components/Common/FMCoin';
 import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
@@ -88,6 +88,27 @@ const getNestedDetailImage = (value) => {
 };
 
 const pickDetailImage = (...values) => values.find(hasUsableDetailImage) || '';
+
+function DetailFighterPortrait({ fight, side }) {
+  const isA = side === 'A';
+  const values = [
+    isA ? fight.fighterAImage : fight.fighterBImage,
+    isA ? fight.fighterAPrimaryImage : fight.fighterBPrimaryImage,
+    isA ? fight.resolvedFighterAImage : fight.resolvedFighterBImage,
+    getNestedDetailImage(isA ? fight.fighterA : fight.fighterB),
+    getNestedDetailImage(isA ? fight.fighterAId : fight.fighterBId),
+    getFighterImage(fight, side, isA ? 0 : 1),
+    // Actual fight artwork shown on the homepage, only after portrait candidates fail.
+    fight.featuredThisWeekImage,
+    fight.fightPosterImage,
+  ];
+  const urls = [...new Set(values.filter(hasUsableDetailImage).map(resolvePublicMediaUrl))];
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => setAttempt(0), [side, urls.join('|')]);
+  return urls[attempt]
+    ? <img src={urls[attempt]} alt={getFighterName(fight, side)} onError={() => setAttempt(value => value + 1)} />
+    : <div role="img" aria-label={getFighterName(fight, side)} style={{width:138,height:138,background:'#10131a'}} />;
+}
 
 const mergeFightForDetail = (base = {}, candidate = {}) => {
   if (!candidate || typeof candidate !== 'object') return normalizePublicFightRow(base || {});
@@ -327,12 +348,12 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
 
           <div className="public-fight-detail-card">
             <div className="public-fight-corner is-blue">
-              <img src={getFighterImage(resolvedFight, 'A', 0)} alt={getFighterName(resolvedFight, 'A')} />
+              <DetailFighterPortrait fight={resolvedFight} side="A" />
               <span><small>Blue corner</small><strong>{getFighterName(resolvedFight, 'A')}</strong></span>
             </div>
             <div className="public-fight-vs-badge">VS</div>
             <div className="public-fight-corner is-red">
-              <img src={getFighterImage(resolvedFight, 'B', 1)} alt={getFighterName(resolvedFight, 'B')} />
+              <DetailFighterPortrait fight={resolvedFight} side="B" />
               <span><small>Red corner</small><strong>{getFighterName(resolvedFight, 'B')}</strong></span>
             </div>
           </div>
