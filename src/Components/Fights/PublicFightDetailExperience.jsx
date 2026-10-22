@@ -98,9 +98,6 @@ function DetailFighterPortrait({ fight, side }) {
     getNestedDetailImage(isA ? fight.fighterA : fight.fighterB),
     getNestedDetailImage(isA ? fight.fighterAId : fight.fighterBId),
     getFighterImage(fight, side, isA ? 0 : 1),
-    // Actual fight artwork shown on the homepage, only after portrait candidates fail.
-    fight.featuredThisWeekImage,
-    fight.fightPosterImage,
   ];
   const urls = [...new Set(values.filter(hasUsableDetailImage).map(resolvePublicMediaUrl))];
   const [attempt, setAttempt] = useState(0);
