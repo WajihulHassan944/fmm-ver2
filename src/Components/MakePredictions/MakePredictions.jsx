@@ -20,7 +20,6 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
     record?.primaryImage, record?.imageUrl, record?.image,
     linked?.primaryImage, linked?.imageUrl, linked?.image,
     getFighterImage(match, side, isA ? 0 : 1),
-    match.featuredThisWeekImage, match.fightPosterImage,
   ].filter(value => typeof value === 'string' && value.trim());
   const urls = [...new Set(candidates.map(resolvePublicMediaUrl))];
   const [index, setIndex] = useState(0);
