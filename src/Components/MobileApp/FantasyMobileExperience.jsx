@@ -439,11 +439,17 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
     // Wave 1 is only what the opening screen actually renders. Each result is
     // applied the instant it lands rather than at the end of the batch, and the
     // loading flag clears as soon as fights are in.
-    const fightsPromise = track('fights', Promise.all([publicRequest('/api/public/prediction-fights?limit=60'), fetchPublishedWrestlingPromotions().catch(() => [])]))
-      .then(([fightRes, wrestling]) => {
+    const fightsPromise = track('fights', Promise.all([publicRequest('/api/public/prediction-fights?limit=60'), fetchPublishedWrestlingPromotions().catch(() => []), publicRequest('/api/public/homepage/promoted-fights?limit=24').catch(() => ({ items: [] }))]))
+      .then(([fightRes, wrestling, promotedRes]) => {
         // The endpoint responds with { items: [...] } — fights/matches/predictionFights/data
         // never matched anything, so this always fell through to the single sample fight.
-        const rawFights = [...wrestling, ...asArray(fightRes.items || fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data)];
+        const promotedById = new Map(asArray(promotedRes.items).map(f => [String(f._id || f.id || ''), f]));
+        const rawFights = [...wrestling, ...asArray(fightRes.items || fightRes.fights || fightRes.matches || fightRes.predictionFights || fightRes.data).map(f => {
+          const promoted = promotedById.get(String(f._id || f.id || ''));
+          if (!promoted) return f;
+          // Use the same back-office fighter portrait as the homepage, not a poster.
+          return { ...f, ...(promoted.fighterAImage ? { fighterAImage: promoted.fighterAImage, fighterAPrimaryImage: promoted.fighterAImage, resolvedFighterAImage: promoted.fighterAImage } : {}), ...(promoted.fighterBImage ? { fighterBImage: promoted.fighterBImage, fighterBPrimaryImage: promoted.fighterBImage, resolvedFighterBImage: promoted.fighterBImage } : {}) };
+        })];
         // Pass RAW fight documents straight through. FantasyMobileAppCore has its
         // own complete normalizer (matchFighterA, fightPosterImage, homepagePromotion,
         // etc.) — running this file's normalizeFight first stripped those fields
