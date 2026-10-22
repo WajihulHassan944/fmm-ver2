@@ -20,7 +20,7 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
     let active = true;
     // Read the same owner-promoted fight record that powers the public homepage.
     // Only its fighter portrait field is eligible here, never its fight poster.
-    fetch(buildPublicApiUrl('/api/public/homepage/promoted-fights?limit=24'))
+    fetch(buildPublicApiUrl('/api/public/homepage/promoted-fights?limit=200'))
       .then(response => response.ok ? response.json() : null)
       .then(data => {
         if (!active) return;
