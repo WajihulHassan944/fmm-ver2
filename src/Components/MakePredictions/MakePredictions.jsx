@@ -58,9 +58,16 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
     getFighterImage(match, side, isA ? 0 : 1),
   ].filter(value => typeof value === 'string' && value.trim());
   const urls = [...new Set(candidates.map(resolvePublicMediaUrl))];
+  // iOS Safari can retain a failed image response after a deployment. Retry the
+  // identical original image with a versioned URL before trying another record.
+  const retryUrls = urls.flatMap(url => {
+    if (!/^https?:\\/\\//i.test(url)) return [url];
+    const separator = url.includes('?') ? '&' : '?';
+    return [url, `${url}${separator}fmm_photo_v=20261022`];
+  });
   const [index, setIndex] = useState(0);
-  useEffect(() => setIndex(0), [side, urls.join('|')]);
-  return urls[index] ? <img {...props} src={urls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
+  useEffect(() => setIndex(0), [side, retryUrls.join('|')]);
+  return retryUrls[index] ? <img {...props} src={retryUrls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
 };
 
 const MetricIcon = ({ code }) => {
