@@ -4,10 +4,29 @@ import { useSelector } from 'react-redux';
 import { FaCheck, FaClock, FaFistRaised, FaShoePrints, FaBullseye, FaShieldAlt, FaTrophy } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { getFighterImage, getFighterName } from '@/Utils/fightExperience';
-import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { buildPublicApiUrl, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
+
+const PredictionFighterPhoto = ({ match, side, ...props }) => {
+  const isA = side === 'A';
+  const record = isA ? match.fighterA : match.fighterB;
+  const linked = isA ? match.fighterAId : match.fighterBId;
+  const candidates = [
+    isA ? match.fighterAImage : match.fighterBImage,
+    isA ? match.fighterAPrimaryImage : match.fighterBPrimaryImage,
+    isA ? match.resolvedFighterAImage : match.resolvedFighterBImage,
+    record?.primaryImage, record?.imageUrl, record?.image,
+    linked?.primaryImage, linked?.imageUrl, linked?.image,
+    getFighterImage(match, side, isA ? 0 : 1),
+    match.featuredThisWeekImage, match.fightPosterImage,
+  ].filter(value => typeof value === 'string' && value.trim());
+  const urls = [...new Set(candidates.map(resolvePublicMediaUrl))];
+  const [index, setIndex] = useState(0);
+  useEffect(() => setIndex(0), [side, urls.join('|')]);
+  return urls[index] ? <img {...props} src={urls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
+};
 
 const MetricIcon = ({ code }) => {
   if (code === 'KI') return <FaShoePrints aria-hidden="true" className="player-round-metric-icon is-kick" />;
@@ -496,12 +515,12 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
 
         <div className="xp-prediction-fighters">
           <article>
-            <img src={fighterAImage} alt={getFighterName(match, 'A')} />
+            <PredictionFighterPhoto match={match} side="A" alt={getFighterName(match, 'A')} />
             <div><span>Blue corner</span><strong>{getFighterName(match, 'A')}</strong></div>
           </article>
           <div className="xp-prediction-vs">VS</div>
           <article>
-            <img src={fighterBImage} alt={getFighterName(match, 'B')} />
+            <PredictionFighterPhoto match={match} side="B" alt={getFighterName(match, 'B')} />
             <div><span>Red corner</span><strong>{getFighterName(match, 'B')}</strong></div>
           </article>
         </div>
@@ -531,7 +550,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
               <article className="player-round-card-v2" key={round.round}>
                 <header className="player-round-card-v2-header">
                   <div className="player-round-corner is-a">
-                    <img src={fighterAImage} alt={getFighterName(match, 'A')} />
+                    <PredictionFighterPhoto match={match} side="A" alt={getFighterName(match, 'A')} />
                     <span><small>Blue corner</small><strong>{getFighterName(match, 'A')}</strong></span>
                   </div>
                   <div className="player-round-number">
@@ -541,7 +560,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                   </div>
                   <div className="player-round-corner is-b">
                     <span><small>Red corner</small><strong>{getFighterName(match, 'B')}</strong></span>
-                    <img src={fighterBImage} alt={getFighterName(match, 'B')} />
+                    <PredictionFighterPhoto match={match} side="B" alt={getFighterName(match, 'B')} />
                   </div>
                 </header>
 
@@ -593,7 +612,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         onClick={() => selectRoundWinner(roundIndex, 'A')}
                         aria-pressed={winnerSide === 'A'}
                       >
-                        <img src={fighterAImage} alt="" />
+                        <PredictionFighterPhoto match={match} side="A" alt="" />
                         <span><small>{getFighterName(match, 'A')}</small><strong>{winnerSide === 'B' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'A' ? (isWrestling ? 'Match winner' : 'Round winner') : winnerSide === 'B' ? (isWrestling ? 'Match loss' : 'Round loss') : 'Select corner'}</em></span>
                         {winnerSide === 'A' && <FaCheck />}
                       </button>
@@ -603,7 +622,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         onClick={() => selectRoundWinner(roundIndex, 'B')}
                         aria-pressed={winnerSide === 'B'}
                       >
-                        <img src={fighterBImage} alt="" />
+                        <PredictionFighterPhoto match={match} side="B" alt="" />
                         <span><small>{getFighterName(match, 'B')}</small><strong>{winnerSide === 'A' ? 'RL' : 'RW'}</strong><em>{winnerSide === 'B' ? (isWrestling ? 'Match winner' : 'Round winner') : winnerSide === 'A' ? (isWrestling ? 'Match loss' : 'Round loss') : 'Select corner'}</em></span>
                         {winnerSide === 'B' && <FaCheck />}
                       </button>
@@ -619,7 +638,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         onClick={() => selectFinish(roundIndex, 'A')}
                         aria-pressed={finishSide === 'A'}
                       >
-                        <img src={fighterAImage} alt="" />
+                        <PredictionFighterPhoto match={match} side="A" alt="" />
                         <span><small>{getFighterName(match, 'A')}</small><strong>{finishSide === 'B' ? 'SP' : 'KO'}</strong><em>{finishSide === 'A' ? 'Knockout pick' : finishSide === 'B' ? 'Survival points' : 'Select corner'}</em></span>
                         {finishSide === 'A' && <FaCheck />}
                       </button>
@@ -629,7 +648,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
                         onClick={() => selectFinish(roundIndex, 'B')}
                         aria-pressed={finishSide === 'B'}
                       >
-                        <img src={fighterBImage} alt="" />
+                        <PredictionFighterPhoto match={match} side="B" alt="" />
                         <span><small>{getFighterName(match, 'B')}</small><strong>{finishSide === 'A' ? 'SP' : 'KO'}</strong><em>{finishSide === 'B' ? 'Knockout pick' : finishSide === 'A' ? 'Survival points' : 'Select corner'}</em></span>
                         {finishSide === 'B' && <FaCheck />}
                       </button>
