@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import modalStyles from './AffiliateEmailModal.module.css';
 import { adminHeaders } from '@/Utils/authFetch';
-import { resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { buildPublicApiUrl, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
