@@ -61,7 +61,7 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   // iOS Safari can retain a failed image response after a deployment. Retry the
   // identical original image with a versioned URL before trying another record.
   const retryUrls = urls.flatMap(url => {
-    if (!/^https?:\\/\\//i.test(url)) return [url];
+    if (!(url.startsWith('https://') || url.startsWith('http://'))) return [url];
     const separator = url.includes('?') ? '&' : '?';
     return [url, `${url}${separator}fmm_photo_v=20261022`];
   });
