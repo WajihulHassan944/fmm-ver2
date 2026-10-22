@@ -138,35 +138,33 @@ const mergeFightForDetail = (base = {}, candidate = {}) => {
   };
 
   const fighterAImage = pickDetailImage(
-    candidate.fighterAPrimaryImage,
-    candidate.resolvedFighterAImage,
-    candidate.fighterAResolvedImage,
-    getNestedDetailImage(candidate.fighterA),
-    getNestedDetailImage(candidate.fighterAId),
-    candidate.fighterAImage,
     base.fighterAPrimaryImage,
     base.resolvedFighterAImage,
     base.fighterAResolvedImage,
     getNestedDetailImage(base.fighterA),
     getNestedDetailImage(base.fighterAId),
     base.fighterAImage,
+    candidate.fighterAPrimaryImage,
+    candidate.resolvedFighterAImage,
+    candidate.fighterAResolvedImage,
+    getNestedDetailImage(candidate.fighterA),
+    getNestedDetailImage(candidate.fighterAId),
+    candidate.fighterAImage,
   );
-
   const fighterBImage = pickDetailImage(
-    candidate.fighterBPrimaryImage,
-    candidate.resolvedFighterBImage,
-    candidate.fighterBResolvedImage,
-    getNestedDetailImage(candidate.fighterB),
-    getNestedDetailImage(candidate.fighterBId),
-    candidate.fighterBImage,
     base.fighterBPrimaryImage,
     base.resolvedFighterBImage,
     base.fighterBResolvedImage,
     getNestedDetailImage(base.fighterB),
     getNestedDetailImage(base.fighterBId),
     base.fighterBImage,
+    candidate.fighterBPrimaryImage,
+    candidate.resolvedFighterBImage,
+    candidate.fighterBResolvedImage,
+    getNestedDetailImage(candidate.fighterB),
+    getNestedDetailImage(candidate.fighterBId),
+    candidate.fighterBImage,
   );
-
   return normalizePublicFightRow({
     ...merged,
     fighterAPrimaryImage: fighterAImage || merged.fighterAPrimaryImage || '',
