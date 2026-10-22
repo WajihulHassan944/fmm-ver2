@@ -42,10 +42,6 @@ function FightFighterPhoto({ fight, side }) {
     isA ? fight.matchFighterAImage : fight.matchFighterBImage,
     isA ? fight.fighterOneImage : fight.fighterTwoImage,
     isA ? fight.imageA : fight.imageB,
-    // The homepage may have a working featured poster even when the portrait URL is broken.
-    // Keep it as a final, real-fight fallback rather than showing a broken image.
-    fight.featuredThisWeekImage,
-    fight.fightPosterImage,
   ];
   const candidates = [...new Set(raw.filter((value) => typeof value === 'string' && value.trim() && !['null', 'undefined', 'none', 'n/a'].includes(value.trim().toLowerCase())).map((value) => resolvePublicMediaUrl(value)))];
   const [position, setPosition] = useState(0);
