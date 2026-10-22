@@ -44,7 +44,15 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   const urls = [...new Set(candidates.map(resolvePublicMediaUrl))];
   const [index, setIndex] = useState(0);
   useEffect(() => setIndex(0), [side, urls.join('|')]);
-  return urls[index] ? <img {...props} src={urls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
+  // Keep the approved desktop photo unchanged. On mobile, bypass stale browser
+  // image caches on the first request instead of waiting for an image failure.
+  const [mobileBrowser, setMobileBrowser] = useState(false);
+  useEffect(() => { setMobileBrowser(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)); }, []);
+  const photoUrl = urls[index];
+  const mobilePhotoUrl = mobileBrowser && photoUrl && /^https?:/i.test(photoUrl)
+    ? photoUrl + (photoUrl.includes('?') ? '&' : '?') + 'fmm_mobile_photo=20261022'
+    : photoUrl;
+  return mobilePhotoUrl ? <img {...props} key={mobilePhotoUrl} src={mobilePhotoUrl} referrerPolicy="no-referrer" onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
 };
 
 const MetricIcon = ({ code }) => {
