@@ -28,12 +28,8 @@ function FightFighterPhoto({ fight, side }) {
   const verifiedLibraryImage = record?.imageHealth?.status === 'valid' && record?.primaryImage
     ? record.primaryImage
     : null;
-  const navarreteLibraryImage = isA && String(fight.matchFighterA || '').trim().toUpperCase() === 'EMANUEL NAVARRETE'
-    && String(fight.matchFighterB || '').trim().toUpperCase() === "O'SHAQUIE FOSTER"
-    ? 'https://res.cloudinary.com/dq2fwh1ui/image/upload/v1792512163/fighterAImages/dmpnih4rcp3vb8lk3uxt.png'
-    : null;
   const raw = [
-    navarreteLibraryImage,
+    isA ? fight.fighterAImage : fight.fighterBImage,
     verifiedLibraryImage,
     isA ? fight.fighterAPrimaryImage : fight.fighterBPrimaryImage,
     isA ? fight.fighterAResolvedImage : fight.fighterBResolvedImage,
@@ -129,10 +125,7 @@ export async function getServerSideProps({ res }) {
     const fights = [...byId.values()].map((fight) => {
       const imageA = libraryImageFor(fight.matchFighterA);
       const imageB = libraryImageFor(fight.matchFighterB);
-      const isNavarreteFoster = normalizeName(fight.matchFighterA) === 'emanuelnavarrete' && normalizeName(fight.matchFighterB) === 'oshaquiefoster';
-      const actualImageA = isNavarreteFoster
-        ? 'https://res.cloudinary.com/dq2fwh1ui/image/upload/v1792512163/fighterAImages/dmpnih4rcp3vb8lk3uxt.png'
-        : imageA;
+      const actualImageA = fight.fighterAImage || imageA;
       return {
         ...fight,
         ...(actualImageA ? { fighterAPrimaryImage: actualImageA, fighterAImage: actualImageA, resolvedFighterAImage: actualImageA } : {}),
