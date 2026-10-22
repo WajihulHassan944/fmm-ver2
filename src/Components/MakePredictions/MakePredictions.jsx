@@ -14,21 +14,6 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   const record = isA ? match.fighterA : match.fighterB;
   const linked = isA ? match.fighterAId : match.fighterBId;
   const [homepagePortrait, setHomepagePortrait] = useState('');
-  const [libraryPortrait, setLibraryPortrait] = useState('');
-  useEffect(() => {
-    let active = true;
-    const name = String(getFighterName(match, side) || '').trim().toLowerCase();
-    if (!name) return;
-    fetch(buildPublicApiUrl('/api/public/combat-fighters?limit=2000&status=active'))
-      .then(response => response.ok ? response.json() : null)
-      .then(data => {
-        if (!active) return;
-        const fighters = Array.isArray(data?.items) ? data.items : Array.isArray(data?.fighters) ? data.fighters : Array.isArray(data) ? data : [];
-        const fighter = fighters.find(f => [f.displayName, f.name, ...(Array.isArray(f.aliases) ? f.aliases : [])].some(n => String(n || '').trim().toLowerCase() === name));
-        setLibraryPortrait(fighter?.primaryImage || fighter?.image || '');
-      }).catch(() => { if (active) setLibraryPortrait(''); });
-    return () => { active = false; };
-  }, [match?._id, match?.id, side]);
   useEffect(() => {
     const id = String(match?._id || match?.id || '');
     if (!id) return;
@@ -49,7 +34,6 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   }, [match?._id, match?.id, isA]);
   const candidates = [
     homepagePortrait,
-    libraryPortrait,
     isA ? match.fighterAImage : match.fighterBImage,
     isA ? match.fighterAPrimaryImage : match.fighterBPrimaryImage,
     isA ? match.resolvedFighterAImage : match.resolvedFighterBImage,
@@ -58,16 +42,9 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
     getFighterImage(match, side, isA ? 0 : 1),
   ].filter(value => typeof value === 'string' && value.trim());
   const urls = [...new Set(candidates.map(resolvePublicMediaUrl))];
-  // iOS Safari can retain a failed image response after a deployment. Retry the
-  // identical original image with a versioned URL before trying another record.
-  const retryUrls = urls.flatMap(url => {
-    if (!(url.startsWith('https://') || url.startsWith('http://'))) return [url];
-    const separator = url.includes('?') ? '&' : '?';
-    return [url, `${url}${separator}fmm_photo_v=20261022`];
-  });
   const [index, setIndex] = useState(0);
-  useEffect(() => setIndex(0), [side, retryUrls.join('|')]);
-  return retryUrls[index] ? <img {...props} src={retryUrls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
+  useEffect(() => setIndex(0), [side, urls.join('|')]);
+  return urls[index] ? <img {...props} src={urls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
 };
 
 const MetricIcon = ({ code }) => {
