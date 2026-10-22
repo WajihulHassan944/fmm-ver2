@@ -13,7 +13,27 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   const isA = side === 'A';
   const record = isA ? match.fighterA : match.fighterB;
   const linked = isA ? match.fighterAId : match.fighterBId;
+  const [homepagePortrait, setHomepagePortrait] = useState('');
+  useEffect(() => {
+    const id = String(match?._id || match?.id || '');
+    if (!id) return;
+    let active = true;
+    // Read the same owner-promoted fight record that powers the public homepage.
+    // Only its fighter portrait field is eligible here, never its fight poster.
+    fetch(buildPublicApiUrl('/api/public/homepage/promoted-fights?limit=24'))
+      .then(response => response.ok ? response.json() : null)
+      .then(data => {
+        if (!active) return;
+        const rows = Array.isArray(data?.items) ? data.items : [];
+        const exact = rows.find(row => String(row?._id || row?.id || '') === id);
+        const image = isA ? exact?.fighterAImage : exact?.fighterBImage;
+        setHomepagePortrait(typeof image === 'string' ? image : '');
+      })
+      .catch(() => { if (active) setHomepagePortrait(''); });
+    return () => { active = false; };
+  }, [match?._id, match?.id, isA]);
   const candidates = [
+    homepagePortrait,
     isA ? match.fighterAImage : match.fighterBImage,
     isA ? match.fighterAPrimaryImage : match.fighterBPrimaryImage,
     isA ? match.resolvedFighterAImage : match.resolvedFighterBImage,
