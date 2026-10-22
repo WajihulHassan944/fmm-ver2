@@ -14,6 +14,21 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   const record = isA ? match.fighterA : match.fighterB;
   const linked = isA ? match.fighterAId : match.fighterBId;
   const [homepagePortrait, setHomepagePortrait] = useState('');
+  const [libraryPortrait, setLibraryPortrait] = useState('');
+  useEffect(() => {
+    let active = true;
+    const name = String(getFighterName(match, side) || '').trim().toLowerCase();
+    if (!name) return;
+    fetch(buildPublicApiUrl('/api/public/combat-fighters?limit=2000&status=active'))
+      .then(response => response.ok ? response.json() : null)
+      .then(data => {
+        if (!active) return;
+        const fighters = Array.isArray(data?.items) ? data.items : Array.isArray(data?.fighters) ? data.fighters : Array.isArray(data) ? data : [];
+        const fighter = fighters.find(f => [f.displayName, f.name, ...(Array.isArray(f.aliases) ? f.aliases : [])].some(n => String(n || '').trim().toLowerCase() === name));
+        setLibraryPortrait(fighter?.primaryImage || fighter?.image || '');
+      }).catch(() => { if (active) setLibraryPortrait(''); });
+    return () => { active = false; };
+  }, [match?._id, match?.id, side]);
   useEffect(() => {
     const id = String(match?._id || match?.id || '');
     if (!id) return;
@@ -34,6 +49,7 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   }, [match?._id, match?.id, isA]);
   const candidates = [
     homepagePortrait,
+    libraryPortrait,
     isA ? match.fighterAImage : match.fighterBImage,
     isA ? match.fighterAPrimaryImage : match.fighterBPrimaryImage,
     isA ? match.resolvedFighterAImage : match.resolvedFighterBImage,
