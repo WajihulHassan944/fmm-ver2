@@ -156,7 +156,7 @@ const enrichFightWithLibraryImages = (fight = {}, libraryImages = new Map()) => 
   const bName = cleanText(fight.matchFighterB, fight.fighterBName, fight.fighterB?.displayName, fight.f2, String(fight.matchName || fight.name || '').split(/\s+vs\.?\s+/i)[1]);
   return {
     ...fight,
-    fighterAPrimaryImage: fight.fighterAPrimaryImage || fight.resolvedFighterAImage || fight.fighterAImage || libraryImages.get(normalizeFighterLookupName(aName)) || '',
+    fighterAPrimaryImage: libraryImages.get(normalizeFighterLookupName(aName)) || fight.fighterAImage || fight.fighterAPrimaryImage || fight.resolvedFighterAImage || '',
     fighterBPrimaryImage: fight.fighterBPrimaryImage || fight.resolvedFighterBImage || fight.fighterBImage || libraryImages.get(normalizeFighterLookupName(bName)) || '',
   };
 };
