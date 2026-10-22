@@ -43,15 +43,8 @@ const PredictionFighterPhoto = ({ match, side, ...props }) => {
   ].filter(value => typeof value === 'string' && value.trim());
   const urls = [...new Set(candidates.map(resolvePublicMediaUrl))];
   const [index, setIndex] = useState(0);
-  const [retry, setRetry] = useState(false);
-  useEffect(() => { setIndex(0); setRetry(false); }, [side, urls.join('|')]);
-  const selectedUrl = urls[index];
-  // Retry the identical approved portrait with a fresh URL if Safari cached a failed response.
-  const displayUrl = selectedUrl && retry ? selectedUrl + (selectedUrl.includes('?') ? '&' : '?') + 'fmm_retry=1' : selectedUrl;
-  return displayUrl ? <img {...props} key={displayUrl} src={displayUrl} onError={() => {
-    if (!retry) setRetry(true);
-    else { setRetry(false); setIndex(n => n + 1); }
-  }} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
+  useEffect(() => setIndex(0), [side, urls.join('|')]);
+  return urls[index] ? <img {...props} src={urls[index]} onError={() => setIndex(n => n + 1)} /> : <span role="img" aria-label={props.alt || getFighterName(match, side)} />;
 };
 
 const MetricIcon = ({ code }) => {
