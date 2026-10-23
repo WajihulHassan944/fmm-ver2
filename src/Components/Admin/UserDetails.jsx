@@ -1,6 +1,7 @@
 import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import React, { useEffect, useState } from 'react';
-import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
+import { FaCheck, FaEnvelope, FaExternalLinkAlt, FaEye, FaMoneyCheckAlt, FaPhone, FaTrophy, FaUsers } from 'react-icons/fa';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { adminHeaders } from '@/Utils/authFetch';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
@@ -23,9 +24,32 @@ const UserDetails = ({ user, affiliates = [] }) => {
   const [buttonText, setButtonText] = useState('Send Email');
   const [isVerified, setIsVerified] = useState(user.verified);
   const [userDetails, setUserDetails] = useState([]);
+  const [promotedFights, setPromotedFights] = useState(null);
+  const [fightsError, setFightsError] = useState('');
+
+  // This affiliate's promoted fights (admin-only endpoint, filtered by exact account ID).
+  useEffect(() => {
+    let active = true;
+    setPromotedFights(null);
+    setFightsError('');
+    fetch(`${PUBLIC_API_BASE_URL}/api/admin/affiliate-fights`, { headers: adminHeaders() })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Could not load promoted fights.'))))
+      .then((data) => {
+        if (!active) return;
+        const rows = Array.isArray(data?.fights) ? data.fights : [];
+        setPromotedFights(rows.filter((fight) => String(fight.affiliateId || '') === affiliateId));
+      })
+      .catch((error) => { if (active) { setFightsError(error.message); setPromotedFights([]); } });
+    return () => { active = false; };
+  }, [affiliateId]);
+
+  const payoutRows = Array.isArray(user.payouts) ? user.payouts : [];
+  const payoutTotal = (status) => payoutRows.filter((row) => String(row?.status || 'pending') === status)
+    .reduce((sum, row) => sum + (Number(row?.amount) || 0), 0);
+  const pendingPayouts = payoutRows.filter((row) => String(row?.status || 'pending') === 'pending').length;
 
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminHeaders() })
+    fetch(`${PUBLIC_API_BASE_URL}/users`, { headers: adminHeaders() })
       .then((response) => response.json())
       .then((data) => {
         const matchedUsers = (user.usersJoined || []).map((affiliateUser) => {
@@ -48,7 +72,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
 
   const handleApprove = async () => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliates/${user._id}/verify`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliates/${user._id}/verify`, {
         method: 'POST',
         headers: adminHeaders({
           'Content-Type': 'application/json',
@@ -78,7 +102,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
 
     try {
       setButtonText('Sending!');
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/send-email-affiliate`, {
         method: 'POST',
         headers: adminHeaders({
           'Content-Type': 'application/json',
@@ -128,6 +152,43 @@ const UserDetails = ({ user, affiliates = [] }) => {
             <FaCheck /> Click to approve
           </button>
         )}
+      </section>
+
+      <section className="admin-table-panel admin-affiliate-manage-panel" style={{ padding: 20, marginBottom: 20 }}>
+        <header className="admin-panel-header">
+          <div><span>Management</span><h3>{user.playerName || user.firstName || 'Affiliate'} — account overview</h3></div>
+        </header>
+        <div className="admin-affiliate-profile-meta">
+          <div><small>Public page views</small><strong><FaEye /> {Number(user.totalViews || 0).toLocaleString()}</strong></div>
+          <div><small>League members</small><strong><FaUsers /> {Array.isArray(user.usersJoined) ? user.usersJoined.length : userDetails.length}</strong></div>
+          <div><small>Promoted fights</small><strong><FaTrophy /> {promotedFights === null ? '…' : promotedFights.length}</strong></div>
+          <div><small>Payout requests</small><strong><FaMoneyCheckAlt /> {pendingPayouts} pending · {payoutTotal('paid').toLocaleString()} paid</strong></div>
+        </div>
+        <div className="admin-row-actions" style={{ marginTop: 16 }}>
+          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer"><FaExternalLinkAlt /> Public page</a>}
+          <a href="/administration/AffiliateMatches">All affiliate fights</a>
+          <a href="/administration/payouts">Payouts</a>
+        </div>
+        <h4 style={{ margin: '20px 0 8px' }}>Promoted fights</h4>
+        {fightsError && <p className="is-error" role="alert">{fightsError}</p>}
+        <div className="admin-data-table-scroll">
+          <table className="admin-data-table">
+            <thead><tr><th>Fight</th><th>Status</th><th>Date</th><th>Entry</th><th>Pot</th></tr></thead>
+            <tbody>
+              {promotedFights && promotedFights.length > 0 ? promotedFights.map((fight) => (
+                <tr key={`${fight.sourceType}-${fight._id}`}>
+                  <td>{fight.matchName}</td>
+                  <td>{fight.matchStatus || '—'}</td>
+                  <td>{fight.matchDate ? new Date(fight.matchDate).toLocaleDateString() : '—'}</td>
+                  <td>{Number(fight.entryFee || 0).toLocaleString()}</td>
+                  <td>{Number(fight.pot || 0).toLocaleString()}</td>
+                </tr>
+              )) : (
+                <tr><td colSpan="5"><div className="admin-empty-table">{promotedFights === null ? 'Loading promoted fights…' : 'This affiliate has not promoted any fights yet.'}</div></td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="admin-table-panel" style={{ padding: 20, marginBottom: 20 }}>
