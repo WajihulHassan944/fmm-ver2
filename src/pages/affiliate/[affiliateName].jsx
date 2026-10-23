@@ -1,4 +1,3 @@
-import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
@@ -9,10 +8,7 @@ import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperi
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
-const normalizeIdentifier = (value) => {
-  try { return decodeURIComponent(String(value || '')).trim().toLowerCase(); }
-  catch { return String(value || '').trim().toLowerCase(); }
-};
+const normalizeIdentifier = (value) => decodeURIComponent(String(value || '')).trim().toLowerCase();
 const slugifyIdentifier = (value) => normalizeIdentifier(value)
   .replace(/[^a-z0-9]+/g, '-')
   .replace(/^-+|-+$/g, '');
@@ -70,7 +66,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       <div className="theme-container">
         <header className="public-affiliate-campaign-header">
           <div className="public-affiliate-campaign-owner">
-            <img src={affiliateProfileImage(affiliate.profileUrl)} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = AFFILIATE_LOGO; }} alt={affiliateName} />
+            <img src={affiliate.profileUrl} alt={affiliateName} />
             <span><p className="xp-eyebrow"><FaBullhorn /> Creator fight room</p><h2>{affiliateName}&apos;s campaigns</h2><small><FaUsers /> {memberCount} league members</small></span>
           </div>
           <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
@@ -105,84 +101,35 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
 export async function getServerSideProps(context) {
   const { affiliateName } = context.params;
   const requestedAffiliateId = String(context.query.affiliateId || '').trim();
-  // A named route and explicit ID must resolve to the same affiliate.
-  // Never silently substitute the signed-in administrator's profile.
   let affiliate = null;
   let promoMatches = [];
 
-  // Keep profile resolution independent of fight-feed failures.
-  const lookupNames = [...new Set([
-    String(affiliateName).replace(/-/g, ' '),
-    String(affiliateName),
-  ])];
-  const parseRows = (payload) => {
-    if (Array.isArray(payload)) return payload;
-    if (!payload || typeof payload !== 'object') return [];
-    for (const key of ['affiliates', 'users', 'items', 'results', 'data', 'affiliate', 'result']) {
-      const value = payload[key];
-      if (Array.isArray(value)) return value;
-      if (value && typeof value === 'object') {
-        const nested = parseRows(value);
-        if (nested.length) return nested;
-      }
-    }
-    return (payload._id || payload.id) ? [payload] : [];
-  };
-  const fetchRows = async (url) => {
-    try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(6000), headers: { Accept: 'application/json' } });
-      if (!response.ok) return [];
-      return parseRows(await response.json());
-    } catch (error) {
-      console.warn('Affiliate directory lookup failed:', url.split('?')[0], error?.message);
-      return [];
-    }
-  };
-  const isMatch = (row) => row && (row._id || row.id)
-    && (requestedAffiliateId
-      ? String(row._id || row.id) === requestedAffiliateId
-      : matchesAffiliateIdentifier(row, affiliateName));
-
-  // Public pages must use the sanitized public directory, not the admin-only
-  // /affiliates route. The API may cap pages below the requested limit.
-  const seenPages = new Set();
-  for (let page = 1; page <= 100 && !affiliate; page++) {
-    const rows = await fetchRows(`${API_BASE}/api/public/affiliates?limit=200&page=${page}`);
-    if (!rows.length) break;
-    const signature = rows.map((row) => String(row?._id || row?.id || '')).join('|');
-    if (seenPages.has(signature)) break;
-    seenPages.add(signature);
-    const matches = rows.filter(isMatch);
-    if (matches.length === 1) affiliate = matches[0];
-    if (matches.length > 1) break;
-  }
-  // Compatibility for older named links: accept only public-safe fields.
-  if (!affiliate && !requestedAffiliateId) {
-    for (const name of lookupNames) {
-      const rows = await fetchRows(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
-      const matches = rows.filter(isMatch);
-      if (matches.length === 1) {
-        const row = matches[0];
-        affiliate = {
-          _id: row._id || row.id,
-          firstName: row.firstName || '',
-          lastName: row.lastName || '',
-          playerName: row.playerName || '',
-          affiliateName: row.affiliateName || '',
-          leagueName: row.leagueName || '',
-          profileUrl: row.profileUrl || '',
-          usersJoined: Array.isArray(row.usersJoined) ? row.usersJoined.length : Number(row.usersJoined || 0),
-        };
-        break;
-      }
-    }
-  }
-
   try {
-    const [promoRes, publicFightsRes] = await Promise.all([
-      fetch(`${API_BASE}/shadow`, { signal: AbortSignal.timeout(8000) }),
-      fetch(`${API_BASE}/api/public/fights?limit=500`, { signal: AbortSignal.timeout(8000) }),
+    const [publicAffiliatesRes, legacyAffiliateRes, promoRes, publicFightsRes] = await Promise.all([
+      fetch(`${API_BASE}/api/public/affiliates?limit=200`),
+      fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(affiliateName)}`),
+      fetch(`${API_BASE}/shadow`),
+      fetch(`${API_BASE}/api/public/fights?limit=500`),
     ]);
+
+    if (publicAffiliatesRes.ok) {
+      const publicAffiliates = await publicAffiliatesRes.json();
+      const rows = Array.isArray(publicAffiliates) ? publicAffiliates : publicAffiliates.items || publicAffiliates.data || [];
+      const matching = safeArray(rows).filter((row) => requestedAffiliateId
+        ? String(row?._id || row?.id || '') === requestedAffiliateId
+        : matchesAffiliateIdentifier(row, affiliateName));
+      affiliate = matching.length === 1 ? matching[0] : null;
+      if (matching.length > 1) return { props: { affiliate: null, promoMatches: [] } };
+    }
+    // Keep every previously shared full-name URL working during migration.
+    if (!affiliate && legacyAffiliateRes.ok) {
+      const payload = await legacyAffiliateRes.json();
+      const rows = Array.isArray(payload) ? payload : [payload?.affiliate || payload?.data || payload];
+      const matching = rows.filter((row) => row && (row._id || row.id) && (requestedAffiliateId
+        ? String(row._id || row.id) === requestedAffiliateId
+        : matchesAffiliateIdentifier(row, affiliateName)));
+      if (matching.length === 1) affiliate = matching[0];
+    }
     const shadowRows = promoRes.ok ? await promoRes.json() : [];
     const publicFightPayload = publicFightsRes.ok ? await publicFightsRes.json() : [];
     const publicFightRows = Array.isArray(publicFightPayload)
@@ -193,7 +140,7 @@ export async function getServerSideProps(context) {
       .map((row) => [String(row._id), row]));
     promoMatches = [...byId.values()];
   } catch (error) {
-    console.error('Affiliate fight feed unavailable:', error);
+    console.error('Error fetching data:', error);
   }
 
   return { props: { affiliate, promoMatches } };
