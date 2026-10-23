@@ -3,24 +3,11 @@ import { useRouter } from 'next/router';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
-import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
-
-const normalizeIdentifier = (value) => decodeURIComponent(String(value || '')).trim().toLowerCase();
-const slugifyIdentifier = (value) => normalizeIdentifier(value)
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '');
-
-const matchesAffiliateIdentifier = (affiliate, identifier) => {
-  const normalized = normalizeIdentifier(identifier);
-  const slug = slugifyIdentifier(identifier);
-  const fullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ');
-  const candidates = [affiliate?._id, affiliate?.id, affiliate?.playerName, affiliate?.affiliateName, affiliate?.leagueName, fullName, getAffiliateNameSlug(affiliate), `${getAffiliateNameSlug(affiliate)}-${String(affiliate?._id || affiliate?.id || '').slice(-6)}`]
-    .filter(Boolean);
-  return candidates.some((candidate) => normalizeIdentifier(candidate) === normalized || slugifyIdentifier(candidate) === slug);
-};
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   const router = useRouter();
@@ -66,7 +53,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       <div className="theme-container">
         <header className="public-affiliate-campaign-header">
           <div className="public-affiliate-campaign-owner">
-            <img src={affiliate.profileUrl} alt={affiliateName} />
+            <img src={affiliateProfileImage(affiliate.profileUrl)} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = AFFILIATE_LOGO; }} alt={affiliateName} />
             <span><p className="xp-eyebrow"><FaBullhorn /> Creator fight room</p><h2>{affiliateName}&apos;s campaigns</h2><small><FaUsers /> {memberCount} league members</small></span>
           </div>
           <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
@@ -105,31 +92,21 @@ export async function getServerSideProps(context) {
   let promoMatches = [];
 
   try {
-    const [publicAffiliatesRes, legacyAffiliateRes, promoRes, publicFightsRes] = await Promise.all([
-      fetch(`${API_BASE}/api/public/affiliates?limit=200`),
-      fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(affiliateName)}`),
+    // ONE authoritative lookup (backend /api/public/affiliates/resolve):
+    // exact account id and/or slug, never a substitute. If both are supplied they
+    // must be the same record, otherwise the page is "not found".
+    const params = new URLSearchParams({ slug: String(affiliateName || '') });
+    if (requestedAffiliateId) params.set('id', requestedAffiliateId);
+    const [resolveRes, promoRes, publicFightsRes] = await Promise.all([
+      fetch(`${API_BASE}/api/public/affiliates/resolve?${params.toString()}`),
       fetch(`${API_BASE}/shadow`),
       fetch(`${API_BASE}/api/public/fights?limit=500`),
     ]);
-
-    if (publicAffiliatesRes.ok) {
-      const publicAffiliates = await publicAffiliatesRes.json();
-      const rows = Array.isArray(publicAffiliates) ? publicAffiliates : publicAffiliates.items || publicAffiliates.data || [];
-      const matching = safeArray(rows).filter((row) => requestedAffiliateId
-        ? String(row?._id || row?.id || '') === requestedAffiliateId
-        : matchesAffiliateIdentifier(row, affiliateName));
-      affiliate = matching.length === 1 ? matching[0] : null;
-      if (matching.length > 1) return { props: { affiliate: null, promoMatches: [] } };
+    if (resolveRes.ok) {
+      const resolved = await resolveRes.json();
+      if (resolved?._id) affiliate = resolved;
     }
-    // Keep every previously shared full-name URL working during migration.
-    if (!affiliate && legacyAffiliateRes.ok) {
-      const payload = await legacyAffiliateRes.json();
-      const rows = Array.isArray(payload) ? payload : [payload?.affiliate || payload?.data || payload];
-      const matching = rows.filter((row) => row && (row._id || row.id) && (requestedAffiliateId
-        ? String(row._id || row.id) === requestedAffiliateId
-        : matchesAffiliateIdentifier(row, affiliateName)));
-      if (matching.length === 1) affiliate = matching[0];
-    }
+    if (!affiliate) context.res.statusCode = 404;
     const shadowRows = promoRes.ok ? await promoRes.json() : [];
     const publicFightPayload = publicFightsRes.ok ? await publicFightsRes.json() : [];
     const publicFightRows = Array.isArray(publicFightPayload)
