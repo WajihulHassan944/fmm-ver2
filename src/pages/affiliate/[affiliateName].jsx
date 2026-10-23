@@ -106,44 +106,32 @@ export async function getServerSideProps(context) {
   let promoMatches = [];
 
   try {
-    // Resolve the public slug across both the public directory and the original
-    // affiliate directory. The public directory may exclude approved legacy accounts.
-    const pageSize = 200;
-    const exactId = requestedAffiliateId;
-    const isMatch = (row) => exactId
-      ? String(row?._id || row?.id || '') === exactId
-      : matchesAffiliateIdentifier(row, affiliateName);
-    const sources = [
-      (page) => `${API_BASE}/api/public/affiliates?limit=${pageSize}&page=${page}`,
-      (page) => `${API_BASE}/affiliates?limit=${pageSize}&page=${page}`,
-    ];
-    for (const source of sources) {
-      const matches = new Map();
-      for (let page = 1; page <= 30; page += 1) {
-        const response = await fetch(source(page), { signal: AbortSignal.timeout(6000) }).catch(() => null);
-        if (!response?.ok) break;
-        const payload = await response.json().catch(() => null);
-        const rows = safeArray(Array.isArray(payload) ? payload : payload?.items || payload?.data || payload?.affiliates || payload?.users);
-        rows.filter(isMatch).forEach((row) => matches.set(String(row._id || row.id), row));
-        if (matches.size || rows.length < pageSize) break;
-      }
-      if (matches.size === 1) {
-        affiliate = [...matches.values()][0];
+    // Original affiliate lookup: try the public directory and legacy name endpoint.
+    // Older affiliate records may only be present in the legacy service.
+    const lookupNames = [...new Set([
+      String(affiliateName).replace(/-/g, ' '),
+      String(affiliateName),
+    ])];
+    const candidateResponses = await Promise.all([
+      fetch(`${API_BASE}/api/public/affiliates?limit=200`, { signal: AbortSignal.timeout(8000) }).catch(() => null),
+      fetch(`${API_BASE}/affiliates`, { signal: AbortSignal.timeout(8000) }).catch(() => null),
+      ...lookupNames.map((name) => fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(8000) }).catch(() => null)),
+    ]);
+    for (const response of candidateResponses) {
+      if (!response?.ok) continue;
+      const payload = await response.json().catch(() => null);
+      const rows = Array.isArray(payload) ? payload
+        : Array.isArray(payload?.affiliates) ? payload.affiliates
+        : Array.isArray(payload?.data) ? payload.data
+        : Array.isArray(payload?.items) ? payload.items
+        : payload && typeof payload === 'object' ? [payload] : [];
+      const matches = rows.filter((row) => row && (row._id || row.id)
+        && (requestedAffiliateId
+          ? String(row._id || row.id) === requestedAffiliateId
+          : matchesAffiliateIdentifier(row, affiliateName)));
+      if (matches.length === 1) {
+        affiliate = matches[0];
         break;
-      }
-      if (matches.size > 1) break; // Ambiguous names must never select the wrong account.
-    }
-
-    if (!affiliate) {
-      const names = [...new Set([affiliateName, String(affiliateName).replace(/-/g, ' ')])];
-      for (const name of names) {
-        const response = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(6000) }).catch(() => null);
-        if (!response?.ok) continue;
-        const record = await response.json().catch(() => null);
-        if (record && !Array.isArray(record) && (record._id || record.id) && isMatch(record)) {
-          affiliate = record;
-          break;
-        }
       }
     }
 
