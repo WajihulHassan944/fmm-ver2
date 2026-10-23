@@ -101,6 +101,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
 
 export async function getServerSideProps(context) {
   const { affiliateName } = context.params;
+  const requestedAffiliateId = String(context.query.affiliateId || '').trim();
   let affiliate = null;
   let promoMatches = [];
 
@@ -114,7 +115,9 @@ export async function getServerSideProps(context) {
       if (!response.ok) break;
       const payload = await response.json();
       const rows = safeArray(Array.isArray(payload) ? payload : payload.items || payload.data || payload.affiliates);
-      publicMatches.push(...rows.filter((row) => matchesAffiliateIdentifier(row, affiliateName)));
+      publicMatches.push(...rows.filter((row) => requestedAffiliateId
+        ? String(row._id || row.id || '') === requestedAffiliateId
+        : matchesAffiliateIdentifier(row, affiliateName)));
       if (publicMatches.length || rows.length < pageSize) break;
     }
     // Never select an arbitrary affiliate if multiple accounts share a name.
@@ -127,7 +130,8 @@ export async function getServerSideProps(context) {
         const response = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
         if (!response.ok) continue;
         const record = await response.json();
-        if (record && !Array.isArray(record) && (record._id || record.id) && matchesAffiliateIdentifier(record, affiliateName)) {
+        if (record && !Array.isArray(record) && (record._id || record.id)
+          && (requestedAffiliateId ? String(record._id || record.id) === requestedAffiliateId : matchesAffiliateIdentifier(record, affiliateName))) {
           affiliate = record;
           break;
         }
