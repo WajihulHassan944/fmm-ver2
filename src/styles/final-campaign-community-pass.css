@@ -1328,11 +1328,12 @@
 }
 
 .public-affiliate-campaign-owner > img {
+  background: #05070b;
   border: 2px solid rgba(223, 17, 27, 0.62);
-  border-radius: 50%;
-  height: 84px;
-  object-fit: cover;
-  width: 84px;
+  border-radius: 12px;
+  height: 96px;
+  object-fit: contain;
+  width: 96px;
 }
 
 .public-affiliate-campaign-owner > span {

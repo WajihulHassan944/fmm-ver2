@@ -5,6 +5,7 @@ import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 
 const API_BASE = PUBLIC_API_BASE_URL;
 
@@ -52,7 +53,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       <div className="theme-container">
         <header className="public-affiliate-campaign-header">
           <div className="public-affiliate-campaign-owner">
-            <img src={affiliate.profileUrl} alt={affiliateName} />
+            <img src={affiliateProfileImage(affiliate.profileUrl)} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = AFFILIATE_LOGO; }} alt={affiliateName} />
             <span><p className="xp-eyebrow"><FaBullhorn /> Creator fight room</p><h2>{affiliateName}&apos;s campaigns</h2><small><FaUsers /> {memberCount} league members</small></span>
           </div>
           <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
