@@ -10,7 +10,7 @@ const FALLBACK_AVATAR = AFFILIATE_LOGO;
 const UserDetails = ({ user, affiliates = [] }) => {
   const affiliateId = String(user._id || user.id || '');
   const publicIdentifier = getAffiliatePublicIdentifier(user, affiliates);
-  const affiliateUrl = publicIdentifier ? `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}` : '';
+  const affiliateUrl = publicIdentifier ? `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}?affiliateId=${encodeURIComponent(affiliateId)}` : '';
   const [copyStatus, setCopyStatus] = useState('');
   const copyAffiliateValue = async (value, label) => {
     try { await navigator.clipboard.writeText(value); setCopyStatus(label + ' copied.'); }
