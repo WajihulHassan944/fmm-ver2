@@ -27,7 +27,7 @@ const Leagues = () => {
   useEffect(() => {
     const fetchAffiliates = async () => {
       try {
-        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates`);
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates?limit=200`);
         const data = await response.json();
         setAffiliates(Array.isArray(data) ? data : []);
       } catch (error) {

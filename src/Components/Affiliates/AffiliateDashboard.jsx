@@ -19,6 +19,7 @@ import {
   safeArray,
   useImageFallback,
 } from '@/Utils/fightExperience';
+import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
@@ -242,9 +243,7 @@ const AffiliateDashboard = () => {
     event.stopPropagation();
 
     try {
-      const encodedMatchName = encodeURIComponent(match?.matchName || 'fight');
-      const encodedFullName = encodeURIComponent(fullName);
-      const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+      const url = getAffiliateFightShareUrl(affiliate, getFightId(match));
       await navigator.clipboard.writeText(url);
       setCopiedId(getFightId(match));
       window.setTimeout(() => setCopiedId(null), 2000);

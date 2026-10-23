@@ -16,6 +16,7 @@ import { toast } from 'react-toastify';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import UsersPlayed from './UsersPlayed/UsersPlayed';
 import { affiliateHeaders } from '@/Utils/authFetch';
+import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { FaArrowLeft, FaBullhorn, FaChartLine, FaCheckCircle, FaClock, FaCopy, FaDownload, FaInfoCircle, FaMicrophone, FaPause, FaPlay, FaShareAlt, FaTimes, FaTrash, FaTrophy, FaUsers, FaVideo } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
@@ -77,7 +78,7 @@ const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null }) =>
   const fighterBImage = getFighterImage(match, 'B');
   const campaignMatchId = getFightId(match) || matchId;
   const affiliateFullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'affiliate';
-  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(match?.matchName || 'fight')}/${encodeURIComponent(affiliateFullName)}`;
+  const promotionUrl = getAffiliateFightShareUrl(affiliate, campaignMatchId);
   const fightCategory = getFightCategory(match) || 'Fight campaign';
   const fightStatus = match?.matchShadowStatus || 'inactive';
   const scheduledDate = formatFightDate(match, { short: true });
@@ -212,10 +213,7 @@ const actualProfit = extraActualProfit / 2;
                 ctx.drawImage(logoImage, 10, 10, 60, 60);
 
                 // Generate QR code
-                const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
-                const encodedMatchName = encodeURIComponent(match.matchName);
-                const encodedFullName = encodeURIComponent(fullName);
-                const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+                const url = getAffiliateFightShareUrl(affiliate, campaignMatchId);
 
                 QRCode.toDataURL(url, { width: 60, margin: 2 }, (err, qrImageUrl) => {
                     if (!err) {
@@ -276,10 +274,7 @@ const actualProfit = extraActualProfit / 2;
                 drawImageWithShadow(fighterTwoImage, 380, 140, fighterBName);
 
                 // Generate QR code
-                const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
-                const encodedMatchName = encodeURIComponent(match.matchName);
-                const encodedFullName = encodeURIComponent(fullName);
-                const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+                const url = getAffiliateFightShareUrl(affiliate, campaignMatchId);
 
                 QRCode.toDataURL(url, { width: 60, margin: 2 }, (err, qrImageUrl) => {
                     if (!err) {
@@ -355,11 +350,7 @@ const actualProfit = extraActualProfit / 2;
 
   const copyToClipboard = () => {
     if (match && affiliate) {
-      const fullName = `${affiliate.firstName} ${affiliate.lastName}`; // Combine first and last name
-      const encodedMatchName = encodeURIComponent(match.matchName);  // Encode matchName
-      const encodedFullName = encodeURIComponent(fullName);  // Encode fullName
-
-      const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+      const url = getAffiliateFightShareUrl(affiliate, campaignMatchId);
 
       navigator.clipboard.writeText(url)
         .then(() => {

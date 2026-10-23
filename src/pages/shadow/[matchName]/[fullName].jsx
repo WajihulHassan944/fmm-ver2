@@ -1,22 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import Link from 'next/link';
-import { FaCalendarAlt, FaClock, FaShareAlt, FaTrophy, FaUsers } from 'react-icons/fa';
-import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
-import AffiliateFightLeaderboard from '@/Components/Affiliates/AffiliateFightLeaderboard';
-import { userHeaders } from '@/Utils/authFetch';
+// Legacy affiliate promotion address: /shadow/<fight name>/<affiliate name>
+//
+// Older posters, QR codes and shared links still point here. This route used to render
+// its own older-style page (styled only by promo.css) and found the affiliate by NAME.
+// It now forwards to the current approved experience so visitors never see two designs:
+//
+//   fight found      ->  /league/<affiliate>?affiliateId=<id>&fightId=<fight id>
+//   no matching fight ->  /affiliate/<affiliate>?affiliateId=<id>   (their campaigns page)
+//   unknown/ambiguous affiliate -> 404 (never a different person)
+//
+// The previous page is preserved in docs/legacy/shadow-promo-page.jsx.txt (and in git
+// history, commit e9e7e55).
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
-import {
-  formatFightDate,
-  getFightCategory,
-  getFightDayParts,
-  getFightRounds,
-  getFighterImage,
-  getFighterName,
-} from '@/Utils/fightExperience';
-
-const API_BASE = PUBLIC_API_BASE_URL;
 
 const normalizeRouteValue = (value = '') => String(value || '')
   .trim()
@@ -24,223 +18,49 @@ const normalizeRouteValue = (value = '') => String(value || '')
   .replace(/-/g, ' ')
   .replace(/\s+/g, ' ');
 
-const PromoShadowPage = ({ affiliate, matchData }) => {
-  const router = useRouter();
-  const [navigateDashboard, setNavigateDashboard] = useState(null);
+const slugify = (value = '') => String(value || '')
+  .normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-  const fighterAName = getFighterName(matchData, 'A');
-  const fighterBName = getFighterName(matchData, 'B');
-  const fighterAImage = getFighterImage(matchData, 'A');
-  const fighterBImage = getFighterImage(matchData, 'B');
-  const categoryLabel = getFightCategory(matchData);
-  const scheduleLabel = formatFightDate(matchData);
-  const dayParts = getFightDayParts(matchData);
-  const backgroundImage = matchData?.promotionBackground || '/images/fmm-experience/fighter-duel-arena.webp';
-  const matchTitle = matchData?.matchName || `${fighterAName} vs ${fighterBName}`;
-  const affiliateName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'Affiliate';
-  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(matchTitle)}/${encodeURIComponent(affiliateName)}`;
-  const safeMetaImage = String(backgroundImage || '').startsWith('http') ? backgroundImage : 'https://fantasymmadness.com/images/fmm-experience/fighter-duel-arena.webp';
-
-  useEffect(() => {
-    const incrementViews = async () => {
-      try {
-        if (!affiliate?._id) return;
-        await fetch(`${API_BASE}/affiliate/${affiliate._id}/incrementViews`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-      } catch (error) {
-        console.error('Error incrementing view count:', error);
-      }
-    };
-
-    incrementViews();
-  }, [affiliate?._id]);
-
-  const handleJoinLeague = async () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-      router.push(`/auth?mode=signup&next=${encodeURIComponent(router.asPath)}`);
-      return;
-    }
-
-    const { _id: userId, email: userEmail } = user;
-
-    try {
-      const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/join`, {
-        method: 'POST',
-        headers: userHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ userId, userEmail }),
-      });
-
-      if (response.ok) {
-        alert('Successfully joined the league');
-        window.location.reload();
-        return;
-      }
-
-      const data = await response.json();
-      alert(`${data.message}`);
-      router.push('/home');
-    } catch (error) {
-      console.error('Error joining league:', error);
-    }
-  };
-
-  if (navigateDashboard) {
-    return <AffiliateFightLeaderboard matchId={navigateDashboard} />;
-  }
-
-  if (!matchData || !affiliate) {
-    return <div className="shadow-promo-loading">Loading promotion…</div>;
-  }
-
-  return (
-    <>
-      <Head>
-        <title>{`${fighterAName} vs ${fighterBName} | Fantasy MMAdness ${categoryLabel}`}</title>
-        <meta
-          name="description"
-          content={`Join ${affiliateName}'s Fantasy MMAdness promotion for ${fighterAName} vs ${fighterBName}. Make predictions, follow the card, and compete with the league.`}
-        />
-        <meta property="og:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMAdness`} />
-        <meta property="og:description" content={matchData?.matchDescription || `Fantasy fight promotion by ${affiliateName}.`} />
-        <meta property="og:url" content={promotionUrl} />
-        <meta property="og:image" content={safeMetaImage} />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${fighterAName} vs ${fighterBName} | Fantasy MMAdness`} />
-        <meta name="twitter:description" content={`Join the ${categoryLabel} fantasy promotion and make your fight picks.`} />
-        <meta name="twitter:image" content={safeMetaImage} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'SportsEvent',
-              name: `${fighterAName} vs ${fighterBName}`,
-              startDate: matchData?.matchDate || undefined,
-              url: promotionUrl,
-              description: matchData?.matchDescription || `${categoryLabel} fantasy promotion`,
-              image: safeMetaImage,
-              eventStatus: matchData?.matchStatus === 'Finished'
-                ? 'https://schema.org/EventCompleted'
-                : 'https://schema.org/EventScheduled',
-              location: { '@type': 'VirtualLocation', url: promotionUrl },
-              performer: [
-                { '@type': 'Person', name: fighterAName, image: fighterAImage },
-                { '@type': 'Person', name: fighterBName, image: fighterBImage },
-              ],
-              organizer: { '@type': 'Organization', name: 'Fantasy MMAdness', url: 'https://fantasymmadness.com' },
-            }),
-          }}
-        />
-      </Head>
-
-      <main className="shadow-promo-page">
-        <section className="shadow-promo-hero" style={{ '--shadow-promo-bg': `url(${backgroundImage})` }}>
-          <div className="shadow-promo-bg" aria-hidden="true" />
-          <div className="shadow-promo-grid" aria-hidden="true" />
-
-          <div className="shadow-promo-shell">
-            <div className="shadow-promo-copy">
-              <p className="shadow-promo-eyebrow"><FaShareAlt /> Affiliate fight promotion</p>
-              <h1>{fighterAName} <span>vs</span> {fighterBName}</h1>
-              <p>{matchData?.matchDescription || 'Join the fight-night campaign, make predictions, and compete with the league.'}</p>
-
-              <div className="shadow-promo-meta-row">
-                <span><FaTrophy /> {categoryLabel}</span>
-                <span><FaClock /> {scheduleLabel}</span>
-                <span><FaCoins /> ${Number(matchData?.matchTokens || 0).toLocaleString()} ticket</span>
-                <span><FaUsers /> {affiliateName}'s league</span>
-              </div>
-
-              <div className="shadow-promo-actions">
-                <button type="button" onClick={handleJoinLeague}>Join {affiliate?.firstName || 'affiliate'}'s league</button>
-                <Link href={`/auth?mode=signup&next=${encodeURIComponent(router.asPath)}`}>Free signup</Link>
-              </div>
-            </div>
-
-            <aside className="shadow-promo-calendar-card">
-              <FaCalendarAlt />
-              <strong>{dayParts.day}</strong>
-              <span>{dayParts.month}</span>
-              <small>{getFightRounds(matchData)}</small>
-            </aside>
-          </div>
-
-          <div className="shadow-promo-faceoff" aria-label={`${fighterAName} versus ${fighterBName}`}>
-            <figure>
-              <img src={fighterAImage} alt={fighterAName} />
-              <figcaption>{fighterAName}</figcaption>
-            </figure>
-            <div className="shadow-promo-vs"><span>{categoryLabel}</span><strong>VS</strong><small>{matchTitle}</small></div>
-            <figure>
-              <img src={fighterBImage} alt={fighterBName} />
-              <figcaption>{fighterBName}</figcaption>
-            </figure>
-          </div>
-        </section>
-
-        <section className="shadow-promo-details">
-          <div>
-            <p className="shadow-promo-eyebrow">Prize and entry</p>
-            <h2>{Number(matchData?.pot || 0).toLocaleString()} FM pot</h2>
-            <p>Max rounds: {matchData?.maxRounds || 'TBA'} · Ticket: {Number(matchData?.matchTokens || 0).toLocaleString()} FM</p>
-          </div>
-          <div>
-            <p className="shadow-promo-eyebrow">How it works</p>
-            <h2>Join, predict, compete</h2>
-            <p>Sign up, join the affiliate league, open the fight card, and submit picks before the card locks.</p>
-          </div>
-          {matchData?.matchPromotionalVideoUrl && (
-            <div className="shadow-promo-video-card">
-              <p className="shadow-promo-eyebrow">Campaign media</p>
-              <video controls>
-                <source src={matchData.matchPromotionalVideoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
-        </section>
-      </main>
-    </>
-  );
-};
+// Never rendered: getServerSideProps always redirects or returns 404.
+const LegacyShadowPromoRedirect = () => null;
 
 export const getServerSideProps = async ({ params }) => {
   const { matchName, fullName } = params;
 
   try {
-    const affiliateRes = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(fullName)}`);
-    const affiliate = await affiliateRes.json();
+    const resolved = await fetch(
+      `${PUBLIC_API_BASE_URL}/api/public/affiliates/resolve?slug=${encodeURIComponent(slugify(fullName))}`,
+    );
+    if (!resolved.ok) return { notFound: true };
+    const affiliate = await resolved.json();
+    if (!affiliate?._id) return { notFound: true };
 
-    if (!affiliateRes.ok || !affiliate) {
-      return { notFound: true };
+    const slug = affiliate.slug || slugify(fullName);
+    const affiliateId = String(affiliate._id);
+
+    let fightId = '';
+    try {
+      const matchesRes = await fetch(`${PUBLIC_API_BASE_URL}/match?includeDrafts=true`);
+      const matches = matchesRes.ok ? await matchesRes.json() : [];
+      const expectedName = normalizeRouteValue(matchName);
+      const match = Array.isArray(matches)
+        ? matches.find((m) => normalizeRouteValue(m?.matchName) === expectedName
+          && String(m?.affiliateId || '') === affiliateId)
+        : null;
+      fightId = match?._id ? String(match._id) : '';
+    } catch (error) {
+      console.error('Legacy promotion link: could not look up the fight:', error);
     }
 
-    const matchesRes = await fetch(`${API_BASE}/match?includeDrafts=true`);
-    const matches = await matchesRes.json();
-    const expectedName = normalizeRouteValue(matchName);
-
-    const matchData = Array.isArray(matches)
-      ? matches.find((m) => normalizeRouteValue(m?.matchName) === expectedName && String(m?.affiliateId || '') === String(affiliate?._id || ''))
-      : null;
-
-    if (!matchData) {
-      return { notFound: true };
-    }
-
-    return {
-      props: {
-        affiliate,
-        matchData,
-      },
-    };
+    const destination = fightId
+      ? `/league/${encodeURIComponent(slug)}?affiliateId=${encodeURIComponent(affiliateId)}&fightId=${encodeURIComponent(fightId)}`
+      : `/affiliate/${encodeURIComponent(slug)}?affiliateId=${encodeURIComponent(affiliateId)}`;
+    return { redirect: { destination, permanent: false } };
   } catch (error) {
-    console.error('Error fetching affiliate promotion page data:', error);
+    console.error('Legacy promotion link failed:', error);
     return { notFound: true };
   }
 };
 
-export default PromoShadowPage;
+export default LegacyShadowPromoRedirect;

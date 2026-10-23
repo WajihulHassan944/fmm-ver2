@@ -31,11 +31,13 @@ const PromoTwo = ({ matchId, affiliateId }) => {
     const fetchAffiliates = async () => {
       setAffiliateLoading(true);
       try {
-        const response = await fetch(`${API_BASE}/api/public/affiliates`);
-        if (!response.ok) throw new Error('Failed to fetch affiliates');
-        const affiliates = await response.json();
-        const matchedAffiliate = safeArray(affiliates).find((item) => String(item?._id || '') === String(affiliateId || ''));
-        if (active) setAffiliate(matchedAffiliate || null);
+        // Look the affiliate up by exact account ID. (The old code downloaded the public
+        // list and searched it, so anyone past the list's size cap showed as unavailable.)
+        if (!affiliateId) throw new Error('Missing affiliate id');
+        const response = await fetch(`${API_BASE}/api/public/affiliates/${encodeURIComponent(affiliateId)}`);
+        if (!response.ok) throw new Error('Failed to fetch affiliate');
+        const matchedAffiliate = await response.json();
+        if (active) setAffiliate(matchedAffiliate?._id ? matchedAffiliate : null);
       } catch (error) {
         console.error('Error fetching affiliates:', error);
         if (active) setAffiliate(null);
@@ -91,7 +93,8 @@ const PromoTwo = ({ matchId, affiliateId }) => {
   }
 
   const affiliateName = [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate';
-  const memberCount = safeArray(affiliate.usersJoined).length;
+  // The public API sends a member COUNT (a number), not the member list.
+  const memberCount = Array.isArray(affiliate.usersJoined) ? affiliate.usersJoined.length : Number(affiliate.usersJoined) || 0;
   const category = getFightCategory(match);
 
   return (

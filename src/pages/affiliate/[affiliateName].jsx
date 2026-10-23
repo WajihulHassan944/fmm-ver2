@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
@@ -22,6 +22,21 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       )
     ));
   }, [affiliate, promoMatches]);
+
+  // Count a public-page view once per browser session. The previous page that did this
+  // is no longer routed, so without this the admin "page views" number never moved.
+  useEffect(() => {
+    const id = String(affiliate?._id || '');
+    if (!id) return;
+    try {
+      const key = `fmm-affiliate-view-${id}`;
+      if (window.sessionStorage.getItem(key)) return;
+      window.sessionStorage.setItem(key, '1');
+    } catch (error) { /* storage unavailable: count this page load */ }
+    fetch(`${PUBLIC_API_BASE_URL}/affiliate/${encodeURIComponent(id)}/incrementViews`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    }).catch(() => {});
+  }, [affiliate?._id]);
 
   if (!affiliate) {
     return <div className="public-promo-loading is-error">This affiliate profile is not currently available.</div>;
