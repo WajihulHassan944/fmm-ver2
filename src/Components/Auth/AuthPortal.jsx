@@ -87,6 +87,8 @@ const getSafeNextPath = (value, fallback) => {
   return candidate.startsWith('/') && !candidate.startsWith('//') ? candidate : fallback;
 };
 
+const PENDING_AUTH_KEY = 'fmm_pending_auth_return';
+
 const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -162,11 +164,21 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   };
 
   const navigateAfterAuth = (fallback) => {
-    let pathname = getSafeNextPath(router.query.next || router.query.returnTo, fallback);
+    let pending = null;
+    if (role === 'player') {
+      try {
+        const raw = window.localStorage.getItem(PENDING_AUTH_KEY);
+        window.localStorage.removeItem(PENDING_AUTH_KEY);
+        const saved = raw ? JSON.parse(raw) : null;
+        const explicitNext = queryValue(router.query.next) || queryValue(router.query.returnTo);
+        if (!explicitNext && saved && Date.now() - Number(saved.at || 0) < 24 * 60 * 60 * 1000) pending = saved;
+      } catch (storageError) { pending = null; }
+    }
+    let pathname = getSafeNextPath(router.query.next || router.query.returnTo || pending?.next, fallback);
     if (redirectTo?.type === 'view-thread' && redirectTo.threadId) pathname = `/threads/${redirectTo.threadId}`;
     if (redirectTo?.type === 'create-thread') pathname = '/create-thread';
     const query = {};
-    if (queryValue(router.query.fight)) query.fight = queryValue(router.query.fight);
+    if (queryValue(router.query.fight) || pending?.fight) query.fight = queryValue(router.query.fight) || pending.fight;
     if (queryValue(router.query.league)) query.league = queryValue(router.query.league);
     // A selected public fight must survive both login and signup. Preserve
     // its play flag instead of replacing the URL's query with the fight id.
@@ -292,6 +304,15 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
         window.gtag('event', 'sign_up_submitted', { method: 'email', send_to: 'G-TP1C9005WD' });
       }
+      // The verification email opens a fresh tab at plain login, which forgets which fight or
+      // league the player came for. Remember it (for 24 hours) so the first login after
+      // verifying still returns them there.
+      try {
+        const nextPath = queryValue(router.query.next) || queryValue(router.query.returnTo);
+        if (nextPath || referrerId) {
+          window.localStorage.setItem(PENDING_AUTH_KEY, JSON.stringify({ next: nextPath || '', fight: queryValue(router.query.fight) || '', at: Date.now() }));
+        }
+      } catch (storageError) { /* storage can be blocked; the normal flow still works */ }
       setPlayerRegistration({ state: registration?.emailFailed ? 'email-failed' : 'polling', email: playerForm.email });
       if (registration?.emailFailed) toast.error('Account saved, but the verification email could not be sent. Use Resend verification email.');
       else toast.success('Account created. Check your email to verify it.');
