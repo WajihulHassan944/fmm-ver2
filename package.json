@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
+    "prebuild": "node scripts/guard-legacy-pages.mjs",
     "build": "next build --webpack",
     "smoke:public": "node scripts/smoke-public-flows.mjs",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "guard:pages": "node scripts/guard-legacy-pages.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^2.0.0",
