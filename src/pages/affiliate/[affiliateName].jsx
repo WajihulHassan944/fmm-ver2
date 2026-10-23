@@ -9,7 +9,10 @@ import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperi
 
 const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
-const normalizeIdentifier = (value) => decodeURIComponent(String(value || '')).trim().toLowerCase();
+const normalizeIdentifier = (value) => {
+  try { return decodeURIComponent(String(value || '')).trim().toLowerCase(); }
+  catch { return String(value || '').trim().toLowerCase(); }
+};
 const slugifyIdentifier = (value) => normalizeIdentifier(value)
   .replace(/[^a-z0-9]+/g, '-')
   .replace(/^-+|-+$/g, '');
@@ -102,6 +105,8 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
 export async function getServerSideProps(context) {
   const { affiliateName } = context.params;
   const requestedAffiliateId = String(context.query.affiliateId || '').trim();
+  // A named route and explicit ID must resolve to the same affiliate.
+  // Never silently substitute the signed-in administrator's profile.
   let affiliate = null;
   let promoMatches = [];
 
@@ -152,7 +157,7 @@ export async function getServerSideProps(context) {
     if (matches.length > 1) break;
   }
   // Compatibility for older named links: accept only public-safe fields.
-  if (!affiliate) {
+  if (!affiliate && !requestedAffiliateId) {
     for (const name of lookupNames) {
       const rows = await fetchRows(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
       const matches = rows.filter(isMatch);
