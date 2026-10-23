@@ -1,10 +1,11 @@
+import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
 
-const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
+const FALLBACK_AVATAR = AFFILIATE_LOGO;
 
 const UserDetails = ({ user, affiliates = [] }) => {
   const affiliateId = String(user._id || user.id || '');
@@ -107,7 +108,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
     <div className="admin-affiliate-detail-content">
       <section className="admin-affiliate-profile-card">
         <div className="admin-affiliate-profile-identity">
-          <img src={user.profileUrl || FALLBACK_AVATAR} alt="User Profile" />
+          <img src={affiliateProfileImage(user.profileUrl)} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = FALLBACK_AVATAR; }} alt="User Profile" />
           <div>
             <span>Affiliate profile</span>
             <h2>{user.playerName || `${user.firstName || ''} ${user.lastName || ''}`}</h2>
