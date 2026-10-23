@@ -74,8 +74,10 @@ const navigationGroups = [
       { label: 'Affiliate users', href: '/administration/AffiliateUsers', icon: FaUserFriends },
       { label: 'Guest & suspended', href: '/administration/non-registered-users', icon: FaShieldAlt, matchPrefixes: ['/administration/suspended-accounts'] },
       { label: 'Payouts', href: '/administration/payouts', icon: FaMoneyCheckAlt },
+      { label: 'Payment health', href: '/administration/payment-health', icon: FaShieldAlt },
       { label: 'Apparel orders', href: '/administration/apparel-orders', icon: FaShoppingBag },
       { label: 'Sponsors', href: '/administration/sponsors', icon: FaTrophy },
+      { label: 'Back office guide', href: '/administration/back-office-guide', icon: FaSearch },
     ],
   },
   {

@@ -668,6 +668,7 @@ const AffiliateUsers = () => {
                   <td>
                     <div className="admin-row-actions">
                       <button type="button" title="View affiliate" onClick={() => handleViewUserDetails(user)}><FaEye /></button>
+                      <a href={`/administration/affiliate-back-office/${encodeURIComponent(String(user._id || ''))}`} target="_blank" rel="noopener noreferrer" title="View affiliate back office (read only)" style={{ marginLeft: 8, whiteSpace: 'nowrap' }}>Back office</a>
                     </div>
                   </td>
                   <td>

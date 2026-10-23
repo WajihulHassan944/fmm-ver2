@@ -34,6 +34,7 @@
   "/administration/adminRecords",
   "/administration/affiliate-back-office/[affiliateId]",
   "/administration/apparel-orders",
+  "/administration/back-office-guide",
   "/administration/blogs",
   "/administration/blogs/add-new-blog",
   "/administration/blogs/blog-details-admin/[blogId]",

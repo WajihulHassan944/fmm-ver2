@@ -63,6 +63,16 @@ const ROUTE_COPY = {
     title: 'Fight records',
     description: 'Audit official records, stats, and admin-maintained historical data.',
   },
+  '/administration/payment-health': {
+    eyebrow: 'Finance',
+    title: 'Payment health',
+    description: 'Check which payment mode is live and whether the payment gateway accepts the stored credentials. No charge is made.',
+  },
+  '/administration/back-office-guide': {
+    eyebrow: 'Help',
+    title: 'Back office guide',
+    description: 'What each major administrator tool does and when to use it.',
+  },
   '/administration/payouts': {
     eyebrow: 'Finance',
     title: 'Affiliate payouts',
