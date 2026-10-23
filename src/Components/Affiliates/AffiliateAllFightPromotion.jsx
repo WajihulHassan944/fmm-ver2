@@ -30,7 +30,8 @@ export default function AffiliateAllFightPromotion() {
     // The public route still accepts legacy name/username links.
     const id = String(affiliate._id || affiliate.id || '');
     const name = getAffiliateNameSlug(affiliate);
-    const publicIdentifier = name && id ? `${name}-${id.slice(-6)}` : id || name;
+    // Use the same clean, human-readable link as the admin affiliate directory.
+    const publicIdentifier = name || id;
     return `https://fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}`;
   }, [affiliate]);
 
