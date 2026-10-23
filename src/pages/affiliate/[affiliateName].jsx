@@ -104,22 +104,39 @@ export async function getServerSideProps(context) {
   let promoMatches = [];
 
   try {
-    const [publicAffiliatesRes, legacyAffiliateRes, promoRes, publicFightsRes] = await Promise.all([
-      fetch(`${API_BASE}/api/public/affiliates?limit=200`),
-      fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(affiliateName)}`),
+    // Resolve the public slug against every page, not just the first 200 affiliates.
+    // A creator may be absent from the first page even though their back-office record exists.
+    const pageSize = 200;
+    let publicMatches = [];
+    for (let page = 1; page <= 30; page += 1) {
+      const response = await fetch(`${API_BASE}/api/public/affiliates?limit=${pageSize}&page=${page}`);
+      if (!response.ok) break;
+      const payload = await response.json();
+      const rows = safeArray(Array.isArray(payload) ? payload : payload.items || payload.data || payload.affiliates);
+      publicMatches.push(...rows.filter((row) => matchesAffiliateIdentifier(row, affiliateName)));
+      if (publicMatches.length || rows.length < pageSize) break;
+    }
+    // Never select an arbitrary affiliate if multiple accounts share a name.
+    if (publicMatches.length === 1) affiliate = publicMatches[0];
+
+    // Older links use the person's full name; new links use a hyphenated slug.
+    if (!affiliate && publicMatches.length === 0) {
+      const names = [...new Set([affiliateName, String(affiliateName).replace(/-/g, ' ')])];
+      for (const name of names) {
+        const response = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
+        if (!response.ok) continue;
+        const record = await response.json();
+        if (record && !Array.isArray(record) && (record._id || record.id) && matchesAffiliateIdentifier(record, affiliateName)) {
+          affiliate = record;
+          break;
+        }
+      }
+    }
+
+    const [promoRes, publicFightsRes] = await Promise.all([
       fetch(`${API_BASE}/shadow`),
       fetch(`${API_BASE}/api/public/fights?limit=500`),
     ]);
-
-    if (publicAffiliatesRes.ok) {
-      const publicAffiliates = await publicAffiliatesRes.json();
-      const rows = Array.isArray(publicAffiliates) ? publicAffiliates : publicAffiliates.items || publicAffiliates.data || [];
-      const matching = safeArray(rows).filter((row) => matchesAffiliateIdentifier(row, affiliateName));
-      affiliate = matching.length === 1 ? matching[0] : null;
-      if (matching.length > 1) return { props: { affiliate: null, promoMatches: [] } };
-    }
-    // Keep every previously shared full-name URL working during migration.
-    if (!affiliate && legacyAffiliateRes.ok) affiliate = await legacyAffiliateRes.json();
     const shadowRows = promoRes.ok ? await promoRes.json() : [];
     const publicFightPayload = publicFightsRes.ok ? await publicFightsRes.json() : [];
     const publicFightRows = Array.isArray(publicFightPayload)
