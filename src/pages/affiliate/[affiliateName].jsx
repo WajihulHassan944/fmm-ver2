@@ -1,3 +1,4 @@
+import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
@@ -66,7 +67,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       <div className="theme-container">
         <header className="public-affiliate-campaign-header">
           <div className="public-affiliate-campaign-owner">
-            <img src={affiliate.profileUrl} alt={affiliateName} />
+            <img src={affiliateProfileImage(affiliate.profileUrl)} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = AFFILIATE_LOGO; }} alt={affiliateName} />
             <span><p className="xp-eyebrow"><FaBullhorn /> Creator fight room</p><h2>{affiliateName}&apos;s campaigns</h2><small><FaUsers /> {memberCount} league members</small></span>
           </div>
           <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
