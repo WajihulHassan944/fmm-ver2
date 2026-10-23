@@ -10,6 +10,8 @@ const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
 const RegisteredUsers = () => {
   const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersError, setUsersError] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [tokensToGive, setTokensToGive] = useState('');
   const [addUserPopup, setAddUserPopup] = useState(false);
@@ -38,19 +40,27 @@ const RegisteredUsers = () => {
   };
 
   const fetchData = async () => {
+    setUsersLoading(true);
+    setUsersError('');
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminJsonHeaders() });
+      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', {
+        headers: adminJsonHeaders(),
+        cache: 'no-store',
+      });
+      if (requireFreshAdminSession(response)) return;
+      if (!response.ok) throw new Error(`Player directory request failed (HTTP ${response.status})`);
       const data = await response.json();
-      // Was unsorted (server order + no client sort) — a brand-new signup
-      // could land anywhere in the list instead of at the top, which is
-      // exactly why it didn't visibly appear as "new" even though the push
-      // notification fired correctly.
-      const sorted = Array.isArray(data)
-        ? [...data].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-        : data;
-      setUsers(sorted);
+      const records = Array.isArray(data) ? data
+        : Array.isArray(data?.users) ? data.users
+        : Array.isArray(data?.data) ? data.data
+        : Array.isArray(data?.items) ? data.items : null;
+      if (!records) throw new Error('Player directory returned an unexpected response.');
+      setUsers([...records].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)));
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching registered users:', error);
+      setUsersError(error.message || 'Unable to load registered users.');
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -302,7 +312,7 @@ const RegisteredUsers = () => {
               onChange={(event) => setSearchQuery(event.target.value)}
             />
           </label>
-          <span className="admin-result-count"><FaUsers /> {filteredUsers.length} of {users.length} users</span>
+          <span className="admin-result-count"><FaUsers /> {usersLoading ? "Loading players…" : usersError ? "Player directory unavailable" : `${filteredUsers.length} of ${users.length} users`}</span>
         </div>
 
         <div className="admin-data-table-scroll">
@@ -319,7 +329,7 @@ const RegisteredUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length > 0 ? filteredUsers.map((user) => (
+              {!usersLoading && !usersError && filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user._id}>
                   <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || user.playerName || 'user'} for email`} checked={selectedUserIds.includes(user._id)} disabled={!canReceiveBulkEmail(user)} onChange={() => toggleUser(user._id)} /></td>
                   <td>
@@ -342,7 +352,7 @@ const RegisteredUsers = () => {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="7"><div className="admin-empty-table">No registered users match the search.</div></td></tr>
+                <tr><td colSpan="7"><div className="admin-empty-table">{usersLoading ? "Loading registered players…" : usersError ? `Unable to load registered players: ${usersError}` : searchQuery.trim() ? "No registered users match the search." : "No registered players returned by the directory."}</div></td></tr>
               )}
             </tbody>
           </table>
