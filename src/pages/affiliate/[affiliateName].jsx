@@ -138,21 +138,38 @@ export async function getServerSideProps(context) {
       ? String(row._id || row.id) === requestedAffiliateId
       : matchesAffiliateIdentifier(row, affiliateName));
 
-  // Resolve legacy direct-name links first, then search both directories.
-  for (const name of lookupNames) {
-    const rows = await fetchRows(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
-    const match = rows.filter(isMatch);
-    if (match.length === 1) { affiliate = match[0]; break; }
+  // Public pages must use the sanitized public directory, not the admin-only
+  // /affiliates route. The API may cap pages below the requested limit.
+  const seenPages = new Set();
+  for (let page = 1; page <= 100 && !affiliate; page++) {
+    const rows = await fetchRows(`${API_BASE}/api/public/affiliates?limit=200&page=${page}`);
+    if (!rows.length) break;
+    const signature = rows.map((row) => String(row?._id || row?.id || '')).join('|');
+    if (seenPages.has(signature)) break;
+    seenPages.add(signature);
+    const matches = rows.filter(isMatch);
+    if (matches.length === 1) affiliate = matches[0];
+    if (matches.length > 1) break;
   }
+  // Compatibility for older named links: accept only public-safe fields.
   if (!affiliate) {
-    for (const endpoint of ['/api/public/affiliates', '/affiliates']) {
-      for (let page = 1; page <= 20; page++) {
-        const rows = await fetchRows(`${API_BASE}${endpoint}?limit=200&page=${page}`);
-        const matches = rows.filter(isMatch);
-        if (matches.length === 1) { affiliate = matches[0]; break; }
-        if (matches.length > 1 || rows.length < 200) break;
+    for (const name of lookupNames) {
+      const rows = await fetchRows(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
+      const matches = rows.filter(isMatch);
+      if (matches.length === 1) {
+        const row = matches[0];
+        affiliate = {
+          _id: row._id || row.id,
+          firstName: row.firstName || '',
+          lastName: row.lastName || '',
+          playerName: row.playerName || '',
+          affiliateName: row.affiliateName || '',
+          leagueName: row.leagueName || '',
+          profileUrl: row.profileUrl || '',
+          usersJoined: Array.isArray(row.usersJoined) ? row.usersJoined.length : Number(row.usersJoined || 0),
+        };
+        break;
       }
-      if (affiliate) break;
     }
   }
 
