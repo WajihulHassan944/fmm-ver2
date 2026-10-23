@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { getUserToken, userHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
+import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import styles from './league.module.css';
 
 export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
@@ -77,6 +78,8 @@ export async function getServerSideProps({ params, query, res }) {
   const affiliateId = String(query?.affiliateId || params?.affiliateId || '');
   const fightId = String(query?.fightId || '');
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
+  const pathId = String(params?.affiliateId || '');
+  if (/^[a-f\d]{24}$/i.test(pathId) && pathId.toLowerCase() !== affiliateId.toLowerCase()) return { notFound: true };
   try {
     const [affiliateResponse, fightResponse] = await Promise.all([
       fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${encodeURIComponent(affiliateId)}`),
@@ -84,6 +87,13 @@ export async function getServerSideProps({ params, query, res }) {
     ]);
     if (!affiliateResponse.ok || !fightResponse.ok) return { notFound: true };
     const [affiliate, payload] = await Promise.all([affiliateResponse.json(), fightResponse.json()]);
+    // The path segment is a label, the id is the identity. If the path is a name
+    // slug it must belong to this same affiliate, otherwise refuse to render.
+    const pathKey = String(params?.affiliateId || '');
+    if (pathKey && !/^[a-f\d]{24}$/i.test(pathKey)) {
+      const own = getAffiliateNameSlug(affiliate);
+      if (pathKey.toLowerCase() !== own && pathKey.toLowerCase() !== `${own}-${affiliateId.slice(-6)}`) return { notFound: true };
+    }
     const fight = payload.fight || payload.data || payload;
     if (!affiliate || !fight?._id) return { notFound: true };
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');

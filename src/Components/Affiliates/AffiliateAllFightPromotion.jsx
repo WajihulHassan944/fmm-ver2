@@ -32,7 +32,7 @@ export default function AffiliateAllFightPromotion() {
     const name = getAffiliateNameSlug(affiliate);
     // Use the same clean, human-readable link as the admin affiliate directory.
     const publicIdentifier = name || id;
-    return `https://fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}`;
+    return `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}`;
   }, [affiliate]);
 
   const promoted = (Array.isArray(matches) ? matches : []).filter(

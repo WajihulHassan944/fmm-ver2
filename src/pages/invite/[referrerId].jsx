@@ -5,7 +5,9 @@ import Head from 'next/head'
 
 const InvitePage = () => {
   const router = useRouter()
-  const referrerId = typeof router.query.ref === 'string' && /^[a-f0-9]{24}$/i.test(router.query.ref) ? router.query.ref : router.query.referrerId
+  const rawReferrer = typeof router.query.ref === 'string' && /^[a-f0-9]{24}$/i.test(router.query.ref) ? router.query.ref : router.query.referrerId
+  const referrerId = typeof rawReferrer === 'string' && /^[a-f0-9]{24}$/i.test(rawReferrer) ? rawReferrer : ''
+  const signupHref = `/auth?mode=signup&role=player${referrerId ? `&referrer=${referrerId}` : ''}`
 
   return (
     <>
@@ -22,7 +24,7 @@ const InvitePage = () => {
         <meta property="og:title" content="Join Fantasy MMAdness – Get 20 Free FM COINS!" />
         <meta property="og:description" content="Sign up now using a referral link and earn 20 free FM COINS to play fantasy boxing and combat sports games!" />
         <meta property="og:image" content="https://www.fantasymmadness.com/images/social/fantasy-mmadness-og-2026.jpg" />
-        <meta property="og:url" content="https://fantasymmadness.com/invite" />
+        <meta property="og:url" content="https://www.fantasymmadness.com/invite" />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:card" content="summary_large_image" />
@@ -35,7 +37,7 @@ const InvitePage = () => {
 
       <div className='invite-container'>
         <h1>Earn 20 free FM COINS to play fantasy sports by Signing up</h1>
-        <Link href={`/auth?mode=signup&role=player&referrer=${referrerId}`} className='signUpBtnInvite'>
+        <Link href={signupHref} className='signUpBtnInvite'>
           Sign up now
         </Link>
       </div>
