@@ -71,3 +71,18 @@
   .body { padding: 12px !important; }
   .inviteModal { height: calc(100dvh - 16px); }
 }
+
+/* Keep provider failures readable instead of collapsing into a thin scroll strip. */
+.modal :global(.admin-bulk-email-errors) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  max-height: 220px !important;
+  min-height: 70px !important;
+  overflow-y: auto !important;
+  padding: 12px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.modal :global(.admin-bulk-email-errors) > span { display: block !important; flex: 0 0 auto !important; }
