@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'fantasymmadness-game-server-three.vercel.app',
       },
+      {
+        protocol: 'https',
+        hostname: 'fantasymmadness-game-server-three-taupe.vercel.app',
+      },
     ],
   },
 

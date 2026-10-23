@@ -1,6 +1,6 @@
 import OpenAI, { toFile } from 'openai';
 
-const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
+const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three-taupe.vercel.app').replace(/\/$/, '');
 const MAX_AUDIO_BYTES = 6 * 1024 * 1024;
 
 const bearer = (req) => {

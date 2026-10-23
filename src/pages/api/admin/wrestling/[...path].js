@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');

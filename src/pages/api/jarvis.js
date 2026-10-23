@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import OpenAI from 'openai';
 
-const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 20;
 const MAX_MESSAGES = 14;
