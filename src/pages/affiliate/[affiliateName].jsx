@@ -105,39 +105,61 @@ export async function getServerSideProps(context) {
   let affiliate = null;
   let promoMatches = [];
 
-  try {
-    // Original affiliate lookup: try the public directory and legacy name endpoint.
-    // Older affiliate records may only be present in the legacy service.
-    const lookupNames = [...new Set([
-      String(affiliateName).replace(/-/g, ' '),
-      String(affiliateName),
-    ])];
-    const candidateResponses = await Promise.all([
-      fetch(`${API_BASE}/api/public/affiliates?limit=200`, { signal: AbortSignal.timeout(8000) }).catch(() => null),
-      fetch(`${API_BASE}/affiliates`, { signal: AbortSignal.timeout(8000) }).catch(() => null),
-      ...lookupNames.map((name) => fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(8000) }).catch(() => null)),
-    ]);
-    for (const response of candidateResponses) {
-      if (!response?.ok) continue;
-      const payload = await response.json().catch(() => null);
-      const rows = Array.isArray(payload) ? payload
-        : Array.isArray(payload?.affiliates) ? payload.affiliates
-        : Array.isArray(payload?.data) ? payload.data
-        : Array.isArray(payload?.items) ? payload.items
-        : payload && typeof payload === 'object' ? [payload] : [];
-      const matches = rows.filter((row) => row && (row._id || row.id)
-        && (requestedAffiliateId
-          ? String(row._id || row.id) === requestedAffiliateId
-          : matchesAffiliateIdentifier(row, affiliateName)));
-      if (matches.length === 1) {
-        affiliate = matches[0];
-        break;
+  // Keep profile resolution independent of fight-feed failures.
+  const lookupNames = [...new Set([
+    String(affiliateName).replace(/-/g, ' '),
+    String(affiliateName),
+  ])];
+  const parseRows = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (!payload || typeof payload !== 'object') return [];
+    for (const key of ['affiliates', 'users', 'items', 'results', 'data', 'affiliate', 'result']) {
+      const value = payload[key];
+      if (Array.isArray(value)) return value;
+      if (value && typeof value === 'object') {
+        const nested = parseRows(value);
+        if (nested.length) return nested;
       }
     }
+    return (payload._id || payload.id) ? [payload] : [];
+  };
+  const fetchRows = async (url) => {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(6000), headers: { Accept: 'application/json' } });
+      if (!response.ok) return [];
+      return parseRows(await response.json());
+    } catch (error) {
+      console.warn('Affiliate directory lookup failed:', url.split('?')[0], error?.message);
+      return [];
+    }
+  };
+  const isMatch = (row) => row && (row._id || row.id)
+    && (requestedAffiliateId
+      ? String(row._id || row.id) === requestedAffiliateId
+      : matchesAffiliateIdentifier(row, affiliateName));
 
+  // Resolve legacy direct-name links first, then search both directories.
+  for (const name of lookupNames) {
+    const rows = await fetchRows(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
+    const match = rows.filter(isMatch);
+    if (match.length === 1) { affiliate = match[0]; break; }
+  }
+  if (!affiliate) {
+    for (const endpoint of ['/api/public/affiliates', '/affiliates']) {
+      for (let page = 1; page <= 20; page++) {
+        const rows = await fetchRows(`${API_BASE}${endpoint}?limit=200&page=${page}`);
+        const matches = rows.filter(isMatch);
+        if (matches.length === 1) { affiliate = matches[0]; break; }
+        if (matches.length > 1 || rows.length < 200) break;
+      }
+      if (affiliate) break;
+    }
+  }
+
+  try {
     const [promoRes, publicFightsRes] = await Promise.all([
-      fetch(`${API_BASE}/shadow`),
-      fetch(`${API_BASE}/api/public/fights?limit=500`),
+      fetch(`${API_BASE}/shadow`, { signal: AbortSignal.timeout(8000) }),
+      fetch(`${API_BASE}/api/public/fights?limit=500`, { signal: AbortSignal.timeout(8000) }),
     ]);
     const shadowRows = promoRes.ok ? await promoRes.json() : [];
     const publicFightPayload = publicFightsRes.ok ? await publicFightsRes.json() : [];
@@ -149,7 +171,7 @@ export async function getServerSideProps(context) {
       .map((row) => [String(row._id), row]));
     promoMatches = [...byId.values()];
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Affiliate fight feed unavailable:', error);
   }
 
   return { props: { affiliate, promoMatches } };
