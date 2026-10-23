@@ -153,7 +153,7 @@ export default function FAQsPage({ faqs = [] }) {
 
 export const getServerSideProps = async () => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/faqs');
+    const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/faqs');
     if (!response.ok) throw new Error('Failed to fetch FAQs');
     const data = await response.json();
     return { props: { faqs: JSON.parse(JSON.stringify(data?.data || data || [])) } };

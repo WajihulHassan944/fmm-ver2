@@ -93,7 +93,7 @@ const Profile = () => {
         formData.append('isUSCitizen', Boolean(user?.isUSCitizen));
         if (typeof File !== 'undefined' && profileUrl instanceof File) formData.append('image', profileUrl);
 
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-profile/${user._id}`, {
+        const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/update-profile/${user._id}`, {
           method: 'PUT',
           headers: userHeaders(),
           body: formData,

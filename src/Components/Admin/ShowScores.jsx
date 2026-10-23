@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { FaChartBar, FaCheckCircle, FaFistRaised, FaTrophy } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 

@@ -21,8 +21,8 @@ const MyFantasyTeam = () => {
       setLoading(true);
       try {
         const [affiliateRes, usersRes] = await Promise.all([
-          fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates'),
-          fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+          fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/affiliates'),
+          fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/users')
         ]);
 
         const affiliatesData = await affiliateRes.json();

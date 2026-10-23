@@ -17,7 +17,7 @@ const Membership = ({ email }) => {
 
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/user/${email}`);
+        const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/user/${email}`);
         if (response.ok) {
           const data = await response.json();
           const { firstName, lastName, profileUrl , _id } = data;
@@ -41,7 +41,7 @@ const Membership = ({ email }) => {
 const handleSelectPlan = async (plan) => {
     if (plan === 'free') {
         try {
-            const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/user/${email}/subscribe`, {
+            const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/user/${email}/subscribe`, {
                 method: 'POST',
                 headers: userHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ plan: 'Free' }),

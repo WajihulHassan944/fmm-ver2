@@ -20,7 +20,7 @@ import { getFightCategory } from '@/Utils/fightExperience';
 // ==========================================================================
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE
-  || 'https://fantasymmadness-game-server-three.vercel.app';
+  || 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','IA','ID','IL','IN',

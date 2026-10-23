@@ -9,7 +9,7 @@ const AdminBlogsIndex = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/blogs');
+        const res = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/api/blogs');
         const data = await res.json();
         setBlogs(data);
       } catch (err) {
@@ -24,7 +24,7 @@ const AdminBlogsIndex = () => {
 
   const deleteBlog = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/blogs/${id}`, {
+      await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/api/blogs/${id}`, {
         method: 'DELETE',
       });
       setBlogs((prev) => prev.filter((blog) => blog._id !== id));
@@ -35,7 +35,7 @@ const AdminBlogsIndex = () => {
 
   const deleteAllBlogs = async () => {
     try {
-      await fetch('https://fantasymmadness-game-server-three.vercel.app/api/delete/blogs', {
+      await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/api/delete/blogs', {
         method: 'DELETE',
       });
       setBlogs([]);

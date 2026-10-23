@@ -21,7 +21,7 @@ const PublicProfile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users');
+                const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/users');
                 const data = await response.json();
                 
                 // Find the user by userId from the URL

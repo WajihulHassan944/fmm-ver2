@@ -13,7 +13,7 @@ const ThreadDetails = () => {
 
   // Fetch all users when the component mounts
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+    fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/users')
       .then(response => response.json())
       .then(data => setUsers(data))
       .catch(error => console.error('Error fetching users:', error));
@@ -23,10 +23,10 @@ const ThreadDetails = () => {
   useEffect(() => {
     if (!threadId) return; // Ensure threadId is available before fetching
 
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/views`, {
+    fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}/views`, {
       method: 'PUT'
     }).then(() => {
-      return fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`);
+      return fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}`);
     })
     .then(res => res.json())
     .then(data => setThread(data))
@@ -35,7 +35,7 @@ const ThreadDetails = () => {
 
   // Like a reply
   const likeReply = (replyId) => {
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies/${replyId}/like`, {
+    fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}/replies/${replyId}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user?._id }) // Ensure user exists
@@ -57,7 +57,7 @@ const ThreadDetails = () => {
   // Submit a reply
   const handleReplySubmit = (e) => {
     e.preventDefault();
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies`, {
+    fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}/replies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ body: replyBody, author: { userId: user?._id, username: user?.firstName } })
@@ -65,7 +65,7 @@ const ThreadDetails = () => {
     .then(res => res.json())
     .then(() => {
       // Re-fetch thread details after posting a reply
-      fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`)
+      fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}`)
         .then(res => res.json())
         .then(data => {
           setThread(data);

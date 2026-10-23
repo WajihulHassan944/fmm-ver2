@@ -31,7 +31,7 @@ const SponsorLogin = () => {
 
     setSubmitting(true);
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/sponsor/login/request`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/api/sponsor/login/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -51,7 +51,7 @@ const SponsorLogin = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/sponsor/login/verify`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/api/sponsor/login/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code }),

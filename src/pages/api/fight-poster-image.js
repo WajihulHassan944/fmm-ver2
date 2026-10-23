@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     const source = new URL(String(req.query.url || ''));
     const allowed = new Set([
       'res.cloudinary.com',
-      new URL(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three.vercel.app').hostname,
+      new URL(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three-taupe.vercel.app').hostname,
       'fantasymmadness-game-server-three.vercel.app',
     ]);
     if (source.protocol !== 'https:' || !allowed.has(source.hostname) || source.port || source.username || source.password) {

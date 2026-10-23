@@ -6,7 +6,7 @@ const Notification = () => {
   const user = useSelector((state) => state.user); // Access user details from Redux store
 
   useEffect(() => {
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/notifications/${user._id}`)
+    fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/notifications/${user._id}`)
       .then(res => res.json())
       .then(data => setNotifications(data))
       .catch(err => console.error(err));

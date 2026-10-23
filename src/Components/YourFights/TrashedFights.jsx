@@ -6,7 +6,7 @@ import { fetchMatches } from '../../Redux/matchSlice';
 import { userHeaders } from '@/Utils/authFetch';
 import { FMCoinAmount } from '@/Components/Common/FMCoin';
 
-const API='https://fantasymmadness-game-server-three.vercel.app';
+const API='https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 export default function TrashedFights(){
  const router=useRouter(); const dispatch=useDispatch();

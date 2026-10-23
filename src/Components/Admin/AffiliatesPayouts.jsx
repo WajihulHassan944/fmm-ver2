@@ -17,7 +17,7 @@ const AffiliatesPayouts = () => {
     const router = useRouter();    
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
+            const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/affiliates', { headers: adminHeaders() });
             const data = await response.json();
             setAffiliateUsers(data);
             setFilteredUsers(data); // Initially set filtered users to all data
@@ -54,7 +54,7 @@ const AffiliatesPayouts = () => {
     const handleConfirmPayment = async () => {
         if (selectedUser && selectedPayout) {
             try {
-                const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/confirm-payment-affiliate`, {
+                const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/confirm-payment-affiliate`, {
                     method: 'POST',
                     headers: adminHeaders({
                         'Content-Type': 'application/json',

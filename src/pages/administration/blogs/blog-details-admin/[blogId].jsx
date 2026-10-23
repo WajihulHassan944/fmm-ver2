@@ -13,7 +13,7 @@ const BlogDetails = () => {
 
     const fetchBlogDetails = async () => {
       try {
-        const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/blogs/${blogId}`);
+        const res = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/api/blogs/${blogId}`);
         const data = await res.json();
         setBlog(data);
       } catch (err) {

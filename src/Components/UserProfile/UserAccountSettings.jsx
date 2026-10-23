@@ -79,7 +79,7 @@ const UserAccountSettings = () => {
         formData.append('isSubscribed', isSubscribed);
         formData.append('isUSCitizen', isUSCitizen);
 
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-profile/${user._id}`, {
+        const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/update-profile/${user._id}`, {
           method: 'PUT',
           headers: userHeaders(),
           body: formData,
@@ -127,7 +127,7 @@ const UserAccountSettings = () => {
 
     const paymentPromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/user/updatePayment/${user._id}`, {
+        const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/user/updatePayment/${user._id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ preferredPaymentMethod, preferredPaymentMethodValue }),

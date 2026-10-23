@@ -5,7 +5,7 @@ const AdminForumList = () => {
     const [threads, setThreads] = useState([]);
     const router = useRouter();
     useEffect(() => {
-      fetch('https://fantasymmadness-game-server-three.vercel.app/threads', { headers: adminHeaders() })
+      fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/threads', { headers: adminHeaders() })
         .then(res => res.json())
         .then(data => setThreads(data))
         .catch(err => console.error(err));
@@ -14,7 +14,7 @@ const AdminForumList = () => {
     // Function to handle deleting all threads
     const handleDeleteAllThreads = () => {
         if (window.confirm("Are you sure you want to delete all threads?")) {
-            fetch('https://fantasymmadness-game-server-three.vercel.app/threads', { headers: adminHeaders(),
+            fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/threads', { headers: adminHeaders(),
                 method: 'DELETE',
             })
             .then(res => {
@@ -32,7 +32,7 @@ const AdminForumList = () => {
     // Function to handle deleting a single thread
     const handleDeleteThread = (threadId) => {
         if (window.confirm("Are you sure you want to delete this thread?")) {
-            fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`, { headers: adminHeaders(),
+            fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}`, { headers: adminHeaders(),
                 method: 'DELETE',
             })
             .then(res => {

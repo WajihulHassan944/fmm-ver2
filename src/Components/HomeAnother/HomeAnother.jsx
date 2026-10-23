@@ -815,7 +815,7 @@ const canUseNextImage = (src = "") => {
     src.startsWith("/") ||
     src.startsWith("https://res.cloudinary.com/") ||
     src.startsWith("https://cdn-icons-png.flaticon.com/") ||
-    src.startsWith("https://fantasymmadness-game-server-three.vercel.app/")
+    src.startsWith("https://fantasymmadness-game-server-three-taupe.vercel.app/")
   );
 };
 

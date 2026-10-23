@@ -1,6 +1,6 @@
 import { getAdminToken as readAdminToken } from './authFetch';
 
-export const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three.vercel.app').trim().replace(/\/+$/, '');
+export const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three-taupe.vercel.app').trim().replace(/\/+$/, '');
 
 export const WRESTLING_STATS = [
   { key: 'HP', code: 'HP', short: 'HP', label: 'Head Punches', description: 'Punches, forearms, elbows, and strikes directed at the head.', weight: 1 },

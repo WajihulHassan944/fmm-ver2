@@ -6,7 +6,7 @@ import PromoTwo from '@/Components/Affiliates/PromoTwo';
 import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 const normalizeIdentifier = (value) => decodeURIComponent(String(value || '')).trim().toLowerCase();
 const slugifyIdentifier = (value) => normalizeIdentifier(value)

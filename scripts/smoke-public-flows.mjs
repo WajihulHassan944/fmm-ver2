@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 
 const site = (process.env.SMOKE_SITE_URL || 'https://www.fantasymmadness.com').replace(/\/$/, '');
-const api = (process.env.SMOKE_API_URL || 'https://fantasymmadness-game-server-three.vercel.app').replace(/\/$/, '');
+const api = (process.env.SMOKE_API_URL || 'https://fantasymmadness-game-server-three-taupe.vercel.app').replace(/\/$/, '');
 const results = [];
 
 async function get(url, { timeout = 20000 } = {}) {

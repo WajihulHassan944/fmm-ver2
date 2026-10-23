@@ -50,7 +50,7 @@ const SpinWheel = () => {
       const response = await fetch(
         // Email included so a player who already spun on another phone is not
         // shown a wheel that will refuse them.
-        `https://fantasymmadness-game-server-three.vercel.app/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`
+        `https://fantasymmadness-game-server-three-taupe.vercel.app/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`
       );
       const data = await response.json();
       const isMatched = Boolean(data?.alreadySpun);
@@ -75,7 +75,7 @@ const SpinWheel = () => {
   const sendDeviceInfoToBackend = async () => {
     try {
       await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/admin/add-device-spin-wheel",
+        "https://fantasymmadness-game-server-three-taupe.vercel.app/admin/add-device-spin-wheel",
         {
           method: "POST",
         // Server validates the prize against its own wheel segments and binds
@@ -94,7 +94,7 @@ const SpinWheel = () => {
     if (!email) return alert("Please enter your email!");
     const prizeValue = data[prizeNumber].value;
     await fetch(
-      "https://fantasymmadness-game-server-three.vercel.app/admin/add-tokens-won-spin-wheel",
+      "https://fantasymmadness-game-server-three-taupe.vercel.app/admin/add-tokens-won-spin-wheel",
       {
         method: "POST",
         // Server validates the prize against its own wheel segments and binds

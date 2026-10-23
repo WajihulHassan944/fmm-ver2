@@ -8,10 +8,10 @@ const router = useRouter();
 
     useEffect(() => {
       // Increment view count when the thread details are fetched
-      fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/views`, {
+      fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}/views`, {
         method: 'PUT'
       }).then(() => {
-        return fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`);
+        return fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}`);
       })
       .then(res => res.json())
       .then(data => setThread(data))
@@ -19,7 +19,7 @@ const router = useRouter();
     }, [threadId]);
   
     const deleteReply = (replyId) => {
-        fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies/${replyId}`, {
+        fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/threads/${threadId}/replies/${replyId}`, {
           method: 'DELETE',
         })
           .then(res => {

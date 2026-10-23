@@ -58,11 +58,11 @@ const UpcomingFights = () => {
     const fetchUpcomingMatches = async () => {
       try {
         // Fetch all affiliates
-        const affiliateResponse = await fetch("https://fantasymmadness-game-server-three.vercel.app/affiliates");
+        const affiliateResponse = await fetch("https://fantasymmadness-game-server-three-taupe.vercel.app/affiliates");
         const affiliates = await affiliateResponse.json();
   
         // Fetch all users
-        const usersResponse = await fetch("https://fantasymmadness-game-server-three.vercel.app/users");
+        const usersResponse = await fetch("https://fantasymmadness-game-server-three-taupe.vercel.app/users");
         const users = await usersResponse.json();
   
         // Filter matches based on matchType

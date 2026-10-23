@@ -134,7 +134,7 @@ const YourFights = () => {
     if (!user?._id) return;
     const fetchRemovedMatches = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches', { headers: userHeaders() });
+        const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/users/removed-matches', { headers: userHeaders() });
         const data = await response.json();
         const userMatches = Array.isArray(data) ? data.filter((item) => sameId(item.userId, user._id)) : [];
         setRemovedMatches(userMatches[0]?.removedMatchesIds || []);
@@ -188,7 +188,7 @@ const YourFights = () => {
 
   const handleRemoveMatch = async (matchId) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/remove-match-from-my-dashboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, matchId }),

@@ -15,7 +15,7 @@ const AffiliateMatches = () => {
   const fetchFights = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-fights', { headers: adminHeaders() });
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/api/admin/affiliate-fights', { headers: adminHeaders() });
       const data = await response.json();
       setFights(Array.isArray(data?.fights) ? data.fights : []);
     } catch (error) {

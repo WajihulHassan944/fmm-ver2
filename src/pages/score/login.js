@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { FaExclamationTriangle, FaLock } from 'react-icons/fa';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 // Regular staff sign in here instead of using a one-time link. The account only
 // ever sees fights that have been explicitly assigned to it, and each fight

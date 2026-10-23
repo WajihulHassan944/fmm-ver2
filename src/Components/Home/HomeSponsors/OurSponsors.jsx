@@ -8,7 +8,7 @@ const FeaturedSponsors = () => {
   useEffect(() => {
     const fetchSponsors = async () => {
       try {
-        const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/sponsors');
+        const res = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/sponsors');
         const json = await res.json();
         if (json.success) {
           setSponsors(json.data);

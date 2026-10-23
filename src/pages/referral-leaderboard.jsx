@@ -10,7 +10,7 @@ export default function ReferralBoard() {
 
   useEffect(() => {
     let active = true;
-    fetch('https://fantasymmadness-game-server-three.vercel.app/api/referrals')
+    fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/api/referrals')
       .then((res) => { if (!res.ok) throw new Error('Referral standings unavailable'); return res.json(); })
       .then((data) => { if (active) setReferrals((Array.isArray(data) ? data : []).sort((a,b) => Number(b?.referralsCount||0)-Number(a?.referralsCount||0))); })
       .catch(() => { if (active) setError('Referral standings could not be loaded.'); })

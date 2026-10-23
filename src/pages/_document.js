@@ -16,7 +16,7 @@ export default function Document() {
         />
         <link
           rel="preconnect"
-          href="https://fantasymmadness-game-server-three.vercel.app"
+          href="https://fantasymmadness-game-server-three-taupe.vercel.app"
         />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 

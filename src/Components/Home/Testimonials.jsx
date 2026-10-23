@@ -9,7 +9,7 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 
-const API_URL = 'https://fantasymmadness-game-server-three.vercel.app/testimonials';
+const API_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app/testimonials';
 
 const normalizeTestimonials = (payload) => {
   if (Array.isArray(payload)) return payload;

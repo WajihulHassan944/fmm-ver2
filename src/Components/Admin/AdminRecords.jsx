@@ -15,7 +15,7 @@ const AdminRecords = () => {
   useEffect(() => {
     const fetchAdminTokens = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin-tokens', { headers: adminHeaders() });
+        const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/api/admin-tokens', { headers: adminHeaders() });
         const data = await response.json();
         setAdminTokens(data.adminTokens);
       } catch (error) {
@@ -27,7 +27,7 @@ const AdminRecords = () => {
     }
     const fetchAffiliates = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
+        const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/affiliates', { headers: adminHeaders() });
         const data = await response.json();
         setAffiliates(data);
       } catch (error) {

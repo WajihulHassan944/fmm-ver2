@@ -12,7 +12,7 @@ const AdminFaqs = () => {
   useEffect(() => {
     const fetchFaqs = async () => {
       try {
-        const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/faqs", { headers: adminHeaders() });
+        const response = await fetch("https://fantasymmadness-game-server-three-taupe.vercel.app/faqs", { headers: adminHeaders() });
         const data = await response.json();
         setFaqs(data.data);
       } catch (error) {
@@ -36,7 +36,7 @@ const AdminFaqs = () => {
   // Add FAQ
   const addFaq = async () => {
     try {
-      const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/faqs", {
+      const response = await fetch("https://fantasymmadness-game-server-three-taupe.vercel.app/faqs", {
         method: "POST",
         headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newFaq),
@@ -53,7 +53,7 @@ const AdminFaqs = () => {
   // Update FAQ
   const updateFaq = async (id, updatedData) => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/faqs/${id}`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/faqs/${id}`, {
         method: "PUT",
         headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(updatedData),
@@ -69,7 +69,7 @@ const AdminFaqs = () => {
   // Delete FAQ
   const deleteFaq = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/faqs/${id}`, { headers: adminHeaders(), method: "DELETE" });
+      await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/faqs/${id}`, { headers: adminHeaders(), method: "DELETE" });
       setFaqs(faqs.filter((faq) => faq._id !== id));
     } catch (error) {
       console.error("Error deleting FAQ:", error);

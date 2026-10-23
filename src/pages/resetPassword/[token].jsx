@@ -19,7 +19,7 @@ const ResetPassword = () => {
 
         try {
             setLoading(true);
-            const endpoint =  `https://fantasymmadness-game-server-three.vercel.app/resetPassword/${token}`
+            const endpoint =  `https://fantasymmadness-game-server-three-taupe.vercel.app/resetPassword/${token}`
                 
             const response = await fetch(endpoint, {
                 method: 'POST',

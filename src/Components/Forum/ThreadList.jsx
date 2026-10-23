@@ -17,7 +17,7 @@ import {
 import CreateThread from './CreateThread';
 import Login from '../Login/Login';
 
-const THREADS_API = 'https://fantasymmadness-game-server-three.vercel.app/threads';
+const THREADS_API = 'https://fantasymmadness-game-server-three-taupe.vercel.app/threads';
 
 const ThreadList = () => {
   const [threads, setThreads] = useState([]);

@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 const apiBase = () => String(process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 

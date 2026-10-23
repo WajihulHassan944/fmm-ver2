@@ -15,7 +15,7 @@ const SponsorsPage = ({ sponsors }) => {
 // ✅ Fetch sponsors data before rendering
 export const getServerSideProps = async () => {
   try {
-    const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/sponsors");
+    const response = await fetch("https://fantasymmadness-game-server-three-taupe.vercel.app/sponsors");
     if (!response.ok) {
       throw new Error("Failed to fetch sponsors");
     }

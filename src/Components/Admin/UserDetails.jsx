@@ -24,7 +24,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
   const [userDetails, setUserDetails] = useState([]);
 
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminHeaders() })
+    fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/users', { headers: adminHeaders() })
       .then((response) => response.json())
       .then((data) => {
         const matchedUsers = (user.usersJoined || []).map((affiliateUser) => {
@@ -47,7 +47,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
 
   const handleApprove = async () => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliates/${user._id}/verify`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/affiliates/${user._id}/verify`, {
         method: 'POST',
         headers: adminHeaders({
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
 
     try {
       setButtonText('Sending!');
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/send-email-affiliate', {
         method: 'POST',
         headers: adminHeaders({
           'Content-Type': 'application/json',

@@ -23,7 +23,7 @@ const FantasyMobileAppCore = dynamic(
 );
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE
-  || 'https://fantasymmadness-game-server-three.vercel.app';
+  || 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 const buildPublicApiUrl = (path) => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
 

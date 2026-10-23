@@ -1,6 +1,6 @@
 import { dedupePublicFights } from "@/Utils/fightExperience";
 export const DEFAULT_PUBLIC_API_BASE_URL =
-  "https://fantasymmadness-game-server-three.vercel.app";
+  "https://fantasymmadness-game-server-three-taupe.vercel.app";
 
 // Two different env var names existed for the same setting (this file read
 // NEXT_PUBLIC_API_BASE_URL, welcome.js read NEXT_PUBLIC_API_BASE) — whichever

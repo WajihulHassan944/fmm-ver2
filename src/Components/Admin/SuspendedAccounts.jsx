@@ -8,7 +8,7 @@ const SuspendedAccounts = () => {
     const router = useRouter();
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', { headers: adminHeaders() });
+            const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/redusers', { headers: adminHeaders() });
             const data = await response.json();
             setUsers(data.data); // Access the 'data' key from the response
         } catch (error) {
@@ -24,7 +24,7 @@ const SuspendedAccounts = () => {
         if (!window.confirm('Unsuspend this account? They will be able to log in again.')) return;
         const deletePromise = new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/redusers/${email}`, {
+                const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/redusers/${email}`, {
                     method: 'DELETE',
                     headers: adminHeaders(),
                 });

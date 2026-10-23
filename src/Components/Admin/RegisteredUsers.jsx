@@ -39,7 +39,7 @@ const RegisteredUsers = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminJsonHeaders() });
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/users', { headers: adminJsonHeaders() });
       const data = await response.json();
       // Was unsorted (server order + no client sort) — a brand-new signup
       // could land anywhere in the list instead of at the top, which is
@@ -64,7 +64,7 @@ const RegisteredUsers = () => {
     }
 
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/reward-tokens-only-forcibly/${userId}`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/api/reward-tokens-only-forcibly/${userId}`, {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({
@@ -91,7 +91,7 @@ const RegisteredUsers = () => {
     if (!window.confirm('Delete this user? This cannot be undone.')) return;
     const deletePromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/usertodelete/${id}`, { headers: adminJsonHeaders(),
+        const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/usertodelete/${id}`, { headers: adminJsonHeaders(),
           method: 'DELETE',
         });
 
@@ -119,7 +119,7 @@ const RegisteredUsers = () => {
 
   const handleSuspendAccount = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/redusers', {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({ email: selectedUser.email, profileUrl: selectedUser.profileUrl }),
@@ -139,7 +139,7 @@ const RegisteredUsers = () => {
 
   const addUser = async (data) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-user', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/admin/add-user', {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify(data),
@@ -246,7 +246,7 @@ const RegisteredUsers = () => {
 
     for (const recipient of selectedRecipients) {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+        const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/send-email-affiliate', {
           method: 'POST',
           headers: adminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({

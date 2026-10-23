@@ -26,7 +26,7 @@ const Leagues = () => {
   useEffect(() => {
     const fetchAffiliates = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/public/affiliates');
+        const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/api/public/affiliates');
         const data = await response.json();
         setAffiliates(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -49,7 +49,7 @@ const Leagues = () => {
     const userId = user._id;
     const userEmail = user.email;
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/join`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/affiliate/${affiliate._id}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, userEmail }),
@@ -69,7 +69,7 @@ const Leagues = () => {
   const handleLeaveLeague = async (affiliate) => {
     setLeavingAffiliateId(affiliate._id);
     try {
-      const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/remove-user`, {
+      const res = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/affiliate/${affiliate._id}/remove-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id }),

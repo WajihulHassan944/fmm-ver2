@@ -204,7 +204,7 @@ const AffiliateUsers = () => {
     formData.append('image', rewardImage);
 
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-affiliate-reward', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/upload-affiliate-reward', {
         method: 'POST',
         headers: adminHeaders(),
         body: formData,
@@ -446,7 +446,7 @@ const AffiliateUsers = () => {
     const deleteUserPromise = new Promise(async (resolve, reject) => {
       try {
         setDeletingId(id);
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliatetodelete/${id}`, { headers: adminHeaders(),
+        const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/affiliatetodelete/${id}`, { headers: adminHeaders(),
           method: 'DELETE',
         });
 
@@ -492,7 +492,7 @@ const AffiliateUsers = () => {
 
   const addAffiliate = async (data) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-affiliate', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/admin/add-affiliate', {
         method: 'POST',
         headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(data),

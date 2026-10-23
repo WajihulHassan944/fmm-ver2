@@ -23,7 +23,7 @@ const UploadAvatar = ({ email }) => {
         formData.append('image', selectedImage); // Append the image file directly
         formData.append('email', email); // Append the email to the form data
         
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-avatar', {
+        const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/upload-avatar', {
           method: 'POST',
           body: formData,
         });

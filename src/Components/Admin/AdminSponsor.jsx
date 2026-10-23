@@ -18,7 +18,7 @@ const AdminSponsor = () => {
   // Fetch sponsors from the backend
   const fetchSponsors = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/sponsors', { headers: adminHeaders() });
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/sponsors', { headers: adminHeaders() });
       const data = await response.json();
       if (data.success) {
         setSponsors(data.data);
@@ -55,7 +55,7 @@ const AdminSponsor = () => {
     sponsorData.append('image', formData.image);
 
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-sponsor', {
+      const response = await fetch('https://fantasymmadness-game-server-three-taupe.vercel.app/upload-sponsor', {
         method: 'POST',
         headers: adminHeaders(),
         body: sponsorData,
@@ -90,7 +90,7 @@ const AdminSponsor = () => {
 
     try {
       const response = await fetch(
-        `https://fantasymmadness-game-server-three.vercel.app/sponsor/${editingSponsorId}`,
+        `https://fantasymmadness-game-server-three-taupe.vercel.app/sponsor/${editingSponsorId}`,
         {
           method: 'PUT',
           headers: adminHeaders(),
@@ -144,7 +144,7 @@ const AdminSponsor = () => {
     if (!window.confirm('Are you sure you want to delete this sponsor?')) return;
 
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/sponsor/${id}`, {
+      const response = await fetch(`https://fantasymmadness-game-server-three-taupe.vercel.app/sponsor/${id}`, {
         method: 'DELETE',
         headers: adminHeaders(),
       });

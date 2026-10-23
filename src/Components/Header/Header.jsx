@@ -12,7 +12,7 @@ import { FaBars, FaBell, FaBullseye, FaCalendarAlt, FaChartLine, FaChevronDown, 
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },

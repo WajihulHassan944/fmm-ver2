@@ -738,7 +738,7 @@ const Dashboard = () => {
     const fetchRemovedMatches = async () => {
       try {
         const response = await fetch(
-          "https://fantasymmadness-game-server-three.vercel.app/users/removed-matches",
+          "https://fantasymmadness-game-server-three-taupe.vercel.app/users/removed-matches",
           { headers: userHeaders() },
         );
         const data = await response.json();
@@ -928,7 +928,7 @@ const Dashboard = () => {
   const handleRemoveMatch = async (matchId) => {
     try {
       const response = await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard",
+        "https://fantasymmadness-game-server-three-taupe.vercel.app/remove-match-from-my-dashboard",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -960,7 +960,7 @@ const Dashboard = () => {
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/testimonials",
+        "https://fantasymmadness-game-server-three-taupe.vercel.app/testimonials",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
