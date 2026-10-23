@@ -34,6 +34,7 @@ const PaymentHealth = () => {
             {row('Mode', true, result.environment)}
             {row('All keys present', Boolean(result.allKeysLoaded))}
             {row('Gateway accepts credentials', Boolean(result.credentialsValid), result.authorizeNet?.messages?.[0]?.text || '')}
+            {row('Card form key', result.cardForm ? Boolean(result.cardForm.ok) : null, result.cardForm?.message || '')}
             {row('Hosted payment page', hosted ? Boolean(hosted.ok) : null, hosted?.messages?.[0]?.text || hosted?.error || '')}
           </ul>
         )}
