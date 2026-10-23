@@ -4,8 +4,9 @@ import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = PUBLIC_API_BASE_URL;
 
 const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   const router = useRouter();

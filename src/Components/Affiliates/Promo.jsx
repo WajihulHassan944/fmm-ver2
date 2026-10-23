@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchMatches } from '../../Redux/matchSlice';
 import AffiliateFightLeaderboard from './AffiliateFightLeaderboard';
 import { userHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const Promo = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -41,7 +42,7 @@ const Promo = () => {
       try {
         console.log("Fetching affiliate data for fullName:", fullName);
         const response = await fetch(
-          `https://fantasymmadness-game-server-three.vercel.app/affiliateByName?fullName=${encodeURIComponent(fullName)}`
+          `${PUBLIC_API_BASE_URL}/affiliateByName?fullName=${encodeURIComponent(fullName)}`
         );
         console.log("Affiliate API response status:", response.status);
 
@@ -84,7 +85,7 @@ const Promo = () => {
     
     const incrementViews = async () => {
       try {
-        await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/incrementViews`, {
+        await fetch(`${PUBLIC_API_BASE_URL}/affiliate/${affiliate._id}/incrementViews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -112,7 +113,7 @@ const Promo = () => {
     console.log("User attempting to join league:", userId, userEmail);
 
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/join`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliate/${affiliate._id}/join`, {
         method: 'POST',
         headers: userHeaders({
           'Content-Type': 'application/json',

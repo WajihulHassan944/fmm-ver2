@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { FaArrowRight, FaCalendarAlt, FaSignOutAlt, FaTrophy, FaUsers } from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const isSameId = (a, b) => String(a || '') === String(b || '');
 const joinedUsers = (affiliate) => Array.isArray(affiliate?.usersJoined) ? affiliate.usersJoined : [];
@@ -26,7 +27,7 @@ const Leagues = () => {
   useEffect(() => {
     const fetchAffiliates = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/public/affiliates');
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates`);
         const data = await response.json();
         setAffiliates(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -49,7 +50,7 @@ const Leagues = () => {
     const userId = user._id;
     const userEmail = user.email;
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/join`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliate/${affiliate._id}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, userEmail }),
@@ -69,7 +70,7 @@ const Leagues = () => {
   const handleLeaveLeague = async (affiliate) => {
     setLeavingAffiliateId(affiliate._id);
     try {
-      const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliate/${affiliate._id}/remove-user`, {
+      const res = await fetch(`${PUBLIC_API_BASE_URL}/affiliate/${affiliate._id}/remove-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id }),
