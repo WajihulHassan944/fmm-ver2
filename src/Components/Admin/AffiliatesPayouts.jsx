@@ -4,6 +4,7 @@ import UserDetails from './UserDetails';
 import PaymentPopup from './PaymentPopup';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AffiliatesPayouts = () => {
     const [affiliateUsers, setAffiliateUsers] = useState([]);
@@ -17,7 +18,7 @@ const AffiliatesPayouts = () => {
     const router = useRouter();    
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
+            const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliates`, { headers: adminHeaders() });
             const data = await response.json();
             setAffiliateUsers(data);
             setFilteredUsers(data); // Initially set filtered users to all data
@@ -54,7 +55,7 @@ const AffiliatesPayouts = () => {
     const handleConfirmPayment = async () => {
         if (selectedUser && selectedPayout) {
             try {
-                const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/confirm-payment-affiliate`, {
+                const response = await fetch(`${PUBLIC_API_BASE_URL}/confirm-payment-affiliate`, {
                     method: 'POST',
                     headers: adminHeaders({
                         'Content-Type': 'application/json',

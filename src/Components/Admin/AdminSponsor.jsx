@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AdminSponsor = () => {
   const [sponsors, setSponsors] = useState([]);
@@ -18,7 +19,7 @@ const AdminSponsor = () => {
   // Fetch sponsors from the backend
   const fetchSponsors = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/sponsors', { headers: adminHeaders() });
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/sponsors`, { headers: adminHeaders() });
       const data = await response.json();
       if (data.success) {
         setSponsors(data.data);
@@ -55,7 +56,7 @@ const AdminSponsor = () => {
     sponsorData.append('image', formData.image);
 
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-sponsor', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/upload-sponsor`, {
         method: 'POST',
         headers: adminHeaders(),
         body: sponsorData,
@@ -90,7 +91,7 @@ const AdminSponsor = () => {
 
     try {
       const response = await fetch(
-        `https://fantasymmadness-game-server-three.vercel.app/sponsor/${editingSponsorId}`,
+        `${PUBLIC_API_BASE_URL}/sponsor/${editingSponsorId}`,
         {
           method: 'PUT',
           headers: adminHeaders(),
@@ -144,7 +145,7 @@ const AdminSponsor = () => {
     if (!window.confirm('Are you sure you want to delete this sponsor?')) return;
 
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/sponsor/${id}`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/sponsor/${id}`, {
         method: 'DELETE',
         headers: adminHeaders(),
       });

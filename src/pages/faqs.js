@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 import { FaChevronDown, FaQuestionCircle, FaSearch, FaShieldAlt, FaTrophy } from 'react-icons/fa';
 import { ExperienceHero } from '@/Components/Theme/ExperiencePrimitives';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 
 const SCORING_SOURCE_TRUTH_COPY = 'A knockout, TKO, or submission is a Finish — and correctly calling the round it happens in pays a 500-point Finish Bonus on top of your round-winner points. If you pick the right fighter to win the finish round, you earn 100 (Round Winner) + 25 (auto-paired) + 500 (Finish Bonus) = 625 points for that round alone. If you miss the finish round pick, that round scores 0. Every other round pays a flat 25-point Survival Bonus regardless of accuracy, plus your round-winner points if you called it right.';
@@ -153,7 +154,7 @@ export default function FAQsPage({ faqs = [] }) {
 
 export const getServerSideProps = async () => {
   try {
-    const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/faqs');
+    const response = await fetch(`${PUBLIC_API_BASE_URL}/faqs`);
     if (!response.ok) throw new Error('Failed to fetch FAQs');
     const data = await response.json();
     return { props: { faqs: JSON.parse(JSON.stringify(data?.data || data || [])) } };

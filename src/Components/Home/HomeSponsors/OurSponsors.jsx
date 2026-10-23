@@ -1,6 +1,7 @@
 // FeaturedSponsors.jsx
 import React, { useEffect, useState } from 'react';
 import styles from './FeaturedSponsors.module.css';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const FeaturedSponsors = () => {
   const [sponsors, setSponsors] = useState([]);
@@ -8,7 +9,7 @@ const FeaturedSponsors = () => {
   useEffect(() => {
     const fetchSponsors = async () => {
       try {
-        const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/sponsors');
+        const res = await fetch(`${PUBLIC_API_BASE_URL}/sponsors`);
         const json = await res.json();
         if (json.success) {
           setSponsors(json.data);

@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { FaArrowLeft, FaArrowRight, FaCamera, FaCopy, FaIdBadge, FaLink, FaShieldAlt, FaTrashAlt, FaTrophy, FaUserCog, FaUserFriends } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import UserWorkspaceNav from './UserWorkspaceNav';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 function ReferFriendModal({ user, onClose }) {
   const userId = user?._id || user?.id || '';
@@ -93,7 +94,7 @@ const Profile = () => {
         formData.append('isUSCitizen', Boolean(user?.isUSCitizen));
         if (typeof File !== 'undefined' && profileUrl instanceof File) formData.append('image', profileUrl);
 
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-profile/${user._id}`, {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/update-profile/${user._id}`, {
           method: 'PUT',
           headers: userHeaders(),
           body: formData,

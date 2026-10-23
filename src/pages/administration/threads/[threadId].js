@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AdminThreadDetails = () => {
     const [thread, setThread] = useState(null);
@@ -8,10 +9,10 @@ const router = useRouter();
 
     useEffect(() => {
       // Increment view count when the thread details are fetched
-      fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/views`, {
+      fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/views`, {
         method: 'PUT'
       }).then(() => {
-        return fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`);
+        return fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}`);
       })
       .then(res => res.json())
       .then(data => setThread(data))
@@ -19,7 +20,7 @@ const router = useRouter();
     }, [threadId]);
   
     const deleteReply = (replyId) => {
-        fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies/${replyId}`, {
+        fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/replies/${replyId}`, {
           method: 'DELETE',
         })
           .then(res => {

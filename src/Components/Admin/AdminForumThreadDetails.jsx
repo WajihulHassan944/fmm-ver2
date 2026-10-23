@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AdminForumThreadDetails = () => {
     const { threadId } = useParams(); // Extract threadId from the URL
@@ -9,10 +10,10 @@ const AdminForumThreadDetails = () => {
     const navigate = useNavigate();
     useEffect(() => {
       // Increment view count when the thread details are fetched
-      fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/views`, { headers: adminHeaders(),
+      fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/views`, { headers: adminHeaders(),
         method: 'PUT'
       }).then(() => {
-        return fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`, { headers: adminHeaders() });
+        return fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}`, { headers: adminHeaders() });
       })
       .then(res => res.json())
       .then(data => setThread(data))
@@ -20,7 +21,7 @@ const AdminForumThreadDetails = () => {
     }, [threadId]);
   
     const deleteReply = (replyId) => {
-        fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies/${replyId}`, { headers: adminHeaders(),
+        fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/replies/${replyId}`, { headers: adminHeaders(),
           method: 'DELETE',
         })
           .then(res => {

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE_URL = PUBLIC_API_BASE_URL;
 
 const ResetPasswordPage = ({ role = 'user' }) => {
   const router = useRouter();

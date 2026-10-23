@@ -4,6 +4,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import AffiliateLogin from '../Affiliates/AffiliateLogin';
 import Login from './Login';
 import { useRouter } from 'next/router';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const SponsorLogin = () => {
    const [email, setEmail] = useState('');
@@ -31,7 +32,7 @@ const SponsorLogin = () => {
 
     setSubmitting(true);
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/sponsor/login/request`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/sponsor/login/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -51,7 +52,7 @@ const SponsorLogin = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/sponsor/login/verify`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/sponsor/login/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code }),

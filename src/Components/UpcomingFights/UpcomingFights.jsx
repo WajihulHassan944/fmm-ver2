@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
 import { diversifyFightsBySport } from '@/Utils/fightOrdering';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const getMatchTimestamp = (match) => {
   const date = match?.matchDate?.split?.('T')?.[0];
@@ -58,11 +59,11 @@ const UpcomingFights = () => {
     const fetchUpcomingMatches = async () => {
       try {
         // Fetch all affiliates
-        const affiliateResponse = await fetch("https://fantasymmadness-game-server-three.vercel.app/affiliates");
+        const affiliateResponse = await fetch(`${PUBLIC_API_BASE_URL}/affiliates`);
         const affiliates = await affiliateResponse.json();
   
         // Fetch all users
-        const usersResponse = await fetch("https://fantasymmadness-game-server-three.vercel.app/users");
+        const usersResponse = await fetch(`${PUBLIC_API_BASE_URL}/users`);
         const users = await usersResponse.json();
   
         // Filter matches based on matchType

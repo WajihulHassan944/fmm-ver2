@@ -18,6 +18,7 @@ import {
   fetchPublicHomeSummary,
   fetchPublicBlogs,
   fetchPublicPredictionFights,
+  PUBLIC_API_BASE_URL,
 } from "@/Utils/publicApi";
 import {
   diversifyFightsBySport,
@@ -815,7 +816,7 @@ const canUseNextImage = (src = "") => {
     src.startsWith("/") ||
     src.startsWith("https://res.cloudinary.com/") ||
     src.startsWith("https://cdn-icons-png.flaticon.com/") ||
-    src.startsWith("https://fantasymmadness-game-server-three.vercel.app/")
+    src.startsWith(`${PUBLIC_API_BASE_URL}/`)
   );
 };
 

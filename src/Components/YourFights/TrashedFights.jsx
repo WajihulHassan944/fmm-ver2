@@ -5,8 +5,9 @@ import { FaArrowLeft, FaShoppingBag, FaTrashRestore, FaUsers } from 'react-icons
 import { fetchMatches } from '../../Redux/matchSlice';
 import { userHeaders } from '@/Utils/authFetch';
 import { FMCoinAmount } from '@/Components/Common/FMCoin';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API='https://fantasymmadness-game-server-three.vercel.app';
+const API=PUBLIC_API_BASE_URL;
 
 export default function TrashedFights(){
  const router=useRouter(); const dispatch=useDispatch();

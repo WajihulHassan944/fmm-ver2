@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import useLeaderboardData from '@/CustomFunctions/useLeaderboardData';
 import { fetchMatches } from '@/Redux/matchSlice';
 import PublicFightLeaderboard from '@/Components/UserProfile/PublicFightLeaderboard';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 const PublicProfile = () => {
     const dispatch = useDispatch();
     const matches = useSelector((state) => state.matches.data);
@@ -21,7 +22,7 @@ const PublicProfile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users');
+                const response = await fetch(`${PUBLIC_API_BASE_URL}/users`);
                 const data = await response.json();
                 
                 // Find the user by userId from the URL

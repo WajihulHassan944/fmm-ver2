@@ -8,8 +8,9 @@ import {
   FaTrophy,
   FaUsers,
 } from 'react-icons/fa';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_URL = 'https://fantasymmadness-game-server-three.vercel.app/testimonials';
+const API_URL = `${PUBLIC_API_BASE_URL}/testimonials`;
 
 const normalizeTestimonials = (payload) => {
   if (Array.isArray(payload)) return payload;

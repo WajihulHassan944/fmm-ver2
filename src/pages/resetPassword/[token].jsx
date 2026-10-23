@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 const ResetPassword = () => {
     const router = useRouter();
     const { token } = router.query;
@@ -19,7 +20,7 @@ const ResetPassword = () => {
 
         try {
             setLoading(true);
-            const endpoint =  `https://fantasymmadness-game-server-three.vercel.app/resetPassword/${token}`
+            const endpoint =  `${PUBLIC_API_BASE_URL}/resetPassword/${token}`
                 
             const response = await fetch(endpoint, {
                 method: 'POST',

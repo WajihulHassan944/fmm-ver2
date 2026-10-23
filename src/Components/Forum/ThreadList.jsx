@@ -16,8 +16,9 @@ import {
 } from 'react-icons/fa';
 import CreateThread from './CreateThread';
 import Login from '../Login/Login';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const THREADS_API = 'https://fantasymmadness-game-server-three.vercel.app/threads';
+const THREADS_API = `${PUBLIC_API_BASE_URL}/threads`;
 
 const ThreadList = () => {
   const [threads, setThreads] = useState([]);

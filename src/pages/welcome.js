@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { FMCoin, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import HomepageCommercial from '@/Components/Home/HomepageCommercial';
 import { getFightCategory } from '@/Utils/fightExperience';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 // ==========================================================================
 // The public website — converted from "Fantasy MMAdness Website.dc.html".
@@ -20,7 +21,7 @@ import { getFightCategory } from '@/Utils/fightExperience';
 // ==========================================================================
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE
-  || 'https://fantasymmadness-game-server-three.vercel.app';
+  || `${PUBLIC_API_BASE_URL}`;
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DC','DE','FL','GA','HI','IA','ID','IL','IN',

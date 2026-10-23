@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
-import { buildPublicApiUrl } from '@/Utils/publicApi';
+import { PUBLIC_API_BASE_URL, buildPublicApiUrl } from '@/Utils/publicApi';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import { FaArrowLeft, FaBan, FaEnvelope, FaEye, FaPlus, FaSearch, FaTrash, FaUserFriends, FaUsers } from 'react-icons/fa';
@@ -43,7 +43,7 @@ const RegisteredUsers = () => {
     setUsersLoading(true);
     setUsersError('');
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/users`, {
         headers: adminJsonHeaders(),
         cache: 'no-store',
       });
@@ -74,7 +74,7 @@ const RegisteredUsers = () => {
     }
 
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/reward-tokens-only-forcibly/${userId}`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/reward-tokens-only-forcibly/${userId}`, {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({
@@ -101,7 +101,7 @@ const RegisteredUsers = () => {
     if (!window.confirm('Delete this user? This cannot be undone.')) return;
     const deletePromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/usertodelete/${id}`, { headers: adminJsonHeaders(),
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/usertodelete/${id}`, { headers: adminJsonHeaders(),
           method: 'DELETE',
         });
 
@@ -129,7 +129,7 @@ const RegisteredUsers = () => {
 
   const handleSuspendAccount = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/redusers`, {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({ email: selectedUser.email, profileUrl: selectedUser.profileUrl }),
@@ -149,7 +149,7 @@ const RegisteredUsers = () => {
 
   const addUser = async (data) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-user', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/admin/add-user`, {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify(data),
@@ -256,7 +256,7 @@ const RegisteredUsers = () => {
 
     for (const recipient of selectedRecipients) {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/send-email-affiliate', {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/send-email-affiliate`, {
           method: 'POST',
           headers: adminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({

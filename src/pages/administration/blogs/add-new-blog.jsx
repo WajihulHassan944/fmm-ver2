@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { adminHeaders } from '@/Utils/authFetch';
 import React, { useState } from 'react';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AddNewBlog = () => {
   const [loading, setLoading] = useState(false);
@@ -72,7 +73,7 @@ const AddNewBlog = () => {
     });
     
     try {
-      const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/create-blog', {
+      const res = await fetch(`${PUBLIC_API_BASE_URL}/api/create-blog`, {
         method: 'POST',
         headers: adminHeaders(),
         body: formData

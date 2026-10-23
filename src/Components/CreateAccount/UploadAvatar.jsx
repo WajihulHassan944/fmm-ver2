@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Membership from './Membership'; // Import the Membership component
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const UploadAvatar = ({ email }) => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -23,7 +24,7 @@ const UploadAvatar = ({ email }) => {
         formData.append('image', selectedImage); // Append the image file directly
         formData.append('email', email); // Append the email to the form data
         
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-avatar', {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/upload-avatar`, {
           method: 'POST',
           body: formData,
         });

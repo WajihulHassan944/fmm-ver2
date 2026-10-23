@@ -16,7 +16,7 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import { fetchMatches } from '../../Redux/matchSlice';
-import { fetchPublicPredictionFights } from '@/Utils/publicApi';
+import { PUBLIC_API_BASE_URL, fetchPublicPredictionFights } from '@/Utils/publicApi';
 import FightLeaderboard from '../GlobalLeaderboard/FightLeaderboard';
 import FightCosting from '../Dashboard/FightCosting';
 import useLeaderboardData from '../../CustomFunctions/useLeaderboardData';
@@ -134,7 +134,7 @@ const YourFights = () => {
     if (!user?._id) return;
     const fetchRemovedMatches = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users/removed-matches', { headers: userHeaders() });
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/users/removed-matches`, { headers: userHeaders() });
         const data = await response.json();
         const userMatches = Array.isArray(data) ? data.filter((item) => sameId(item.userId, user._id)) : [];
         setRemovedMatches(userMatches[0]?.removedMatchesIds || []);
@@ -188,7 +188,7 @@ const YourFights = () => {
 
   const handleRemoveMatch = async (matchId) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/remove-match-from-my-dashboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, matchId }),

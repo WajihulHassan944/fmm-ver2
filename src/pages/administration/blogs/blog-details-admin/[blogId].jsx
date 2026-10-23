@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const BlogDetails = () => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const BlogDetails = () => {
 
     const fetchBlogDetails = async () => {
       try {
-        const res = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/blogs/${blogId}`);
+        const res = await fetch(`${PUBLIC_API_BASE_URL}/api/blogs/${blogId}`);
         const data = await res.json();
         setBlog(data);
       } catch (err) {

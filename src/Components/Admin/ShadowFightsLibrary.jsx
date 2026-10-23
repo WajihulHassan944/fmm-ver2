@@ -24,8 +24,9 @@ import { orderFightsForDisplay } from '@/Utils/fightOrdering';
 import { fetchMatches } from '@/Redux/matchSlice';
 import { fightDataQualityApi } from '@/Utils/fightDataQualityApi';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || `${PUBLIC_API_BASE_URL}`;
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 

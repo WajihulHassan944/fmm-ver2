@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { FaArrowLeft, FaCommentDots, FaPaperPlane } from 'react-icons/fa';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 export default function CreateThread() {
   const [title,setTitle]=useState('');
@@ -14,7 +15,7 @@ export default function CreateThread() {
   const handleSubmit=async(e)=>{
     e.preventDefault(); setSubmitting(true); setError('');
     try {
-      const res=await fetch('https://fantasymmadness-game-server-three.vercel.app/threads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:title.trim(),body:body.trim(),profileUrl:user?.profileUrl,author:{userId:user?._id,username:[user?.firstName,user?.lastName].filter(Boolean).join(' ')}})});
+      const res=await fetch(`${PUBLIC_API_BASE_URL}/threads`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:title.trim(),body:body.trim(),profileUrl:user?.profileUrl,author:{userId:user?._id,username:[user?.firstName,user?.lastName].filter(Boolean).join(' ')}})});
       if(!res.ok) throw new Error('Unable to publish discussion');
       setTitle(''); setBody(''); router.push('/community-forum');
     } catch(err){setError(err.message || 'Unable to publish discussion.');}

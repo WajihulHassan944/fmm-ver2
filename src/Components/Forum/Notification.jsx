@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const user = useSelector((state) => state.user); // Access user details from Redux store
 
   useEffect(() => {
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/notifications/${user._id}`)
+    fetch(`${PUBLIC_API_BASE_URL}/notifications/${user._id}`)
       .then(res => res.json())
       .then(data => setNotifications(data))
       .catch(err => console.error(err));

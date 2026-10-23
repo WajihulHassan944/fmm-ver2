@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AdminBlogsIndex = () => {
   const [blogs, setBlogs] = useState([]);
@@ -9,7 +10,7 @@ const AdminBlogsIndex = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/blogs');
+        const res = await fetch(`${PUBLIC_API_BASE_URL}/api/blogs`);
         const data = await res.json();
         setBlogs(data);
       } catch (err) {
@@ -24,7 +25,7 @@ const AdminBlogsIndex = () => {
 
   const deleteBlog = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/blogs/${id}`, {
+      await fetch(`${PUBLIC_API_BASE_URL}/api/blogs/${id}`, {
         method: 'DELETE',
       });
       setBlogs((prev) => prev.filter((blog) => blog._id !== id));
@@ -35,7 +36,7 @@ const AdminBlogsIndex = () => {
 
   const deleteAllBlogs = async () => {
     try {
-      await fetch('https://fantasymmadness-game-server-three.vercel.app/api/delete/blogs', {
+      await fetch(`${PUBLIC_API_BASE_URL}/api/delete/blogs`, {
         method: 'DELETE',
       });
       setBlogs([]);

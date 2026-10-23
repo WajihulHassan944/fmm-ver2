@@ -3,6 +3,7 @@ import MembershipCheckout from './MembershipCheckout';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { userHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const Membership = ({ email }) => {
   const [memberName, setMemberName] = useState('');
@@ -17,7 +18,7 @@ const Membership = ({ email }) => {
 
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/user/${email}`);
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/user/${email}`);
         if (response.ok) {
           const data = await response.json();
           const { firstName, lastName, profileUrl , _id } = data;
@@ -41,7 +42,7 @@ const Membership = ({ email }) => {
 const handleSelectPlan = async (plan) => {
     if (plan === 'free') {
         try {
-            const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/user/${email}/subscribe`, {
+            const response = await fetch(`${PUBLIC_API_BASE_URL}/user/${email}/subscribe`, {
                 method: 'POST',
                 headers: userHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ plan: 'Free' }),

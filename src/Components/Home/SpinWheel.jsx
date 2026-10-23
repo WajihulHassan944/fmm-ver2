@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 const Wheel = dynamic(
   () => import("react-custom-roulette").then((mod) => mod.Wheel),
   { ssr: false }
@@ -50,7 +51,7 @@ const SpinWheel = () => {
       const response = await fetch(
         // Email included so a player who already spun on another phone is not
         // shown a wheel that will refuse them.
-        `https://fantasymmadness-game-server-three.vercel.app/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`
+        `${PUBLIC_API_BASE_URL}/api/spin-wheel/eligibility?deviceId=${encodeURIComponent(deviceId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`
       );
       const data = await response.json();
       const isMatched = Boolean(data?.alreadySpun);
@@ -75,7 +76,7 @@ const SpinWheel = () => {
   const sendDeviceInfoToBackend = async () => {
     try {
       await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/admin/add-device-spin-wheel",
+        `${PUBLIC_API_BASE_URL}/admin/add-device-spin-wheel`,
         {
           method: "POST",
         // Server validates the prize against its own wheel segments and binds
@@ -94,7 +95,7 @@ const SpinWheel = () => {
     if (!email) return alert("Please enter your email!");
     const prizeValue = data[prizeNumber].value;
     await fetch(
-      "https://fantasymmadness-game-server-three.vercel.app/admin/add-tokens-won-spin-wheel",
+      `${PUBLIC_API_BASE_URL}/admin/add-tokens-won-spin-wheel`,
       {
         method: "POST",
         // Server validates the prize against its own wheel segments and binds

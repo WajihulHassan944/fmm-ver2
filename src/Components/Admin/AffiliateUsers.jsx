@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import modalStyles from './AffiliateEmailModal.module.css';
 import { adminHeaders } from '@/Utils/authFetch';
-import { buildPublicApiUrl, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { PUBLIC_API_BASE_URL, buildPublicApiUrl, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { formatFightDate, getFightId, getFighterName } from '@/Utils/fightExperience';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
@@ -204,7 +204,7 @@ const AffiliateUsers = () => {
     formData.append('image', rewardImage);
 
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/upload-affiliate-reward', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/upload-affiliate-reward`, {
         method: 'POST',
         headers: adminHeaders(),
         body: formData,
@@ -446,7 +446,7 @@ const AffiliateUsers = () => {
     const deleteUserPromise = new Promise(async (resolve, reject) => {
       try {
         setDeletingId(id);
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliatetodelete/${id}`, { headers: adminHeaders(),
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliatetodelete/${id}`, { headers: adminHeaders(),
           method: 'DELETE',
         });
 
@@ -492,7 +492,7 @@ const AffiliateUsers = () => {
 
   const addAffiliate = async (data) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-affiliate', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/admin/add-affiliate`, {
         method: 'POST',
         headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(data),

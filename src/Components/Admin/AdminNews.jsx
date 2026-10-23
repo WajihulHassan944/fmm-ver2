@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AdminNews = () => {
   const [news, setNews] = useState([]);
@@ -12,7 +13,7 @@ const AdminNews = () => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/news", { headers: adminHeaders() });
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/news`, { headers: adminHeaders() });
         const data = await response.json();
         setNews(data.data);
       } catch (error) {
@@ -36,7 +37,7 @@ const AdminNews = () => {
   // Add News
   const addNews = async () => {
     try {
-      const response = await fetch("https://fantasymmadness-game-server-three.vercel.app/news", {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/news`, {
         method: "POST",
         headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newNews),
@@ -53,7 +54,7 @@ const AdminNews = () => {
   // Update News
   const updateNews = async (id, updatedData) => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/news/${id}`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/news/${id}`, {
         method: "PUT",
         headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(updatedData),
@@ -69,7 +70,7 @@ const AdminNews = () => {
   // Delete News
   const deleteNews = async (id) => {
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/news/${id}`, { headers: adminHeaders(), method: "DELETE" });
+      await fetch(`${PUBLIC_API_BASE_URL}/news/${id}`, { headers: adminHeaders(), method: "DELETE" });
       setNews(news.filter((newsItem) => newsItem._id !== id));
     } catch (error) {
       console.error("Error deleting news:", error);

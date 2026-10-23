@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { FaArrowLeft, FaArrowRight, FaBolt, FaCalendarAlt, FaChartLine, FaCrown, FaFire, FaFistRaised, FaGlobe, FaHistory, FaMedal, FaShieldAlt, FaStar, FaTimes, FaTrophy, FaUserCircle, FaUserCog, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import { fetchMatches } from "../../Redux/matchSlice";
-import { fetchPublicPredictionFights } from "@/Utils/publicApi";
+import { PUBLIC_API_BASE_URL, fetchPublicPredictionFights } from "@/Utils/publicApi";
 import FightCosting from "./FightCosting";
 import FightLeaderboard from "../GlobalLeaderboard/FightLeaderboard";
 import PurchaseTokensIntimation from "./PurchaseTokensIntimation";
@@ -738,7 +738,7 @@ const Dashboard = () => {
     const fetchRemovedMatches = async () => {
       try {
         const response = await fetch(
-          "https://fantasymmadness-game-server-three.vercel.app/users/removed-matches",
+          `${PUBLIC_API_BASE_URL}/users/removed-matches`,
           { headers: userHeaders() },
         );
         const data = await response.json();
@@ -928,7 +928,7 @@ const Dashboard = () => {
   const handleRemoveMatch = async (matchId) => {
     try {
       const response = await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/remove-match-from-my-dashboard",
+        `${PUBLIC_API_BASE_URL}/remove-match-from-my-dashboard`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -960,7 +960,7 @@ const Dashboard = () => {
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        "https://fantasymmadness-game-server-three.vercel.app/testimonials",
+        `${PUBLIC_API_BASE_URL}/testimonials`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

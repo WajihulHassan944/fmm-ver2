@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
 import { FaArrowLeft, FaSearch, FaUsers } from 'react-icons/fa';
 import AffiliateMatchDetails from './AffiliateMatchDetails';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const money = (n) => Number(n || 0).toLocaleString();
 
@@ -15,7 +16,7 @@ const AffiliateMatches = () => {
   const fetchFights = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin/affiliate-fights', { headers: adminHeaders() });
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/affiliate-fights`, { headers: adminHeaders() });
       const data = await response.json();
       setFights(Array.isArray(data?.fights) ? data.fights : []);
     } catch (error) {

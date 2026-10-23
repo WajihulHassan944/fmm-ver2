@@ -9,6 +9,7 @@ import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AddTokensToWallet from './AddTokensToWallet';
 import MembershipCheckout from '../CreateAccount/MembershipCheckout';
 import UserWorkspaceNav from './UserWorkspaceNav';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const UserAccountSettings = () => {
   const router = useRouter();
@@ -79,7 +80,7 @@ const UserAccountSettings = () => {
         formData.append('isSubscribed', isSubscribed);
         formData.append('isUSCitizen', isUSCitizen);
 
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/update-profile/${user._id}`, {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/update-profile/${user._id}`, {
           method: 'PUT',
           headers: userHeaders(),
           body: formData,
@@ -127,7 +128,7 @@ const UserAccountSettings = () => {
 
     const paymentPromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/user/updatePayment/${user._id}`, {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/user/updatePayment/${user._id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ preferredPaymentMethod, preferredPaymentMethodValue }),

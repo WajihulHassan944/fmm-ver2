@@ -8,6 +8,7 @@ import CombatFighterSelect from './CombatFighterSelect';
 import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const EMPTY = {
   matchCategory: '',
@@ -35,7 +36,7 @@ const EMPTY = {
   promotionBackground: null,
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || `${PUBLIC_API_BASE_URL}`;
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 const FALLBACK_PROMOTION = '/images/fmm-pages/admin-command-hd.webp';

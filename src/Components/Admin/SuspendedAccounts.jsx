@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { adminHeaders } from '@/Utils/authFetch';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const SuspendedAccounts = () => {
     const [users, setUsers] = useState([]);
     const router = useRouter();
     const fetchData = async () => {
         try {
-            const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', { headers: adminHeaders() });
+            const response = await fetch(`${PUBLIC_API_BASE_URL}/redusers`, { headers: adminHeaders() });
             const data = await response.json();
             setUsers(data.data); // Access the 'data' key from the response
         } catch (error) {
@@ -24,7 +25,7 @@ const SuspendedAccounts = () => {
         if (!window.confirm('Unsuspend this account? They will be able to log in again.')) return;
         const deletePromise = new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/redusers/${email}`, {
+                const response = await fetch(`${PUBLIC_API_BASE_URL}/redusers/${email}`, {
                     method: 'DELETE',
                     headers: adminHeaders(),
                 });

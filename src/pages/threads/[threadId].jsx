@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import styles from "../../Components/Forum/ThreadDetails.module.css";
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const ThreadDetails = () => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const ThreadDetails = () => {
 
   // Fetch all users when the component mounts
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+    fetch(`${PUBLIC_API_BASE_URL}/users`)
       .then(response => response.json())
       .then(data => setUsers(data))
       .catch(error => console.error('Error fetching users:', error));
@@ -23,10 +24,10 @@ const ThreadDetails = () => {
   useEffect(() => {
     if (!threadId) return; // Ensure threadId is available before fetching
 
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/views`, {
+    fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/views`, {
       method: 'PUT'
     }).then(() => {
-      return fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`);
+      return fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}`);
     })
     .then(res => res.json())
     .then(data => setThread(data))
@@ -35,7 +36,7 @@ const ThreadDetails = () => {
 
   // Like a reply
   const likeReply = (replyId) => {
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies/${replyId}/like`, {
+    fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/replies/${replyId}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user?._id }) // Ensure user exists
@@ -57,7 +58,7 @@ const ThreadDetails = () => {
   // Submit a reply
   const handleReplySubmit = (e) => {
     e.preventDefault();
-    fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}/replies`, {
+    fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}/replies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ body: replyBody, author: { userId: user?._id, username: user?.firstName } })
@@ -65,7 +66,7 @@ const ThreadDetails = () => {
     .then(res => res.json())
     .then(() => {
       // Re-fetch thread details after posting a reply
-      fetch(`https://fantasymmadness-game-server-three.vercel.app/threads/${threadId}`)
+      fetch(`${PUBLIC_API_BASE_URL}/threads/${threadId}`)
         .then(res => res.json())
         .then(data => {
           setThread(data);

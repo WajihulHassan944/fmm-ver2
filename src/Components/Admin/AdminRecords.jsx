@@ -3,6 +3,7 @@ import { adminHeaders } from '@/Utils/authFetch';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { fetchMatches } from '@/Redux/matchSlice';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const AdminRecords = () => {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const AdminRecords = () => {
   useEffect(() => {
     const fetchAdminTokens = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/admin-tokens', { headers: adminHeaders() });
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin-tokens`, { headers: adminHeaders() });
         const data = await response.json();
         setAdminTokens(data.adminTokens);
       } catch (error) {
@@ -27,7 +28,7 @@ const AdminRecords = () => {
     }
     const fetchAffiliates = async () => {
       try {
-        const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates', { headers: adminHeaders() });
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliates`, { headers: adminHeaders() });
         const data = await response.json();
         setAffiliates(data);
       } catch (error) {

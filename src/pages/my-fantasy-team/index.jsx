@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import styles from './myFantasyTeam.module.css';
 import { useSelector } from 'react-redux';
 import Link from 'next/link';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const MyFantasyTeam = () => {
   
@@ -21,8 +22,8 @@ const MyFantasyTeam = () => {
       setLoading(true);
       try {
         const [affiliateRes, usersRes] = await Promise.all([
-          fetch('https://fantasymmadness-game-server-three.vercel.app/affiliates'),
-          fetch('https://fantasymmadness-game-server-three.vercel.app/users')
+          fetch(`${PUBLIC_API_BASE_URL}/affiliates`),
+          fetch(`${PUBLIC_API_BASE_URL}/users`)
         ]);
 
         const affiliatesData = await affiliateRes.json();

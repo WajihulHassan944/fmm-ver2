@@ -1,6 +1,7 @@
 import { fetchPublishedWrestlingPromotions, isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 // ==========================================================================
 // FantasyMobileExperience — the data layer for the mobile app
@@ -23,7 +24,7 @@ const FantasyMobileAppCore = dynamic(
 );
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE
-  || 'https://fantasymmadness-game-server-three.vercel.app';
+  || `${PUBLIC_API_BASE_URL}`;
 
 const buildPublicApiUrl = (path) => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
 

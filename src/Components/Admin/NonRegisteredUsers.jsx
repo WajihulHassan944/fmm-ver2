@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import React, { useState, useEffect } from 'react';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const NonRegisteredUsers = () => {
   const [users, setUsers] = useState([]);
@@ -11,7 +12,7 @@ const NonRegisteredUsers = () => {
   // Function to fetch non-registered users from the API
   const fetchUsers = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered', { headers: adminHeaders() });
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users/nonregistered`, { headers: adminHeaders() });
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -33,7 +34,7 @@ const NonRegisteredUsers = () => {
     setLoading(true);
   
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users/nonregistered`, {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({ fullName: name, email }),
@@ -62,7 +63,7 @@ const NonRegisteredUsers = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this entry? This cannot be undone.')) return;
     try {
-      await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/users/nonregistered/${id}`, {
+      await fetch(`${PUBLIC_API_BASE_URL}/api/users/nonregistered/${id}`, {
         method: 'DELETE',
         headers: adminHeaders(),
       });

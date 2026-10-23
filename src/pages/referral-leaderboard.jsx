@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { FaArrowRight, FaMedal, FaTrophy, FaUsers } from 'react-icons/fa';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 export default function ReferralBoard() {
   const [referrals, setReferrals] = useState([]);
@@ -10,7 +11,7 @@ export default function ReferralBoard() {
 
   useEffect(() => {
     let active = true;
-    fetch('https://fantasymmadness-game-server-three.vercel.app/api/referrals')
+    fetch(`${PUBLIC_API_BASE_URL}/api/referrals`)
       .then((res) => { if (!res.ok) throw new Error('Referral standings unavailable'); return res.json(); })
       .then((data) => { if (active) setReferrals((Array.isArray(data) ? data : []).sort((a,b) => Number(b?.referralsCount||0)-Number(a?.referralsCount||0))); })
       .catch(() => { if (active) setError('Referral standings could not be loaded.'); })

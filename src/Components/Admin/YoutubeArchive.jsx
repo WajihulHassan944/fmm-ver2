@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 const YoutubeArchive = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [videos, setVideos] = useState([]);
@@ -9,7 +10,7 @@ const YoutubeArchive = () => {
   // Fetch videos from the API
   const fetchVideos = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/youtubeVideos', { headers: adminHeaders() });
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/youtubeVideos`, { headers: adminHeaders() });
       const data = await response.json();
       setVideos(data); // Update the videos state
     } catch (error) {
@@ -32,7 +33,7 @@ const YoutubeArchive = () => {
     setIsSubmitting(true); // Start submission
 
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/youtubeVideos', {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/youtubeVideos`, {
         method: 'POST',
         headers: adminHeaders({
           'Content-Type': 'application/json',
@@ -71,7 +72,7 @@ const YoutubeArchive = () => {
   // Delete a video by ID
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/youtubevideotodelete/${id}`, { headers: adminHeaders(),
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/youtubevideotodelete/${id}`, { headers: adminHeaders(),
         method: 'DELETE',
       });
 

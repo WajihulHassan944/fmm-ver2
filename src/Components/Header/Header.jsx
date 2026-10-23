@@ -10,9 +10,10 @@ import { useRouter } from 'next/router';
 import { userHeaders } from '@/Utils/authFetch';
 import { FaBars, FaBell, FaBullseye, FaCalendarAlt, FaChartLine, FaChevronDown, FaCrown, FaComments, FaCog, FaEllipsisH, FaFire, FaFistRaised, FaGift, FaHandshake, FaHome, FaMedal, FaNewspaper, FaQuestionCircle, FaPlus, FaSignOutAlt, FaTimes, FaTrophy, FaUserCircle, FaUsers, FaVideo } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || `${PUBLIC_API_BASE_URL}`;
 
 const fightLinks = [
   { label: 'Upcoming Fights', href: '/upcomingfights', icon: FaFire },
