@@ -106,32 +106,41 @@ export async function getServerSideProps(context) {
   let promoMatches = [];
 
   try {
-    // Resolve the public slug against every page, not just the first 200 affiliates.
-    // A creator may be absent from the first page even though their back-office record exists.
+    // Resolve the public slug across both the public directory and the original
+    // affiliate directory. The public directory may exclude approved legacy accounts.
     const pageSize = 200;
-    let publicMatches = [];
-    for (let page = 1; page <= 30; page += 1) {
-      const response = await fetch(`${API_BASE}/api/public/affiliates?limit=${pageSize}&page=${page}`);
-      if (!response.ok) break;
-      const payload = await response.json();
-      const rows = safeArray(Array.isArray(payload) ? payload : payload.items || payload.data || payload.affiliates);
-      publicMatches.push(...rows.filter((row) => requestedAffiliateId
-        ? String(row._id || row.id || '') === requestedAffiliateId
-        : matchesAffiliateIdentifier(row, affiliateName)));
-      if (publicMatches.length || rows.length < pageSize) break;
+    const exactId = requestedAffiliateId;
+    const isMatch = (row) => exactId
+      ? String(row?._id || row?.id || '') === exactId
+      : matchesAffiliateIdentifier(row, affiliateName);
+    const sources = [
+      (page) => `${API_BASE}/api/public/affiliates?limit=${pageSize}&page=${page}`,
+      (page) => `${API_BASE}/affiliates?limit=${pageSize}&page=${page}`,
+    ];
+    for (const source of sources) {
+      const matches = new Map();
+      for (let page = 1; page <= 30; page += 1) {
+        const response = await fetch(source(page), { signal: AbortSignal.timeout(6000) }).catch(() => null);
+        if (!response?.ok) break;
+        const payload = await response.json().catch(() => null);
+        const rows = safeArray(Array.isArray(payload) ? payload : payload?.items || payload?.data || payload?.affiliates || payload?.users);
+        rows.filter(isMatch).forEach((row) => matches.set(String(row._id || row.id), row));
+        if (matches.size || rows.length < pageSize) break;
+      }
+      if (matches.size === 1) {
+        affiliate = [...matches.values()][0];
+        break;
+      }
+      if (matches.size > 1) break; // Ambiguous names must never select the wrong account.
     }
-    // Never select an arbitrary affiliate if multiple accounts share a name.
-    if (publicMatches.length === 1) affiliate = publicMatches[0];
 
-    // Older links use the person's full name; new links use a hyphenated slug.
-    if (!affiliate && publicMatches.length === 0) {
+    if (!affiliate) {
       const names = [...new Set([affiliateName, String(affiliateName).replace(/-/g, ' ')])];
       for (const name of names) {
-        const response = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`);
-        if (!response.ok) continue;
-        const record = await response.json();
-        if (record && !Array.isArray(record) && (record._id || record.id)
-          && (requestedAffiliateId ? String(record._id || record.id) === requestedAffiliateId : matchesAffiliateIdentifier(record, affiliateName))) {
+        const response = await fetch(`${API_BASE}/affiliateByName?fullName=${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(6000) }).catch(() => null);
+        if (!response?.ok) continue;
+        const record = await response.json().catch(() => null);
+        if (record && !Array.isArray(record) && (record._id || record.id) && isMatch(record)) {
           affiliate = record;
           break;
         }
