@@ -1,3 +1,4 @@
+import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { fetchAffiliatePromotionFights } from '@/Utils/affiliatePromotionFights';
 import React, { useEffect, useRef, useState } from 'react';
@@ -26,18 +27,7 @@ import {
   FaWallet,
 } from 'react-icons/fa';
 
-const FALLBACK_AVATAR = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
-const affiliateAvatar = (profileUrl) => {
-  const value = String(profileUrl || '').trim();
-  if (!value) return FALLBACK_AVATAR;
-  // Replace legacy FANTASY MMADNESS logo assets, but preserve real personal portraits.
-  const path = value.split('?')[0].toLowerCase();
-  const file = path.split('/').pop() || '';
-  if ((/fantasy[-_ ]?mmadness|fantasymmadness|fmm[-_]/.test(file) && /logo|avatar|profile|icon/.test(file))
-    || /^(?:old[-_])?(?:fmm[-_])?logo(?:[-_.]|$)/.test(file)) return FALLBACK_AVATAR;
-  return resolvePublicMediaUrl(value) || FALLBACK_AVATAR;
-};
-
+const FALLBACK_AVATAR = AFFILIATE_LOGO;
 const AffiliateUsers = () => {
   const [affiliateUsers, setAffiliateUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -652,7 +642,7 @@ const AffiliateUsers = () => {
                   <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || 'affiliate'} for email`} checked={selectedAffiliateIds.includes(user._id)} disabled={!isValidEmail(user.email)} onChange={() => toggleAffiliate(user._id)} /></td>
                   <td>
                     <button type="button" className="admin-person-cell" onClick={() => handleViewUserDetails(user)}>
-                      <img src={affiliateAvatar(user.profileUrl)} onError={(event) => { if (!event.currentTarget.src.endsWith(FALLBACK_AVATAR)) event.currentTarget.src = FALLBACK_AVATAR; }} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'} />
+                      <img src={affiliateProfileImage(user.profileUrl)} onError={(event) => { if (!event.currentTarget.src.endsWith(FALLBACK_AVATAR)) event.currentTarget.src = FALLBACK_AVATAR; }} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'} />
                       <span>
                         <strong>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'}</strong>
                         <small>{user.playerName || user.email || 'Creator account'}</small>
