@@ -205,7 +205,8 @@ const UserDetails = ({ user, affiliates = [] }) => {
         </label>
         <div className="admin-row-actions">
           <button type="button" disabled={!affiliateUrl} onClick={() => copyAffiliateValue(affiliateUrl, 'Affiliate link')}>Copy link</button>
-          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">Open affiliate page</a>}
+          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">View Public Affiliate Page</a>}
+          {affiliateId && <a href={`/administration/affiliate-back-office/${encodeURIComponent(affiliateId)}`} target="_blank" rel="noopener noreferrer">View Affiliate Back Office</a>}
         </div>
         <p role="status">{copyStatus}</p>
         <ShareQrCode key={affiliateId} url={affiliateUrl} label={user.playerName || user.firstName || 'Affiliate'} fileName={`affiliate-${affiliateId}-qr`} />

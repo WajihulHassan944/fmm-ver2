@@ -89,9 +89,12 @@ const extractAffiliatePromotedRows = (payload = {}) => normalizePublicFightRows(
 );
 
 
-const AffiliateDashboard = () => {
+// adminAffiliate / readOnly are used only by the administrator's back-office view: it shows the
+// selected affiliate's dashboard from that affiliate's own record, never the signed-in user's.
+const AffiliateDashboard = ({ adminAffiliate = null, readOnly = false }) => {
   const dispatch = useDispatch();
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const affiliate = adminAffiliate || signedInAffiliate;
   const authLoading = useSelector((state) => state.affiliateAuth.loading);
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
@@ -123,7 +126,9 @@ const AffiliateDashboard = () => {
   }, [matchStatus, dispatch]);
 
   useEffect(() => {
-    if (!affiliate?._id) return undefined;
+    // The wrestling summary is fetched with the affiliate's own token, which an administrator
+    // does not (and must not) have, so it is skipped in the read-only admin view.
+    if (!affiliate?._id || readOnly) return undefined;
     let active = true;
     setWrestlingLoading(true);
     wrestlingRequest('/api/affiliates/me/wrestling-summary', { affiliate: true })
@@ -135,7 +140,7 @@ const AffiliateDashboard = () => {
       })
       .finally(() => { if (active) setWrestlingLoading(false); });
     return () => { active = false; };
-  }, [affiliate?._id]);
+  }, [affiliate?._id, readOnly]);
 
   useEffect(() => {
     let active = true;
@@ -259,7 +264,7 @@ const AffiliateDashboard = () => {
     const totalPages = Math.ceil(total / MAX_CARDS);
 
     return (
-      <nav className="affiliate-dashboard-pagination" aria-label={`${label} pages`}>
+      <nav className="affiliate-dashboard-pagination" aria-label={`${label} pages`} data-admin-allowed="true">
         <button type="button" disabled={startIndex <= 0} onClick={onPrevious}>
           <FaArrowLeft /> Previous
         </button>
@@ -316,10 +321,26 @@ const AffiliateDashboard = () => {
     );
   }
 
+  // Read-only administrator view: only scrolling, in-page anchors, copy-link buttons and the
+  // page-turn buttons work. Everything else (create/remove promotions, opening campaigns,
+  // money, profile and settings pages) is blocked so nothing can be changed as the affiliate.
+  const blockAdminActions = readOnly ? (event) => {
+    const control = event.target?.closest?.('a,button');
+    if (!control) return;
+    if (control.closest('[data-admin-allowed]') || control.matches('a[href^="#"]') || control.classList.contains('xp-copy-promo')) return;
+    event.preventDefault();
+    event.stopPropagation();
+  } : undefined;
+
   return (
     <>
-      <Head><title>Affiliate Dashboard | Fantasy MMAdness</title></Head>
-      <div className="experience-page affiliate-dashboard-experience-page affiliate-command-v3" data-ui-version="command-v3">
+      <Head><title>{readOnly ? `${fullName} · Affiliate back office (admin view)` : 'Affiliate Dashboard'} | Fantasy MMAdness</title></Head>
+      <div className="experience-page affiliate-dashboard-experience-page affiliate-command-v3" data-ui-version="command-v3" onClickCapture={blockAdminActions}>
+        {readOnly && (
+          <div role="status" style={{ background: '#1b1305', color: '#ffd166', border: '1px solid #ffd166', padding: '10px 16px', textAlign: 'center', fontWeight: 600 }}>
+            Administrator view · read only · {fullName}&apos;s private back office. Promotions, payouts and settings can&apos;t be changed here.
+          </div>
+        )}
         <section className="affiliate-command-ribbon" aria-label="Affiliate command status">
           <div className="theme-container affiliate-command-ribbon-inner">
             <span><i /> Affiliate command online</span>

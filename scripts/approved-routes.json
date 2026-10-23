@@ -32,6 +32,7 @@
   "/administration/SocialAiBot",
   "/administration/YoutubeArchive",
   "/administration/adminRecords",
+  "/administration/affiliate-back-office/[affiliateId]",
   "/administration/apparel-orders",
   "/administration/blogs",
   "/administration/blogs/add-new-blog",
