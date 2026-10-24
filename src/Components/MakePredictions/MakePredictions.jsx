@@ -513,6 +513,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
             <span><FaFistRaised /> Prediction scorecard</span>
             <h1>{getFighterName(match, 'A')} <em>vs</em> {getFighterName(match, 'B')}</h1>
           <p>{match.matchCategoryTwo || match.matchCategory} · {match.matchType}{isWrestling ? ' · full-match scorecard' : ` · ${roundCount} rounds`}</p>
+            <p style={{ margin: '6px 0 0', fontSize: 13, fontWeight: 700 }}><a href="/how-to-play" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>How to play and how scoring works</a> <span style={{ opacity: .75 }}>(opens in a new tab, your picks stay saved)</span></p>
             <div className="xp-prediction-countdown"><FaClock /> {timeRemaining.hasStarted ? 'Fight has started' : `${timeRemaining.diffHrs}h ${timeRemaining.diffMins}m ${timeRemaining.diffSecs}s until lock`}</div>
           </div>
           <button className="xp-prediction-wallet" type="button" onClick={() => router.push(checkoutUrl)}>

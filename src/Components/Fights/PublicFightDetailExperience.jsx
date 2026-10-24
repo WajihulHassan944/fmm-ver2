@@ -334,6 +334,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
                 {hasSubmitted ? 'Predictions submitted' : !playable ? 'Entry closed' : 'START YOUR PREDICTIONS'} <FaArrowRight />
               </button>
               <a href="#fight-leaderboard" className="theme-btn theme-btn-secondary">View leaderboard <FaTrophy /></a>
+              <a href="/how-to-play" target="_blank" rel="noopener noreferrer" className="theme-btn theme-btn-secondary">How to play</a>
             </div>
             {playable && <p style={{margin:'10px 0 0',fontSize:13,fontWeight:700,opacity:.82}}>Make your picks first. Create or sign in to your account only when you are ready to lock in your official entry.</p>}
             {hasSubmitted && (
