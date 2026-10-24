@@ -74,9 +74,17 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   </main>;
 }
 
-export async function getServerSideProps({ params, query, res }) {
-  const affiliateId = String(query?.affiliateId || params?.affiliateId || '');
-  const fightId = String(query?.fightId || '');
+// Next.js merges the dynamic segment into `query`, so for a named link like
+// /league/kelly-davis?affiliateId=<id> `query.affiliateId` is "kelly-davis",
+// not the id. Read the real ?affiliateId= from the request URL instead.
+const searchParamFrom = (resolvedUrl, name) => {
+  try { return new URL(String(resolvedUrl || ''), 'https://www.fantasymmadness.com').searchParams.get(name) || ''; }
+  catch { return ''; }
+};
+
+export async function getServerSideProps({ params, query, res, resolvedUrl }) {
+  const affiliateId = String(searchParamFrom(resolvedUrl, 'affiliateId') || params?.affiliateId || '');
+  const fightId = String(searchParamFrom(resolvedUrl, 'fightId') || query?.fightId || '');
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
   const pathId = String(params?.affiliateId || '');
   if (/^[a-f\d]{24}$/i.test(pathId) && pathId.toLowerCase() !== affiliateId.toLowerCase()) return { notFound: true };
