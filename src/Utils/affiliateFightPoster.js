@@ -314,8 +314,64 @@ const goldFill = (ctx, top, bottom) => {
   return g;
 };
 
-// Fighter photo drawn large (cover, anchored at the top so heads stay in
-// frame), faded toward the centre and bottom so it melts into the arena.
+// Official fighter photos are often full-body cut-outs on plain white. Turn the
+// white that touches the photo's edges transparent (flood fill from the border,
+// so white inside the photo — shorts, belts — is kept), then find the fighter.
+const prepareFighter = (image) => {
+  const scale = Math.min(1, 1000 / Math.max(image.width, image.height));
+  const w = Math.max(1, Math.round(image.width * scale));
+  const h = Math.max(1, Math.round(image.height * scale));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  g.drawImage(image, 0, 0, w, h);
+  let data;
+  try { data = g.getImageData(0, 0, w, h); } catch { return { canvas: c, box: { x: 0, y: 0, w, h }, keyed: false }; }
+  const px = data.data;
+  const isPlain = (i) => {
+    const r = px[i], gg = px[i + 1], b = px[i + 2], a = px[i + 3];
+    if (a < 16) return true;
+    const max = Math.max(r, gg, b), min = Math.min(r, gg, b);
+    return min > 222 && max - min < 26;
+  };
+  // Only key the background when most of the border is plain white.
+  let plainBorder = 0; let border = 0;
+  for (let x = 0; x < w; x += 4) { border += 2; if (isPlain(x * 4)) plainBorder += 1; if (isPlain(((h - 1) * w + x) * 4)) plainBorder += 1; }
+  for (let y = 0; y < h; y += 4) { border += 2; if (isPlain((y * w) * 4)) plainBorder += 1; if (isPlain((y * w + w - 1) * 4)) plainBorder += 1; }
+  let keyed = false;
+  if (plainBorder / border > 0.6) {
+    keyed = true;
+    const seen = new Uint8Array(w * h);
+    const stack = [];
+    const push = (x, y) => { const k = y * w + x; if (!seen[k] && isPlain(k * 4)) { seen[k] = 1; stack.push(k); } };
+    for (let x = 0; x < w; x += 1) { push(x, 0); push(x, h - 1); }
+    for (let y = 0; y < h; y += 1) { push(0, y); push(w - 1, y); }
+    while (stack.length) {
+      const k = stack.pop(); const x = k % w; const y = (k - x) / w;
+      px[k * 4 + 3] = 0;
+      if (x > 0) push(x - 1, y); if (x < w - 1) push(x + 1, y);
+      if (y > 0) push(x, y - 1); if (y < h - 1) push(x, y + 1);
+    }
+    // Soften the cut edge by one pixel so there is no white fringe.
+    for (let k = 0; k < w * h; k += 1) {
+      if (seen[k]) continue;
+      const x = k % w; const y = (k - x) / w;
+      if ((x > 0 && seen[k - 1]) || (x < w - 1 && seen[k + 1]) || (y > 0 && seen[k - w]) || (y < h - 1 && seen[k + w])) px[k * 4 + 3] = 110;
+    }
+    g.putImageData(data, 0, 0);
+  }
+  // Bounding box of the fighter (non-transparent pixels).
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for (let y = 0; y < h; y += 2) for (let x = 0; x < w; x += 2) {
+    if (px[(y * w + x) * 4 + 3] > 40) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  }
+  const box = maxX < 0 ? { x: 0, y: 0, w, h } : { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+  return { canvas: c, box, keyed };
+};
+
+// Fighter drawn large: a cut-out is framed from the top of the head down
+// (head and torso, like the approved poster); a regular photo fills its side,
+// anchored at the top so heads stay in frame. Faded toward the centre and
+// bottom so it melts into the arena.
 const drawPromoFighter = (ctx, image, side, spec, box) => {
   const half = spec.width / 2;
   const w = half + 90;
@@ -324,18 +380,49 @@ const drawPromoFighter = (ctx, image, side, spec, box) => {
   const layer = document.createElement('canvas');
   layer.width = Math.round(w); layer.height = Math.round(h);
   const l = layer.getContext('2d');
-  const scale = Math.max(w / image.width, h / image.height);
-  const dw = image.width * scale; const dh = image.height * scale;
-  l.drawImage(image, (w - dw) / 2, 0, dw, dh);
+  const prepared = prepareFighter(image);
+  if (prepared.keyed) {
+    const b = prepared.box;
+    // Head to roughly the waist (top ~48% of a full-body figure, or all of a
+    // half-length photo), centred on the fighter, at the layer's aspect ratio.
+    const tall = b.h > b.w * 1.6;
+    const sh = (tall ? b.h * 0.5 : b.h) + b.h * 0.03;
+    const sw = sh * (w / h);
+    const sx = b.x + b.w / 2 - sw / 2;
+    const sy = Math.max(0, b.y - b.h * 0.03);
+    l.drawImage(prepared.canvas, sx, sy, sw, sh, side === 'A' ? -24 : 24, 0, w, h);
+  } else {
+    const scale = Math.max(w / image.width, h / image.height);
+    const dw = image.width * scale; const dh = image.height * scale;
+    l.drawImage(image, (w - dw) / 2, 0, dw, dh);
+  }
   l.globalCompositeOperation = 'destination-in';
   const across = l.createLinearGradient(0, 0, w, 0);
   if (side === 'A') { across.addColorStop(0, '#000'); across.addColorStop(0.72, '#000'); across.addColorStop(1, 'rgba(0,0,0,0)'); }
   else { across.addColorStop(0, 'rgba(0,0,0,0)'); across.addColorStop(0.28, '#000'); across.addColorStop(1, '#000'); }
   l.fillStyle = across; l.fillRect(0, 0, w, h);
   const down = l.createLinearGradient(0, 0, 0, h);
-  down.addColorStop(0, 'rgba(0,0,0,0)'); down.addColorStop(0.1, '#000'); down.addColorStop(0.7, '#000'); down.addColorStop(1, 'rgba(0,0,0,0)');
+  down.addColorStop(0, prepared.keyed ? '#000' : 'rgba(0,0,0,0)'); down.addColorStop(0.1, '#000'); down.addColorStop(0.7, '#000'); down.addColorStop(1, 'rgba(0,0,0,0)');
   l.fillStyle = down; l.fillRect(0, 0, w, h);
+  // Warm arena light on the fighter for the gold-and-black look.
+  if (prepared.keyed) {
+    l.globalCompositeOperation = 'source-atop';
+    const tone = l.createLinearGradient(0, 0, 0, h);
+    tone.addColorStop(0, 'rgba(255,190,90,0.10)'); tone.addColorStop(1, 'rgba(0,0,0,0.35)');
+    l.fillStyle = tone; l.fillRect(0, 0, w, h);
+  }
   ctx.drawImage(layer, x, box.top);
+};
+
+// Average brightness of the artwork (0–1), used to keep bright artwork dark.
+const artBrightness = (art) => {
+  try {
+    const c = document.createElement('canvas'); c.width = 24; c.height = 24;
+    const g = c.getContext('2d'); g.drawImage(art, 0, 0, 24, 24);
+    const d = g.getImageData(0, 0, 24, 24).data; let sum = 0;
+    for (let i = 0; i < d.length; i += 4) sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    return sum / (d.length / 4) / 255;
+  } catch { return 0.4; }
 };
 
 const drawArena = (ctx, art, spec) => {
@@ -344,10 +431,16 @@ const drawArena = (ctx, art, spec) => {
     const r = coverRect(art, 0, 0, spec.width, spec.height);
     ctx.save();
     // Soft enough that any lettering in the registry artwork never competes
-    // with the poster's own type, while keeping the arena colour and light.
-    if ('filter' in ctx) ctx.filter = 'blur(9px) brightness(0.55) saturate(1.25)';
+    // with the poster's own type; bright artwork is darkened further so every
+    // poster keeps the black-and-gold arena look.
+    const lum = artBrightness(art);
+    const bright = lum > 0.55 ? 0.28 : lum > 0.4 ? 0.42 : 0.55;
+    if ('filter' in ctx) ctx.filter = `blur(9px) brightness(${bright}) saturate(1.25)`;
     ctx.drawImage(art, r.x, r.y, r.w, r.h);
     ctx.restore();
+    // Extra dimming that works even where canvas filters are unsupported.
+    ctx.fillStyle = `rgba(0,0,0,${lum > 0.55 ? 0.5 : lum > 0.4 ? 0.3 : 0.12})`;
+    ctx.fillRect(0, 0, spec.width, spec.height);
   }
   // Warm stadium spotlights across the top.
   [0.08, 0.27, 0.5, 0.73, 0.92].forEach((fx, i) => {
@@ -365,7 +458,7 @@ const drawRedSmoke = (ctx, spec, y) => {
   [[0, y + 140], [spec.width, y + 140]].forEach(([x, cy]) => {
     const g = ctx.createRadialGradient(x, cy, 10, x, cy, 330);
     g.addColorStop(0, 'rgba(210,20,30,0.55)'); g.addColorStop(1, 'rgba(210,20,30,0)');
-    ctx.fillStyle = g; ctx.fillRect(0, y - 200, spec.width, 600);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, spec.width, spec.height);
   });
 };
 
@@ -413,7 +506,7 @@ const drawNames = (ctx, spec, layout, { fighterA, fighterB }) => {
   const n = layout.names; const cx = spec.width / 2;
   const glow = ctx.createRadialGradient(cx, (n.mainEvent + n.b) / 2, 20, cx, (n.mainEvent + n.b) / 2, n.width * 0.62);
   glow.addColorStop(0, 'rgba(0,0,0,0.62)'); glow.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = glow; ctx.fillRect(0, n.mainEvent - 120, spec.width, n.b - n.mainEvent + 200);
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, spec.width, spec.height);
   ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff';
   ctx.font = `400 ${Math.round(n.size * 0.32)}px ${DISPLAY_FONT}`;
   ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 12;
