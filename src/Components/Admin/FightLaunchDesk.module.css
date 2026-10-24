@@ -23,9 +23,17 @@
 .copyPoster { position: absolute; top: 12px; right: 12px; z-index: 1; border: 2px solid white; border-radius: 8px; padding: 10px 15px; background: #ed253e; color: white; font: inherit; font-weight: 900; cursor: pointer; box-shadow: 0 4px 18px #0009; }
 .copyPoster:hover { background: #ff3851; }
 .posterStudio { margin-top: 16px; background: #1a1e2c; border: 1px solid #ffc94d66; border-radius: 12px; padding: 16px; }
-.posterStudioHead { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 14px; }
-.posterStudioHead p { margin: 4px 0 0; color: #c6cbd8; }
-.posterStudioHead .picker { margin: 0; min-width: 260px; }
+.posterControls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.posterControls .picker { margin: 0; min-width: 0; }
+.posterToolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 14px 0 10px; }
+.posterToolbar .posterTabs { margin: 0; }
+.posterStage { display: flex; justify-content: center; align-items: center; background: #0b0d14; border-radius: 10px; padding: 10px; min-height: 240px; overflow: hidden; }
+.posterStage img { display: block; max-width: 100%; max-height: min(78vh, 900px); width: auto; height: auto; object-fit: contain; }
+.posterLink { display: flex; gap: 8px; margin-top: 10px; }
+.posterLink input { flex: 1; min-width: 0; background: #0e121c; border: 1px solid #525c72; border-radius: 8px; padding: 10px; color: #c6cbd8; font: inherit; font-size: 13px; }
+.posterLink button { border: 1px solid #a667d5; border-radius: 8px; padding: 10px 12px; background: #722da7; color: white; font: inherit; font-weight: bold; cursor: pointer; white-space: nowrap; }
+.desk details.deskExtras { margin-top: 14px; }
+.desk details.deskExtras summary { cursor: pointer; font-weight: 800; }
 .posterTabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .posterTabs button { border: 1px solid #5a6380; border-radius: 999px; padding: 8px 14px; background: #161a27; color: #e8ebf4; font: inherit; font-weight: 800; cursor: pointer; }
 .posterTabs .posterTabActive { background: #ffc94d; border-color: #ffc94d; color: #10131d; }

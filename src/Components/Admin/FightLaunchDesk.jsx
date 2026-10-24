@@ -3,12 +3,10 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { buildPublicApiUrl, normalizePublicFightRows, resolvePublicMediaUrl } from '@/Utils/publicApi';
+import { buildPublicApiUrl, normalizePublicFightRows } from '@/Utils/publicApi';
 import { adminHeaders } from '@/Utils/authFetch';
-import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
-import ShareQrCode from '@/Components/Common/ShareQrCode';
+import { formatFightDate, getFightId, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import AffiliatePosterStudio from '@/Components/Admin/AffiliatePosterStudio';
-import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
 import { fighterNameHashtags } from '@/Utils/fightShareCopy';
 import styles from './FightLaunchDesk.module.css';
@@ -28,7 +26,6 @@ export default function FightLaunchDesk() {
   const [selected, setSelected] = useState('');
   useEffect(() => { if (typeof router.query.fightId === 'string') setSelected(router.query.fightId); }, [router.query.fightId]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -48,7 +45,6 @@ export default function FightLaunchDesk() {
   const tiktok = `Join FANTASY MMADNESS for ${title}. Make your picks and compete with fight fans. ${prizeLine} Scan the poster QR to play, or use your affiliate's personal link to join their league. #FANTASYMMADNESS #FightTok${fighterTags ? ` ${fighterTags}` : ''}`;
   const xEnding = `. Make your picks and compete for prizes where eligible. Join: ${url}${fighterTags ? ` ${fighterTags}` : ''}`;
   const xPost = `Join the fight: ${title.slice(0, Math.max(0, 280 - 'Join the fight: '.length - xEnding.length))}${xEnding}`;
-  const affiliateText = `Hello {firstName},\n\n${title} is open on FANTASY MMADNESS. The owner has already set up the fight and its economics. Open your personal kit to download the social poster with your tracked QR, then share it with your ready-made Facebook, Instagram, TikTok, or X caption. Your tracked paid entries share 50% of FANTASY MMADNESS platform proceeds under the existing affiliate split. Review your recipients before sending.`;
 
   const uploadPoster = async (file) => {
     if (!file || !id) return;
@@ -90,45 +86,28 @@ export default function FightLaunchDesk() {
     catch { toast.error(`Could not copy ${name.toLowerCase()}. Select the text and copy it manually.`); }
   };
 
-  const downloadPoster = async () => {
-    if (!fight || busy) return;
-    setBusy(true);
-    try {
-      if (!posterImage) throw new Error('Upload a fight poster before downloading a social poster.');
-      const image = await buildFightSocialPoster({ fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
-        fighterAImage: getFighterImage(fight, 'A'), fighterBImage: getFighterImage(fight, 'B'),
-        basePoster: posterImage, sport: fight.matchCategoryTwo || fight.matchCategory, event: fight.matchName,
-        date: formatFightDate(fight), url, prize: fight.pot, entryCoins: fight.matchTokens });
-      saveFightSocialPoster(image, id);
-      toast.success('Fight post image downloaded.');
-    } catch (err) { toast.error(err.message || 'Could not save the post image. Check the fighter photos.'); }
-    finally { setBusy(false); }
-  };
+
+  const fightPicker = <label className={styles.picker}>Fight
+      <select value={id} onChange={(e) => setSelected(e.target.value)} disabled={loading || !open.length}>
+        {open.map((row) => <option key={getFightId(row)} value={getFightId(row)}>{titleFor(row)} · {formatFightDate(row, { dateOnly: true })}</option>)}
+      </select>
+    </label>;
 
   return <section className={styles.desk} aria-label="Fight launch desk">
-    <div className={styles.heading}><div><span>FIGHT LAUNCH DESK</span><h2>Post a fight. Rally your affiliates.</h2><p>Prepare a post from an open fight, then send affiliates a message through your existing email tool.</p></div></div>
+    <div className={styles.heading}><div><span>FIGHT LAUNCH DESK</span><h2>Affiliate fight posters</h2></div></div>
     {error && <p role="alert">{error}</p>}
-    <label className={styles.picker}>Choose an open fight
-      <select value={id} onChange={(e) => setSelected(e.target.value)} disabled={loading || !open.length}>
-        {open.map((row) => <option key={getFightId(row)} value={getFightId(row)}>{titleFor(row)} · {formatFightDate(row)}</option>)}
-      </select>
-    </label>
-    <div className={styles.uploadPanel}>
-      <label htmlFor="fight-launch-poster">Upload your finished fight poster</label>
-      <p>Select a fight above, then choose your PNG, JPEG, or WebP poster (up to 25 MB). Each affiliate kit adds that affiliate's tracked link and QR code to your artwork.</p>
-      <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp" disabled={!fight || uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} />
-      <small>{uploadBusy ? 'Uploading poster…' : fight && (uploadedPosters[id] || fight.fightPosterImage) ? 'Poster saved for this fight. Choose another image to replace it.' : fight ? 'The fight poster is shown below. Upload your own to replace it for affiliate kits.' : 'Choose an open fight to enable upload.'}</small>
-      {uploadError && <p role="alert" className={styles.uploadError}>{uploadError}</p>}
-    </div>
-    {loading ? <p>Loading fights…</p> : !fight ? <p>No upcoming published fights were found in the Fight Registry. Publish or schedule a fight there first.</p> : <>
-      <div className={styles.layout}>
-        <div className={styles.preview}>{posterImage ? <img src={resolvePublicMediaUrl(posterImage)} alt={`Fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={resolvePublicMediaUrl(getFighterImage(fight, 'A'))} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={resolvePublicMediaUrl(getFighterImage(fight, 'B'))} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
-        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
+    {loading ? <p>Loading fights…</p> : !fight ? <p>No upcoming published fights were found in the Fight Registry.</p>
+      : <AffiliatePosterStudio fight={fight} artwork={posterImage} fightPicker={fightPicker} />}
+    {fight && <details className={styles.deskExtras}>
+      <summary>Fight artwork, captions and affiliate alerts</summary>
+      <div className={styles.uploadPanel}>
+        <label htmlFor="fight-launch-poster">Replace this fight&apos;s artwork</label>
+        <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp" disabled={uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} />
+        <small>{uploadBusy ? 'Uploading…' : 'PNG, JPEG or WebP up to 25 MB.'}</small>
+        {uploadError && <p role="alert" className={styles.uploadError}>{uploadError}</p>}
       </div>
-      <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
-      <AffiliatePosterStudio fight={fight} artwork={posterImage} />
-      <div className={styles.affiliate}><div><strong>Send personal social posters to affiliates</strong><p>Each approved affiliate gets a ready-to-post kit with this fight design, their own tracked QR and link, and Facebook, Instagram, TikTok, and X captions. Review recipients before sending.</p></div><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
-      <details className={styles.message}><summary>Preview affiliate message</summary><pre>{affiliateText}</pre></details>
-    </>}
+      <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name}</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={4} onFocus={(e) => e.target.select()} /></article>)}</div>
+      <div className={styles.affiliate}><strong>Email affiliates about this fight</strong><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
+    </details>}
   </section>;
 }

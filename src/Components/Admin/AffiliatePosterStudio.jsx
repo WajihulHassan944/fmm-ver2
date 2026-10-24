@@ -27,7 +27,7 @@ const readAffiliateRows = (payload) => {
   return [];
 };
 
-export default function AffiliatePosterStudio({ fight, artwork }) {
+export default function AffiliatePosterStudio({ fight, artwork, fightPicker = null }) {
   const [affiliates, setAffiliates] = useState([]);
   const [loadError, setLoadError] = useState('');
   const [affiliateId, setAffiliateId] = useState('');
@@ -113,8 +113,8 @@ export default function AffiliatePosterStudio({ fight, artwork }) {
   };
 
   return <div className={styles.posterStudio} aria-label="Affiliate posters">
-    <div className={styles.posterStudioHead}>
-      <div><strong>Affiliate posters</strong><p>Pick an affiliate to get their personalized poster for this fight, with their name and their own tracked QR.</p></div>
+    <div className={styles.posterControls}>
+      {fightPicker}
       <label className={styles.picker}>Affiliate
         <select value={affiliateId} onChange={(e) => setAffiliateId(e.target.value)} disabled={!affiliates.length}>
           {affiliates.map((row) => <option key={row._id || row.id} value={row._id || row.id}>{affiliateLabel(row)}</option>)}
@@ -123,28 +123,25 @@ export default function AffiliatePosterStudio({ fight, artwork }) {
     </div>
     {loadError && <p role="alert">{loadError}</p>}
     {!loadError && !affiliates.length && <p>Loading affiliates…</p>}
-    {affiliate && <div className={styles.layout}>
-      <div className={styles.preview}>
+    {affiliate && fight && <>
+      <div className={styles.posterToolbar}>
         <div className={styles.posterTabs} role="group" aria-label="Poster size">
-          {Object.values(POSTER_FORMATS).map((spec) => <button key={spec.key} type="button" aria-pressed={format === spec.key} className={format === spec.key ? styles.posterTabActive : ''} onClick={() => setFormat(spec.key)}>{spec.label} · {spec.width}×{spec.height}</button>)}
+          {Object.values(POSTER_FORMATS).map((spec) => <button key={spec.key} type="button" aria-pressed={format === spec.key} className={format === spec.key ? styles.posterTabActive : ''} onClick={() => setFormat(spec.key)}>{spec.label} {spec.width}×{spec.height}</button>)}
         </div>
-        <div className={styles.posterFrame}>
-          {current ? <img className={format === 'story' ? styles.storyPoster : ''} src={current.objectUrl} width={current.width} height={current.height} alt={`${current.cta} poster for ${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`} data-poster-format={format} data-poster-link={link} />
-            : posterError ? <p role="alert">{posterError}</p> : <p>Making {firstName ? `${firstName}'s` : 'the'} posters…</p>}
-          {current && <button className={styles.copyPoster} type="button" onClick={copyImage}>Copy poster</button>}
-        </div>
-      </div>
-      <div className={styles.share}>
-        <strong>{affiliateLabel(affiliate)} · tracked fight link</strong>
-        <input readOnly value={link} aria-label="Affiliate tracked fight link" onFocus={(e) => e.target.select()} />
         <div className={styles.buttons}>
-          <button type="button" disabled={!posters.feed} onClick={() => download('feed')}>Download feed poster (1080×1350)</button>
-          <button type="button" disabled={!posters.story} onClick={() => download('story')}>Download story poster (1080×1920)</button>
-          <button type="button" disabled={!current || busy} onClick={share}>{busy ? 'Opening…' : 'Share poster'}</button>
-          <button type="button" onClick={copyLink}>Copy tracked link</button>
+          <button type="button" disabled={!current} onClick={() => download(format)}>Download</button>
+          <button type="button" disabled={!current} onClick={copyImage}>Copy</button>
+          <button type="button" disabled={!current || busy} onClick={share}>{busy ? 'Opening…' : 'Share'}</button>
         </div>
-        <small>The QR on this poster opens the link above, which credits {firstName || 'this affiliate'} for signups and entries on this fight. Feed posters fit Instagram and Facebook posts; Story posters fit Stories.</small>
       </div>
-    </div>}
+      <div className={styles.posterStage}>
+        {current ? <img src={current.objectUrl} width={current.width} height={current.height} alt={`${current.cta} poster for ${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`} data-poster-format={format} data-poster-link={link} />
+          : posterError ? <p role="alert">{posterError}</p> : <p>Making {firstName ? `${firstName}'s` : 'the'} poster…</p>}
+      </div>
+      <div className={styles.posterLink}>
+        <input readOnly value={link} aria-label="Affiliate tracked fight link" onFocus={(e) => e.target.select()} />
+        <button type="button" onClick={copyLink}>Copy link</button>
+      </div>
+    </>}
   </div>;
 }
