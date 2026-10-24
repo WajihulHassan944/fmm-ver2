@@ -103,7 +103,7 @@ const BRAND_RATIO = 218 / 640; // height / width of the brand lockup image
 // are scaled down to make room rather than covered).
 const PLANS = {
   feed: {
-    split: { brandW: 520, brandPad: 22, card: 330, rowPad: 56, bottomPad: 28 },
+    split: { brandW: 520, brandPad: 16, card: 330, rowPad: 54, bottomPad: 24 },
     stacked: { brandW: 340, card: 286, rowPad: 50, gap: 14, bottomPad: 18 },
   },
   story: {
@@ -144,7 +144,9 @@ export function planOverlay(format, artWidth, artHeight) {
   const panel = stacked.rowPad + stacked.card + stacked.gap + brandHeight(stacked.brandW) + stacked.bottomPad;
   const box = fit(spec.width, spec.height - panel);
   const art = { x: Math.round((spec.width - box.w) / 2), y: 0, w: box.w, h: box.h };
-  const rowY = art.h + stacked.rowPad;
+  // Any spare height is shared evenly above and below the promo block.
+  const spare = Math.max(0, spec.height - art.h - panel);
+  const rowY = art.h + stacked.rowPad + Math.round(spare / 2);
   return {
     mode: 'stacked', spec, art,
     brand: { x: Math.round((spec.width - stacked.brandW) / 2), y: rowY + stacked.card + stacked.gap, w: stacked.brandW, h: brandHeight(stacked.brandW) },
