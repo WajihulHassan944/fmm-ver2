@@ -7,6 +7,7 @@ import { buildPublicApiUrl, normalizePublicFightRows, resolvePublicMediaUrl } fr
 import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
+import CustomPosterQr from '@/Components/Admin/CustomPosterQr';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
 import { fighterNameHashtags } from '@/Utils/fightShareCopy';
@@ -28,6 +29,7 @@ export default function FightLaunchDesk() {
   useEffect(() => { if (typeof router.query.fightId === 'string') setSelected(router.query.fightId); }, [router.query.fightId]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [customPosterOpen, setCustomPosterOpen] = useState(false);
   const [error, setError] = useState('');
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -122,8 +124,9 @@ export default function FightLaunchDesk() {
     {loading ? <p>Loading fights…</p> : !fight ? <p>No upcoming published fights were found in the Fight Registry. Publish or schedule a fight there first.</p> : <>
       <div className={styles.layout}>
         <div className={styles.preview}>{posterImage ? <img src={resolvePublicMediaUrl(posterImage)} alt={`Fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={resolvePublicMediaUrl(getFighterImage(fight, 'A'))} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={resolvePublicMediaUrl(getFighterImage(fight, 'B'))} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
-        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
+        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /><button type="button" aria-expanded={customPosterOpen} onClick={() => setCustomPosterOpen((open) => !open)}>CUSTOM POSTER + QR</button></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
       </div>
+      {customPosterOpen && <CustomPosterQr fightId={id} fightTitle={title} />}
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
       <div className={styles.affiliate}><div><strong>Send personal social posters to affiliates</strong><p>Each approved affiliate gets a ready-to-post kit with this fight design, their own tracked QR and link, and Facebook, Instagram, TikTok, and X captions. Review recipients before sending.</p></div><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
       <details className={styles.message}><summary>Preview affiliate message</summary><pre>{affiliateText}</pre></details>
