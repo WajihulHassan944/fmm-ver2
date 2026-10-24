@@ -17,8 +17,11 @@ export const getAffiliatePublicIdentifier = (affiliate = {}, affiliates = []) =>
 export const getAffiliateFightShareUrl = (affiliate = {}, fightId = '') => {
   const id = String(affiliate?._id || affiliate?.id || '');
   const name = getAffiliateNameSlug(affiliate) || 'league';
-  // The id travels as ?ref=, not ?affiliateId=: the page route is
-  // /league/[affiliateId], and on Vercel that path segment overwrites a query
-  // parameter of the same name, so ?affiliateId= never reached the page.
+  // TEMPORARY (approved by the owner on 2026-10-24, Issue #182): named league
+  // links (/league/<name>?…) are rejected on production before the page runs,
+  // so fight links, emails and poster QRs use the verified ID-style league link
+  // until the named route is repaired. Attribution is unchanged: the affiliate
+  // and fight ids are in the link. Restore the named form here once fixed.
+  if (/^[a-f\d]{24}$/i.test(id)) return `https://www.fantasymmadness.com/league/${encodeURIComponent(id)}?fightId=${encodeURIComponent(fightId)}`;
   return `https://www.fantasymmadness.com/league/${encodeURIComponent(name)}?ref=${encodeURIComponent(id)}&fightId=${encodeURIComponent(fightId)}`;
 };

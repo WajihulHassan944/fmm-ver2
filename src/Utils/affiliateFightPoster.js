@@ -297,14 +297,14 @@ const RED = '#e3141f';
 
 const LAYOUT = {
   feed: {
-    header: { y: 18, h: 160, w: 470 }, fighters: { top: 60, bottom: 880 },
-    names: { mainEvent: 494, a: 612, vs: 648, b: 762, size: 116, width: 900 },
-    row: { y: 792, qr: 250 }, brand: { y: 1080, w: 420 }, strip: { h: 124 },
+    header: { y: 18, h: 156, w: 460 }, fighters: { top: 56, bottom: 860 },
+    names: { mainEvent: 462, a: 570, vs: 604, b: 708, size: 106, width: 880 },
+    row: { y: 762, qr: 316 }, brand: { y: 1118, w: 340 }, strip: { h: 116 },
   },
   story: {
     header: { y: 150, h: 196, w: 520 }, fighters: { top: 210, bottom: 1220 },
-    names: { mainEvent: 800, a: 946, vs: 988, b: 1130, size: 148, width: 960 },
-    row: { y: 1168, qr: 344 }, brand: { y: 1572, w: 540 }, strip: { h: 156 },
+    names: { mainEvent: 790, a: 934, vs: 976, b: 1116, size: 146, width: 960 },
+    row: { y: 1150, qr: 362 }, brand: { y: 1582, w: 520 }, strip: { h: 156 },
   },
 };
 
@@ -343,7 +343,9 @@ const drawArena = (ctx, art, spec) => {
   if (art) {
     const r = coverRect(art, 0, 0, spec.width, spec.height);
     ctx.save();
-    if ('filter' in ctx) ctx.filter = 'blur(2px) brightness(0.62) saturate(1.15)';
+    // Soft enough that any lettering in the registry artwork never competes
+    // with the poster's own type, while keeping the arena colour and light.
+    if ('filter' in ctx) ctx.filter = 'blur(9px) brightness(0.55) saturate(1.25)';
     ctx.drawImage(art, r.x, r.y, r.w, r.h);
     ctx.restore();
   }
@@ -467,9 +469,13 @@ const drawPromoRow = (ctx, spec, layout, { qr, crown, cta }) => {
   ctx.drawImage(qr, cardX + cardPad, cardY + cardPad, qrSize, qrSize);
   ctx.imageSmoothingEnabled = true;
   if (crown) {
-    const badge = Math.round(qrSize * 0.15);
-    const bx = Math.round(cx - badge / 2); const by = Math.round(cardY + card / 2 - badge / 2);
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(bx - 4, by - 4, badge + 8, badge + 8);
+    // The FM crown rides on the top edge of the red frame, outside the code
+    // and its quiet zone, so it never costs scan reliability.
+    const badge = Math.round(card * 0.17);
+    const bx = Math.round(cx - badge / 2); const by = Math.round(cardY - badge * 0.62);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 12;
+    ctx.fillStyle = '#000000'; ctx.fillRect(bx - 3, by - 3, badge + 6, badge + 6); ctx.restore();
+    ctx.strokeStyle = RED; ctx.lineWidth = 3; ctx.strokeRect(bx - 3, by - 3, badge + 6, badge + 6);
     ctx.drawImage(crown, bx, by, badge, badge);
   }
   // Right: JOIN <NAME>'S / LEAGUE with an arrow to the QR.
@@ -510,7 +516,7 @@ const drawBrandAndStrip = (ctx, spec, layout, { brand, strip }) => {
  */
 export async function buildAffiliateFightPoster({
   format = 'feed', url, affiliate, artUrl, fighterAImage, fighterBImage,
-  fighterA, fighterB, event, date, venue, loadImage = defaultLoadImage,
+  fighterA, fighterB, event, date, venue, loadImage = defaultLoadImage, qrCrown = true,
 }) {
   const spec = POSTER_FORMATS[format];
   const layout = LAYOUT[format];
@@ -547,7 +553,7 @@ export async function buildAffiliateFightPoster({
   drawHeader(ctx, spec, layout, { event, date, venue });
   drawNames(ctx, spec, layout, { fighterA, fighterB });
   const cta = posterCallToAction(affiliate);
-  drawPromoRow(ctx, spec, layout, { qr, crown, cta });
+  drawPromoRow(ctx, spec, layout, { qr, crown: qrCrown ? crown : null, cta });
   drawBrandAndStrip(ctx, spec, layout, { brand, strip });
 
   const blob = await canvasToBlob(canvas);
