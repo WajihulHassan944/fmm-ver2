@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
-import { formatFightDate, getFallbackFighterImage, getFightId, getFighterImage, getFighterName } from '@/Utils/fightExperience';
+import { getFightId, getFighterName } from '@/Utils/fightExperience';
 import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import {
   buildAffiliateFightPoster, downloadPosterBlob, getAffiliateFirstName, posterFileName, POSTER_FORMATS,
@@ -17,12 +17,6 @@ const affiliateLabel = (affiliate) => {
   const name = [affiliate.firstName, affiliate.lastName].map((part) => String(part || '').trim()).filter(Boolean).join(' ');
   const handle = String(affiliate.playerName || '').trim();
   return name && handle && handle.toLowerCase() !== name.toLowerCase() ? `${name} (${handle})` : name || handle || 'Affiliate';
-};
-
-// The fighter's own registry photo only — never the generic stand-in image.
-const registryFighterImage = (fight, side) => {
-  const url = getFighterImage(fight, side);
-  return url && url !== getFallbackFighterImage(side) ? url : '';
 };
 
 const readAffiliateRows = (payload) => {
@@ -65,13 +59,9 @@ export default function AffiliatePosterStudio({ fight, artwork, fightPicker = nu
   const fightId = fight ? String(getFightId(fight)) : '';
   const link = affiliate && fightId ? getAffiliateFightShareUrl(affiliate, fightId) : '';
   const firstName = affiliate ? getAffiliateFirstName(affiliate) : '';
-  // Everything comes from the Fight Registry record: artwork, both fighter
-  // photos, event, date and venue (only when the record has one).
-  const inputs = link ? JSON.stringify({
-    link, artwork: artwork || '', firstName, fightId,
-    a: registryFighterImage(fight, 'A'), b: registryFighterImage(fight, 'B'),
-    venue: String(fight.venue || '').trim(),
-  }) : '';
+  // The fight's own poster from the Fight Registry, used exactly as uploaded;
+  // only the FANTASY MMADNESS overlay and this affiliate's QR are added.
+  const inputs = link ? JSON.stringify({ link, artwork: artwork || '', firstName, fightId }) : '';
 
   useEffect(() => {
     if (!inputs) return;
@@ -82,14 +72,9 @@ export default function AffiliatePosterStudio({ fight, artwork, fightPicker = nu
     setPosterError('');
     Promise.all(Object.keys(POSTER_FORMATS).map((key) => buildAffiliateFightPoster({
       format: key, url: settings.link, affiliate, artUrl: settings.artwork,
-      fighterAImage: settings.a, fighterBImage: settings.b,
-      fighterA: getFighterName(fight, 'A'), fighterB: getFighterName(fight, 'B'),
-      event: fight.matchName || '', venue: settings.venue,
-      // Date only: a clock time would show in the viewer's own time zone with no label.
-      date: formatFightDate(fight, { dateOnly: true }),
     }).then((result) => { const objectUrl = URL.createObjectURL(result.blob); urls.push(objectUrl); return [key, { ...result, objectUrl }]; })))
       .then((entries) => { if (live) setPosters(Object.fromEntries(entries)); })
-      .catch((err) => { if (live) setPosterError(err.message || 'Could not make this poster. Check the fight artwork in the Fight Registry.'); });
+      .catch((err) => { if (live) setPosterError(err.message || 'Could not make this poster. Check the fight poster in the Fight Registry.'); });
     return () => { live = false; urls.forEach((url) => URL.revokeObjectURL(url)); };
   }, [inputs]);
 
