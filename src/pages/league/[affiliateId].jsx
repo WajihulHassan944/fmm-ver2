@@ -77,14 +77,18 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
 // Next.js merges the dynamic segment into `query`, so for a named link like
 // /league/kelly-davis?affiliateId=<id> `query.affiliateId` is "kelly-davis",
 // not the id. Read the real ?affiliateId= from the request URL instead.
-const searchParamFrom = (resolvedUrl, name) => {
-  try { return new URL(String(resolvedUrl || ''), 'https://www.fantasymmadness.com').searchParams.get(name) || ''; }
+const OBJECT_ID = /^[a-f\d]{24}$/i;
+const searchParamFrom = (url, name) => {
+  try { return new URL(String(url || ''), 'https://www.fantasymmadness.com').searchParams.get(name) || ''; }
   catch { return ''; }
 };
+// First candidate that is a real id: the raw request URL (never merged with
+// the path segment), then resolvedUrl, then the path segment itself.
+const firstObjectId = (...values) => values.map((value) => String(value || '')).find((value) => OBJECT_ID.test(value)) || '';
 
-export async function getServerSideProps({ params, query, res, resolvedUrl }) {
-  const affiliateId = String(searchParamFrom(resolvedUrl, 'affiliateId') || params?.affiliateId || '');
-  const fightId = String(searchParamFrom(resolvedUrl, 'fightId') || query?.fightId || '');
+export async function getServerSideProps({ params, query, req, res, resolvedUrl }) {
+  const affiliateId = firstObjectId(searchParamFrom(req?.url, 'affiliateId'), searchParamFrom(resolvedUrl, 'affiliateId'), params?.affiliateId, query?.affiliateId);
+  const fightId = firstObjectId(searchParamFrom(req?.url, 'fightId'), searchParamFrom(resolvedUrl, 'fightId'), query?.fightId);
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
   const pathId = String(params?.affiliateId || '');
   if (/^[a-f\d]{24}$/i.test(pathId) && pathId.toLowerCase() !== affiliateId.toLowerCase()) return { notFound: true };

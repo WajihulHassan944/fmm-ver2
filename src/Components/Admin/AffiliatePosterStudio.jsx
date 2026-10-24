@@ -38,7 +38,7 @@ export default function AffiliatePosterStudio({ fight, artwork }) {
 
   useEffect(() => {
     let live = true;
-    fetch(buildPublicApiUrl('/api/public/affiliates'))
+    fetch(buildPublicApiUrl('/api/public/affiliates', { limit: 200 }))
       .then(async (response) => {
         const text = await response.text();
         if (!response.ok) throw new Error(`Could not load affiliates (HTTP ${response.status}).`);
