@@ -9,7 +9,24 @@ import { SITE_URL } from '@/Utils/seoConfig';
 import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import styles from './league.module.css';
 
-export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
+// A league link that can't be matched shows a plain explanation (with a short
+// reason code for support) instead of a bare 404 page.
+function InvalidLeagueLink({ reason }) {
+  return <main className={styles.page || ''} style={{ maxWidth: 640, margin: '60px auto', padding: 20, color: '#fff' }}>
+    <Head><title>League link not found | FANTASY MMADNESS</title><meta name="robots" content="noindex" /></Head>
+    <h1>This league link isn&apos;t valid</h1>
+    <p>The link may be incomplete or out of date. Ask the person who shared it for a new link, or browse open fights.</p>
+    <p><Link href="/fights">See open fights →</Link></p>
+    <small data-league-link-reason={reason}>Reference: {reason}</small>
+  </main>;
+}
+
+export default function LeaguePage(props) {
+  if (props.invalid) return <InvalidLeagueLink reason={props.invalid} />;
+  return <AffiliateFightLeague {...props} />;
+}
+
+function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const router = useRouter();
   const [joining, setJoining] = useState(false);
   const affiliateId = String(affiliate._id);
@@ -78,6 +95,10 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
 // /league/kelly-davis?affiliateId=<id> `query.affiliateId` is "kelly-davis",
 // not the id. Read the real ?affiliateId= from the request URL instead.
 const OBJECT_ID = /^[a-f\d]{24}$/i;
+const invalidLink = (res, reason) => {
+  if (res) res.setHeader('Cache-Control', 'no-store');
+  return { props: { invalid: reason } };
+};
 const searchParamFrom = (url, name) => {
   try { return new URL(String(url || ''), 'https://www.fantasymmadness.com').searchParams.get(name) || ''; }
   catch { return ''; }
@@ -91,29 +112,29 @@ export async function getServerSideProps({ params, query, req, res, resolvedUrl 
   // ID-path links (/league/<id>?fightId=) use the path segment.
   const affiliateId = firstObjectId(query?.ref, searchParamFrom(req?.url, 'ref'), searchParamFrom(req?.url, 'affiliateId'), searchParamFrom(resolvedUrl, 'affiliateId'), params?.affiliateId, query?.affiliateId);
   const fightId = firstObjectId(searchParamFrom(req?.url, 'fightId'), searchParamFrom(resolvedUrl, 'fightId'), query?.fightId);
-  if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
+  if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return invalidLink(res, 'bad-id');
   const pathId = String(params?.affiliateId || '');
-  if (/^[a-f\d]{24}$/i.test(pathId) && pathId.toLowerCase() !== affiliateId.toLowerCase()) return { notFound: true };
+  if (/^[a-f\d]{24}$/i.test(pathId) && pathId.toLowerCase() !== affiliateId.toLowerCase()) return invalidLink(res, 'id-mismatch');
   try {
     const [affiliateResponse, fightResponse] = await Promise.all([
       fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${encodeURIComponent(affiliateId)}`),
       fetch(`${PUBLIC_API_BASE_URL}/api/public/fights/${fightId}`),
     ]);
-    if (!affiliateResponse.ok || !fightResponse.ok) return { notFound: true };
+    if (!affiliateResponse.ok || !fightResponse.ok) return invalidLink(res, 'lookup-failed');
     const [affiliate, payload] = await Promise.all([affiliateResponse.json(), fightResponse.json()]);
     // The path segment is a label, the id is the identity. If the path is a name
     // slug it must belong to this same affiliate, otherwise refuse to render.
     const pathKey = String(params?.affiliateId || '');
     if (pathKey && !/^[a-f\d]{24}$/i.test(pathKey)) {
       const own = getAffiliateNameSlug(affiliate);
-      if (pathKey.toLowerCase() !== own && pathKey.toLowerCase() !== `${own}-${affiliateId.slice(-6)}`) return { notFound: true };
+      if (pathKey.toLowerCase() !== own && pathKey.toLowerCase() !== `${own}-${affiliateId.slice(-6)}`) return invalidLink(res, 'name-mismatch');
     }
     const fight = payload.fight || payload.data || payload;
-    if (!affiliate || !fight?._id) return { notFound: true };
+    if (!affiliate || !fight?._id) return invalidLink(res, 'missing-record');
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     return { props: { affiliate, fight: { gameMode: fight.gameMode || '', matchFighterA: fight.matchFighterA || '', matchFighterB: fight.matchFighterB || '', pot: fight.pot || 0 }, fightId } };
   } catch (error) {
     console.error('Affiliate league landing failed:', error);
-    return { notFound: true };
+    return invalidLink(res, 'error');
   }
 }
