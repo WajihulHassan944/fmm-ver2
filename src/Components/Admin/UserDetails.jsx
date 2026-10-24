@@ -4,14 +4,14 @@ import { FaCheck, FaEnvelope, FaExternalLinkAlt, FaEye, FaMoneyCheckAlt, FaPhone
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { adminHeaders } from '@/Utils/authFetch';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
-import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
+import { getAffiliatePublicIdentifier, getAffiliatePublicPageUrl } from '@/Utils/affiliatePublicLink';
 
 const FALLBACK_AVATAR = AFFILIATE_LOGO;
 
 const UserDetails = ({ user, affiliates = [] }) => {
   const affiliateId = String(user._id || user.id || '');
   const publicIdentifier = getAffiliatePublicIdentifier(user, affiliates);
-  const affiliateUrl = publicIdentifier ? `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}` : '';
+  const affiliateUrl = publicIdentifier ? getAffiliatePublicPageUrl({ ...user, _id: affiliateId }) : '';
   const [copyStatus, setCopyStatus] = useState('');
   const copyAffiliateValue = async (value, label) => {
     try { await navigator.clipboard.writeText(value); setCopyStatus(label + ' copied.'); }

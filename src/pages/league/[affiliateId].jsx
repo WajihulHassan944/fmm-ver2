@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -7,6 +7,7 @@ import { getUserToken, userHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
 import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
+import { rememberAffiliateRef } from '@/Utils/affiliateAttribution';
 import styles from './league.module.css';
 
 // A league link that can't be matched shows a plain explanation (with a short
@@ -30,6 +31,7 @@ function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const router = useRouter();
   const [joining, setJoining] = useState(false);
   const affiliateId = String(affiliate._id);
+  useEffect(() => { rememberAffiliateRef(affiliateId); }, [affiliateId]);
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
   const fightUrl = `${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&affiliateId=${encodeURIComponent(affiliateId)}&fromLeague=1`;
@@ -127,7 +129,14 @@ export async function getServerSideProps({ params, query, req, res, resolvedUrl 
     const pathKey = String(params?.affiliateId || '');
     if (pathKey && !/^[a-f\d]{24}$/i.test(pathKey)) {
       const own = getAffiliateNameSlug(affiliate);
-      if (pathKey.toLowerCase() !== own && pathKey.toLowerCase() !== `${own}-${affiliateId.slice(-6)}`) return invalidLink(res, 'name-mismatch');
+      if (pathKey.toLowerCase() !== own && pathKey.toLowerCase() !== `${own}-${affiliateId.slice(-6)}`) {
+        // Old link whose name part no longer matches (e.g. renamed account). The id is the
+        // identity, so open this same affiliate's current link instead of an error page.
+        if (own && own !== pathKey.toLowerCase()) {
+          return { redirect: { destination: `/league/${encodeURIComponent(own)}?fightId=${encodeURIComponent(fightId)}&ref=${encodeURIComponent(affiliateId)}`, permanent: false } };
+        }
+        return invalidLink(res, 'name-mismatch');
+      }
     }
     const fight = payload.fight || payload.data || payload;
     if (!affiliate || !fight?._id) return invalidLink(res, 'missing-record');

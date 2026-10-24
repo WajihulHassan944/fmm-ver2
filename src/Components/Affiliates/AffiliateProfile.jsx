@@ -1,4 +1,4 @@
-import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
+import { getAffiliatePublicPageUrl } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useState } from 'react';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import Head from 'next/head';
@@ -74,7 +74,8 @@ const AffiliateProfile = () => {
   const affiliateId = affiliate?._id || affiliate?.id || '';
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || playerName || 'Affiliate creator';
   const memberCount = safeArray(affiliate?.usersJoined).length;
-  const referralUrl = `https://www.fantasymmadness.com/my-fantasy-team?league=${encodeURIComponent(getAffiliateNameSlug(affiliate) || 'league')}&referenceId=${encodeURIComponent(affiliateId)}`;
+  // League invite: the affiliate's public league page (name + unique account id).
+  const referralUrl = getAffiliatePublicPageUrl({ ...affiliate, _id: affiliateId });
 
   const handleSubmit = async (event) => {
     event.preventDefault();

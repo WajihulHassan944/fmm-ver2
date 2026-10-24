@@ -40,6 +40,30 @@ const nextConfig = {
     ],
   },
 
+  // Compatibility for links/QR codes that were already handed out.
+  async redirects() {
+    return [
+      {
+        // Named league links from Oct 18-24 used ?affiliateId=<id>. On Vercel the
+        // path name hides that value, so carry the same id as ?ref= (which the league
+        // page reads). Same affiliate, same fight; other query values pass through.
+        source: '/league/:slug',
+        has: [{ type: 'query', key: 'affiliateId', value: '(?<aid>[a-fA-F0-9]{24})' }],
+        missing: [{ type: 'query', key: 'ref' }],
+        destination: '/league/:slug?ref=:aid',
+        permanent: false,
+      },
+      {
+        // Old league-invite QR codes pointed at /my-fantasy-team?referenceId=<id>.
+        // Send them to that affiliate's public league page (by unique account id).
+        source: '/my-fantasy-team',
+        has: [{ type: 'query', key: 'referenceId', value: '(?<rid>[a-fA-F0-9]{24})' }],
+        destination: '/affiliate/:rid?affiliateId=:rid',
+        permanent: false,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

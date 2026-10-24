@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FaArrowLeft, FaArrowRight, FaBolt, FaCalendarAlt, FaCheckCircle, FaCrown, FaFistRaised, FaLock, FaShieldAlt, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
+import { currentAffiliateRef, rememberAffiliateRef } from '@/Utils/affiliateAttribution';
 import {
   WrestlingEmptyState,
   WrestlingModeNav,
@@ -73,6 +74,8 @@ const WrestlingMatchDetail = () => {
     return () => { active = false; };
   }, [isAuthenticated, matchId, router.isReady]);
 
+  useEffect(() => { if (router.isReady) rememberAffiliateRef(typeof router.query.affiliateId === 'string' ? router.query.affiliateId : router.query.ref); }, [router.isReady, router.query.affiliateId, router.query.ref]);
+
   const joinContest = async () => {
     if (!isAuthenticated) {
       router.push(`/auth?mode=login&role=player&next=${encodeURIComponent(router.asPath)}`);
@@ -86,7 +89,7 @@ const WrestlingMatchDetail = () => {
         method: 'POST',
         headers: { 'Idempotency-Key': `wrestling-ui:${match._id}:${user?._id || 'player'}` },
         body: {
-          affiliateId: typeof router.query.affiliateId === 'string' ? router.query.affiliateId : typeof router.query.ref === 'string' && /^[a-f\d]{24}$/i.test(router.query.ref) ? router.query.ref : undefined,
+          affiliateId: typeof router.query.affiliateId === 'string' ? router.query.affiliateId : currentAffiliateRef(router.query.ref) || undefined,
           referralCode: typeof router.query.referralCode === 'string'
             ? router.query.referralCode
             : typeof router.query.ref === 'string'

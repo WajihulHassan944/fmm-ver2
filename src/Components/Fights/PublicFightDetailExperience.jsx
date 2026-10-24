@@ -26,6 +26,7 @@ import { fetchPublicPredictionFights, normalizePublicFightRow, resolvePublicMedi
 import { SITE_URL } from '@/Utils/seoConfig';
 import { FMCoin, FMContestValue } from '@/Components/Common/FMCoin';
 import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
+import { rememberAffiliateRef } from '@/Utils/affiliateAttribution';
 
 const sameId = (left, right) => String(left || '') === String(right || '');
 
@@ -212,6 +213,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   useEffect(() => {
     if (!matchId) return;
     trackRevenueEvent(REVENUE_EVENTS.FIGHT_VIEW, { fightId: String(matchId), affiliateRef: String(router.query.ref || '') });
+    rememberAffiliateRef(router.query.ref);
   }, [matchId, router.query.ref]);
 
 

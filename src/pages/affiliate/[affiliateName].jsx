@@ -6,10 +6,40 @@ import PromoTwo from '@/Components/Affiliates/PromoTwo';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
+import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
+import { rememberAffiliateRef } from '@/Utils/affiliateAttribution';
 
 const API_BASE = PUBLIC_API_BASE_URL;
 
-const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
+// Shown only when an old name-only link matches more than one affiliate (for example two
+// people with the same name). We never guess: the visitor picks the right person, and each
+// choice opens that account's own id-based page.
+const AffiliateChooser = ({ choices }) => (
+  <section className="public-affiliate-campaign-page">
+    <div className="theme-container">
+      <header className="public-affiliate-campaign-header">
+        <span><p className="xp-eyebrow"><FaUsers /> More than one creator uses this name</p><h2>Which creator are you looking for?</h2></span>
+      </header>
+      <div className="public-affiliate-campaign-grid">
+        {choices.map((choice) => {
+          const name = [choice.firstName, choice.lastName].filter(Boolean).join(' ') || choice.playerName || 'Affiliate';
+          const href = `/affiliate/${encodeURIComponent(getAffiliateNameSlug(choice) || choice._id)}?affiliateId=${encodeURIComponent(choice._id)}`;
+          return (
+            <a key={choice._id} href={href} className="public-affiliate-campaign-card" style={{ display: 'block', textDecoration: 'none' }}>
+              <div className="public-affiliate-campaign-owner">
+                <img src={affiliateProfileImage(choice.profileUrl)} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = AFFILIATE_LOGO; }} alt={name} />
+                <span><h3>{name}</h3><small>{[choice.playerName && choice.playerName !== name ? choice.playerName : '', choice.leagueName || ''].filter(Boolean).join(' · ') || 'Creator league'}</small></span>
+              </div>
+              <div className="public-affiliate-campaign-copy"><button type="button">Open this creator <FaArrowRight /></button></div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+);
+
+const AffiliateAllPromos = ({ affiliate, promoMatches, choices = [] }) => {
   const router = useRouter();
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null });
 
@@ -28,6 +58,8 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   useEffect(() => {
     const id = String(affiliate?._id || '');
     if (!id) return;
+    // Remember this affiliate so "Explore all fights" / "Join free" keep the referral.
+    rememberAffiliateRef(id);
     try {
       const key = `fmm-affiliate-view-${id}`;
       if (window.sessionStorage.getItem(key)) return;
@@ -37,6 +69,8 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
     }).catch(() => {});
   }, [affiliate?._id]);
+
+  if (!affiliate && choices.length > 1) return <AffiliateChooser choices={choices} />;
 
   if (!affiliate) {
     return <div className="public-promo-loading is-error">This affiliate profile is not currently available.</div>;
@@ -102,9 +136,12 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
 
 export async function getServerSideProps(context) {
   const { affiliateName } = context.params;
-  const requestedAffiliateId = String(context.query.affiliateId || '').trim();
+  const queryId = (value) => String(Array.isArray(value) ? value[0] : value || '').trim();
+  // Older links may carry the account id as ?affiliateId= or ?ref=.
+  const requestedAffiliateId = queryId(context.query.affiliateId) || (/^[a-f\d]{24}$/i.test(queryId(context.query.ref)) ? queryId(context.query.ref) : '');
   let affiliate = null;
   let promoMatches = [];
+  let choices = [];
 
   try {
     // ONE authoritative lookup (backend /api/public/affiliates/resolve):
@@ -121,7 +158,27 @@ export async function getServerSideProps(context) {
       const resolved = await resolveRes.json();
       if (resolved?._id) affiliate = resolved;
     }
-    if (!affiliate) context.res.statusCode = 404;
+    // Old/renamed links: the unique account id is authoritative. If the name part no longer
+    // matches (renamed account, old link format), send the visitor to that same account's
+    // current page. The id never changes, so this can never switch to a different person.
+    if (!affiliate && /^[a-f\d]{24}$/i.test(requestedAffiliateId)) {
+      const byIdRes = await fetch(`${API_BASE}/api/public/affiliates/resolve?id=${encodeURIComponent(requestedAffiliateId)}`);
+      const byId = byIdRes.ok ? await byIdRes.json() : null;
+      if (byId?._id && String(byId._id) === requestedAffiliateId) {
+        const slug = byId.slug || getAffiliateNameSlug(byId) || requestedAffiliateId;
+        // Already on that address (e.g. an account with no name): show it, never loop.
+        if (slug === String(affiliateName || '')) affiliate = byId;
+        else return { redirect: { destination: `/affiliate/${encodeURIComponent(slug)}?affiliateId=${encodeURIComponent(requestedAffiliateId)}`, permanent: false } };
+      }
+    }
+    // Name-only link that matches more than one account: list them so the visitor can choose.
+    if (!affiliate && !requestedAffiliateId && resolveRes.status === 409) {
+      const listRes = await fetch(`${API_BASE}/api/public/affiliates?limit=200`);
+      const list = listRes.ok ? await listRes.json() : [];
+      const wanted = String(affiliateName || '').toLowerCase();
+      choices = safeArray(list).filter((row) => row?._id && getAffiliateNameSlug(row) === wanted);
+    }
+    if (!affiliate && choices.length < 2) context.res.statusCode = 404;
     const shadowRows = promoRes.ok ? await promoRes.json() : [];
     const publicFightPayload = publicFightsRes.ok ? await publicFightsRes.json() : [];
     const publicFightRows = Array.isArray(publicFightPayload)
@@ -135,7 +192,7 @@ export async function getServerSideProps(context) {
     console.error('Error fetching data:', error);
   }
 
-  return { props: { affiliate, promoMatches } };
+  return { props: { affiliate, promoMatches, choices } };
 }
 
 export default AffiliateAllPromos;

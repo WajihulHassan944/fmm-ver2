@@ -25,3 +25,14 @@ export const getAffiliateFightShareUrl = (affiliate = {}, fightId = '') => {
   if (/^[a-f\d]{24}$/i.test(id)) return `https://www.fantasymmadness.com/league/${encodeURIComponent(id)}?fightId=${encodeURIComponent(fightId)}`;
   return `https://www.fantasymmadness.com/league/${encodeURIComponent(name)}?ref=${encodeURIComponent(id)}&fightId=${encodeURIComponent(fightId)}`;
 };
+
+/**
+ * The affiliate's public league page: readable name plus the account id, so
+ * two affiliates who share a name always get their own, correct page.
+ */
+export const getAffiliatePublicPageUrl = (affiliate = {}) => {
+  const id = String(affiliate?._id || affiliate?.id || '');
+  const name = getAffiliateNameSlug(affiliate) || id;
+  if (!name) return '';
+  return `https://www.fantasymmadness.com/affiliate/${encodeURIComponent(name)}${/^[a-f\d]{24}$/i.test(id) ? `?affiliateId=${encodeURIComponent(id)}` : ''}`;
+};

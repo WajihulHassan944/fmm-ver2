@@ -28,6 +28,7 @@ import Membership from '@/Components/CreateAccount/Membership';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
+import { getRememberedAffiliateRef } from '@/Utils/affiliateAttribution';
 
 
 const API_BASE_URL = PUBLIC_API_BASE_URL;
@@ -293,7 +294,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     submitLockRef.current = true;
     setIsSubmitting(true);
     try {
-      const referrerId = queryValue(router.query.referrer);
+      const referrerId = queryValue(router.query.referrer) || getRememberedAffiliateRef();
       const registration = await apiRequest('/register', {
         method: 'POST',
         token: null,
@@ -388,7 +389,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     if (!credential || role === 'sponsor') return;
     setIsSubmitting(true);
     try {
-      const referrerId = queryValue(router.query.referrer);
+      const referrerId = queryValue(router.query.referrer) || (role === 'player' ? getRememberedAffiliateRef() : '');
       const endpoint = role === 'affiliate' ? '/affiliate-google-login' : '/google-login';
       const data = await apiRequest(endpoint, {
         method: 'POST',

@@ -8,6 +8,7 @@ import { buildPublicApiUrl, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { SCORE_POINTS } from '@/Utils/scoringRules';
 import { FMCoin, FMCoinAmount } from '@/Components/Common/FMCoin';
 import { REVENUE_EVENTS, trackRevenueEvent } from '@/Utils/revenueAnalytics';
+import { currentAffiliateRef } from '@/Utils/affiliateAttribution';
 
 const PredictionFighterPhoto = ({ match, side, ...props }) => {
   const isA = side === 'A';
@@ -364,7 +365,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           role: 'player',
           next: returnTo,
           fight: matchId,
-          ...(router.query.ref ? { referrer: String(router.query.ref) } : {}),
+          ...(currentAffiliateRef(router.query.ref) ? { referrer: currentAffiliateRef(router.query.ref) } : {}),
         },
       });
       return;
@@ -400,7 +401,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         body: JSON.stringify({
           predictions: rounds,
           category: match.matchCategory,
-          ...(typeof router.query.ref === 'string' ? { referralAffiliateId: router.query.ref } : {}),
+          ...(currentAffiliateRef(router.query.ref) ? { referralAffiliateId: currentAffiliateRef(router.query.ref) } : {}),
         }),
       });
 
@@ -534,7 +535,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           </div>
           <div className="player-paid-entry-verify">
             <header><b>{eligibility?.eligible ? '✓' : '1'}</b><span><strong>{eligibility?.eligible ? 'ELIGIBILITY CONFIRMED' : 'VERIFY ELIGIBILITY'}</strong><small>{eligibility?.eligible ? 'You are cleared for this paid contest.' : 'Confirm your state and age before entering.'}</small></span></header>
-            {!eligibility ? <p>Checking your paid-entry details…</p> : null}
+            {!eligibility ? <p>{user?._id || user?.id ? 'Checking your paid-entry details…' : 'Sign up or sign in to confirm eligibility. Press Submit Predictions below — your picks are saved.'}</p> : null}
             {eligibility && !eligibility.eligible && !['STATE_BLOCKED', 'UNDERAGE', 'FREE_PLAY_ONLY', 'SELF_EXCLUDED'].includes(eligibility.reason) && <form onSubmit={saveEligibility}>
               <label><span>State of residence</span><small>2-letter state code</small><input required maxLength={2} pattern="[A-Za-z]{2}" value={residenceState} onChange={(event) => setResidenceState(event.target.value.toUpperCase())} placeholder="GA" /></label>
               {!eligibility.hasDateOfBirth && <label><span>Date of birth</span><small>Required for paid-contest eligibility</small><input required type="date" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} /></label>}
@@ -698,7 +699,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         <div className="xp-prediction-submit-panel">
           {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError} {serverShortfall !== null && <button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS →</button>}</p>}
           <div><FaShieldAlt /><span>Review your picks. {entryFee > 0 ? `Submitting charges ${entryFee} FM COINS and saves your predictions.` : 'Submit your free entry and save your predictions.'}</span></div>
-          <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting || (entryFee > 0 && !eligibility?.eligible)}>
+          <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting || (entryFee > 0 && Boolean(user?._id || user?.id) && !eligibility?.eligible)}>
             <FaTrophy /> {buttonText}
           </button>
         </div>
