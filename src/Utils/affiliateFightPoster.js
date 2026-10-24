@@ -171,7 +171,7 @@ const drawExtension = (ctx, spec, art, plan) => {
   ctx.drawImage(art, Math.min(0, Math.max(spec.width - w, cx - w / 2)), Math.min(0, Math.max(spec.height - h, cy - h / 2)), w, h);
   ctx.restore();
   // General dim (also covers browsers without canvas filters).
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
   ctx.fillRect(0, 0, spec.width, spec.height);
   const top = plan.art.y; const bottom = plan.art.y + plan.art.h;
   if (top > 0) {
@@ -181,7 +181,7 @@ const drawExtension = (ctx, spec, art, plan) => {
   }
   if (bottom < spec.height) {
     const g = ctx.createLinearGradient(0, bottom - 40, 0, spec.height);
-    g.addColorStop(0, 'rgba(0,0,0,0.25)'); g.addColorStop(0.35, 'rgba(0,0,0,0.62)'); g.addColorStop(1, 'rgba(0,0,0,0.86)');
+    g.addColorStop(0, 'rgba(0,0,0,0.05)'); g.addColorStop(0.5, 'rgba(0,0,0,0.5)'); g.addColorStop(1, 'rgba(0,0,0,0.84)');
     ctx.fillStyle = g; ctx.fillRect(0, bottom - 40, spec.width, spec.height - bottom + 40);
   }
   const ry = plan.row.y + plan.row.card / 2;
@@ -199,15 +199,15 @@ const drawExtension = (ctx, spec, art, plan) => {
 // The original poster, sharp and unaltered, with only a soft fade at the
 // edges that meet the background so there is no hard line or box. Returns
 // the inner rectangle that is drawn completely untouched.
-const FEATHER = 0.07;
+const FEATHER = 0.1;
 const drawBlendedPoster = (ctx, spec, art, rect) => {
   const layer = document.createElement('canvas');
   layer.width = spec.width; layer.height = spec.height;
   const l = layer.getContext('2d');
   l.imageSmoothingQuality = 'high';
   l.drawImage(art, rect.x, rect.y, rect.w, rect.h);
-  const fy = Math.round(Math.min(80, rect.h * FEATHER));
-  const fx = Math.round(Math.min(80, rect.w * FEATHER));
+  const fy = Math.round(Math.min(110, rect.h * FEATHER));
+  const fx = Math.round(Math.min(110, rect.w * FEATHER));
   const edges = {
     top: rect.y > 0 ? fy : 0,
     bottom: rect.y + rect.h < spec.height ? fy : 0,
