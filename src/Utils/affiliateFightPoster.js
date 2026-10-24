@@ -80,8 +80,10 @@ const fitFont = (ctx, text, maxWidth, maxSize, minSize, family, weight = '400') 
 //
 // The fight's own poster from the Fight Registry is the poster. It is drawn
 // exactly once, whole, at its own proportions (scaled to fit — never cropped,
-// stretched, filtered, recolored or drawn over). The FANTASY MMADNESS
-// elements are added in branded bands next to it, never on top of it:
+// stretched, filtered, recolored or drawn over). Its outer edge fades softly
+// into a blurred, darkened extension of the same artwork that fills the rest
+// of the frame, so the result reads as one poster. The FANTASY MMADNESS
+// elements sit on that extension, never on top of the fight artwork:
 //   • the official FANTASY MMADNESS logo with the FM crown and the tagline
 //     "WE DON'T PICK WINNERS... WE PREDICT HISTORY."
 //   • PLAY / PREDICT / COMPETE
@@ -154,29 +156,79 @@ export function planOverlay(format, artWidth, artHeight) {
   };
 }
 
-// Branded background for the bands around the poster (the poster is drawn
-// afterwards, untouched, on top of this).
-const drawBands = (ctx, spec, art) => {
+// One continuous background: the fight poster's own artwork, enlarged to
+// fill the frame, softly blurred and darkened, so the poster's colours carry
+// all the way to the edges. Extra shade is laid where the FANTASY MMADNESS
+// elements sit so they read clearly, plus warm FM red/gold light.
+const drawExtension = (ctx, spec, art, plan) => {
   ctx.fillStyle = '#050507';
   ctx.fillRect(0, 0, spec.width, spec.height);
-  const below = art.y + art.h;
-  [[0, below + 260], [spec.width, below + 260], [spec.width / 2, art.y - 40]].forEach(([x, y], i) => {
-    const g = ctx.createRadialGradient(x, y, 10, x, y, i === 2 ? 520 : 420);
-    g.addColorStop(0, i === 2 ? 'rgba(255,190,70,0.16)' : 'rgba(210,20,30,0.42)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
+  const scale = Math.max(spec.width / art.width, spec.height / art.height) * 1.08;
+  const w = art.width * scale; const h = art.height * scale;
+  const cx = plan.art.x + plan.art.w / 2; const cy = plan.art.y + plan.art.h / 2;
+  ctx.save();
+  if ('filter' in ctx) ctx.filter = 'blur(26px) saturate(1.2) brightness(0.62)';
+  ctx.drawImage(art, Math.min(0, Math.max(spec.width - w, cx - w / 2)), Math.min(0, Math.max(spec.height - h, cy - h / 2)), w, h);
+  ctx.restore();
+  // General dim (also covers browsers without canvas filters).
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.fillRect(0, 0, spec.width, spec.height);
+  const top = plan.art.y; const bottom = plan.art.y + plan.art.h;
+  if (top > 0) {
+    const g = ctx.createLinearGradient(0, 0, 0, top + 40);
+    g.addColorStop(0, 'rgba(0,0,0,0.78)'); g.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, spec.width, top + 40);
+  }
+  if (bottom < spec.height) {
+    const g = ctx.createLinearGradient(0, bottom - 40, 0, spec.height);
+    g.addColorStop(0, 'rgba(0,0,0,0.25)'); g.addColorStop(0.35, 'rgba(0,0,0,0.62)'); g.addColorStop(1, 'rgba(0,0,0,0.86)');
+    ctx.fillStyle = g; ctx.fillRect(0, bottom - 40, spec.width, spec.height - bottom + 40);
+  }
+  const ry = plan.row.y + plan.row.card / 2;
+  [[0, ry], [spec.width, ry]].forEach(([x, y]) => {
+    const g = ctx.createRadialGradient(x, y, 10, x, y, 460);
+    g.addColorStop(0, 'rgba(214,18,30,0.5)'); g.addColorStop(1, 'rgba(214,18,30,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, spec.width, spec.height);
   });
+  const by = plan.brand.y + plan.brand.h / 2;
+  const glow = ctx.createRadialGradient(spec.width / 2, by, 10, spec.width / 2, by, plan.brand.w * 0.7);
+  glow.addColorStop(0, 'rgba(255,190,70,0.18)'); glow.addColorStop(1, 'rgba(255,190,70,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, spec.width, spec.height);
 };
 
-// Thin gold rules along the poster's edges, drawn just outside it.
-const frameArt = (ctx, spec, art) => {
-  const rule = (y) => {
-    const g = ctx.createLinearGradient(0, 0, spec.width, 0);
-    g.addColorStop(0, 'rgba(255,201,77,0)'); g.addColorStop(0.5, GOLD); g.addColorStop(1, 'rgba(255,201,77,0)');
-    ctx.fillStyle = g; ctx.fillRect(0, y, spec.width, 3);
+// The original poster, sharp and unaltered, with only a soft fade at the
+// edges that meet the background so there is no hard line or box. Returns
+// the inner rectangle that is drawn completely untouched.
+const FEATHER = 0.07;
+const drawBlendedPoster = (ctx, spec, art, rect) => {
+  const layer = document.createElement('canvas');
+  layer.width = spec.width; layer.height = spec.height;
+  const l = layer.getContext('2d');
+  l.imageSmoothingQuality = 'high';
+  l.drawImage(art, rect.x, rect.y, rect.w, rect.h);
+  const fy = Math.round(Math.min(80, rect.h * FEATHER));
+  const fx = Math.round(Math.min(80, rect.w * FEATHER));
+  const edges = {
+    top: rect.y > 0 ? fy : 0,
+    bottom: rect.y + rect.h < spec.height ? fy : 0,
+    left: rect.x > 0 ? fx : 0,
+    right: rect.x + rect.w < spec.width ? fx : 0,
   };
-  if (art.y >= 3) rule(art.y - 3);
-  if (art.y + art.h <= spec.height - 3) rule(art.y + art.h);
+  l.globalCompositeOperation = 'destination-out';
+  const fade = (x0, y0, x1, y1, rx, ry, rw, rh) => {
+    const g = l.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.15, 'rgba(0,0,0,0.85)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    l.fillStyle = g; l.fillRect(rx, ry, rw, rh);
+  };
+  if (edges.top) fade(0, rect.y, 0, rect.y + edges.top, rect.x, rect.y, rect.w, edges.top);
+  if (edges.bottom) fade(0, rect.y + rect.h, 0, rect.y + rect.h - edges.bottom, rect.x, rect.y + rect.h - edges.bottom, rect.w, edges.bottom);
+  if (edges.left) fade(rect.x, 0, rect.x + edges.left, 0, rect.x, rect.y, edges.left, rect.h);
+  if (edges.right) fade(rect.x + rect.w, 0, rect.x + rect.w - edges.right, 0, rect.x + rect.w - edges.right, rect.y, edges.right, rect.h);
+  ctx.drawImage(layer, 0, 0);
+  return {
+    x: rect.x + edges.left, y: rect.y + edges.top,
+    w: rect.w - edges.left - edges.right, h: rect.h - edges.top - edges.bottom,
+  };
 };
 
 // Italic poster type (skewed Anton), drawn with a dark outline for contrast.
@@ -250,8 +302,9 @@ const canvasToBlob = (canvas) => new Promise((resolve, reject) => {
 /**
  * Build one personalized poster: the fight's original Fight Registry poster,
  * unchanged, with the FANTASY MMADNESS promotional overlay added around it.
- * Returns { blob, dataUrl, width, height, format, url, cta, art } where `art`
- * is the rectangle the original poster occupies.
+ * Returns { blob, dataUrl, width, height, format, url, cta, art, untouched }:
+ * `art` is where the original poster sits and `untouched` the part of it that
+ * is drawn with no blending at all (everything except the soft outer fade).
  */
 export async function buildAffiliateFightPoster({
   format = 'feed', url, affiliate, artUrl, loadImage = defaultLoadImage, qrCrown = true,
@@ -277,17 +330,15 @@ export async function buildAffiliateFightPoster({
   canvas.height = spec.height;
   const ctx = canvas.getContext('2d');
   ctx.textBaseline = 'alphabetic';
-  drawBands(ctx, spec, plan.art);
+  drawExtension(ctx, spec, art, plan);
   // The original poster: whole, proportional, nothing drawn over it.
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(art, plan.art.x, plan.art.y, plan.art.w, plan.art.h);
-  frameArt(ctx, spec, plan.art);
+  const untouched = drawBlendedPoster(ctx, spec, art, plan.art);
   if (brand) ctx.drawImage(brand, plan.brand.x, plan.brand.y, plan.brand.w, plan.brand.h);
   const cta = posterCallToAction(affiliate);
   drawPromoRow(ctx, spec, plan.row, { qr, crown: qrCrown ? crown : null, cta });
 
   const blob = await canvasToBlob(canvas);
-  return { blob, dataUrl: canvas.toDataURL('image/png'), width: spec.width, height: spec.height, format, url, cta: cta.text, art: plan.art };
+  return { blob, dataUrl: canvas.toDataURL('image/png'), width: spec.width, height: spec.height, format, url, cta: cta.text, art: plan.art, untouched };
 }
 
 export function posterFileName({ format, firstName, fightId }) {
