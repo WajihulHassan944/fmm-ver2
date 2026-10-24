@@ -17,5 +17,8 @@ export const getAffiliatePublicIdentifier = (affiliate = {}, affiliates = []) =>
 export const getAffiliateFightShareUrl = (affiliate = {}, fightId = '') => {
   const id = String(affiliate?._id || affiliate?.id || '');
   const name = getAffiliateNameSlug(affiliate) || 'league';
-  return `https://www.fantasymmadness.com/league/${encodeURIComponent(name)}?affiliateId=${encodeURIComponent(id)}&fightId=${encodeURIComponent(fightId)}`;
+  // The id travels as ?ref=, not ?affiliateId=: the page route is
+  // /league/[affiliateId], and on Vercel that path segment overwrites a query
+  // parameter of the same name, so ?affiliateId= never reached the page.
+  return `https://www.fantasymmadness.com/league/${encodeURIComponent(name)}?ref=${encodeURIComponent(id)}&fightId=${encodeURIComponent(fightId)}`;
 };

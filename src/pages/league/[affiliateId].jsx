@@ -87,7 +87,9 @@ const searchParamFrom = (url, name) => {
 const firstObjectId = (...values) => values.map((value) => String(value || '')).find((value) => OBJECT_ID.test(value)) || '';
 
 export async function getServerSideProps({ params, query, req, res, resolvedUrl }) {
-  const affiliateId = firstObjectId(searchParamFrom(req?.url, 'affiliateId'), searchParamFrom(resolvedUrl, 'affiliateId'), params?.affiliateId, query?.affiliateId);
+  // ?ref= carries the id on named links (see getAffiliateFightShareUrl);
+  // ID-path links (/league/<id>?fightId=) use the path segment.
+  const affiliateId = firstObjectId(query?.ref, searchParamFrom(req?.url, 'ref'), searchParamFrom(req?.url, 'affiliateId'), searchParamFrom(resolvedUrl, 'affiliateId'), params?.affiliateId, query?.affiliateId);
   const fightId = firstObjectId(searchParamFrom(req?.url, 'fightId'), searchParamFrom(resolvedUrl, 'fightId'), query?.fightId);
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
   const pathId = String(params?.affiliateId || '');
