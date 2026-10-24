@@ -22,6 +22,10 @@
 .posterFrame img { display: block; width: 100%; height: auto; object-fit: contain; }
 .copyPoster { position: absolute; top: 12px; right: 12px; z-index: 1; border: 2px solid white; border-radius: 8px; padding: 10px 15px; background: #ed253e; color: white; font: inherit; font-weight: 900; cursor: pointer; box-shadow: 0 4px 18px #0009; }
 .copyPoster:hover { background: #ff3851; }
+.posterTabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.posterTabs button { border: 1px solid #5a6380; border-radius: 999px; padding: 8px 14px; background: #161a27; color: #e8ebf4; font: inherit; font-weight: 800; cursor: pointer; }
+.posterTabs .posterTabActive { background: #ffc94d; border-color: #ffc94d; color: #10131d; }
+.posterFrame img.storyPoster { width: auto; max-width: 100%; max-height: 82vh; margin: 0 auto; }
 .preview small { display: block; margin-top: 10px; color: #d5d9e5; line-height: 1.45; }
 .preview p { margin: 0 0 12px; color: #c6cbd8; }
 .preview a, .affiliate a { color: #ffbd4d; }

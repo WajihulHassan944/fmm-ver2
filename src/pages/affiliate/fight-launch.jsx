@@ -9,6 +9,8 @@ import { PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
+import { buildAffiliateFightPoster, downloadPosterBlob, getAffiliateFirstName, posterFileName, POSTER_FORMATS } from '@/Utils/affiliateFightPoster';
+import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { formatFightDate, getFightId, getFighterImage } from '@/Utils/fightExperience';
 import { SITE_URL } from '@/Utils/seoConfig';
 import styles from '@/Components/Admin/FightLaunchDesk.module.css';
@@ -23,11 +25,17 @@ export default function AffiliateFightLaunch() {
   const [socialBusy, setSocialBusy] = useState('');
   const [poster, setPoster] = useState('');
   const [posterError, setPosterError] = useState('');
-  const [squarePosterFailed, setSquarePosterFailed] = useState(false);
   const [posterBusy, setPosterBusy] = useState(false);
   const shareInProgress = useRef(false);
   const [shareBusy, setShareBusy] = useState(false);
   const [fightPhotos, setFightPhotos] = useState(null);
+  // Personalized posters (Issue #180): one exact PNG per format, reused for
+  // preview, download, copy and share so what the affiliate sees is what they send.
+  const [affiliateRecord, setAffiliateRecord] = useState(undefined);
+  const [posters, setPosters] = useState({});
+  const [posterFormat, setPosterFormat] = useState('feed');
+  const [personalPosterError, setPersonalPosterError] = useState('');
+  const [posterFileBusy, setPosterFileBusy] = useState('');
   useEffect(() => {
     if (!fightId) return;
     let active = true;
@@ -59,6 +67,49 @@ export default function AffiliateFightLaunch() {
     return () => { active = false; };
   }, [router.isReady, fightId]);
 
+  const kitAffiliateId = String(kit?.attribution?.affiliateId || '');
+  useEffect(() => {
+    if (!kitAffiliateId) return;
+    let active = true;
+    setAffiliateRecord(undefined);
+    fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${encodeURIComponent(kitAffiliateId)}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((record) => { if (active) setAffiliateRecord(record && String(record._id || record.id) === kitAffiliateId ? record : null); })
+      .catch(() => { if (active) setAffiliateRecord(null); });
+    return () => { active = false; };
+  }, [kitAffiliateId]);
+
+  // The QR, the link box and the captions all use this one tracked link: the
+  // readable league link with the affiliate and fight IDs that credit the referral.
+  const trackedLink = affiliateRecord && fightId ? getAffiliateFightShareUrl(affiliateRecord, fightId) : (kit?.fightLink || '');
+  const nameParts = String(kit?.creative?.promotedBy || '').trim().split(/\s+/);
+  const posterAffiliate = affiliateRecord || { firstName: nameParts.length > 1 ? nameParts[0] : '' };
+  const posterArt = kit?.creative?.fightPoster || fightPhotos?.poster || '';
+  const posterInputs = kit?.creative && affiliateRecord !== undefined && trackedLink ? JSON.stringify({
+    trackedLink, firstName: getAffiliateFirstName(posterAffiliate), posterArt,
+    a: posterArt ? '' : (fightPhotos?.a || kit.creative.fighterAImage || ''),
+    b: posterArt ? '' : (fightPhotos?.b || kit.creative.fighterBImage || ''),
+  }) : '';
+  useEffect(() => {
+    if (!posterInputs) return;
+    const creative = kit.creative;
+    const inputs = JSON.parse(posterInputs);
+    let active = true;
+    const made = [];
+    setPersonalPosterError('');
+    setPosters({});
+    Promise.all(Object.keys(POSTER_FORMATS).map((format) => buildAffiliateFightPoster({
+      format, url: inputs.trackedLink, affiliate: posterAffiliate, artUrl: inputs.posterArt,
+      fighterAImage: inputs.a ? resolvePublicMediaUrl(inputs.a) : '', fighterBImage: inputs.b ? resolvePublicMediaUrl(inputs.b) : '',
+      fighterA: creative.fighterA || creative.headline?.split(/\s+vs\s+/i)[0], fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
+      // Date only: a clock time would show in the affiliate's own time zone with no label.
+      event: creative.event, date: creative.matchDate ? formatFightDate(creative, { dateOnly: true }) : '',
+    }).then((result) => { const objectUrl = URL.createObjectURL(result.blob); made.push(objectUrl); return [format, { ...result, objectUrl }]; })))
+      .then((entries) => { if (active) setPosters(Object.fromEntries(entries)); })
+      .catch((err) => { if (active) setPersonalPosterError(err.message || 'Could not make your posters. Check the fight artwork in the Fight Registry.'); });
+    return () => { active = false; made.forEach((objectUrl) => URL.revokeObjectURL(objectUrl)); };
+  }, [posterInputs]);
+
   useEffect(() => {
     const creative = kit?.creative;
     if (!creative || !kit.fightLink) return;
@@ -69,11 +120,38 @@ export default function AffiliateFightLaunch() {
       fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
       fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
       basePoster: fightPhotos?.poster || creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
-      url: kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins })
+      url: trackedLink || kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins })
       .then((image) => { if (active) setPoster(image); })
       .catch((err) => { if (active) setPosterError(err.message || 'Could not make your fight poster. Check the saved fighter photos.'); });
     return () => { active = false; };
-  }, [kit, fightPhotos]);
+  }, [kit, fightPhotos, trackedLink]);
+
+  const firstName = getAffiliateFirstName(posterAffiliate);
+  const currentPoster = posters[posterFormat];
+  const posterFile = (format) => posterFileName({ format, firstName, fightId });
+  const downloadPersonalPoster = (format) => {
+    const item = posters[format];
+    if (!item) { toast.error('Your poster is still being made.'); return; }
+    downloadPosterBlob(item.blob, posterFile(format));
+    toast.success(`${POSTER_FORMATS[format].label} poster saved (${item.width} × ${item.height}).`);
+  };
+  const copyPersonalPoster = async () => {
+    if (!currentPoster) { toast.error('The poster is still loading.'); return; }
+    if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') { toast.info('Press and hold the poster to copy or save it to Photos.'); return; }
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': currentPoster.blob })]);
+      toast.success('Poster copied. Paste it into your post.');
+    } catch { toast.info('Press and hold the poster to copy or save it to Photos.'); }
+  };
+  const sharePersonalPoster = async () => {
+    if (!currentPoster || posterFileBusy) return;
+    const file = new File([currentPoster.blob], posterFile(posterFormat), { type: 'image/png' });
+    if (!navigator.canShare?.({ files: [file] })) { downloadPersonalPoster(posterFormat); return; }
+    setPosterFileBusy('share');
+    try { await navigator.share({ files: [file] }); }
+    catch (err) { if (err?.name !== 'AbortError') toast.error('Could not open the share menu. Use Download instead.'); }
+    finally { setPosterFileBusy(''); }
+  };
 
   const downloadPoster = async () => {
     if (!kit?.fightLink || posterBusy) return;
@@ -84,7 +162,7 @@ export default function AffiliateFightLaunch() {
         fighterB: creative.fighterB || creative.headline?.split(/\s+vs\s+/i)[1],
         fighterAImage: fightPhotos?.a || resolvePublicMediaUrl(creative.fighterAImage), fighterBImage: fightPhotos?.b || resolvePublicMediaUrl(creative.fighterBImage),
         basePoster: fightPhotos?.poster || creative.fightPoster, sport: creative.sport, event: creative.event, date: creative.matchDate ? formatFightDate(creative) : '',
-        url: kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins });
+        url: trackedLink || kit.fightLink, league: kit.attribution?.leagueName, prize: creative.prizeCoins, entryCoins: creative.entryCoins });
       saveFightSocialPoster(image, fightId);
       toast.success('Your fight poster is ready with your tracked QR.');
     } catch (err) { toast.error(err.message || 'Could not prepare your poster. Check the saved fighter photos.'); }
@@ -130,33 +208,17 @@ export default function AffiliateFightLaunch() {
     try { await navigator.clipboard.writeText(value); toast.success(`${name} copied.`); }
     catch { toast.error('Copy failed. Select the text and copy manually.'); }
   };
-  const copyPosterImage = async () => {
-    const image = squarePosterUrl && !squarePosterFailed ? squarePosterUrl : poster;
-    if (!image) { toast.error('The poster is still loading.'); return; }
-    if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
-      toast.info('Press and hold the poster to copy or save it to Photos.');
-      return;
-    }
-    try {
-      const png = fetch(image).then(async (response) => {
-        if (!response.ok) throw new Error('The poster could not be loaded.');
-        return response.blob();
-      });
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
-      toast.success('Full poster copied. Paste it into your post, then copy your Facebook caption below.');
-    } catch { toast.info('Press and hold the poster to copy or save it to Photos.'); }
-  };
   const sharePoster = async (caption) => {
     if (shareInProgress.current) return;
-    if (!poster) { toast.error('Wait for your QR poster to finish preparing.'); return; }
+    const shareable = posters.feed;
+    if (!shareable) { toast.error('Wait for your QR poster to finish preparing.'); return; }
     shareInProgress.current = true;
     setShareBusy(true);
     try {
-      const bytes = Uint8Array.from(atob(poster.split(',')[1]), (character) => character.charCodeAt(0));
-      const file = new File([bytes], `fantasy-mmadness-${fightId}.png`, { type: 'image/png' });
+      const file = new File([shareable.blob], posterFile('feed'), { type: 'image/png' });
       const copied = navigator.clipboard?.writeText(caption).then(() => true).catch(() => false) || Promise.resolve(false);
       if (!navigator.canShare?.({ files: [file] })) {
-        saveFightSocialPoster(poster, fightId);
+        downloadPosterBlob(shareable.blob, posterFile('feed'));
         toast.info((await copied) ? 'Poster saved to Downloads; caption copied. Upload the PNG and paste the caption.' : 'Poster saved to Downloads. Copy the caption above before posting.');
         return;
       }
@@ -170,10 +232,7 @@ export default function AffiliateFightLaunch() {
     } finally { shareInProgress.current = false; setShareBusy(false); }
   };
   const name = kit?.creative?.headline || 'the fight';
-  const link = kit?.fightLink || '';
-  const squarePosterUrl = kit?.attribution?.affiliateId && fightId
-    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&format=facebook&v=13`
-    : '';
+  const link = trackedLink || kit?.fightLink || '';
   const facebookLeagueUrl = kit?.attribution?.affiliateId && fightId
     ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-13`
     : link;
@@ -191,11 +250,19 @@ export default function AffiliateFightLaunch() {
     {kit && <>
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>
-          <div className={styles.posterFrame}>
-            {squarePosterUrl && !squarePosterFailed ? <img src={squarePosterUrl} onError={() => setSquarePosterFailed(true)} alt={`Full ${name} fight poster with your QR`} /> : poster ? <img src={poster} alt={`Personalized ${name} fight poster with your QR`} /> : posterError ? <p role="alert">{posterError}</p> : <p>Preparing your personal fight poster…</p>}
-            {(squarePosterUrl && !squarePosterFailed || poster) && <button className={styles.copyPoster} type="button" onClick={copyPosterImage}>Copy poster</button>}
+          <div className={styles.posterTabs} role="group" aria-label="Poster size">
+            {Object.values(POSTER_FORMATS).map((spec) => <button key={spec.key} type="button" aria-pressed={posterFormat === spec.key} className={posterFormat === spec.key ? styles.posterTabActive : ''} onClick={() => setPosterFormat(spec.key)}>{spec.label} · {spec.width}×{spec.height}</button>)}
           </div>
-          <small>Copy the full photo here, then use it in Facebook. On a phone, you can also press and hold the poster to copy or save it.</small>
+          <div className={styles.posterFrame}>
+            {currentPoster ? <img className={posterFormat === 'story' ? styles.storyPoster : ''} src={currentPoster.objectUrl} width={currentPoster.width} height={currentPoster.height} alt={`${currentPoster.cta} — ${name} poster with your QR code`} /> : personalPosterError ? <p role="alert">{personalPosterError}</p> : <p>Making your personal posters…</p>}
+            {currentPoster && <button className={styles.copyPoster} type="button" onClick={copyPersonalPoster}>Copy poster</button>}
+          </div>
+          <div className={styles.buttons} style={{ marginTop: 12 }}>
+            <button type="button" disabled={!posters.feed} onClick={() => downloadPersonalPoster('feed')}>Download feed poster (1080×1350)</button>
+            <button type="button" disabled={!posters.story} onClick={() => downloadPersonalPoster('story')}>Download story poster (1080×1920)</button>
+            <button type="button" disabled={!currentPoster || Boolean(posterFileBusy)} onClick={sharePersonalPoster}>{posterFileBusy ? 'Opening…' : 'Share poster'}</button>
+          </div>
+          <small>Your QR opens your personal league link for this fight: {link}. Feed posters fit Instagram and Facebook posts; Story posters fit Instagram and Facebook Stories. On a phone, you can also press and hold the poster to save it to Photos.</small>
           <h3>{name}</h3><p>Promoted by {kit.creative?.promotedBy || kit.attribution?.leagueName}</p>
         </div>
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><details><summary>Other ways to save or copy</summary><div className={styles.buttons}><button type="button" onClick={downloadPoster} disabled={posterBusy}>{posterBusy ? 'Preparing…' : 'Save poster to Downloads'}</button><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Downloads appear in your phone’s Files or Downloads app, usually not Photos. You can also long press the poster preview to save the image to Photos if your phone offers that option.</small></details></div>
