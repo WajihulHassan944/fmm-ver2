@@ -116,6 +116,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
   const [submitError, setSubmitError] = useState('');
+  const [serverShortfall, setServerShortfall] = useState(null);
   const quickPickApplied = useRef('');
   // Stable per submit attempt so a double-tap or retry cannot double-charge.
   const idempotencyKeyRef = useRef('');
@@ -144,6 +145,9 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
   }, [entryFee, matchId, router.query.ref, user?._id, user?.id]);
   const returnToFight = `/fight/${matchId}?play=1${router.query.ref ? `&ref=${encodeURIComponent(String(router.query.ref))}` : ''}${featuredWinner ? `&pick=${featuredWinner}` : ''}`;
   const checkoutUrl = `/checkout?product=fm-coins&returnTo=${encodeURIComponent(returnToFight)}`;
+  const walletBalance = Math.max(0, Number(user?.tokens) || 0);
+  const displayedShortfall = serverShortfall !== null ? serverShortfall : Math.max(0, entryFee - walletBalance);
+  const needsCoins = entryFee > 0 && displayedShortfall > 0;
 
   useEffect(() => {
     try {
@@ -373,6 +377,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
     setSubmitting(true);
     setButtonText('Saving!');
     setSubmitError('');
+    setServerShortfall(null);
 
     try {
       // Single atomic call: charges the entry fee and saves the prediction together.
@@ -404,7 +409,8 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
       if (!entryResponse.ok) {
         if (entryPayload?.code === 'INSUFFICIENT_FUNDS') {
           const shortfall = Number(entryPayload.shortfall || 0);
-          setSubmitError(`You need ${shortfall} more FM COINS. Your picks are saved here; add FM COINS and return to submit.`);
+          setServerShortfall(shortfall > 0 ? shortfall : Math.max(0, entryFee - walletBalance));
+          setSubmitError('Not enough FM COINS to enter this fight. Your predictions are saved; add coins and return to submit.');
           return;
         }
         if (entryPayload?.code === 'FIGHT_LOCKED') {
@@ -432,6 +438,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         return counts;
       }, { A: 0, B: 0 });
       trackRevenueEvent(entryFee > 0 ? REVENUE_EVENTS.PAID_ENTRY : REVENUE_EVENTS.FREE_ENTRY, { fightId: String(matchId), entryFee, affiliateRef: String(router.query.ref || '') });
+      setServerShortfall(null);
       setConfirmation({
         pickName: winnerVotes.B > winnerVotes.A ? getFighterName(match, 'B') : winnerVotes.A > winnerVotes.B ? getFighterName(match, 'A') : 'Round-by-round card submitted',
       });
@@ -511,7 +518,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
           <button className="xp-prediction-wallet" type="button" onClick={() => router.push(checkoutUrl)}>
             <FMCoin size="lg" motion="shine" />
             <span>Fight wallet</span>
-            <strong>{Number(user.tokens || 0).toLocaleString()}</strong>
+            <strong>{walletBalance.toLocaleString()}</strong>
             <small>FM COINS available</small>
           </button>
         </div>
@@ -534,7 +541,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
             </form>}
             {eligibility?.message && !eligibility?.eligible ? <p>{eligibility.message}</p> : null}
             {eligibilityError && <p className="player-paid-entry-error" role="alert">{eligibilityError}</p>}
-            {eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <div className="player-paid-entry-low"><strong>You need {Math.max(0, entryFee - Number(user?.tokens || 0)).toLocaleString()} more FM COINS.</strong><button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS →</button><small>Your prediction card will be waiting when you return.</small></div>}
+            {eligibility?.eligible && needsCoins && <div className="player-paid-entry-low" role="status"><strong>Not enough FM COINS for this fight</strong><p>Available balance: {walletBalance.toLocaleString()} FM COINS</p><p>Fight entry fee: {entryFee.toLocaleString()} FM COINS</p><p><strong>You need {displayedShortfall.toLocaleString()} more FM COINS.</strong></p><button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS →</button><small>Your predictions are saved here. After payment, you'll return to this fight to submit them.</small></div>}
           </div>
         </section>}
 
@@ -688,7 +695,7 @@ const MakePredictions = ({ matchId, matchOverride = null, onSubmitted }) => {
         </div>
 
         <div className="xp-prediction-submit-panel">
-          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError} {entryFee > 0 && eligibility?.eligible && Number(user?.tokens || 0) < entryFee && <button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS</button>}</p>}
+          {submitError && <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{submitError} {serverShortfall !== null && <button type="button" onClick={() => router.push(checkoutUrl)}>ADD FM COINS →</button>}</p>}
           <div><FaShieldAlt /><span>Review your picks. {entryFee > 0 ? `Submitting charges ${entryFee} FM COINS and saves your predictions.` : 'Submit your free entry and save your predictions.'}</span></div>
           <button type="button" className="theme-btn theme-btn-primary" onClick={handleFinish} disabled={submitting || (entryFee > 0 && !eligibility?.eligible)}>
             <FaTrophy /> {buttonText}
