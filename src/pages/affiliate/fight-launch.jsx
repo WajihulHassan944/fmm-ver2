@@ -60,7 +60,16 @@ export default function AffiliateFightLaunch() {
     loadSocial();
     let active = true;
     fetch(`${PUBLIC_API_BASE_URL}/api/affiliates/me/promotions/${encodeURIComponent(fightId)}/share`, { headers: affiliateHeaders() })
-      .then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Could not load your fight kit.'); return result; })
+      .then(async (response) => {
+        const text = await response.text();
+        let result = {};
+        try { result = text ? JSON.parse(text) : {}; } catch { result = {}; }
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('This page needs an affiliate sign-in. If you are the owner, open Administration → Growth → Fight Launch Desk to make any affiliate\'s poster.');
+        }
+        if (!response.ok) throw new Error(result.message || `Could not load your fight kit (HTTP ${response.status}).`);
+        return result;
+      })
       .then((result) => { if (active) setKit(result); })
       .catch((err) => { if (active) setError(err.message); })
       .finally(() => { if (active) setBusy(false); });
@@ -246,7 +255,7 @@ export default function AffiliateFightLaunch() {
     <div className={styles.heading}><span>YOUR FIGHT. YOUR LINK.</span><h2>Post this fight in minutes</h2><p>Facebook and X open a post with your tracked fight link and image preview. Instagram and TikTok require you to select the poster and paste your copied caption.</p></div>
     {busy && <p>Preparing your personal fight link…</p>}
     {!busy && !getAffiliateToken() && <p><Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate to see your personal kit →</Link></p>}
-    {error && <p role="alert">{error} <Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate →</Link></p>}
+    {error && <p role="alert">{error} <Link href={`/auth?mode=login&role=affiliate&next=${encodeURIComponent(router.asPath)}`}>Sign in as an affiliate →</Link> · <Link href={`/administration/growth?fightId=${encodeURIComponent(fightId)}`}>Owner Fight Launch Desk →</Link></p>}
     {kit && <>
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>

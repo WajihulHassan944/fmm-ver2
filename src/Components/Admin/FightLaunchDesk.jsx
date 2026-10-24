@@ -7,6 +7,7 @@ import { buildPublicApiUrl, normalizePublicFightRows, resolvePublicMediaUrl } fr
 import { adminHeaders } from '@/Utils/authFetch';
 import { formatFightDate, getFightId, getFighterImage, getFighterName, parseFightDate } from '@/Utils/fightExperience';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
+import AffiliatePosterStudio from '@/Components/Admin/AffiliatePosterStudio';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
 import { fighterNameHashtags } from '@/Utils/fightShareCopy';
@@ -125,6 +126,7 @@ export default function FightLaunchDesk() {
         <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
+      <AffiliatePosterStudio fight={fight} artwork={posterImage} />
       <div className={styles.affiliate}><div><strong>Send personal social posters to affiliates</strong><p>Each approved affiliate gets a ready-to-post kit with this fight design, their own tracked QR and link, and Facebook, Instagram, TikTok, and X captions. Review recipients before sending.</p></div><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
       <details className={styles.message}><summary>Preview affiliate message</summary><pre>{affiliateText}</pre></details>
     </>}
