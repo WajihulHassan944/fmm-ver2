@@ -31,41 +31,33 @@ import { rememberAffiliateRef } from '@/Utils/affiliateAttribution';
 const sameId = (left, right) => String(left || '') === String(right || '');
 
 const entryOpen = (fight) => {
-  const status = `${fight?.matchStatus || ''} ${fight?.matchShadowOpenStatus || ''}`.toLowerCase();
-  const rawDate = fight?.matchDate || fight?.date || '';
-  const rawTime = String(fight?.matchTime || fight?.time || '').trim();
-  const isTimeTba = fight?.timeTba === true || fight?.matchTimeTba === true || !rawTime || rawTime === '00:00' || rawTime.toUpperCase() === '12:00 AM';
-  const explicitLock = fight?.lockAt ? new Date(fight.lockAt).getTime() : NaN;
-  let scheduledLock = NaN;
-  if (rawDate) {
-    const parsedDate = new Date(rawDate);
-    if (!Number.isNaN(parsedDate.getTime())) {
-      if (isTimeTba) {
-        parsedDate.setHours(23, 59, 59, 999);
-      } else {
-        const twelveHour = rawTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-        const twentyFour = rawTime.match(/^(\d{1,2}):(\d{2})/);
-        if (twelveHour) {
-          let hours = Number(twelveHour[1]) % 12;
-          if (twelveHour[3].toUpperCase() === 'PM') hours += 12;
-          parsedDate.setHours(hours, Number(twelveHour[2]), 0, 0);
-        } else if (twentyFour) {
-          parsedDate.setHours(Number(twentyFour[1]), Number(twentyFour[2]), 0, 0);
-        } else {
-          parsedDate.setHours(23, 59, 59, 999);
-        }
-      }
-      scheduledLock = parsedDate.getTime();
-    }
-  }
-  const lock = Number.isFinite(explicitLock) ? explicitLock : scheduledLock;
-
-  // The actual schedule is authoritative. A future published fight must stay
-  // playable even if an older registry/shadow status still says "closed".
-  if (Number.isFinite(lock)) return lock > Date.now();
-  if (/finished|completed|cancelled/.test(status)) return false;
-  if (typeof fight?.entryOpen === 'boolean') return fight.entryOpen;
-  return !/closed|draft/.test(status);
+  if (fight?.entryClosedAt) return false;
+  const status = String(fight?.matchStatus || '').toLowerCase();
+  if (['draft', 'closed', 'finished', 'completed', 'cancelled', 'canceled', 'void'].includes(status)) return false;
+  const explicit = fight?.lockAt ? new Date(fight.lockAt).getTime() : NaN;
+  if (Number.isFinite(explicit)) return explicit > Date.now();
+  const date = String(fight?.matchDateKey || fight?.matchDate || fight?.date || '').slice(0, 10);
+  const time = String(fight?.matchTime || fight?.time || '').trim();
+  const parts = time.match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/);
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !parts) return typeof fight?.entryOpen === 'boolean' ? fight.entryOpen : false;
+  const [year, month, day] = date.split('-').map(Number);
+  const hour = Number(parts[1]), minute = Number(parts[2]), second = Number(parts[3] || 0);
+  if (hour > 23 || minute > 59 || second > 59) return false;
+  const target = Date.UTC(year, month - 1, day, hour, minute, second);
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: String(fight?.eventTimeZone || 'America/New_York'), hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    });
+    const wall = (timestamp) => {
+      const fields = Object.fromEntries(formatter.formatToParts(new Date(timestamp)).map(({ type, value }) => [type, value]));
+      return Date.UTC(Number(fields.year), Number(fields.month) - 1, Number(fields.day), Number(fields.hour), Number(fields.minute), Number(fields.second));
+    };
+    let instant = target;
+    for (let i = 0; i < 3; i += 1) instant += target - wall(instant);
+    return wall(instant) === target && instant > Date.now();
+  } catch { return false; }
 };
 
 const hasUsableDetailImage = (value) => {
