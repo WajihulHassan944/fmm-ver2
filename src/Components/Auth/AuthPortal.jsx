@@ -228,7 +228,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       if (role === 'player') {
         const result = await dispatch(loginUser(loginForm)).unwrap();
         const loggedInUser = result?.user || await dispatch(fetchUser(result.token)).unwrap();
-        if (loggedInUser?.currentPlan === 'None') {
+        if (loggedInUser?.currentPlan === 'None' && loggedInUser?.verified !== true) {
           setMembershipEmail(loggedInUser.email || loginForm.email);
         } else {
           toast.success('Welcome back to the fight room.');
@@ -427,7 +427,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       } else {
         localStorage.setItem('authToken', accessToken);
         const account = await dispatch(fetchUser(accessToken)).unwrap();
-        if (account?.currentPlan === 'None') setMembershipEmail(account.email);
+        if (account?.currentPlan === 'None' && account?.verified !== true) setMembershipEmail(account.email);
         else navigateAfterAuth('/UserDashboard');
       }
     } catch (error) {

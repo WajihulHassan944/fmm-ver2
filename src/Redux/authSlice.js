@@ -97,8 +97,9 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.user.currentPlan !== 'None') {
-          state.isAuthenticated = true; // Only set to true if the plan is not 'None'
+        // Verified players are signed in even before choosing a membership plan.
+        if (action.payload.user.currentPlan !== 'None' || action.payload.user.verified === true) {
+          state.isAuthenticated = true;
         }
         localStorage.setItem('authToken', action.payload.token); // Store token in local storage
         state.user = action.payload.user; // Set user from action payload
@@ -114,8 +115,9 @@ const authSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        if (action.payload.currentPlan !== 'None') {
-          state.isAuthenticated = true; // Only set to true if the plan is not 'None'
+        // Verified players are signed in even before choosing a membership plan.
+        if (action.payload.currentPlan !== 'None' || action.payload.verified === true) {
+          state.isAuthenticated = true;
         }
       })
       .addCase(fetchUser.rejected, (state, action) => {

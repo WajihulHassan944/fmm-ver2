@@ -190,6 +190,7 @@
   "/threads/[threadId]",
   "/trashed-fights",
   "/upcomingfights",
+  "/verified",
   "/watch-party",
   "/welcome",
   "/wrestlers/[wrestlerId]"
