@@ -56,6 +56,7 @@
   "/administration/notifications",
   "/administration/payment-health",
   "/administration/payouts",
+  "/administration/player-recovery",
   "/administration/predictions",
   "/administration/pro-wrestling",
   "/administration/pro-wrestling/[id]",
