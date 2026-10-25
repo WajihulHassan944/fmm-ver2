@@ -35,6 +35,30 @@ const PlayerRecovery = () => {
   const [busy, setBusy] = useState('');
   const [confirm, setConfirm] = useState('');
   const [sendLog, setSendLog] = useState('');
+  const [reportDate, setReportDate] = useState('2026-10-24');
+  const [report, setReport] = useState(null);
+  const [reportError, setReportError] = useState('');
+
+  const loadReport = useCallback(async (date) => {
+    setReportError('');
+    try { setReport(await get(`/registrations?date=${encodeURIComponent(date)}`)); }
+    catch (reportLoadError) { setReport(null); setReportError(reportLoadError.message); }
+  }, []);
+  useEffect(() => { loadReport('2026-10-24'); }, [loadReport]);
+
+  const downloadCsv = async () => {
+    setBusy('csv');
+    try {
+      const response = await fetch(`${API}/registrations?date=${encodeURIComponent(reportDate)}&format=csv`, { headers: adminHeaders(), cache: 'no-store' });
+      if (!response.ok) throw new Error('The CSV file could not be created.');
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url; link.download = `fmm-registrations-${reportDate}-eastern.csv`;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch (csvError) { setReportError(csvError.message); }
+    setBusy('');
+  };
 
   const load = useCallback(async () => {
     setError('');
@@ -156,6 +180,55 @@ const PlayerRecovery = () => {
               <summary>{failures.length} emails failed — see why</summary>
               <ul>{failures.map((row) => <li key={row._id}>{row.email}: {row.error || 'unknown error'}</li>)}</ul>
             </details>
+          ) : null}
+        </section>
+
+        <section style={box} id="registration-report">
+          <h2>October 24 Registration Report</h2>
+          <p>Every account created on the chosen day, in Eastern Time (New York). Reading this list never changes an account.</p>
+          <label>Day:{' '}
+            <input type="date" value={reportDate} onChange={(event) => setReportDate(event.target.value)} />
+          </label>{' '}
+          <button type="button" onClick={() => loadReport(reportDate)} disabled={Boolean(busy)}>Show this day</button>{' '}
+          <button type="button" onClick={downloadCsv} disabled={Boolean(busy) || !report}>{busy === 'csv' ? 'Preparing…' : 'Download CSV'}</button>
+          {reportError ? <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{reportError}</p> : null}
+          {report ? (
+            <>
+              <p style={{ opacity: 0.85 }}>{report.windowET}</p>
+              <div style={grid}>
+                <Stat label="Accounts created" value={report.totals.realAccounts} note={report.totals.testAccounts ? `${report.totals.testAccounts} test accounts listed separately` : 'real players'} />
+                <Stat label="Verified" value={report.totals.verified} />
+                <Stat label="Pending verification" value={report.totals.pending} />
+                <Stat label="Through an affiliate" value={report.totals.viaAffiliate} />
+                <Stat label="Signed up with Google" value={report.totals.google} />
+              </div>
+              <div style={{ overflowX: 'auto', marginTop: 12 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr>{['Email', 'Name', 'Registered (ET)', 'Status', 'Verification email', 'Affiliate', 'Test'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {report.registrations.length ? report.registrations.map((row) => (
+                      <tr key={row.id}>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>{row.email}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>{[row.firstName, row.lastName].filter(Boolean).join(' ')}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', whiteSpace: 'nowrap' }}>{row.registeredAtET}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>{row.status}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>{row.verificationEmail}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>{row.viaAffiliate === 'Yes' ? (row.affiliateName || 'Yes') : 'No'}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>{row.testAccount}</td>
+                      </tr>
+                    )) : <tr><td colSpan={7} style={{ padding: 8 }}>No accounts were created on this day.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+              <h3>Sign-up attempts that did not become accounts</h3>
+              <p>Attempts that can be identified with an email address: <strong>{report.failedAttempts.identifiableWithEmail}</strong>.{report.failedAttempts.signupPageVisitsFromFights !== null ? ` Visitors sent from a fight to the sign-up page that day: ${report.failedAttempts.signupPageVisitsFromFights} (anonymous count, no emails; many of them may have signed up or simply left).` : ''}</p>
+              {report.failedAttempts.emailListSignupsNotAccounts.length ? (
+                <p>Email-list sign-ups that day (not player accounts): {report.failedAttempts.emailListSignupsNotAccounts.map((e) => e.email).join(', ')}</p>
+              ) : null}
+              <ul style={{ opacity: 0.85 }}>{report.failedAttempts.unavailable.map((line) => <li key={line}>{line}</li>)}</ul>
+            </>
           ) : null}
         </section>
 
