@@ -36,24 +36,28 @@ const PlayerRecovery = () => {
   const [confirm, setConfirm] = useState('');
   const [sendLog, setSendLog] = useState('');
   const [reportDate, setReportDate] = useState('2026-10-24');
+  const [reportTo, setReportTo] = useState('2026-10-24');
+  const [reportScope, setReportScope] = useState('day');
+  const reportQuery = (scope, from, to) => (scope === 'all-pending' ? 'scope=all-pending' : `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to || from)}`);
   const [report, setReport] = useState(null);
   const [reportError, setReportError] = useState('');
 
-  const loadReport = useCallback(async (date) => {
+  const loadReport = useCallback(async (from, to, scope = 'day') => {
     setReportError('');
-    try { setReport(await get(`/registrations?date=${encodeURIComponent(date)}`)); }
+    setReportScope(scope);
+    try { setReport(await get(`/registrations?${reportQuery(scope, from, to)}`)); }
     catch (reportLoadError) { setReport(null); setReportError(reportLoadError.message); }
   }, []);
-  useEffect(() => { loadReport('2026-10-24'); }, [loadReport]);
+  useEffect(() => { loadReport('2026-10-24', '2026-10-24'); }, [loadReport]);
 
   const downloadCsv = async () => {
     setBusy('csv');
     try {
-      const response = await fetch(`${API}/registrations?date=${encodeURIComponent(reportDate)}&format=csv`, { headers: adminHeaders(), cache: 'no-store' });
+      const response = await fetch(`${API}/registrations?${reportQuery(reportScope, reportDate, reportTo)}&format=csv`, { headers: adminHeaders(), cache: 'no-store' });
       if (!response.ok) throw new Error('The CSV file could not be created.');
       const url = URL.createObjectURL(await response.blob());
       const link = document.createElement('a');
-      link.href = url; link.download = `fmm-registrations-${reportDate}-eastern.csv`;
+      link.href = url; link.download = `fmm-registrations-${report?.date || reportDate}-eastern.csv`;
       document.body.appendChild(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
     } catch (csvError) { setReportError(csvError.message); }
@@ -185,16 +189,20 @@ const PlayerRecovery = () => {
 
         <section style={box} id="registration-report">
           <h2>October 24 Registration Report</h2>
-          <p>Every account created on the chosen day, in Eastern Time (New York). Reading this list never changes an account.</p>
-          <label>Day:{' '}
-            <input type="date" value={reportDate} onChange={(event) => setReportDate(event.target.value)} />
+          <p>Every account created on the chosen days, in Eastern Time (New York). Reading this list never changes an account.</p>
+          <label>From:{' '}
+            <input type="date" value={reportDate} onChange={(event) => { setReportDate(event.target.value); if (reportTo < event.target.value) setReportTo(event.target.value); }} />
           </label>{' '}
-          <button type="button" onClick={() => loadReport(reportDate)} disabled={Boolean(busy)}>Show this day</button>{' '}
+          <label>To:{' '}
+            <input type="date" value={reportTo} min={reportDate} onChange={(event) => setReportTo(event.target.value)} />
+          </label>{' '}
+          <button type="button" onClick={() => loadReport(reportDate, reportTo)} disabled={Boolean(busy)}>Show these days</button>{' '}
+          <button type="button" onClick={() => loadReport(reportDate, reportTo, 'all-pending')} disabled={Boolean(busy)}>All pending players (any date)</button>{' '}
           <button type="button" onClick={downloadCsv} disabled={Boolean(busy) || !report}>{busy === 'csv' ? 'Preparing…' : 'Download CSV'}</button>
           {reportError ? <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{reportError}</p> : null}
           {report ? (
             <>
-              <p style={{ opacity: 0.85 }}>{report.windowET}</p>
+              <p style={{ opacity: 0.85 }}><strong>{report.scope}</strong> · {report.windowET}</p>
               <div style={grid}>
                 <Stat label="Accounts created" value={report.totals.realAccounts} note={report.totals.testAccounts ? `${report.totals.testAccounts} test accounts listed separately` : 'real players'} />
                 <Stat label="Verified" value={report.totals.verified} />
@@ -222,12 +230,20 @@ const PlayerRecovery = () => {
                   </tbody>
                 </table>
               </div>
+              {report.affiliateSignups?.length ? (
+                <>
+                  <h3>Creator / affiliate sign-ups in this period ({report.affiliateSignups.length})</h3>
+                  <ul>{report.affiliateSignups.map((a) => <li key={`${a.email}-${a.registeredAtET}`}>{a.email} · {a.name} · {a.registeredAtET} · {a.status}</li>)}</ul>
+                </>
+              ) : null}
+              {reportScope === 'all-pending' ? null : <>
               <h3>Sign-up attempts that did not become accounts</h3>
-              <p>Attempts that can be identified with an email address: <strong>{report.failedAttempts.identifiableWithEmail}</strong>.{report.failedAttempts.signupPageVisitsFromFights !== null ? ` Visitors sent from a fight to the sign-up page that day: ${report.failedAttempts.signupPageVisitsFromFights} (anonymous count, no emails; many of them may have signed up or simply left).` : ''}</p>
+              <p>Attempts that can be identified with an email address: <strong>{report.failedAttempts.identifiableWithEmail}</strong>.{report.failedAttempts.signupPageVisitsFromFights !== null ? ` Visitors sent from a fight to the sign-up page in this period: ${report.failedAttempts.signupPageVisitsFromFights} (anonymous count, no emails; many of them may have signed up or simply left).` : ''}</p>
               {report.failedAttempts.emailListSignupsNotAccounts.length ? (
-                <p>Email-list sign-ups that day (not player accounts): {report.failedAttempts.emailListSignupsNotAccounts.map((e) => e.email).join(', ')}</p>
+                <p>Email-list sign-ups in this period (not player accounts): {report.failedAttempts.emailListSignupsNotAccounts.map((e) => e.email).join(', ')}</p>
               ) : null}
               <ul style={{ opacity: 0.85 }}>{report.failedAttempts.unavailable.map((line) => <li key={line}>{line}</li>)}</ul>
+              </>}
             </>
           ) : null}
         </section>
