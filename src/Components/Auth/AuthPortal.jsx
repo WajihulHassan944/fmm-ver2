@@ -100,6 +100,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
   const [affiliateForm, setAffiliateForm] = useState(affiliateInitialState);
   const [sponsorForm, setSponsorForm] = useState(sponsorInitialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitLockRef = useRef(false);
@@ -545,7 +546,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <label><span>Email address</span><input type="email" name="email" value={playerForm.email} onChange={updatePlayer} required /></label>
                     <label><span>Phone</span><input name="phone" value={playerForm.phone} onChange={updatePlayer} required /></label>
                     <label><span>ZIP code</span><input name="zipCode" value={playerForm.zipCode} onChange={updatePlayer} required /></label>
-                    <label className="is-wide"><span>Password</span><input type="password" name="password" value={playerForm.password} onChange={updatePlayer} required /></label>
+                    <label className="is-wide"><span>Password</span><div className="xp-auth-input"><FaLock /><input type={showSignupPassword ? 'text' : 'password'} name="password" value={playerForm.password} onChange={updatePlayer} required /><button type="button" className="xp-password-toggle" onClick={() => setShowSignupPassword((current) => !current)} aria-label={showSignupPassword ? 'Hide password' : 'Show password'} aria-pressed={showSignupPassword}>{showSignupPassword ? <FaEye /> : <FaEyeSlash />}</button></div></label>
                   </div>
                   <div className="xp-auth-checks">
                     <label><input type="checkbox" name="isNotificationsEnabled" checked={playerForm.isNotificationsEnabled} onChange={updatePlayer} /><span>Send activity notifications by SMS</span></label>
@@ -575,7 +576,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
                     <label><span>Phone</span><input name="phone" value={affiliateForm.phone} onChange={updateAffiliate} required /></label>
                     <label><span>ZIP code</span><input name="zipCode" value={affiliateForm.zipCode} onChange={updateAffiliate} required /></label>
                     <label className="is-wide"><span>How did you hear about us?</span><input name="hearing" value={affiliateForm.hearing} onChange={updateAffiliate} required /></label>
-                    <label className="is-wide"><span>Password</span><input type="password" name="password" value={affiliateForm.password} onChange={updateAffiliate} required /></label>
+                    <label className="is-wide"><span>Password</span><div className="xp-auth-input"><FaLock /><input type={showSignupPassword ? 'text' : 'password'} name="password" value={affiliateForm.password} onChange={updateAffiliate} required /><button type="button" className="xp-password-toggle" onClick={() => setShowSignupPassword((current) => !current)} aria-label={showSignupPassword ? 'Hide password' : 'Show password'} aria-pressed={showSignupPassword}>{showSignupPassword ? <FaEye /> : <FaEyeSlash />}</button></div></label>
                   </div>
                   <div className="xp-auth-checks">
                     <label><input type="checkbox" name="isNotificationsEnabled" checked={affiliateForm.isNotificationsEnabled} onChange={updateAffiliate} /><span>Send activity notifications by SMS</span></label>
