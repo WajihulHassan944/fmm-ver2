@@ -113,8 +113,11 @@ const getRegistryStatus = (fight = {}) => {
 // back to that break-even figure). Lets the desk show risk at a glance
 // instead of only after settlement fails.
 const renderEntrantsCell = (fight) => {
-  if (fight?.sourceType === 'shadow' || fight?.entrants == null) {
-    return <span className="admin-cell-stack"><small>Shadow template</small></span>;
+  if (fight?.sourceType === 'shadow') {
+    return <span className="admin-cell-stack"><small>Shadow template — no live entrant count</small></span>;
+  }
+  if (fight?.entrants == null) {
+    return <span className="admin-cell-stack"><small>Entrant count unavailable</small><small>Check contest economics</small></span>;
   }
   const entryFee = Number(fight.matchTokens) || 0;
   const entrants = Number(fight.entrants) || 0;
