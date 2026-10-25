@@ -61,6 +61,20 @@ const apiRequest = async (path, { method = 'GET', body, headers = {}, token = nu
   return payload;
 };
 
+// Tells the back office about sign-up attempts the server never receives (robot check
+// skipped, terms not accepted, server unreachable). Only the reason and the typed email
+// are sent; never the password. Failures here are ignored so sign-up is unaffected.
+const reportSignupAttempt = (reason, email, kind = 'player', withReferral = false) => {
+  try {
+    fetch(`${API_BASE_URL}/api/registration-attempts/client`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({ reason, kind, email: String(email || '').slice(0, 254), withReferral: Boolean(withReferral) }),
+    }).catch(() => {});
+  } catch (_ignored) { /* never block sign-up */ }
+};
+
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeLErwpAAAAAD3s3QWddvNAWULeDdLGUu3_-5lK';
 
 const roles = [
@@ -281,8 +295,11 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
 
   const handlePlayerSignup = async (event) => {
     event.preventDefault();
+    const hasReferral = Boolean(queryValue(router.query.referrer) || getRememberedAffiliateRef());
+    if (!recaptchaToken) reportSignupAttempt('captcha_not_completed', playerForm.email, 'player', hasReferral);
     if (!requireRecaptcha()) return;
     if (!playerForm.isAgreed) {
+      reportSignupAttempt('terms_not_accepted', playerForm.email, 'player', hasReferral);
       toast.error('Please agree to the terms and conditions.');
       return;
     }
@@ -318,6 +335,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       if (registration?.emailFailed) toast.error('Account saved, but the verification email could not be sent. Use Resend verification email.');
       else toast.success('Account created. Check your email to verify it.');
     } catch (error) {
+      if (error instanceof TypeError) reportSignupAttempt('could_not_reach_server', playerForm.email, 'player');
       toast.error(error.message || 'Unable to create the account.');
     } finally {
       setIsSubmitting(false);
@@ -327,8 +345,10 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
 
   const handleAffiliateSignup = async (event) => {
     event.preventDefault();
+    if (!recaptchaToken) reportSignupAttempt('captcha_not_completed', affiliateForm.email, 'creator');
     if (!requireRecaptcha()) return;
     if (!affiliateForm.isAgreed) {
+      reportSignupAttempt('terms_not_accepted', affiliateForm.email, 'creator');
       toast.error('Please agree to the terms and conditions.');
       return;
     }

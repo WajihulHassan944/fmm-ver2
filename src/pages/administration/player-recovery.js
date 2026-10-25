@@ -8,8 +8,8 @@ import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 // confirmation phrase; the FM COINS bonus is a preview only.
 const API = `${PUBLIC_API_BASE_URL}/api/admin/player-recovery`;
 
-const get = async (path) => {
-  const response = await fetch(`${API}${path}`, { headers: adminHeaders(), cache: 'no-store' });
+const get = async (path, base = API) => {
+  const response = await fetch(`${base}${path}`, { headers: adminHeaders(), cache: 'no-store' });
   if (response.status === 401 || response.status === 403) throw new Error('Your administrator session has expired. Please sign in again.');
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.message || 'This information could not be loaded.');
@@ -41,6 +41,30 @@ const PlayerRecovery = () => {
   const reportQuery = (scope, from, to) => (scope === 'all-pending' ? 'scope=all-pending' : `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to || from)}`);
   const [report, setReport] = useState(null);
   const [reportError, setReportError] = useState('');
+  const todayET = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+  const [attemptFrom, setAttemptFrom] = useState(todayET());
+  const [attemptTo, setAttemptTo] = useState(todayET());
+  const [attempts, setAttempts] = useState(null);
+  const [attemptError, setAttemptError] = useState('');
+  const loadAttempts = useCallback(async (from, to) => {
+    setAttemptError('');
+    try { setAttempts(await get(`/registration-attempts?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, `${PUBLIC_API_BASE_URL}/api/admin`)); }
+    catch (attemptLoadError) { setAttempts(null); setAttemptError(attemptLoadError.message); }
+  }, []);
+  useEffect(() => { const t = todayET(); loadAttempts(t, t); }, [loadAttempts]);
+  const downloadAttemptsCsv = async () => {
+    setBusy('attempts-csv');
+    try {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/api/admin/registration-attempts?from=${encodeURIComponent(attemptFrom)}&to=${encodeURIComponent(attemptTo)}&format=csv`, { headers: adminHeaders(), cache: 'no-store' });
+      if (!response.ok) throw new Error('The CSV file could not be created.');
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url; link.download = `fmm-registration-attempts-${attemptFrom}${attemptTo !== attemptFrom ? `_to_${attemptTo}` : ''}-eastern.csv`;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch (csvError) { setAttemptError(csvError.message); }
+    setBusy('');
+  };
 
   const loadReport = useCallback(async (from, to, scope = 'day') => {
     setReportError('');
@@ -184,6 +208,51 @@ const PlayerRecovery = () => {
               <summary>{failures.length} emails failed — see why</summary>
               <ul>{failures.map((row) => <li key={row._id}>{row.email}: {row.error || 'unknown error'}</li>)}</ul>
             </details>
+          ) : null}
+        </section>
+
+        <section style={box} id="registration-attempts">
+          <h2>Registration attempts</h2>
+          <p>Every sign-up attempt from now on: who tried, when, whether it worked, and why it failed. Passwords and verification codes are never recorded. Records are kept for {attempts?.retentionDays || 180} days, then deleted automatically.{attempts?.trackingStarted ? ` Tracking started ${attempts.trackingStarted}.` : ' Tracking starts with the next sign-up attempt.'}</p>
+          <label>From:{' '}<input type="date" value={attemptFrom} onChange={(event) => { setAttemptFrom(event.target.value); if (attemptTo < event.target.value) setAttemptTo(event.target.value); }} /></label>{' '}
+          <label>To:{' '}<input type="date" value={attemptTo} min={attemptFrom} onChange={(event) => setAttemptTo(event.target.value)} /></label>{' '}
+          <button type="button" onClick={() => loadAttempts(attemptFrom, attemptTo)} disabled={Boolean(busy)}>Show attempts</button>{' '}
+          <button type="button" onClick={downloadAttemptsCsv} disabled={Boolean(busy) || !attempts}>{busy === 'attempts-csv' ? 'Preparing…' : 'Download CSV'}</button>
+          {attemptError ? <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{attemptError}</p> : null}
+          {attempts ? (
+            <>
+              <p style={{ opacity: 0.85 }}>{attempts.windowET}</p>
+              <div style={grid}>
+                <Stat label="People who tried" value={attempts.totals.peopleWhoTried} />
+                <Stat label="People who succeeded" value={attempts.totals.peopleWhoSucceeded} />
+                <Stat label="All attempts" value={attempts.totals.attempts} />
+                <Stat label="Failed" value={attempts.totals.failed} />
+                <Stat label="Blocked" value={attempts.totals.blocked} />
+                <Stat label="Created, pending verification" value={attempts.totals.pendingVerification} />
+                <Stat label="Created and verified" value={attempts.totals.verified} />
+              </div>
+              {attempts.totals.extraAttemptsCountedOnly ? <p style={{ opacity: 0.8 }}>{attempts.totals.extraAttemptsCountedOnly} extra rapid attempts were counted but not stored (abuse protection).</p> : null}
+              {attempts.reasons.length ? (
+                <>
+                  <h3>Reasons</h3>
+                  <ul>{attempts.reasons.map((row) => <li key={row.reason}>{row.reason}: <strong>{row.count}</strong></li>)}</ul>
+                </>
+              ) : <p>No attempts recorded in this period.</p>}
+              {attempts.attempts.length ? (
+                <div style={{ overflowX: 'auto', marginTop: 12 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead><tr>{['Time (ET)', 'Result', 'Reason', 'Email', 'Verification', 'Type', 'Recorded by'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {attempts.attempts.map((row, index) => (
+                        <tr key={`${row.atET}-${index}`}>
+                          {[row.atET, row.result, row.reason, row.email, row.verification, row.kind, row.source].map((cell, cellIndex) => <td key={cellIndex} style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', whiteSpace: cellIndex === 0 ? 'nowrap' : 'normal' }}>{cell}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
+            </>
           ) : null}
         </section>
 
