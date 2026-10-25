@@ -237,6 +237,8 @@ const SupportWidget = dynamic(() => import("@/Components/SupportWidget"), {
   loading: () => null,
 });
 
+const VerifiedWelcome = dynamic(() => import("@/Components/Auth/VerifiedWelcome"), { ssr: false });
+
 const RouteExperienceFrame = dynamic(
   () => import("@/Components/Theme/RouteExperienceFrame"),
   {
@@ -750,6 +752,7 @@ function AppContent({ children }) {
       <div style={{ position: "fixed", inset: 0, zIndex: 2147483647, pointerEvents: "none" }}>
         <ToastContainer position="top-center" autoClose={3500} style={{ pointerEvents: "auto" }} />
       </div>
+      {router.pathname === "/UserDashboard" && <VerifiedWelcome />}
 
       {/* Never show the legacy site header while the app is rendering — it has
           its own topbar. This used to key off isExactMobile, so viewing the app
