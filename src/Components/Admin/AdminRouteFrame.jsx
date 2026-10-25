@@ -63,6 +63,11 @@ const ROUTE_COPY = {
     title: 'Fight records',
     description: 'Audit official records, stats, and admin-maintained historical data.',
   },
+  '/administration/player-recovery': {
+    eyebrow: 'Players',
+    title: 'Player recovery',
+    description: 'Players who could not verify their email, a backup copy of every account, and the approved recovery email.',
+  },
   '/administration/payment-health': {
     eyebrow: 'Finance',
     title: 'Payment health',
