@@ -91,7 +91,8 @@ const PlayerRecovery = () => {
         <section style={box}>
           <h2>Accounts</h2>
           <div style={grid}>
-            <Stat label="Registered players" value={a.total} note="test accounts not counted" />
+            <Stat label="All accounts" value={a.allAccountsIncludingTest} note="same as the dashboard's Registered users" />
+            <Stat label="Real players" value={a.total} note="test accounts not counted" />
             <Stat label="Verified" value={a.verified} />
             <Stat label="Pending verification" value={a.pending} />
             <Stat label="Pending, last 7 days" value={a.pendingLast7Days} />
@@ -128,6 +129,12 @@ const PlayerRecovery = () => {
         <section style={box}>
           <h2>Apology and recovery email</h2>
           <p><strong>{campaign ? campaign.recipients.toLocaleString() : '—'}</strong> players would receive this email. Each email carries that player&apos;s own verification link, so no account is changed. {campaign?.skippedNoLink ? `${campaign.skippedNoLink} pending players have no link and are not included.` : ''}</p>
+          {campaign?.linkCheck ? (
+            <p style={{ padding: 10, borderRadius: 8, background: campaign.linkCheck.linkServerResponding && !campaign.linkCheck.usesOldBrokenServer ? 'rgba(40,180,90,.15)' : 'rgba(225,29,46,.18)' }}>
+              {campaign.linkCheck.linkServerResponding && !campaign.linkCheck.usesOldBrokenServer ? '✓ ' : '✗ '}
+              Links point to <strong>{campaign.linkCheck.linkBase}</strong> (our live server{campaign.linkCheck.linkServerResponding ? ', responding now' : ' — NOT responding, do not send'}). Each player gets their own existing link; no account is changed.
+            </p>
+          ) : null}
           {campaign ? (
             <>
               <p><strong>Subject:</strong> {campaign.subject}</p>
