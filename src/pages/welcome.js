@@ -780,12 +780,36 @@ const normalizedFightStatus = (fight = {}) => String(fight.matchStatus || fight.
 const isTerminalFight = (fight = {}) => Boolean(fight.prizesSettledAt || fight.settledAt || TERMINAL_FIGHT_STATUSES.has(normalizedFightStatus(fight)));
 const isLiveFight = (fight = {}) => LIVE_FIGHT_STATUSES.has(normalizedFightStatus(fight));
 const getFightTimestamp = (fight = {}) => {
-  const rawDate = String(fight.matchDate || fight.eventDate || '').split('T')[0];
-  if (!rawDate) return Number.POSITIVE_INFINITY;
-  const timeMatch = String(fight.matchTime || '23:59').trim().match(/^(\d{1,2}):(\d{2})/);
-  const time = timeMatch ? `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}` : '23:59';
-  const timestamp = new Date(`${rawDate}T${time}:00`).getTime();
-  return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY;
+  // Match times are entered in the event's time zone (Eastern for legacy
+  // fights). A bare Date("YYYY-MM-DDTHH:mm") uses the Vercel server time zone
+  // and can incorrectly close entries hours before the actual start.
+  if (fight.lockAt) {
+    const explicit = new Date(fight.lockAt).getTime();
+    if (Number.isFinite(explicit)) return explicit;
+  }
+  const date = String(fight.matchDateKey || fight.matchDate || fight.eventDate || '').slice(0, 10);
+  const parts = String(fight.matchTime || '').trim().match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/);
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !parts) return Number.POSITIVE_INFINITY;
+  const [year, month, day] = date.split('-').map(Number);
+  const hour = Number(parts[1]), minute = Number(parts[2]), second = Number(parts[3] || 0);
+  if (hour > 23 || minute > 59 || second > 59) return Number.POSITIVE_INFINITY;
+  const target = Date.UTC(year, month - 1, day, hour, minute, second);
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: String(fight.eventTimeZone || 'America/New_York'),
+      hourCycle: 'h23', year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+    });
+    const asWallTime = (timestamp) => {
+      const fields = Object.fromEntries(formatter.formatToParts(new Date(timestamp)).map(({ type, value }) => [type, value]));
+      return Date.UTC(Number(fields.year), Number(fields.month) - 1, Number(fields.day), Number(fields.hour), Number(fields.minute), Number(fields.second));
+    };
+    let instant = target;
+    for (let i = 0; i < 3; i += 1) instant += target - asWallTime(instant);
+    return asWallTime(instant) === target ? instant : Number.POSITIVE_INFINITY;
+  } catch {
+    return Number.POSITIVE_INFINITY;
+  }
 };
 
 // matchDate is date-only; the real scheduled time lives in the separate
