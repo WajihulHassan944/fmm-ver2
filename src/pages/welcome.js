@@ -1020,7 +1020,10 @@ async function buildWelcomeProps() {
     // A card whose scheduled time passed but was never scored belongs in the
     // Back Office review queue. It is not an upcoming card and must not remain
     // on the website/app unless an admin explicitly marks it Live/Ongoing.
-    .filter((f) => (f.gameMode === 'PRO_WRESTLING' && f.entryOpen) || isLiveFight(f) || getFightTimestamp(f) >= now);
+    // An explicit owner-selected homepage slot is a DISPLAY placement, not permission
+    // to enter a fight. Preserve the owner's selection after its scheduled start
+    // without reopening predictions, changing fight status, or altering scoring.
+    .filter((f) => (f.homepagePromoted && Number(f.homepageSlot) >= 1 && Number(f.homepageSlot) <= 5) || (f.gameMode === 'PRO_WRESTLING' && f.entryOpen) || isLiveFight(f) || getFightTimestamp(f) >= now);
 
   // Admin "Homepage banner" / "Featured fight" / "Featured this week" toggles
   // must actually surface here — they used to only flip a flag nothing read,
