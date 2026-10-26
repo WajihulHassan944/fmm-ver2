@@ -3,6 +3,7 @@ import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import { FMCoinAmount } from '@/Components/Common/FMCoin';
+import PlanCoinRestoration from '@/Components/Admin/PlanCoinRestoration';
 
 // Player Recovery: players who could not verify their email while the link was broken.
 // Reading this page never changes a player account. Sending requires typing the
@@ -99,6 +100,7 @@ const PlayerRecovery = () => {
   useEffect(() => { load(); }, [load]);
 
   const [coinLoss, setCoinLoss] = useState(null);
+  const [restoreRefresh, setRestoreRefresh] = useState(0);
   const [coinLossError, setCoinLossError] = useState('');
   const loadCoinLoss = useCallback(async () => {
     setCoinLossError('');
@@ -132,6 +134,7 @@ const PlayerRecovery = () => {
       link.download = `fmm-players-backup-${new Date().toISOString().slice(0, 10)}-part${part}.json`;
       document.body.appendChild(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setRestoreRefresh((n) => n + 1);
     } catch (downloadError) { setError(downloadError.message); }
     setBusy('');
   };
@@ -342,7 +345,7 @@ const PlayerRecovery = () => {
 
         <section style={box} id="plan-coin-losses">
           <h2>FM COINS lost to the membership plan problem</h2>
-          <p>Before the fix on {coinLoss ? coinLoss.fixDeployedET : 'October 25, 2026'}, choosing the Free plan set a player&apos;s balance to 20 FM COINS and Standard set it to 100, even when they had more. This report is <strong>read-only</strong>: it never changes a balance, and no coins can be restored from it.</p>
+          <p>Before the fix on {coinLoss ? coinLoss.fixDeployedET : 'October 25, 2026'}, choosing the Free plan set a player&apos;s balance to 20 FM COINS and Standard set it to 100, even when they had more. Viewing this report never changes a balance. Confirmed losses can be restored in the next section, after your approval.</p>
           <button type="button" onClick={loadCoinLoss} disabled={Boolean(busy)}>Refresh</button>{' '}
           <button type="button" onClick={downloadCoinLossCsv} disabled={Boolean(busy) || !coinLoss}>{busy === 'coinloss-csv' ? 'Preparing…' : 'Download CSV'}</button>
           {coinLossError ? <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{coinLossError}</p> : null}
@@ -352,15 +355,16 @@ const PlayerRecovery = () => {
                 <Stat label="Players who chose a plan" value={coinLoss.totals.playersWhoChoseAPlan} />
                 <Stat label="Confirmed losses" value={coinLoss.totals.confirmedPlayers} note="exact amount on record" />
                 <Stat label="FM COINS lost (confirmed)" value={coinLoss.totals.confirmedCoinsLost} />
-                <Stat label="Possible losses" value={coinLoss.totals.possiblePlayers} note="need your review" />
-                <Stat label="Checked, no loss" value={coinLoss.totals.noLossPlayers} />
+                <Stat label="Confirmed, restored" value={coinLoss.totals.confirmedRestoredPlayers} note={`${Number(coinLoss.totals.confirmedCoinsRestored).toLocaleString()} FM COINS returned`} />
+                <Stat label="Probable losses" value={coinLoss.totals.probablePlayers} note={`need your approval · ${coinLoss.totals.probableWithAmount} with an indicated amount`} />
+                <Stat label="No loss identified" value={coinLoss.totals.noLossPlayers} note={coinLoss.totals.noLossNoRecords ? `${coinLoss.totals.noLossNoRecords} of them have no records to check` : 'records show no loss'} />
               </div>
 
               <h3>Confirmed losses ({coinLoss.confirmed.length})</h3>
               <p style={{ opacity: 0.85 }}>The amount comes from the coin-history record written at the moment the plan was chosen.</p>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead><tr>{['Email', 'Name', 'Original balance', 'Amount lost', 'Current balance', 'Plan / when (ET)', 'Evidence'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
+                  <thead><tr>{['Email', 'Name', 'Original balance', 'Amount lost', 'Current balance', 'Plan / when (ET)', 'Evidence', 'Restored'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
                   <tbody>
                     {coinLoss.confirmed.length ? coinLoss.confirmed.map((row) => (
                       <tr key={row.id}>
@@ -371,42 +375,46 @@ const PlayerRecovery = () => {
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><FMCoinAmount amount={row.currentBalance} size="sm" motion="none" /></td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.events.map((e) => <div key={e.recordId}>{e.plan} · {e.atET}</div>)}</td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.events.map((e) => <div key={e.recordId}>{e.evidence}</div>)}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.events.map((e) => <div key={e.recordId}>{e.restoration ? `Yes, ${Number(e.restoration.amount).toLocaleString()} on ${e.restoration.atET}` : 'Not yet'}</div>)}</td>
                       </tr>
-                    )) : <tr><td colSpan={7} style={{ padding: 8 }}>No confirmed losses were found.</td></tr>}
+                    )) : <tr><td colSpan={8} style={{ padding: 8 }}>No confirmed losses were found.</td></tr>}
                   </tbody>
                 </table>
               </div>
 
-              <h3>Possible losses, needing review ({coinLoss.possible.length})</h3>
-              <p style={{ opacity: 0.85 }}>These players chose a plan, but no record of their balance at that moment exists. The amount is not guessed. The records that do exist are shown so you can decide.</p>
+              <h3>Probable losses, needing your approval ({coinLoss.probable.length})</h3>
+              <p style={{ opacity: 0.85 }}>These players show the old problem&apos;s signature (a balance of exactly the plan amount right after choosing a plan), but no record was written at the moment of the plan change. Where records on both sides exist, the indicated amount is shown. No coins are given for these players without your separate approval.</p>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead><tr>{['Email', 'Name', 'Plan chosen', 'When (ET)', 'Current balance', 'What the records show'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
+                  <thead><tr>{['Email', 'Name', 'Plan chosen', 'When (ET)', 'Current balance', 'Indicated loss', 'What the records show'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
                   <tbody>
-                    {coinLoss.possible.length ? coinLoss.possible.map((row) => (
+                    {coinLoss.probable.length ? coinLoss.probable.map((row) => (
                       <tr key={row.id}>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.email}{row.testAccount === 'Yes' ? ' (test account)' : ''}</td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.name}</td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.plansChosen}</td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.planChosenAtET || 'Not recorded'}</td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><FMCoinAmount amount={row.currentBalance} size="sm" motion="none" /></td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.indicatedLoss === null ? 'Not determinable' : <FMCoinAmount amount={row.indicatedLoss} size="sm" motion="none" />}</td>
                         <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><strong>{row.indication}</strong><ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{row.evidence.map((line) => <li key={line}>{line}</li>)}</ul></td>
                       </tr>
-                    )) : <tr><td colSpan={6} style={{ padding: 8 }}>No possible losses were found.</td></tr>}
+                    )) : <tr><td colSpan={7} style={{ padding: 8 }}>No probable losses were found.</td></tr>}
                   </tbody>
                 </table>
               </div>
 
               {coinLoss.noLoss.length ? (
                 <details style={{ marginTop: 12 }}>
-                  <summary>Checked, no loss ({coinLoss.noLoss.length})</summary>
-                  <ul>{coinLoss.noLoss.map((row) => <li key={row.id}>{row.email}: {row.reason}</li>)}</ul>
+                  <summary>No loss identified ({coinLoss.noLoss.length})</summary>
+                  <ul>{coinLoss.noLoss.map((row) => <li key={row.id}>{row.email}{row.testAccount === 'Yes' ? ' (test account)' : ''}: {row.reason}</li>)}</ul>
                 </details>
               ) : null}
               <ul style={{ opacity: 0.85 }}>{coinLoss.notes.map((line) => <li key={line}>{line}</li>)}</ul>
             </>
           ) : null}
         </section>
+
+        <PlanCoinRestoration refreshKey={restoreRefresh} onRestored={loadCoinLoss} />
 
         <section style={box}>
           <h2>Goodwill FM COINS bonus (preview only)</h2>
