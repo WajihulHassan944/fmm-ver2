@@ -1034,8 +1034,14 @@ async function buildWelcomeProps() {
   const promoterId = (fight) => String(fight.affiliateId || '').trim();
   const usedPromoters = new Set();
   // Explicit admin placements stay put, including fights linked to affiliates.
-  // When old data assigns the same slot twice, the owner's selection wins.
-  [...eligible].sort((a, b) => Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b)))).forEach((f) => {
+  // When old data assigns the same slot twice, the owner's selection wins, and
+  // then the most recent manual pick — never whichever fight was updated last
+  // by something else (that made Position 1 flip between two fights).
+  const slotPickedAt = (f) => {
+    const time = new Date(f.homepageSlotAssignedAt || f.homepagePromotionUpdatedAt || f.homepagePromotion?.updatedAt || 0).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
+  [...eligible].sort((a, b) => (Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b)))) || (slotPickedAt(b) - slotPickedAt(a))).forEach((f) => {
     const slot = Number(f.homepageSlot);
     const promoter = promoterId(f);
     if (f.homepagePromoted && slot >= 1 && slot <= 5 && !slots[slot - 1]) {

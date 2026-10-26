@@ -477,8 +477,13 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
     const promoterId = (fight) => String(fight.affiliateId || '').trim();
     const usedPromoters = new Set();
     const takenSlots = new Set();
+    const slotPickedAt = (f) => {
+      const time = new Date(f.homepageSlotAssignedAt || f.homepagePromotionUpdatedAt || f.homepagePromotion?.updatedAt || 0).getTime();
+      return Number.isNaN(time) ? 0 : time;
+    };
+    // Same tie-break as the homepage: owner first, then the most recent pick.
     const explicit = eligible.filter((f) => isHomepagePromoted(f) && Number(f.homepageSlot) >= 1 && Number(f.homepageSlot) <= 5)
-      .sort((a, b) => Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b))));
+      .sort((a, b) => (Number(Boolean(promoterId(a))) - Number(Boolean(promoterId(b)))) || (slotPickedAt(b) - slotPickedAt(a)));
     explicit.forEach((f) => {
       const slot = Number(f.homepageSlot);
       const promoter = promoterId(f);
