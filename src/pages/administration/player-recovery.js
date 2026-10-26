@@ -101,6 +101,14 @@ const PlayerRecovery = () => {
 
   const [coinLoss, setCoinLoss] = useState(null);
   const [restoreRefresh, setRestoreRefresh] = useState(0);
+  const [payoutCheck, setPayoutCheck] = useState(null);
+  const [payoutCheckError, setPayoutCheckError] = useState('');
+  const loadPayoutCheck = useCallback(async () => {
+    setPayoutCheckError('');
+    try { setPayoutCheck(await get('/payout-check')); }
+    catch (checkError) { setPayoutCheck(null); setPayoutCheckError(checkError.message); }
+  }, []);
+  useEffect(() => { loadPayoutCheck(); }, [loadPayoutCheck]);
   const [coinLossError, setCoinLossError] = useState('');
   const loadCoinLoss = useCallback(async () => {
     setCoinLossError('');
@@ -415,6 +423,34 @@ const PlayerRecovery = () => {
         </section>
 
         <PlanCoinRestoration refreshKey={restoreRefresh} onRestored={loadCoinLoss} />
+
+        <section style={box} id="payout-check">
+          <h2>Affiliate payout check (read-only)</h2>
+          <p>Checks the live records for affiliate payout requests, confirmations and any payout deducted twice. Nothing is changed.</p>
+          <button type="button" onClick={loadPayoutCheck} disabled={Boolean(busy)}>Check again</button>
+          {payoutCheckError ? <p role="alert" style={{ color: '#ff8585', fontWeight: 800 }}>{payoutCheckError}</p> : null}
+          {payoutCheck ? (
+            <>
+              <p style={{ fontWeight: 800, color: payoutCheck.doubleDeductions.length ? '#ffcf6b' : '#6fe39b' }}>{payoutCheck.verdict}</p>
+              <div style={grid}>
+                <Stat label="Affiliate accounts" value={payoutCheck.affiliates} note={payoutCheck.testAffiliates ? `${payoutCheck.testAffiliates} test accounts not counted` : 'real accounts'} />
+                <Stat label="Payout requests" value={payoutCheck.payoutRequests} note={payoutCheck.testAccountPayoutRequests ? `plus ${payoutCheck.testAccountPayoutRequests} on test accounts` : 'all time'} />
+                <Stat label="Request deductions" value={payoutCheck.payoutHistoryRecords.payout_requested} />
+                <Stat label="Confirmation deductions" value={payoutCheck.payoutHistoryRecords.affiliate_payout_legacy} />
+                <Stat label="Payouts deducted twice" value={payoutCheck.doubleDeductions.length} />
+              </div>
+              {payoutCheck.doubleDeductions.length ? (
+                <ul>{payoutCheck.doubleDeductions.map((d) => <li key={`${d.payoutId}-${d.requestedET}`}>{d.email}{d.testAccount ? ' (test account)' : ''}: {Number(d.amount).toLocaleString()} FM COINS requested {d.requestedET}, deducted again {d.confirmedET}</li>)}</ul>
+              ) : null}
+              {payoutCheck.payouts.length ? (
+                <details style={{ marginTop: 10 }}>
+                  <summary>All payout requests ({payoutCheck.payouts.length})</summary>
+                  <ul>{payoutCheck.payouts.map((r) => <li key={`${r.affiliateId}-${r.payoutId}-${r.createdET}`}>{r.email}{r.testAccount ? ' (test account)' : ''}: {Number(r.amount).toLocaleString()} FM COINS, {r.status}{r.createdET ? `, ${r.createdET}` : ''}</li>)}</ul>
+                </details>
+              ) : null}
+            </>
+          ) : null}
+        </section>
 
         <section style={box}>
           <h2>Goodwill FM COINS bonus (preview only)</h2>
