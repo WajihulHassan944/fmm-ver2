@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { createRequestKeys } from '@/Utils/requestKey';
 import Link from 'next/link';
 import { FaArrowRight, FaBolt, FaCheckCircle, FaClock, FaExclamationTriangle, FaHistory, FaTimesCircle, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+
+const moneyPayoutKeys = createRequestKeys();
 
 const API_BASE = PUBLIC_API_BASE_URL;
 
@@ -72,10 +75,11 @@ const AffiliateMoney = () => {
       const response = await fetch(`${API_BASE}/affiliate/me/payout`, {
         method: 'POST',
         headers: affiliateHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ amount: value }),
+        body: JSON.stringify({ amount: value, idempotencyKey: moneyPayoutKeys.for(`payout:${value}`) }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Payout request failed.');
+      moneyPayoutKeys.clear(`payout:${value}`);
       setNotice('Payout requested. You will see it move to paid once it is actioned.');
       setAmount('');
       load();

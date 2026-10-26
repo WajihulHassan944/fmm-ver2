@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createRequestKeys } from '@/Utils/requestKey';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -10,6 +11,8 @@ import { ExperienceHero, ExperienceSectionHeading } from '@/Components/Theme/Exp
 import { FMM_ASSET_BASE, safeArray } from '@/Utils/fightExperience';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+
+const payoutKeys = createRequestKeys();
 
 const API_BASE = PUBLIC_API_BASE_URL;
 const PAYMENT_METHODS = [
@@ -91,10 +94,11 @@ const AffiliateAccountSettings = () => {
       const response = await fetch(`${API_BASE}/affiliate/${affiliate._id}/payout`, {
         method: 'POST',
         headers: affiliateHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount, idempotencyKey: payoutKeys.for(`payout:${amount}`) }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Failed to create payout request');
+      payoutKeys.clear(`payout:${amount}`);
       toast.success('Payout request created successfully.');
       setIsPayoutOpen(false);
       setPayoutAmount('');

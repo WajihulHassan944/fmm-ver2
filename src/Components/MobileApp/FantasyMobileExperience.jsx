@@ -1,4 +1,5 @@
 import { fetchPublishedWrestlingPromotions, isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
+import { createRequestKeys } from '@/Utils/requestKey';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
@@ -120,6 +121,8 @@ const tokenRequest = (getToken, signInMessage) => async (path, options = {}) => 
 };
 
 const playerRequest = tokenRequest(readSessionToken, 'Sign in to do that.');
+// One key per payout request: a double tap or retry creates one request.
+const mobilePayoutKeys = createRequestKeys();
 const affiliateRequest = tokenRequest(readAffiliateToken, 'Sign in to your league account first.');
 const adminRequest = tokenRequest(readAdminToken, 'Admin sign-in required.');
 
@@ -761,7 +764,10 @@ const FantasyMobileExperience = ({ initialTab = 'home', forceRender = false }) =
   const onRequestPayout = useCallback(async (payload = {}) => {
     // The route carries an id in the path, but the server takes the affiliate
     // from the token and ignores the path value — so 'me' is safe and honest.
-    return affiliateRequest('/affiliate/me/payout', { method: 'POST', body: JSON.stringify(payload) });
+    const intent = `payout:${Number(payload?.amount) || 0}`;
+    const result = await affiliateRequest('/affiliate/me/payout', { method: 'POST', body: JSON.stringify({ ...payload, idempotencyKey: mobilePayoutKeys.for(intent) }) });
+    mobilePayoutKeys.clear(intent);
+    return result;
   }, []);
 
   // ------------------------------------------------------------------------

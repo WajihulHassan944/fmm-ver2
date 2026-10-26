@@ -5,6 +5,10 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import { FaArrowLeft, FaBan, FaEnvelope, FaEye, FaPlus, FaSearch, FaTrash, FaUserFriends, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
+import { createRequestKeys } from '@/Utils/requestKey';
+
+// One key per grant (player + amount): a double click or retry is applied once.
+const grantKeys = createRequestKeys();
 
 const FALLBACK_AVATAR = '/images/fmm-experience/avatar-placeholder.svg';
 
@@ -79,6 +83,7 @@ const RegisteredUsers = () => {
         headers: adminJsonHeaders(),
         body: JSON.stringify({
           tokens: tokensToGive,
+          idempotencyKey: grantKeys.for(`${userId}:${tokensToGive}`),
         }),
       });
 
@@ -87,6 +92,7 @@ const RegisteredUsers = () => {
       if (!response.ok) {
         throw new Error(data.message || 'Failed to reward FM COINS.');
       }
+      grantKeys.clear(`${userId}:${tokensToGive}`);
 
       setTokensToGive('');
       alert('FM COINS rewarded successfully!');
