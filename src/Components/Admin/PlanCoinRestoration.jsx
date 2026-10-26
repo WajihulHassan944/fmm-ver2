@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import { FMCoinAmount } from '@/Components/Common/FMCoin';
@@ -30,6 +30,7 @@ export default function PlanCoinRestoration({ refreshKey = 0, onRestored }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  const submitting = useRef(false); // blocks a second click before the screen updates
 
   const loadPreview = useCallback(async (sel, acknowledged) => {
     setError('');
@@ -57,7 +58,8 @@ export default function PlanCoinRestoration({ refreshKey = 0, onRestored }) {
   };
 
   const restore = async () => {
-    if (!preview || busy) return;
+    if (!preview || busy || submitting.current) return;
+    submitting.current = true;
     setBusy(true); setError(''); setResult(null);
     try {
       const response = await fetch(`${API}/apply`, {
@@ -71,6 +73,7 @@ export default function PlanCoinRestoration({ refreshKey = 0, onRestored }) {
       await Promise.all([loadPreview(null, []), loadHistory()]);
       if (onRestored) onRestored();
     } catch (restoreError) { setError(restoreError.message); }
+    submitting.current = false;
     setBusy(false);
   };
 
