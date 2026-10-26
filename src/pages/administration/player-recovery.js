@@ -360,17 +360,17 @@ const PlayerRecovery = () => {
               <p style={{ opacity: 0.85 }}>The amount comes from the coin-history record written at the moment the plan was chosen.</p>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead><tr>{['Email', 'Name', 'Original balance', 'Amount lost', 'Current balance', 'Plan / when (ET)', 'Evidence'].map((h) => <th key={h} style={ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }>{h}</th>)}</tr></thead>
+                  <thead><tr>{['Email', 'Name', 'Original balance', 'Amount lost', 'Current balance', 'Plan / when (ET)', 'Evidence'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
                   <tbody>
                     {coinLoss.confirmed.length ? coinLoss.confirmed.map((row) => (
                       <tr key={row.id}>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.email}{row.testAccount === 'Yes' ? ' (test account)' : ''}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.name}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }><FMCoinAmount amount={row.originalBalance} size="sm" motion="none" /></td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }><FMCoinAmount amount={row.amountLost} size="sm" motion="none" /></td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }><FMCoinAmount amount={row.currentBalance} size="sm" motion="none" /></td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.events.map((e) => <div key={e.recordId}>{e.plan} · {e.atET}</div>)}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.events.map((e) => <div key={e.recordId}>{e.evidence}</div>)}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.email}{row.testAccount === 'Yes' ? ' (test account)' : ''}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.name}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><FMCoinAmount amount={row.originalBalance} size="sm" motion="none" /></td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><FMCoinAmount amount={row.amountLost} size="sm" motion="none" /></td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><FMCoinAmount amount={row.currentBalance} size="sm" motion="none" /></td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.events.map((e) => <div key={e.recordId}>{e.plan} · {e.atET}</div>)}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.events.map((e) => <div key={e.recordId}>{e.evidence}</div>)}</td>
                       </tr>
                     )) : <tr><td colSpan={7} style={{ padding: 8 }}>No confirmed losses were found.</td></tr>}
                   </tbody>
@@ -381,16 +381,16 @@ const PlayerRecovery = () => {
               <p style={{ opacity: 0.85 }}>These players chose a plan, but no record of their balance at that moment exists. The amount is not guessed. The records that do exist are shown so you can decide.</p>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead><tr>{['Email', 'Name', 'Plan chosen', 'When (ET)', 'Current balance', 'What the records show'].map((h) => <th key={h} style={ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }>{h}</th>)}</tr></thead>
+                  <thead><tr>{['Email', 'Name', 'Plan chosen', 'When (ET)', 'Current balance', 'What the records show'].map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.2)', whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
                   <tbody>
                     {coinLoss.possible.length ? coinLoss.possible.map((row) => (
                       <tr key={row.id}>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.email}{row.testAccount === 'Yes' ? ' (test account)' : ''}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.name}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.plansChosen}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }>{row.planChosenAtET || 'Not recorded'}</td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }><FMCoinAmount amount={row.currentBalance} size="sm" motion="none" /></td>
-                        <td style={ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }><strong>{row.indication}</strong><ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{row.evidence.map((line) => <li key={line}>{line}</li>)}</ul></td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.email}{row.testAccount === 'Yes' ? ' (test account)' : ''}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.name}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.plansChosen}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}>{row.planChosenAtET || 'Not recorded'}</td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><FMCoinAmount amount={row.currentBalance} size="sm" motion="none" /></td>
+                        <td style={{ padding: '6px 8px', borderBottom: '1px solid rgba(255,255,255,.08)', verticalAlign: 'top' }}><strong>{row.indication}</strong><ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{row.evidence.map((line) => <li key={line}>{line}</li>)}</ul></td>
                       </tr>
                     )) : <tr><td colSpan={6} style={{ padding: 8 }}>No possible losses were found.</td></tr>}
                   </tbody>
