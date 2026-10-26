@@ -464,6 +464,12 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
 
   const isHomepagePromoted = (fight) => Boolean(fight?.homepagePromoted || fight?.homepagePromotion?.isPromoted);
 
+  // The homepage position the admin actually saved (0 = none saved).
+  const savedHomepageSlot = (fight) => {
+    const slot = Number(fight?.homepageSlot) || 0;
+    return isHomepagePromoted(fight) && slot >= 1 && slot <= 5 ? slot : 0;
+  };
+
   // Mirrors the exact filter/sort/slice(0,5) the public homepage (pages/welcome.js)
   // uses to pick its 5 fight-card windows, so this table shows precisely which
   // slot (if any) each fight currently occupies there — not a guess.
@@ -1469,10 +1475,15 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                         style={{ cursor: 'pointer' }}
                         title="Click to choose which of the homepage's 5 fight-card windows this fight occupies"
                         disabled={Boolean(placementUpdatingKey)}
-                        value={homepageSlotById[String(id)] || 0}
-                        onChange={(e) => setHomepageSlot(fight, Number(e.target.value))}
+                        /* The value is the position the admin actually saved. A fight
+                           the homepage only filled in automatically used to show as
+                           "Homepage 1" too, so it looked locked when it was not, and
+                           picking 1 again did nothing (the value never changed). */
+                        value={savedHomepageSlot(fight)}
+                        onChange={(e) => setHomepageSlot(fight, Math.max(0, Number(e.target.value)))}
                       >
-                        <option value={0}>Not shown</option>
+                        <option value={0}>{!savedHomepageSlot(fight) && homepageSlotById[String(id)] ? `Automatic (now Homepage ${homepageSlotById[String(id)]})` : 'Not shown'}</option>
+                        {!savedHomepageSlot(fight) && homepageSlotById[String(id)] ? <option value={-1}>Not shown</option> : null}
                         {[1, 2, 3, 4, 5].map((slot) => (
                           <option key={slot} value={slot}>Homepage {slot}</option>
                         ))}
