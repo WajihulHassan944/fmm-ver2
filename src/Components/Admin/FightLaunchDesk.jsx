@@ -22,6 +22,19 @@ const isPastFight = (fight) => Boolean(fight?.prizesSettledAt)
   || /finished|complete|settled|finali[sz]ed|^final$|result|cancel|no_contest|no contest/.test(statusOf(fight));
 const fightTime = (fight) => parseFightDate(fight)?.getTime();
 const datePassed = (fight) => { const time = fightTime(fight); return Number.isFinite(time) && time < Date.now(); };
+// A fight stays "current" through its fight day (24 hours after its start).
+const CURRENT_GRACE_MS = 24 * 60 * 60 * 1000;
+// Which list a fight belongs in. Records are never changed; this is display only.
+const fightGroup = (fight, homepageSlot) => {
+  if (isPastFight(fight)) return 'past';
+  const time = fightTime(fight);
+  if (homepageSlot || (Number.isFinite(time) && time >= Date.now() - CURRENT_GRACE_MS)) return 'current';
+  return Number.isFinite(time) ? 'stale' : 'undated';
+};
+const GROUP_LABELS = { current: 'Current and upcoming fights', undated: 'No date set', stale: 'Date passed — not marked completed', past: 'Past fights (completed)' };
+const rowsOf = (payload) => (Array.isArray(payload) ? payload : Array.isArray(payload?.items) ? payload.items : Array.isArray(payload?.data) ? payload.data : Array.isArray(payload?.rows) ? payload.rows : []);
+const searchWords = (value) => String(value || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9']+/).filter(Boolean);
+const srOnly = { position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 };
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 const personName = (user) => `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.playerName || 'Affiliate';
 
@@ -37,6 +50,7 @@ export default function FightLaunchDesk() {
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadedPosters, setUploadedPosters] = useState({});
+  const [uploadPreview, setUploadPreview] = useState(null);
   // Poster campaign: who receives it, which artwork, where the QR goes, the
   // promotional text, and the finished image the owner approved.
   const [affiliates, setAffiliates] = useState([]);
@@ -53,14 +67,27 @@ export default function FightLaunchDesk() {
   const [campaignBusy, setCampaignBusy] = useState('');
   const placementRef = useRef(null);
 
+  const [homepageSlots, setHomepageSlots] = useState({});
   const usable = useMemo(() => (Array.isArray(fights) ? fights : []).filter((fight) => getFightId(fight) && !isPlaceholderWrestlingPromotion(fight) && !isDraft(fight)), [fights]);
-  const matchesSearch = (fight) => {
-    const term = search.trim().toLowerCase();
-    if (!term) return true;
-    return `${titleFor(fight)} ${fight.matchName || ''} ${fight.matchCategoryTwo || fight.matchCategory || ''} ${formatFightDate(fight)}`.toLowerCase().includes(term);
-  };
-  const current = useMemo(() => usable.filter((fight) => !isPastFight(fight)).sort((a, b) => (fightTime(a) ?? Infinity) - (fightTime(b) ?? Infinity)), [usable]);
-  const past = useMemo(() => usable.filter(isPastFight).sort((a, b) => (fightTime(b) ?? 0) - (fightTime(a) ?? 0)), [usable]);
+  const slotOf = (fight) => homepageSlots[String(getFightId(fight))] || 0;
+  // Every word typed must appear in either fighter's name, the event name or
+  // the date; partial words and any capitalization match.
+  const searchText = (fight) => searchWords(`${getFighterName(fight, 'A')} ${getFighterName(fight, 'B')} ${fight.matchFighterA || ''} ${fight.matchFighterB || ''} ${fight.matchName || ''} ${fight.matchTitle || ''} ${formatFightDate(fight)}`).join(' ');
+  const groups = useMemo(() => {
+    const out = { current: [], undated: [], stale: [], past: [] };
+    usable.forEach((fight) => { out[fightGroup(fight, homepageSlots[String(getFightId(fight))])].push(fight); });
+    out.current.sort((a, b) => (fightTime(a) ?? Infinity) - (fightTime(b) ?? Infinity));
+    out.stale.sort((a, b) => (fightTime(b) ?? 0) - (fightTime(a) ?? 0));
+    out.past.sort((a, b) => (fightTime(b) ?? 0) - (fightTime(a) ?? 0));
+    return out;
+  }, [usable, homepageSlots]);
+  const searchResults = useMemo(() => {
+    const terms = searchWords(search);
+    if (!terms.length) return [];
+    return ['current', 'undated', 'stale', 'past'].flatMap((group) => groups[group]
+      .filter((fight) => { const text = searchText(fight); return terms.every((term) => text.includes(term)); })
+      .map((fight) => ({ fight, group })));
+  }, [search, groups]); // eslint-disable-line react-hooks/exhaustive-deps
   // The fight is exactly the one chosen in the list; nothing is pre-selected
   // behind the owner's back, so an upload can never land on another fight.
   const fight = usable.find((row) => String(getFightId(row)) === selected) || null;
@@ -164,20 +191,25 @@ export default function FightLaunchDesk() {
 
   const uploadPoster = async (file) => {
     if (!file || !id) return;
-    if (audience === 'one' && !affiliateId) { setUploadError('Choose the affiliate first, then upload their poster.'); return; }
-    setUploadBusy(true);
     setUploadError('');
+    // Show the chosen image right away; it is marked saved only once the server confirms.
+    setUploadPreview((current) => { if (current?.src) URL.revokeObjectURL(current.src); return { fightId: id, name: file.name, src: URL.createObjectURL(file), saved: false }; });
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) { setUploadError(`"${file.name}" is not a PNG, JPEG, or WebP image.`); return; }
+    if (file.size > 25 * 1024 * 1024) { setUploadError(`"${file.name}" is ${(file.size / 1048576).toFixed(1)} MB; the limit is 25 MB.`); return; }
+    setUploadBusy(true);
     try {
       if (audience === 'one') {
         // Saved only for this campaign: the fight's general poster and every
         // other affiliate's poster stay exactly as they are.
         const source = await uploadAffiliatePosterSource(id, file);
         setCustomSource(source);
+        setUploadPreview((current) => (current ? { ...current, saved: true } : current));
         clearCampaign();
         toast.success(source.exact ? 'Poster saved for this affiliate only.' : 'Poster saved for this affiliate only (a slightly smaller copy, because the file was very large).');
       } else {
         const result = await uploadFightPosterExact(id, file);
         setUploadedPosters((current) => ({ ...current, [id]: result.poster }));
+        setUploadPreview((current) => (current ? { ...current, saved: true } : current));
         clearCampaign();
         toast.success(result.exact ? 'Poster saved for this fight.' : 'Poster saved for this fight (a slightly smaller copy, because the file was very large).');
       }
@@ -229,15 +261,41 @@ export default function FightLaunchDesk() {
 
   useEffect(() => {
     let live = true;
-    Promise.all([
-      fetch(buildPublicApiUrl('/api/admin/fights', { limit: 240, includeShadow: true, source: 'all' }), { headers: adminHeaders() }),
-      fetchPublishedWrestlingPromotions('OPEN,LOCKED,LIVE,SCORING,FINALIZED').catch(() => []),
+    // Source of truth: the live Fight Registry (fresh, never cached), plus the
+    // fights the public website is showing right now and the homepage slots,
+    // so a newly entered fight can never be missing from this list.
+    const getJson = async (path, query, headers) => {
+      const response = await fetch(buildPublicApiUrl(path, { ...query, _: Date.now() }), { headers, cache: 'no-store' });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || `HTTP ${response.status}`);
+      return payload;
+    };
+    Promise.allSettled([
+      getJson('/api/admin/fights', { limit: 500, includeShadow: true, source: 'all' }, adminHeaders()),
+      getJson('/api/public/prediction-fights', { limit: 500 }),
+      getJson('/api/public/homepage/promoted-fights', { limit: 10 }),
+      fetchPublishedWrestlingPromotions('OPEN,LOCKED,LIVE,SCORING,FINALIZED'),
     ])
-      .then(async ([response, wrestling]) => {
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload.message || `Could not load Fight Registry (HTTP ${response.status}).`);
-        const rows = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload?.data) ? payload.data : [];
-        if (live) setFights([...wrestling, ...normalizePublicFightRows(rows)]);
+      .then(([registry, website, homepage, wrestling]) => {
+        if (!live) return;
+        if (registry.status === 'rejected' && website.status === 'rejected') throw new Error(`Could not load the Fight Registry (${registry.reason?.message || 'unavailable'}).`);
+        if (registry.status === 'rejected') setError(`The Fight Registry did not answer (${registry.reason?.message || 'unavailable'}); showing the fights on the public website.`);
+        const byId = new Map();
+        const add = (row) => { const key = String(getFightId(row) || ''); if (key) byId.set(key, { ...(byId.get(key) || {}), ...row }); };
+        normalizePublicFightRows(rowsOf(website.value)).forEach(add);
+        normalizePublicFightRows(rowsOf(homepage.value)).forEach(add);
+        normalizePublicFightRows(rowsOf(registry.value)).forEach(add);
+        (wrestling.status === 'fulfilled' && Array.isArray(wrestling.value) ? wrestling.value : []).forEach(add);
+        // Homepage positions as saved in the Fight Registry (slots 1–5).
+        const slots = {};
+        [...rowsOf(homepage.value), ...byId.values()].forEach((row) => {
+          const key = String(getFightId(row) || row?._id || row?.id || '');
+          const slot = Number(row?.homepageSlot);
+          const promoted = row?.homepagePromoted === true || row?.homepagePromotion?.isPromoted === true;
+          if (key && promoted && slot >= 1 && slot <= 5 && !isPastFight(row)) slots[key] = slot;
+        });
+        setHomepageSlots(slots);
+        setFights([...byId.values()]);
       })
       .catch((err) => { if (live) setError(err.message || 'Could not load Fight Registry.'); })
       .finally(() => { if (live) setLoading(false); });
@@ -271,30 +329,34 @@ export default function FightLaunchDesk() {
     finally { setBusy(false); }
   };
 
-  const optionLabel = (row) => `${titleFor(row)} · ${formatFightDate(row)}${!isPastFight(row) && datePassed(row) ? ' · date passed, not completed' : ''}`;
-  const shownCurrent = current.filter(matchesSearch);
-  const shownPast = past.filter(matchesSearch);
-  const selectedHidden = fight && !matchesSearch(fight);
+  const optionLabel = (row) => `${titleFor(row)} · ${formatFightDate(row)}${slotOf(row) ? ` · Homepage ${slotOf(row)}` : ''}${!isPastFight(row) && datePassed(row) && !slotOf(row) ? ' · date passed, not completed' : ''}`;
   const field = { display: 'block', width: '100%', marginTop: 6 };
+  const chooseFight = (value) => { setSelected(value); setSearch(''); };
+  const uploadButton = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 22px', borderRadius: 10, fontSize: 18, fontWeight: 800, color: '#fff', background: '#ed253e', border: '2px solid #fff', cursor: 'pointer', width: 'fit-content', maxWidth: '100%' };
 
   return <section className={styles.desk} aria-label="Fight launch desk">
     <div className={styles.heading}><div><span>FIGHT LAUNCH DESK</span><h2>Post a fight. Rally your affiliates.</h2><p>Prepare a post from an open fight, then send affiliates a message through your existing email tool.</p></div></div>
     {error && <p role="alert">{error}</p>}
-    <label className={styles.picker}>Find a fight
-      <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Type a fighter or event name" aria-label="Find a fight" style={field} />
-    </label>
+    <div className={styles.picker}>
+      <label htmlFor="fight-launch-search">Find a fight</label>
+      <input id="fight-launch-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Type a fighter's first or last name" aria-label="Find a fight" autoComplete="off" disabled={loading} style={field} />
+      {search.trim() && <div data-search-results="true" role="listbox" aria-label="Matching fights" style={{ display: 'grid', gap: 6, maxHeight: 360, overflowY: 'auto', fontWeight: 400 }}>
+        {searchResults.length
+          ? searchResults.slice(0, 60).map(({ fight: row, group }) => <button key={getFightId(row)} type="button" role="option" aria-selected={String(getFightId(row)) === id} onClick={() => chooseFight(String(getFightId(row)))} style={{ textAlign: 'left', padding: '10px 12px', borderRadius: 8, border: '1px solid #525c72', background: '#0e121c', color: '#fff', font: 'inherit', cursor: 'pointer' }}>
+            <strong>{titleFor(row)}</strong><br /><span>{formatFightDate(row)}{row.matchName && row.matchName !== titleFor(row) ? ` · ${row.matchName}` : ''}{slotOf(row) ? ` · Homepage ${slotOf(row)}` : ''} · {GROUP_LABELS[group]}</span>
+          </button>)
+          : <p role="status" style={{ margin: 0 }}>No fights match “{search.trim()}”. Check the spelling, or try the other fighter&apos;s name.</p>}
+      </div>}
+    </div>
     <label className={styles.picker}>Choose a fight
       <select value={id} onChange={(e) => setSelected(e.target.value)} disabled={loading || !usable.length} aria-label="Choose a fight">
         <option value="">{loading ? 'Loading fights…' : 'Choose a fight…'}</option>
-        {selectedHidden && <option value={id}>{optionLabel(fight)}</option>}
-        <optgroup label="Current and upcoming fights">
-          {shownCurrent.map((row) => <option key={getFightId(row)} value={getFightId(row)}>{optionLabel(row)}</option>)}
-        </optgroup>
-        {shownPast.length > 0 && <optgroup label="Past fights">
-          {shownPast.map((row) => <option key={getFightId(row)} value={getFightId(row)}>{optionLabel(row)} · completed</option>)}
-        </optgroup>}
+        {['current', 'undated', 'stale', 'past'].map((group) => groups[group].length > 0 && <optgroup key={group} label={GROUP_LABELS[group]}>
+          {groups[group].map((row) => <option key={getFightId(row)} value={getFightId(row)}>{optionLabel(row)}{group === 'past' ? ' · completed' : ''}</option>)}
+        </optgroup>)}
       </select>
     </label>
+    {fight && <p role="status" data-selected-fight="true" style={{ margin: '0 0 16px', fontWeight: 700 }}>Selected fight: {fightTitle} · {formatFightDate(fight)}{slotOf(fight) ? ` · Homepage ${slotOf(fight)}` : ''}</p>}
     <div className={styles.uploadPanel}>
       <fieldset style={{ border: 0, padding: 0, margin: '0 0 12px' }}>
         <legend style={{ fontWeight: 600, marginBottom: 6 }}>Who is this poster for?</legend>
@@ -307,11 +369,18 @@ export default function FightLaunchDesk() {
           {affiliates.map((user) => <option key={user._id} value={String(user._id)}>{personName(user)} · {user.email}</option>)}
         </select>
       </label>}
-      <label htmlFor="fight-launch-poster">Upload your finished fight poster</label>
-      <p>{fight ? <>This poster will be saved to <strong>{fightTitle}</strong>{audience === 'one' ? (affiliate ? <> for <strong>{personName(affiliate)}</strong> only</> : ' (choose the affiliate first)') : ' as its general poster'}.</> : 'Choose a fight first. The poster is saved to exactly the fight you choose.'} PNG, JPEG, or WebP, up to 25 MB.</p>
-      <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp" disabled={!fight || uploadBusy || (audience === 'one' && !affiliateId)} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} />
-      <small>{uploadBusy ? 'Uploading poster…' : !fight ? 'Choose a fight to enable upload.' : audience === 'one' ? (customSource?.fightId === id ? 'Poster uploaded for this affiliate.' : 'Upload the poster for this affiliate.') : generalPoster ? 'Poster saved for this fight. Choose another image to replace it.' : 'No poster saved for this fight yet. Upload your own.'}</small>
-      {uploadError && <p role="alert" className={styles.uploadError}>{uploadError}</p>}
+      <strong style={{ fontSize: 20, color: '#ffbd4d' }}>Upload your finished fight poster</strong>
+      <p>{fight ? <>This poster will be saved to <strong>{fightTitle}</strong>{audience === 'one' ? (affiliate ? <> for <strong>{personName(affiliate)}</strong> only</> : ' for one affiliate only (choose the affiliate before the preview)') : ' as its general poster'}.</> : 'Choose a fight first. The poster is saved to exactly the fight you choose.'} PNG, JPEG, or WebP, up to 25 MB. It does not need to be in the Fighter Library.</p>
+      <input id="fight-launch-poster" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" disabled={!fight || uploadBusy} onChange={(e) => { uploadPoster(e.target.files?.[0]); e.target.value = ''; }} style={srOnly} />
+      <label htmlFor="fight-launch-poster" data-upload-button="true" aria-disabled={!fight || uploadBusy} style={{ ...uploadButton, ...(!fight || uploadBusy ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' } : {}) }}>
+        {uploadBusy ? 'Uploading…' : 'Choose File / Upload Custom Poster'}
+      </label>
+      <small>{uploadBusy ? 'Uploading poster…' : !fight ? 'Choose a fight to enable upload.' : audience === 'one' ? (customSource?.fightId === id ? 'Saved. This poster is for one affiliate only. Choose another image to replace it.' : 'Choose your finished poster.') : generalPoster ? 'Poster saved for this fight. Choose another image to replace it.' : 'No poster saved for this fight yet. Upload your own.'}</small>
+      {uploadPreview && uploadPreview.fightId === id && <figure style={{ margin: 0 }} data-upload-preview="true">
+        <img src={uploadPreview.src} alt={`Your poster for ${fightTitle}`} style={{ display: 'block', maxWidth: 220, maxHeight: 280, borderRadius: 8, border: '1px solid #a667d5' }} />
+        <figcaption style={{ marginTop: 6 }}>{uploadPreview.name} · {uploadBusy ? 'saving…' : uploadPreview.saved ? 'saved successfully ✓' : 'not saved'}</figcaption>
+      </figure>}
+      {uploadError && <p role="alert" className={styles.uploadError}>Upload failed: {uploadError}</p>}
     </div>
     {loading ? <p>Loading fights…</p> : !usable.length ? <p>No published fights were found in the Fight Registry. Publish or schedule a fight there first.</p> : !fight ? <p>Choose a fight above to prepare its poster and posts.</p> : <>
       {campaignArt && (audience === 'all' || affiliate) && <div className={styles.uploadPanel} data-campaign="true">
