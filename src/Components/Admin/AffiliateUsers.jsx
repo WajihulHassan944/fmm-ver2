@@ -292,6 +292,14 @@ const AffiliateUsers = () => {
     launchSelectionPending.current = !onlyAffiliateId && (loading || !affiliateUsers.length);
     setSelectedAffiliateIds(onlyAffiliateId ? [onlyAffiliateId] : affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`${title || 'A new fight'} · your FANTASY MMADNESS share kit`);
+    if (manualLaunch?.promo) {
+      const promoLines = [manualLaunch.promo.message, [title, manualLaunch.promo.event].filter(Boolean).join(' · ')].filter(Boolean).join('\n\n');
+      setBulkMessage(`Hi {firstName},\n\n${promoLines}\n\nThe fight entry is {entryCoins} and the advertised prize pool is {prizeCoins}.\n\nYour finished fight poster with your personal QR code is attached to this email. Your personal fight link: {fightLink}\n\nOpen your share kit: {shareKit}\n\nReady-to-post captions:\n\nFacebook:\n{facebookPost}\n\nInstagram:\n{instagramPost}\n\nTikTok:\n{tiktokPost}\n\nX:\n{xPost}\n\nWhen someone joins and enters through your link, their eligible paid entry remains attributed to you; your affiliate share of the platform proceeds is credited under the existing payout terms after the fight is settled. Refunds are excluded.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadness.com.\n\nFANTASY MMADNESS Owner Office`);
+      setBulkResults([]);
+      setMailLimitReached(false);
+      setBulkEmailOpen(true);
+      return;
+    }
     setBulkMessage(`Hi {firstName},\n\n${title || 'A new fight'} is ready for your league. The fight entry is {entryCoins} and the advertised prize pool is {prizeCoins}. We have prepared your personal fight link, QR poster, and captions.\n\nOpen your share kit: {shareKit}\n\nSign in with your FANTASY MMADNESS affiliate account if asked. Your own tracked link and QR code are in the kit. When someone joins and enters through your link, their eligible paid entry remains attributed to you; your affiliate share of the platform proceeds is credited under the existing payout terms after the fight is settled. Refunds are excluded. You can review your referrals and earnings in your affiliate back office.\n\nChoose Facebook to review your post, or use the ready-made captions for the other platforms. The fight entry and prize pool are already set; you do not need to set them again.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadness.com.\n\nFANTASY MMADNESS Owner Office`);
     setBulkResults([]);
     setMailLimitReached(false);
@@ -399,7 +407,7 @@ const AffiliateUsers = () => {
       setPosterUrls((current) => ({ ...current, [fightId]: result.poster }));
       // A new base poster makes any earlier finished/approved version stale.
       setFinishedPoster(null);
-      setApprovedPoster((current) => (current && current.fightId === String(fightId) ? null : current));
+      setApprovedPoster((current) => (current && current.fightId === String(fightId) && current.sourceKind !== 'custom' ? null : current));
       toast.success('Fight poster saved. Each affiliate gets their own tracked QR version.');
     } catch (error) { toast.error(error.message || 'The poster could not be uploaded.'); }
     finally { setPosterUploading(false); }
@@ -414,13 +422,50 @@ const AffiliateUsers = () => {
   const posterAffiliate = singlePosterAffiliates.find((user) => String(user._id) === posterAffiliateId) || null;
   const affiliateLabel = (user) => `${`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.playerName || 'Affiliate'}`;
   const approvedForSelection = Boolean(approvedPoster && approvedPoster.fightId === posterFightId && approvedPoster.affiliateId === posterAffiliateId);
-  const singlePosterNeedsApproval = Boolean(manualLaunch?.affiliateId && launchFightId === manualLaunch.id && !(approvedPoster && approvedPoster.affiliateId === manualLaunch.affiliateId && approvedPoster.fightId === launchFightId));
-  const approvedForLaunch = Boolean(approvedPoster && manualLaunch?.affiliateId && manualLaunch.affiliateId === approvedPoster.affiliateId && launchFightId === approvedPoster.fightId);
+  const approvedForLaunch = Boolean(approvedPoster && launchFightId === approvedPoster.fightId && (
+    approvedPoster.audience === 'all'
+      ? manualLaunch?.campaignId === approvedPoster.id
+      : (manualLaunch?.affiliateId && manualLaunch.affiliateId === approvedPoster.affiliateId)));
+  // A one-affiliate or campaign announcement never goes out without its approved poster.
+  const singlePosterNeedsApproval = Boolean((manualLaunch?.affiliateId || manualLaunch?.campaignId) && launchFightId === manualLaunch.id && !approvedForLaunch);
 
   // Any change to the fight, affiliate or QR position means the preview on
   // screen is no longer what would be sent.
   const resetFinishedPoster = () => { setFinishedPoster(null); setApprovedPoster(null); };
-  useEffect(() => { setFinishedPoster(null); setApprovedPoster(null); }, [posterFightId, posterAffiliateId]);
+  useEffect(() => {
+    setFinishedPoster((current) => (current?.fromCampaign ? current : null));
+    setApprovedPoster((current) => (current?.fromCampaign ? current : null));
+  }, [posterFightId, posterAffiliateId]);
+
+  // Opened from the Fight Launch Desk with an approved poster campaign: load
+  // exactly that approved poster and its promotional text.
+  useEffect(() => {
+    const campaignId = typeof router.query.posterCampaign === 'string' ? router.query.posterCampaign : '';
+    if (!router.isReady || !/^[a-f\d]{24}$/i.test(campaignId)) return undefined;
+    let active = true;
+    fetch(buildPublicApiUrl(`/api/admin/affiliate-posters/${encodeURIComponent(campaignId)}`), { headers: adminHeaders(), cache: 'no-store' })
+      .then(async (response) => {
+        if (requireFreshAdminSession(response)) return;
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.poster) throw new Error(result.message || 'The approved poster could not be loaded.');
+        if (!active) return;
+        if (result.poster.status !== 'approved') throw new Error('This poster is no longer approved. Approve it again in the Fight Launch Desk.');
+        const poster = { ...result.poster, fromCampaign: true };
+        setApprovedPoster(poster);
+        setFinishedPoster(poster);
+        setManualLaunch({
+          id: poster.fightId,
+          title: poster.promo?.title || 'This fight',
+          campaignId: poster.id,
+          audience: poster.audience,
+          promo: poster.promo,
+          ...(poster.audience === 'one' ? { affiliateId: poster.affiliateId } : {}),
+        });
+        setLaunchRequested((count) => count + 1);
+      })
+      .catch((error) => toast.error(error.message || 'The approved poster could not be loaded.'));
+    return () => { active = false; };
+  }, [router.isReady, router.query.posterCampaign]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!finishedPoster?.url) { setFinishedPosterSrc(''); return undefined; }
@@ -510,7 +555,7 @@ const AffiliateUsers = () => {
     const coins = (value) => value === undefined || value === null || value === ''
       ? 'shown in your share kit'
       : `${Math.max(0, Math.round(Number(value) || 0)).toLocaleString()} FM COINS`;
-    const posts = affiliateFightPosts(title, fightLink, recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens, campaignFight && getFighterName(campaignFight, 'A'), campaignFight && getFighterName(campaignFight, 'B'));
+    const posts = affiliateFightPosts(title, fightLink, (manualLaunch?.audience === 'one' && manualLaunch?.promo?.affiliateName ? `${manualLaunch.promo.affiliateName}'s league` : '') || recipient.leagueName || recipient.playerName || 'my league', campaignFight?.pot, campaignFight?.matchTokens, campaignFight && getFighterName(campaignFight, 'A'), campaignFight && getFighterName(campaignFight, 'B'));
     return bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate')
       .replaceAll('{fightLink}', fightLink).replaceAll('{qrLink}', qrLink)
       .replaceAll('{shareKit}', shareKit)
@@ -557,7 +602,7 @@ const AffiliateUsers = () => {
             message: launchFightId ? affiliateLaunchMessage(recipient) : bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate'),
             ...(launchFightId ? { launchFightId } : {}),
             // The exact finished poster the owner approved for this affiliate.
-            ...(approvedForLaunch && String(recipient._id) === approvedPoster.affiliateId ? { customPosterId: approvedPoster.id } : {}),
+            ...(approvedForLaunch && (approvedPoster.audience === 'all' || String(recipient._id) === approvedPoster.affiliateId) ? { customPosterId: approvedPoster.id } : {}),
           }),
         });
         if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
@@ -894,7 +939,7 @@ const AffiliateUsers = () => {
               </div>
               {launchFightId && <div className="admin-bulk-email-note"><strong>Fight poster for these affiliates</strong><p>Upload your finished poster here before sending. Each affiliate’s kit will add their own tracked QR.</p><input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading || bulkSending} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0], launchFightId); event.target.value = ''; }} />{posterUploading ? <p>Saving poster…</p> : (posterUrls[launchFightId] || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.fightPosterImage) ? <p>Poster saved for this fight.</p> : <p>The kit will use fighter photos until you upload a poster.</p>}</div>}
               {singlePosterNeedsApproval && <div className="admin-bulk-email-note" role="alert"><strong>The finished poster is no longer approved</strong><p>The fight poster changed after you approved the finished version. Close this window, make the finished poster again and approve it before sending.</p></div>}
-              {approvedForLaunch && <div className="admin-bulk-email-note" data-approved-poster="true"><strong>Finished poster attached for {affiliateLabel(affiliateUsers.find((user) => String(user._id) === approvedPoster.affiliateId))}</strong><p>This exact image, with their personal QR code, is attached to their email.{selectedRecipients.some((user) => String(user._id) !== approvedPoster.affiliateId) ? ' Other selected affiliates get the regular email without it.' : ''}</p>{finishedPosterSrc && finishedPoster?.id === approvedPoster.id ? <img src={finishedPosterSrc} alt="Approved finished poster" style={{ width: 140, maxHeight: 200, objectFit: 'contain', borderRadius: 8 }} /> : null}</div>}
+              {approvedForLaunch && <div className="admin-bulk-email-note" data-approved-poster="true"><strong>{approvedPoster.audience === 'all' ? 'Approved poster attached for every affiliate' : `Finished poster attached for ${affiliateLabel(affiliateUsers.find((user) => String(user._id) === approvedPoster.affiliateId))}`}</strong><p>{approvedPoster.audience === 'all' ? 'Each selected affiliate receives the approved design with their own personal QR code, attached to their email.' : <>This exact image, with their personal QR code, is attached to their email.{selectedRecipients.some((user) => String(user._id) !== approvedPoster.affiliateId) ? ' Other selected affiliates get the regular email without it.' : ''}</>}</p>{finishedPosterSrc && finishedPoster?.id === approvedPoster.id ? <img src={finishedPosterSrc} alt="Approved finished poster" style={{ width: 140, maxHeight: 200, objectFit: 'contain', borderRadius: 8 }} /> : null}</div>}
               <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. {launchFightId ? 'Each approved affiliate receives their own tracked fight link, QR download, and ready-to-copy posts.' : <>Use <strong>{'{firstName}'}</strong> to personalize each greeting.</>}</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
