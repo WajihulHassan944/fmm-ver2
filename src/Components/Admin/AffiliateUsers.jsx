@@ -71,6 +71,18 @@ const AffiliateUsers = () => {
   const [posterLoadError, setPosterLoadError] = useState('');
   const [manualLaunch, setManualLaunch] = useState(null);
   const [launchRequested, setLaunchRequested] = useState(0);
+  // One-affiliate custom poster: who receives it, where the QR goes, the
+  // finished image the server built, and the one the owner approved.
+  const [posterAudience, setPosterAudience] = useState('all');
+  const [posterAffiliateId, setPosterAffiliateId] = useState('');
+  const [qrPlacement, setQrPlacement] = useState({ x: 0.7, y: 0.72, scale: 0.22 });
+  const [posterAspect, setPosterAspect] = useState(1);
+  const [finishedPoster, setFinishedPoster] = useState(null);
+  const [finishedPosterSrc, setFinishedPosterSrc] = useState('');
+  const [approvedPoster, setApprovedPoster] = useState(null);
+  const [finishedBusy, setFinishedBusy] = useState('');
+  const placementRef = useRef(null);
+  const qrDrag = useRef(null);
   const router = useRouter();
   const preparedLaunch = useRef('');
   const launchSelectionPending = useRef(false);
@@ -275,8 +287,10 @@ const AffiliateUsers = () => {
     const requestKey = `${fightId}:${launchRequested}`;
     if (!router.isReady || !fightId || (!affiliateUsers.length && !manualLaunch) || preparedLaunch.current === requestKey) return;
     preparedLaunch.current = requestKey;
-    launchSelectionPending.current = loading || !affiliateUsers.length;
-    setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
+    // A poster prepared for one affiliate opens with only that affiliate selected.
+    const onlyAffiliateId = manualLaunch?.affiliateId || '';
+    launchSelectionPending.current = !onlyAffiliateId && (loading || !affiliateUsers.length);
+    setSelectedAffiliateIds(onlyAffiliateId ? [onlyAffiliateId] : affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`${title || 'A new fight'} · your FANTASY MMADNESS share kit`);
     setBulkMessage(`Hi {firstName},\n\n${title || 'A new fight'} is ready for your league. The fight entry is {entryCoins} and the advertised prize pool is {prizeCoins}. We have prepared your personal fight link, QR poster, and captions.\n\nOpen your share kit: {shareKit}\n\nSign in with your FANTASY MMADNESS affiliate account if asked. Your own tracked link and QR code are in the kit. When someone joins and enters through your link, their eligible paid entry remains attributed to you; your affiliate share of the platform proceeds is credited under the existing payout terms after the fight is settled. Refunds are excluded. You can review your referrals and earnings in your affiliate back office.\n\nChoose Facebook to review your post, or use the ready-made captions for the other platforms. The fight entry and prize pool are already set; you do not need to set them again.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadness.com.\n\nFANTASY MMADNESS Owner Office`);
     setBulkResults([]);
@@ -348,9 +362,98 @@ const AffiliateUsers = () => {
       if (requireFreshAdminSession(response)) return;
       if (!response.ok || !result.poster) throw new Error(result.message || `The poster could not be uploaded (HTTP ${response.status}).`);
       setPosterUrls((current) => ({ ...current, [fightId]: result.poster }));
+      // A new base poster makes any earlier finished/approved version stale.
+      setFinishedPoster(null);
+      setApprovedPoster((current) => (current && current.fightId === String(fightId) ? null : current));
       toast.success('Fight poster saved. Each affiliate gets their own tracked QR version.');
     } catch (error) { toast.error(error.message || 'The poster could not be uploaded.'); }
     finally { setPosterUploading(false); }
+  };
+
+  // The poster the server will use: the one uploaded for this fight. Older
+  // background art is never used for a one-affiliate poster.
+  const savedFightPoster = posterUrls[posterFightId] || posterFight?.fightPosterImage || '';
+  const singlePosterAffiliates = affiliateUsers
+    .filter((user) => user.verified && isValidEmail(user.email))
+    .sort((a, b) => `${a.firstName || ''} ${a.lastName || ''}`.localeCompare(`${b.firstName || ''} ${b.lastName || ''}`));
+  const posterAffiliate = singlePosterAffiliates.find((user) => String(user._id) === posterAffiliateId) || null;
+  const affiliateLabel = (user) => `${`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.playerName || 'Affiliate'}`;
+  const approvedForSelection = Boolean(approvedPoster && approvedPoster.fightId === posterFightId && approvedPoster.affiliateId === posterAffiliateId);
+  const singlePosterNeedsApproval = Boolean(manualLaunch?.affiliateId && launchFightId === manualLaunch.id && !(approvedPoster && approvedPoster.affiliateId === manualLaunch.affiliateId && approvedPoster.fightId === launchFightId));
+  const approvedForLaunch = Boolean(approvedPoster && manualLaunch?.affiliateId && manualLaunch.affiliateId === approvedPoster.affiliateId && launchFightId === approvedPoster.fightId);
+
+  // Any change to the fight, affiliate or QR position means the preview on
+  // screen is no longer what would be sent.
+  const resetFinishedPoster = () => { setFinishedPoster(null); setApprovedPoster(null); };
+  useEffect(() => { setFinishedPoster(null); setApprovedPoster(null); }, [posterFightId, posterAffiliateId]);
+
+  useEffect(() => {
+    if (!finishedPoster?.url) { setFinishedPosterSrc(''); return undefined; }
+    if (/^https?:\/\//i.test(finishedPoster.url)) { setFinishedPosterSrc(finishedPoster.url); return undefined; }
+    // Stored only in our database: load the exact bytes with the admin session.
+    let active = true;
+    let objectUrl = '';
+    fetch(buildPublicApiUrl(finishedPoster.url), { headers: adminHeaders(), cache: 'no-store' })
+      .then((response) => { if (!response.ok) throw new Error('The finished poster could not be loaded.'); return response.blob(); })
+      .then((blob) => { if (!active) return; objectUrl = URL.createObjectURL(blob); setFinishedPosterSrc(objectUrl); })
+      .catch((error) => toast.error(error.message));
+    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [finishedPoster?.url]);
+
+  const clampPlacement = (next) => {
+    const scale = Math.min(0.6, Math.max(0.08, Number(next.scale) || 0.22));
+    const heightShare = scale * posterAspect;
+    return {
+      scale,
+      x: Math.min(1 - scale, Math.max(0, Number(next.x) || 0)),
+      y: Math.min(Math.max(0, 1 - heightShare), Math.max(0, Number(next.y) || 0)),
+    };
+  };
+  const updatePlacement = (next) => { setQrPlacement(clampPlacement(next)); setFinishedPoster(null); setApprovedPoster(null); };
+  const startQrDrag = (event) => {
+    const box = placementRef.current?.getBoundingClientRect();
+    if (!box) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    qrDrag.current = { startX: event.clientX, startY: event.clientY, from: qrPlacement, width: box.width, height: box.height };
+  };
+  const moveQrDrag = (event) => {
+    const drag = qrDrag.current;
+    if (!drag) return;
+    updatePlacement({ ...drag.from, x: drag.from.x + (event.clientX - drag.startX) / drag.width, y: drag.from.y + (event.clientY - drag.startY) / drag.height });
+  };
+  const endQrDrag = () => { qrDrag.current = null; };
+
+  const buildFinishedPoster = async () => {
+    if (!posterFightId || !posterAffiliateId || !savedFightPoster) return;
+    setFinishedBusy('preview');
+    setApprovedPoster(null);
+    try {
+      const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-posters/preview'), {
+        method: 'POST',
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ fightId: posterFightId, affiliateId: posterAffiliateId, sourcePosterUrl: savedFightPoster, qr: qrPlacement }),
+      });
+      if (requireFreshAdminSession(response)) return;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.poster) throw new Error(result.message || `The finished poster could not be made (HTTP ${response.status}).`);
+      setFinishedPoster(result.poster);
+    } catch (error) { setFinishedPoster(null); toast.error(error.message || 'The finished poster could not be made.'); }
+    finally { setFinishedBusy(''); }
+  };
+
+  const approveFinishedPoster = async () => {
+    if (!finishedPoster?.id) return;
+    setFinishedBusy('approve');
+    try {
+      const response = await fetch(buildPublicApiUrl(`/api/admin/affiliate-posters/${encodeURIComponent(finishedPoster.id)}/approve`), { method: 'POST', headers: adminHeaders() });
+      if (requireFreshAdminSession(response)) return;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.poster) throw new Error(result.message || 'The finished poster could not be approved.');
+      setApprovedPoster(result.poster);
+      toast.success('Finished poster approved. This exact image will be attached to the announcement.');
+    } catch (error) { toast.error(error.message || 'The finished poster could not be approved.'); }
+    finally { setFinishedBusy(''); }
   };
 
   const affiliateLaunchMessage = (recipient) => {
@@ -409,6 +512,8 @@ const AffiliateUsers = () => {
             subject: bulkSubject.trim(),
             message: launchFightId ? affiliateLaunchMessage(recipient) : bulkMessage.replaceAll('{firstName}', recipient.firstName || 'Affiliate'),
             ...(launchFightId ? { launchFightId } : {}),
+            // The exact finished poster the owner approved for this affiliate.
+            ...(approvedForLaunch && String(recipient._id) === approvedPoster.affiliateId ? { customPosterId: approvedPoster.id } : {}),
           }),
         });
         if (requireFreshAdminSession(response)) throw new Error('Admin session expired.');
@@ -564,10 +669,43 @@ const AffiliateUsers = () => {
               <input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0]); event.target.value = ''; }} style={{ display: 'block', marginTop: 6, maxWidth: '100%' }} />
             </label>
             <p>{posterUploading ? 'Saving poster…' : (posterUrls[posterFightId] || posterFight?.fightPosterImage) ? 'Poster saved for this fight. Affiliates will see it with their personal QR.' : posterUrl ? 'Showing the fight poster. Upload your finished version to replace it.' : 'No fight poster yet. Upload your finished version above.'}</p>
-            <button type="button" className="admin-action-primary" disabled={!posterFight || posterUploading} onClick={() => {
-              setManualLaunch({ id: posterFightId, title: `${getFighterName(posterFight, 'A')} vs ${getFighterName(posterFight, 'B')}` });
+            <fieldset style={{ border: 0, padding: 0, margin: '0 0 14px' }}>
+              <legend style={{ fontWeight: 600, marginBottom: 6 }}>Who receives this poster?</legend>
+              <label style={{ display: 'block', marginBottom: 4 }}><input type="radio" name="poster-audience" value="all" checked={posterAudience === 'all'} onChange={() => { setPosterAudience('all'); resetFinishedPoster(); }} /> All approved affiliates (each kit adds their own QR code)</label>
+              <label style={{ display: 'block' }}><input type="radio" name="poster-audience" value="one" checked={posterAudience === 'one'} onChange={() => { setPosterAudience('one'); resetFinishedPoster(); }} /> One affiliate, with their QR code placed on my poster</label>
+            </fieldset>
+            {posterAudience === 'one' && <div style={{ marginBottom: 14 }}>
+              <label style={{ display: 'block', marginBottom: 12 }}>Affiliate
+                <select value={posterAffiliateId} onChange={(event) => setPosterAffiliateId(event.target.value)} style={{ display: 'block', width: '100%', marginTop: 6 }}>
+                  <option value="">Choose an affiliate…</option>
+                  {singlePosterAffiliates.map((user) => <option key={user._id} value={String(user._id)}>{affiliateLabel(user)} · {user.email}</option>)}
+                </select>
+              </label>
+              {!savedFightPoster ? <p>Upload your finished poster above first.</p> : !posterAffiliate ? <p>Choose the affiliate who should receive this poster.</p> : <>
+                <p>Drag the QR code onto an empty area of your poster and use the slider to resize it. Nothing else on your poster changes.</p>
+                <div ref={placementRef} aria-label="QR code placement on your poster" style={{ position: 'relative', width: '100%', maxWidth: 420, touchAction: 'none', userSelect: 'none' }}>
+                  <img src={resolvePublicMediaUrl(savedFightPoster)} alt="Your uploaded poster" draggable={false} onLoad={(event) => { const image = event.currentTarget; if (image.naturalWidth && image.naturalHeight) setPosterAspect(image.naturalWidth / image.naturalHeight); }} style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 8 }} />
+                  <img data-qr-handle="true" src={`/api/fight-qr?fightId=${encodeURIComponent(posterFightId)}&affiliateId=${encodeURIComponent(posterAffiliateId)}&inline=1`} alt={`QR code for ${affiliateLabel(posterAffiliate)}`} draggable={false} onPointerDown={startQrDrag} onPointerMove={moveQrDrag} onPointerUp={endQrDrag} onPointerCancel={endQrDrag} style={{ position: 'absolute', left: `${qrPlacement.x * 100}%`, top: `${qrPlacement.y * 100}%`, width: `${qrPlacement.scale * 100}%`, aspectRatio: '1 / 1', cursor: 'move', background: '#fff', outline: '2px dashed #b7192c', outlineOffset: 2, touchAction: 'none' }} />
+                </div>
+                <label style={{ display: 'block', margin: '10px 0' }}>QR code size: {Math.round(qrPlacement.scale * 100)}% of the poster width
+                  <input type="range" min="8" max="45" step="1" value={Math.round(qrPlacement.scale * 100)} onChange={(event) => updatePlacement({ ...qrPlacement, scale: Number(event.target.value) / 100 })} style={{ display: 'block', width: '100%', maxWidth: 420 }} />
+                </label>
+                <button type="button" className="admin-action-secondary" disabled={Boolean(finishedBusy) || posterUploading} onClick={buildFinishedPoster}>{finishedBusy === 'preview' ? 'Making the finished poster…' : 'Show finished poster'}</button>
+                {finishedPoster && <div data-finished-poster="true" style={{ marginTop: 14 }}>
+                  <strong>Finished poster for {affiliateLabel(posterAffiliate)}</strong>
+                  {finishedPosterSrc ? <img src={finishedPosterSrc} alt={`Finished poster with ${affiliateLabel(posterAffiliate)}'s QR code`} style={{ display: 'block', width: '100%', maxWidth: 420, height: 'auto', marginTop: 8, borderRadius: 8 }} /> : <p>Loading the finished poster…</p>}
+                  <p style={{ overflowWrap: 'anywhere' }}>The QR code opens {affiliateLabel(posterAffiliate)}’s own league for this fight: <a href={finishedPoster.qrLink} target="_blank" rel="noopener noreferrer">{finishedPoster.qrLink}</a></p>
+                  {approvedForSelection
+                    ? <p role="status"><strong>Approved.</strong> This exact image will be attached to {affiliateLabel(posterAffiliate)}’s announcement.</p>
+                    : <button type="button" className="admin-action-primary" disabled={Boolean(finishedBusy) || !finishedPosterSrc} onClick={approveFinishedPoster}>{finishedBusy === 'approve' ? 'Approving…' : 'Approve this poster'}</button>}
+                </div>}
+              </>}
+            </div>}
+            <button type="button" className="admin-action-primary" disabled={!posterFight || posterUploading || (posterAudience === 'one' && !approvedForSelection)} onClick={() => {
+              setManualLaunch({ id: posterFightId, title: `${getFighterName(posterFight, 'A')} vs ${getFighterName(posterFight, 'B')}`, ...(posterAudience === 'one' ? { affiliateId: posterAffiliateId } : {}) });
               setLaunchRequested((count) => count + 1);
             }}>Prepare affiliate announcement →</button>
+            {posterAudience === 'one' && !approvedForSelection && <small style={{ display: 'block', marginTop: 6 }}>Approve the finished poster first.</small>}
           </div>
           {posterUrl && <img src={resolvePublicMediaUrl(posterUrl)} alt="Saved fight poster artwork" style={{ width: 150, maxHeight: 210, objectFit: 'contain', borderRadius: 10 }} />}
         </div>}
@@ -711,6 +849,8 @@ const AffiliateUsers = () => {
                 </div>
               </div>
               {launchFightId && <div className="admin-bulk-email-note"><strong>Fight poster for these affiliates</strong><p>Upload your finished poster here before sending. Each affiliate’s kit will add their own tracked QR.</p><input type="file" accept="image/png,image/jpeg,image/webp" disabled={posterUploading || bulkSending} onChange={(event) => { uploadCampaignPoster(event.target.files?.[0], launchFightId); event.target.value = ''; }} />{posterUploading ? <p>Saving poster…</p> : (posterUrls[launchFightId] || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.fightPosterImage) ? <p>Poster saved for this fight.</p> : <p>The kit will use fighter photos until you upload a poster.</p>}</div>}
+              {singlePosterNeedsApproval && <div className="admin-bulk-email-note" role="alert"><strong>The finished poster is no longer approved</strong><p>The fight poster changed after you approved the finished version. Close this window, make the finished poster again and approve it before sending.</p></div>}
+              {approvedForLaunch && <div className="admin-bulk-email-note" data-approved-poster="true"><strong>Finished poster attached for {affiliateLabel(affiliateUsers.find((user) => String(user._id) === approvedPoster.affiliateId))}</strong><p>This exact image, with their personal QR code, is attached to their email.{selectedRecipients.some((user) => String(user._id) !== approvedPoster.affiliateId) ? ' Other selected affiliates get the regular email without it.' : ''}</p>{finishedPosterSrc && finishedPoster?.id === approvedPoster.id ? <img src={finishedPosterSrc} alt="Approved finished poster" style={{ width: 140, maxHeight: 200, objectFit: 'contain', borderRadius: 8 }} /> : null}</div>}
               <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. {launchFightId ? 'Each approved affiliate receives their own tracked fight link, QR download, and ready-to-copy posts.' : <>Use <strong>{'{firstName}'}</strong> to personalize each greeting.</>}</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
@@ -719,7 +859,7 @@ const AffiliateUsers = () => {
               {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.skipped} not attempted · {bulkProgress.total} total</span></div>}
             </div>
             <footer>
-              <button type="button" className="admin-action-primary" disabled={bulkSending || mailLimitReached || posterUploading || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : mailLimitReached ? 'Sending paused by Gmail' : `Send ${selectedRecipients.length} emails`}</button>
+              <button type="button" className="admin-action-primary" disabled={bulkSending || mailLimitReached || posterUploading || singlePosterNeedsApproval || !selectedRecipients.length || !bulkSubject.trim() || !bulkMessage.trim()} onClick={sendBulkEmail}><FaEnvelope /> {bulkSending ? `Sending ${bulkProgress.sent + bulkProgress.failed + 1} of ${bulkProgress.total}…` : mailLimitReached ? 'Sending paused by Gmail' : `Send ${selectedRecipients.length} emails`}</button>
               <button type="button" className="admin-action-secondary" disabled={bulkSending} onClick={() => setBulkEmailOpen(false)}>Close</button>
             </footer>
           </section>
