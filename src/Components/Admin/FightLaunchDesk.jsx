@@ -188,7 +188,9 @@ export default function FightLaunchDesk() {
   const buildFinished = async () => {
     if (!id || !campaignArt) return;
     setCampaignBusy('preview');
-    setApproved(null);
+    // The old preview disappears while the new one is made, so an outdated
+    // poster can never be approved by mistake.
+    clearCampaign();
     try {
       const response = await fetch(buildPublicApiUrl('/api/admin/affiliate-posters/preview'), {
         method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
