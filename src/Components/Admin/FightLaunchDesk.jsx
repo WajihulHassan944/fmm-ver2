@@ -11,6 +11,7 @@ import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSoci
 import { fighterNameHashtags } from '@/Utils/fightShareCopy';
 import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { uploadAffiliatePosterSource, uploadFightPosterExact } from '@/Utils/posterUploads';
+import { computeHomepagePositions } from '@/Utils/homepagePositions';
 import styles from './FightLaunchDesk.module.css';
 
 const titleFor = (fight) => `${getFighterName(fight, 'A')} vs ${getFighterName(fight, 'B')}`;
@@ -69,13 +70,14 @@ export default function FightLaunchDesk() {
 
   const [homepageSlots, setHomepageSlots] = useState({});
   const usable = useMemo(() => (Array.isArray(fights) ? fights : []).filter((fight) => getFightId(fight) && !isPlaceholderWrestlingPromotion(fight) && !isDraft(fight)), [fights]);
-  const slotOf = (fight) => homepageSlots[String(getFightId(fight))] || 0;
+  const slotOf = (fight) => homepageSlots[String(getFightId(fight))]?.slot || 0;
+  const slotLabel = (fight) => { const position = homepageSlots[String(getFightId(fight))]; return position ? ` · Homepage ${position.slot}${position.automatic ? ' (automatic)' : ''}` : ''; };
   // Every word typed must appear in either fighter's name, the event name or
   // the date; partial words and any capitalization match.
   const searchText = (fight) => searchWords(`${getFighterName(fight, 'A')} ${getFighterName(fight, 'B')} ${fight.matchFighterA || ''} ${fight.matchFighterB || ''} ${fight.matchName || ''} ${fight.matchTitle || ''} ${formatFightDate(fight)}`).join(' ');
   const groups = useMemo(() => {
     const out = { current: [], undated: [], stale: [], past: [] };
-    usable.forEach((fight) => { out[fightGroup(fight, homepageSlots[String(getFightId(fight))])].push(fight); });
+    usable.forEach((fight) => { out[fightGroup(fight, slotOf(fight))].push(fight); });
     out.current.sort((a, b) => (fightTime(a) ?? Infinity) - (fightTime(b) ?? Infinity));
     out.stale.sort((a, b) => (fightTime(b) ?? 0) - (fightTime(a) ?? 0));
     out.past.sort((a, b) => (fightTime(b) ?? 0) - (fightTime(a) ?? 0));
@@ -272,11 +274,13 @@ export default function FightLaunchDesk() {
     };
     Promise.allSettled([
       getJson('/api/admin/fights', { limit: 500, includeShadow: true, source: 'all' }, adminHeaders()),
-      getJson('/api/public/prediction-fights', { limit: 500 }),
-      getJson('/api/public/homepage/promoted-fights', { limit: 10 }),
+      // The same three lists the public homepage reads, with the same limits.
+      getJson('/api/public/prediction-fights', { limit: 100 }),
+      getJson('/api/public/homepage/promoted-fights', { limit: 24 }),
       fetchPublishedWrestlingPromotions('OPEN,LOCKED,LIVE,SCORING,FINALIZED'),
+      getJson('/api/wrestling/matches', { status: 'OPEN,LOCKED,LIVE,SCORING', limit: 100 }),
     ])
-      .then(([registry, website, homepage, wrestling]) => {
+      .then(([registry, website, homepage, wrestling, homepageWrestling]) => {
         if (!live) return;
         if (registry.status === 'rejected' && website.status === 'rejected') throw new Error(`Could not load the Fight Registry (${registry.reason?.message || 'unavailable'}).`);
         if (registry.status === 'rejected') setError(`The Fight Registry did not answer (${registry.reason?.message || 'unavailable'}); showing the fights on the public website.`);
@@ -286,14 +290,14 @@ export default function FightLaunchDesk() {
         normalizePublicFightRows(rowsOf(homepage.value)).forEach(add);
         normalizePublicFightRows(rowsOf(registry.value)).forEach(add);
         (wrestling.status === 'fulfilled' && Array.isArray(wrestling.value) ? wrestling.value : []).forEach(add);
-        // Homepage positions as saved in the Fight Registry (slots 1–5).
-        const slots = {};
-        [...rowsOf(homepage.value), ...byId.values()].forEach((row) => {
-          const key = String(getFightId(row) || row?._id || row?.id || '');
-          const slot = Number(row?.homepageSlot);
-          const promoted = row?.homepagePromoted === true || row?.homepagePromotion?.isPromoted === true;
-          if (key && promoted && slot >= 1 && slot <= 5 && !isPastFight(row)) slots[key] = slot;
-        });
+        // All five homepage positions exactly as the public homepage fills
+        // them: the owner's saved picks plus the automatic fills.
+        let slots = {};
+        try {
+          if (website.status === 'fulfilled' || homepage.status === 'fulfilled') {
+            slots = computeHomepagePositions({ fightData: website.value, promotedData: homepage.value, wrestlingData: homepageWrestling.status === 'fulfilled' ? homepageWrestling.value : null });
+          }
+        } catch { slots = {}; }
         setHomepageSlots(slots);
         setFights([...byId.values()]);
       })
@@ -329,7 +333,7 @@ export default function FightLaunchDesk() {
     finally { setBusy(false); }
   };
 
-  const optionLabel = (row) => `${titleFor(row)} · ${formatFightDate(row)}${slotOf(row) ? ` · Homepage ${slotOf(row)}` : ''}${!isPastFight(row) && datePassed(row) && !slotOf(row) ? ' · date passed, not completed' : ''}`;
+  const optionLabel = (row) => `${titleFor(row)} · ${formatFightDate(row)}${slotLabel(row)}${!isPastFight(row) && datePassed(row) && !slotOf(row) ? ' · date passed, not completed' : ''}`;
   const field = { display: 'block', width: '100%', marginTop: 6 };
   const chooseFight = (value) => { setSelected(value); setSearch(''); };
   const uploadButton = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 22px', borderRadius: 10, fontSize: 18, fontWeight: 800, color: '#fff', background: '#ed253e', border: '2px solid #fff', cursor: 'pointer', width: 'fit-content', maxWidth: '100%' };
@@ -343,7 +347,7 @@ export default function FightLaunchDesk() {
       {search.trim() && <div data-search-results="true" role="listbox" aria-label="Matching fights" style={{ display: 'grid', gap: 6, maxHeight: 360, overflowY: 'auto', fontWeight: 400 }}>
         {searchResults.length
           ? searchResults.slice(0, 60).map(({ fight: row, group }) => <button key={getFightId(row)} type="button" role="option" aria-selected={String(getFightId(row)) === id} onClick={() => chooseFight(String(getFightId(row)))} style={{ textAlign: 'left', padding: '10px 12px', borderRadius: 8, border: '1px solid #525c72', background: '#0e121c', color: '#fff', font: 'inherit', cursor: 'pointer' }}>
-            <strong>{titleFor(row)}</strong><br /><span>{formatFightDate(row)}{row.matchName && row.matchName !== titleFor(row) ? ` · ${row.matchName}` : ''}{slotOf(row) ? ` · Homepage ${slotOf(row)}` : ''} · {GROUP_LABELS[group]}</span>
+            <strong>{titleFor(row)}</strong><br /><span>{formatFightDate(row)}{row.matchName && row.matchName !== titleFor(row) ? ` · ${row.matchName}` : ''}{slotLabel(row)} · {GROUP_LABELS[group]}</span>
           </button>)
           : <p role="status" style={{ margin: 0 }}>No fights match “{search.trim()}”. Check the spelling, or try the other fighter&apos;s name.</p>}
       </div>}
@@ -356,7 +360,7 @@ export default function FightLaunchDesk() {
         </optgroup>)}
       </select>
     </label>
-    {fight && <p role="status" data-selected-fight="true" style={{ margin: '0 0 16px', fontWeight: 700 }}>Selected fight: {fightTitle} · {formatFightDate(fight)}{slotOf(fight) ? ` · Homepage ${slotOf(fight)}` : ''}</p>}
+    {fight && <p role="status" data-selected-fight="true" style={{ margin: '0 0 16px', fontWeight: 700 }}>Selected fight: {fightTitle} · {formatFightDate(fight)}{slotLabel(fight)}</p>}
     <div className={styles.uploadPanel}>
       <fieldset style={{ border: 0, padding: 0, margin: '0 0 12px' }}>
         <legend style={{ fontWeight: 600, marginBottom: 6 }}>Who is this poster for?</legend>
