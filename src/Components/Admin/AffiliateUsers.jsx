@@ -348,6 +348,28 @@ const AffiliateUsers = () => {
   const posterFight = posterFights.find((fight) => String(getFightId(fight)) === posterFightId);
   const posterUrl = posterUrls[posterFightId] || posterFight?.fightPosterImage || posterFight?.promotionBackground || posterFight?.fightPosterMobileImage || '';
 
+  const uploadExactPoster = async (file, fightId) => {
+    const signed = await fetch(buildPublicApiUrl(`/api/admin/fights/${encodeURIComponent(fightId)}/social-poster/direct-upload`), { method: 'POST', headers: adminHeaders() });
+    if (requireFreshAdminSession(signed)) throw Object.assign(new Error('Admin session expired.'), { sessionExpired: true });
+    const ticket = await signed.json().catch(() => ({}));
+    if (!signed.ok || !ticket.uploadUrl) throw new Error(ticket.message || 'Direct upload unavailable.');
+    const form = new FormData();
+    Object.entries(ticket.fields || {}).forEach(([key, value]) => form.append(key, String(value)));
+    form.append('file', file);
+    const uploaded = await fetch(ticket.uploadUrl, { method: 'POST', body: form });
+    const stored = await uploaded.json().catch(() => ({}));
+    if (!uploaded.ok || !stored.secure_url) throw new Error(stored?.error?.message || 'The image library did not accept the poster.');
+    const confirmed = await fetch(buildPublicApiUrl(`/api/admin/fights/${encodeURIComponent(fightId)}/social-poster/confirm`), {
+      method: 'POST',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ secure_url: stored.secure_url, public_id: stored.public_id, version: stored.version, signature: stored.signature }),
+    });
+    if (requireFreshAdminSession(confirmed)) throw Object.assign(new Error('Admin session expired.'), { sessionExpired: true });
+    const saved = await confirmed.json().catch(() => ({}));
+    if (!confirmed.ok || !saved.poster) throw new Error(saved.message || 'The poster could not be saved.');
+    return saved;
+  };
+
   const uploadCampaignPoster = async (file, fightId = posterFightId) => {
     if (!file || !fightId) return;
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 25 * 1024 * 1024) {
@@ -355,12 +377,25 @@ const AffiliateUsers = () => {
     }
     setPosterUploading(true);
     try {
-      const prepared = await prepareFightPosterUpload(file);
-      const form = new FormData(); form.append('poster', prepared);
-      const response = await fetch(`/api/admin/fights/${encodeURIComponent(fightId)}/social-poster`, { method: 'POST', headers: adminHeaders(), body: form });
-      const result = await response.json().catch(() => ({}));
-      if (requireFreshAdminSession(response)) return;
-      if (!response.ok || !result.poster) throw new Error(result.message || `The poster could not be uploaded (HTTP ${response.status}).`);
+      let result = null;
+      // Large posters go straight to the image library so the exact file is
+      // kept. Only if that is unavailable is a smaller copy uploaded instead.
+      if (file.size > 3 * 1024 * 1024) {
+        result = await uploadExactPoster(file, fightId).catch((error) => {
+          if (error?.sessionExpired) throw error;
+          console.warn('Exact poster upload unavailable:', error?.message);
+          return null;
+        });
+        if (!result) toast.info('Your poster was too large to keep the exact file, so a slightly smaller copy was saved. Check the preview before sending.', { autoClose: 12000 });
+      }
+      if (!result) {
+        const prepared = await prepareFightPosterUpload(file);
+        const form = new FormData(); form.append('poster', prepared);
+        const response = await fetch(`/api/admin/fights/${encodeURIComponent(fightId)}/social-poster`, { method: 'POST', headers: adminHeaders(), body: form });
+        result = await response.json().catch(() => ({}));
+        if (requireFreshAdminSession(response)) return;
+        if (!response.ok || !result.poster) throw new Error(result.message || `The poster could not be uploaded (HTTP ${response.status}).`);
+      }
       setPosterUrls((current) => ({ ...current, [fightId]: result.poster }));
       // A new base poster makes any earlier finished/approved version stale.
       setFinishedPoster(null);
@@ -410,19 +445,28 @@ const AffiliateUsers = () => {
     };
   };
   const updatePlacement = (next) => { setQrPlacement(clampPlacement(next)); setFinishedPoster(null); setApprovedPoster(null); };
+  // The QR follows the pointer anywhere on the page until it is released,
+  // so a quick drag (or a finger on a phone) never loses it.
   const startQrDrag = (event) => {
     const box = placementRef.current?.getBoundingClientRect();
-    if (!box) return;
+    if (!box || !box.width || !box.height) return;
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    qrDrag.current = { startX: event.clientX, startY: event.clientY, from: qrPlacement, width: box.width, height: box.height };
+    const drag = { startX: event.clientX, startY: event.clientY, from: qrPlacement, width: box.width, height: box.height };
+    const move = (moveEvent) => {
+      moveEvent.preventDefault?.();
+      updatePlacement({ ...drag.from, x: drag.from.x + (moveEvent.clientX - drag.startX) / drag.width, y: drag.from.y + (moveEvent.clientY - drag.startY) / drag.height });
+    };
+    const end = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      qrDrag.current = null;
+    };
+    qrDrag.current = drag;
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
   };
-  const moveQrDrag = (event) => {
-    const drag = qrDrag.current;
-    if (!drag) return;
-    updatePlacement({ ...drag.from, x: drag.from.x + (event.clientX - drag.startX) / drag.width, y: drag.from.y + (event.clientY - drag.startY) / drag.height });
-  };
-  const endQrDrag = () => { qrDrag.current = null; };
 
   const buildFinishedPoster = async () => {
     if (!posterFightId || !posterAffiliateId || !savedFightPoster) return;
@@ -685,7 +729,7 @@ const AffiliateUsers = () => {
                 <p>Drag the QR code onto an empty area of your poster and use the slider to resize it. Nothing else on your poster changes.</p>
                 <div ref={placementRef} aria-label="QR code placement on your poster" style={{ position: 'relative', width: '100%', maxWidth: 420, touchAction: 'none', userSelect: 'none' }}>
                   <img src={resolvePublicMediaUrl(savedFightPoster)} alt="Your uploaded poster" draggable={false} onLoad={(event) => { const image = event.currentTarget; if (image.naturalWidth && image.naturalHeight) setPosterAspect(image.naturalWidth / image.naturalHeight); }} style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 8 }} />
-                  <img data-qr-handle="true" src={`/api/fight-qr?fightId=${encodeURIComponent(posterFightId)}&affiliateId=${encodeURIComponent(posterAffiliateId)}&inline=1`} alt={`QR code for ${affiliateLabel(posterAffiliate)}`} draggable={false} onPointerDown={startQrDrag} onPointerMove={moveQrDrag} onPointerUp={endQrDrag} onPointerCancel={endQrDrag} style={{ position: 'absolute', left: `${qrPlacement.x * 100}%`, top: `${qrPlacement.y * 100}%`, width: `${qrPlacement.scale * 100}%`, aspectRatio: '1 / 1', cursor: 'move', background: '#fff', outline: '2px dashed #b7192c', outlineOffset: 2, touchAction: 'none' }} />
+                  <img data-qr-handle="true" src={`/api/fight-qr?fightId=${encodeURIComponent(posterFightId)}&affiliateId=${encodeURIComponent(posterAffiliateId)}&inline=1`} alt={`QR code for ${affiliateLabel(posterAffiliate)}`} draggable={false} onPointerDown={startQrDrag} style={{ position: 'absolute', left: `${qrPlacement.x * 100}%`, top: `${qrPlacement.y * 100}%`, width: `${qrPlacement.scale * 100}%`, aspectRatio: '1 / 1', cursor: 'move', background: '#fff', outline: '2px dashed #b7192c', outlineOffset: 2, touchAction: 'none' }} />
                 </div>
                 <label style={{ display: 'block', margin: '10px 0' }}>QR code size: {Math.round(qrPlacement.scale * 100)}% of the poster width
                   <input type="range" min="8" max="45" step="1" value={Math.round(qrPlacement.scale * 100)} onChange={(event) => updatePlacement({ ...qrPlacement, scale: Number(event.target.value) / 100 })} style={{ display: 'block', width: '100%', maxWidth: 420 }} />
