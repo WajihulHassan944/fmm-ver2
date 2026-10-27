@@ -459,6 +459,7 @@ const AffiliateUsers = () => {
           campaignId: poster.id,
           audience: poster.audience,
           promo: poster.promo,
+          qrTarget: poster.qrTarget || 'league',
           ...(poster.audience === 'one' ? { affiliateId: poster.affiliateId } : {}),
         });
         setLaunchRequested((count) => count + 1);
@@ -547,7 +548,13 @@ const AffiliateUsers = () => {
 
   const affiliateLaunchMessage = (recipient) => {
     const affiliateId = String(recipient._id);
-    const fightLink = getAffiliateFightShareUrl(recipient, launchFightId);
+    // A paid-fight campaign links each affiliate to the paid fight, credited to them.
+    // Same address as the approved paid-fight poster's QR (fight page, play=1),
+    // with this recipient's own affiliate id as ref.
+    const paidBase = manualLaunch?.qrTarget === 'paid' && launchFightId === manualLaunch.id && approvedPoster?.qrTarget === 'paid' ? String(approvedPoster.qrLink || '').split('?')[0] : '';
+    const fightLink = paidBase
+      ? `${paidBase}?play=1&ref=${encodeURIComponent(affiliateId)}`
+      : getAffiliateFightShareUrl(recipient, launchFightId);
     const qrLink = `https://www.fantasymmadness.com/api/fight-qr?fightId=${encodeURIComponent(launchFightId)}&affiliateId=${encodeURIComponent(affiliateId)}`;
     const shareKit = `https://www.fantasymmadness.com/affiliate/fight-launch?fightId=${encodeURIComponent(launchFightId)}`;
     const title = (manualLaunch?.title || (typeof router.query.launchTitle === 'string' ? router.query.launchTitle : 'This fight')).slice(0, 150);

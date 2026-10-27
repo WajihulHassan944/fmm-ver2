@@ -64,6 +64,10 @@ export default function FightLaunchDesk() {
   const [promo, setPromo] = useState({ title: '', event: '', affiliateName: '', message: '' });
   const [finished, setFinished] = useState(null);
   const [finishedSrc, setFinishedSrc] = useState('');
+  // Lower section: the approved poster again, with the QR opening the paid fight.
+  const [paidPoster, setPaidPoster] = useState(null);
+  const [paidSrc, setPaidSrc] = useState('');
+  const [paidBusy, setPaidBusy] = useState(false);
   const [approved, setApproved] = useState(null);
   const [campaignBusy, setCampaignBusy] = useState('');
   const placementRef = useRef(null);
@@ -104,7 +108,8 @@ export default function FightLaunchDesk() {
   const posterImage = generalPoster || fight?.promotionBackground || fight?.fightPosterMobileImage || '';
   // The artwork the QR goes on: a one-affiliate upload, or the fight's poster.
   const campaignArt = audience === 'one' ? (customSource?.fightId === id ? customSource.url : '') : generalPoster;
-  const shareLink = audience === 'one' && affiliate && id ? getAffiliateFightShareUrl(affiliate, id) : url;
+  const paidFor = paidPoster && paidPoster.fightId === id && paidPoster.audience === audience && (audience === 'all' || paidPoster.affiliateId === affiliateId) ? paidPoster : null;
+  const shareLink = audience === 'one' && affiliate && id ? (paidFor ? paidFor.qrLink : getAffiliateFightShareUrl(affiliate, id)) : url;
   const prizeLine = Number(fight?.matchTokens) > 0 && Number(fight?.pot) > 0
     ? 'Compete for cash prizes where eligible. See the fight page for entry details, prize rules, and availability.'
     : 'Play for prizes and bragging rights. See the fight page for the rewards and entry rules.';
@@ -132,7 +137,7 @@ export default function FightLaunchDesk() {
         : `Play ${fightName} on FANTASY MMADNESS. Scan the QR code on the poster to join my league and make your picks.`,
     };
   };
-  const clearCampaign = () => { setFinished(null); setApproved(null); };
+  const clearCampaign = () => { setFinished(null); setApproved(null); setPaidPoster(null); };
   // A different fight, audience or affiliate starts a fresh campaign: new
   // text from the registry, no old preview or approval carried over.
   useEffect(() => { setPromo(defaultPromo(fight, affiliate, audience)); clearCampaign(); }, [id, affiliateId, audience]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -149,6 +154,16 @@ export default function FightLaunchDesk() {
       .catch((err) => toast.error(err.message));
     return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [finished?.url]);
+  useEffect(() => {
+    if (!paidPoster?.url) { setPaidSrc(''); return undefined; }
+    if (/^https?:\/\//i.test(paidPoster.url)) { setPaidSrc(paidPoster.url); return undefined; }
+    let active = true; let objectUrl = '';
+    fetch(buildPublicApiUrl(paidPoster.url), { headers: adminHeaders(), cache: 'no-store' })
+      .then((response) => { if (!response.ok) throw new Error('The paid-fight poster could not be loaded.'); return response.blob(); })
+      .then((blob) => { if (!active) return; objectUrl = URL.createObjectURL(blob); setPaidSrc(objectUrl); })
+      .catch((err) => toast.error(err.message));
+    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [paidPoster?.url]);
 
   // Put the QR in an empty QR box on the artwork, or else a calm open area
   // (lower-right preferred). The owner can still drag and resize it.
@@ -248,14 +263,29 @@ export default function FightLaunchDesk() {
     } catch (err) { toast.error(err.message || 'The finished poster could not be approved.'); }
     finally { setCampaignBusy(''); }
   };
-  const downloadFinished = async () => {
-    if (!finishedSrc) return;
+  // Same approved poster, same QR spot; only the QR destination changes to the
+  // already-configured paid fight, credited to the selected affiliate.
+  const makePaidVersion = async () => {
+    if (!approvedFor?.id) return;
+    setPaidBusy(true);
     try {
-      const blob = await (await fetch(finishedSrc)).blob();
+      const response = await fetch(buildPublicApiUrl(`/api/admin/affiliate-posters/${encodeURIComponent(approvedFor.id)}/paid-version`), { method: 'POST', headers: adminHeaders() });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.poster) throw new Error(result.message || 'The paid-fight poster could not be made.');
+      setPaidPoster(result.poster);
+      toast.success('Ready: your approved poster with the QR opening the paid fight.');
+    } catch (err) { toast.error(err.message || 'The paid-fight poster could not be made.'); }
+    finally { setPaidBusy(false); }
+  };
+  const downloadPaid = async () => downloadFinished(paidSrc, '-paid-fight');
+  const downloadFinished = async (src = finishedSrc, suffix = '') => {
+    if (!src) return;
+    try {
+      const blob = await (await fetch(src)).blob();
       const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[blob.type] || 'png';
       const href = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
-      anchor.href = href; anchor.download = `fantasy-mmadness-poster-${id}${audience === 'one' && affiliate ? `-${String(affiliate.firstName || 'affiliate').toLowerCase()}` : ''}.${ext}`;
+      anchor.href = href; anchor.download = `fantasy-mmadness-poster-${id}${audience === 'one' && affiliate ? `-${String(affiliate.firstName || 'affiliate').toLowerCase()}` : ''}${suffix}.${ext}`;
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       setTimeout(() => URL.revokeObjectURL(href), 30000);
     } catch { toast.error('Could not download the poster.'); }
@@ -421,7 +451,7 @@ export default function FightLaunchDesk() {
           </dl>
           <div className={styles.buttons}>
             {approvedFor ? <p role="status"><strong>Approved.</strong> This exact poster and text will be used.</p> : <button type="button" disabled={Boolean(campaignBusy) || !finishedSrc} onClick={approveFinished}>{campaignBusy === 'approve' ? 'Approving…' : 'Approve this poster'}</button>}
-            <button type="button" disabled={!finishedSrc} onClick={downloadFinished}>Download finished poster</button>
+            <button type="button" disabled={!finishedSrc} onClick={() => downloadFinished()}>Download finished poster</button>
           </div>
         </div>}
         <div className={styles.affiliate} style={{ marginTop: 14 }}>
@@ -430,8 +460,22 @@ export default function FightLaunchDesk() {
         </div>
       </div>}
       <div className={styles.layout}>
-        <div className={styles.preview}>{posterImage ? <img src={resolvePublicMediaUrl(audience === 'one' && campaignArt ? campaignArt : posterImage)} alt={`Fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={resolvePublicMediaUrl(getFighterImage(fight, 'A'))} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={resolvePublicMediaUrl(getFighterImage(fight, 'B'))} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{eventLine || formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
-        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small></div>
+        <div className={styles.preview}>{paidFor && paidSrc ? <img data-paid-poster-preview="true" src={paidSrc} alt={`Your approved poster for ${title} with the paid fight QR`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : posterImage ? <img src={resolvePublicMediaUrl(audience === 'one' && campaignArt ? campaignArt : posterImage)} alt={`Fight poster for ${title}`} style={{ width: '100%', maxHeight: 470, objectFit: 'contain' }} /> : <div className={styles.photos}><img src={resolvePublicMediaUrl(getFighterImage(fight, 'A'))} alt={getFighterName(fight, 'A')} /><strong>VS</strong><img src={resolvePublicMediaUrl(getFighterImage(fight, 'B'))} alt={getFighterName(fight, 'B')} /></div>}<h3>{title}</h3><p>{eventLine || formatFightDate(fight)}</p><Link href={`/fight/${encodeURIComponent(id)}?play=1`} target="_blank">Check player page ↗</Link></div>
+        <div className={styles.share}><strong>Owner fight link</strong><input readOnly value={url} aria-label="Owner fight link" onFocus={(e) => e.target.select()} /><div className={styles.buttons}><button type="button" onClick={() => copy(url, 'Fight link')}>Copy link</button><button type="button" onClick={downloadPoster} disabled={busy || !posterImage}>{busy ? 'Preparing image…' : 'Download poster with QR'}</button><ShareQrCode url={url} label="Fight" fileName={`fight-${id}`} /></div><small>The poster preview shows the selected fight artwork. Download adds the owner QR; affiliate kits add each affiliate’s own tracked link and QR. Include a clickable link in Facebook and X posts too.</small>
+          {approvedFor && <div data-paid-poster="true" style={{ marginTop: 14 }}>
+            <strong>Your approved poster for the paid fight</strong>
+            {!paidFor ? <>
+              <p>Same poster and QR position as above; {audience === 'one' && affiliate ? `${personName(affiliate)}'s` : 'each affiliate’s own'} QR opens the paid fight (its existing entry fee and prize pool), credited to {audience === 'one' && affiliate ? 'them' : 'that affiliate'}.</p>
+              <div className={styles.buttons}><button type="button" disabled={paidBusy} onClick={makePaidVersion}>{paidBusy ? 'Making it…' : 'Use my approved poster here'}</button></div>
+            </> : <>
+              <p>{audience === 'one' ? 'QR code opens' : `QR code opens (sample: ${paidFor.affiliateName || 'first affiliate'}; each affiliate gets their own)`}: <a href={paidFor.qrLink} target="_blank" rel="noopener noreferrer" style={{ overflowWrap: 'anywhere' }}>{paidFor.qrLink}</a></p>
+              <div className={styles.buttons}>
+                <button type="button" disabled={!paidSrc} onClick={downloadPaid}>Download paid-fight poster</button>
+                <Link href={{ pathname: '/administration/AffiliateUsers', query: { posterCampaign: paidFor.id } }}>Prepare paid-fight announcement →</Link>
+              </div>
+              {audience === 'one' && <small>The posts below now use this paid-fight link.</small>}
+            </>}
+          </div>}</div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
       <div className={styles.affiliate}><div><strong>Send personal social posters to affiliates</strong><p>Each approved affiliate gets a ready-to-post kit with this fight design, their own tracked QR and link, and Facebook, Instagram, TikTok, and X captions. Review recipients before sending.</p></div><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
