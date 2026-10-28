@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getFighterImage, getFallbackFighterImage, useImageFallback } from '@/Utils/fightExperience';
+import { getFighterImage, getFallbackFighterImage, useImageFallback as applyImageFallback } from '@/Utils/fightExperience';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMatches } from '../../Redux/matchSlice';
 import { useRouter } from 'next/router';
@@ -136,10 +136,10 @@ const UpcomingFights = () => {
                 <div className='fightItem' key={match._id} onClick={() => handleFightClick(match._id)}>
                   <div className={`fightersImages ${match.blurred ? 'blurred' : ''}`}>
                     <div className='fighterOne'>
-                      <img src={getFighterImage(match, 'A')} alt={match.matchFighterA} onError={(event) => useImageFallback(event, getFallbackFighterImage('A'))} />
+                      <img src={getFighterImage(match, 'A')} alt={match.matchFighterA} onError={(event) => applyImageFallback(event, getFallbackFighterImage('A'))} />
                     </div>
                     <div className='fighterTwo'>
-                      <img src={getFighterImage(match, 'B')} alt={match.matchFighterB} onError={(event) => useImageFallback(event, getFallbackFighterImage('B'))} />
+                      <img src={getFighterImage(match, 'B')} alt={match.matchFighterB} onError={(event) => applyImageFallback(event, getFallbackFighterImage('B'))} />
                     </div>
                   </div>
                   <div className='fightItemOne'>
