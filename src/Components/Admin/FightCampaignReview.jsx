@@ -13,13 +13,9 @@ const STATE_LABELS = {
   queued: 'Queued', published: 'Published', failed: 'Failed',
 };
 const STATE_COLORS = { draft: '#2f6fb3', needs_review: '#a86a12', approved: '#186b42', queued: '#555', published: '#555', failed: '#9f3030' };
-// How each platform frames the image, so the owner can judge the fit.
-const FRAMES = {
-  instagram: { ratio: '4 / 5', fit: 'cover', note: 'Instagram feed shows a 4:5 crop' },
-  facebook: { ratio: 'auto', fit: 'contain', note: 'Facebook shows the full poster' },
-  x: { ratio: '16 / 9', fit: 'cover', note: 'X timeline shows a 16:9 crop' },
-  affiliate_email: { ratio: 'auto', fit: 'contain', note: 'Email attaches the full poster' },
-};
+// Preview always shows the WHOLE poster at its true shape (never cropped or
+// stretched). When a platform would crop it, the area that platform keeps is
+// outlined and a warning is shown. Rules come from the backend (cropRule).
 const box = { padding: 16, border: '1px solid #394152', borderRadius: 12, background: '#111725', marginBottom: 16 };
 const btn = (bg) => ({ padding: '9px 14px', background: bg, color: '#fff', border: 0, borderRadius: 7, cursor: 'pointer', fontWeight: 700 });
 
@@ -35,14 +31,23 @@ async function call(path, options = {}) {
   return body;
 }
 
+// Area a platform keeps when it centre-crops to its nearest allowed ratio.
+function keptArea(ratio, rule) {
+  if (!rule || !ratio) return null;
+  if (ratio < rule.min) { const h = ratio / rule.min; return { top: (1 - h) / 2, height: h, left: 0, width: 1 }; }
+  if (ratio > rule.max) { const w = rule.max / ratio; return { left: (1 - w) / 2, width: w, top: 0, height: 1 }; }
+  return null;
+}
+
 // Personal QR posters are served only to signed-in admins, so load them with
 // the admin token instead of a plain <img src>.
-function PosterImage({ url, frame }) {
+function PosterImage({ url, rule, channelLabel }) {
   const [src, setSrc] = useState('');
   const [failed, setFailed] = useState(false);
+  const [size, setSize] = useState(null);
   useEffect(() => {
     let revoke = '';
-    setFailed(false);
+    setFailed(false); setSize(null);
     if (!url) { setSrc(''); return undefined; }
     if (/^https:\/\//.test(url)) { setSrc(url); return undefined; }
     fetch(PUBLIC_API_BASE_URL + url, { headers: adminHeaders() })
@@ -53,19 +58,24 @@ function PosterImage({ url, frame }) {
   }, [url]);
   if (!url) return <div style={{ padding: 24, border: '1px dashed #a86a12', borderRadius: 8, color: '#ffd59a' }}>No approved poster</div>;
   if (failed) return <div style={{ padding: 24, border: '1px dashed #9f3030', borderRadius: 8, color: '#ffb7b7' }}>Poster could not be loaded</div>;
+  const ratio = size ? size.w / size.h : 0;
+  const kept = keptArea(ratio, rule);
   return (
     <div>
-      <div style={{ aspectRatio: frame.ratio, maxHeight: 380, overflow: 'hidden', borderRadius: 8, background: '#000' }}>
-        {src && <img src={src} alt="Approved fight poster preview" style={{ width: '100%', height: frame.ratio === 'auto' ? 'auto' : '100%', objectFit: frame.fit, display: 'block' }} />}
+      <div style={{ position: 'relative', borderRadius: 8, background: '#000', lineHeight: 0 }}>
+        {src && <img src={src} alt="Approved fight poster, shown in full" data-testid="poster-full" onLoad={(e) => setSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })} style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block', borderRadius: 8 }} />}
+        {kept && <div aria-hidden="true" data-testid="crop-outline" style={{ position: 'absolute', left: kept.left * 100 + '%', top: kept.top * 100 + '%', width: kept.width * 100 + '%', height: kept.height * 100 + '%', border: '2px dashed #ffd400', boxShadow: '0 0 0 9999px rgba(0,0,0,.45)', pointerEvents: 'none' }} />}
       </div>
-      <small style={{ color: '#aebbd0' }}>{frame.note}</small>
+      <small style={{ display: 'block', color: '#aebbd0', lineHeight: 1.4, marginTop: 4 }}>
+        Full poster shown, not cropped or stretched{size ? ' · ' + size.w + '×' + size.h : ''}.
+      </small>
+      {kept && <small role="alert" data-testid="crop-warning" style={{ display: 'block', color: rule.severity === 'blocking' ? '#ffb7b7' : '#ffd59a', lineHeight: 1.4 }}>{channelLabel}: {rule.text} Dashed box = what {channelLabel} would keep.</small>}
     </div>
   );
 }
 
 function ChannelPreview({ campaign, name, channel, checks, checkLabels, busy, onCheck }) {
-  const frame = FRAMES[name] || FRAMES.facebook;
-  const editable = ['draft', 'needs_review'].includes(campaign.state);
+  const editable = ['draft', 'needs_review'].includes(campaign.state) && !campaign.rejected;
   if (!channel.enabled) {
     return <div style={{ padding: 12, border: '1px solid #2a3344', borderRadius: 8, color: '#aebbd0' }}><strong>{channel.label}</strong> — {channel.blocking?.[0] || 'Not used for this campaign.'}</div>;
   }
@@ -73,7 +83,7 @@ function ChannelPreview({ campaign, name, channel, checks, checkLabels, busy, on
     <article style={{ padding: 14, border: '1px solid #40516a', borderRadius: 10, background: '#0d1320' }}>
       <h4 style={{ margin: '0 0 10px' }}>{channel.label} <small style={{ color: '#aebbd0', fontWeight: 400 }}>· {channel.characterCount} characters{name === 'x' ? ' of 280' : ''}</small></h4>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(180px,260px) 1fr', gap: 14 }}>
-        <PosterImage url={channel.image?.url} frame={frame} />
+        <PosterImage url={channel.image?.url} rule={channel.cropRule} channelLabel={channel.label} />
         <div>
           {channel.subject && <p style={{ margin: '0 0 8px' }}><strong>Subject:</strong> {channel.subject}</p>}
           <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', lineHeight: 1.55, padding: 12, background: '#101827', borderRadius: 8 }}>{channel.text}</div>
@@ -135,6 +145,11 @@ export default function FightCampaignReview() {
     return body;
   }, (b) => `Prepared ${b.created.length} new draft(s). ${b.duplicates.length} already existed. ${b.skipped.length} fight(s) could not be promoted (reasons below). Nothing was posted or sent.`);
   const check = (campaign, channel, name, result, note = '') => run(() => call('/' + campaign._id + '/checks', { method: 'POST', body: JSON.stringify({ channel, check: name, result, note }) }), 'Check saved.');
+  const rejectDraft = (campaign) => {
+    const reason = window.prompt('Why are you rejecting this draft? (saved with the campaign; nothing is sent)') || '';
+    if (!reason.trim()) return;
+    run(() => call('/' + campaign._id + '/reject', { method: 'POST', body: JSON.stringify({ reason }) }), 'Draft rejected. It will not be approved or sent.');
+  };
   const setStatus = (campaign, status) => {
     if (status === 'approved' && !window.confirm('Approve this campaign as a DRAFT?\n\nNothing will be posted, emailed or sent. Publishing is not switched on.')) return;
     run(() => call('/' + campaign._id + '/status', { method: 'POST', body: JSON.stringify({ status }) }), status === 'approved' ? 'Approved as a draft. Nothing was posted or sent.' : 'Status updated.');
@@ -170,9 +185,10 @@ export default function FightCampaignReview() {
                 <p style={{ margin: '4px 0 0', color: '#aebbd0' }}>{c.affiliateId ? 'Affiliate campaign: ' + (c.affiliateName || c.affiliateId) : 'Owner campaign (FANTASY MMADNESS accounts)'}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ padding: '4px 10px', borderRadius: 20, background: STATE_COLORS[c.state] || '#555', fontWeight: 700 }}>{STATE_LABELS[c.state] || c.state}</span>
+                <span data-testid="campaign-state" style={{ padding: '4px 10px', borderRadius: 20, background: c.rejected ? '#9f3030' : (STATE_COLORS[c.state] || '#555'), fontWeight: 700 }}>{c.rejected ? 'Rejected — will not be approved or sent' : (STATE_LABELS[c.state] || c.state)}</span>
               </div>
             </div>
+            {c.rejected && <p style={{ color: '#ffb7b7' }}>Rejected by {c.rejectedBy || 'admin'}{c.rejectedAt ? ' on ' + new Date(c.rejectedAt).toLocaleString() : ''}: {c.rejectionReason}</p>}
             {c.liveCheck && !c.liveCheck.ok && <p style={{ color: '#ffb7b7' }}>Live Fight Registry check: {c.liveCheck.reasons.join(' ')}</p>}
             {c.validation?.blocking?.length > 0 && <p style={{ color: '#ffb7b7' }}>Blocked: {c.validation.blocking.join(' ')}</p>}
             {c.validation?.warnings?.length > 0 && <p style={{ color: '#ffd59a' }}>Needs attention: {c.validation.warnings.join(' ')}</p>}
@@ -180,7 +196,8 @@ export default function FightCampaignReview() {
             {c.research?.matchingNews?.length > 0 && <p style={{ color: '#aebbd0', fontSize: 13 }}>Research: {c.research.matchingNews.length} news lead(s) mention these fighters · {c.research.suggestedAudiences?.length || 0} saved {c.sportName} audiences (not contacted)</p>}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
               <button type="button" onClick={() => setOpen(expanded ? '' : c._id)} style={btn('#36455d')}>{expanded ? 'Hide previews' : 'Preview and check each channel'}</button>
-              {['draft', 'needs_review'].includes(c.state) && <button type="button" disabled={busy} onClick={() => setStatus(c, 'approved')} style={btn('#186b42')}>Approve draft (does not post)</button>}
+              {['draft', 'needs_review'].includes(c.state) && !c.rejected && <button type="button" disabled={busy} onClick={() => setStatus(c, 'approved')} style={btn('#186b42')}>Approve draft (does not post)</button>}
+              {['draft', 'needs_review', 'approved'].includes(c.state) && !c.rejected && <button type="button" disabled={busy} onClick={() => rejectDraft(c)} style={btn('#9f3030')}>Reject draft</button>}
               {c.state === 'approved' && <button type="button" disabled={busy} onClick={() => setStatus(c, 'needs_review')} style={btn('#a86a12')}>Move back to review</button>}
               {c.state === 'draft' && <button type="button" disabled={busy} onClick={() => setStatus(c, 'needs_review')} style={btn('#a86a12')}>Flag for review</button>}
             </div>
