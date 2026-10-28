@@ -3,6 +3,7 @@ import Head from 'next/head';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 import {adminHeaders} from '@/Utils/authFetch';
 import {PUBLIC_API_BASE_URL} from '@/Utils/publicApi';
+import FightCampaignReview from '@/Components/Admin/FightCampaignReview';
 const names=['Boxing','MMA / UFC','Bare Knuckle','Kickboxing / Muay Thai','Pro Wrestling'];
 const jobLabels={'content.newsletter-draft':'Newsletter Campaign','seo.audit':'Website SEO Audit','seo.schema-markup':'Search Engine Structured Data','content.article':'Combat Sports Article','social.draft':'Social Media Promotion','seo.metadata':'Search Engine Page Details','seo.sitemap-refresh':'Website Sitemap Check','content.match-preview':'Fight Preview','content.event-recap':'Fight Event Recap','content.fight-publish-blog-draft':'Fight Blog Draft','social.fight-publish-post':'Fight Announcement Post'};
 const jobName=(type)=>jobLabels[type]||String(type||'Swarm task').replace(/^[^.]+\./,'').replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
@@ -71,6 +72,7 @@ function Dashboard(){
    <p style={{color:'#bbb'}}>Automatic daily audience discovery is enabled. This page shows verified activity; outreach delivery and paid advertising require connected, authorized channels.</p>
    <button onClick={runPipeline} disabled={runningAll} style={{background:'#cb1028',color:'white',border:0,borderRadius:8,padding:'12px 20px',cursor:'pointer'}}>{runningAll?'Running five agents and preparing campaigns…':'RUN FAN ACQUISITION NOW'}</button>
    <div role="status" aria-live="polite" style={{marginTop:14,padding:14,border:'1px solid #596174',borderRadius:10,background:'#171d29'}}><strong>{runningAll?'⏳ RUNNING':'AGENT STATUS'}</strong><p style={{margin:'8px 0'}}>{runStatus}</p>{lastCompleted&&<small>Last completed on this screen: {lastCompleted}</small>}{runningAll&&<p style={{color:'#ffb7b7'}}>Please wait. This may take time while the agents search public sources.</p>}</div>
+   <FightCampaignReview/>
    {data?.lastRunAt&&<p style={{color:'#bbb'}}>Last saved research run: {new Date(data.lastRunAt).toLocaleString()}</p>}
    {error&&<p role="alert" style={{color:'#ff9b9b'}}>{error}</p>}
    <p style={{color:'#aaa'}}>Daily research runs automatically; you do not need to press RUN every day. This button starts an extra research run. It does not send messages or buy ads.</p>
