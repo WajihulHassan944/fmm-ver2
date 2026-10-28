@@ -25,6 +25,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Verify page guard
         run: npm run guard:pages
+      - name: Verify frontend production build
+        run: npm run build
       - name: Commit validated lockfile to draft branch
         run: |
           test "$GITHUB_REF_NAME" = "fix/growth-engine-fight-campaigns"
