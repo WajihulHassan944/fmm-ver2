@@ -32,12 +32,15 @@ jobs:
           npm audit --json > /tmp/b.json || true; node /tmp/rep.js /tmp/b.json "Website audit BEFORE (all deps)"
           node -e 'const p=require("./package.json");p.overrides=p.overrides||{};p.overrides["@vercel/cli-config"]={zod:"4.6.7"};require("fs").writeFileSync("package.json",JSON.stringify(p,null,2)+"\n")'
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          npm audit fix --package-lock-only --ignore-scripts || true
+          # Targeted, in-range updates only (npm audit fix would also move Next.js,
+          # which is handled separately in #188).
+          npm update dompurify source-map-js deepmerge --package-lock-only --ignore-scripts --no-audit --no-fund
+          node -p "'next stays ' + require('./package-lock.json').packages['node_modules/next'].version"
           npm ci --ignore-scripts
           npm audit --json > /tmp/a.json || true; node /tmp/rep.js /tmp/a.json "Website audit AFTER (all deps)"
           echo "::notice title=Changed versions::$(git diff -U0 package-lock.json | grep -B1 -E '^[-+]\s+"version"' | grep -vE '^--$' | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g' | head -c 30000)"
           echo "::notice title=package.json diff::$(git diff package.json | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "Security: compatible website dependency fixes (npm audit fix, no --force) + scoped zod override"
+          git commit -am "Security: compatible website dependency fixes (targeted in-range updates; Next.js unchanged) + scoped zod override"
           git push origin HEAD:${{ github.head_ref }}
