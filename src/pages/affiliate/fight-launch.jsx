@@ -95,7 +95,31 @@ export default function AffiliateFightLaunch() {
   // The QR, the link box and the captions all use this one tracked link: the
   // readable league link with the affiliate and fight IDs that credit the referral.
   const trackedLink = affiliateRecord && fightId ? getAffiliateFightShareUrl(affiliateRecord, fightId) : (kit?.fightLink || '');
-  const posterArt = kit?.creative?.fightPoster || fightPhotos?.poster || '';
+  // Issue #185: the poster the owner approved for THIS affiliate and fight
+  // (with her own QR) comes first. Shown, copied, downloaded, shared and
+  // published exactly as approved. The general fight poster is only the
+  // fallback for affiliates without a personalized poster.
+  const personalized = kit?.creative?.personalizedPoster && String(kit.creative.personalizedPoster.affiliateId || '') === String(kit?.attribution?.affiliateId || '') && String(kit.creative.personalizedPoster.fightId || '') === fightId
+    ? kit.creative.personalizedPoster : null;
+  const posterArt = personalized ? '' : (kit?.creative?.fightPoster || fightPhotos?.poster || '');
+  const personalizedImagePath = personalized?.imagePath || '';
+  useEffect(() => {
+    if (!personalizedImagePath) return undefined;
+    let active = true;
+    let objectUrl = '';
+    setOriginal(null);
+    setPosterError('');
+    fetch(`${PUBLIC_API_BASE_URL}${personalizedImagePath}`, { headers: affiliateHeaders(), cache: 'no-store' })
+      .then((response) => { if (!response.ok) throw new Error('Your personalized fight poster could not be loaded. Refresh the page to try again.'); return response.blob(); })
+      .then((blob) => {
+        if (!active) return;
+        objectUrl = URL.createObjectURL(blob);
+        const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[blob.type] || 'png';
+        setOriginal({ blob, objectUrl, personalized: true, fileName: `fantasy-mmadness-fight-poster-${fightId}-my-qr.${ext}` });
+      })
+      .catch((err) => { if (active) setPosterError(err.message); });
+    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [personalizedImagePath, fightId]);
   // Load the uploaded file through our own origin (same bytes, no CORS taint).
   useEffect(() => {
     if (!posterArt) return undefined;
@@ -140,7 +164,7 @@ export default function AffiliateFightLaunch() {
   const downloadPoster = () => {
     if (!original) { toast.error('The poster is still loading.'); return; }
     saveBlob(original.blob, original.fileName);
-    toast.success('Original fight poster saved.');
+    toast.success(original.personalized ? 'Your personalized fight poster saved.' : 'Original fight poster saved.');
   };
   const copyPoster = async () => {
     if (!original) { toast.error('The poster is still loading.'); return; }
@@ -219,7 +243,7 @@ export default function AffiliateFightLaunch() {
   const wrongAccount = Boolean(kit && expectedAffiliateId && String(kit.attribution?.affiliateId || '') !== expectedAffiliateId);
   const link = trackedLink || kit?.fightLink || '';
   const facebookLeagueUrl = kit?.attribution?.affiliateId && fightId
-    ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-13`
+    ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-14`
     : link;
   const facebookShareUrl = facebookLeagueUrl
     ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookLeagueUrl)}`
@@ -237,13 +261,14 @@ export default function AffiliateFightLaunch() {
       <div className={styles.layout} style={{ marginTop: 20 }}>
         <div className={styles.preview}>
           <div className={styles.posterFrame}>
-            {original ? <img src={original.objectUrl} alt={`${name} fight poster`} /> : posterError ? <p role="alert">{posterError}</p> : posterArt ? <p>Loading the fight poster…</p> : <p>No fight poster has been uploaded for this fight yet.</p>}
+            {original ? <img src={original.objectUrl} alt={original.personalized ? `Your personalized ${name} fight poster with your QR code` : `${name} fight poster`} {...(original.personalized ? { 'data-personalized-poster': 'true' } : {})} /> : posterError ? <p role="alert">{posterError}</p> : (posterArt || personalized) ? <p>Loading the fight poster…</p> : <p>No fight poster has been uploaded for this fight yet.</p>}
             {original && <button className={styles.copyPoster} type="button" onClick={copyPoster}>Copy poster</button>}
           </div>
           <div className={styles.buttons} style={{ marginTop: 12 }}>
             <button type="button" disabled={!original} onClick={downloadPoster}>Download poster</button>
           </div>
-          <small>This is the fight poster exactly as it was uploaded. Your personal link and QR code are next to it, so fans can scan or tap to join your league. On a phone, you can also press and hold the poster to save it to Photos.</small>
+          <small>{personalized ? 'This is your personalized fight poster with your own QR code, exactly as the owner approved it. Fans who scan it join your league. On a phone, you can also press and hold the poster to save it to Photos.' : 'This is the fight poster exactly as it was uploaded. Your personal link and QR code are next to it, so fans can scan or tap to join your league. On a phone, you can also press and hold the poster to save it to Photos.'}</small>
+          {kit.creative?.personalizedPosterUnavailable && <p role="alert">Your personalized poster could not be checked right now, so the general fight poster is shown. Refresh the page in a moment.</p>}
           <h3>{name}</h3><p>Promoted by {kit.creative?.promotedBy || kit.attribution?.leagueName}</p>
         </div>
         <div className={styles.share}><strong>Your tracked fight link</strong><input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Your fight link" /><div className={styles.buttons}><button type="button" onClick={() => copy(link, 'Fight link')}>Copy fight link</button><ShareQrCode url={link} label="Your fight" fileName={`fight-${fightId}`} /></div><small>Your QR code opens this same personal link. Show it, download it, or add it to your own post. Downloads appear in your phone’s Files or Downloads app, usually not Photos.</small></div>

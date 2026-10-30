@@ -168,7 +168,7 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
     return () => { active = false; };
   }, [hasReferredFight, referredFightId]);
   const referredPoster = hasReferredFight
-    ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(referredFightId)}&affiliateId=${encodeURIComponent(referredAffiliateId)}&format=facebook&v=13`
+    ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(referredFightId)}&affiliateId=${encodeURIComponent(referredAffiliateId)}&format=facebook&v=14`
     : '';
 
   const updateRouteState = (nextMode, nextRole = role) => {
