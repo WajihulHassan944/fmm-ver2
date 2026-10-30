@@ -42,8 +42,10 @@ jobs:
       - name: Install exactly that version and report
         run: |
           V=$(cat /tmp/pick.txt)
-          EXTRA=""; if grep -q '"eslint-config-next"' package.json; then EXTRA="eslint-config-next@^$V"; fi
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund "next@^$V" $EXTRA
+          EXTRA=""; if grep -q '"eslint-config-next"' package.json; then EXTRA="eslint-config-next@$V"; fi
+          # Exact version: the lockfile gets exactly $V (package.json keeps a ^ range from $V).
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund "next@$V" $EXTRA
+          echo "::notice title=Installed next::$(node -p "require('./package-lock.json').packages['node_modules/next'].version")"
           npm ci --ignore-scripts
           npm audit --omit=dev --json > /tmp/after.json || true
           node -e '
