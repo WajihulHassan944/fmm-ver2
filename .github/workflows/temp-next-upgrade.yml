@@ -1,0 +1,56 @@
+name: TEMP Next.js smallest patched version
+
+# TEMPORARY (removed before review). Finds the smallest Next.js release that
+# is outside every vulnerable range npm audit reports, in the same major
+# version, installs exactly that, and commits package.json + lockfile.
+on:
+  pull_request:
+    paths: ['.github/workflows/temp-next-upgrade.yml']
+permissions:
+  contents: write
+jobs:
+  next:
+    if: github.head_ref == 'exp/nextjs-security-upgrade'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - name: Find smallest patched version
+        run: |
+          (mkdir -p /tmp/sv && cd /tmp/sv && npm init -y >/dev/null && npm install --no-audit --no-fund semver >/dev/null)
+          npm audit --json > /tmp/audit.json || true
+          npm view next versions --json > /tmp/versions.json
+          cat > /tmp/pick.js <<'JS'
+          const semver = require('/tmp/sv/node_modules/semver');
+          const audit = require('/tmp/audit.json'); const versions = require('/tmp/versions.json');
+          const current = require(process.cwd() + '/node_modules/next/package.json').version;
+          const adv = [].concat(audit.vulnerabilities?.next?.via || []).filter((v) => typeof v === 'object');
+          const lines = adv.map((v) => `${v.severity.toUpperCase()} ${v.url} range ${v.range} — ${v.title}`);
+          const candidates = versions.filter((v) => !semver.prerelease(v) && semver.major(v) === semver.major(current) && semver.gt(v, current)).sort(semver.compare);
+          const pick = candidates.find((v) => adv.every((a) => !semver.satisfies(v, a.range)));
+          console.log(`::notice title=Next.js advisories (current ${current})::${lines.join('%0A')}`);
+          console.log(`::notice title=Next.js smallest patched::current ${current} -> ${pick || 'NONE in same major'}; newest ${candidates[candidates.length - 1]}`);
+          require('fs').writeFileSync('/tmp/pick.txt', pick || '');
+          JS
+          node /tmp/pick.js
+          test -s /tmp/pick.txt
+      - name: Install exactly that version and report
+        run: |
+          V=$(cat /tmp/pick.txt)
+          EXTRA=""; if grep -q '"eslint-config-next"' package.json; then EXTRA="eslint-config-next@^$V"; fi
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund "next@^$V" $EXTRA
+          npm ci --ignore-scripts
+          npm audit --omit=dev --json > /tmp/after.json || true
+          node -e '
+            const a = require("/tmp/after.json"); const v = Object.values(a.vulnerabilities || {});
+            console.log("::notice title=Website audit after (prod deps)::" + JSON.stringify(a.metadata?.vulnerabilities) + "%0A" + v.map((x) => x.severity.toUpperCase() + " " + x.name + " " + x.range + " fix:" + JSON.stringify(x.fixAvailable)).join("%0A"));'
+          git diff --stat
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Next.js $V: smallest patched release for the reported advisories (same major)"
+          git push origin HEAD:${{ github.head_ref }}
