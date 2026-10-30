@@ -1,0 +1,27 @@
+name: TEMP build diagnosis
+
+# TEMPORARY (removed before review): captures `npm run build` output.
+on:
+  pull_request:
+    paths: ['.github/workflows/temp-build-diagnose.yml']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Build (same as CI, no extra env)
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee /tmp/build.log || { echo "::error title=Build output tail::$(grep -vE '^\s*$' /tmp/build.log | tail -n 40 | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g' | head -c 30000)"; echo "::error title=Build error lines::$(grep -nEi 'error|failed|cannot|exceeded|killed|heap' /tmp/build.log | head -n 30 | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"; exit 1; }
+          echo "::notice title=Build::succeeded"
+      - name: Audit (report)
+        if: always()
+        run: |
+          npm audit --omit=dev --audit-level=high > /tmp/audit.txt 2>&1 && echo "::notice title=Website npm audit::passes (no high/critical)" || echo "::warning title=Website npm audit::$(tail -n 40 /tmp/audit.txt | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"
