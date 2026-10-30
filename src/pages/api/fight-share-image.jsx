@@ -28,8 +28,21 @@ export default async function handler(req, res) {
     const fight = fightPayload.fight || fightPayload.data || fightPayload;
     if (!fight || !affiliate || String(affiliate._id) !== affiliateId || !affiliate.verified) return res.status(404).end();
 
-    let artUrl = fight.fightPosterImage || '';
-    if (!artUrl) {
+    // Issue #185: an affiliate with an owner-approved personalized poster for
+    // this fight gets THAT poster in her link preview; everyone else keeps the
+    // general fight poster below.
+    let poster = '';
+    let posterSource = 'general';
+    try {
+      const personal = await fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliate-posters/${fightId}/${affiliateId}/image?format=jpeg`, { signal: AbortSignal.timeout(8000) });
+      if (personal.ok && (personal.headers.get('content-type') || '').startsWith('image/jpeg')) {
+        const bytes = Buffer.from(await personal.arrayBuffer());
+        if (bytes.length && bytes.length < 8_000_000) { poster = `data:image/jpeg;base64,${bytes.toString('base64')}`; posterSource = 'personalized'; }
+      }
+    } catch (error) { console.error('Could not load the personalized poster:', error); }
+
+    let artUrl = poster ? '' : (fight.fightPosterImage || '');
+    if (!artUrl && !poster) {
       const listResponse = await fetch(`${PUBLIC_API_BASE_URL}/api/public/prediction-fights?limit=100`, { signal: AbortSignal.timeout(8000) });
       if (listResponse.ok) {
         const list = await listResponse.json();
@@ -37,8 +50,7 @@ export default async function handler(req, res) {
         artUrl = row?.fightPosterImage || row?.promotionBackground || '';
       }
     }
-    artUrl ||= fight.promotionBackground || '';
-    let poster = '';
+    if (!poster) artUrl ||= fight.promotionBackground || '';
     if (artUrl) {
       const source = new URL(artUrl);
       if (source.protocol === 'https:' && source.hostname === 'res.cloudinary.com') {
@@ -74,11 +86,14 @@ export default async function handler(req, res) {
       { width: 1200, height },
     );
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+    // Shorter cache for a personalized poster so a newly approved version shows up quickly.
+    res.setHeader('Cache-Control', posterSource === 'personalized' ? 'public, max-age=300, s-maxage=300' : 'public, max-age=3600, s-maxage=3600');
+    res.setHeader('X-Poster-Source', posterSource);
     let bytes;
     try { bytes = await render(poster).arrayBuffer(); }
     catch (error) {
       console.error('Could not render uploaded fight poster, using fight title:', error);
+      res.setHeader('X-Poster-Source', 'title-fallback');
       bytes = await render('').arrayBuffer();
     }
     return res.status(200).send(Buffer.from(bytes));

@@ -173,14 +173,16 @@ export default function FightLaunchDesk() {
     setPlacementNote('Finding a spot for the QR code…');
     fetch(buildPublicApiUrl('/api/admin/affiliate-posters/suggest-placement'), {
       method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ fightId: id, sourceId: audience === 'one' ? customSource?.id : '', sourcePosterUrl: campaignArt }),
+      body: JSON.stringify({ fightId: id, sourceId: audience === 'one' ? customSource?.id : '', sourcePosterUrl: campaignArt, affiliateId: audience === 'one' ? affiliateId : '' }),
     }).then(async (response) => {
       const result = await response.json().catch(() => ({}));
       if (!active) return;
       if (!response.ok || !result.placement) { setPlacementNote(result.message || 'Drag the QR code onto an empty area of your poster.'); return; }
       setPlacement({ x: result.placement.x, y: result.placement.y, scale: result.placement.scale });
       clearCampaign();
-      setPlacementNote(result.placement.reason === 'empty-box'
+      setPlacementNote(result.placement.reason === 'existing-qr'
+        ? 'Found this affiliate’s QR code already on your poster and lined the checked QR code up over it.'
+        : result.placement.reason === 'empty-box'
         ? 'Found the empty QR box on your poster and placed the QR code inside it.'
         : result.placement.reason === 'open-area'
           ? 'No empty QR box was found, so the QR code is in a clear area near the lower-right corner.'
@@ -478,6 +480,7 @@ export default function FightLaunchDesk() {
           </div>}</div>
       </div>
       <div className={styles.templates}>{[['Facebook', facebook], ['Instagram', instagram], ['TikTok', tiktok], ['X', xPost]].map(([name, value]) => <article key={name}><div><h3>{name} post</h3><button type="button" onClick={() => copy(value, `${name} post`)}>Copy post</button></div><textarea aria-label={`${name} post`} readOnly value={value} rows={5} onFocus={(e) => e.target.select()} /></article>)}</div>
+      {audience === 'one' && customSource?.fightId === id && !approvedFor && <p role="status" data-personal-poster-pending="true" style={{ color: '#ffbd4d' }}>{affiliate ? personName(affiliate) : 'This affiliate'}’s own poster is saved but not approved yet. Until you press “Show finished poster” and “Approve this poster” above, affiliate alerts and kits use the general fight poster.</p>}
       <div className={styles.affiliate}><div><strong>Send personal social posters to affiliates</strong><p>Each approved affiliate gets a ready-to-post kit with this fight design, their own tracked QR and link, and Facebook, Instagram, TikTok, and X captions. Review recipients before sending.</p></div><Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: id, launchTitle: title } }}>Prepare affiliate alerts →</Link></div>
       <details className={styles.message}><summary>Preview affiliate message</summary><pre>{affiliateText}</pre></details>
     </>}
