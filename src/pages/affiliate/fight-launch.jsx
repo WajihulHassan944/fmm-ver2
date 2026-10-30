@@ -102,13 +102,14 @@ export default function AffiliateFightLaunch() {
   const personalized = kit?.creative?.personalizedPoster && String(kit.creative.personalizedPoster.affiliateId || '') === String(kit?.attribution?.affiliateId || '') && String(kit.creative.personalizedPoster.fightId || '') === fightId
     ? kit.creative.personalizedPoster : null;
   const posterArt = personalized ? '' : (kit?.creative?.fightPoster || fightPhotos?.poster || '');
+  const personalizedImagePath = personalized?.imagePath || '';
   useEffect(() => {
-    if (!personalized?.imagePath) return undefined;
+    if (!personalizedImagePath) return undefined;
     let active = true;
     let objectUrl = '';
     setOriginal(null);
     setPosterError('');
-    fetch(`${PUBLIC_API_BASE_URL}${personalized.imagePath}`, { headers: affiliateHeaders(), cache: 'no-store' })
+    fetch(`${PUBLIC_API_BASE_URL}${personalizedImagePath}`, { headers: affiliateHeaders(), cache: 'no-store' })
       .then((response) => { if (!response.ok) throw new Error('Your personalized fight poster could not be loaded. Refresh the page to try again.'); return response.blob(); })
       .then((blob) => {
         if (!active) return;
@@ -118,7 +119,7 @@ export default function AffiliateFightLaunch() {
       })
       .catch((err) => { if (active) setPosterError(err.message); });
     return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [personalized?.imagePath, fightId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [personalizedImagePath, fightId]);
   // Load the uploaded file through our own origin (same bytes, no CORS taint).
   useEffect(() => {
     if (!posterArt) return undefined;
