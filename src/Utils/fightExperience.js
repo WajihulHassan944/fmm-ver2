@@ -72,6 +72,8 @@ export const useImageFallback = (event, fallback = AFFILIATE_AVATAR_FALLBACK) =>
   image.dataset.fallbackApplied = 'true';
   image.src = fallback;
 };
+// Same handler under a non-hook name (it is a plain onError handler, not a React hook).
+export const applyImageFallback = useImageFallback;
 
 const getNestedImageValue = (value) => {
   if (!value || typeof value === 'string') return '';
