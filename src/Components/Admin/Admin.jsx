@@ -158,6 +158,7 @@ const Admin = () => {
   const quickActions = [
     { title: 'Revenue Command Center', copy: 'Track fight views, prediction starts, paid entries, referrals, and bigger-money partner channels.', href: '/administration/revenue', icon: FaChartLine },
     { title: 'Fight Launch Desk', copy: 'Prepare fight posts, QR images, and an affiliate announcement from open fights.', href: '/administration/growth', icon: FaBolt },
+    { title: 'Growth Engine (staging)', copy: 'Approve fight campaigns, PR and affiliate outreach, control publishing, and see the campaign funnel from the isolated Growth Engine.', href: '/administration/growth-engine', icon: FaRobot },
     { title: 'Fighter Affiliates', copy: 'Create and manage fighter affiliates, promoter access, tracked fight links, QR/share assets, and affiliate outreach.', href: '/administration/AffiliateUsers', icon: FaUserFriends },
     { title: 'FOUNDER PAGE — UPLOAD PHOTOS & RING PDF', copy: 'Click here to upload the original Ring Magazine article and your Founder page photographs.', href: '/administration/founder-media', icon: FaEye },
     { title: 'Homepage posters', copy: 'Promote fight posters and shadow-fight videos to the homepage mobile funnel.', href: '/administration/homepage-content', icon: FaBullhorn },
