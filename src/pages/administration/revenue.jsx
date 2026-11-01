@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { GROWTH_ENGINE_V2 } from '@/Utils/adminFeatures';
 import Head from 'next/head';
 import Link from 'next/link';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
@@ -80,7 +81,7 @@ function RevenueCommandCenter(){
     <tr><td><strong>FM COINS committed</strong></td><td>{revenue.toLocaleString()}</td><td>Entry value represented by captured paid entries.</td></tr>
    </tbody></table></div><p style={{opacity:.65,fontSize:12}}>Server analytics aggregate the last 30 days across visitors and devices. Until the backend route is available, this page safely falls back to this browser’s captured events.</p></div>
    <aside className="admin-dashboard-panel"><div className="admin-dashboard-panel-heading"><h2>Bigger-money channels</h2><span>Build beyond entry fees</span></div><div className="admin-quick-actions">
-    <Link className="admin-quick-action" href="/administration/growth"><span><FaRocket/></span><div><strong>Fight Night Growth</strong><small>Drive traffic into the prediction funnel around every event.</small></div><FaArrowRight/></Link>
+    <Link className="admin-quick-action" href={GROWTH_ENGINE_V2 ? "/administration/growth-engine/marketing" : "/administration/growth"}><span><FaRocket/></span><div><strong>Fight Night Growth</strong><small>Drive traffic into the prediction funnel around every event.</small></div><FaArrowRight/></Link>
     <Link className="admin-quick-action" href="/administration/AffiliateUsers"><span><FaBullhorn/></span><div><strong>Affiliate + Fighter Distribution</strong><small>Give every promoter and fighter a measurable acquisition channel.</small></div><FaArrowRight/></Link>
     <Link className="admin-quick-action" href="/administration/sponsors"><span><FaHandshake/></span><div><strong>Sponsored Fight Inventory</strong><small>Sell branded prediction cards, fight-night placements and sponsored prizes.</small></div><FaArrowRight/></Link>
     <Link className="admin-quick-action" href="/administration/full-cards"><span><FaTrophy/></span><div><strong>Promotion / Broadcaster Package</strong><small>Use full cards as an interactive second-screen product for partners.</small></div><FaArrowRight/></Link>

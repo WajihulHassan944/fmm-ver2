@@ -23,6 +23,7 @@ import {
   FaNewspaper,
   FaPlus,
   FaRobot,
+  FaRocket,
   FaSearch,
   FaShieldAlt,
   FaSignOutAlt,
@@ -33,9 +34,10 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
+import { GROWTH_ENGINE_V2, GROWTH_SECTIONS } from '@/Utils/adminFeatures';
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
 
-const navigationGroups = [
+const legacyNavigationGroups = [
   {
     id: 'pro-wrestling',
     label: 'Pro Wrestling',
@@ -116,6 +118,27 @@ const navigationGroups = [
   },
 ];
 
+// V2: one Growth Engine group replaces the retired growth screens. Everything else is unchanged.
+const RETIRED_FROM_NAV = new Set(['/administration/growth', '/administration/july-growth', '/administration/swarm']);
+const growthEngineGroup = {
+  id: 'growth-engine',
+  label: 'Growth Engine',
+  icon: FaRocket,
+  items: GROWTH_SECTIONS.map((s) => ({ label: s.label, href: s.slug === 'overview' ? '/administration/growth-engine' : `/administration/growth-engine/${s.slug}`, icon: FaRocket, exact: true, growth: true })),
+};
+const contentGroupV2 = (group) => ({
+  ...group,
+  label: 'Content & social',
+  items: [
+    ...group.items.filter((item) => !RETIRED_FROM_NAV.has(item.href)),
+    // Swarm stays available for its blog and SEO drafting (shared with SEO and editorial tools).
+    { label: 'Blog & SEO automation (Swarm)', href: '/administration/swarm', icon: FaRobot },
+  ],
+});
+const navigationGroups = GROWTH_ENGINE_V2
+  ? [growthEngineGroup, ...legacyNavigationGroups.map((g) => (g.id === 'automation' ? contentGroupV2(g) : g))]
+  : legacyNavigationGroups;
+
 const getActiveItem = (pathname) => {
   for (const group of navigationGroups) {
     const item = group.items.find((entry) => pathname === entry.href || (!entry.exact && pathname.startsWith(`${entry.href}/`)) || entry.matchPrefixes?.some((prefix) => pathname.startsWith(prefix)));
@@ -128,7 +151,10 @@ const AdminHeader = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = router.pathname || '/administration';
-  const active = useMemo(() => getActiveItem(pathname), [pathname]);
+  // Growth Engine sections share one dynamic page, so they are matched on the real path.
+  const realPath = String(router.asPath || pathname).split(/[?#]/)[0];
+  const matchPath = pathname.startsWith('/administration/growth-engine') ? realPath : pathname;
+  const active = useMemo(() => getActiveItem(matchPath), [matchPath]);
   const isWrestlingRoute = pathname.startsWith('/administration/pro-wrestling');
   const [menuOpen, setMenuOpen] = useState(false);
   const [compact, setCompact] = useState(false);
@@ -196,9 +222,15 @@ const AdminHeader = () => {
         <Link href="/administration" className={`admin-overview-link ${pathname === '/administration' ? 'is-active' : ''}`} title="Command center">
           <FaChartBar /><span>Command center</span>
         </Link>
-        <Link href="/administration/growth" className={`admin-overview-link ${pathname === '/administration/growth' ? 'is-active' : ''}`} title="This Week’s Three Fights">
-          <FaBolt /><span>This Week’s Three Fights</span>
-        </Link>
+        {GROWTH_ENGINE_V2 ? (
+          <Link href="/administration/growth-engine" className={`admin-overview-link ${pathname.startsWith('/administration/growth-engine') ? 'is-active' : ''}`} title="Growth Engine">
+            <FaRocket /><span>Growth Engine</span>
+          </Link>
+        ) : (
+          <Link href="/administration/growth" className={`admin-overview-link ${pathname === '/administration/growth' ? 'is-active' : ''}`} title="This Week’s Three Fights">
+            <FaBolt /><span>This Week’s Three Fights</span>
+          </Link>
+        )}
 
         <label className="admin-command-search">
           <FaSearch aria-hidden="true" />
@@ -227,7 +259,7 @@ const AdminHeader = () => {
                   <div className="admin-command-group-items">
                     {group.items.map((item) => {
                       const Icon = item.icon;
-                      const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`) || item.matchPrefixes?.some((prefix) => pathname.startsWith(prefix));
+                      const isActive = item.growth ? matchPath === item.href : (pathname === item.href || pathname.startsWith(`${item.href}/`) || item.matchPrefixes?.some((prefix) => pathname.startsWith(prefix)));
                       return (
                         <Link key={item.href} href={item.href} className={`admin-command-link ${isActive ? 'is-active' : ''}`} title={item.label}>
                           <Icon aria-hidden="true" /><span>{item.label}</span>
