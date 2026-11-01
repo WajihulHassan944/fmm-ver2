@@ -107,6 +107,7 @@ const navigationGroups = [
     icon: FaRobot,
     items: [
       { label: 'Fight Launch Desk', href: '/administration/growth', icon: FaChartBar },
+      { label: 'Growth Engine (staging)', href: '/administration/growth-engine', icon: FaRobot },
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
       { label: 'July 10K growth', href: '/administration/july-growth', icon: FaBolt },
       { label: 'SEO growth center', href: '/administration/seo-growth', icon: FaSearch },
