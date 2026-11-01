@@ -34,7 +34,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
-import { GROWTH_ENGINE_V2, GROWTH_SECTIONS } from '@/Utils/adminFeatures';
+import { GROWTH_ENGINE_V2, GROWTH_SECTIONS, HIDDEN_FROM_MENU } from '@/Utils/adminFeatures';
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
 
 const legacyNavigationGroups = [
@@ -121,21 +121,21 @@ const legacyNavigationGroups = [
 ];
 
 // V2: one Growth Engine group replaces the retired growth screens. Everything else is unchanged.
-const RETIRED_FROM_NAV = new Set(['/administration/growth', '/administration/july-growth', '/administration/swarm']);
+// V2: one Growth Engine group (plus the working Fight Launch Desk); legacy automation
+// screens classified obsolete/broken/display-only by the audit are hidden from the menu.
 const growthEngineGroup = {
   id: 'growth-engine',
   label: 'Growth Engine',
   icon: FaRocket,
-  items: GROWTH_SECTIONS.map((s) => ({ label: s.label, href: s.slug === 'overview' ? '/administration/growth-engine' : `/administration/growth-engine/${s.slug}`, icon: FaRocket, exact: true, growth: true })),
+  items: [
+    ...GROWTH_SECTIONS.map((s) => ({ label: s.label, href: s.slug === 'overview' ? '/administration/growth-engine' : `/administration/growth-engine/${s.slug}`, icon: FaRocket, exact: true, growth: true })),
+    { label: 'Fight Launch Desk (posters & QR)', href: '/administration/growth', icon: FaChartBar },
+  ],
 };
 const contentGroupV2 = (group) => ({
   ...group,
-  label: 'Content & social',
-  items: [
-    ...group.items.filter((item) => !RETIRED_FROM_NAV.has(item.href)),
-    // Swarm stays available for its blog and SEO drafting (shared with SEO and editorial tools).
-    { label: 'Blog & SEO automation (Swarm)', href: '/administration/swarm', icon: FaRobot },
-  ],
+  label: 'Content & media',
+  items: group.items.filter((item) => item.href !== '/administration/growth' && !HIDDEN_FROM_MENU.has(item.href)),
 });
 const navigationGroups = GROWTH_ENGINE_V2
   ? [growthEngineGroup, ...legacyNavigationGroups.map((g) => (g.id === 'automation' ? contentGroupV2(g) : g))]

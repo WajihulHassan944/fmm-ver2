@@ -158,8 +158,8 @@ const Admin = () => {
     ] : [
       { area: 'Fan Acquisition Swarm', metric: 'Five sport agents', status: 'Research and outreach queue', statusClass: 'is-warning', href: '/administration/fan-acquisition', action: 'Open fan acquisition' },
       { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
+      { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
     ]),
-    { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
   ];
 
   const allQuickActions = [
@@ -180,7 +180,7 @@ const Admin = () => {
     { title: 'Manage FAQs', copy: 'Add, edit, publish, or remove support answers.', href: '/administration/faqs', icon: FaQuestionCircle },
   ];
   // V2: the Growth Engine card replaces the retired growth shortcuts; legacy keeps them.
-  const RETIRED_ACTIONS = new Set(['Fight Launch Desk', 'FAN ACQUISITION COMMAND CENTER', 'Swarm automation']);
+  const RETIRED_ACTIONS = new Set(['FAN ACQUISITION COMMAND CENTER', 'Swarm automation', 'SEO growth center']);
   const quickActions = GROWTH_ENGINE_V2
     ? allQuickActions.filter((a) => !RETIRED_ACTIONS.has(a.title)).map((a) => (a.href === '/administration/growth-engine' ? { ...a, title: 'Growth Engine' } : a))
     : allQuickActions.filter((a) => a.href !== '/administration/growth-engine');

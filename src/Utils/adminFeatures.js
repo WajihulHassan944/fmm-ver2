@@ -20,9 +20,21 @@ export const GROWTH_SECTIONS = [
   { slug: 'connections', label: 'Connections' },
 ];
 
-// Old growth screens retired by V2 (pages stay in the codebase for rollback).
-export const RETIRED_GROWTH_ROUTES = {
-  '/administration/growth': 'marketing',
-  '/administration/fan-acquisition': 'pr',
-  '/administration/july-growth': 'overview',
+// Legacy automation screens, classified by the functional audit (Nov 2026).
+// V2 hides HIDDEN_FROM_MENU items from navigation; the pages and their data stay.
+// REDIRECT_TO_GROWTH sends a retired/broken screen to the Growth Engine section that
+// replaces it. Fight Launch Desk (affiliate posters & QR) is WORKING and kept.
+export const HIDDEN_FROM_MENU = new Set([
+  '/administration/swarm',        // PARTIALLY WORKING: template drafts only (no AI/IONOS configured)
+  '/administration/seo-growth',   // PARTIALLY WORKING: agent buttons = template text; page metadata not read by the site
+  '/administration/july-growth',  // OBSOLETE: July 2026 campaign
+  '/administration/BlogsAiBot',   // DISPLAY ONLY: redirect into Swarm
+  '/administration/MakePost',     // BROKEN: X posting not connected; Make.com result unchecked
+]);
+export const REDIRECT_TO_GROWTH = {
+  '/administration/fan-acquisition': 'pr',      // replaced by PR + Affiliate recruitment
+  '/administration/july-growth': 'overview',    // obsolete
+  '/administration/MakePost': 'publishing',     // replaced by approval-gated Publishing
+  '/administration/tweet': 'publishing',
+  '/administration/tiktok': 'publishing',
 };
