@@ -12,6 +12,6 @@ const JulyGrowthPage = () => (GROWTH_ENGINE_V2 ? <AdminPrivateRoute><RetiredGrow
       <JulyGrowthCommandCenter />
     </div>
   </AdminPrivateRoute>
-));
+);
 
 export default JulyGrowthPage;
