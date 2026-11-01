@@ -47,6 +47,7 @@
   "/administration/founder-media",
   "/administration/full-cards",
   "/administration/growth",
+  "/administration/growth-engine/[[...section]]",
   "/administration/homepage-content",
   "/administration/jarvis",
   "/administration/july-growth",
