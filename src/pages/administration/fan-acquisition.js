@@ -1,4 +1,6 @@
 import React,{useEffect,useState} from 'react';
+import RetiredGrowthRedirect from '@/Components/Admin/RetiredGrowthRedirect';
+import { GROWTH_ENGINE_V2 } from '@/Utils/adminFeatures';
 import Head from 'next/head';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 import {adminHeaders} from '@/Utils/authFetch';
@@ -118,4 +120,4 @@ function Dashboard(){
   </div>
  </main>;
 }
-export default function Page(){return <AdminPrivateRoute><Head><title>Fan Acquisition Command Center | FANTASY MMADNESS</title></Head><Dashboard/></AdminPrivateRoute>;}
+export default function Page(){if(GROWTH_ENGINE_V2)return <AdminPrivateRoute><RetiredGrowthRedirect section="pr"/></AdminPrivateRoute>;return <AdminPrivateRoute><Head><title>Fan Acquisition Command Center | FANTASY MMADNESS</title></Head><Dashboard/></AdminPrivateRoute>;}

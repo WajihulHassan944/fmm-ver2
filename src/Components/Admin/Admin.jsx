@@ -21,6 +21,8 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 import SwarmStatusPanel from './SwarmStatusPanel';
+import GrowthEngineStatusPanel from './GrowthEngineStatusPanel';
+import { GROWTH_ENGINE_V2 } from '@/Utils/adminFeatures';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 const VisitorsAnalytics = dynamic(() => import('./VisitorsAnalytics'), {
@@ -150,12 +152,16 @@ const Admin = () => {
     { area: 'Affiliate network', metric: `${dashboardCounts?.affiliatesCount || 0} creators`, status: 'Review queue', statusClass: 'is-warning', href: '/administration/AffiliateUsers', action: 'Review affiliates' },
     { area: 'Apparel orders', metric: `${dashboardCounts?.apparelOrdersCount || 0} orders`, status: dashboardCounts?.apparelOrdersCount ? 'Needs review' : 'Clear', statusClass: dashboardCounts?.apparelOrdersCount ? 'is-warning' : 'is-success', href: '/administration/apparel-orders', action: 'Open order queue' },
     { area: 'Community alerts', metric: actionableCount === null ? 'Unavailable' : `${actionableCount} actionable`, status: alertServiceError ? 'Check service' : actionableCount ? 'Attention' : 'No reported alerts', statusClass: alertServiceError ? 'is-warning' : actionableCount ? 'is-danger' : 'is-success', href: '/administration/notifications', action: 'Investigate alerts' },
-    { area: 'Fan Acquisition Swarm', metric: 'Five sport agents', status: 'Research and outreach queue', statusClass: 'is-warning', href: '/administration/fan-acquisition', action: 'Open fan acquisition' },
-    { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
+    ...(GROWTH_ENGINE_V2 ? [
+      { area: 'Growth Engine', metric: 'Marketing · PR · Affiliates', status: 'Staging', statusClass: 'is-warning', href: '/administration/growth-engine', action: 'Open Growth Engine' },
+    ] : [
+      { area: 'Fan Acquisition Swarm', metric: 'Five sport agents', status: 'Research and outreach queue', statusClass: 'is-warning', href: '/administration/fan-acquisition', action: 'Open fan acquisition' },
+      { area: 'Swarm automation', metric: 'MMA + pro wrestling', status: 'Verify connection', statusClass: 'is-warning', href: '/administration/swarm', action: 'Open swarm panel' },
+    ]),
     { area: 'SEO growth center', metric: 'Reports + traffic', status: 'Review tools', statusClass: 'is-warning', href: '/administration/seo-growth', action: 'Open SEO center' },
   ];
 
-  const quickActions = [
+  const allQuickActions = [
     { title: 'Revenue Command Center', copy: 'Track fight views, prediction starts, paid entries, referrals, and bigger-money partner channels.', href: '/administration/revenue', icon: FaChartLine },
     { title: 'Fight Launch Desk', copy: 'Prepare fight posts, QR images, and an affiliate announcement from open fights.', href: '/administration/growth', icon: FaBolt },
     { title: 'Growth Engine (staging)', copy: 'Approve fight campaigns, PR and affiliate outreach, control publishing, and see the campaign funnel from the isolated Growth Engine.', href: '/administration/growth-engine', icon: FaRobot },
@@ -172,6 +178,11 @@ const Admin = () => {
     { title: 'SEO growth center', copy: 'Review SEO reports, metadata, links, and growth tasks.', href: '/administration/seo-growth', icon: FaChartLine },
     { title: 'Manage FAQs', copy: 'Add, edit, publish, or remove support answers.', href: '/administration/faqs', icon: FaQuestionCircle },
   ];
+  // V2: the Growth Engine card replaces the retired growth shortcuts; legacy keeps them.
+  const RETIRED_ACTIONS = new Set(['Fight Launch Desk', 'FAN ACQUISITION COMMAND CENTER', 'Swarm automation']);
+  const quickActions = GROWTH_ENGINE_V2
+    ? allQuickActions.filter((a) => !RETIRED_ACTIONS.has(a.title)).map((a) => (a.href === '/administration/growth-engine' ? { ...a, title: 'Growth Engine' } : a))
+    : allQuickActions.filter((a) => a.href !== '/administration/growth-engine');
 
   if (showAnalytics) {
     return (
@@ -277,7 +288,7 @@ const Admin = () => {
           )}
         </div>
 
-        <SwarmStatusPanel />
+        {GROWTH_ENGINE_V2 ? <GrowthEngineStatusPanel /> : <SwarmStatusPanel />}
 
         <aside className="admin-dashboard-panel">
           <div className="admin-dashboard-panel-heading">
