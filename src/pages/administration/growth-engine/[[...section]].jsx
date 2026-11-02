@@ -8,6 +8,10 @@ import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 // connection. The Growth Engine is a separate service, with separate sign-in, Atlas
 // database, publishing/email providers, and payment boundaries.
 const ENABLED = process.env.NEXT_PUBLIC_FMM_GROWTH_ENGINE_ENABLED === 'true';
+// TEST PREVIEW ONLY: use the Growth Engine's separate owner-password protection
+// instead of sending reviewers to the live-site administrator login. NEVER set
+// this variable on production; production continues to require AdminPrivateRoute.
+const PREVIEW_REVIEW_ONLY = process.env.NEXT_PUBLIC_FMM_GROWTH_REVIEW_ONLY === 'true';
 const CONSOLE_ORIGIN = 'https://fantasymmadness-growth-isolated-tes.vercel.app';
 const SECTIONS = [
   ['overview', 'Dashboard'],
@@ -28,8 +32,9 @@ export default function IsolatedGrowthEngineAdmin() {
   const part = Array.isArray(router.query.section) ? router.query.section[0] : null;
   const section = slugs.has(part) ? part : 'overview';
   const consoleUrl = `${CONSOLE_ORIGIN}/api/growth/console?embed=1#/${section}`;
+  const AccessBoundary = PREVIEW_REVIEW_ONLY ? React.Fragment : AdminPrivateRoute;
   return (
-    <AdminPrivateRoute>
+    <AccessBoundary>
       <Head><title>Growth Engine | FANTASY MMADNESS Administration</title></Head>
       <main style={{ padding: '24px', background: '#0d111a', color: '#f4f5f7', minHeight: '90vh' }}>
         <header style={{ maxWidth: 1500, margin: '0 auto 16px' }}>
@@ -60,6 +65,6 @@ export default function IsolatedGrowthEngineAdmin() {
           )}
         </header>
       </main>
-    </AdminPrivateRoute>
+    </AccessBoundary>
   );
 }
