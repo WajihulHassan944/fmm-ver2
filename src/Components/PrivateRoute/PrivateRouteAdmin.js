@@ -2,6 +2,8 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { swarmRequest } from '@/Utils/swarmApi';
+import { ADMIN_STAGING_REVIEW } from '@/Utils/adminFeatures';
+import StagingReviewGate from '@/Components/Admin/StagingReviewGate';
 
 const urlBase64ToUint8Array = (base64String) => {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -10,7 +12,7 @@ const urlBase64ToUint8Array = (base64String) => {
   return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
 };
 
-const AdminPrivateRoute = ({ children }) => {
+const LiveAdminPrivateRoute = ({ children }) => {
   const { isAdminAuthenticated } = useSelector((state) => state.adminAuth);
 
   // Hooks must run unconditionally on every render (Rules of Hooks) — this
@@ -62,5 +64,7 @@ const AdminPrivateRoute = ({ children }) => {
   return children;
 };
 
-export default AdminPrivateRoute;
+// Staging review mode (test previews only): Growth Engine session, no live admin access.
+const AdminPrivateRoute = (props) => (ADMIN_STAGING_REVIEW ? <StagingReviewGate {...props} /> : <LiveAdminPrivateRoute {...props} />);
 
+export default AdminPrivateRoute;

@@ -1,3 +1,4 @@
+import { blockInStagingReview } from '@/Utils/stagingReviewGuard';
 const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 export const getAdminToken = (req) => {
@@ -6,6 +7,7 @@ export const getAdminToken = (req) => {
 };
 
 export const requireAdmin = async (req, res) => {
+  if (blockInStagingReview(res)) return '';
   const token = getAdminToken(req);
   if (!token) {
     res.status(401).json({ message: 'Admin authentication is required.' });

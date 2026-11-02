@@ -1,8 +1,10 @@
+import { blockInStagingReview } from '@/Utils/stagingReviewGuard';
 const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 const apiBase = () => String(process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 
 export default async function handler(req, res) {
+  if (blockInStagingReview(res)) return;
   const path = Array.isArray(req.query.path) ? req.query.path : [];
   if (!path.length) return res.status(400).json({ message: 'A Swarm API path is required.' });
 

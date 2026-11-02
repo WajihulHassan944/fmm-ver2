@@ -38,3 +38,14 @@ export const REDIRECT_TO_GROWTH = {
   '/administration/tweet': 'publishing',
   '/administration/tiktok': 'publishing',
 };
+
+// Staging review mode (test previews only; never set on the live site).
+// The test back office signs in with the Growth Engine owner password against the
+// isolated staging engine and never sends live admin credentials or tokens anywhere.
+// Screens that read or change live data (fights, players, payouts, payments) are not
+// opened here, so staging is never connected to production admin write operations.
+export const ADMIN_STAGING_REVIEW = String(process.env.NEXT_PUBLIC_ADMIN_STAGING_REVIEW || '').trim().toLowerCase() === 'on';
+export const isStagingReviewPath = (path = '') => {
+  const p = String(path || '').split(/[?#]/)[0].replace(/\/+$/, '');
+  return p === '/administration/growth-engine' || p.startsWith('/administration/growth-engine/') || p === '/administration/back-office-guide';
+};

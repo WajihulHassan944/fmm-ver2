@@ -1,6 +1,8 @@
+import { blockInStagingReview } from '@/Utils/stagingReviewGuard';
 const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three-taupe.vercel.app';
 
 export default async function handler(req, res) {
+  if (blockInStagingReview(res)) return;
   res.setHeader('Cache-Control', 'private, no-store');
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');

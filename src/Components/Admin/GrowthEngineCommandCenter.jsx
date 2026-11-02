@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 import { GROWTH_ENGINE_V2, GROWTH_SECTIONS } from '@/Utils/adminFeatures';
-import { GROWTH_CONSOLE_URL, GROWTH_ENGINE_URL, growthEngineApi } from '@/Utils/growthEngineApi';
+import { GROWTH_CONSOLE_URL, GROWTH_ENGINE_URL, growthEngineApi, growthToken } from '@/Utils/growthEngineApi';
 import styles from './GrowthEngineCommandCenter.module.css';
 
 const SLUGS = new Set(GROWTH_SECTIONS.map((s) => s.slug));
@@ -27,10 +27,20 @@ export default function GrowthEngineCommandCenter() {
     return () => { alive = false; };
   }, []);
 
+  // One sign-in: when this back office already holds a Growth Engine session (staging
+  // review sign-in), hand it to the embedded console. Sent only to the engine's origin;
+  // the console accepts it only from an allowed embedding origin and re-checks it.
+  const handOverSession = () => {
+    const t = growthToken.get();
+    if (!t || !engineOrigin || !frame.current?.contentWindow) return;
+    frame.current.contentWindow.postMessage({ type: 'fmm-growth-session', token: t }, engineOrigin);
+  };
+
   // Navigating inside the console keeps the admin menu in sync (messages accepted only from the engine).
   useEffect(() => {
     const onMessage = (event) => {
       if (event.origin !== engineOrigin || event.data?.type !== 'fmm-growth-console') return;
+      if (event.data.section === 'signin') handOverSession();
       const s = event.data.section;
       if (SLUGS.has(s) && s !== section) router.replace(hrefFor(s), undefined, { shallow: true });
     };
@@ -68,7 +78,7 @@ export default function GrowthEngineCommandCenter() {
         </section>
       )}
       {reach === 'ok' && (
-        <iframe ref={frame} className={styles.frame} src={src} title={`Growth Engine — ${GROWTH_SECTIONS.find((s) => s.slug === section)?.label}`} data-testid="ge-frame" referrerPolicy="no-referrer" />
+        <iframe ref={frame} className={styles.frame} src={src} title={`Growth Engine — ${GROWTH_SECTIONS.find((s) => s.slug === section)?.label}`} data-testid="ge-frame" referrerPolicy="no-referrer" onLoad={handOverSession} />
       )}
     </main>
   );

@@ -1,8 +1,10 @@
+import { blockInStagingReview } from '@/Utils/stagingReviewGuard';
 import { DEFAULT_PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
+  if (blockInStagingReview(res)) return;
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ message: 'Method not allowed.' });

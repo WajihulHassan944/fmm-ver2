@@ -39,6 +39,7 @@ const adminAuthSlice = createSlice({
     logoutAdmin: (state) => {
       state.isAdminAuthenticated = false;
       localStorage.removeItem('adminAuthToken');
+      try { sessionStorage.removeItem('fmmGrowthBridgeToken'); } catch (_error) { /* storage disabled */ }
     },
     setAdminAuthenticated: (state, action) => {
       state.isAdminAuthenticated = true;

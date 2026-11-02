@@ -40,6 +40,7 @@ export const growthEngineApi = {
   health: () => growthRequest('GET', '/health'),
   login: async (password) => { const r = await growthRequest('POST', '/admin/login', { password }); growthToken.set(r.token); return r; },
   logout: () => growthToken.set(''),
+  session: () => growthRequest('GET', '/admin/session'),
   status: () => growthRequest('GET', '/admin/status'),
   funnel: () => growthRequest('GET', '/admin/funnel'),
   pending: () => growthRequest('GET', '/admin/drafts?status=needs_owner_review&limit=10'),
