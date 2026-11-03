@@ -84,7 +84,10 @@ export default function GrowthEngineCommandCenter() {
       if (!alive || error.name === 'AbortError') return;
       growthToken.set('');
       verifiedToken.current = '';
-      setSession(error.status === 401 || error.status === 403 ? 'rejected' : 'unavailable');
+      const rejected = error.status === 401 || error.status === 403;
+      setSession(rejected ? 'rejected' : 'unavailable');
+      // a refused administrator must not keep an earlier console session in this tab
+      if (rejected) { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } }
     });
     // tell the console to revoke and forget its copy before the frame is removed
     const onLogout = () => { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } verifiedToken.current = ''; setSession('expired'); };
