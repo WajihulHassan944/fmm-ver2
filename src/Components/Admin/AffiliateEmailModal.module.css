@@ -71,3 +71,6 @@
   .body { padding: 12px !important; }
   .inviteModal { height: calc(100dvh - 16px); }
 }
+
+.previewPoster { display: block; width: 100%; max-width: 900px; height: auto; object-fit: contain; border-radius: 8px; margin-top: 12px; }
+.previewMessage { white-space: pre-wrap; overflow-wrap: anywhere; }
