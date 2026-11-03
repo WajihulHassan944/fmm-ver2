@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Separate build artifacts for ON/OFF isolated integration browser tests.
+  distDir: process.env.FMM_INTEGRATION_TEST_DIST_DIR || '.next',
   poweredByHeader: false,
   compress: true,
   productionBrowserSourceMaps: false,
