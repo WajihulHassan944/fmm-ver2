@@ -12,8 +12,9 @@ const AUTH = 'https://fantasymmadness-game-server-three.vercel.app';
 const ENGINE = 'https://fantasymmadness-growth-isolated-tes.vercel.app';
 const keys = crypto.generateKeyPairSync('ed25519');
 const privB64 = Buffer.from(keys.privateKey.export({ type: 'pkcs8', format: 'pem' })).toString('base64');
-const ADMIN_SECRET = 'admin-secret-for-tests-only-0123456789abcdef';
+const ADMIN_SECRET = crypto.randomBytes(32).toString('hex'); // generated per run (no fixed test secret in the repository)
 const ID = '65f0c0ffee0000000000abcd';
+const GROWTH_TOKEN = `growth.${crypto.randomBytes(12).toString('hex')}.session`;
 const b64u = (v) => Buffer.from(typeof v === 'string' ? v : JSON.stringify(v)).toString('base64url');
 const hs256 = (payload, secret = ADMIN_SECRET, header = { alg: 'HS256', typ: 'JWT' }) => { const h = b64u(header); const p = b64u(payload); return `${h}.${p}.${crypto.createHmac('sha256', secret).update(`${h}.${p}`).digest('base64url')}`; };
 const nowS = () => Math.floor(Date.now() / 1000);
@@ -30,7 +31,7 @@ function harness({ env = {}, authority = 404, engine } = {}) {
       const [h, p, s] = assertion.split('.');
       const ok = crypto.verify(null, Buffer.from(`${h}.${p}`), keys.publicKey, Buffer.from(s, 'base64url'));
       const claims = JSON.parse(Buffer.from(p, 'base64url'));
-      const result = engine ? engine({ ok, claims }) : { status: ok ? 200 : 401, body: ok ? (claims.purpose === 'session' ? { ok: true, token: 'growth-only-session-token-xyz', expiresAt: Date.now() + 1800000 } : { ok: true }) : { ok: false, reason: 'assertion_bad_signature' } };
+      const result = engine ? engine({ ok, claims }) : { status: ok ? 200 : 401, body: ok ? (claims.purpose === 'session' ? { ok: true, token: GROWTH_TOKEN, expiresAt: Date.now() + 1800000 } : { ok: true }) : { ok: false, reason: 'assertion_bad_signature' } };
       return { status: result.status, json: async () => result.body };
     }
     throw new Error(`unexpected request to ${url}`);
@@ -89,7 +90,7 @@ test('administrator session checks fail closed', async () => {
   // local signature check when this site holds the admin secret
   const local = harness({ env: { JWT_SECRET_ADMIN: ADMIN_SECRET } });
   assert.equal((await local.call()).status, 200);
-  const forged = await local.call({ token: hs256({ id: ID, email: 'a@b.c', iat: nowS(), exp: nowS() + 99 }, 'forged-secret') });
+  const forged = await local.call({ token: hs256({ id: ID, email: 'a@b.c', iat: nowS(), exp: nowS() + 99 }, crypto.randomBytes(16).toString('hex')) });
   assert.equal(forged.body.reason, 'administrator_session_rejected'); assert.equal(local.calls.filter((c) => c.url.startsWith(ENGINE)).length, 1, 'forged token never produced an assertion');
   assert.equal((await harness({ env: { GROWTH_SSO_ALLOWED_ADMINS: 'other@x.y' } }).call()).status, 403);
 });
@@ -100,8 +101,8 @@ test('engine refusals and bad engine answers are not passed through as sessions'
   assert.equal((await harness({ engine: 'down' }).call()).status, 503);
   const token = adminToken();
   assert.equal((await harness({ engine: () => ({ status: 200, body: { ok: true, token, expiresAt: Date.now() + 60000 } }) }).call({ token })).body.reason, 'growth_engine_bad_response', 'echo of the admin token refused');
-  assert.equal((await harness({ engine: () => ({ status: 200, body: { ok: true, token: 'growth-only-session-token-xyz', expiresAt: Date.now() + 7200000 } }) }).call({ token: adminToken({ exp: nowS() + 600 }) })).body.reason, 'growth_engine_bad_response', 'outlives the admin session');
-  assert.equal((await harness({ engine: () => ({ status: 200, body: { ok: true, token: 'growth-only-session-token-xyz', expiresAt: Date.now() - 1 } }) }).call()).body.reason, 'growth_engine_bad_response');
+  assert.equal((await harness({ engine: () => ({ status: 200, body: { ok: true, token: GROWTH_TOKEN, expiresAt: Date.now() + 7200000 } }) }).call({ token: adminToken({ exp: nowS() + 600 }) })).body.reason, 'growth_engine_bad_response', 'outlives the admin session');
+  assert.equal((await harness({ engine: () => ({ status: 200, body: { ok: true, token: GROWTH_TOKEN, expiresAt: Date.now() - 1 } }) }).call()).body.reason, 'growth_engine_bad_response');
 });
 
 test('logout (DELETE): signed revoke assertion; an already-ended admin session needs nothing', async () => {
