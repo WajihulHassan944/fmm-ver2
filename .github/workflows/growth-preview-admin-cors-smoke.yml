@@ -1,0 +1,32 @@
+name: Growth preview admin login CORS smoke (read-only)
+on:
+  push:
+    branches:
+      - integration/growth-engine-first-party-session
+  workflow_dispatch:
+jobs:
+  preview-admin-cors:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Check preflight for preview administrator login (no credentials)
+        shell: bash
+        env:
+          PREVIEW_ORIGIN: https://fmm-ver2-git-integration-g-3a9420-kelly-davis-projects-6c108d0b.vercel.app
+          ADMIN_BACKEND: https://fantasymmadness-game-server-three-taupe.vercel.app
+        run: |
+          set -euo pipefail
+          headers=$(mktemp)
+          status=$(curl --connect-timeout 8 --max-time 20 -sS -D "$headers" -o /dev/null -w '%{http_code}' \
+            -X OPTIONS "$ADMIN_BACKEND/admin/login" \
+            -H "Origin: $PREVIEW_ORIGIN" \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: content-type')
+          allow_origin=$(grep -i '^access-control-allow-origin:' "$headers" | head -1 | tr -d '\r' | cut -d' ' -f2- || true)
+          allow_methods=$(grep -i '^access-control-allow-methods:' "$headers" | head -1 | tr -d '\r' | cut -d' ' -f2- || true)
+          echo "OPTIONS status=$status"
+          echo "Allow-Origin matches isolated preview=$([ "$allow_origin" = "$PREVIEW_ORIGIN" ] && echo yes || echo no)"
+          echo "POST in allowed methods=$(echo "$allow_methods" | grep -Eqi '(^|[, ])POST([, ]|$)' && echo yes || echo no)"
+          test "$status" = 200 -o "$status" = 204
+          test "$allow_origin" = "$PREVIEW_ORIGIN"
+          echo "$allow_methods" | grep -Eqi '(^|[, ])POST([, ]|$)'

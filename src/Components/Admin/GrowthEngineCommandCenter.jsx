@@ -27,11 +27,14 @@ export default function GrowthEngineCommandCenter() {
   const verifiedToken = useRef('');
   const frame = useRef(null);
   const handover = useRef(false);
+  const lastRenew = useRef(0);
+  const sessionState = useRef('connecting');
   const enabled = GROWTH_ENGINE_V2 && mounted && authenticated && Boolean(engine);
   const target = sectionTarget(section, GROWTH_SECTIONS);
   const src = engine ? `${engine.consoleUrl}?embed=1#/${target}` : '';
 
   useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { sessionState.current = session; }, [session]);
 
   useEffect(() => {
     if (!enabled) return undefined;
@@ -51,6 +54,8 @@ export default function GrowthEngineCommandCenter() {
 
   const handOverSession = useCallback(async () => {
     if (!enabled || handover.current || !frame.current?.contentWindow) return;
+    // refused administrator: the console (loaded now) must not keep an earlier session
+    if (sessionState.current === 'rejected') { try { frame.current.contentWindow.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } return; }
     const token = growthToken.get();
     if (!token) return;
     handover.current = true;
@@ -81,9 +86,13 @@ export default function GrowthEngineCommandCenter() {
       if (!alive || error.name === 'AbortError') return;
       growthToken.set('');
       verifiedToken.current = '';
-      setSession(error.status === 401 || error.status === 403 ? 'rejected' : 'unavailable');
+      const rejected = error.status === 401 || error.status === 403;
+      setSession(rejected ? 'rejected' : 'unavailable');
+      // a refused administrator must not keep an earlier console session in this tab
+      if (rejected) { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } }
     });
-    const onLogout = () => { verifiedToken.current = ''; setSession('expired'); };
+    // tell the console to revoke and forget its copy before the frame is removed
+    const onLogout = () => { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } verifiedToken.current = ''; setSession('expired'); };
     window.addEventListener('fmm-growth-logout', onLogout);
     return () => { alive = false; controller.abort(); window.clearTimeout(expiryTimer); window.removeEventListener('fmm-growth-logout', onLogout); };
   }, [enabled, attempt, handOverSession]);
@@ -95,6 +104,11 @@ export default function GrowthEngineCommandCenter() {
       setConfirmed(true);
       setSlow(false);
       const incoming = event.data.section;
+      // console session protocol: signed out inside the console -> stay signed out; ended/revoked -> renew from the administrator session
+      // the administrator session was not accepted: the console must not stay signed in with an earlier session
+      if (event.data.signedIn && !verifiedToken.current && sessionState.current === 'rejected') { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } return; }
+      if (event.data.event === 'signed-out') { growthToken.set(''); verifiedToken.current = ''; if (sessionState.current !== 'rejected') setSession('expired'); return; }
+      if (event.data.event === 'session-expired') { growthToken.set(''); verifiedToken.current = ''; if (Date.now() - lastRenew.current < 30000) { setSession('expired'); return; } lastRenew.current = Date.now(); setAttempt(value => value + 1); return; }
       if (incoming === 'signin') { if (verifiedToken.current && !growthToken.get()) setSession('expired'); else handOverSession(); return; }
       // Posters are the original Marketing poster workflow, not another page.
       if (section === 'posters' && incoming === 'marketing') return;

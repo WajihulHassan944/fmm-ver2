@@ -1,0 +1,2 @@
+# Reviewed false positive: a comment listing environment variable NAMES (no value), since reworded.
+b7ec2ce9455892ff4adc08fc8dc44b43208672a9:src/pages/api/admin/growth-session.js:generic-api-key:5
