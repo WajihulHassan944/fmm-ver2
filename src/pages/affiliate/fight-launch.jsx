@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { affiliateHeaders, getAffiliateToken } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
+import { affiliatePosterPreviewUrl } from '@/Utils/affiliatePosterPreview.cjs';
 import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { buildFightSocialPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
 import { formatFightDate, getFightId, getFighterImage } from '@/Utils/fightExperience';
@@ -171,9 +172,7 @@ export default function AffiliateFightLaunch() {
   };
   const name = kit?.creative?.headline || 'the fight';
   const link = kit?.fightLink || '';
-  const squarePosterUrl = kit?.attribution?.affiliateId && fightId
-    ? `/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(kit.attribution.affiliateId)}&format=facebook&v=13`
-    : '';
+  const squarePosterUrl = affiliatePosterPreviewUrl(fightId, kit?.attribution?.affiliateId, fightPhotos?.poster || kit?.creative?.fightPoster || '');
   const facebookLeagueUrl = kit?.attribution?.affiliateId && fightId
     ? `${SITE_URL}/league/${encodeURIComponent(kit.attribution.affiliateId)}?fightId=${encodeURIComponent(fightId)}&share=affiliate-qr-13`
     : link;

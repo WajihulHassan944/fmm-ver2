@@ -11,6 +11,7 @@ import { affiliateFightPosts } from '@/Utils/fightShareCopy';
 import { prepareFightPosterUpload } from '@/Utils/prepareFightPosterUpload';
 import { fullCardRequest } from '@/Utils/fullCardApi';
 import UserDetails from './UserDetails';
+import AffiliateEmailPreview from './AffiliateEmailPreview';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 import {
@@ -278,7 +279,7 @@ const AffiliateUsers = () => {
     launchSelectionPending.current = loading || !affiliateUsers.length;
     setSelectedAffiliateIds(affiliateUsers.filter((user) => user.verified && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || '').trim())).map((user) => user._id));
     setBulkSubject(`${title || 'A new fight'} · your FANTASY MMADNESS share kit`);
-    setBulkMessage(`Hi {firstName},\n\n${title || 'A new fight'} is ready for your league. The fight entry is {entryCoins} and the advertised prize pool is {prizeCoins}. We have prepared your personal fight link, QR poster, and captions.\n\nOpen your share kit: {shareKit}\n\nSign in with your FANTASY MMADNESS affiliate account if asked. Your own tracked link and QR code are in the kit. When someone joins and enters through your link, their eligible paid entry remains attributed to you; your affiliate share of the platform proceeds is credited under the existing payout terms after the fight is settled. Refunds are excluded. You can review your referrals and earnings in your affiliate back office.\n\nChoose Facebook to review your post, or use the ready-made captions for the other platforms. The fight entry and prize pool are already set; you do not need to set them again.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadness.com.\n\nFANTASY MMADNESS Owner Office`);
+    setBulkMessage(`Hi {firstName},\n\n${title || 'A new fight'} is ready for your league. The fight entry is {entryCoins} and the advertised prize pool is {prizeCoins}. We have prepared your personal fight link, QR poster, and captions.\n\nOpen your share kit: {shareKit}\n\nSign in with your FANTASY MMADNESS affiliate account if asked. Your own tracked link and QR code are in the kit. When someone joins and enters through your link, their eligible paid entry remains attributed to you; your affiliate share of the platform proceeds is credited under the existing payout terms after the fight is settled. Refunds are excluded. You can review your referrals and earnings in your affiliate back office.\n\nChoose Facebook to review your post, or use the ready-made captions for the other platforms. The fight entry and prize pool are already set; you do not need to set them again.\n\nYou received this because you are a FANTASY MMADNESS affiliate. If you need help, reply to contact@fantasymmadnesscom.com.\n\nFANTASY MMADNESS Owner Office`);
     setBulkResults([]);
     setMailLimitReached(false);
     setBulkEmailOpen(true);
@@ -713,7 +714,7 @@ const AffiliateUsers = () => {
               <p className="admin-bulk-email-note">Messages are delivered one at a time through the same verified email process. {launchFightId ? 'Each approved affiliate receives their own tracked fight link, QR download, and ready-to-copy posts.' : <>Use <strong>{'{firstName}'}</strong> to personalize each greeting.</>}</p>
               <label>Subject<input type="text" value={bulkSubject} disabled={bulkSending} onChange={(event) => setBulkSubject(event.target.value)} /></label>
               <label>Message<textarea rows="9" value={bulkMessage} disabled={bulkSending} onChange={(event) => setBulkMessage(event.target.value)} /></label>
-              {launchFightId && selectedRecipients.length > 0 && <details className="admin-bulk-email-note"><summary>Preview the first affiliate’s actual message</summary><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{affiliateLaunchMessage(selectedRecipients[0])}</pre></details>}
+              {launchFightId && selectedRecipients.length > 0 && <AffiliateEmailPreview recipients={selectedRecipients} fightId={launchFightId} artwork={posterUrls[launchFightId] || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.fightPosterImage || posterFights.find((fight) => String(getFightId(fight)) === launchFightId)?.promotionBackground || ''} messageFor={affiliateLaunchMessage} />}
               <div className="admin-bulk-email-recipients"><strong>Recipients ({selectedRecipients.length})</strong><span>{selectedRecipients.map((user) => user.email).join(', ')}</span></div>
               {(bulkSending || bulkResults.length > 0) && <div className="admin-bulk-email-progress"><strong>{bulkSending ? 'Sending…' : 'Finished'}</strong><span>{bulkProgress.sent} sent · {bulkProgress.failed} failed · {bulkProgress.skipped} not attempted · {bulkProgress.total} total</span></div>}
             </div>
