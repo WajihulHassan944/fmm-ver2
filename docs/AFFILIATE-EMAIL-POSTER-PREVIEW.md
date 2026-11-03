@@ -13,4 +13,12 @@ Verification:
 - Existing fight-registry regressions: 3 pass.
 - Screenshot: `test-results/screenshots/affiliate-email-custom-poster-preview.png` (clearly labeled fixture artwork).
 
-Branch: `fix/affiliate-email-poster-preview-isolated-20261103`. No production data, email, payment or live affiliate accounts changed. No merge or deployment.
+Production release authorized by the owner for this back-office fix only. Release branch: `release/backoffice-affiliate-email-preview-20261103`, based on main `6b8f083`. The application changes are limited to the email footer, preview component/styles, and shared poster image version key. Growth Engine integration commits are excluded. No backend settings, live affiliate records, email sends or payment processing are changed.
+
+Release prerequisites repaired on the production baseline:
+
+- Synchronized its lockfile with the existing `@vercel/blob` declaration so frozen installation succeeds.
+- Applied non-forced updates within existing dependency ranges: Next.js 16.3.5 → 16.4.5, DOMPurify 3.4.15 → 3.4.17, source-map-js 1.2.1 → 1.2.2, sharp 0.35.4 → 0.35.5; pinned the compatible transitive Zod 4.6.7 patch. No major upgrade or Growth Engine configuration is included.
+- Aliased the existing plain `useImageFallback` handler to `applyImageFallback` at its UpcomingFights import/call sites, eliminating the pre-existing false rules-of-hooks errors without changing behavior.
+
+Final release-worktree checks: clean `npm ci --ignore-scripts`, full build, full lint (0 errors, 63 existing warnings), 2 back-office Chromium cases, and 3 fight-registry cases pass. Production audit: 0 high/critical/moderate, 1 existing LOW deepmerge advisory. Browser recipients, records and upload/image services were local fixtures; no emails were sent. The original testing workspaces and Growth Engine branches remain preserved.
