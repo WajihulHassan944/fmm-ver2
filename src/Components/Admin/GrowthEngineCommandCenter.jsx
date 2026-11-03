@@ -54,6 +54,8 @@ export default function GrowthEngineCommandCenter() {
 
   const handOverSession = useCallback(async () => {
     if (!enabled || handover.current || !frame.current?.contentWindow) return;
+    // refused administrator: the console (loaded now) must not keep an earlier session
+    if (sessionState.current === 'rejected') { try { frame.current.contentWindow.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } return; }
     const token = growthToken.get();
     if (!token) return;
     handover.current = true;
