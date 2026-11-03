@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
-    "test:growth-integration": "node --test scripts/growth-engine-security.test.cjs",
+    "test:growth-integration": "node --test scripts/growth-engine-security.test.cjs scripts/growth-session-bridge.test.cjs",
     "test:growth-browser": "playwright test --config=playwright.growth.config.cjs",
     "smoke:public": "node scripts/smoke-public-flows.mjs",
     "start": "next start",

@@ -55,7 +55,19 @@ export const growthEngineApi = {
     growthToken.set(result.token, result.expiresAt);
     return result;
   },
-  logout: () => { growthToken.set(''); if (typeof window !== 'undefined') window.dispatchEvent(new Event('fmm-growth-logout')); },
+  // Administration logout: end the Growth Engine session on the server too.
+  // 1) the Growth session revokes itself at the engine (it is the only credential sent there);
+  // 2) the same-origin endpoint ends every Growth session of this administrator (website logout).
+  // Both are fire-and-forget (keepalive) so logout is never delayed.
+  logout: () => {
+    const growth = growthToken.get();
+    const path = sameOriginSessionPath(process.env.NEXT_PUBLIC_FMM_GROWTH_SESSION_PATH);
+    const admin = path ? getAdminToken() : '';
+    try { if (growth) fetch(`${GROWTH_ENGINE_URL}/api/growth/admin/logout`, { method: 'POST', keepalive: true, cache: 'no-store', credentials: 'omit', headers: { Authorization: `Bearer ${growth}` } }).catch(() => {}); } catch (_error) { /* ignore */ }
+    try { if (admin) fetch(path, { method: 'DELETE', keepalive: true, cache: 'no-store', credentials: 'same-origin', redirect: 'error', headers: { Authorization: `Bearer ${admin}` } }).catch(() => {}); } catch (_error) { /* ignore */ }
+    growthToken.set('');
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('fmm-growth-logout'));
+  },
   session: () => growthRequest('GET', '/admin/session'),
   status: () => growthRequest('GET', '/admin/status'),
   funnel: () => growthRequest('GET', '/admin/funnel'),
