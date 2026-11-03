@@ -4,8 +4,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FaArrowRight, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { loginAdmin } from '@/Redux/adminAuthSlice';
+import { ADMIN_STAGING_REVIEW } from '@/Utils/adminFeatures';
+import StagingReviewLogin from '@/Components/Admin/StagingReviewLogin';
 
-const AdminLogin = () => {
+const LiveAdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -103,5 +105,8 @@ const AdminLogin = () => {
     </div>
   );
 };
+
+// Staging review mode (test previews only): Growth Engine password, never live credentials.
+const AdminLogin = () => (ADMIN_STAGING_REVIEW ? <StagingReviewLogin /> : <LiveAdminLogin />);
 
 export default AdminLogin;

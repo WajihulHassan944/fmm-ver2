@@ -1,0 +1,16 @@
+.page { padding: 18px 20px 24px; color: #f2f3f5; max-width: 1400px; margin: 0 auto; }
+.header { display: flex; gap: 14px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; }
+.header h1 { margin: 2px 0; font-size: 24px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #ff5a60; }
+.muted { color: #aab0ba; font-size: 13px; margin: 0; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid #2f333d; margin-bottom: 12px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.tab { padding: 9px 12px; white-space: nowrap; color: #c7cad1; text-decoration: none; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tab:hover { color: #fff; }
+.tabActive { color: #ff5a60; border-bottom-color: #e0262d; }
+.frame { width: 100%; height: calc(100vh - 210px); min-height: 560px; border: 1px solid #e3e4e8; border-radius: 10px; background: #f4f5f7; display: block; }
+.card { color: #16181d; background: #fff; border: 1px solid #e3e4e8; border-radius: 10px; padding: 16px 18px; }
+.card h2 { margin: 0 0 8px; font-size: 18px; }
+.primary, .linkButton { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 8px 14px; font-weight: 700; text-decoration: none; font-size: 14px; border: 1px solid #d3d5db; background: #fff; color: #16181d; }
+.primary { background: #c92127; border-color: #c92127; color: #fff; }
+@media (max-width: 760px) { .page { padding: 12px 10px; } .frame { height: calc(100vh - 230px); min-height: 480px; } }
+@media (min-width: 1000px) { .tabs { flex-wrap: wrap; overflow-x: visible; } }

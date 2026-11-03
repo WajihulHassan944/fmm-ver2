@@ -1,7 +1,9 @@
 import { issueSignedToken, presignUrl } from '@vercel/blob';
 import { requireAdmin } from './_adminAuth';
 const IMAGE_SLOTS=new Set(['hero','career','championship','gyms','legends','vision','mission']);
+import { blockInStagingReview } from '@/Utils/stagingReviewGuard';
 export default async function handler(req,res) {
+  if (blockInStagingReview(res)) return;
   if(req.method!=='POST') return res.status(405).json({message:'Method not allowed'});
   if(!process.env.BLOB_STORE_ID && !process.env.BLOB_READ_WRITE_TOKEN) return res.status(503).json({message:'Founder storage is not connected.'});
   const token=await requireAdmin(req,res);

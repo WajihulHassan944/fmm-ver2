@@ -1,9 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
+import { GROWTH_ENGINE_V2 } from '@/Utils/adminFeatures';
 
 // Plain-language guide to the major administrator tools. Static content only.
-const GUIDE = [
+const LEGACY_GUIDE = [
   { group: 'Fights', tools: [
     ['Create fight', '/administration/AddNewMatch', 'Builds a new fight card and its prediction setup.', 'When a new fight is confirmed and ready to open for entries.'],
     ['Fight calendar and upcoming fights', '/administration/upcomingFights', 'Lists fights and lets you submit final scores.', 'After a fight ends, to enter the result and settle the contest.'],
@@ -34,6 +35,15 @@ const GUIDE = [
     ['Jarvis action center', '/administration/jarvis', 'System health and incident triage.', 'When something looks wrong with the platform.'],
   ]},
 ];
+
+// V2: the growth group describes the Growth Engine and the kept Fight Launch Desk only.
+const V2_GROWTH = { group: 'Growth Engine and content', tools: [
+  ['Growth Engine', '/administration/growth-engine', 'Fight campaigns from verified fights, PR and affiliate outreach, approvals, publishing controls and the campaign funnel.', 'To plan and approve promotion. Nothing is posted or sent without your approval.'],
+  ['Fight Launch Desk', '/administration/growth', 'Affiliate posters with QR codes, previews and approval for open fights.', 'When a fight opens and an affiliate needs a poster.'],
+  ['Founder page uploads', '/administration/founder-media', 'Upload the Ring Magazine article and Founder page photographs.', 'To update Founder page media.'],
+  ['Manage FAQs', '/administration/faqs', 'Support answers shown on the site.', 'To add or fix a support answer.'],
+]};
+const GUIDE = GROWTH_ENGINE_V2 ? LEGACY_GUIDE.map((g) => (g.group === 'Growth and content' ? V2_GROWTH : g)) : LEGACY_GUIDE;
 
 const BackOfficeGuide = () => (
   <AdminPrivateRoute>
