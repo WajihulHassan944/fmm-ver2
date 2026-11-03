@@ -39,6 +39,19 @@ export async function growthRequest(method, path, body) {
 export const growthEngineApi = {
   health: () => growthRequest('GET', '/health'),
   login: async (password) => { const r = await growthRequest('POST', '/admin/login', { password }); growthToken.set(r.token); return r; },
+  // Website administrator sign-in: the Growth Engine verifies the website's admin session on its
+  // server (with the live backend) and returns a short-lived Growth Engine session. The admin token
+  // is sent only to the Growth Engine's sign-in route, once; it is never stored there.
+  sso: async (adminToken) => {
+    let response;
+    try {
+      response = await fetch(`${GROWTH_ENGINE_URL}/api/growth/admin/sso`, { method: 'POST', headers: { Accept: 'application/json', Authorization: `Bearer ${adminToken}` }, cache: 'no-store', credentials: 'omit' });
+    } catch (_error) { throw new GrowthEngineError('The Growth Engine could not be reached from this page.', { unreachable: true }); }
+    let json = null; try { json = await response.json(); } catch (_error) { json = null; }
+    if (!response.ok || !json?.token) throw new GrowthEngineError(json?.message || `Sign-in failed (${response.status})`, { status: response.status, reason: json?.reason || '' });
+    growthToken.set(json.token);
+    return json;
+  },
   logout: () => growthToken.set(''),
   session: () => growthRequest('GET', '/admin/session'),
   status: () => growthRequest('GET', '/admin/status'),
