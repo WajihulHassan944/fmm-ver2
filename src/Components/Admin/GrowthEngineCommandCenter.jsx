@@ -107,7 +107,7 @@ export default function GrowthEngineCommandCenter() {
       // console session protocol: signed out inside the console -> stay signed out; ended/revoked -> renew from the administrator session
       // the administrator session was not accepted: the console must not stay signed in with an earlier session
       if (event.data.signedIn && !verifiedToken.current && sessionState.current === 'rejected') { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } return; }
-      if (event.data.event === 'signed-out') { growthToken.set(''); verifiedToken.current = ''; setSession('expired'); return; }
+      if (event.data.event === 'signed-out') { growthToken.set(''); verifiedToken.current = ''; if (sessionState.current !== 'rejected') setSession('expired'); return; }
       if (event.data.event === 'session-expired') { growthToken.set(''); verifiedToken.current = ''; if (Date.now() - lastRenew.current < 30000) { setSession('expired'); return; } lastRenew.current = Date.now(); setAttempt(value => value + 1); return; }
       if (incoming === 'signin') { if (verifiedToken.current && !growthToken.get()) setSession('expired'); else handOverSession(); return; }
       // Posters are the original Marketing poster workflow, not another page.
