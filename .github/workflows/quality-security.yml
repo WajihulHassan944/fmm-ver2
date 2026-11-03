@@ -10,7 +10,10 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Playwright 1.56 supports Ubuntu 24.04. ubuntu-latest is migrating to
+    # Ubuntu 26 and failed during its browser/dependency installation.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
