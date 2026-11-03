@@ -22,8 +22,20 @@ jobs:
       - name: Verify fight registry regressions
         run: node scripts/fight-registry-regression.test.cjs
       - run: npm ci --ignore-scripts
+      - name: Growth iframe and credential-boundary security tests
+        run: npm run test:growth-integration
       - run: npm run lint
       - run: npm run build
+      - name: Install Chromium for original-console integration tests
+        run: npx playwright install --with-deps chromium
+      - name: Browser-test original admin console integration (isolated fixtures only)
+        run: npm run test:growth-browser
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: growth-admin-integration-evidence
+          path: test-results/
       - run: npm audit --omit=dev --audit-level=high
       - uses: gitleaks/gitleaks-action@v2
         env:

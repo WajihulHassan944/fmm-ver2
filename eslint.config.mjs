@@ -1,6 +1,7 @@
 import nextVitals from "eslint-config-next/core-web-vitals";
 
 const eslintConfig = [
+  { ignores: [".next-ge-test-*/**", ".cache/**", "test-results/**", "playwright-report/**"] },
   ...nextVitals,
   {
     rules: {

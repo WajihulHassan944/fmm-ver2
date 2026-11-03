@@ -14,3 +14,8 @@
 .primary { background: #c92127; border-color: #c92127; color: #fff; }
 @media (max-width: 760px) { .page { padding: 12px 10px; } .frame { height: calc(100vh - 230px); min-height: 480px; } }
 @media (min-width: 1000px) { .tabs { flex-wrap: wrap; overflow-x: visible; } }
+
+.notice { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin: 12px 0; padding: 12px; border: 1px solid #765c2a; border-radius: 10px; color: #f2dfb6; background: #211d16; }
+.notice p { margin: 0; max-width: 75ch; }
+.tab:focus-visible, .linkButton:focus-visible { outline: 2px solid #ff5a60; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .page *, .page *::before, .page *::after { scroll-behavior: auto; animation: none; transition: none; } }

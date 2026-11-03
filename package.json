@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "test:growth-integration": "node --test scripts/growth-engine-security.test.cjs",
+    "test:growth-browser": "playwright test --config=playwright.growth.config.cjs",
     "smoke:public": "node scripts/smoke-public-flows.mjs",
     "start": "next start",
     "lint": "eslint ."
@@ -52,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.56.1",
     "encoding": "^0.1.13",
     "eslint": "^9",
     "eslint-config-next": "^16.2.9",

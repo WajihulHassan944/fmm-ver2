@@ -44,3 +44,9 @@ next-env.d.ts
 # /public/sitemap.xml
 # /public/sitemap-0.xml
 /public/robots.txt
+
+# Isolated integration test artifacts
+.cache/
+.next-ge-test-*/
+test-results/
+playwright-report/
