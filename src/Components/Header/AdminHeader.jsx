@@ -33,6 +33,8 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { logoutAdmin } from '@/Redux/adminAuthSlice';
+import { GROWTH_ENGINE_V2 } from '@/Utils/adminFeatures';
+import { growthEngineApi } from '@/Utils/growthEngineApi';
 const LOGO_URL = '/images/brand/fantasy-mmadness-main-logo-v23.jpg';
 
 const navigationGroups = [
@@ -105,6 +107,7 @@ const navigationGroups = [
     icon: FaRobot,
     items: [
       { label: 'Fight Launch Desk', href: '/administration/growth', icon: FaChartBar },
+      ...(GROWTH_ENGINE_V2 ? [{ label: 'Growth Engine', href: '/administration/growth-engine', icon: FaRobot }] : []),
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
       { label: 'July 10K growth', href: '/administration/july-growth', icon: FaBolt },
       { label: 'SEO growth center', href: '/administration/seo-growth', icon: FaSearch },
@@ -153,6 +156,7 @@ const AdminHeader = () => {
 
   const handleLogout = (event) => {
     event?.preventDefault();
+    if (GROWTH_ENGINE_V2) growthEngineApi.logout();
     dispatch(logoutAdmin());
     router.push('/administration/login');
   };

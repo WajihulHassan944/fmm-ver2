@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { GROWTH_ENGINE_V2 } from '@/Utils/adminFeatures';
 import { adminHeaders } from '@/Utils/authFetch';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -156,6 +157,7 @@ const Admin = () => {
   ];
 
   const quickActions = [
+    ...(GROWTH_ENGINE_V2 ? [{ title: 'FANTASY MMADNESS Growth Engine', copy: 'Open the original Marketing, PR, Affiliate Recruitment, Publishing, and Analytics command center.', href: '/administration/growth-engine', icon: FaRobot }] : []),
     { title: 'Revenue Command Center', copy: 'Track fight views, prediction starts, paid entries, referrals, and bigger-money partner channels.', href: '/administration/revenue', icon: FaChartLine },
     { title: 'Fight Launch Desk', copy: 'Prepare fight posts, QR images, and an affiliate announcement from open fights.', href: '/administration/growth', icon: FaBolt },
     { title: 'Fighter Affiliates', copy: 'Create and manage fighter affiliates, promoter access, tracked fight links, QR/share assets, and affiliate outreach.', href: '/administration/AffiliateUsers', icon: FaUserFriends },
