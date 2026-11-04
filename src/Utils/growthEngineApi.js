@@ -65,6 +65,7 @@ export const growthEngineApi = {
     const admin = path ? getAdminToken() : '';
     try { if (growth) fetch(`${GROWTH_ENGINE_URL}/api/growth/admin/logout`, { method: 'POST', keepalive: true, cache: 'no-store', credentials: 'omit', headers: { Authorization: `Bearer ${growth}` } }).catch(() => {}); } catch (_error) { /* ignore */ }
     try { if (admin) fetch(path, { method: 'DELETE', keepalive: true, cache: 'no-store', credentials: 'same-origin', redirect: 'error', headers: { Authorization: `Bearer ${admin}` } }).catch(() => {}); } catch (_error) { /* ignore */ }
+    try { if (process.env.NEXT_PUBLIC_GROWTH_SOCIAL_PREVIEW === 'true') { const websiteAdmin = getAdminToken(); if (websiteAdmin) fetch('/api/admin/growth-social-session', { method: 'DELETE', keepalive: true, cache: 'no-store', credentials: 'same-origin', redirect: 'error', headers: { Authorization: `Bearer ${websiteAdmin}` } }).catch(() => {}); } } catch (_) { /* logout still completes */ }
     growthToken.set('');
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('fmm-growth-logout'));
   },
