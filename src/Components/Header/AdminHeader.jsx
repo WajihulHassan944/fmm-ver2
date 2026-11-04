@@ -156,7 +156,7 @@ const AdminHeader = () => {
 
   const handleLogout = (event) => {
     event?.preventDefault();
-    if (GROWTH_ENGINE_V2) growthEngineApi.logout();
+    if (GROWTH_ENGINE_V2 || process.env.NEXT_PUBLIC_GROWTH_SOCIAL_PREVIEW === 'true') growthEngineApi.logout();
     dispatch(logoutAdmin());
     router.push('/administration/login');
   };
