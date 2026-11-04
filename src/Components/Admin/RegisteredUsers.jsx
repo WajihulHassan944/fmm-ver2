@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminHeaders, adminJsonHeaders } from '@/Utils/authFetch';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 import { toast } from 'react-toastify';
@@ -28,7 +28,7 @@ const RegisteredUsers = () => {
   const [promotingId, setPromotingId] = useState('');
   const router = useRouter();
 
-  const requireFreshAdminSession = (response) => {
+  const requireFreshAdminSession = useCallback((response) => {
     if (response.status !== 401 && response.status !== 403) return false;
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem('adminAuthToken');
@@ -37,13 +37,13 @@ const RegisteredUsers = () => {
     }
     router.replace('/administration/login?reason=session-expired');
     return true;
-  };
+  }, [router]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setUsersLoading(true);
     setUsersError('');
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', {
+      const response = await fetch(buildPublicApiUrl('/users'), {
         headers: adminJsonHeaders(),
         cache: 'no-store',
       });
@@ -62,11 +62,11 @@ const RegisteredUsers = () => {
     } finally {
       setUsersLoading(false);
     }
-  };
+  }, [requireFreshAdminSession]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleGiveTokens = async (userId) => {
     if (!tokensToGive || isNaN(tokensToGive) || tokensToGive <= 0) {
@@ -74,7 +74,7 @@ const RegisteredUsers = () => {
     }
 
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/api/reward-tokens-only-forcibly/${userId}`, {
+      const response = await fetch(buildPublicApiUrl(`/api/reward-tokens-only-forcibly/${encodeURIComponent(userId)}`), {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({
@@ -101,7 +101,7 @@ const RegisteredUsers = () => {
     if (!window.confirm('Delete this user? This cannot be undone.')) return;
     const deletePromise = new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/usertodelete/${id}`, { headers: adminJsonHeaders(),
+        const response = await fetch(buildPublicApiUrl(`/usertodelete/${encodeURIComponent(id)}`), { headers: adminJsonHeaders(),
           method: 'DELETE',
         });
 
@@ -129,7 +129,7 @@ const RegisteredUsers = () => {
 
   const handleSuspendAccount = async () => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/redusers', {
+      const response = await fetch(buildPublicApiUrl('/redusers'), {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify({ email: selectedUser.email, profileUrl: selectedUser.profileUrl }),
@@ -149,7 +149,7 @@ const RegisteredUsers = () => {
 
   const addUser = async (data) => {
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/admin/add-user', {
+      const response = await fetch(buildPublicApiUrl('/admin/add-user'), {
         method: 'POST',
         headers: adminJsonHeaders(),
         body: JSON.stringify(data),
@@ -312,7 +312,8 @@ const RegisteredUsers = () => {
               onChange={(event) => setSearchQuery(event.target.value)}
             />
           </label>
-          <span className="admin-result-count"><FaUsers /> {usersLoading ? "Loading players…" : usersError ? "Player directory unavailable" : `${filteredUsers.length} of ${users.length} users`}</span>
+          <button type="button" className="admin-action-secondary" disabled={usersLoading} onClick={fetchData}>{usersLoading ? 'Refreshing…' : 'Refresh users'}</button>
+          <span className="admin-result-count" role="status"><FaUsers /> {usersLoading ? "Loading players…" : usersError ? "Player directory unavailable" : `${filteredUsers.length} of ${users.length} users`}</span>
         </div>
 
         <div className="admin-data-table-scroll">
@@ -335,7 +336,7 @@ const RegisteredUsers = () => {
                   <td>
                     <button type="button" className="admin-person-cell" onClick={() => handleView(user)}>
                       <img src={user.profileUrl || FALLBACK_AVATAR} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Player'} />
-                      <span><strong>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Player'}</strong><small>{user.playerName || 'No player name'}</small></span>
+                      <span><strong>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Player'}</strong><small>{user.playerName || 'No player name'}</small><small>{user.createdAt && Number.isFinite(new Date(user.createdAt).getTime()) ? `Joined ${new Date(user.createdAt).toLocaleString()}` : 'Signup date unavailable'}</small></span>
                     </button>
                   </td>
                   <td><span className="admin-status-badge is-draft">{user.currentPlan || 'None'}</span></td>
