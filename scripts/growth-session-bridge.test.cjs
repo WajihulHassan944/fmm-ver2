@@ -20,11 +20,11 @@ const hs256 = (payload, secret = ADMIN_SECRET, header = { alg: 'HS256', typ: 'JW
 const nowS = () => Math.floor(Date.now() / 1000);
 const adminToken = (over = {}) => hs256({ id: ID, email: 'Owner@FMM.test', iat: nowS() - 60, exp: nowS() + 3600, ...over });
 
-function harness({ env = {}, authority = 404, engine } = {}) {
+function harness({ env = {}, authority = 404, authorityProof = { message: 'Fight not found.' }, engine } = {}) {
   const calls = [];
   const fetchImpl = async (url, opts = {}) => {
     calls.push({ url, opts });
-    if (url.startsWith(AUTH)) { if (authority === 'down') throw new TypeError('fetch failed'); return { status: authority, json: async () => ({}) }; }
+    if (url.startsWith(AUTH)) { if (authority === 'down') throw new TypeError('fetch failed'); return { status: authority, json: async () => authorityProof }; }
     if (url.startsWith(ENGINE)) {
       if (engine === 'down') throw new TypeError('fetch failed');
       const { assertion } = JSON.parse(opts.body);
@@ -124,4 +124,10 @@ test('configuration: private key required, live authority must be an FMM host, r
   const { call } = harness(); let last;
   for (let i = 0; i < 21; i += 1) last = await call({ ip: '7.7.7.7', token: 'x' });
   assert.equal(last.status, 429);
+});
+
+test('generic routing 404 cannot establish live administrator authority', async () => {
+  const h = harness({ authorityProof: { message: 'Not Found' } });
+  assert.equal((await h.call()).body.reason, 'admin_authority_invalid_proof');
+  assert.equal(h.calls.length, 1, 'no assertion is sent without authority proof');
 });
