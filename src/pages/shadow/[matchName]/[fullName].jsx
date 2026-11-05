@@ -7,6 +7,7 @@ import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateFightLeaderboard from '@/Components/Affiliates/AffiliateFightLeaderboard';
 import { userHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import {getAffiliateFightShareUrl} from '@/Utils/affiliatePublicLink';
 import {
   formatFightDate,
   getFightCategory,
@@ -38,7 +39,7 @@ const PromoShadowPage = ({ affiliate, matchData }) => {
   const backgroundImage = matchData?.promotionBackground || '/images/fmm-experience/fighter-duel-arena.webp';
   const matchTitle = matchData?.matchName || `${fighterAName} vs ${fighterBName}`;
   const affiliateName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'Affiliate';
-  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(matchTitle)}/${encodeURIComponent(affiliateName)}`;
+  const promotionUrl = getAffiliateFightShareUrl(affiliate,matchData?._id);
   const safeMetaImage = String(backgroundImage || '').startsWith('http') ? backgroundImage : 'https://fantasymmadness.com/images/fmm-experience/fighter-duel-arena.webp';
 
   useEffect(() => {
