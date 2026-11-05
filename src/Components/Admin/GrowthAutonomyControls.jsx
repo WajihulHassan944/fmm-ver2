@@ -8,6 +8,7 @@ export default function GrowthAutonomyControls() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [confirmation, setConfirmation] = useState('');
+  const [resumeConfirmation, setResumeConfirmation] = useState('');
   const [edited, setEdited] = useState(false);
   const load = useCallback(async () => {
     try { const r = await growthEngineApi.autonomy(); if (!r.policy || !r.queue || !Number.isInteger(r.policy.version) || !Array.isArray(r.policy.departments) || !Array.isArray(r.policy.genres) || !Array.isArray(r.policy.channels) || !Array.isArray(r.policy.approvedRecipients)) throw new Error('The Growth Engine returned an incomplete automation status.'); setData(r); if (!edited) setPolicy(r.policy); setError(''); }
@@ -24,8 +25,15 @@ export default function GrowthAutonomyControls() {
   };
   const stop = async () => {
     setBusy(true); setError('');
-    try { const r = await growthEngineApi.stopAutonomy(); setData(d => ({ ...d, policy: r.policy })); setPolicy(r.policy); setEdited(false); }
+    try { const r = await growthEngineApi.stopAutonomy(); setData(d => ({ ...d, policy: r.policy, scheduler:d.scheduler?{...d.scheduler,schedulerEnabled:false,preparationPaused:true,preparationEnabled:false,healthy:false}:d.scheduler })); setPolicy(r.policy); setEdited(false); }
     catch (e) { setError(e.message || 'The emergency stop could not be confirmed.'); }
+    finally { setBusy(false); }
+  };
+  const resume = async () => {
+    if (resumeConfirmation !== 'RESUME PREPARATION') return;
+    setBusy(true); setError('');
+    try { const r = await growthEngineApi.resumeAutonomy(policy.version, resumeConfirmation); setData(d => ({ ...d, policy:r.policy, scheduler:r.scheduler })); setPolicy(r.policy); setEdited(false); setResumeConfirmation(''); }
+    catch (e) { setError(e.message || 'Preparation could not be resumed. Refresh the owner policy and worker status.'); }
     finally { setBusy(false); }
   };
   return <section className={`${styles.card} ${styles.autonomy}`} data-testid="autonomy-controls" aria-label="Autonomous Growth owner controls">
@@ -35,7 +43,7 @@ export default function GrowthAutonomyControls() {
     {!data && !error && <p role="status">Loading recorded worker and policy status…</p>}
     {data && policy && <>
       {data.scheduler?.generation && <div data-testid="autonomy-scheduler">
-        <p><strong>{data.policy.paused || data.scheduler.preparationPaused ? 'Scheduled preparation paused' : !data.scheduler.schedulerEnabled ? 'Scheduled preparation stopped' : data.scheduler.healthy ? 'Scheduled sandbox preparation active' : 'Scheduled worker needs attention'}</strong> · {data.scheduler.schedule} · generation {data.scheduler.generation}</p>
+        <p><strong>{data.policy.paused || data.scheduler.preparationPaused ? 'Scheduled preparation paused' : !data.scheduler.schedulerEnabled ? 'Scheduled preparation stopped' : data.scheduler.resumePending ? 'Resume requested — awaiting timer verification' : data.scheduler.healthy ? 'Scheduled sandbox preparation active' : 'Scheduled worker needs attention'}</strong> · {data.scheduler.schedule} · generation {data.scheduler.generation}</p>
         <p>Completed scheduled runs in this generation: {data.scheduler.generationScheduledExecutions || 0}. Last scheduled run: {data.scheduler.lastScheduledAt || 'Not yet verified'}. Next wake: {data.scheduler.nextWakeAt || 'Unavailable'}.</p>
         <p>Campaigns await owner approval. Scheduled run history is separate from pending background jobs; an empty queue does not mean the scheduler is off.</p>
       </div>}
@@ -50,6 +58,11 @@ export default function GrowthAutonomyControls() {
       <p>A recent heartbeat is not proof of 24/7 uptime. Emergency stop prevents new work; requests already accepted by a provider cannot be unsent.</p>
       {data.lastCycle && <p>Last policy cycle: {data.lastCycle.at} · {data.lastCycle.approved.length} approved · {data.lastCycle.held.length} held for review.</p>}
       {data.ownerPolicyEditable === false && <p>Policy changes require an explicitly configured automation owner. Read-only status remains available.</p>}
+      {data.scheduler?.workerBindingReady && (!data.scheduler.schedulerEnabled || data.scheduler.resumePending) && <div data-testid="preparation-resume">
+        <p>Resume only sandbox preparation using the pinned worker. Automatic approval, live delivery and publishing remain disabled. Timer verification is required before status becomes healthy.</p>
+        <label>Type RESUME PREPARATION <input aria-label="Resume preparation confirmation" value={resumeConfirmation} onChange={e=>setResumeConfirmation(e.target.value)} disabled={busy || data.ownerPolicyEditable === false} autoComplete="off" /></label>
+        <button type="button" className={styles.primary} onClick={resume} disabled={busy || data.ownerPolicyEditable === false || resumeConfirmation !== 'RESUME PREPARATION'}>{data.scheduler.resumePending ? 'Retry pending resume' : 'Resume sandbox preparation'}</button>
+      </div>}
       <details><summary>Review automation policy</summary><form onSubmit={save} className={styles.policyForm}>
         {!data.scheduler?.generation && <label><input type="checkbox" checked={policy.enabled} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('enabled', e.target.checked)} /> Enable unattended processing under this policy</label>}
         <label><input type="checkbox" checked={policy.paused} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('paused', e.target.checked)} /> Pause all engine work</label>

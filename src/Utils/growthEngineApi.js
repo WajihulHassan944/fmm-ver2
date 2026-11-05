@@ -72,6 +72,7 @@ export const growthEngineApi = {
   session: () => growthRequest('GET', '/admin/session'),
   autonomy: () => growthRequest('GET', '/admin/autonomy'),
   saveAutonomy: (policy, expectedVersion) => growthRequest('PUT', '/admin/autonomy', { policy, expectedVersion }),
+  resumeAutonomy: (expectedVersion, confirmation) => growthRequest('POST', '/admin/autonomy/resume', { expectedVersion, confirmation }),
   stopAutonomy: () => growthRequest('POST', '/admin/autonomy/stop', {}),
   status: () => growthRequest('GET', '/admin/status'),
   funnel: () => growthRequest('GET', '/admin/funnel'),

@@ -154,7 +154,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
         {session === 'rejected' && <Link href={`/administration/login?next=${encodeURIComponent(hrefFor(section))}`}>Sign in again</Link>}
       </section>}
       {session === 'connected' && section === 'automation' && <GrowthAutonomyControls />}
-      {session !== 'expired' && <iframe key={attempt} ref={frame} className={styles.frame} src={src}
+      {session !== 'expired' && <iframe key={`${attempt}:${target}`} ref={frame} className={styles.frame} src={src}
         title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label}`}
         data-testid="ge-frame" referrerPolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
