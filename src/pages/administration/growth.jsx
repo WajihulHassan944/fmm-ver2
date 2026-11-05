@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
-import WeeklyFightGrowth from '@/Components/Admin/WeeklyFightGrowth';
-import FightLaunchDesk from '@/Components/Admin/FightLaunchDesk';
+import GrowthAdministration from '@/Components/Admin/GrowthAdministration';
 
 export default function GrowthPage() {
-  return <AdminPrivateRoute><Head><title>Fight Launch Desk | FANTASY MMADNESS Administration</title></Head><FightLaunchDesk /><WeeklyFightGrowth /></AdminPrivateRoute>;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return <p role="status">Checking administrator session…</p>;
+  return <AdminPrivateRoute><Head><title>Growth | FANTASY MMADNESS Administration</title></Head><GrowthAdministration /></AdminPrivateRoute>;
 }

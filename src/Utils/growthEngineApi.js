@@ -70,6 +70,9 @@ export const growthEngineApi = {
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('fmm-growth-logout'));
   },
   session: () => growthRequest('GET', '/admin/session'),
+  autonomy: () => growthRequest('GET', '/admin/autonomy'),
+  saveAutonomy: (policy, expectedVersion) => growthRequest('PUT', '/admin/autonomy', { policy, expectedVersion }),
+  stopAutonomy: () => growthRequest('POST', '/admin/autonomy/stop', {}),
   status: () => growthRequest('GET', '/admin/status'),
   funnel: () => growthRequest('GET', '/admin/funnel'),
   pending: () => growthRequest('GET', '/admin/drafts?status=needs_owner_review&limit=10'),

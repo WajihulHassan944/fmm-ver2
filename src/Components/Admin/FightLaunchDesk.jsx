@@ -21,7 +21,7 @@ const getOpenFights = (rows) => (Array.isArray(rows) ? rows : []).filter((fight)
     && !/draft|closed|finished|complete|cancel/.test(String(fight.matchStatus || fight.status || '').toLowerCase());
 }).sort((a, b) => (parseFightDate(a)?.getTime() ?? Infinity) - (parseFightDate(b)?.getTime() ?? Infinity));
 
-export default function FightLaunchDesk() {
+export default function FightLaunchDesk({ onFightSelection } = {}) {
   const router = useRouter();
   const [fights, setFights] = useState([]);
   const [selected, setSelected] = useState('');
@@ -35,6 +35,7 @@ export default function FightLaunchDesk() {
   const open = useMemo(() => getOpenFights(fights), [fights]);
   const fight = open.find((row) => String(getFightId(row)) === selected) || open[0];
   const id = fight ? String(getFightId(fight)) : '';
+  useEffect(() => { if (onFightSelection) onFightSelection(id); }, [id, onFightSelection]);
   const url = id ? `https://www.fantasymmadness.com${fight?.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(id)}?play=1&utm_source=owner&utm_medium=social&utm_campaign=fight_launch` : '';
   const title = fight ? titleFor(fight) : '';
   const fighterTags = fight ? fighterNameHashtags(getFighterName(fight, 'A'), getFighterName(fight, 'B')).join(' ') : '';

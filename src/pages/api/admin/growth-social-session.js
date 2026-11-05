@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   try {
     const current = getBridge();
     if (!current) return res.status(503).json({ ok: false, reason: 'isolated_preview_sign_in_not_configured' });
-    if (req.method === 'GET') return res.json({ ok: current.config.enabled, environment: 'preview', method: 'website_admin', keyId: current.config.keyId, engineOrigin: current.config.engineOrigin, siteOrigins: current.config.siteOrigins });
+    if (req.method === 'GET') return res.json({ ok: current.config.enabled, environment: 'preview', method: 'website_admin', backofficeIntegrated: process.env.NEXT_PUBLIC_FMM_GROWTH_ENGINE_ENABLED === 'true', keyId: current.config.keyId, engineOrigin: current.config.engineOrigin, siteOrigins: current.config.siteOrigins });
     const out = await current.handle({ method: req.method, headers: req.headers, ip, selfOrigin });
     if (out.allow) res.setHeader('Allow', out.allow);
     return res.status(out.status).json(out.body);

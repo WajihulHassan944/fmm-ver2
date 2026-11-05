@@ -19,3 +19,18 @@
 .notice p { margin: 0; max-width: 75ch; }
 .tab:focus-visible, .linkButton:focus-visible { outline: 2px solid #ff5a60; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .page *, .page *::before, .page *::after { scroll-behavior: auto; animation: none; transition: none; } }
+
+.policyForm { display: grid; gap: 12px; margin: 14px 0 20px; }
+.policyForm label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.policyForm fieldset { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px; border: 1px solid #d3d5db; }
+.policyForm input:not([type=checkbox]), .policyForm select, .policyForm textarea { background: white; color: #16181d; border: 1px solid #aab0ba; padding: 8px; max-width: 100%; }
+.stopButton { background: #a3181d; color: white; border: 1px solid #a3181d; padding: 8px 14px; border-radius: 8px; font-weight: 700; }
+
+/* Existing back-office global typography rules must not wash out owner controls. */
+.page .autonomy { background: #101820; color: #f2f3f5; border-color: #303a44; margin-bottom: 14px; }
+.page .autonomy :is(h2,p,strong,label,legend,small,div) { color: #f2f3f5 !important; }
+.page .autonomy fieldset { border-color: #46525e; border-radius: 6px; }
+.page .autonomy :is(input:not([type=checkbox]),select,textarea) { background: #17232e !important; color: #f2f3f5 !important; border: 1px solid #596674; opacity: 1; }
+.page .autonomy button { color: #fff !important; background: #283440; }
+.page .autonomy .primary, .page .autonomy .stopButton { background: #bc1c25 !important; }
+.page .autonomy button:disabled { opacity: .6; }
