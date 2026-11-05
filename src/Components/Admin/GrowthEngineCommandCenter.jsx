@@ -79,13 +79,14 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
     let alive = true;
     let expiryTimer;
     const controller = new AbortController();
+    sessionState.current = 'connecting';
     setSession('connecting');
     growthEngineApi.exchangeAdminSession({ signal: controller.signal }).then(result => {
       if (!alive) return;
       verifiedToken.current = result.token;
-      setSession('connected');
+      setSession('connecting'); // The embedded console must independently accept this session.
       handOverSession();
-      expiryTimer = window.setTimeout(() => { growthToken.set(''); verifiedToken.current = ''; setSession('expired'); }, Math.max(0, result.expiresAt - Date.now()));
+      expiryTimer = window.setTimeout(() => { growthToken.set(''); verifiedToken.current = ''; lastRenew.current = Date.now(); setAttempt(value => value + 1); }, Math.max(0, result.expiresAt - Date.now() - 30000));
     }).catch(error => {
       if (!alive || error.name === 'AbortError') return;
       growthToken.set('');
@@ -109,6 +110,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
       setConfirmed(true);
       setSlow(false);
       const incoming = event.data.section;
+      if (event.data.event === 'session-ready' && event.data.signedIn && verifiedToken.current && growthToken.get() === verifiedToken.current) { sessionState.current = 'connected'; setSession('connected'); }
       // console session protocol: signed out inside the console -> stay signed out; ended/revoked -> renew from the administrator session
       // the administrator session was not accepted: the console must not stay signed in with an earlier session
       if (event.data.signedIn && !verifiedToken.current && sessionState.current === 'rejected') { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } return; }
