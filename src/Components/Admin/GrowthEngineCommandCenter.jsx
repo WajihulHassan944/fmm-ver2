@@ -7,6 +7,7 @@ import { GROWTH_ENGINE_V2, GROWTH_SECTIONS } from '@/Utils/adminFeatures';
 import { GROWTH_ENGINE_URL, growthEngineApi, growthToken } from '@/Utils/growthEngineApi';
 import { engineLocation, trustedConsoleMessage, sectionTarget } from '@/Utils/growthEngineEmbed.cjs';
 import styles from './GrowthEngineCommandCenter.module.css';
+import GrowthAffiliateAcceptance from './GrowthAffiliateAcceptance';
 import GrowthAutonomyControls from './GrowthAutonomyControls';
 
 const SLUGS = new Set(GROWTH_SECTIONS.map(s => s.slug));
@@ -154,6 +155,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
         {session === 'rejected' && <Link href={`/administration/login?next=${encodeURIComponent(hrefFor(section))}`}>Sign in again</Link>}
       </section>}
       {session === 'connected' && section === 'automation' && <GrowthAutonomyControls />}
+      {session === 'connected' && section === 'affiliates' && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <GrowthAffiliateAcceptance />}
       {session !== 'expired' && <iframe key={`${attempt}:${target}`} ref={frame} className={styles.frame} src={src}
         title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label}`}
         data-testid="ge-frame" referrerPolicy="no-referrer"

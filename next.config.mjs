@@ -62,4 +62,6 @@ const nextConfig = {
   },
 };
 
+if (!process.env.VERCEL && /^\.next-[a-z0-9-]+-test$/.test(process.env.FMM_INTEGRATION_TEST_DIST_DIR || '')) nextConfig.distDir = process.env.FMM_INTEGRATION_TEST_DIST_DIR;
+
 export default nextConfig;

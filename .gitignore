@@ -47,3 +47,6 @@ next-env.d.ts
 
 # Local browser verification artifacts
 test-results/
+
+# Isolated integration-test Next builds
+/.next-*-test/

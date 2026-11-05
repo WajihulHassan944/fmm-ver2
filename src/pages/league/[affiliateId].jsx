@@ -7,10 +7,11 @@ import { getUserToken, userHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
 import {getAffiliateFightShareUrl} from '@/Utils/affiliatePublicLink';
+import {affiliateAcceptanceConfig} from '@/server/affiliateAcceptanceConfig.cjs';
 import {appendCampaignParams} from '@/Utils/affiliateSignupRedirect.cjs';
 import styles from './league.module.css';
 
-export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
+export default function AffiliateFightLeague({ affiliate, fight, fightId, stagingLeague=null }) {
   const router = useRouter();
   const [joining, setJoining] = useState(false);
   const affiliateId = String(affiliate._id);
@@ -22,6 +23,8 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&format=facebook&v=13`;
   const shareTitle = `Join ${leagueName}'s league for ${title} | FANTASY MMADNESS`;
   const shareDescription = `${title}: make your picks in ${leagueName}'s league${Number(fight?.pot) > 0 ? ` for a ${Number(fight.pot).toLocaleString()} FM COINS prize pool` : ''}. Open the fight to see entry details, eligibility, and rules.`;
+
+  if(stagingLeague)return <main className={styles.page}><Head><title>{`Verified staging league | FANTASY MMADNESS`}</title><meta name="robots" content="noindex,nofollow"/></Head><div className={styles.shell}><section className={styles.content}><p>ISOLATED STAGING · VERIFIED TEST LEAGUE</p><h1>{leagueName}</h1><p>{title}</p><p>This approved staging identity is mapped to this published fight. TEST entries create no real charge or commission.</p><img src={'/api/growth-affiliate-sandbox/leagues/'+stagingLeague.id+'/qr.png'} alt="Verified staging league QR" width="260" height="260"/><p>Affiliate: {affiliateId}</p><p>Fight: {fightId}</p><Link href="/administration/growth?engine=affiliates">Owner TEST-entry and acceptance controls</Link></section></div></main>;
 
   const join = async () => {
     if (!getUserToken()) {
@@ -83,6 +86,7 @@ export async function getServerSideProps({ params, query, req, res }) {
   const affiliateId = String(requestedIds[0] || params?.affiliateId || '');
   const fightId = String(query?.fightId || '');
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
+  if(query.stagingLeagueId){const cfg=affiliateAcceptanceConfig();if(!cfg||!/^[a-f\d]{24}$/i.test(String(query.stagingLeagueId)))return{notFound:true};try{const r=await fetch(cfg.origin+'/api/growth/affiliate-sandbox/leagues/'+query.stagingLeagueId,{redirect:'error',signal:AbortSignal.timeout(15000)}),j=await r.json(),l=j.league;if(!r.ok||!l?.stagingOnly||!l.verified||l.accountId!==affiliateId||l.fightId!==fightId)return{notFound:true};res.setHeader('Cache-Control','no-store');return{props:{affiliate:{_id:l.accountId,firstName:l.displayName,leagueName:l.displayName},fight:{matchFighterA:l.fight.fighterA,matchFighterB:l.fight.fighterB},fightId,stagingLeague:{id:l.id}}};}catch{return{notFound:true};}}
   try {
     const [affiliateResponse, fightResponse] = await Promise.all([
       fetch(`${PUBLIC_API_BASE_URL}/api/public/affiliates/${encodeURIComponent(affiliateId)}`),
