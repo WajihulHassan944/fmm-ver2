@@ -106,7 +106,7 @@ const navigationGroups = [
     label: 'Automation & social',
     icon: FaRobot,
     items: [
-      { label: 'Fight Launch Desk', href: '/administration/growth', icon: FaChartBar },
+      { label: 'Fight Launch Desk', href: GROWTH_ENGINE_V2 ? '/administration/growth?engine=launch' : '/administration/growth', icon: FaChartBar },
       ...(GROWTH_ENGINE_V2 ? [{ label: 'Growth Engine', href: '/administration/growth-engine', icon: FaRobot }] : []),
       { label: 'Swarm command center', href: '/administration/swarm', icon: FaRobot },
       { label: 'July 10K growth', href: '/administration/july-growth', icon: FaBolt },
@@ -200,7 +200,7 @@ const AdminHeader = () => {
         <Link href="/administration" className={`admin-overview-link ${pathname === '/administration' ? 'is-active' : ''}`} title="Command center">
           <FaChartBar /><span>Command center</span>
         </Link>
-        <Link href="/administration/growth" className={`admin-overview-link ${pathname === '/administration/growth' ? 'is-active' : ''}`} title="This Week’s Three Fights">
+        <Link href={GROWTH_ENGINE_V2 ? "/administration/growth?engine=launch" : "/administration/growth"} className={`admin-overview-link ${pathname === '/administration/growth' ? 'is-active' : ''}`} title="This Week’s Three Fights">
           <FaBolt /><span>This Week’s Three Fights</span>
         </Link>
 
