@@ -32,7 +32,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
   const handover = useRef(false);
   const lastRenew = useRef(0);
   const sessionState = useRef('connecting');
-  const enabled = GROWTH_ENGINE_V2 && mounted && authenticated && Boolean(engine);
+  const enabled = GROWTH_ENGINE_V2 && mounted && router.isReady && authenticated && Boolean(engine);
   const baseTarget = sectionTarget(section, GROWTH_SECTIONS);
   const target = growthRoute && /^[a-f\d]{24}$/i.test(fightContext) && ['marketing','posters','approvals'].includes(section) ? `${baseTarget}${baseTarget.includes('?') ? '&' : '?'}fightId=${encodeURIComponent(fightContext)}` : baseTarget;
   const src = engine ? `${engine.consoleUrl}?embed=1#/${target}` : '';
@@ -126,7 +126,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
   }, [enabled, handOverSession, router, section, hrefFor]);
 
   if (!GROWTH_ENGINE_V2) return <main className={styles.page} data-testid="ge-disabled"><p>The Growth Engine is turned off. <Link href="/administration">Back to administration</Link></p></main>;
-  if (!mounted || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
+  if (!mounted || !router.isReady || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
   if (!engine) return <main className={styles.page}><p role="alert">The Growth Engine address is not configured securely. Contact the staging administrator.</p></main>;
 
   const retry = () => { setConfirmed(false); setSlow(false); setAttempt(value => value + 1); };

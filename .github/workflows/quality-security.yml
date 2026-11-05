@@ -41,6 +41,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npx playwright install --with-deps chromium
+      - name: Select existing Chromium or install browser only
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "GROWTH_TEST_CHROMIUM=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install chromium
+          fi
       - name: Administration Growth integration (local API contract fixtures only)
         run: npx playwright test --config playwright.growth-integrated.config.cjs

@@ -16,7 +16,7 @@ export default function GrowthAutonomyControls() {
   useEffect(() => { load(); const timer = setInterval(load, 30000); return () => clearInterval(timer); }, [load]);
   const change = (key, value) => { setEdited(true); setPolicy(p => ({ ...p, [key]: value })); };
   const save = async event => {
-    event.preventDefault(); if (policy.enabled && confirmation !== 'ENABLE AUTONOMY') { setError('Type ENABLE AUTONOMY to approve this policy.'); return; }
+    event.preventDefault(); if (!data?.scheduler?.generation && policy.enabled && confirmation !== 'ENABLE AUTONOMY') { setError('Type ENABLE AUTONOMY to approve this policy.'); return; }
     setBusy(true); setError('');
     try { const r = await growthEngineApi.saveAutonomy(policy, policy.version); setData(d => ({ ...d, policy: r.policy })); setPolicy(r.policy); setEdited(false); setConfirmation(''); }
     catch (e) { setError(e.message || 'The owner policy was not saved.'); }
@@ -30,18 +30,23 @@ export default function GrowthAutonomyControls() {
   };
   return <section className={`${styles.card} ${styles.autonomy}`} data-testid="autonomy-controls" aria-label="Autonomous Growth owner controls">
     <h2>Autonomous Growth operation</h2>
-    <p>Recorded worker activity and owner policy. This Preview deployment does not enable unattended processing.</p>
+    <p>Scheduled sandbox preparation, pending jobs and owner approval policy.</p>
     {error && <p role="alert">{error}</p>}
     {!data && !error && <p role="status">Loading recorded worker and policy status…</p>}
     {data && policy && <>
-      <p data-testid="autonomy-state"><strong>{data.policy.paused ? 'Emergency stop active' : data.policy.enabled ? 'Owner policy enabled' : 'Automatic approval is off'}</strong> · {data.policy.mode} · policy version {data.policy.version}</p>
+      {data.scheduler?.generation && <div data-testid="autonomy-scheduler">
+        <p><strong>{data.policy.paused || data.scheduler.preparationPaused ? 'Scheduled preparation paused' : !data.scheduler.schedulerEnabled ? 'Scheduled preparation stopped' : data.scheduler.healthy ? 'Scheduled sandbox preparation active' : 'Scheduled worker needs attention'}</strong> · {data.scheduler.schedule} · generation {data.scheduler.generation}</p>
+        <p>Completed scheduled runs in this generation: {data.scheduler.generationScheduledExecutions || 0}. Last scheduled run: {data.scheduler.lastScheduledAt || 'Not yet verified'}. Next wake: {data.scheduler.nextWakeAt || 'Unavailable'}.</p>
+        <p>Campaigns await owner approval. Scheduled run history is separate from pending background jobs; an empty queue does not mean the scheduler is off.</p>
+      </div>}
+      <p data-testid="autonomy-state"><strong>{data.policy.paused ? 'Emergency stop active' : data.scheduler?.generation ? 'Owner approval required' : data.policy.enabled ? 'Owner policy enabled' : 'Automatic approval is off'}</strong> · {data.policy.mode} · policy version {data.policy.version}</p>
       <p data-testid="autonomy-heartbeat">{data.heartbeat ? `Last worker observation: ${data.heartbeat.at} (${data.heartbeat.healthy ? 'recent' : 'stale'})` : 'No worker heartbeat has been recorded.'}</p>
-      <p>Persistent jobs: {data.queue.pending} pending · {Number.isInteger(data.queue.retrying) ? `${data.queue.retrying} retrying` : 'retry count unavailable'} · {data.queue.running} running · {data.queue.failed} failed. Paid advertising/spend is disabled.</p>
+      <p>Pending background jobs (not scheduled runs): {data.queue.pending} pending · {Number.isInteger(data.queue.retrying) ? `${data.queue.retrying} retrying` : 'retry count unavailable'} · {data.queue.running} running · {data.queue.failed} failed. Paid advertising/spend is disabled.</p>
       <p>A recent heartbeat is not proof of 24/7 uptime. Emergency stop prevents new work; requests already accepted by a provider cannot be unsent.</p>
       {data.lastCycle && <p>Last policy cycle: {data.lastCycle.at} · {data.lastCycle.approved.length} approved · {data.lastCycle.held.length} held for review.</p>}
       {data.ownerPolicyEditable === false && <p>Policy changes require an explicitly configured automation owner. Read-only status remains available.</p>}
       <details><summary>Review automation policy</summary><form onSubmit={save} className={styles.policyForm}>
-        <label><input type="checkbox" checked={policy.enabled} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('enabled', e.target.checked)} /> Enable unattended processing under this policy</label>
+        {!data.scheduler?.generation && <label><input type="checkbox" checked={policy.enabled} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('enabled', e.target.checked)} /> Enable unattended processing under this policy</label>}
         <label><input type="checkbox" checked={policy.paused} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('paused', e.target.checked)} /> Pause all engine work</label>
         <label>Delivery mode <select value={policy.mode} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('mode', e.target.value)}><option value="sandbox">Sandbox — no real delivery</option><option value="approved-delivery" disabled={!data.liveApproved}>Previously authorized live delivery</option></select></label>
         <fieldset><legend>Departments</legend>{departments.map(([id,label]) => <label key={id}><input type="checkbox" checked={policy.departments.includes(id)} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('departments', e.target.checked ? [...policy.departments,id] : policy.departments.filter(x=>x!==id))} /> {label}</label>)}</fieldset>
@@ -51,7 +56,7 @@ export default function GrowthAutonomyControls() {
         <label>Campaigns and affiliate variants per department per day <input aria-label="Daily campaign limit" type="number" min="1" max="100" value={policy.maxCampaignsPerDepartmentPerDay} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('maxCampaignsPerDepartmentPerDay', Number(e.target.value))} /></label>
         <label><input type="checkbox" checked={policy.allowPublishedBusinessContacts} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('allowPublishedBusinessContacts', e.target.checked)} /> Permit verified public business contacts in sandbox drafts (not consent for real outreach)</label>
         <label>Explicitly authorized outreach recipients <textarea aria-label="Approved outreach recipients" rows="2" value={policy.approvedRecipients.join('\n')} disabled={busy || data?.ownerPolicyEditable === false} onChange={e => change('approvedRecipients', e.target.value.split(/[\n,]/).map(x=>x.trim()).filter(Boolean))} /></label>
-        {policy.enabled && <label>Type ENABLE AUTONOMY to approve <input aria-label="Approve automation policy" value={confirmation} onChange={e=>setConfirmation(e.target.value)} disabled={busy || data?.ownerPolicyEditable === false} autoComplete="off" /></label>}
+        {!data.scheduler?.generation && policy.enabled && <label>Type ENABLE AUTONOMY to approve <input aria-label="Approve automation policy" value={confirmation} onChange={e=>setConfirmation(e.target.value)} disabled={busy || data?.ownerPolicyEditable === false} autoComplete="off" /></label>}
         <div><button type="submit" className={styles.primary} disabled={busy || data?.ownerPolicyEditable === false}>Save owner policy</button></div>
       </form></details><div><button type="button" className={styles.stopButton} disabled={busy || data?.ownerPolicyEditable === false} onClick={stop}>Emergency stop</button> <button type="button" className={styles.linkButton} onClick={load} disabled={busy}>Refresh recorded status</button></div>
     </>}
