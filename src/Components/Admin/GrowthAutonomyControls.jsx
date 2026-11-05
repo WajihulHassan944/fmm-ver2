@@ -42,6 +42,11 @@ export default function GrowthAutonomyControls() {
       <p data-testid="autonomy-state"><strong>{data.policy.paused ? 'Emergency stop active' : data.scheduler?.generation ? 'Owner approval required' : data.policy.enabled ? 'Owner policy enabled' : 'Automatic approval is off'}</strong> · {data.policy.mode} · policy version {data.policy.version}</p>
       <p data-testid="autonomy-heartbeat">{data.heartbeat ? `Last worker observation: ${data.heartbeat.at} (${data.heartbeat.healthy ? 'recent' : 'stale'})` : 'No worker heartbeat has been recorded.'}</p>
       <p>Pending background jobs (not scheduled runs): {data.queue.pending} pending · {Number.isInteger(data.queue.retrying) ? `${data.queue.retrying} retrying` : 'retry count unavailable'} · {data.queue.running} running · {data.queue.failed} failed. Paid advertising/spend is disabled.</p>
+      {data.operations && <div data-testid="owner-preparation-summary">
+        <p><strong>Preparation only — no messages sent or posts published.</strong></p>
+        {departments.map(([id,label]) => { const d = data.operations.departments[id]; return <p key={id}>{label}: {d.awaitingOwnerReview} awaiting owner review · {d.ready} ready · {d.held} held · {d.receipts} preparation receipts.</p>; })}
+        <p>Receipts record prepared evidence, not delivery, approval or paying conversions. Source failures retry with bounded backoff; exhausted attempts cool down before another automatic attempt.</p>
+      </div>}
       <p>A recent heartbeat is not proof of 24/7 uptime. Emergency stop prevents new work; requests already accepted by a provider cannot be unsent.</p>
       {data.lastCycle && <p>Last policy cycle: {data.lastCycle.at} · {data.lastCycle.approved.length} approved · {data.lastCycle.held.length} held for review.</p>}
       {data.ownerPolicyEditable === false && <p>Policy changes require an explicitly configured automation owner. Read-only status remains available.</p>}
