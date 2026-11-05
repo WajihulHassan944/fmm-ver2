@@ -48,6 +48,8 @@ http.createServer(async(req,res)=>{
  res.setHeader('Access-Control-Allow-Origin',ui);res.setHeader('Access-Control-Allow-Credentials','true');res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');res.setHeader('Access-Control-Allow-Headers','Authorization,Content-Type');if(req.method==='OPTIONS')return json(200,{});
  if(u.pathname==='/api/admin/fights')return json(200,{ok:true,items:['0123456789abcdef01234567','1123456789abcdef01234567'].map((_id,i)=>({_id,matchFighterA:'TEST FIXTURE Fighter '+i,matchFighterB:'TEST FIXTURE Opponent '+i,matchCategory:'boxing',matchStatus:'Scheduled',matchDate:new Date(Date.now()+86400000*4).toISOString(),matchDateKey:new Date(Date.now()+86400000*4).toISOString().slice(0,10)}))});
  if(u.pathname==='/admin/login'){let b='';for await(const c of req)b+=c;return json(JSON.parse(b||'{}').password==='fixture-password'?200:401,JSON.parse(b||'{}').password==='fixture-password'?{token:admin}:{message:'Incorrect password'});}
+ if(/^\/api\/public\/affiliates\/(611111111111111111111111|622222222222222222222222)$/.test(u.pathname))return json(200,{_id:u.pathname.split('/').pop(),firstName:'Fixture',lastName:'Same Name',verified:true});
+ if(u.pathname==='/api/public/fights/633333333333333333333333')return json(200,{_id:'633333333333333333333333',matchFighterA:'FIXTURE Fighter A',matchFighterB:'FIXTURE Fighter B'});
  if(u.pathname==='/dashboard-counts')return json(200,{matchesCount:1,usersCount:0,affiliatesCount:0});
  if(!u.pathname.startsWith('/api/growth/'))return json(200,{ok:true,configured:false,items:[],data:[],counts:{}});
  const p=u.pathname.replace('/api/growth','');

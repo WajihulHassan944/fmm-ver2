@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { getUserToken, userHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
+import {getAffiliateFightShareUrl} from '@/Utils/affiliatePublicLink';
+import {appendCampaignParams} from '@/Utils/affiliateSignupRedirect.cjs';
 import styles from './league.module.css';
 
 export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
@@ -14,15 +16,16 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   const affiliateId = String(affiliate._id);
   const leagueName = String(affiliate.leagueName || affiliate.playerName || [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || 'Affiliate');
   const title = [fight?.matchFighterA, fight?.matchFighterB].filter(Boolean).join(' vs ') || 'Fight night';
-  const fightUrl = `${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&affiliateId=${encodeURIComponent(affiliateId)}&fromLeague=1`;
+  const fightUrl = appendCampaignParams(`${fight.gameMode === 'PRO_WRESTLING' ? '/pro-wrestling/matches' : '/fight'}/${encodeURIComponent(fightId)}?ref=${encodeURIComponent(affiliateId)}&affiliateId=${encodeURIComponent(affiliateId)}&fromLeague=1`,router.query);
+  const leagueReturnPath = appendCampaignParams(getAffiliateFightShareUrl(affiliate,fightId),router.query);
+  const authPath = mode => appendCampaignParams(`/auth?${new URLSearchParams({mode,role:'player',next:leagueReturnPath,referrer:affiliateId,fight:fightId})}`,router.query);
   const shareImage = `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(fightId)}&affiliateId=${encodeURIComponent(affiliateId)}&format=facebook&v=13`;
   const shareTitle = `Join ${leagueName}'s league for ${title} | FANTASY MMADNESS`;
   const shareDescription = `${title}: make your picks in ${leagueName}'s league${Number(fight?.pot) > 0 ? ` for a ${Number(fight.pot).toLocaleString()} FM COINS prize pool` : ''}. Open the fight to see entry details, eligibility, and rules.`;
 
   const join = async () => {
     if (!getUserToken()) {
-      const next = `/league/${encodeURIComponent(affiliateId)}?fightId=${encodeURIComponent(fightId)}`;
-      router.push(`/auth?mode=signup&role=player&next=${encodeURIComponent(next)}&referrer=${encodeURIComponent(affiliateId)}&fight=${encodeURIComponent(fightId)}`);
+      router.push(authPath('signup'));
       return;
     }
     if (joining) return;
@@ -36,8 +39,7 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
         if (response.ok) toast.success(`You joined ${leagueName}'s league.`);
         router.push(fightUrl);
       } else if (response.status === 401 || response.status === 403) {
-        const next = `/league/${encodeURIComponent(affiliateId)}?fightId=${encodeURIComponent(fightId)}`;
-        router.push(`/auth?mode=login&role=player&next=${encodeURIComponent(next)}&referrer=${encodeURIComponent(affiliateId)}&fight=${encodeURIComponent(fightId)}`);
+        router.push(authPath('login'));
       } else throw new Error(result.message || 'Could not join this league.');
     } catch (error) { toast.error(error.message); }
     finally { setJoining(false); }
@@ -73,8 +75,12 @@ export default function AffiliateFightLeague({ affiliate, fight, fightId }) {
   </main>;
 }
 
-export async function getServerSideProps({ params, query, res }) {
-  const affiliateId = String(query?.affiliateId || params?.affiliateId || '');
+export async function getServerSideProps({ params, query, req, res }) {
+  // Next merges a dynamic [affiliateId] segment over the same-named query key.
+  // Read the explicit persisted ID from the request rather than the display slug.
+  const requestedIds = new URL(req?.url || '/', 'https://fixture.invalid').searchParams.getAll('affiliateId');
+  if (requestedIds.length > 1) return { notFound: true };
+  const affiliateId = String(requestedIds[0] || params?.affiliateId || '');
   const fightId = String(query?.fightId || '');
   if (!/^[a-f\d]{24}$/i.test(affiliateId) || !/^[a-f\d]{24}$/i.test(fightId)) return { notFound: true };
   try {
