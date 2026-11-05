@@ -56,6 +56,8 @@
     "encoding": "^0.1.13",
     "eslint": "^9",
     "eslint-config-next": "^16.2.9",
+    "jsdom": "26.1.0",
+    "jsqr": "1.4.0",
     "typescript": "^5.9.3"
   },
   "overrides": {

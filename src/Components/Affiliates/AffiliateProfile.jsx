@@ -1,4 +1,4 @@
-import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
+import { getAffiliateProfileShareUrl } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useState } from 'react';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import Head from 'next/head';
@@ -74,7 +74,7 @@ const AffiliateProfile = () => {
   const affiliateId = affiliate?._id || affiliate?.id || '';
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || playerName || 'Affiliate creator';
   const memberCount = safeArray(affiliate?.usersJoined).length;
-  const referralUrl = `https://www.fantasymmadness.com/my-fantasy-team?league=${encodeURIComponent(getAffiliateNameSlug(affiliate) || 'league')}&referenceId=${encodeURIComponent(affiliateId)}`;
+  const referralUrl = getAffiliateProfileShareUrl(affiliate);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -111,7 +111,7 @@ const AffiliateProfile = () => {
     try {
       await navigator.clipboard.writeText(referralUrl);
       setCopied(true);
-      toast.success('Fantasy team link copied.');
+      toast.success('Public affiliate profile copied.');
       window.setTimeout(() => setCopied(false), 1800);
     } catch (error) {
       console.error('Unable to copy affiliate referral link:', error);
@@ -231,13 +231,13 @@ const AffiliateProfile = () => {
             <section className="affiliate-settings-card affiliate-referral-card affiliate-referral-card-final">
               <div className="affiliate-settings-card-heading">
                 <FaShareAlt />
-                <span><small>League growth</small><h2>Fantasy team invitation</h2></span>
+                <span><small>Published campaigns</small><h2>Public affiliate profile</h2></span>
               </div>
-              <p>Share this affiliate reference URL to direct players into your fantasy team and league experience.</p>
+              <p>Share your profile so players can review your published campaigns and choose a fight to join.</p>
               <div className="affiliate-referral-url affiliate-referral-url-final">
                 <span>{referralUrl}</span>
                 <button type="button" onClick={copyToClipboard}>{copied ? <FaCheck /> : <FaCopy />} {copied ? 'Copied' : 'Copy link'}</button>
-                <ShareQrCode url={referralUrl} label="Your league invite" fileName="fantasy-mmadness-league-invite" />
+                <ShareQrCode url={referralUrl} label="Your public affiliate profile" fileName="fantasy-mmadness-affiliate-profile" />
               </div>
               <div className="affiliate-referral-actions">
                 <Link href="/affiliate-league" className="theme-btn theme-btn-secondary"><FaIdBadge /> Manage league</Link>

@@ -6,6 +6,7 @@ import AffiliateFightLeaderboard from './AffiliateFightLeaderboard';
 import ShareQrCode from '../Common/ShareQrCode';
 import { fetchMatches } from '../../Redux/matchSlice';
 import QRCode from 'qrcode';
+import {qrOptions,qrBox} from '@/Utils/affiliateQrPresentation.cjs';
 import dynamic from "next/dynamic";
 const ReactMediaRecorder = dynamic(
   () => import("react-media-recorder").then((mod) => mod.ReactMediaRecorder),
@@ -27,6 +28,7 @@ import {
   getFighterName,
 } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import {getAffiliateFightShareUrl} from '@/Utils/affiliatePublicLink';
 
 const API_BASE = PUBLIC_API_BASE_URL;
 
@@ -47,6 +49,7 @@ const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null }) =>
   const [showUsersPlayed, setShowUsersPlayed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
   const canvasRef = useRef(null);
+  const [posterQrReady,setPosterQrReady]=useState(false);
   const dispatch = useDispatch();
   const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const matches = useSelector((state) => state.matches.data);
@@ -76,8 +79,7 @@ const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null }) =>
   const fighterAImage = getFighterImage(match, 'A');
   const fighterBImage = getFighterImage(match, 'B');
   const campaignMatchId = getFightId(match) || matchId;
-  const affiliateFullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'affiliate';
-  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(match?.matchName || 'fight')}/${encodeURIComponent(affiliateFullName)}`;
+  const promotionUrl = getAffiliateFightShareUrl(affiliate,campaignMatchId);
   const fightCategory = getFightCategory(match) || 'Fight campaign';
   const fightStatus = match?.matchShadowStatus || 'inactive';
   const scheduledDate = formatFightDate(match, { short: true });
@@ -171,11 +173,16 @@ const actualProfit = extraActualProfit / 2;
   }, [matchId, reduxMatch, initialMatch]);
 
   useEffect(() => {
-    if (!match) return; // Exit if match is not available yet
+    setPosterQrReady(false);
+    if (!match || !promotionUrl) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return; // Check if canvas is available
     const ctx = canvas.getContext('2d');
+    let canceled=false;
+    const drawQr=()=>QRCode.toDataURL(promotionUrl,qrOptions,(err,src)=>{
+      if(err||canceled)return;const image=new Image();image.onload=()=>{if(canceled)return;const smooth=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(image,(canvas.width-qrBox.size)/2,qrBox.top,qrBox.size,qrBox.size);ctx.imageSmoothingEnabled=smooth;setPosterQrReady(true);};image.src=src;
+    });
 
     // Initialize images
     const backgroundImage = new Image();
@@ -198,6 +205,7 @@ const actualProfit = extraActualProfit / 2;
     const totalImages = match.promotionBackground ? 2 : 4; // Adjust based on rendering flow
 
     const handleImageLoad = () => {
+        if(canceled)return;
         imagesLoaded += 1;
         if (imagesLoaded === totalImages) {
             // Draw background image
@@ -211,21 +219,7 @@ const actualProfit = extraActualProfit / 2;
                 // Draw logo
                 ctx.drawImage(logoImage, 10, 10, 60, 60);
 
-                // Generate QR code
-                const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
-                const encodedMatchName = encodeURIComponent(match.matchName);
-                const encodedFullName = encodeURIComponent(fullName);
-                const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
-
-                QRCode.toDataURL(url, { width: 60, margin: 2 }, (err, qrImageUrl) => {
-                    if (!err) {
-                        const qrImage = new Image();
-                        qrImage.src = qrImageUrl;
-                        qrImage.onload = () => {
-                            ctx.drawImage(qrImage, (canvas.width / 2) - 30, 225, 60, 60); // Center QR code below URL
-                        };
-                    }
-                });
+                drawQr();
             } else {
                 // Render all elements when no custom background
                 ctx.fillStyle = "rgba(0, 0, 0, 0.0)";
@@ -275,21 +269,7 @@ const actualProfit = extraActualProfit / 2;
                 drawImageWithShadow(fighterOneImage, 110, 140, fighterAName);
                 drawImageWithShadow(fighterTwoImage, 380, 140, fighterBName);
 
-                // Generate QR code
-                const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
-                const encodedMatchName = encodeURIComponent(match.matchName);
-                const encodedFullName = encodeURIComponent(fullName);
-                const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
-
-                QRCode.toDataURL(url, { width: 60, margin: 2 }, (err, qrImageUrl) => {
-                    if (!err) {
-                        const qrImage = new Image();
-                        qrImage.src = qrImageUrl;
-                        qrImage.onload = () => {
-                            ctx.drawImage(qrImage, (canvas.width / 2) - 30, 225, 60, 60);
-                        };
-                    }
-                });
+                drawQr();
             }
         }
     };
@@ -302,7 +282,8 @@ const actualProfit = extraActualProfit / 2;
         fighterOneImage.onload = handleImageLoad;
         fighterTwoImage.onload = handleImageLoad;
     }
-}, [match, affiliate, backgroundImgVar, fighterAImage, fighterBImage, fighterAName, fighterBName]);
+    return ()=>{canceled=true;};
+}, [match, affiliate, backgroundImgVar, fighterAImage, fighterBImage, fighterAName, fighterBName, promotionUrl, imageData.logoImage]);
 
   if (!match && detailLoading) {
     return <div className="affiliate-campaign-loading">Loading campaign details…</div>;
@@ -354,12 +335,8 @@ const actualProfit = extraActualProfit / 2;
 
 
   const copyToClipboard = () => {
-    if (match && affiliate) {
-      const fullName = `${affiliate.firstName} ${affiliate.lastName}`; // Combine first and last name
-      const encodedMatchName = encodeURIComponent(match.matchName);  // Encode matchName
-      const encodedFullName = encodeURIComponent(fullName);  // Encode fullName
-
-      const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+    if (match && affiliate && promotionUrl) {
+      const url = promotionUrl;
 
       navigator.clipboard.writeText(url)
         .then(() => {
@@ -388,6 +365,7 @@ const actualProfit = extraActualProfit / 2;
   };
 
   const downloadImage = () => {
+    if(!posterQrReady)return;
     const canvas = canvasRef.current;
     const image = canvas.toDataURL('image/png');
     const link = document.createElement('a');
@@ -614,7 +592,7 @@ const handleSave = async (blobUrl) => {
               <span><small>Public campaign URL</small><strong>{promotionUrl}</strong></span>
               <i><FaCopy /> Copy</i>
             </button>
-            <ShareQrCode url={promotionUrl} filename="fight-promotion-qr.png" />
+            <ShareQrCode url={promotionUrl} fileName="fight-promotion-qr" />
           </section>
 
           <section className="affiliate-campaign-panel">
@@ -658,7 +636,7 @@ const handleSave = async (blobUrl) => {
                 <h3>Take the fight to your audience.</h3>
                 <p>Download the generated promotion graphic, publish it across your channels, and let fans scan directly into the campaign.</p>
                 <div>
-                  <button type="button" className="theme-btn theme-btn-primary" onClick={downloadImage}><FaDownload /> Download image</button>
+                  <button type="button" className="theme-btn theme-btn-primary" onClick={downloadImage} disabled={!posterQrReady}><FaDownload /> {posterQrReady ? 'Download image' : 'Preparing poster…'}</button>
                   <button type="button" className="theme-btn theme-btn-secondary" onClick={openModal}><FaInfoCircle /> View instructions</button>
                   {!match.matchPromotionalVideoUrl && (
                     <button
