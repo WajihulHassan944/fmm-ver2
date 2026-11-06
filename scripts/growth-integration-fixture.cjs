@@ -1,7 +1,7 @@
 // TEST ONLY: serves the ORIGINAL backend console at a pinned commit, with local
 // API contract fixtures. Never mounts in Next or contacts a production service.
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
-const sha='5f74baa486ba8dab9cd9c64b3f2e0806fc5ebf6d',dir=process.env.GROWTH_CONSOLE_SOURCE_DIR||path.resolve('.cache/growth-original-console-'+sha);fs.mkdirSync(dir,{recursive:true});
+const sha='278eef2399dc64767e34e50fd2e227a616a420e7',dir=process.env.GROWTH_CONSOLE_SOURCE_DIR||path.resolve('.cache/growth-original-console-'+sha);fs.mkdirSync(dir,{recursive:true});
 for(const f of ['index.html','app.js','app.css'])if(!fs.existsSync(path.join(dir,f)))fs.writeFileSync(path.join(dir,f),cp.execFileSync('curl',['--fail','--silent','--show-error','--max-time','30',`https://raw.githubusercontent.com/WajihulHassan944/fantasymmadness-game-server-three/${sha}/growth-console/${f}`]));
 const ui='http://127.0.0.1:4390',engine='http://127.0.0.1:4391',growth='fixture-growth-scoped-session',admin='fixture-administrator-session';
 let requests=[],paused=true,expired=false,review='needs_owner_review',count=37;
@@ -22,6 +22,7 @@ function payload(p,q){
  if(p==='/admin/marketing/coverage')return {ok:true,coverage:{sports:['mma-ufc'],horizonNote:'LOCAL CONTRACT FIXTURE',latest:{checkedAt:now(),sourceReachable:true,verifiedContests:1,sports:{'mma-ufc':{verifiedContests:1,campaignsActive:1,rejectedContests:0,rejected:[]}}}}};
  if(p==='/admin/fighter-assets')return {ok:true,assets:[]};
  if(p==='/admin/research')return {ok:true,counts:{researched:0,waitingForResearch:0,publishedContacts:0,drafted:0},bySport:{},shows:[]};
+ if(p==='/admin/recruitment')return {ok:true,counters:{discovered:0,researched:0,contactVerified:0,draftPrepared:0,awaitingApproval:0,approved:0,sandboxCaptures:0,responses:0,onboarded:0,active:0},prospects:[],program:{signupVerified:false,termsVerified:false},lastResearch:null,deliveryEnabled:false};
  if(p==='/admin/affiliates')return {ok:true,affiliates:[]};
  if(p==='/admin/social')return {ok:true,posts:[],paused:{paused},channels:{},capabilities:{},provider:'sandbox'};
  if(['/admin/jobs','/admin/runs','/admin/suppressions','/admin/audit'].includes(p))return {ok:true,[p==='/admin/audit'?'entries':p.split('/').pop()]:[]};
