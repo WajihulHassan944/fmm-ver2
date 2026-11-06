@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 import { GROWTH_ENGINE_V2, GROWTH_SECTIONS } from '@/Utils/adminFeatures';
 import { GROWTH_ENGINE_URL, growthEngineApi, growthToken } from '@/Utils/growthEngineApi';
-import { engineLocation, trustedConsoleMessage, sectionTarget, consoleFrameHeight } from '@/Utils/growthEngineEmbed.cjs';
+import { engineLocation, trustedConsoleMessage, sectionTarget } from '@/Utils/growthEngineEmbed.cjs';
 import styles from './GrowthEngineCommandCenter.module.css';
 import GrowthAffiliateAcceptance from './GrowthAffiliateAcceptance';
 import GrowthAutonomyControls from './GrowthAutonomyControls';
@@ -25,7 +25,6 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
   const [mounted, setMounted] = useState(false);
   const [reach, setReach] = useState('checking');
   const [confirmed, setConfirmed] = useState(false);
-  const [frameHeight, setFrameHeight] = useState(null);
   const [slow, setSlow] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [session, setSession] = useState('connecting');
@@ -109,7 +108,6 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
     if (!enabled) return undefined;
     const onMessage = event => {
       if (!trustedConsoleMessage(event, engine.origin, frame.current?.contentWindow)) return;
-      if (event.data.event === 'resize') { const height = consoleFrameHeight(event.data.height); if (height !== null) setFrameHeight(height); return; }
       setConfirmed(true);
       setSlow(false);
       const incoming = event.data.section;
@@ -158,7 +156,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
       </section>}
       {session === 'connected' && section === 'automation' && <GrowthAutonomyControls />}
       {session === 'connected' && section === 'affiliates' && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <GrowthAffiliateAcceptance />}
-      {session !== 'expired' && <iframe key={`${attempt}:${target}`} ref={frame} className={styles.frame} src={src} style={frameHeight ? { height: `${frameHeight}px`, minHeight: 0 } : undefined}
+      {session !== 'expired' && <iframe key={`${attempt}:${target}`} ref={frame} className={styles.frame} src={src}
         title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label}`}
         data-testid="ge-frame" referrerPolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"

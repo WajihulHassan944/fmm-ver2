@@ -29,12 +29,8 @@ test('launch desk keeps affiliate alerts and passes the newly selected fight int
 // Fixture-only diagnostics: never emit credential headers, tokens or browser storage.
 test.afterEach(async({page,request},info)=>{if(info.status===info.expectedStatus)return;const notices=await page.getByTestId('ge-session-notice').allTextContents().catch(()=>[]);const requests=await request.get('http://127.0.0.1:4391/__test/requests').then(r=>r.json()).catch(()=>({requests:[]}));console.info(JSON.stringify({fixtureFailureUrl:page.url(),notices,frames:page.frames().map(f=>f.url()),apiRequests:requests.requests.slice(-15)}));});
 
-test('restored embedded dashboard resizes safely and has usable dark navigation on mobile',async({page})=>{
- await page.addInitScript(token=>localStorage.setItem('adminAuthToken',token),admin);await bridge(page);await page.setViewportSize({width:390,height:844});await page.goto('/administration/growth?engine=marketing');
- const frame=page.frameLocator('[data-testid=ge-frame]');await expect(frame.getByTestId('page-marketing')).toBeVisible();await expect(frame.getByTestId('nav-connections')).toBeVisible();
- await expect.poll(()=>page.getByTestId('ge-frame').evaluate(n=>parseInt(n.style.height)||0)).toBeGreaterThan(160);
- expect(await frame.locator('body').evaluate(n=>n.scrollWidth<=innerWidth+1)).toBeTruthy();
- const before=await page.getByTestId('ge-frame').getAttribute('style');await page.evaluate(()=>window.postMessage({type:'fmm-growth-console',event:'resize',height:1e9,section:'marketing'},location.origin));await expect(page.getByTestId('ge-frame')).toHaveAttribute('style',before);
- await frame.getByTestId('nav-connections').click();await expect(frame.getByTestId('oauth-x')).toBeVisible();await frame.getByTestId('nav-marketing').focus();await page.keyboard.press('Enter');await expect(frame.getByTestId('page-marketing')).toBeVisible();
- await page.screenshot({path:'test-results/issue203-admin-mobile.png',fullPage:true});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'test-results/issue203-admin-desktop.png',fullPage:true});
+test('exact November 5 dashboard restoration has every department and preserved approved frame presentation',async({page})=>{
+ await page.addInitScript(token=>localStorage.setItem('adminAuthToken',token),admin);await bridge(page);await page.setViewportSize({width:1280,height:1000});
+ for(const section of ['marketing','pr','affiliates','connections','automation','analytics']){await page.goto('/administration/growth?engine='+section);const frame=page.frameLocator('[data-testid=ge-frame]');await expect(frame.locator('main h1')).toBeVisible();await expect(frame.getByTestId('page-error')).toHaveCount(0);if(section==='marketing'){await expect(frame.getByTestId('nav-marketing')).toBeHidden();expect(await frame.locator('body').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(244, 245, 247)');await page.screenshot({path:'test-results/issue203-exact-restored-desktop.png',fullPage:true});}}
+ await page.setViewportSize({width:390,height:844});await page.goto('/administration/growth?engine=connections');await expect(page.frameLocator('[data-testid=ge-frame]').getByTestId('oauth-x')).toBeVisible();await page.screenshot({path:'test-results/issue203-exact-restored-mobile.png',fullPage:true});
 });

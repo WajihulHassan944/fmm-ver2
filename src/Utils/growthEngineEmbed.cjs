@@ -26,8 +26,4 @@ function sameOriginSessionPath(value) {
   catch (_) { return ''; }
 }
 
-function consoleFrameHeight(value) {
-  return Number.isFinite(value) && Number.isInteger(value) && value >= 160 && value <= 30000 ? value : null;
-}
-
-module.exports = { consoleFrameHeight, engineLocation, trustedConsoleMessage, sectionTarget, sameOriginSessionPath };
+module.exports = { engineLocation, trustedConsoleMessage, sectionTarget, sameOriginSessionPath };

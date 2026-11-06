@@ -1,7 +1,7 @@
 // TEST ONLY: serves the ORIGINAL backend console at a pinned commit, with local
 // API contract fixtures. Never mounts in Next or contacts a production service.
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
-const sha='278eef2399dc64767e34e50fd2e227a616a420e7',dir=process.env.GROWTH_CONSOLE_SOURCE_DIR||path.resolve('.cache/growth-original-console-'+sha);fs.mkdirSync(dir,{recursive:true});
+const sha='9b181672c18202c2f8af95536c29a7a9f3f37c87',dir=process.env.GROWTH_CONSOLE_SOURCE_DIR||path.resolve('.cache/growth-original-console-'+sha);fs.mkdirSync(dir,{recursive:true});
 for(const f of ['index.html','app.js','app.css'])if(!fs.existsSync(path.join(dir,f)))fs.writeFileSync(path.join(dir,f),cp.execFileSync('curl',['--fail','--silent','--show-error','--max-time','30',`https://raw.githubusercontent.com/WajihulHassan944/fantasymmadness-game-server-three/${sha}/growth-console/${f}`]));
 const ui='http://127.0.0.1:4390',engine='http://127.0.0.1:4391',growth='fixture-growth-scoped-session',admin='fixture-administrator-session';
 let requests=[],paused=true,expired=false,review='needs_owner_review',count=37;
