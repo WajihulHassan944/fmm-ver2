@@ -93,6 +93,7 @@ const isActiveFight = (fight = {}) => LIVE_FIGHT_STATUSES.has(getFightStatus(fig
 const getRegistryStatus = (fight = {}) => {
   if (isFinishedFight(fight)) return 'Finished';
   if (String(fight?.sourceType || fight?.matchType || '').toLowerCase().includes('shadow')) return 'Template';
+  if (getFightStatus(fight) === 'draft') return 'Draft';
   const dateText = fight?.matchDate;
   if (dateText) {
     const date = new Date(dateText);

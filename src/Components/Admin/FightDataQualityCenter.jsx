@@ -19,6 +19,7 @@ import { DEFAULT_COMBAT_SCORING } from '@/Utils/scoringRules';
 import { fightDataQualityApi, getFightGroupTitle, getImageStatusClass } from '@/Utils/fightDataQualityApi';
 
 const qualityTabs = [
+  { key: 'proposals', label: 'Fight proposals', icon: FaUserShield },
   { key: 'duplicates', label: 'Duplicate fights', icon: FaDatabase },
   { key: 'images', label: 'Image health', icon: FaImage },
   { key: 'fighters', label: 'Fighter library', icon: FaFistRaised },
@@ -41,6 +42,9 @@ const getRows = (payload) => {
 };
 
 const FightDataQualityCenter = ({ onBack, onRefresh }) => {
+  const [proposals, setProposals] = useState(null);
+  const [proposalError, setProposalError] = useState('');
+  const [proposalLoading, setProposalLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('duplicates');
   const [loading, setLoading] = useState(false);
   const [actionId, setActionId] = useState('');
@@ -59,6 +63,14 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
   const imageRows = useMemo(() => getRows(imagePayload), [imagePayload]);
   const fighters = useMemo(() => getRows(fightersPayload), [fightersPayload]);
   const fighterSuggestions = useMemo(() => getRows(suggestionsPayload), [suggestionsPayload]);
+
+  const loadProposals = useCallback(async () => {
+    setProposalLoading(true); setProposalError('');
+    try { const r = await fightDataQualityApi.discoveredProposals(); setProposals(r.proposals || []); }
+    catch (error) { setProposalError(error.message || 'Could not load the proposal queue.'); }
+    finally { setProposalLoading(false); }
+  }, []);
+  useEffect(() => { if (activeTab === 'proposals' && proposals === null && !proposalError) loadProposals(); }, [activeTab, proposals, proposalError, loadProposals]);
 
   const loadScoringConfig = useCallback(async () => {
     try {
@@ -224,6 +236,28 @@ const FightDataQualityCenter = ({ onBack, onRefresh }) => {
           return <button key={tab.key} type="button" className={tabClass(tab.key)} onClick={() => setActiveTab(tab.key)}><Icon /> {tab.label}</button>;
         })}
       </section>
+
+      {activeTab === 'proposals' && (
+        <section className="admin-swarm-panel" aria-label="Discovered fight proposals">
+          <header><div><span>Owner review required</span><h2>Discovered fight proposals</h2></div><button type="button" className="admin-action-secondary" onClick={loadProposals} disabled={proposalLoading}><FaSyncAlt /> Refresh proposals</button></header>
+          <p className="admin-swarm-note">Discovery cannot insert or change Registry fights. These reports are unverified proposals. Verify the original source, fighters, date and artwork, then use the existing Create Fight form for an explicit owner decision. Existing fights are unchanged.</p>
+          {proposalLoading && <p role="status">Loading proposals…</p>}
+          {proposalError && <p role="alert">{proposalError}</p>}
+          {proposals?.length === 0 && <p>No discoveries are awaiting owner review.</p>}
+          <div className="admin-quality-suggestion-list">{(proposals || []).map((p) => {
+            const c = p.latestCandidate || p.initialCandidate || {};
+            let source = ''; try { const u = new URL(c.articleUrl || c.officialEventUrl || ''); if (u.protocol === 'https:' && !u.username && !u.password) source = u.href; } catch (_) { /* Unverified URLs are not made clickable. */ }
+            return <article key={p._id}>
+              <strong>{c.eventName || c.title || 'Unverified discovery'}</strong>
+              <span>{[c.fighterA, c.fighterB].filter(Boolean).join(' vs ') || 'Fighter identity requires verification'}</span>
+              <span>Reported date (unverified): {formatDate(c.eventDate)} · Awaiting owner review</span>
+              <small>First discovered: {formatDate(p.firstSeenAt)} · Source: {c.articleSource || 'Unverified'}</small>
+              {source && <a href={source} target="_blank" rel="noopener noreferrer">Review original source</a>}
+              <a className="admin-action-secondary" href="/administration/AddNewMatch">Review using the existing Create Fight form</a>
+            </article>;
+          })}</div>
+        </section>
+      )}
 
       {activeTab === 'duplicates' && (
         <section className="admin-swarm-panel admin-swarm-list-panel">

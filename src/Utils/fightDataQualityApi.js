@@ -1,6 +1,7 @@
 import { swarmRequest } from './swarmApi';
 
 export const fightDataQualityApi = {
+  discoveredProposals: () => swarmRequest('/api/admin/ufc-event-discovery/proposals'),
   scoringConfig: () => swarmRequest('/api/admin/fights/scoring-config'),
   adminFights: (query = {}) => swarmRequest('/api/admin/fights', { query }),
   adminLiveFights: (query = {}) => swarmRequest('/api/admin/fights/live', { query }),
