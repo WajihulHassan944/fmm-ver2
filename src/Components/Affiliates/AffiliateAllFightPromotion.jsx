@@ -1,4 +1,4 @@
-import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
+import { getAffiliateProfileShareUrl } from '@/Utils/affiliatePublicLink';
 import Head from 'next/head';
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -28,11 +28,7 @@ export default function AffiliateAllFightPromotion() {
     if (!affiliate) return '';
     // IDs do not change when a promoter edits their name or league branding.
     // The public route still accepts legacy name/username links.
-    const id = String(affiliate._id || affiliate.id || '');
-    const name = getAffiliateNameSlug(affiliate);
-    // Use the same clean, human-readable link as the admin affiliate directory.
-    const publicIdentifier = name || id;
-    return `https://fantasymmadness.com/affiliate/${encodeURIComponent(publicIdentifier)}`;
+    return getAffiliateProfileShareUrl(affiliate);
   }, [affiliate]);
 
   const promoted = (Array.isArray(matches) ? matches : []).filter(

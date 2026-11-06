@@ -23,10 +23,35 @@ jobs:
         run: node scripts/fight-registry-regression.test.cjs
       - run: npm ci --ignore-scripts
       - name: Verify Growth Engine first-party session bridge and security
-        run: node --test scripts/growth-engine-security.test.cjs scripts/growth-session-bridge.test.cjs
+        run: node --test scripts/growth-engine-security.test.cjs scripts/growth-session-bridge.test.cjs scripts/growth-social-session.test.cjs
+      - name: Affiliate signup redirect and campaign context regression
+        run: |
+          node scripts/growth-affiliate-signup-context.test.cjs
+          node scripts/affiliate-qr-parity.test.cjs
+          node scripts/share-qr-identity.test.cjs
       - run: npm run lint
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  integrated-growth-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Select existing Chromium or install browser only
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "GROWTH_TEST_CHROMIUM=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install chromium
+          fi
+      - name: Administration Growth integration (local API contract fixtures only)
+        run: npx playwright test --config playwright.growth-integrated.config.cjs

@@ -6,6 +6,8 @@ import { FaArrowLeft, FaArrowRight, FaBullhorn, FaChartLine, FaCheck, FaCopy, Fa
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateAddNewMatch from './AffiliateAddNewMatch';
 import AffiliateMatchDetails from './AffiliateMatchDetails';
+import {toast} from 'react-toastify';
+import {getAffiliateFightShareUrl} from '@/Utils/affiliatePublicLink';
 import { fetchMatches } from '../../Redux/matchSlice';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
 import { ExperienceEmptyState, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
@@ -242,9 +244,8 @@ const AffiliateDashboard = () => {
     event.stopPropagation();
 
     try {
-      const encodedMatchName = encodeURIComponent(match?.matchName || 'fight');
-      const encodedFullName = encodeURIComponent(fullName);
-      const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+      const url = getAffiliateFightShareUrl(affiliate,getFightId(match));
+      if(!url){toast.error('A verified affiliate and fight are required before sharing.');return;}
       await navigator.clipboard.writeText(url);
       setCopiedId(getFightId(match));
       window.setTimeout(() => setCopiedId(null), 2000);

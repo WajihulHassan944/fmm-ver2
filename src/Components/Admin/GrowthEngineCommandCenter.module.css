@@ -19,3 +19,33 @@
 .notice p { margin: 0; max-width: 75ch; }
 .tab:focus-visible, .linkButton:focus-visible { outline: 2px solid #ff5a60; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .page *, .page *::before, .page *::after { scroll-behavior: auto; animation: none; transition: none; } }
+
+.policyForm { display: grid; gap: 12px; margin: 14px 0 20px; }
+.policyForm label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.policyForm fieldset { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px; border: 1px solid #d3d5db; }
+.policyForm input:not([type=checkbox]), .policyForm select, .policyForm textarea { background: white; color: #16181d; border: 1px solid #aab0ba; padding: 8px; max-width: 100%; }
+.stopButton { background: #a3181d; color: white; border: 1px solid #a3181d; padding: 8px 14px; border-radius: 8px; font-weight: 700; }
+
+/* Existing back-office global typography rules must not wash out owner controls. */
+.page .autonomy { background: #101820; color: #f2f3f5; border-color: #303a44; margin-bottom: 14px; }
+.page .autonomy :is(h2,p,strong,label,legend,small,div) { color: #f2f3f5 !important; }
+.page .autonomy fieldset { border-color: #46525e; border-radius: 6px; }
+.page .autonomy :is(input:not([type=checkbox]),select,textarea) { background: #17232e !important; color: #f2f3f5 !important; border: 1px solid #596674; opacity: 1; }
+.page .autonomy button { color: #fff !important; background: #283440; }
+.page .autonomy .primary, .page .autonomy .stopButton { background: #bc1c25 !important; }
+.page .autonomy button:disabled { opacity: .6; }
+
+/* Scoped usability repair: preserve the November 5 light-card palette. */
+.page .card.card:not(.autonomy) :is(h2,h3,p,strong,label,legend,small,div,summary,th,td) { color: #16181d !important; }
+.page .card.card:not(.autonomy) :is(input:not([type=checkbox]),select,textarea) { color: #16181d !important; background: #fff !important; border: 1px solid #69717d !important; border-radius: 4px; padding: 8px; max-width: 100%; min-width: 0; }
+.page .card.card:not(.autonomy) input::placeholder, .page .card.card:not(.autonomy) textarea::placeholder { color: #59616d; opacity: 1; }
+.page .card.card:not(.autonomy) button { color: #16181d !important; background: #fff !important; border: 1px solid #69717d !important; border-radius: 6px; padding: 8px 12px; margin: 4px 4px 4px 0; max-width: 100%; white-space: normal; }
+.page .card.card:not(.autonomy) button:disabled { color: #535b66 !important; background: #eceef1 !important; cursor: not-allowed; }
+.page .card.card:not(.autonomy) a { color: #a3181d !important; text-decoration: underline; overflow-wrap: anywhere; }
+.page .card.card:not(.autonomy) :is(button,input,select,textarea,summary,a):focus-visible { outline: 2px solid #a3181d; outline-offset: 3px; }
+.page .card { overflow-wrap: anywhere; min-width: 0; }
+.page .card table { display: block; max-width: 100%; overflow-x: auto; }
+.page .card label { max-width: 100%; }
+/* Reserve room for the existing floating support control and mobile safe area. */
+.page { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+.frame { scroll-margin-top: 100px; }

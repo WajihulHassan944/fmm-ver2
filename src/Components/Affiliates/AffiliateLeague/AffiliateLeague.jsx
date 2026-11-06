@@ -1,4 +1,4 @@
-import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
+import { getAffiliateProfileShareUrl } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -186,7 +186,7 @@ const AffiliateLeague = () => {
     || 'Affiliate';
   const verifiedCount = members.filter((member) => member.verified).length;
   const subscribedCount = members.filter((member) => member.subscribed).length;
-  const referralUrl = `https://www.fantasymmadness.com/my-fantasy-team?league=${encodeURIComponent(getAffiliateNameSlug(affiliate) || 'league')}&referenceId=${encodeURIComponent(affiliate?._id || '')}`;
+  const referralUrl = getAffiliateProfileShareUrl(affiliate);
 
   const manageMember = async (member, action) => {
     const labels = { archive: 'archived', restore: 'restored', mark_test: 'moved to Test accounts', unmark_test: 'returned to the active roster', remove: 'removed from this affiliate league' };
@@ -216,7 +216,7 @@ const AffiliateLeague = () => {
     try {
       await navigator.clipboard.writeText(referralUrl);
       setCopied(true);
-      toast.success('League invitation link copied.');
+      toast.success('Public affiliate profile copied.');
       window.setTimeout(() => setCopied(false), 1800);
     } catch (copyError) {
       console.error(copyError);

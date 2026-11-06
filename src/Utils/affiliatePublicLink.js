@@ -16,6 +16,12 @@ export const getAffiliatePublicIdentifier = (affiliate = {}, affiliates = []) =>
 
 export const getAffiliateFightShareUrl = (affiliate = {}, fightId = '') => {
   const id = String(affiliate?._id || affiliate?.id || '');
-  const name = getAffiliateNameSlug(affiliate) || 'league';
+  const name = getAffiliateNameSlug(affiliate);
+  if(!/^[a-f\d]{24}$/i.test(id)||!/^[a-f\d]{24}$/i.test(String(fightId))||!name)return '';
   return `https://www.fantasymmadness.com/league/${encodeURIComponent(name)}?affiliateId=${encodeURIComponent(id)}&fightId=${encodeURIComponent(fightId)}`;
+};
+
+export const getAffiliateProfileShareUrl = (affiliate = {}) => {
+  const id=String(affiliate?._id||affiliate?.id||''),name=getAffiliateNameSlug(affiliate);
+  return /^[a-f\d]{24}$/i.test(id)&&name?`https://www.fantasymmadness.com/affiliate/${encodeURIComponent(name)}?affiliateId=${encodeURIComponent(id)}`:'';
 };

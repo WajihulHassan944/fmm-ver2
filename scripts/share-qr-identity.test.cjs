@@ -1,0 +1,13 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),Module=require('node:module');
+const {JSDOM}=require('jsdom'),React=require('react'),{createRoot}=require('react-dom/client'),{transform,loadBindings}=require('next/dist/build/swc'),sharp=require('sharp'),jsQR=require('jsqr');
+test('the real shared QR panel never displays a previous affiliate image after its URL changes',async()=>{
+ const dom=new JSDOM('<div id="root"></div>',{url:'https://fixture.invalid'});global.window=dom.window;global.document=dom.window.document;global.IS_REACT_ACT_ENVIRONMENT=true;
+ await loadBindings();
+ const filename=path.resolve('src/Components/Common/ShareQrCode.jsx'),source=fs.readFileSync(filename,'utf8').replace("import styles from './ShareQrCode.module.css';","const styles={};"),compiled=await transform(source,{filename,jsc:{parser:{syntax:'ecmascript',jsx:true},transform:{react:{runtime:'automatic'}}},module:{type:'commonjs'}}),m=new Module(filename,module);m.filename=filename;m.paths=Module._nodeModulePaths(path.dirname(filename));m._compile(compiled.code,filename);const Share=m.exports.default,root=createRoot(document.getElementById('root'));
+ const first='https://www.fantasymmadness.com/league/same-name?affiliateId=611111111111111111111111&fightId=633333333333333333333333',second=first.replace('611111111111111111111111','622222222222222222222222');
+ const awaitImage=async()=>{for(let i=0;i<100&&!document.querySelector('img');i++)await React.act(async()=>new Promise(r=>setTimeout(r,20)));assert.ok(document.querySelector('img'),'Actual asynchronous QR image must finish');};
+ const decode=async()=>{const src=document.querySelector('img').src,raw=await sharp(Buffer.from(src.split(',')[1],'base64')).ensureAlpha().raw().toBuffer({resolveWithObject:true});return jsQR(new Uint8ClampedArray(raw.data),raw.info.width,raw.info.height).data;};
+ try{await React.act(async()=>root.render(React.createElement(Share,{url:first})));await React.act(async()=>document.querySelector('button').click());await awaitImage();assert.equal(await decode(),first);await React.act(async()=>root.render(React.createElement(Share,{url:second})));assert.equal(document.querySelector('img'),null);assert.equal(document.querySelector('a[download]'),null);assert.match(document.querySelector('button').textContent,/Show QR/);await React.act(async()=>document.querySelector('button').click());await awaitImage();assert.equal(await decode(),second);assert.equal(document.querySelector('a[download]').href,document.querySelector('img').src);}
+ finally{await React.act(async()=>root.unmount());dom.window.close();delete global.IS_REACT_ACT_ENVIRONMENT;}
+});

@@ -28,6 +28,7 @@ import Membership from '@/Components/CreateAccount/Membership';
 import { FMM_ASSET_BASE } from '@/Utils/fightExperience';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { SITE_URL } from '@/Utils/seoConfig';
+import {signupCampaignContext} from '@/Utils/affiliateSignupRedirect.cjs';
 
 
 const API_BASE_URL = PUBLIC_API_BASE_URL;
@@ -321,6 +322,8 @@ const AuthPortal = ({ initialMode, initialRole, onSuccess, redirectTo }) => {
       if (affiliateForm.affiliateImage) payload.append('image', affiliateForm.affiliateImage);
       const inviteCode = queryValue(router.query.invite);
       if (inviteCode) payload.append('inviteCode', inviteCode);
+      const campaign = signupCampaignContext(window.sessionStorage);
+      if (campaign) payload.append('campaignAttribution', JSON.stringify(campaign));
 
       const result = await apiRequest('/registerAffiliate', { method: 'POST', token: null, body: payload });
       setAffiliateRegistered(true);

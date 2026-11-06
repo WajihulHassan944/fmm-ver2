@@ -7,17 +7,21 @@ import { GROWTH_ENGINE_V2, GROWTH_SECTIONS } from '@/Utils/adminFeatures';
 import { GROWTH_ENGINE_URL, growthEngineApi, growthToken } from '@/Utils/growthEngineApi';
 import { engineLocation, trustedConsoleMessage, sectionTarget } from '@/Utils/growthEngineEmbed.cjs';
 import styles from './GrowthEngineCommandCenter.module.css';
+import GrowthAffiliateAcceptance from './GrowthAffiliateAcceptance';
+import GrowthAutonomyControls from './GrowthAutonomyControls';
 
 const SLUGS = new Set(GROWTH_SECTIONS.map(s => s.slug));
-const hrefFor = slug => slug === 'overview' ? '/administration/growth-engine' : `/administration/growth-engine/${slug}`;
+const legacyHrefFor = slug => slug === 'overview' ? '/administration/growth-engine' : `/administration/growth-engine/${slug}`;
 const engine = engineLocation(GROWTH_ENGINE_URL);
 
 // This is the existing console, not a second implementation of its departments.
-export default function GrowthEngineCommandCenter() {
+export default function GrowthEngineCommandCenter({ growthRoute = false, qaRoute = false }) {
   const router = useRouter();
   const authenticated = useSelector(state => Boolean(state.adminAuth?.isAdminAuthenticated));
-  const requested = Array.isArray(router.query.section) ? router.query.section[0] : '';
-  const section = SLUGS.has(requested) ? requested : 'overview';
+  const fightContext = typeof router.query.fightId === 'string' ? router.query.fightId : '';
+  const hrefFor = useCallback(slug => growthRoute ? `/administration/growth?engine=${slug}${fightContext ? `&fightId=${encodeURIComponent(fightContext)}` : ''}` : legacyHrefFor(slug), [growthRoute, fightContext]);
+  const requested = growthRoute ? router.query.engine : Array.isArray(router.query.section) ? router.query.section[0] : '';
+  const section = qaRoute ? 'qa' : SLUGS.has(requested) ? requested : 'overview';
   const [mounted, setMounted] = useState(false);
   const [reach, setReach] = useState('checking');
   const [confirmed, setConfirmed] = useState(false);
@@ -29,8 +33,9 @@ export default function GrowthEngineCommandCenter() {
   const handover = useRef(false);
   const lastRenew = useRef(0);
   const sessionState = useRef('connecting');
-  const enabled = GROWTH_ENGINE_V2 && mounted && authenticated && Boolean(engine);
-  const target = sectionTarget(section, GROWTH_SECTIONS);
+  const enabled = GROWTH_ENGINE_V2 && mounted && router.isReady && authenticated && Boolean(engine);
+  const baseTarget = qaRoute ? 'qa' : sectionTarget(section, GROWTH_SECTIONS);
+  const target = growthRoute && /^[a-f\d]{24}$/i.test(fightContext) && ['marketing','posters','approvals'].includes(section) ? `${baseTarget}${baseTarget.includes('?') ? '&' : '?'}fightId=${encodeURIComponent(fightContext)}` : baseTarget;
   const src = engine ? `${engine.consoleUrl}?embed=1#/${target}` : '';
 
   useEffect(() => { setMounted(true); }, []);
@@ -75,11 +80,12 @@ export default function GrowthEngineCommandCenter() {
     let alive = true;
     let expiryTimer;
     const controller = new AbortController();
+    sessionState.current = 'connecting';
     setSession('connecting');
     growthEngineApi.exchangeAdminSession({ signal: controller.signal }).then(result => {
       if (!alive) return;
       verifiedToken.current = result.token;
-      setSession('connecting'); // The embedded console must confirm acceptance first.
+      setSession('connecting'); // The embedded console must independently accept this session.
       handOverSession();
       expiryTimer = window.setTimeout(() => { growthToken.set(''); verifiedToken.current = ''; lastRenew.current = Date.now(); setAttempt(value => value + 1); }, Math.max(0, result.expiresAt - Date.now() - 30000));
     }).catch(error => {
@@ -87,7 +93,8 @@ export default function GrowthEngineCommandCenter() {
       growthToken.set('');
       verifiedToken.current = '';
       const rejected = error.status === 401 || error.status === 403;
-      setSession(rejected ? 'rejected' : 'unavailable');
+      sessionState.current = rejected ? 'rejected' : 'unavailable';
+      setSession(sessionState.current);
       // a refused administrator must not keep an earlier console session in this tab
       if (rejected) { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } }
     });
@@ -101,10 +108,25 @@ export default function GrowthEngineCommandCenter() {
     if (!enabled) return undefined;
     const onMessage = event => {
       if (!trustedConsoleMessage(event, engine.origin, frame.current?.contentWindow)) return;
+      // Layout messages never establish authentication or navigate departments.
+      if (event.data.event === 'content-size') {
+        const height = event.data.height;
+        if (event.data.section === target.split('?')[0] && Number.isInteger(height) && height >= 160 && height <= 30000 && frame.current) {
+          frame.current.style.height = `${height}px`;
+        }
+        return;
+      }
+      if (event.data.event === 'dialog-open') {
+        if (event.data.section === target.split('?')[0]) {
+          frame.current?.contentWindow?.postMessage({type:'fmm-growth-viewport',height:window.innerHeight},engine.origin);
+          frame.current?.scrollIntoView({block:'start', behavior:'instant'});
+        }
+        return;
+      }
       setConfirmed(true);
       setSlow(false);
       const incoming = event.data.section;
-      if (event.data.event === 'session-ready' && event.data.signedIn && verifiedToken.current && growthToken.get() === verifiedToken.current) setSession('connected');
+      if (event.data.event === 'session-ready' && event.data.signedIn && verifiedToken.current && growthToken.get() === verifiedToken.current) { sessionState.current = 'connected'; setSession('connected'); }
       // console session protocol: signed out inside the console -> stay signed out; ended/revoked -> renew from the administrator session
       // the administrator session was not accepted: the console must not stay signed in with an earlier session
       if (event.data.signedIn && !verifiedToken.current && sessionState.current === 'rejected') { try { frame.current?.contentWindow?.postMessage({ type: 'fmm-growth-logout' }, engine.origin); } catch (_) { /* ignore */ } return; }
@@ -117,10 +139,10 @@ export default function GrowthEngineCommandCenter() {
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [enabled, handOverSession, router, section]);
+  }, [enabled, handOverSession, router, section, target, hrefFor]);
 
   if (!GROWTH_ENGINE_V2) return <main className={styles.page} data-testid="ge-disabled"><p>The Growth Engine is turned off. <Link href="/administration">Back to administration</Link></p></main>;
-  if (!mounted || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
+  if (!mounted || !router.isReady || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
   if (!engine) return <main className={styles.page}><p role="alert">The Growth Engine address is not configured securely. Contact the staging administrator.</p></main>;
 
   const retry = () => { setConfirmed(false); setSlow(false); setAttempt(value => value + 1); };
@@ -129,7 +151,7 @@ export default function GrowthEngineCommandCenter() {
       <header className={styles.header}>
         <div>
           <span className={styles.eyebrow}>FANTASY MMADNESS · GROWTH ENGINE</span>
-          <h1>Growth Engine</h1>
+          <h1>{qaRoute ? 'Administrator QA' : 'Growth Engine'}</h1>
           <p className={styles.muted}>The original Growth Engine console. Staging delivery controls and campaign approvals remain enforced.</p>
         </div>
         <a className={styles.linkButton} href={`${engine.consoleUrl}#/${target}`} target="_blank" rel="noopener noreferrer">Open in a new tab <FaExternalLinkAlt aria-hidden="true" /></a>
@@ -147,11 +169,16 @@ export default function GrowthEngineCommandCenter() {
         <button type="button" className={styles.linkButton} onClick={retry}>Reconnect administrator session</button>
         {session === 'rejected' && <Link href={`/administration/login?next=${encodeURIComponent(hrefFor(section))}`}>Sign in again</Link>}
       </section>}
-      {session !== 'expired' && <iframe key={attempt} ref={frame} className={styles.frame} src={src}
-        title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label}`}
+      {session === 'connected' && section === 'automation' && <GrowthAutonomyControls />}
+      {session === 'connected' && qaRoute && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <GrowthAffiliateAcceptance />}
+
+      {session === 'connected' && section === 'automation' && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <p><Link className={styles.linkButton} href="/administration/growth-qa">Administrator QA tools</Link></p>}
+      {session !== 'expired' && <iframe key={`${attempt}:${target}`} ref={frame} className={styles.frame} src={src}
+        title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label || 'Administrator QA'}`}
         data-testid="ge-frame" referrerPolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
         allow="clipboard-write" onLoad={handOverSession} />}
+      <div id="growth-support-dock" />
     </main>
   );
 }

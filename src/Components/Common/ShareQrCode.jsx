@@ -9,12 +9,13 @@ const safeFileName = (value) => String(value || 'fantasy-mmadness-link').toLower
 export default function ShareQrCode({ url, label = 'Share link', fileName = 'fantasy-mmadness-link' }) {
   const [open, setOpen] = useState(false);
   const [image, setImage] = useState('');
+  const [encodedFor, setEncodedFor] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const show = async () => {
     if (!url || loading) return;
-    if (open) { setOpen(false); return; }
+    if (open && encodedFor === url) { setOpen(false); return; }
     setLoading(true);
     setError('');
     try {
@@ -24,17 +25,18 @@ export default function ShareQrCode({ url, label = 'Share link', fileName = 'fan
         width: 900, margin: 4, errorCorrectionLevel: 'M',
         color: { dark: '#101820ff', light: '#ffffffff' },
       }));
+      setEncodedFor(url);
       setOpen(true);
     } catch (_error) { setError('Could not create this QR code. Copy the link instead.'); }
     finally { setLoading(false); }
   };
 
   return <div className={styles.root}>
-    <button type="button" className={styles.toggle} onClick={show} disabled={!url || loading} aria-expanded={open}>
-      <FaQrcode aria-hidden="true" /> {loading ? 'Creating QR…' : open ? 'Hide QR' : 'Show QR'}
+    <button type="button" className={styles.toggle} onClick={show} disabled={!url || loading} aria-expanded={open && encodedFor === url}>
+      <FaQrcode aria-hidden="true" /> {loading ? 'Creating QR…' : open && encodedFor === url ? 'Hide QR' : 'Show QR'}
     </button>
     {error && <p role="alert" className={styles.error}>{error}</p>}
-    {open && image && <div className={styles.panel}>
+    {open && image && encodedFor === url && <div className={styles.panel}>
       <strong>{label} QR code</strong>
       <img src={image} alt={`QR code for ${label}: ${url}`} width="220" height="220" />
       <p>Fans can scan this to open your link. Test it before printing.</p>

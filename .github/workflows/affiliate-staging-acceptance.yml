@@ -1,0 +1,41 @@
+name: Isolated affiliate signup acceptance
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-mobile-signup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      mongo:
+        image: mongo:7.0
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1}).ok'"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      GROWTH_TEST_MONGO_URI: mongodb://127.0.0.1:27017/fmgrowthtest
+      GROWTH_ACCEPTANCE_BACKEND_DIR: .cache/affiliate-acceptance-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: WajihulHassan944/fantasymmadness-game-server-three
+          ref: feature/growth-social-oauth-isolated
+          path: .cache/affiliate-acceptance-backend
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts --prefix .cache/affiliate-acceptance-backend
+      - name: Select Chromium
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "GROWTH_TEST_CHROMIUM=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install chromium
+          fi
+      - run: node scripts/affiliate-acceptance-browser.cjs
