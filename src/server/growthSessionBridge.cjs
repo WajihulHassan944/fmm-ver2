@@ -114,6 +114,9 @@ function createGrowthSessionBridge({ env = process.env, fetchImpl = globalThis.f
     } catch { return { ok: false, status: 503, reason: 'admin_authority_unreachable' }; }
     if (probe.status === 401 || probe.status === 403) return { ok: false, status: 401, reason: 'administrator_session_rejected' };
     if (probe.status !== 404) return { ok: false, status: 503, reason: `admin_authority_unexpected_${probe.status}` };
+    // A generic platform/router 404 does not establish administrator authority.
+    let proof; try { proof = await probe.json(); } catch { proof = null; }
+    if (proof?.message !== 'Fight not found.') return { ok: false, status: 503, reason: 'admin_authority_invalid_proof' };
     const email = String(p.email).trim().toLowerCase(); const adminId = String(p.id).toLowerCase();
     if (config.allow.length && !config.allow.includes(email) && !config.allow.includes(adminId)) return { ok: false, status: 403, reason: 'admin_not_allowed_for_growth_engine' };
     return { ok: true, admin: { email, adminId, exp: p.exp, signatureVerifiedLocally: Boolean(config.localSecret) } };
