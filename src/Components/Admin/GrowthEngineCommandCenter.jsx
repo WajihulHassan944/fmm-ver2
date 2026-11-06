@@ -15,13 +15,13 @@ const legacyHrefFor = slug => slug === 'overview' ? '/administration/growth-engi
 const engine = engineLocation(GROWTH_ENGINE_URL);
 
 // This is the existing console, not a second implementation of its departments.
-export default function GrowthEngineCommandCenter({ growthRoute = false }) {
+export default function GrowthEngineCommandCenter({ growthRoute = false, qaRoute = false }) {
   const router = useRouter();
   const authenticated = useSelector(state => Boolean(state.adminAuth?.isAdminAuthenticated));
   const fightContext = typeof router.query.fightId === 'string' ? router.query.fightId : '';
   const hrefFor = useCallback(slug => growthRoute ? `/administration/growth?engine=${slug}${fightContext ? `&fightId=${encodeURIComponent(fightContext)}` : ''}` : legacyHrefFor(slug), [growthRoute, fightContext]);
   const requested = growthRoute ? router.query.engine : Array.isArray(router.query.section) ? router.query.section[0] : '';
-  const section = SLUGS.has(requested) ? requested : 'overview';
+  const section = qaRoute ? 'qa' : SLUGS.has(requested) ? requested : 'overview';
   const [mounted, setMounted] = useState(false);
   const [reach, setReach] = useState('checking');
   const [confirmed, setConfirmed] = useState(false);
@@ -34,7 +34,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
   const lastRenew = useRef(0);
   const sessionState = useRef('connecting');
   const enabled = GROWTH_ENGINE_V2 && mounted && router.isReady && authenticated && Boolean(engine);
-  const baseTarget = sectionTarget(section, GROWTH_SECTIONS);
+  const baseTarget = qaRoute ? 'qa' : sectionTarget(section, GROWTH_SECTIONS);
   const target = growthRoute && /^[a-f\d]{24}$/i.test(fightContext) && ['marketing','posters','approvals'].includes(section) ? `${baseTarget}${baseTarget.includes('?') ? '&' : '?'}fightId=${encodeURIComponent(fightContext)}` : baseTarget;
   const src = engine ? `${engine.consoleUrl}?embed=1#/${target}` : '';
 
@@ -151,7 +151,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
       <header className={styles.header}>
         <div>
           <span className={styles.eyebrow}>FANTASY MMADNESS · GROWTH ENGINE</span>
-          <h1>Growth Engine</h1>
+          <h1>{qaRoute ? 'Administrator QA' : 'Growth Engine'}</h1>
           <p className={styles.muted}>The original Growth Engine console. Staging delivery controls and campaign approvals remain enforced.</p>
         </div>
         <a className={styles.linkButton} href={`${engine.consoleUrl}#/${target}`} target="_blank" rel="noopener noreferrer">Open in a new tab <FaExternalLinkAlt aria-hidden="true" /></a>
@@ -170,9 +170,11 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
         {session === 'rejected' && <Link href={`/administration/login?next=${encodeURIComponent(hrefFor(section))}`}>Sign in again</Link>}
       </section>}
       {session === 'connected' && section === 'automation' && <GrowthAutonomyControls />}
-      {session === 'connected' && section === 'affiliates' && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <GrowthAffiliateAcceptance />}
+      {session === 'connected' && qaRoute && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <GrowthAffiliateAcceptance />}
+
+      {session === 'connected' && section === 'automation' && process.env.NEXT_PUBLIC_GROWTH_AFFILIATE_ACCEPTANCE_ENABLED === 'true' && <p><Link className={styles.linkButton} href="/administration/growth-qa">Administrator QA tools</Link></p>}
       {session !== 'expired' && <iframe key={`${attempt}:${target}`} ref={frame} className={styles.frame} src={src}
-        title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label}`}
+        title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label || 'Administrator QA'}`}
         data-testid="ge-frame" referrerPolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
         allow="clipboard-write" onLoad={handOverSession} />}

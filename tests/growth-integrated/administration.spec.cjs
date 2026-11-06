@@ -46,16 +46,10 @@ test('all original Growth tabs remain readable and usable at desktop and mobile 
    const frame=page.frameLocator('[data-testid=ge-frame]');
    await expect(frame.locator('main h1')).toBeVisible();await expect(frame.getByTestId('page-error')).toHaveCount(0);
    await expect(page.getByTestId('ge-tab-'+section)).toHaveAttribute('aria-current','page');
-   if(section==='affiliates'){
-    const acceptance=page.getByTestId('affiliate-acceptance-controls');await expect(acceptance.getByLabel('Acceptance fight')).toBeVisible();
-    await acceptance.getByLabel('Staging acceptance confirmation').fill('NOT AUTHORIZED');await expect(acceptance.getByRole('button',{name:'Run isolated signup-to-entry acceptance'})).toBeDisabled();
-    if(phase==='after')for(const selector of ['h2','p','label','input','select','button']){
-     const colors=await acceptance.locator(selector).first().evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor}));
-     expect(colors.color).not.toBe('rgb(255, 255, 255)');
-    }
-    await acceptance.getByRole('button',{name:'Refresh acceptance evidence'}).click();
-    await acceptance.getByText('Owner recruitment terms review',{exact:true}).click();await expect(acceptance.getByLabel('Document version')).toBeVisible();
-   }
+   if(section==='affiliates'){await expect(page.getByTestId('affiliate-acceptance-controls')).toHaveCount(0);await expect(frame.locator('main h1')).toHaveText('Affiliate Recruitment');}
+   if(section==='posters')await expect(frame.locator('main h1')).toHaveText('Posters');
+   if(section==='publishing')await expect(frame.getByTestId('live-test')).toHaveCount(0);
+   if(section==='revenue')await expect(frame.getByTestId('synthetic-lane')).toHaveCount(0);
    if(section==='automation'){await page.getByText('Review automation policy',{exact:true}).click();await expect(page.getByRole('button',{name:'Save owner policy',exact:true})).toBeDisabled();}
    await page.getByTestId('ge-frame').evaluate(n=>n.scrollIntoView({block:'start',behavior:'instant'}));
    await page.waitForTimeout(150);
@@ -83,4 +77,20 @@ test('embedded sizing rejects spoofed, oversized and wrong-department messages w
  const draft=page.frameLocator('[data-testid=ge-frame]').getByTestId('draft').first();await draft.getByTestId('btn-approve').click();
  const modal=page.frameLocator('[data-testid=ge-frame]').getByTestId('modal');await expect(modal.getByTestId('campaign-final-review')).toContainText('separate explicit owner authorization');
  await modal.getByTestId('modal-cancel').click();await expect(modal).toHaveCount(0);
+});
+
+test('recruitment remains its department and technical acceptance lives only in authenticated administrator QA',async({page})=>{
+ await page.goto('/administration/growth-qa');await expect(page).toHaveURL(/administration\/login/);
+ await page.addInitScript(token=>localStorage.setItem('adminAuthToken',token),admin);await bridge(page);
+ await page.goto('/administration/growth?engine=affiliates');await expect(page.getByTestId('affiliate-acceptance-controls')).toHaveCount(0);
+ const recruitment=page.frameLocator('[data-testid=ge-frame]');await expect(recruitment.locator('main h1')).toHaveText('Affiliate Recruitment');
+ await recruitment.getByLabel('sports',{exact:true}).selectOption('pro-wrestling');await expect(recruitment.getByLabel('sports',{exact:true})).toHaveValue('pro-wrestling');
+ await page.goto('/administration/growth-qa');await expect(page.getByTestId('affiliate-acceptance-controls')).toBeVisible();await expect(page.frameLocator('[data-testid=ge-frame]').locator('main h1')).toHaveText('Administrator QA');
+ const card=page.getByTestId('affiliate-acceptance-controls');await card.getByLabel('Staging acceptance confirmation').fill('NOT AUTHORIZED');await expect(card.getByRole('button',{name:'Run isolated signup-to-entry acceptance'})).toBeDisabled();await card.getByRole('button',{name:'Refresh acceptance evidence'}).click();
+});
+test('unsafe recipients are held outside the default eligible queue and cannot be approved',async({page})=>{
+ await page.addInitScript(token=>localStorage.setItem('adminAuthToken',token),admin);await bridge(page);
+ await page.route('**/api/growth/admin/drafts?**',async route=>{const r=await route.fetch(),body=await r.json();body.drafts.push({id:'fixture-unsafe-person',kind:'affiliate',genre:'pro-wrestling',subject:'TEST FIXTURE Dory Funk Jr.',text:'Hi,',status:'needs_owner_review',recipient:'qa@fixture.invalid',approvalBlockers:['owner_reported_recipient_status_requires_verification'],review:{state:'held',blockers:['owner_reported_recipient_status_requires_verification']}});await route.fulfill({response:r,json:body});});
+ await page.goto('/administration/growth?engine=approvals');const frame=page.frameLocator('[data-testid=ge-frame]');await expect(frame.getByTestId('queue-review-counts')).toContainText('1 on HOLD');await expect(frame.locator('[data-draft-id=fixture-unsafe-person]')).toHaveCount(0);
+ await frame.getByLabel('Evidence readiness').selectOption('held');const held=frame.locator('[data-draft-id=fixture-unsafe-person]');await expect(held.getByTestId('review-hold')).toBeVisible();await expect(held.getByTestId('btn-approve')).toBeDisabled();await expect(frame.locator('[data-draft-id=fixture-draft]')).toHaveCount(0);
 });
