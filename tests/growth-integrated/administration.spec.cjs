@@ -57,7 +57,7 @@ test('all original Growth tabs remain readable and usable at desktop and mobile 
     await acceptance.getByText('Owner recruitment terms review',{exact:true}).click();await expect(acceptance.getByLabel('Document version')).toBeVisible();
    }
    if(section==='automation'){await page.getByText('Review automation policy',{exact:true}).click();await expect(page.getByRole('button',{name:'Save owner policy',exact:true})).toBeDisabled();}
-   await frame.locator('main h1').evaluate(n=>n.scrollIntoView({block:'start',behavior:'instant'}));
+   await page.getByTestId('ge-frame').evaluate(n=>n.scrollIntoView({block:'start',behavior:'instant'}));
    await page.waitForTimeout(150);
    await frame.locator('body').screenshot({path:`test-results/department-${phase}-${viewport.width}-${section}.png`});
    await page.screenshot({path:`test-results/ui-${phase}-${viewport.width}-${section}.png`,fullPage:true});
