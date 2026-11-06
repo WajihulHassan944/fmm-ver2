@@ -108,6 +108,21 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
     if (!enabled) return undefined;
     const onMessage = event => {
       if (!trustedConsoleMessage(event, engine.origin, frame.current?.contentWindow)) return;
+      // Layout messages never establish authentication or navigate departments.
+      if (event.data.event === 'content-size') {
+        const height = event.data.height;
+        if (event.data.section === target.split('?')[0] && Number.isInteger(height) && height >= 160 && height <= 30000 && frame.current) {
+          frame.current.style.height = `${height}px`;
+        }
+        return;
+      }
+      if (event.data.event === 'dialog-open') {
+        if (event.data.section === target.split('?')[0]) {
+          frame.current?.contentWindow?.postMessage({type:'fmm-growth-viewport',height:window.innerHeight},engine.origin);
+          frame.current?.scrollIntoView({block:'start', behavior:'instant'});
+        }
+        return;
+      }
       setConfirmed(true);
       setSlow(false);
       const incoming = event.data.section;
@@ -124,7 +139,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [enabled, handOverSession, router, section, hrefFor]);
+  }, [enabled, handOverSession, router, section, target, hrefFor]);
 
   if (!GROWTH_ENGINE_V2) return <main className={styles.page} data-testid="ge-disabled"><p>The Growth Engine is turned off. <Link href="/administration">Back to administration</Link></p></main>;
   if (!mounted || !router.isReady || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
@@ -161,6 +176,7 @@ export default function GrowthEngineCommandCenter({ growthRoute = false }) {
         data-testid="ge-frame" referrerPolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
         allow="clipboard-write" onLoad={handOverSession} />}
+      <div id="growth-support-dock" />
     </main>
   );
 }

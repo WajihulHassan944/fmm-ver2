@@ -1,7 +1,7 @@
 // TEST ONLY: serves the ORIGINAL backend console at a pinned commit, with local
 // API contract fixtures. Never mounts in Next or contacts a production service.
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
-const sha='9b181672c18202c2f8af95536c29a7a9f3f37c87',dir=process.env.GROWTH_CONSOLE_SOURCE_DIR||path.resolve('.cache/growth-original-console-'+sha);fs.mkdirSync(dir,{recursive:true});
+const sha='612d213956bc4f2d842f181a0ae8cac19cfd83ef',dir=process.env.GROWTH_CONSOLE_SOURCE_DIR||path.resolve('.cache/growth-original-console-'+sha);fs.mkdirSync(dir,{recursive:true});
 for(const f of ['index.html','app.js','app.css'])if(!fs.existsSync(path.join(dir,f)))fs.writeFileSync(path.join(dir,f),cp.execFileSync('curl',['--fail','--silent','--show-error','--max-time','30',`https://raw.githubusercontent.com/WajihulHassan944/fantasymmadness-game-server-three/${sha}/growth-console/${f}`]));
 const ui='http://127.0.0.1:4390',engine='http://127.0.0.1:4391',growth='fixture-growth-scoped-session',admin='fixture-administrator-session';
 let requests=[],paused=true,expired=false,review='needs_owner_review',count=37;
@@ -11,6 +11,7 @@ function draft(){return {id:'fixture-draft',kind:'marketing',genre:'mma-ufc',hea
 const status=()=>({ok:true,database:{name:'fmgrowthtest (LOCAL CONTRACT FIXTURE)',hostPinned:true},scheduler:{healthy:true,lastRunAt:now(),runsLast24h:3,schedule:'TEST ONLY'},delivery:{provider:'sandbox-capture',realDelivery:false},warnings:[]});
 function payload(p,q){
  if(p==='/social/connections')return {ok:true,providers:['tiktok','x'].map(provider=>({provider,configured:true,blockers:[],callbackUrl:engine+'/api/growth/social/'+provider+'/callback'})),connections:[{provider:'tiktok',identity:'fixture_verified_open_id',displayName:'TEST FIXTURE TikTok',status:'connected'},{provider:'x',identity:'123456789',username:'FMmadness2024',displayName:'TEST FIXTURE X',status:'connected'}],pending:[]};
+ if(p==='/admin/affiliate-sandbox')return {accounts:0,approvedMappings:0,verifiedLeagues:0,uniqueTestCredits:0,capturedNotifications:0,realCharges:0,outboundMessages:0,eligibleFights:[contest],pendingAccounts:[],recentRuns:[]};
  if(p==='/admin/autonomy')return {ok:true,ownerPolicyEditable:false,liveApproved:false,policy:{enabled:false,paused:false,mode:'sandbox',version:0,departments:['marketing','pr','affiliate'],genres:['boxing'],channels:['x'],approvedRecipients:[],affiliateIds:[],maxCampaignsPerDepartmentPerDay:10},queue:{pending:0,retrying:0,running:0,failed:0},heartbeat:null,activeAffiliates:[]};
  if(p==='/admin/session')return {ok:true,admin:'fixture-admin',exp:Math.floor(Date.now()/1000)+60};
  if(p==='/admin/status')return status();

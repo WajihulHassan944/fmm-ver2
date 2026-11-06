@@ -34,3 +34,51 @@ test('exact November 5 dashboard restoration has every department and preserved 
  for(const section of ['marketing','pr','affiliates','connections','automation','analytics']){await page.goto('/administration/growth?engine='+section);const frame=page.frameLocator('[data-testid=ge-frame]');await expect(frame.locator('main h1')).toBeVisible();await expect(frame.getByTestId('page-error')).toHaveCount(0);if(section==='marketing'){await expect(frame.getByTestId('nav-marketing')).toBeHidden();expect(await frame.locator('body').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(244, 245, 247)');await page.screenshot({path:'test-results/issue203-exact-restored-desktop.png',fullPage:true});}}
  await page.setViewportSize({width:390,height:844});await page.goto('/administration/growth?engine=connections');await expect(page.frameLocator('[data-testid=ge-frame]').getByTestId('oauth-x')).toBeVisible();await page.screenshot({path:'test-results/issue203-exact-restored-mobile.png',fullPage:true});
 });
+
+test('all original Growth tabs remain readable and usable at desktop and mobile sizes',async({page})=>{
+ test.setTimeout(240000);
+ await page.addInitScript(token=>localStorage.setItem('adminAuthToken',token),admin);await bridge(page);
+ const phase=process.env.GROWTH_VISUAL_PHASE||'after';
+ for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
+  await page.setViewportSize(viewport);
+  for(const section of ['overview','approvals','marketing','pr','affiliates','publishing','posters','automation','analytics','revenue','connections']){
+   await page.goto('/administration/growth?engine='+section);
+   const frame=page.frameLocator('[data-testid=ge-frame]');
+   await expect(frame.locator('main h1')).toBeVisible();await expect(frame.getByTestId('page-error')).toHaveCount(0);
+   await expect(page.getByTestId('ge-tab-'+section)).toHaveAttribute('aria-current','page');
+   if(section==='affiliates'){
+    const acceptance=page.getByTestId('affiliate-acceptance-controls');await expect(acceptance.getByLabel('Acceptance fight')).toBeVisible();
+    await acceptance.getByLabel('Staging acceptance confirmation').fill('NOT AUTHORIZED');await expect(acceptance.getByRole('button',{name:'Run isolated signup-to-entry acceptance'})).toBeDisabled();
+    if(phase==='after')for(const selector of ['h2','p','label','input','select','button']){
+     const colors=await acceptance.locator(selector).first().evaluate(n=>({color:getComputedStyle(n).color,background:getComputedStyle(n).backgroundColor}));
+     expect(colors.color).not.toBe('rgb(255, 255, 255)');
+    }
+    await acceptance.getByRole('button',{name:'Refresh acceptance evidence'}).click();
+    await acceptance.getByText('Owner recruitment terms review',{exact:true}).click();await expect(acceptance.getByLabel('Document version')).toBeVisible();
+   }
+   if(section==='automation'){await page.getByText('Review automation policy',{exact:true}).click();await expect(page.getByRole('button',{name:'Save owner policy',exact:true})).toBeDisabled();}
+   await frame.locator('main h1').scrollIntoViewIfNeeded();
+   await page.screenshot({path:`test-results/ui-${phase}-${viewport.width}-${section}.png`,fullPage:true});
+  }
+ }
+});
+
+test('embedded sizing rejects spoofed, oversized and wrong-department messages without altering authentication',async({page})=>{
+ await page.addInitScript(token=>localStorage.setItem('adminAuthToken',token),admin);await bridge(page);await page.goto('/administration/growth?engine=marketing');
+ await expect(page.frameLocator('[data-testid=ge-frame]').locator('main h1')).toHaveText('Marketing');
+ await page.waitForTimeout(300);
+ const original=await page.getByTestId('ge-frame').evaluate(n=>n.style.height);expect(original).toMatch(/^\d+px$/);
+ for(const data of [{section:'marketing',height:999999},{section:'connections',height:800},{section:'marketing',height:NaN}]){
+  await page.evaluate(data=>window.dispatchEvent(new MessageEvent('message',{origin:'http://127.0.0.1:4391',source:document.querySelector('[data-testid=ge-frame]').contentWindow,data:{type:'fmm-growth-console',event:'content-size',...data}})),data);
+  expect(await page.getByTestId('ge-frame').evaluate(n=>n.style.height)).toBe(original);
+ }
+ await page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{origin:'https://attacker.invalid',source:window,data:{type:'fmm-growth-console',event:'content-size',section:'marketing',height:180}})));
+ expect(await page.getByTestId('ge-frame').evaluate(n=>n.style.height)).toBe(original);await expect(page).toHaveURL(/engine=marketing/);
+ await expect(page.getByTestId('ge-session-notice')).toHaveCount(0);
+ const support=page.locator('.fmm-support-widget');await expect(support).toHaveCSS('position','relative');
+ await support.getByRole('button',{name:'Open Help and Support'}).click();await expect(support.getByRole('dialog')).toBeVisible();
+ await support.getByRole('button',{name:/close/i}).click();await expect(support.getByRole('dialog')).toHaveCount(0);
+ const draft=page.frameLocator('[data-testid=ge-frame]').getByTestId('draft').first();await draft.getByTestId('btn-approve').click();
+ const modal=page.frameLocator('[data-testid=ge-frame]').getByTestId('modal');await expect(modal.getByTestId('campaign-final-review')).toContainText('separate explicit owner authorization');
+ await modal.getByTestId('modal-cancel').click();await expect(modal).toHaveCount(0);
+});

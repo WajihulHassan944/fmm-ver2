@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { FaChevronDown, FaEnvelope, FaLifeRing, FaPaperPlane, FaTimes } from 'react-icons/fa';
@@ -26,6 +27,16 @@ const QUICK_HELP = [
 
 export default function SupportWidget() {
   const router = useRouter();
+  const growthPage = /^\/administration\/growth(?:[/-]|$)/.test(router.pathname);
+  const [growthDock, setGrowthDock] = useState(null);
+  useEffect(() => {
+    if (!growthPage) { setGrowthDock(null); return undefined; }
+    const locate = () => { const dock = document.getElementById('growth-support-dock'); setGrowthDock(dock); };
+    locate();
+    const observer = new MutationObserver(locate);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [growthPage, router.asPath]);
   const user = useSelector((state) => state.auth?.user || state.user?.user || null);
   const affiliate = useSelector((state) => state.affiliateAuth?.userAffiliate || null);
   const identity = affiliate || user || {};
@@ -94,8 +105,8 @@ export default function SupportWidget() {
 
   if (router.pathname === '/contact') return null;
 
-  return (
-    <div className={`fmm-support-widget${open ? ' is-open' : ''}`}>
+  const content = (
+    <div className={`fmm-support-widget${growthPage ? ' growth-support' : ''}${open ? ' is-open' : ''}`}>
       {open ? (
         <section className="fmm-support-panel" role="dialog" aria-modal="false" aria-label="Fantasy MMAdness Help and Support">
           <header>
@@ -139,6 +150,8 @@ export default function SupportWidget() {
       </button>
       <style jsx global>{`
         .fmm-support-widget { position: fixed; right: 18px; bottom: 18px; z-index: 2147483000; font-family: Rajdhani, Arial, sans-serif; }
+        .fmm-support-widget.growth-support { position: relative; right: auto; bottom: auto; width: fit-content; max-width: calc(100% - 24px); margin: 16px 18px 24px auto; }
+        .growth-support .fmm-support-launcher { color: #fff !important; background: #16181d !important; }
         .fmm-support-launcher { min-height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 18px; border: 1px solid rgba(255,207,69,.7); border-radius: 999px; background: linear-gradient(135deg,#f2b544,#ffda64); color: #241600; box-shadow: 0 16px 42px rgba(0,0,0,.42); font-weight: 900; cursor: pointer; }
         .fmm-support-launcher svg { font-size: 1.15rem; }
         .fmm-support-panel { position: absolute; right: 0; bottom: 64px; width: min(410px, calc(100vw - 24px)); max-height: min(720px, calc(100vh - 96px)); overflow: auto; border: 1px solid rgba(255,255,255,.16); border-radius: 22px; background: #080b12; color: #fff; box-shadow: 0 28px 80px rgba(0,0,0,.68); }
@@ -180,4 +193,5 @@ export default function SupportWidget() {
       `}</style>
     </div>
   );
+  return growthPage ? (growthDock ? createPortal(content, growthDock) : null) : content;
 }
