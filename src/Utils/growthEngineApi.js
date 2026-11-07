@@ -8,9 +8,25 @@ export const GROWTH_CONSOLE_URL = `${GROWTH_ENGINE_URL}/api/growth/console`;
 const TOKEN_KEY = 'fmmGrowthBridgeToken';
 const EXPIRY_KEY = 'fmmGrowthBridgeExpiry';
 
+// Keep the freshly verified Growth-only session usable when browser storage is
+// denied or full. The ordinary administrator token never enters this cache.
+let bridgeSession = null;
 export const growthToken = {
-  get() { try { const exp = Number(window.sessionStorage.getItem(EXPIRY_KEY)); if (exp && exp <= Date.now()) { this.set(''); return ''; } return window.sessionStorage.getItem(TOKEN_KEY) || ''; } catch (_error) { return ''; } },
-  set(value, expiresAt) { try { if (value) window.sessionStorage.setItem(TOKEN_KEY, value); else window.sessionStorage.removeItem(TOKEN_KEY); if (value && expiresAt) window.sessionStorage.setItem(EXPIRY_KEY, String(expiresAt)); else window.sessionStorage.removeItem(EXPIRY_KEY); } catch (_error) { /* storage disabled */ } },
+  get() {
+    if (bridgeSession === null) {
+      try { bridgeSession = { token: window.sessionStorage.getItem(TOKEN_KEY) || '', expiresAt: Number(window.sessionStorage.getItem(EXPIRY_KEY)) || 0 }; }
+      catch (_error) { bridgeSession = { token: '', expiresAt: 0 }; }
+    }
+    if (bridgeSession.expiresAt && bridgeSession.expiresAt <= Date.now()) this.set('');
+    return bridgeSession.token;
+  },
+  set(value, expiresAt) {
+    bridgeSession = { token: value || '', expiresAt: value && expiresAt ? Number(expiresAt) : 0 };
+    try {
+      if (value) window.sessionStorage.setItem(TOKEN_KEY, value); else window.sessionStorage.removeItem(TOKEN_KEY);
+      if (value && expiresAt) window.sessionStorage.setItem(EXPIRY_KEY, String(expiresAt)); else window.sessionStorage.removeItem(EXPIRY_KEY);
+    } catch (_error) { /* The current verified session remains in memory only. */ }
+  },
 };
 
 export class GrowthEngineError extends Error {

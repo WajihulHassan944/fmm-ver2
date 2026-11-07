@@ -29,7 +29,7 @@ export default function GrowthEngineCommandCenter() {
   const handover = useRef(false);
   const lastRenew = useRef(0);
   const sessionState = useRef('connecting');
-  const enabled = GROWTH_ENGINE_V2 && mounted && authenticated && Boolean(engine);
+  const enabled = GROWTH_ENGINE_V2 && mounted && router.isReady && authenticated && Boolean(engine);
   const target = sectionTarget(section, GROWTH_SECTIONS);
   const src = engine ? `${engine.consoleUrl}?embed=1#/${target}` : '';
 
@@ -97,6 +97,17 @@ export default function GrowthEngineCommandCenter() {
     return () => { alive = false; controller.abort(); window.clearTimeout(expiryTimer); window.removeEventListener('fmm-growth-logout', onLogout); };
   }, [enabled, attempt, handOverSession]);
 
+  // A frame can load while the exchange or its first ready message is in flight.
+  // Retry only the already verified Growth session until the frame acknowledges it.
+  useEffect(() => {
+    if (!enabled || session !== 'connecting') return undefined;
+    const retryTimer = window.setInterval(handOverSession, 1000);
+    const timeout = window.setTimeout(() => {
+      if (sessionState.current === 'connecting') setSession('unavailable');
+    }, 15000);
+    return () => { window.clearInterval(retryTimer); window.clearTimeout(timeout); };
+  }, [enabled, session, attempt, handOverSession]);
+
   useEffect(() => {
     if (!enabled) return undefined;
     const onMessage = event => {
@@ -120,7 +131,7 @@ export default function GrowthEngineCommandCenter() {
   }, [enabled, handOverSession, router, section]);
 
   if (!GROWTH_ENGINE_V2) return <main className={styles.page} data-testid="ge-disabled"><p>The Growth Engine is turned off. <Link href="/administration">Back to administration</Link></p></main>;
-  if (!mounted || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
+  if (!mounted || !router.isReady || !authenticated) return <main className={styles.page}><p role="status">Checking administrator session…</p></main>;
   if (!engine) return <main className={styles.page}><p role="alert">The Growth Engine address is not configured securely. Contact the staging administrator.</p></main>;
 
   const retry = () => { setConfirmed(false); setSlow(false); setAttempt(value => value + 1); };
@@ -132,7 +143,7 @@ export default function GrowthEngineCommandCenter() {
           <h1>Growth Engine</h1>
           <p className={styles.muted}>The original Growth Engine console. Staging delivery controls and campaign approvals remain enforced.</p>
         </div>
-        <a className={styles.linkButton} href={`${engine.consoleUrl}#/${target}`} target="_blank" rel="noopener noreferrer">Open in a new tab <FaExternalLinkAlt aria-hidden="true" /></a>
+        <a className={styles.linkButton} href={hrefFor(section)} target="_blank" rel="noopener noreferrer">Open in a new tab <FaExternalLinkAlt aria-hidden="true" /></a>
       </header>
       <nav className={styles.tabs} aria-label="Growth Engine sections">
         {GROWTH_SECTIONS.map(s => <Link key={s.slug} href={hrefFor(s.slug)} shallow className={`${styles.tab} ${s.slug === section ? styles.tabActive : ''}`} aria-current={s.slug === section ? 'page' : undefined} data-testid={`ge-tab-${s.slug}`}>{s.label}</Link>)}
@@ -151,7 +162,7 @@ export default function GrowthEngineCommandCenter() {
         title={`Growth Engine — ${GROWTH_SECTIONS.find(s => s.slug === section)?.label}`}
         data-testid="ge-frame" referrerPolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
-        allow="clipboard-write" onLoad={handOverSession} />}
+        allow="clipboard-write" onLoad={() => { if (verifiedToken.current) setSession('connecting'); handOverSession(); }} />}
     </main>
   );
 }

@@ -52,3 +52,11 @@ test('rejected, echoed, expired and wrong-origin sessions are not accepted', asy
 test('expired token and explicit logout clear the browser bridge cache', () => {
   const c=client('/api/session',{});c.token.set('expired-growth-session',Date.now()-1);assert.equal(c.token.get(),'');c.token.set('active-growth-session');c.api.logout();assert.equal(c.token.get(),'');
 });
+
+test('blocked or full session storage cannot silently discard the verified handoff; expiry and logout still apply', async () => {
+ const c=client('/api/admin/growth-session',{status:200,body:{ok:true,token:'test-growth-memory-session',expiresAt:Date.now()+60000,engineOrigin:'https://engine.example'}});
+ for (const method of ['getItem','setItem','removeItem']) c.window.sessionStorage[method]=()=>{throw new Error('Storage denied');};
+ await c.api.exchangeAdminSession();assert.equal(c.token.get(),'test-growth-memory-session');
+ c.token.set('expired-growth-session',Date.now()-1);assert.equal(c.token.get(),'');
+ await c.api.exchangeAdminSession();c.api.logout();assert.equal(c.token.get(),'');
+});
