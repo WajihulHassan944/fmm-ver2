@@ -30,6 +30,7 @@ import ShowScores from './ShowScores';
 import MatchDetailsPromotion from './MatchDetailsPromotion';
 import FightDataQualityCenter from './FightDataQualityCenter';
 import { FMCoin } from '@/Components/Common/FMCoin';
+import { registryFighterDisplay, registryEditorialLabel } from '@/Utils/registryFighterDisplay.cjs';
 import { adminHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL, resolvePublicMediaUrl } from '@/Utils/publicApi';
 import {
@@ -83,6 +84,8 @@ const getFightSearchRank = (fight = {}, query = '') => {
 };
 const getSport = (fight) => fight?.matchCategoryTwo || fight?.matchCategory || 'combat';
 const getTitle = (fight) => fight?.matchName || `${fight?.matchFighterA || 'Fighter A'} vs ${fight?.matchFighterB || 'Fighter B'}`;
+const getRegistryDisplayName = (fight, side) => registryFighterDisplay(getFighterName(fight, side), { autoDiscovered: fight?.autoDiscovered === true });
+const getRegistryDisplayTitle = (fight) => registryEditorialLabel(getTitle(fight), fight?.autoDiscovered === true);
 const formatDate = (fight) => fight?.matchDate?.split?.('T')?.[0] || 'Date pending';
 const formatTime = (fight) => fight?.matchTime || 'Time pending';
 const TERMINAL_FIGHT_STATUSES = new Set(['finished', 'completed', 'closed', 'settled', 'cancelled', 'canceled', 'void', 'voided']);
@@ -1454,8 +1457,8 @@ export default function AdminFightsWorkspace({ initialTab = 'all', mode = 'regis
                     </td>
                     <td>
                       <div className="admin-fight-cell">
-                        <span><RegistryFighterImage key={fighterAMedia.sources.join("|")} sources={fighterAMedia.sources} alt={`${getFighterName(fight, 'A')} photo`} /><RegistryFighterImage key={fighterBMedia.sources.join("|")} sources={fighterBMedia.sources} alt={`${getFighterName(fight, 'B')} photo`} /></span>
-                        <div><strong>{getTitle(fight)}</strong><small>{getFighterName(fight, 'A')} vs {getFighterName(fight, 'B')}</small><small>ID: {id}</small></div>
+                        <span><RegistryFighterImage key={fighterAMedia.sources.join("|")} sources={fighterAMedia.sources} alt={`${getRegistryDisplayName(fight, 'A')} photo`} /><RegistryFighterImage key={fighterBMedia.sources.join("|")} sources={fighterBMedia.sources} alt={`${getRegistryDisplayName(fight, 'B')} photo`} /></span>
+                        <div><strong>{getRegistryDisplayTitle(fight)}</strong><small>{getRegistryDisplayName(fight, 'A')} vs {getRegistryDisplayName(fight, 'B')}</small><small>ID: {id}</small></div>
                       </div>
                     </td>
                     <td>{getSport(fight)}</td>
