@@ -2,10 +2,8 @@
 // version of the site — different chrome, different form styling from the
 // unified /auth flow players already use. Redirect here instead of showing it,
 // same pattern as terms-of-service.js. /auth already supports role=affiliate.
+import { legacyAffiliateSignupDestination } from '@/Utils/legacyAffiliateSignup.cjs';
 export async function getServerSideProps({ query = {} }) {
-  const params = new URLSearchParams({ mode: 'signup', role: 'affiliate' });
-  const invite = Array.isArray(query.invite) ? query.invite[0] : query.invite;
-  if (typeof invite === 'string' && invite.trim()) params.set('invite', invite.trim());
-  return { redirect: { destination: `/auth?${params.toString()}`, permanent: false } };
+  return { redirect: { destination: legacyAffiliateSignupDestination(query), permanent: false } };
 }
 export default function AffiliateCreateAccountRedirect() { return null; }
