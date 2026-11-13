@@ -2,7 +2,6 @@ import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileI
 import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
-import { buildPublicApiUrl } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
 
@@ -54,7 +53,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
     setApprovalBusy(true);
     setApprovalError('');
     try {
-      const response = await fetch(buildPublicApiUrl(`/affiliates/${encodeURIComponent(affiliateId)}/verify`), {
+      const response = await fetch(`/api/admin/affiliates/${encodeURIComponent(affiliateId)}/verify`, {
         method: 'POST',
         headers: adminHeaders({ 'Content-Type': 'application/json' }),
       });
