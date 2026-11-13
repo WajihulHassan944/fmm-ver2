@@ -1,5 +1,5 @@
 const DEFAULT_API_BASE_URL = 'https://fantasymmadness-game-server-three.vercel.app';
-const apiBase = () => String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || DEFAULT_API_BASE_URL).replace(/\\/$/, '');
+const apiBase = () => String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
