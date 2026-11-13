@@ -46,25 +46,30 @@ const UserDetails = ({ user, affiliates = [] }) => {
     }
   }, [isVerified]);
 
+  const [approvalBusy, setApprovalBusy] = useState(false);
+  const [approvalError, setApprovalError] = useState('');
   const handleApprove = async () => {
+    if (approvalBusy || isVerified) return;
+    setApprovalBusy(true);
+    setApprovalError('');
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliates/${user._id}/verify`, {
+      const response = await fetch(`/api/admin/affiliates/${encodeURIComponent(affiliateId)}/verify`, {
         method: 'POST',
-        headers: adminHeaders({
-          'Content-Type': 'application/json',
-        }),
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
       });
-
-      if (response.ok) {
-        alert('User verified successfully');
-        setIsVerified(true);
-        setShowEmailTemplate(true);
-      } else {
-        alert('Failed to verify user');
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.message || payload.error || `Approval failed (HTTP ${response.status}).`);
       }
+      setIsVerified(true);
+      setShowEmailTemplate(true);
     } catch (error) {
-      console.error('Error verifying user:', error);
-      alert('An error occurred while verifying the user');
+      console.error('Error verifying affiliate:', error);
+      setApprovalError(error instanceof TypeError
+        ? 'Could not reach the affiliate verification service. Approval has not been confirmed.'
+        : (error.message || 'Could not verify affiliate.'));
+    } finally {
+      setApprovalBusy(false);
     }
   };
 
@@ -124,10 +129,11 @@ const UserDetails = ({ user, affiliates = [] }) => {
         </div>
 
         {!isVerified && (
-          <button type="button" className="admin-action-primary admin-affiliate-approve" onClick={handleApprove}>
-            <FaCheck /> Click to approve
+          <button type="button" className="admin-action-primary admin-affiliate-approve" onClick={handleApprove} disabled={approvalBusy}>
+            <FaCheck /> {approvalBusy ? 'Approving…' : 'Click to approve'}
           </button>
         )}
+        {approvalError && <p role="alert" className="is-error">{approvalError}</p>}
       </section>
 
       <section className="admin-table-panel" style={{ padding: 20, marginBottom: 20 }}>
