@@ -1,0 +1,42 @@
+/* Local desktop sizing for the registry table; keep the existing controls. */
+@media (min-width: 1100px) {
+  .registry :global(.admin-fights-table th),
+  .registry :global(.admin-fights-table td) {
+    min-width: 0;
+    padding: 10px 5px !important;
+  }
+  .registry :global(.admin-fights-table th:nth-child(1)) { width: 5%; }
+  .registry :global(.admin-fights-table th:nth-child(2)) { width: 19%; }
+  .registry :global(.admin-fights-table th:nth-child(3)) { width: 6%; }
+  .registry :global(.admin-fights-table th:nth-child(4)) { width: 15%; }
+  .registry :global(.admin-fights-table th:nth-child(5)) { width: 9%; }
+  .registry :global(.admin-fights-table th:nth-child(6)) { width: 8%; }
+  .registry :global(.admin-fights-table th:nth-child(7)) { width: 6%; }
+  .registry :global(.admin-fights-table th:nth-child(8)) { width: 7%; }
+  .registry :global(.admin-fights-table th:nth-child(9)) { width: 8%; }
+  .registry :global(.admin-fights-table th:nth-child(10)) { width: 17%; }
+  .registry :global(.admin-fights-table .admin-fight-cell) { gap: 6px; }
+  .registry :global(.admin-fights-table .admin-fight-cell > span) { gap: 3px; }
+  .registry :global(.admin-fights-table .admin-fight-cell > div) { min-width: 0; }
+  .registry :global(.admin-fights-table .admin-fight-cell img) {
+    width: 32px;
+    height: 44px;
+    object-fit: contain;
+  }
+  .registry :global(.admin-fights-table .admin-table-actions) { gap: 4px; }
+  .registry :global(.admin-fights-table .admin-table-actions > button),
+  .registry :global(.admin-fights-table .admin-table-actions > div > button) {
+    padding-inline: 6px !important;
+  }
+  .registry :global(.admin-fights-table td > select) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding-inline: 4px !important;
+  }
+  .registry :global(.admin-fights-table .admin-status-badge) {
+    padding-inline: 4px !important;
+    max-width: 100%;
+    white-space: normal;
+  }
+}
