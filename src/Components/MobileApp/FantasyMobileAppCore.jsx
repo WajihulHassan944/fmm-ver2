@@ -1,6 +1,7 @@
 import { isPlaceholderWrestlingPromotion } from '@/Utils/affiliatePromotionFights';
 /* Derived from the client-approved standalone prototype in the design handoff. */
 import React from 'react';
+import UpcomingFightPhotos from './UpcomingFightPhotos';
 import { resolvePublicMediaUrl } from '@/Utils/publicApi';
 import { dateOnlyToLocalDate, getDateOnlyKey } from '@/Utils/dateOnly';
 import designTokens from './design-tokens.json';
@@ -3903,6 +3904,8 @@ class FantasyMobileAppCore extends React.Component {
   }
 
   renderUpcomingEvents(filteredEvents, s) {
+    const libraryImages = buildFighterLibraryImageMap(this.props.fighterLibrary);
+    const fightsById = new Map((this.props.fights || []).map(fight => [String(fight._id || fight.id || fight.matchId), fight]));
     if (this.props.dataLoading && filteredEvents.length === 0) return null;
     return React.createElement('div', { className: 'fmm-unified-upcoming', 'data-fmm-section': 'upcoming-events', style: { padding: '0 16px 16px', scrollMarginTop: 8 } },
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 } },
@@ -3911,17 +3914,21 @@ class FantasyMobileAppCore extends React.Component {
       ),
       React.createElement('div', { className: 'fmm-unified-upcoming-rail', style: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 } },
         filteredEvents.length === 0 ? React.createElement('div', { style: { fontSize: 12, color: 'rgba(255,255,255,.4)', padding: 10 } }, 'No events for this sport yet.') :
-        filteredEvents.map(ev => React.createElement('div', {
+        filteredEvents.map(ev => React.createElement(UpcomingFightPhotos, {
+          key: ev.id, event: ev, fight: fightsById.get(String(ev.backendId || ev.id)),
+          libraryA: libraryImages.get(normalizeFighterLookupName(ev.f1)),
+          libraryB: libraryImages.get(normalizeFighterLookupName(ev.f2)),
+        }, photos => React.createElement('div', {
           className: 'fmm-unified-upcoming-card',
           key: ev.id, style: { flex: '0 0 140px', position: 'relative', background: 'rgba(255,255,255,.05)', border: '1px solid ' + ev.tagColor, borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 0 14px ' + ev.tagColor + '55, inset 0 0 10px ' + ev.tagColor + '20', animation: s.flashCard[ev.id] ? 'cardPop .35s ease' : 'none' }
         },
           s.flashCard[ev.id] && React.createElement('div', { key: s.flashCard[ev.id], style: { position: 'absolute', inset: 0, background: 'radial-gradient(circle,rgba(242,181,68,.55),transparent 70%)', animation: 'quickFlash .6s ease-out forwards', zIndex: 5, pointerEvents: 'none' } }),
           React.createElement('div', { style: { height: 150, position: 'relative' } },
-            ev.hasPoster
-              ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: ev.image, fallbackSrc: ev.fallbackImage })
+            photos.hasPoster
+              ? React.createElement(MobileImageSlot, { id: 'event-poster-' + ev.id, shape: 'rect', placeholder: ev.f1 + ' vs ' + ev.f2 + ' poster', fit: 'contain', src: photos.image, onImageError: photos.onImageError })
               : React.createElement('div', { className: 'fmm-unified-upcoming-fighters', style: { position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' } },
-                  ev.fighterAImage ? React.createElement(MobileImageSlot, { id: 'event-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'cover', src: ev.fighterAImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 34 } }, (ev.f1 || '?')[0]),
-                  ev.fighterBImage ? React.createElement(MobileImageSlot, { id: 'event-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'cover', src: ev.fighterBImage }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 34 } }, (ev.f2 || '?')[0])
+                  photos.fighterAImage ? React.createElement(MobileImageSlot, { id: 'event-a-' + ev.id, shape: 'rect', placeholder: ev.f1, fit: 'cover', src: photos.fighterAImage, onImageError: photos.onImageError }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 34 } }, (ev.f1 || '?')[0]),
+                  photos.fighterBImage ? React.createElement(MobileImageSlot, { id: 'event-b-' + ev.id, shape: 'rect', placeholder: ev.f2, fit: 'cover', src: photos.fighterBImage, onImageError: photos.onImageError }) : React.createElement('b', { style: { display: 'grid', placeItems: 'center', color: '#f2b544', fontSize: 34 } }, (ev.f2 || '?')[0])
                 ),
             s.showNewTag && s.newFightId === ev.backendId && React.createElement('div', { style: { position: 'absolute', top: 6, right: 6, background: '#22c55e', color: '#05120a', fontSize: 8, fontWeight: 1000, padding: '3px 7px', borderRadius: 999, animation: 'newTagFlash .8s ease-in-out infinite' } }, 'NEW')
           ),
@@ -3941,7 +3948,7 @@ class FantasyMobileAppCore extends React.Component {
               style: { marginTop: 4, textAlign: 'center', padding: '7px 0', borderRadius: 8, fontSize: 11, fontWeight: 900, cursor: ev.entered ? 'default' : 'pointer', background: ev.entered ? 'rgba(34,197,94,.15)' : ev.tagColor, color: ev.entered ? '#22c55e' : '#fff' }
             }, ev.entered ? 'ENTERED ✓' : this.getEventActionLabel(ev))
           )
-        ))
+        )))
       )
     );
   }
