@@ -130,7 +130,7 @@ const EditMatch = ({ matchId, isShadow }) => {
         const title = current.matchName || '';
         const autoTitle = previous && current.matchFighterA && title.toLowerCase().includes(previous.toLowerCase()) && title.toLowerCase().includes(current.matchFighterA.toLowerCase());
         return { ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null,
-          matchName: autoTitle ? title.replace(new RegExp(previous.replace(/[.*+?^${}()|[\]\\]/g, '\\setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null }));'), 'i'), name) : title };
+          matchName: autoTitle ? title.replace(previous, name) : title };
       });
     }
   };
