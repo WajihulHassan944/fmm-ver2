@@ -311,6 +311,24 @@ const EditMatch = ({ matchId, isShadow }) => {
     setButtonText('Updating, please wait...');
 
     try {
+      // The normal Save Fight button must save newly selected fighter photos too.
+      // Preserve every other field and the existing right-hand editing controls.
+      for (const side of ['A', 'B']) {
+        const photo = formData[`fighter${side}Image`];
+        if (!(photo instanceof File)) continue;
+        if (!photo.type.startsWith('image/') || photo.size > 5 * 1024 * 1024) {
+          throw new Error(`Fighter ${side} photo must be an image smaller than 5 MB.`);
+        }
+        const fighterId = formData[`fighter${side}Id`];
+        if (fighterId) {
+          const upload = new FormData();
+          upload.append('image', photo);
+          await combatFightersApi.update(fighterId, upload);
+        } else {
+          // Legacy fights without a library ID use the existing editMatch image upload.
+          data.append(`fighter${side}Image`, photo);
+        }
+      }
       const response = await fetch(url, { headers: adminHeaders(), method: 'POST', body: data });
 
       if (response.ok) {
