@@ -7,7 +7,7 @@ import OptimizedImage from '@/Components/Common/OptimizedImage';
 import { getCombatFighterId, getCombatFighterImage, getCombatFighterName, normalizeCombatCategory } from '@/Utils/combatFightersApi';
 import { adminHeaders } from '@/Utils/authFetch';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://fantasymmadness-game-server-three.vercel.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three.vercel.app';
 const FALLBACK_A = '/images/fmm-experience/fighter-action-red.webp';
 const FALLBACK_B = '/images/fmm-experience/fighter-action-blue.webp';
 const FALLBACK_PROMOTION = 'https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png';
@@ -120,13 +120,24 @@ const EditMatch = ({ matchId, isShadow }) => {
   const chooseFighter = (side, fighter) => {
     const id = getCombatFighterId(fighter);
     const name = getCombatFighterName(fighter);
-    if (side === 'A') {
-      setSelectedFighterA(fighter);
-      setFormData((current) => ({ ...current, fighterAId: id, matchFighterA: name, fighterAImage: getCombatFighterImage(fighter) || null }));
-    } else {
-      setSelectedFighterB(fighter);
-      setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null }));
-    }
+    const image = getCombatFighterImage(fighter) || null;
+    if (side === 'A') setSelectedFighterA(fighter);
+    else setSelectedFighterB(fighter);
+    setFormData((current) => {
+      const oldA = current.matchFighterA;
+      const oldB = current.matchFighterB;
+      const nextA = side === 'A' ? name : oldA;
+      const nextB = side === 'B' ? name : oldB;
+      const oldTitle = String(current.matchName || '').trim();
+      const oldPair = [oldA, oldB].filter(Boolean).join(' vs ');
+      const isMatchupTitle = !oldTitle || oldTitle.toLowerCase() === oldPair.toLowerCase()
+        || (oldA && oldB && oldTitle.toLowerCase().includes(oldA.toLowerCase()) && oldTitle.toLowerCase().includes(oldB.toLowerCase()));
+      return {
+        ...current,
+        ...(side === 'A' ? { fighterAId: id, matchFighterA: name, fighterAImage: image } : { fighterBId: id, matchFighterB: name, fighterBImage: image }),
+        ...(isMatchupTitle ? { matchName: [nextA, nextB].filter(Boolean).join(' vs ') } : {}),
+      };
+    });
   };
 
   useEffect(() => {
@@ -316,7 +327,26 @@ const EditMatch = ({ matchId, isShadow }) => {
       if (response.ok) {
         const result = await response.json();
         console.log('Response received:', result);
-        alert('Match updated successfully!');
+        // A successful HTTP response is not proof that the correct live record retained the edit.
+        // Read it back before telling the owner that publishing succeeded.
+        const verifyResponse = await fetch(`${API_BASE}/api/admin/matches/${encodeURIComponent(matchId)}?verify=${Date.now()}`, {
+          headers: { ...adminHeaders(), 'Cache-Control': 'no-cache' },
+          cache: 'no-store',
+        });
+        const verifiedPayload = await verifyResponse.json().catch(() => ({}));
+        const saved = verifiedPayload?.match;
+        const expectedFields = ['matchName', 'matchFighterA', 'matchFighterB', 'fighterAId', 'fighterBId'];
+        const sameId = (value) => String(value?._id || value?.id || value || '');
+        const mismatches = expectedFields.filter((field) => {
+          const expected = String(formData[field] || '').trim();
+          if (!expected) return false;
+          const actual = field.endsWith('Id') ? sameId(saved?.[field]) : String(saved?.[field] || '').trim();
+          return actual !== expected;
+        });
+        if (!verifyResponse.ok || !saved || mismatches.length) {
+          throw new Error(`The server responded, but the saved fight could not be verified${mismatches.length ? ': ' + mismatches.join(', ') : ''}. Your changes may not be published. Do not re-enter them until the record is checked.`);
+        }
+        alert('Fight changes saved and verified in the live registry.');
 
         // Everything below only fires more requests / reloads the page after
         // the edit is already confirmed saved — none of it should be able to
