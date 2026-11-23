@@ -209,10 +209,7 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
     if (matchStatus === 'idle') dispatch(fetchMatches({ limit: 200 }));
   }, [dispatch, matchStatus]);
 
-  useEffect(() => {
-    if (!matchId) return;
-    trackRevenueEvent(REVENUE_EVENTS.FIGHT_VIEW, { fightId: String(matchId), affiliateRef: String(router.query.ref || '') });
-  }, [matchId, router.query.ref]);
+
 
 
   useEffect(() => {
@@ -234,6 +231,18 @@ const PublicFightDetailExperience = ({ fight: initialFight = {}, relatedBlogs = 
   const playable = entryOpen(resolvedFight) && !hasSubmitted;
   const title = getFightName(resolvedFight);
   const category = getFightCategory(resolvedFight);
+  // Record the view once the matchup identity is available, so analytics can
+  // identify newly viewed fights even when their registry entry is archived.
+  useEffect(() => {
+    if (!router.isReady || !matchId || !title || /^Fight(?:\\s|$)/i.test(title)) return;
+    trackRevenueEvent(REVENUE_EVENTS.FIGHT_VIEW, {
+      fightId: String(matchId),
+      affiliateRef: String(router.query.ref || ''),
+      fightName: title,
+      category,
+    });
+  }, [router.isReady, matchId, router.query.ref, title, category]);
+
   const heroImage = getFightHeroImage(resolvedFight);
   const affiliateShareImage = /^[a-f\d]{24}$/i.test(String(router.query.ref || '')) && /^[a-f\d]{24}$/i.test(String(matchId || ''))
     ? `${SITE_URL}/api/fight-share-image?fightId=${encodeURIComponent(matchId)}&affiliateId=${encodeURIComponent(router.query.ref)}&format=facebook&v=13`
