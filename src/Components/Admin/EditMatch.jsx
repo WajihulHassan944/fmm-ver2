@@ -125,7 +125,13 @@ const EditMatch = ({ matchId, isShadow }) => {
       setFormData((current) => ({ ...current, fighterAId: id, matchFighterA: name, fighterAImage: getCombatFighterImage(fighter) || null }));
     } else {
       setSelectedFighterB(fighter);
-      setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null }));
+      setFormData((current) => {
+        const previous = current.matchFighterB || '';
+        const title = current.matchName || '';
+        const autoTitle = previous && current.matchFighterA && title.toLowerCase().includes(previous.toLowerCase()) && title.toLowerCase().includes(current.matchFighterA.toLowerCase());
+        return { ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null,
+          matchName: autoTitle ? title.replace(new RegExp(previous.replace(/[.*+?^${}()|[\]\\]/g, '\\setFormData((current) => ({ ...current, fighterBId: id, matchFighterB: name, fighterBImage: getCombatFighterImage(fighter) || null }));'), 'i'), name) : title };
+      });
     }
   };
 
