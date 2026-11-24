@@ -69,7 +69,10 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
             <img src={affiliate.profileUrl} alt={affiliateName} />
             <span><p className="xp-eyebrow"><FaBullhorn /> Creator fight room</p><h2>{affiliateName}&apos;s campaigns</h2><small><FaUsers /> {memberCount} league members</small></span>
           </div>
-          <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            <button type="button" className="theme-btn theme-btn-primary" onClick={() => router.push('/AffiliateDashboard')}>Affiliate back office <FaArrowRight /></button>
+            <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
+          </div>
         </header>
 
         {visiblePromotions.length ? (
