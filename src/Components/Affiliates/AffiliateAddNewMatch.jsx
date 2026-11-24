@@ -37,8 +37,6 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
     matchTokens: '',
     matchTokensUsd: '',
     affiliateId: '',
-    promoterStake: '',
-    promoterStakeUsd: '',
     pot: '',
     potUsd: '',
     profit: '',
@@ -97,7 +95,6 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
       matchTokensUsd: sourceType === 'live' ? current.matchTokensUsd : current.matchTokensUsd || affiliateTokensToUsd(promoDetails.matchTokens),
       pot: sourceType === 'live' ? current.pot : current.pot || promoDetails.pot || '',
       potUsd: sourceType === 'live' ? current.potUsd : current.potUsd || affiliateTokensToUsd(promoDetails.pot),
-      promoterStakeUsd: current.promoterStakeUsd || affiliateTokensToUsd(current.promoterStake),
       profit: sourceType === 'live' ? current.profit : current.profit || promoDetails.profit || '',
       amountOverPotBudget: sourceType === 'live' ? current.amountOverPotBudget : current.amountOverPotBudget || promoDetails.amountOverPotBudget || '',
       matchDate: current.matchDate || String(promoDetails.matchDate || '').slice(0, 10),
@@ -105,19 +102,10 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
     }));
   }, [promoDetails, sourceType]);
 
-  // The default deal costs the promoter nothing: if the card fills it runs, and
-  // if it does not it voids at lock and every entry is refunded. Nobody is ever
-  // short — not the players, not the platform, not them.
-  //
-  // Staking is the optional upgrade. Put the pot up front and the card is
-  // GUARANTEED: it runs however few turn up, and the shortfall comes out of the
-  // stake instead of voiding. A free card has no fees, so there is nothing to
-  // fill and nothing to guarantee.
   const economics = useMemo(() => {
     const free = formData.prizeMode === 'free';
     const pot = Number(formData.pot) || 0;
     const buyIn = free ? 0 : Number(formData.matchTokens) || 0;
-    const stake = Number(formData.promoterStake) || 0;
     const breakEven = free || buyIn <= 0 || pot <= 0 ? 0 : Math.ceil(pot / buyIn);
     // Everything past break-even is surplus, split 50/50 with the platform.
     const atDouble = breakEven ? Math.floor((breakEven * buyIn) / 2) : 0;
@@ -125,14 +113,10 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
       free,
       pot,
       buyIn,
-      stake,
       breakEven,
-      guaranteed: !free && pot > 0 && stake >= pot,
-      partialStake: !free && stake > 0 && stake < pot,
-      shortfall: free ? 0 : Math.max(0, pot - stake),
       profitAtDouble: atDouble,
     };
-  }, [formData.matchTokens, formData.pot, formData.promoterStake, formData.prizeMode]);
+  }, [formData.matchTokens, formData.pot, formData.prizeMode]);
 
   const requiredUsers = economics.breakEven;
   const leagueSize = safeArray(affiliate?.usersJoined).length;
@@ -187,7 +171,6 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
     const tokenFieldByMoneyField = {
       matchTokensUsd: 'matchTokens',
       potUsd: 'pot',
-      promoterStakeUsd: 'promoterStake',
     };
     const tokenField = tokenFieldByMoneyField[name];
     setFormData((current) => tokenField
@@ -220,7 +203,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
 
     const data = new FormData();
     data.append('matchTokens', economics.free ? 0 : formData.matchTokens);
-    data.append('promoterStake', economics.free ? 0 : economics.stake);
+    data.append('promoterStake', '0');
     data.append('potTarget', economics.free ? 0 : economics.pot);
     data.append('autoRefundIfShort', economics.free ? false : true);
     if (sourceType === 'live') data.append('sourceLiveMatchId', matchDetails._id);
@@ -394,13 +377,9 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
             </label>
           )}
           {!economics.free && (
-            <label className={economics.partialStake ? 'is-short' : ''}>
-              <span>
-                <FaShieldAlt /> Guarantee the prize
-                <small>{economics.guaranteed ? 'Prize fully backed' : 'Optional'}</small>
-              </span>
-              <input type="number" name="promoterStakeUsd" min="0" step="0.01" placeholder="0.00" value={formData.promoterStakeUsd} onChange={handleChange} onFocus={selectNumericValue} />
-              <small className="affiliate-money-conversion">{Number(formData.promoterStake || 0).toLocaleString()} FM COINS committed</small>
+            <label>
+              <span><FaShieldAlt /> Guarantee the prize <small>Unavailable</small></span>
+              <input type="number" aria-label="Guarantee the prize" disabled />
             </label>
           )}
           <label>
@@ -433,9 +412,9 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
             </span>
           </div>
         ) : (
-          <div className={`affiliate-stake-panel${economics.guaranteed ? ' is-covered' : ''}`}>
+          <div className="affiliate-stake-panel">
             <div>
-              <span>{economics.guaranteed ? 'Your stake back at' : 'This card fills at'}</span>
+              <span>This card fills at</span>
               <strong>{requiredUsers || '—'}</strong>
               <small>
                 {requiredUsers
@@ -451,9 +430,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
               </small>
             </div>
             <p>
-              {economics.guaranteed
-                ? 'Your stake covers any shortfall in the prize.'
-                : 'Without a full prize stake, the campaign needs enough paid entries by lock time. Otherwise, entries are refunded.'}
+              If paid entries fall short at lock time, the campaign is voided and entries are refunded.
             </p>
           </div>
         )}
