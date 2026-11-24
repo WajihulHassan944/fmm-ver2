@@ -128,8 +128,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
 
         {affiliateId && (
           <div className="admin-row-actions">
-            <Link href={`/owner?affiliate=${encodeURIComponent(affiliateId)}`}>Open Command Center 3.0</Link>
-            <Link href={`/administration/affiliate-command/${encodeURIComponent(affiliateId)}`}>Manage affiliate fights</Link>
+            <Link href={`/administration/affiliate-command/${encodeURIComponent(affiliateId)}`}>Open Command Center 3.0</Link>
           </div>
         )}
 

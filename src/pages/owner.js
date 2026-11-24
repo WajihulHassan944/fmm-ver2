@@ -9,6 +9,14 @@ const TOKEN_KEY = 'ownerAuthToken';
 // Quick access: prove it once by email, then unlock with a PIN on this device.
 // Safe here only because everything behind it is read-only.
 const DEVICE_KEY = 'ownerDeviceKey';
+const AFFILIATE_WORKSPACES = new Set([
+  '/AffiliatePromotion',
+  '/affiliate-money',
+  '/affiliate-league',
+  '/AffiliateProfile',
+  '/past-promotions',
+  '/AffiliateAccountSettings',
+]);
 
 const shell = {
   minHeight: '100vh',
@@ -210,7 +218,11 @@ const OwnerCheck = () => {
           backOffice: Boolean(selectedAffiliate),
         }));
         window.sessionStorage.setItem('previewToken', payload.token);
-        window.location.assign('/AffiliateDashboard#affiliate-business-suite');
+        const requestedWorkspace = new URLSearchParams(window.location.search).get('workspace');
+        const destination = selectedAffiliate && AFFILIATE_WORKSPACES.has(requestedWorkspace)
+          ? requestedWorkspace
+          : '/AffiliateDashboard#affiliate-business-suite';
+        window.location.assign(destination);
         return;
       }
 
