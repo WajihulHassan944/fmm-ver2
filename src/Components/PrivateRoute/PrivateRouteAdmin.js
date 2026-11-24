@@ -10,7 +10,7 @@ const urlBase64ToUint8Array = (base64String) => {
   return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
 };
 
-const AdminPrivateRoute = ({ children }) => {
+const AdminPrivateRoute = ({ children, requestPushNotifications = true }) => {
   const { isAdminAuthenticated } = useSelector((state) => state.adminAuth);
 
   // Hooks must run unconditionally on every render (Rules of Hooks) — this
@@ -30,6 +30,7 @@ const AdminPrivateRoute = ({ children }) => {
   // yet) — this must never block getting into the admin panel.
   useEffect(() => {
     if (typeof window === 'undefined' || !isAdminAuthenticated) return;
+    if (!requestPushNotifications) return;
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     if (window.sessionStorage.getItem('adminPushAsked')) return;
 
@@ -52,7 +53,7 @@ const AdminPrivateRoute = ({ children }) => {
         console.warn('Admin push subscribe skipped:', error.message);
       }
     })();
-  }, [isAdminAuthenticated]);
+  }, [isAdminAuthenticated, requestPushNotifications]);
 
   if (typeof window !== "undefined" && !isAdminAuthenticated) {
     window.location.href = "/administration/login";

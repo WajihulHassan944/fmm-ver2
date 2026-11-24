@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -89,8 +89,9 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
   const matchStatus = useSelector((state) => state.matches.status);
 
   const [shadowMatchId, setShadowMatchId] = useState(null);
-  const [campaignPublished, setCampaignPublished] = useState(false);
+  const [publishedCount, setPublishedCount] = useState(0);
   const [selectedLiveFight, setSelectedLiveFight] = useState(null);
+  const campaignDialog = useRef(null);
   const [homepageFights, setHomepageFights] = useState([]);
   const [liveInventoryStatus, setLiveInventoryStatus] = useState('loading');
 
@@ -124,17 +125,21 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
   const [wrestlingLoading, setWrestlingLoading] = useState(false);
 
   useEffect(() => {
+    const dialog = campaignDialog.current;
+    if (selectedLiveFight && dialog && !dialog.open) dialog.showModal();
+  }, [selectedLiveFight]);
+
+  useEffect(() => {
     if (affiliate && window.location.hash === '#affiliate-business-suite') {
       document.getElementById('affiliate-business-suite')?.scrollIntoView();
     }
   }, [affiliate]);
 
   useEffect(() => {
-    if (campaignPublished && !shadowMatchId) {
+    if (publishedCount > 0) {
       document.getElementById('live-campaign-room')?.scrollIntoView();
-      setCampaignPublished(false);
     }
-  }, [campaignPublished, shadowMatchId]);
+  }, [publishedCount]);
 
   useEffect(() => {
     if (shadowMatchId || promoMatchDetails.matchId) {
@@ -228,7 +233,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
 
     fetchAffiliatePromotedFights();
     return () => { active = false; };
-  }, [affiliate?._id, shadowMatchId]);
+  }, [affiliate?._id, shadowMatchId, publishedCount]);
 
   const affiliateId = affiliate?._id ? String(affiliate._id) : '';
   const liveMatches = safeArray(matches);
@@ -330,12 +335,10 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
         </button>
         <AffiliateAddNewMatch
           matchId={shadowMatchId}
-          sourceType={promotionSourceType}
-          initialLiveFight={promotionSourceType === 'live' ? selectedLiveFight : null}
           managedAffiliate={managedAffiliate}
           onPublished={() => {
             setShadowMatchId(null);
-            setCampaignPublished(true);
+            setPublishedCount((count) => count + 1);
           }}
         />
       </div>
@@ -360,6 +363,40 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
   return (
     <>
       <Head><title>Affiliate Dashboard | Fantasy MMAdness</title></Head>
+      {selectedLiveFight && (
+        <dialog
+          ref={campaignDialog}
+          aria-labelledby="live-campaign-title"
+          onClose={() => setSelectedLiveFight(null)}
+          style={{
+            width: 'min(1000px, calc(100% - 32px))',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            border: '1px solid #36414e',
+            borderRadius: 16,
+            padding: 20,
+            background: '#0d131c',
+            color: '#fff',
+          }}
+        >
+          <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+            <h2 id="live-campaign-title">Set up campaign</h2>
+            <button type="button" className="theme-btn theme-btn-secondary" onClick={() => campaignDialog.current?.close()}>
+              Back to upcoming fights
+            </button>
+          </header>
+          <AffiliateAddNewMatch
+            matchId={getFightId(selectedLiveFight)}
+            sourceType="live"
+            initialLiveFight={selectedLiveFight}
+            managedAffiliate={managedAffiliate}
+            onPublished={() => {
+              campaignDialog.current?.close();
+              setPublishedCount((count) => count + 1);
+            }}
+          />
+        </dialog>
+      )}
       <div className="experience-page affiliate-dashboard-experience-page affiliate-command-v3" data-ui-version="command-v3">
         <section className="affiliate-command-ribbon" aria-label="Affiliate command status">
           <div className="theme-container affiliate-command-ribbon-inner">
@@ -451,18 +488,9 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                             <p>{formatFightDate(match, { short: true })}</p>
                             <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
                             <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Live fight promotion'}</span></div>
-                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
-                              setSelectedLiveFight(match);
-                              setPromotionSourceType('live');
-                              setShadowMatchId(fightId);
-                            }}>
+                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => setSelectedLiveFight(match)}>
                               Set up campaign <FaArrowRight />
                             </button>
-                            {managedAffiliate && (
-                              <Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: fightId, launchTitle: match.matchName } }}>
-                                Prepare affiliate email
-                              </Link>
-                            )}
                           </div>
                         </article>
                       );
@@ -576,7 +604,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                               className="theme-btn theme-btn-primary"
                               onClick={() => isPromotedByAffiliate(match, affiliateId)
                                 ? setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match })
-                                : (() => { setPromotionSourceType('shadow'); setShadowMatchId(fightId); })()}
+                                : setShadowMatchId(fightId)}
                             >
                               {isPromotedByAffiliate(match, affiliateId) ? 'Open campaign' : 'Create promotion'} <FaArrowRight />
                             </button>

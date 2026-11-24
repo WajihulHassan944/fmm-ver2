@@ -85,7 +85,7 @@ export default function AffiliateCommandPage() {
   const affiliateId = typeof query.affiliateId === 'string' ? query.affiliateId : '';
 
   return (
-    <AdminPrivateRoute>
+    <AdminPrivateRoute requestPushNotifications={false}>
       <AffiliateCommand key={affiliateId} affiliateId={affiliateId} section={typeof query.section === 'string' ? query.section : ''} />
     </AdminPrivateRoute>
   );

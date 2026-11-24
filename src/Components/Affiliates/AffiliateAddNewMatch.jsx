@@ -27,8 +27,8 @@ const selectNumericValue = (event) => event.currentTarget.select();
 const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight, managedAffiliate, onPublished }) => {
   const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const affiliate = managedAffiliate || signedInAffiliate;
-  const [promoMatches, setPromoMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [promoMatches, setPromoMatches] = useState(() => initialLiveFight ? [initialLiveFight] : []);
+  const [loading, setLoading] = useState(!initialLiveFight);
   const [loadError, setLoadError] = useState('');
   const [buttonText, setButtonText] = useState('Publish fight promotion');
   const [formData, setFormData] = useState({
@@ -49,6 +49,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
   });
 
   useEffect(() => {
+    if (initialLiveFight) return undefined;
     let active = true;
 
     const fetchPromoMatches = async () => {
@@ -57,7 +58,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
 
       try {
         if (sourceType === 'live') {
-          const data = initialLiveFight ? [initialLiveFight] : await fetchPublicFights({ limit: 500 });
+          const data = await fetchPublicFights({ limit: 500 });
           if (active) setPromoMatches(safeArray(data));
         } else {
           const response = await fetch(`${API_BASE}/shadow?compact=promotion&limit=150&scoredOnly=true`);
