@@ -509,50 +509,19 @@
   background: rgba(1, 4, 8, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 13px;
-  color: #fff;
-  cursor: pointer;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto;
-  padding: 14px;
-  text-align: left;
-  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
 }
 
-.affiliate-campaign-url > span {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-}
-
-.affiliate-campaign-url small {
-  color: #ff6b74;
-  font-family: var(--ff-display, Impact, sans-serif);
-  font-size: 9px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.affiliate-campaign-url strong {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.affiliate-campaign-url > i {
-  align-items: center;
-  background: linear-gradient(135deg, #df111b, #980812);
-  border-radius: 9px;
-  display: inline-flex;
-  font-family: var(--ff-display, Impact, sans-serif);
-  font-size: 10px;
-  font-style: normal;
-  gap: 7px;
-  min-height: 42px;
-  padding: 0 14px;
-  text-transform: uppercase;
+.affiliate-campaign-url > a {
+  color: #fff;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .affiliate-campaign-metric-grid {
@@ -2700,10 +2669,6 @@
 
   .affiliate-campaign-url {
     grid-template-columns: 1fr;
-  }
-
-  .affiliate-campaign-url > i {
-    justify-content: center;
   }
 
   .affiliate-campaign-recorder-videos {

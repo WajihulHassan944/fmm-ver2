@@ -1,4 +1,5 @@
 "use client";
+import { getAffiliateCampaignShareUrl } from '@/Utils/affiliatePublicLink';
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState, useRef }  from 'react';
@@ -78,8 +79,8 @@ const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, mana
   const fighterAImage = getFighterImage(match, 'A');
   const fighterBImage = getFighterImage(match, 'B');
   const campaignMatchId = getFightId(match) || matchId;
-  const affiliateFullName = [affiliate?.firstName, affiliate?.lastName].filter(Boolean).join(' ') || affiliate?.playerName || 'affiliate';
-  const promotionUrl = `https://fantasymmadness.com/shadow/${encodeURIComponent(match?.matchName || 'fight')}/${encodeURIComponent(affiliateFullName)}`;
+  const promotionUrl = getAffiliateCampaignShareUrl(affiliate, match);
+  const promotionDisplayUrl = promotionUrl.replace(/^https:\/\/(?:www\.)?/, '').split('?')[0];
   const fightCategory = getFightCategory(match) || 'Fight campaign';
   const fightStatus = match?.matchShadowStatus || 'inactive';
   const scheduledDate = formatFightDate(match, { short: true });
@@ -214,12 +215,7 @@ const actualProfit = extraActualProfit / 2;
                 ctx.drawImage(logoImage, 10, 10, 60, 60);
 
                 // Generate QR code
-                const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
-                const encodedMatchName = encodeURIComponent(match.matchName);
-                const encodedFullName = encodeURIComponent(fullName);
-                const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
-
-                QRCode.toDataURL(url, { width: 60, margin: 2 }, (err, qrImageUrl) => {
+                QRCode.toDataURL(promotionUrl, { width: 60, margin: 2 }, (err, qrImageUrl) => {
                     if (!err) {
                         const qrImage = new Image();
                         qrImage.src = qrImageUrl;
@@ -278,12 +274,7 @@ const actualProfit = extraActualProfit / 2;
                 drawImageWithShadow(fighterTwoImage, 380, 140, fighterBName);
 
                 // Generate QR code
-                const fullName = `${affiliate.firstName} ${affiliate.lastName}`;
-                const encodedMatchName = encodeURIComponent(match.matchName);
-                const encodedFullName = encodeURIComponent(fullName);
-                const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
-
-                QRCode.toDataURL(url, { width: 60, margin: 2 }, (err, qrImageUrl) => {
+                QRCode.toDataURL(promotionUrl, { width: 60, margin: 2 }, (err, qrImageUrl) => {
                     if (!err) {
                         const qrImage = new Image();
                         qrImage.src = qrImageUrl;
@@ -357,21 +348,12 @@ const actualProfit = extraActualProfit / 2;
   }
 
 
-  const copyToClipboard = () => {
-    if (match && affiliate) {
-      const fullName = `${affiliate.firstName} ${affiliate.lastName}`; // Combine first and last name
-      const encodedMatchName = encodeURIComponent(match.matchName);  // Encode matchName
-      const encodedFullName = encodeURIComponent(fullName);  // Encode fullName
-
-      const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
-
-      navigator.clipboard.writeText(url)
-        .then(() => {
-          alert("URL copied to clipboard!");
-        })
-        .catch(err => {
-          console.error("Failed to copy: ", err);
-        });
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(promotionUrl);
+      toast.success('Campaign link copied.');
+    } catch {
+      toast.error('Could not copy the link. Open it and copy it from the address bar.');
     }
   };
 
@@ -621,11 +603,19 @@ const handleSave = async (blobUrl) => {
               <div><p className="xp-eyebrow">Audience entry point</p><h2>Public promotion link</h2></div>
               <FaShareAlt />
             </header>
-            <button type="button" className="affiliate-campaign-url" onClick={copyToClipboard}>
-              <span><small>Public campaign URL</small><strong>{promotionUrl}</strong></span>
-              <i><FaCopy /> Copy</i>
-            </button>
-            <ShareQrCode url={promotionUrl} filename="fight-promotion-qr.png" />
+            {promotionUrl && (
+              <>
+                <div className="affiliate-campaign-url">
+                  <a href={promotionUrl} target="_blank" rel="noopener noreferrer" title={promotionUrl}>
+                    {promotionDisplayUrl}
+                  </a>
+                  <button type="button" className="theme-btn theme-btn-secondary" onClick={copyToClipboard}>
+                    <FaCopy aria-hidden="true" /> Copy link
+                  </button>
+                </div>
+                <ShareQrCode url={promotionUrl} filename="fight-promotion-qr.png" />
+              </>
+            )}
           </section>
 
           <section className="affiliate-campaign-panel">

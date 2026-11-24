@@ -1,3 +1,4 @@
+import { getAffiliateCampaignShareUrl } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -277,9 +278,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
     event.stopPropagation();
 
     try {
-      const encodedMatchName = encodeURIComponent(match?.matchName || 'fight');
-      const encodedFullName = encodeURIComponent(fullName);
-      const url = `https://fantasymmadness.com/shadow/${encodedMatchName}/${encodedFullName}`;
+      const url = getAffiliateCampaignShareUrl(affiliate, match);
+      if (!url) return;
       await navigator.clipboard.writeText(url);
       setCopiedId(getFightId(match));
       window.setTimeout(() => setCopiedId(null), 2000);

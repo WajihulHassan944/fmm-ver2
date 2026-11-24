@@ -19,3 +19,16 @@ export const getAffiliateFightShareUrl = (affiliate = {}, fightId = '') => {
   const name = getAffiliateNameSlug(affiliate) || 'league';
   return `https://www.fantasymmadness.com/league/${encodeURIComponent(name)}?affiliateId=${encodeURIComponent(id)}&fightId=${encodeURIComponent(fightId)}`;
 };
+
+export const getAffiliateCampaignShareUrl = (affiliate, fight) => {
+  const affiliateId = affiliate?._id || affiliate?.id;
+  const fightId = fight?._id || fight?.id || fight?.matchId;
+  if (!affiliateId || !fightId) return '';
+
+  const source = String(fight.sourceType || fight.affiliatePromotion?.sourceType || fight.matchType || '');
+  if (/shadow/i.test(source)) {
+    const name = [affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || affiliate.playerName || '';
+    return `https://fantasymmadness.com/shadow/${encodeURIComponent(fight.matchName || 'fight')}/${encodeURIComponent(name)}`;
+  }
+  return getAffiliateFightShareUrl(affiliate, fightId);
+};
