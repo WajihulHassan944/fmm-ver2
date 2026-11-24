@@ -17,7 +17,7 @@ import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import UsersPlayed from './UsersPlayed/UsersPlayed';
 import { adminHeaders, affiliateHeaders } from '@/Utils/authFetch';
 import { FaArrowLeft, FaBullhorn, FaChartLine, FaCheckCircle, FaClock, FaCopy, FaDownload, FaInfoCircle, FaMicrophone, FaPause, FaPlay, FaShareAlt, FaTimes, FaTrash, FaTrophy, FaUsers, FaVideo } from 'react-icons/fa';
-import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
+import { FMCoin as FaCoins, formatFMCoinUsd } from '@/Components/Common/FMCoin';
 import {
   formatFightDate,
   getFightCategory,
@@ -554,7 +554,7 @@ const handleSave = async (blobUrl) => {
           </p>
           <div className="affiliate-campaign-hero-meta">
             <span><FaTrophy /> {fightCategory}</span>
-            <span><FaCoins /> {match.matchTokens || 0} FM COINS entry</span>
+            <span><FaCoins /> {Number(match.matchTokens || 0).toLocaleString()} FM COINS entry · {formatFMCoinUsd(match.matchTokens)} USD value</span>
             <span><FaClock /> {scheduledDate}</span>
           </div>
         </div>
@@ -573,7 +573,7 @@ const handleSave = async (blobUrl) => {
       </section>
 
       <section className="affiliate-campaign-kpi-strip">
-        <article><span>Prize pot</span><strong>{Number(match.pot || 0).toLocaleString()} FM COINS</strong><small>Configured winner award</small></article>
+        <article><span>Prize pot</span><strong>{Number(match.pot || 0).toLocaleString()} FM COINS</strong><small>{formatFMCoinUsd(match.pot)} USD value · Configured winner award</small></article>
         <article><span>Entries</span><strong>{userPredictionCount}</strong><small>Predictions submitted</small></article>
         <article><span>Required</span><strong>{minimumUsers || '—'}</strong><small>Minimum paid players</small></article>
         <article><span>Earned</span><strong>${actualProfit.toFixed(2)}</strong><small>Calculated campaign profit</small></article>

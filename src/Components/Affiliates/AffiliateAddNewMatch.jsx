@@ -397,7 +397,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
             <label className={economics.partialStake ? 'is-short' : ''}>
               <span>
                 <FaShieldAlt /> Guarantee the prize
-                <small>{economics.guaranteed ? 'Card runs no matter what' : 'Optional cash amount — leave blank for none'}</small>
+                <small>{economics.guaranteed ? 'Prize fully backed' : 'Optional'}</small>
               </span>
               <input type="number" name="promoterStakeUsd" min="0" step="0.01" placeholder="0.00" value={formData.promoterStakeUsd} onChange={handleChange} onFocus={selectNumericValue} />
               <small className="affiliate-money-conversion">{Number(formData.promoterStake || 0).toLocaleString()} FM COINS committed</small>
@@ -452,8 +452,8 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
             </div>
             <p>
               {economics.guaranteed
-                ? `Guaranteed card. It runs however few turn up, and any shortfall comes out of your ${economics.stake.toLocaleString()} — never out of the players' prize.`
-                : `Costs you nothing to run. If it fills, it goes ahead; if it comes up short it voids at lock and every entry is refunded automatically. Stake ${economics.pot.toLocaleString()} to guarantee it runs either way.`}
+                ? 'Your stake covers any shortfall in the prize.'
+                : 'Without a full prize stake, the campaign needs enough paid entries by lock time. Otherwise, entries are refunded.'}
             </p>
           </div>
         )}
