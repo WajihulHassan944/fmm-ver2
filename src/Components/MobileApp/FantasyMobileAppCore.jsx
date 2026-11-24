@@ -906,6 +906,7 @@ class FantasyMobileAppCore extends React.Component {
     if (name === 'wrestlingScorecard') reset.scorecardDraft = emptyWrestlingDraft();
     if (name === 'boxingScorecard') reset.boxingDraft = emptyBoxingDraft(roundsForSport(data?.sport, data?.maxRounds));
     if (name === 'mmaScorecard') reset.mmaDraft = emptyMmaDraft(roundsForSport(data?.sport, data?.maxRounds));
+    if (name === 'addcoins') reset.checkoutFightPath = this.getFightReturnPath(data);
     this.setState({ modal: name, modalData: data || null, ...reset });
   };
   closeModal = () => this.setState({ modal: null, modalData: null });
@@ -1179,7 +1180,7 @@ class FantasyMobileAppCore extends React.Component {
     const { winner } = this.state.scorecardDraft;
     const entryFee = this.getEventEntryFee(ev);
     if (!winner) { this.showToast('Pick a winner first'); return; }
-    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins'); return; }
+    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins', ev); return; }
     if (this.props.onSubmitPrediction) {
       const continueLocally = await this.props.onSubmitPrediction({ type: 'wrestling', event: ev, prediction: this.state.scorecardDraft });
       if (continueLocally === false) return;
@@ -1240,7 +1241,7 @@ class FantasyMobileAppCore extends React.Component {
     const { winner, outcome } = draft;
     const entryFee = this.getEventEntryFee(ev);
     if (!winner) { this.showToast('Pick a winner first'); return; }
-    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins'); return; }
+    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins', ev); return; }
     if (this.props.onSubmitPrediction) {
       const continueLocally = await this.props.onSubmitPrediction({ type: 'boxing', event: ev, prediction: this.state.boxingDraft });
       if (continueLocally === false) return;
@@ -1290,7 +1291,7 @@ class FantasyMobileAppCore extends React.Component {
     const { winner, outcome } = draft;
     const entryFee = this.getEventEntryFee(ev);
     if (!winner) { this.showToast('Pick a winner first'); return; }
-    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins'); return; }
+    if (this.state.coins < entryFee) { this.showToast('Not enough FM COINS — add more to enter'); this.openModal('addcoins', ev); return; }
     if (this.props.onSubmitPrediction) {
       const continueLocally = await this.props.onSubmitPrediction({ type: 'mma', event: ev, prediction: this.state.mmaDraft });
       if (continueLocally === false) return;
@@ -1668,10 +1669,17 @@ class FantasyMobileAppCore extends React.Component {
   // sign-in included) instead of this app's own older email/password-only
   // modal, which never got Google wired in. `next` brings them back to
   // exactly where they tapped Sign up from.
+  getFightReturnPath = (event) => {
+    const id = event?.backendId || event?.id;
+    if (!id) return '';
+    if (event.gameMode === 'PRO_WRESTLING') return `/pro-wrestling/matches/${encodeURIComponent(id)}`;
+    return `/fight/${encodeURIComponent(id)}?play=1`;
+  };
+
   openAuth = (intent = null, role = 'player') => {
     if (typeof window === 'undefined') return;
     const mode = intent ? 'signup' : 'login';
-    const next = encodeURIComponent(window.location.pathname + window.location.search);
+    const next = encodeURIComponent(this.getFightReturnPath(intent?.event) || window.location.pathname + window.location.search + window.location.hash);
     window.location.assign(`/auth?mode=${mode}&role=${role}&next=${next}`);
   };
   submitAuth = async () => {
@@ -1957,7 +1965,7 @@ class FantasyMobileAppCore extends React.Component {
     const entryFee = this.getEventEntryFee(ev);
     if (this.state.coins < entryFee) {
       this.showToast(`This contest needs ${entryFee.toLocaleString()} FM — add FM COINS to continue`);
-      this.openModal('addcoins');
+      this.openModal('addcoins', ev);
       return;
     }
     if (ev.sport === 'wrestling') { this.openModal('wrestlingScorecard', ev); return; }
@@ -2119,7 +2127,8 @@ class FantasyMobileAppCore extends React.Component {
     // here directly.
     const cart = (this.state.cart || []).map(({ sku, quantity }) => `${sku}:${quantity}`).join(',');
     if (typeof window !== 'undefined') {
-      window.location.assign(`/checkout?product=fm-coins&cart=${encodeURIComponent(cart)}`);
+      const returnTo = this.state.checkoutFightPath || window.location.pathname + window.location.search + window.location.hash;
+      window.location.assign(`/checkout?product=fm-coins&cart=${encodeURIComponent(cart)}&returnTo=${encodeURIComponent(returnTo)}`);
     }
   };
   vote = (fighter) => {
