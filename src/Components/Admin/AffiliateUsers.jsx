@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import { getAffiliateFightShareUrl } from '@/Utils/affiliatePublicLink';
 import { fetchAffiliatePromotionFights } from '@/Utils/affiliatePromotionFights';
@@ -642,13 +643,13 @@ const AffiliateUsers = () => {
                 <tr key={user._id}>
                   <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || 'affiliate'} for email`} checked={selectedAffiliateIds.includes(user._id)} disabled={!isValidEmail(user.email)} onChange={() => toggleAffiliate(user._id)} /></td>
                   <td>
-                    <button type="button" className="admin-person-cell" onClick={() => handleViewUserDetails(user)}>
+                    <Link className="admin-person-cell" href={`/administration/affiliate-command/${encodeURIComponent(user._id)}`} aria-label={`Open ${user.firstName || user.playerName || 'affiliate'}’s Command Center 3.0`}>
                       <img src={affiliateProfileImage(user.profileUrl)} onError={(event) => { if (!event.currentTarget.src.endsWith(FALLBACK_AVATAR)) event.currentTarget.src = FALLBACK_AVATAR; }} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'} />
                       <span>
                         <strong>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'}</strong>
                         <small>{user.playerName || user.email || 'Creator account'}</small>
                       </span>
-                    </button>
+                    </Link>
                   </td>
                   <td><span className={`admin-status-badge ${user.verified ? 'is-success' : 'is-warning'}`}>{user.verified ? 'Approved' : 'Pending'}</span></td>
                   <td><button type="button" className="admin-distinction-button" disabled={promoterBusyId === user._id || approvedPromoterIds.includes(user._id) || (user.canCreateFullCards && !user.promoterSuspendedAt)} onClick={() => approvePromoter(user)}><FaAward /> {promoterBusyId === user._id ? 'Approving…' : approvedPromoterIds.includes(user._id) || (user.canCreateFullCards && !user.promoterSuspendedAt) ? 'Promoter approved' : 'Approve promoter'}</button></td>

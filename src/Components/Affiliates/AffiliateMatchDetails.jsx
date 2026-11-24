@@ -15,7 +15,7 @@ const ReactMediaRecorder = dynamic(
 import { toast } from 'react-toastify';
 import { stopMusic, playMusic } from '../../Redux/musicSlice';
 import UsersPlayed from './UsersPlayed/UsersPlayed';
-import { affiliateHeaders } from '@/Utils/authFetch';
+import { adminHeaders, affiliateHeaders } from '@/Utils/authFetch';
 import { FaArrowLeft, FaBullhorn, FaChartLine, FaCheckCircle, FaClock, FaCopy, FaDownload, FaInfoCircle, FaMicrophone, FaPause, FaPlay, FaShareAlt, FaTimes, FaTrash, FaTrophy, FaUsers, FaVideo } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import {
@@ -43,12 +43,14 @@ const isSameFightId = (match, targetId) => {
   ].some((candidate) => normalizeId(candidate) === id);
 };
 
-const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null }) => {
+const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, managedAffiliate }) => {
   const [showUsersPlayed, setShowUsersPlayed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
   const canvasRef = useRef(null);
   const dispatch = useDispatch();
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const affiliate = managedAffiliate || signedInAffiliate;
+  const campaignHeaders = managedAffiliate ? adminHeaders : affiliateHeaders;
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
   const reduxMatch = Array.isArray(matches)
@@ -321,17 +323,19 @@ const actualProfit = extraActualProfit / 2;
   }
 
   const handleDeleteFight = async (id) => {
+    if (managedAffiliate && !window.confirm('Delete this affiliate’s fight promotion?')) return;
     try {
       const response = await fetch(`${API_BASE}/api/matches/${id}?affiliateId=${affiliateId}`, {
         method: 'DELETE',
-        headers: affiliateHeaders(),
+        headers: campaignHeaders(),
       });
 
       if (response.ok) {
         alert("Promotion Deleted");
         window.location.reload();
       } else {
-        console.error('Failed to delete:', response.statusText);
+        const failure = await response.json().catch(() => ({}));
+        alert(failure.message || 'The promotion could not be deleted.');
       }
     } catch (error) {
       console.error('Error deleting match:', error);
@@ -447,12 +451,15 @@ const handleSave = async (blobUrl) => {
   const saveVideoUrlToDatabase = (videoUrl) => {
     fetch(`${API_BASE}/api/matches/${campaignMatchId}/promotional-video`, {
       method: 'POST', // Change to POST
-      headers: affiliateHeaders({
+      headers: campaignHeaders({
         'Content-Type': 'application/json',
       }),
       body: JSON.stringify({ promotionalVideoUrl: videoUrl }),
     })
-      .then((response) => response.json())
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Could not save the promotional video.');
+        return response.json();
+      })
       .then((data) => {
         if (data.message) {
           console.log('Video URL saved:', data);
@@ -461,14 +468,14 @@ const handleSave = async (blobUrl) => {
           alert('Failed to update video URL');
         }
       })
-      .catch((error) => console.error('Error saving video URL:', error));
+      .catch((error) => alert(error.message));
   };
 
   const handleActiveFight = async (id) => {
     try {
       const response = await fetch(`${API_BASE}/activate-match/${id}`, {
         method: "POST",
-        headers: affiliateHeaders({
+        headers: campaignHeaders({
           "Content-Type": "application/json",
         }),
       });
@@ -493,7 +500,7 @@ const handleSave = async (blobUrl) => {
     try {
       const response = await fetch(`${API_BASE}/update-match-status-shadow/${matchId}`, {
         method: "POST",
-        headers: affiliateHeaders({
+        headers: campaignHeaders({
           "Content-Type": "application/json",
         }),
         body: JSON.stringify({ status: newStatus }),

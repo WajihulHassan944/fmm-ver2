@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileImage';
 import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
@@ -125,6 +126,12 @@ const UserDetails = ({ user, affiliates = [] }) => {
           <div><small>League members</small><strong><FaUsers /> {userDetails.length}</strong></div>
         </div>
 
+        {affiliateId && (
+          <Link className="admin-action-primary" href={`/administration/affiliate-command/${encodeURIComponent(affiliateId)}`}>
+            Open Command Center 3.0
+          </Link>
+        )}
+
         {!isVerified && (
           <button type="button" className="admin-action-primary admin-affiliate-approve" onClick={handleApprove}>
             <FaCheck /> Click to approve
@@ -146,7 +153,7 @@ const UserDetails = ({ user, affiliates = [] }) => {
         </label>
         <div className="admin-row-actions">
           <button type="button" disabled={!affiliateUrl} onClick={() => copyAffiliateValue(affiliateUrl, 'Affiliate link')}>Copy link</button>
-          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">Open affiliate page</a>}
+          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">Open public fight room</a>}
         </div>
         <p role="status">{copyStatus}</p>
         <ShareQrCode key={affiliateId} url={affiliateUrl} label={user.playerName || user.firstName || 'Affiliate'} fileName={`affiliate-${affiliateId}-qr`} />

@@ -88,9 +88,10 @@ const extractAffiliatePromotedRows = (payload = {}) => normalizePublicFightRows(
 );
 
 
-const AffiliateDashboard = () => {
+const AffiliateDashboard = ({ managedAffiliate }) => {
   const dispatch = useDispatch();
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const affiliate = managedAffiliate || signedInAffiliate;
   const authLoading = useSelector((state) => state.affiliateAuth.loading);
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
@@ -122,7 +123,7 @@ const AffiliateDashboard = () => {
   }, [matchStatus, dispatch]);
 
   useEffect(() => {
-    if (!affiliate?._id) return undefined;
+    if (managedAffiliate || !affiliate?._id) return undefined;
     let active = true;
     setWrestlingLoading(true);
     wrestlingRequest('/api/affiliates/me/wrestling-summary', { affiliate: true })
@@ -134,7 +135,7 @@ const AffiliateDashboard = () => {
       })
       .finally(() => { if (active) setWrestlingLoading(false); });
     return () => { active = false; };
-  }, [affiliate?._id]);
+  }, [affiliate?._id, managedAffiliate]);
 
   useEffect(() => {
     let active = true;
@@ -223,8 +224,12 @@ const AffiliateDashboard = () => {
   );
 
   const promotedFights = useMemo(
-    () => dedupeAffiliateFightRows([...safeArray(affiliatePromotedFights), ...legacyPromotedFights]),
-    [affiliatePromotedFights, legacyPromotedFights],
+    () => {
+      const rows = dedupeAffiliateFightRows([...safeArray(affiliatePromotedFights), ...legacyPromotedFights]);
+      // A shared Shadow template can appear in multiple affiliate portfolios.
+      return managedAffiliate ? rows.filter((fight) => !isShadowLikeFight(fight)) : rows;
+    },
+    [affiliatePromotedFights, legacyPromotedFights, managedAffiliate],
   );
 
   const totalPromotions = liveMatches.filter(
@@ -286,6 +291,7 @@ const AffiliateDashboard = () => {
           matchId={promoMatchDetails.matchId}
           affiliateId={promoMatchDetails.affiliateId}
           initialMatch={promoMatchDetails.initialMatch}
+          managedAffiliate={managedAffiliate}
         />
       </div>
     );
@@ -297,7 +303,12 @@ const AffiliateDashboard = () => {
         <button type="button" className="xp-dashboard-back" onClick={() => setShadowMatchId(null)}>
           <FaArrowLeft /> Back to affiliate dashboard
         </button>
-        <AffiliateAddNewMatch matchId={shadowMatchId} sourceType={promotionSourceType} />
+        <AffiliateAddNewMatch
+          matchId={shadowMatchId}
+          sourceType={promotionSourceType}
+          managedAffiliate={managedAffiliate}
+          onPublished={() => setShadowMatchId(null)}
+        />
       </div>
     );
   }
@@ -327,8 +338,8 @@ const AffiliateDashboard = () => {
             <nav>
               <a href="#shadow-templates">Fight inventory</a>
               <a href="#live-campaign-room">Live campaigns</a>
-              <Link href="/promoter/full-cards">Full Card Promoter</Link>
-              <Link href="/affiliate-money">Money desk</Link>
+              {!managedAffiliate && <Link href="/promoter/full-cards">Full Card Promoter</Link>}
+              {!managedAffiliate && <Link href="/affiliate-money">Money desk</Link>}
             </nav>
           </div>
         </section>
@@ -348,9 +359,9 @@ const AffiliateDashboard = () => {
                   <a href="#shadow-templates" className="theme-btn theme-btn-primary">
                     Create a promotion <FaPlus />
                   </a>
-                  <Link href="/affiliate-league" className="theme-btn theme-btn-secondary">
+                  {!managedAffiliate && <Link href="/affiliate-league" className="theme-btn theme-btn-secondary">
                     Manage league
-                  </Link>
+                  </Link>}
                 </div>
               </div>
             </div>
@@ -367,7 +378,7 @@ const AffiliateDashboard = () => {
           </div>
         </section>
 
-        <AffiliateExperienceNav />
+        {!managedAffiliate && <AffiliateExperienceNav />}
 
         <main className="xp-page-main xp-dashboard-main affiliate-dashboard-main-final">
           <div className="theme-container">
@@ -394,41 +405,41 @@ const AffiliateDashboard = () => {
                   <span><small>Promote</small><strong>Create a fight campaign</strong><em>Open an approved template, configure the prize and publish.</em></span>
                   <FaArrowRight />
                 </a>
-                <Link href="/AffiliatePromotion" className="is-blue">
+                {!managedAffiliate && <Link href="/AffiliatePromotion" className="is-blue">
                   <FaChartLine />
                   <span><small>Track</small><strong>Campaign insights</strong><em>Review active promotions, audience activity and performance.</em></span>
                   <FaArrowRight />
-                </Link>
-                <Link href="/affiliate-money" className="is-gold">
+                </Link>}
+                {!managedAffiliate && <Link href="/affiliate-money" className="is-gold">
                   <FaMoneyCheckAlt />
                   <span><small>Earn</small><strong>Earnings and payouts</strong><em>See fight earnings, balances, payout history and cash-out tools.</em></span>
                   <FaArrowRight />
-                </Link>
-                <Link href="/affiliate-league" className="is-blue">
+                </Link>}
+                {!managedAffiliate && <Link href="/affiliate-league" className="is-blue">
                   <FaTrophy />
                   <span><small>Grow</small><strong>League manager</strong><em>Manage members, standings and your creator community.</em></span>
                   <FaArrowRight />
-                </Link>
-                <Link href="/AffiliateProfile" className="is-red">
+                </Link>}
+                {!managedAffiliate && <Link href="/AffiliateProfile" className="is-red">
                   <FaIdBadge />
                   <span><small>Identity</small><strong>Profile and referral link</strong><em>Update your public creator card and copy your referral URL.</em></span>
                   <FaArrowRight />
-                </Link>
+                </Link>}
                 <a href="#live-campaign-room" className="is-gold">
                   <FaQrcode />
                   <span><small>Create</small><strong>QR and media studio</strong><em>Open a live campaign to download artwork or record promotional video.</em></span>
                   <FaArrowRight />
                 </a>
-                <Link href="/past-promotions" className="is-blue">
+                {!managedAffiliate && <Link href="/past-promotions" className="is-blue">
                   <FaHistory />
                   <span><small>Review</small><strong>Promotion archive</strong><em>Open completed campaigns and their final results.</em></span>
                   <FaArrowRight />
-                </Link>
-                <Link href="/AffiliateAccountSettings" className="is-red">
+                </Link>}
+                {!managedAffiliate && <Link href="/AffiliateAccountSettings" className="is-red">
                   <FaDollarSign />
                   <span><small>Manage</small><strong>Payment settings</strong><em>Maintain payout destinations and request available funds.</em></span>
                   <FaArrowRight />
-                </Link>
+                </Link>}
                 <Link href="/affiliate-guides" className="is-gold">
                   <FaRegPlayCircle />
                   <span><small>Learn</small><strong>Affiliate playbook</strong><em>Follow the complete launch, sharing and growth workflow.</em></span>
@@ -554,7 +565,7 @@ const AffiliateDashboard = () => {
                 eyebrow="Live campaign room"
                 title="Promoted fights"
                 description="Open campaign details or copy the existing public promotion link for your audience."
-                action={{ href: '/past-promotions', label: 'View campaign archive' }}
+                action={managedAffiliate ? undefined : { href: '/past-promotions', label: 'View campaign archive' }}
               />
 
               {promotedFights.length ? (
@@ -672,9 +683,9 @@ const AffiliateDashboard = () => {
                 </p>
               </div>
               <div className="affiliate-dashboard-link-grid">
-                <Link href="/affiliate-league"><FaTrophy /><span><strong>League manager</strong><small>Members and standings</small></span><FaArrowRight /></Link>
-                <Link href="/AffiliateProfile"><FaUserFriends /><span><strong>Creator profile</strong><small>Public identity and referral</small></span><FaArrowRight /></Link>
-                <Link href="/past-promotions"><FaHistory /><span><strong>Past promotions</strong><small>Completed campaigns</small></span><FaArrowRight /></Link>
+                {!managedAffiliate && <Link href="/affiliate-league"><FaTrophy /><span><strong>League manager</strong><small>Members and standings</small></span><FaArrowRight /></Link>}
+                {!managedAffiliate && <Link href="/AffiliateProfile"><FaUserFriends /><span><strong>Creator profile</strong><small>Public identity and referral</small></span><FaArrowRight /></Link>}
+                {!managedAffiliate && <Link href="/past-promotions"><FaHistory /><span><strong>Past promotions</strong><small>Completed campaigns</small></span><FaArrowRight /></Link>}
                 <Link href="/HowItWorks"><FaBullhorn /><span><strong>How it works</strong><small>Creator operating guide</small></span><FaArrowRight /></Link>
               </div>
             </section>

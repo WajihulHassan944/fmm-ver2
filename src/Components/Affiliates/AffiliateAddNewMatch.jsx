@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { affiliateHeaders } from '@/Utils/authFetch';
+import { adminHeaders, affiliateHeaders } from '@/Utils/authFetch';
 import { fetchPublicFights, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { FaBullhorn, FaCalendarAlt, FaDollarSign, FaInfoCircle, FaSave, FaShieldAlt, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
@@ -24,8 +24,9 @@ const affiliateTokensToUsd = (tokens) => {
 const affiliateUsdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / AFFILIATE_TOKEN_USD_RATE)));
 const selectNumericValue = (event) => event.currentTarget.select();
 
-const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', managedAffiliate, onPublished }) => {
+  const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const affiliate = managedAffiliate || signedInAffiliate;
   const [promoMatches, setPromoMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -224,6 +225,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
     if (sourceType === 'live') data.append('sourceLiveMatchId', matchDetails._id);
     else data.append('shadowFightId', matchDetails._id);
     data.append('affiliateId', affiliate._id);
+    if (managedAffiliate) data.append('matchBy', 'affiliate');
     data.append('pot', formData.pot);
     data.append('eventTimeZone', Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York');
     data.append('profit', formData.profit);
@@ -262,7 +264,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
-        headers: affiliateHeaders(),
+        headers: managedAffiliate ? adminHeaders() : affiliateHeaders(),
         body: data,
       });
 
@@ -273,7 +275,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
 
         // Notify only this promoter's league. Keep the legacy platform-wide
         // `notify` switch off so one affiliate cannot email every FMM account.
-        if (publishedFightId) {
+        if (publishedFightId && !managedAffiliate) {
           try {
             const noticeResponse = await fetch(`${API_BASE}/api/affiliates/me/promotions/${encodeURIComponent(publishedFightId)}/announce`, {
               method: 'POST',
@@ -291,7 +293,8 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow' }) => {
 
         alert(confirmation);
         console.log(responseData.data || publishedFightId);
-        window.location.assign('/AffiliateDashboard#promoted-fights');
+        if (managedAffiliate) onPublished();
+        else window.location.assign('/AffiliateDashboard#promoted-fights');
       } else {
         const problem = await response.json().catch(() => ({}));
         if (response.status === 401 || response.status === 403) {
