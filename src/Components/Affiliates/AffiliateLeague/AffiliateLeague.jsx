@@ -1,8 +1,7 @@
 import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import Link, { useAffiliateCommandAccount, affiliateCommandRead } from '@/Components/Affiliates/AffiliateCommandContext';
 import { toast } from 'react-toastify';
 import {
   FaArrowLeft,
@@ -85,8 +84,7 @@ const formatMemberDate = (value) => {
 };
 
 const AffiliateLeague = () => {
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
-  const authLoading = useSelector((state) => state.affiliateAuth.loading);
+  const { affiliate, authLoading, ownerAccount } = useAffiliateCommandAccount();
   const joinedMembers = useMemo(() => safeArray(affiliate?.usersJoined), [affiliate?.usersJoined]);
 
   const [members, setMembers] = useState([]);
@@ -111,12 +109,14 @@ const AffiliateLeague = () => {
 
       try {
         try {
-          const managed = await fullCardRequest('/api/affiliates/me/league-members', { kind: 'affiliate' });
+          const rosterRequest = affiliateCommandRead('/api/affiliates/me/league-members', ownerAccount);
+          const managed = await fullCardRequest(rosterRequest.path, { headers: rosterRequest.headers });
           if (active && Array.isArray(managed?.members)) {
             setMembers(managed.members);
             return;
           }
         } catch (managedError) {
+          if (ownerAccount) throw managedError;
           console.warn('Managed affiliate roster unavailable; using directory fallback.', managedError);
         }
         const response = await fetch(`${API_BASE}/api/public/user-directory?refresh=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
@@ -189,6 +189,7 @@ const AffiliateLeague = () => {
   const referralUrl = `https://www.fantasymmadness.com/my-fantasy-team?league=${encodeURIComponent(getAffiliateNameSlug(affiliate) || 'league')}&referenceId=${encodeURIComponent(affiliate?._id || '')}`;
 
   const manageMember = async (member, action) => {
+    if (ownerAccount) return;
     const labels = { archive: 'archived', restore: 'restored', mark_test: 'moved to Test accounts', unmark_test: 'returned to the active roster', remove: 'removed from this affiliate league' };
     if (action === 'remove' && !window.confirm(`Remove ${member.email} from this affiliate's office? Their FANTASY MMADNESS account, wallet, predictions and winnings will not be deleted.`)) return;
     if (action === 'mark_test' && !window.confirm(`Mark ${member.email} as a test account?\n\nThis only moves the member to the Test accounts list. It does not change email verification, login access, wallet, predictions, or winnings.`)) return;
@@ -348,19 +349,19 @@ const AffiliateLeague = () => {
                                 <strong>{member.name}</strong><small>{member.email}</small>
                                 <div className="affiliate-roster-actions">
                                   {member.removed || member.archived ? (
-                                    <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'restore')}><FaUndo /> Restore</button>
+                                    <button type="button" disabled={Boolean(ownerAccount || memberAction)} onClick={() => manageMember(member, 'restore')}><FaUndo /> Restore</button>
                                   ) : (
                                     <>
-                                      <button type="button" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'archive')}><FaArchive /> Archive</button>
+                                      <button type="button" disabled={Boolean(ownerAccount || memberAction)} onClick={() => manageMember(member, 'archive')}><FaArchive /> Archive</button>
                                       <button
                                         type="button"
-                                        disabled={Boolean(memberAction)}
+                                        disabled={Boolean(ownerAccount || memberAction)}
                                         title={member.testAccount ? 'Remove the test-account label' : 'Move this member to the Test accounts list'}
                                         onClick={() => manageMember(member, member.testAccount ? 'unmark_test' : 'mark_test')}
                                       >
                                         {member.testAccount ? 'Remove test label' : 'Mark as test'}
                                       </button>
-                                      <button type="button" className="is-remove" disabled={Boolean(memberAction)} onClick={() => manageMember(member, 'remove')}><FaTrash /> Remove</button>
+                                      <button type="button" className="is-remove" disabled={Boolean(ownerAccount || memberAction)} onClick={() => manageMember(member, 'remove')}><FaTrash /> Remove</button>
                                     </>
                                   )}
                                 </div>

@@ -2,8 +2,7 @@ import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import React, { useEffect, useState } from 'react';
 import { affiliateHeaders } from '@/Utils/authFetch';
 import Head from 'next/head';
-import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import Link, { useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import { toast } from 'react-toastify';
 import {
   FaArrowRight,
@@ -32,8 +31,7 @@ import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 const API_BASE = PUBLIC_API_BASE_URL;
 
 const AffiliateProfile = () => {
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
-  const authLoading = useSelector((state) => state.affiliateAuth.loading);
+  const { affiliate, authLoading, ownerAccount } = useAffiliateCommandAccount();
 
   const [profileUrl, setProfileUrl] = useState(affiliate?.profileUrl || null);
   const [profilePreview, setProfilePreview] = useState(
@@ -78,6 +76,7 @@ const AffiliateProfile = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (ownerAccount) return;
     if (savingProfile || !affiliateId) return;
 
     setSavingProfile(true);
@@ -201,7 +200,7 @@ const AffiliateProfile = () => {
 
                   <div className="affiliate-settings-submit-row">
                     <span><FaShieldAlt /> Public profile fields and image upload remain attached to the authenticated affiliate record.</span>
-                    <button type="submit" className="theme-btn theme-btn-primary" disabled={savingProfile}>
+                    <button type="submit" className="theme-btn theme-btn-primary" disabled={Boolean(ownerAccount) || savingProfile}>
                       <FaSave /> {savingProfile ? 'Saving profile…' : 'Save profile'}
                     </button>
                   </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
+import Link, { useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   FaArrowLeft,
@@ -28,8 +28,7 @@ const FIGHTS_PER_PAGE = 6;
 
 const PastPromotions = () => {
   const dispatch = useDispatch();
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
-  const authLoading = useSelector((state) => state.affiliateAuth.loading);
+  const { affiliate, authLoading } = useAffiliateCommandAccount();
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
 

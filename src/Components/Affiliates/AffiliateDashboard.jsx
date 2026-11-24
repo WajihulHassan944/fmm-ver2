@@ -8,6 +8,7 @@ import AffiliateAddNewMatch from './AffiliateAddNewMatch';
 import AffiliateMatchDetails from './AffiliateMatchDetails';
 import { fetchMatches } from '../../Redux/matchSlice';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
+import { affiliateCommandHref } from './AffiliateCommandContext';
 import { ExperienceEmptyState, ExperienceSectionHeading } from '@/Components/Theme/ExperiencePrimitives';
 import {
   AFFILIATE_AVATAR_FALLBACK,
@@ -19,7 +20,7 @@ import {
   safeArray,
   useImageFallback,
 } from '@/Utils/fightExperience';
-import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
+import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL, safeFetchJson } from '@/Utils/publicApi';
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const MAX_CARDS = 5;
@@ -45,7 +46,9 @@ const isApprovedAffiliateTemplate = (match = {}) => {
 const isPromotableLiveFight = (match = {}) => (
   !isShadowLikeFight(match)
   && getFightStatus(match) !== 'past'
-  && !/draft|cancel/i.test(String(match?.matchStatus || match?.status || ''))
+  && !match?.prizesSettledAt && !match?.settledAt
+  && !/draft|cancel|void|refund|settled/i.test(String(match?.matchStatus || match?.status || ''))
+  && !match?.affiliateId
   && String(match?.matchBy || '').toLowerCase() !== 'affiliate'
   && !match?.sourceShadowId
   && !match?.sourceLiveMatchId
@@ -97,6 +100,26 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
   const matchStatus = useSelector((state) => state.matches.status);
 
   const [shadowMatchId, setShadowMatchId] = useState(null);
+  const [selectedLiveFight, setSelectedLiveFight] = useState(null);
+  const [homepageFights, setHomepageFights] = useState([]);
+  const [liveInventoryStatus, setLiveInventoryStatus] = useState('loading');
+
+  useEffect(() => {
+    let active = true;
+    Promise.allSettled([
+      safeFetchJson('/api/public/homepage/promoted-fights', { limit: 24 }),
+      safeFetchJson('/api/public/prediction-fights', { limit: 100 }),
+    ]).then(([promoted, scheduled]) => {
+      if (!active) return;
+      const rows = [promoted, scheduled].flatMap((result) => result.status === 'fulfilled' ? extractAffiliatePromotedRows(result.value) : []);
+      setHomepageFights(dedupeAffiliateFightRows(rows).filter(isPromotableLiveFight).sort((a, b) => {
+        const slot = (fight) => Number(fight.homepageSlot) > 0 ? Number(fight.homepageSlot) : Infinity;
+        return (slot(a) - slot(b)) || Number(Boolean(b.homepagePromoted)) - Number(Boolean(a.homepagePromoted));
+      }));
+      setLiveInventoryStatus(promoted.status === 'rejected' && scheduled.status === 'rejected' ? 'error' : 'ready');
+    });
+    return () => { active = false; };
+  }, []);
   const [promotionSourceType, setPromotionSourceType] = useState('shadow');
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null, initialMatch: null });
   const [promoMatches, setPromoMatches] = useState([]);
@@ -219,10 +242,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
     [promoMatches],
   );
 
-  const livePromotionFights = useMemo(
-    () => dedupeAffiliateFightRows(liveMatches.filter(isPromotableLiveFight)),
-    [liveMatches],
-  );
+  const livePromotionFights = homepageFights;
 
   const legacyPromotedFights = useMemo(
     () => dedupeAffiliateFightRows(safeArray(promoMatches).filter((match) => isPromotedByAffiliate(match, affiliateId))),
@@ -242,11 +262,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
     (match) => String(match?.affiliateId || '') === affiliateId,
   ).length;
 
-  const workspaceHref = (path) => {
-    if (!managedAffiliate) return path;
-    const query = new URLSearchParams({ affiliate: affiliateId, workspace: path });
-    return `/owner?${query}`;
-  };
+  const workspaceHref = (path) => managedAffiliate ? affiliateCommandHref(affiliateId, path) : path;
 
   const fullName = [affiliate?.firstName, affiliate?.lastName]
     .filter(Boolean)
@@ -318,6 +334,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
         <AffiliateAddNewMatch
           matchId={shadowMatchId}
           sourceType={promotionSourceType}
+          initialLiveFight={promotionSourceType === 'live' ? selectedLiveFight : null}
           managedAffiliate={managedAffiliate}
           onPublished={() => setShadowMatchId(null)}
         />
@@ -350,8 +367,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
             <nav>
               <a href="#shadow-templates">Fight inventory</a>
               <a href="#live-campaign-room">Live campaigns</a>
-              {!managedAffiliate && <Link href="/promoter/full-cards">Full Card Promoter</Link>}
-              {!managedAffiliate && <Link href="/affiliate-money">Money desk</Link>}
+              <Link href={workspaceHref('/promoter/full-cards')}>Full Card Promoter</Link>
+              <Link href={workspaceHref('/affiliate-money')}>Money desk</Link>
             </nav>
           </div>
         </section>
@@ -371,9 +388,9 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                   <a href="#shadow-templates" className="theme-btn theme-btn-primary">
                     Create a promotion <FaPlus />
                   </a>
-                  {!managedAffiliate && <Link href="/affiliate-league" className="theme-btn theme-btn-secondary">
+                  <Link href={workspaceHref('/affiliate-league')} className="theme-btn theme-btn-secondary">
                     Manage league
-                  </Link>}
+                  </Link>
                 </div>
               </div>
             </div>
@@ -390,7 +407,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
           </div>
         </section>
 
-        {!managedAffiliate && <AffiliateExperienceNav />}
+        <AffiliateExperienceNav />
 
         <main className="xp-page-main xp-dashboard-main affiliate-dashboard-main-final">
           <div className="theme-container">
@@ -452,7 +469,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                   <span><small>Manage</small><strong>Payment settings</strong><em>Maintain payout destinations and request available funds.</em></span>
                   <FaArrowRight />
                 </Link>
-                <Link href="/affiliate-guides" className="is-gold">
+                <Link href={workspaceHref('/affiliate-guides')} className="is-gold">
                   <FaRegPlayCircle />
                   <span><small>Learn</small><strong>Affiliate playbook</strong><em>Follow the complete launch, sharing and growth workflow.</em></span>
                   <FaArrowRight />
@@ -467,7 +484,11 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                 description="Create an affiliate campaign from a scheduled or live fight. These fights remain live records and do not become Shadow templates."
               />
 
-              {livePromotionFights.length ? (
+              {liveInventoryStatus === 'loading' ? (
+                <p role="status">Loading upcoming website fights…</p>
+              ) : liveInventoryStatus === 'error' ? (
+                <p role="alert">The website fight feed could not be loaded. Refresh to try again.</p>
+              ) : livePromotionFights.length ? (
                 <>
                   <div className="xp-affiliate-fight-grid">
                     {livePromotionFights.slice(liveStartIndex, liveStartIndex + MAX_CARDS).map((match, index) => {
@@ -486,11 +507,17 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                             <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
                             <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Live fight promotion'}</span></div>
                             <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
+                              setSelectedLiveFight(match);
                               setPromotionSourceType('live');
                               setShadowMatchId(fightId);
                             }}>
                               Promote live fight <FaArrowRight />
                             </button>
+                            {managedAffiliate && (
+                              <Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: fightId, launchTitle: match.matchName } }}>
+                                Prepare affiliate email
+                              </Link>
+                            )}
                           </div>
                         </article>
                       );
@@ -577,7 +604,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                 eyebrow="Live campaign room"
                 title="Promoted fights"
                 description="Open campaign details or copy the existing public promotion link for your audience."
-                action={managedAffiliate ? undefined : { href: '/past-promotions', label: 'View campaign archive' }}
+                action={{ href: workspaceHref('/past-promotions'), label: 'View campaign archive' }}
               />
 
               {promotedFights.length ? (
@@ -695,10 +722,10 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                 </p>
               </div>
               <div className="affiliate-dashboard-link-grid">
-                {!managedAffiliate && <Link href="/affiliate-league"><FaTrophy /><span><strong>League manager</strong><small>Members and standings</small></span><FaArrowRight /></Link>}
-                {!managedAffiliate && <Link href="/AffiliateProfile"><FaUserFriends /><span><strong>Creator profile</strong><small>Public identity and referral</small></span><FaArrowRight /></Link>}
-                {!managedAffiliate && <Link href="/past-promotions"><FaHistory /><span><strong>Past promotions</strong><small>Completed campaigns</small></span><FaArrowRight /></Link>}
-                <Link href="/HowItWorks"><FaBullhorn /><span><strong>How it works</strong><small>Creator operating guide</small></span><FaArrowRight /></Link>
+                <Link href={workspaceHref('/affiliate-league')}><FaTrophy /><span><strong>League manager</strong><small>Members and standings</small></span><FaArrowRight /></Link>
+                <Link href={workspaceHref('/AffiliateProfile')}><FaUserFriends /><span><strong>Creator profile</strong><small>Public identity and referral</small></span><FaArrowRight /></Link>
+                <Link href={workspaceHref('/past-promotions')}><FaHistory /><span><strong>Past promotions</strong><small>Completed campaigns</small></span><FaArrowRight /></Link>
+                <Link href={workspaceHref('/HowItWorks')}><FaBullhorn /><span><strong>How it works</strong><small>Creator operating guide</small></span><FaArrowRight /></Link>
               </div>
             </section>
           </div>

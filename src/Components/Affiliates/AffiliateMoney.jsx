@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import Link, { useAffiliateCommandAccount, affiliateCommandRead } from '@/Components/Affiliates/AffiliateCommandContext';
 import { FaArrowRight, FaBolt, FaCheckCircle, FaClock, FaExclamationTriangle, FaHistory, FaTimesCircle, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import AffiliateExperienceNav from './AffiliateExperienceNav';
@@ -17,6 +17,7 @@ const PAYOUT_ICON = {
 };
 
 const AffiliateMoney = () => {
+  const { ownerAccount } = useAffiliateCommandAccount();
   const [data, setData] = useState(null);
   const [referrals, setReferrals] = useState(null);
   const [referralError, setReferralError] = useState('');
@@ -30,12 +31,14 @@ const AffiliateMoney = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_BASE}/api/affiliates/me/money`, { headers: affiliateHeaders() });
+      const moneyRequest = affiliateCommandRead('/api/affiliates/me/money', ownerAccount);
+      const response = await fetch(`${API_BASE}${moneyRequest.path}`, { headers: moneyRequest.headers });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Could not load your earnings.');
       setData(payload);
       try {
-        const referralResponse = await fetch(`${API_BASE}/api/affiliates/me/fight-referrals`, { headers: affiliateHeaders() });
+        const referralRequest = affiliateCommandRead('/api/affiliates/me/fight-referrals', ownerAccount);
+        const referralResponse = await fetch(`${API_BASE}${referralRequest.path}`, { headers: referralRequest.headers });
         const referralPayload = await referralResponse.json().catch(() => ({}));
         if (!referralResponse.ok) throw new Error(referralPayload.message || 'Referral counts are unavailable.');
         setReferrals(referralPayload); setReferralError('');
@@ -45,7 +48,7 @@ const AffiliateMoney = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [ownerAccount]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -63,6 +66,7 @@ const AffiliateMoney = () => {
 
   const requestPayout = async (event) => {
     event.preventDefault();
+    if (ownerAccount) return;
     const value = Math.floor(Number(amount) || 0);
     if (value <= 0) { setNotice('Enter how much you want paid out.'); return; }
     if (value > requestable) { setNotice(`You can request up to ${coins(requestable)} right now.`); return; }
@@ -166,9 +170,9 @@ const AffiliateMoney = () => {
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 placeholder={String(requestable || 0)}
-                disabled={requestable <= 0 || requesting}
+                disabled={Boolean(ownerAccount) || requestable <= 0 || requesting}
               />
-              <button type="submit" className="theme-btn theme-btn-primary" disabled={requestable <= 0 || requesting}>
+              <button type="submit" className="theme-btn theme-btn-primary" disabled={Boolean(ownerAccount) || requestable <= 0 || requesting}>
                 {requesting ? 'Requesting…' : 'Request payout'} <FaArrowRight />
               </button>
               {notice && <p className="affiliate-money-inline-note">{notice}</p>}

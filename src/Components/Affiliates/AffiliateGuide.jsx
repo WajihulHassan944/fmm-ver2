@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/Components/Affiliates/AffiliateCommandContext';
 import { FaArrowRight, FaBullhorn, FaChartLine, FaCheckCircle, FaFistRaised, FaGift, FaMicrophone, FaQrcode, FaShareAlt, FaShieldAlt, FaUserCircle, FaWallet } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 

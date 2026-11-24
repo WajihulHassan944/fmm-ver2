@@ -24,7 +24,7 @@ const affiliateTokensToUsd = (tokens) => {
 const affiliateUsdToTokens = (dollars) => String(Math.max(0, Math.round((Number(dollars) || 0) / AFFILIATE_TOKEN_USD_RATE)));
 const selectNumericValue = (event) => event.currentTarget.select();
 
-const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', managedAffiliate, onPublished }) => {
+const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight, managedAffiliate, onPublished }) => {
   const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const affiliate = managedAffiliate || signedInAffiliate;
   const [promoMatches, setPromoMatches] = useState([]);
@@ -57,7 +57,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', managedAffiliate
 
       try {
         if (sourceType === 'live') {
-          const data = await fetchPublicFights({ limit: 500 });
+          const data = initialLiveFight ? [initialLiveFight] : await fetchPublicFights({ limit: 500 });
           if (active) setPromoMatches(safeArray(data));
         } else {
           const response = await fetch(`${API_BASE}/shadow?compact=promotion&limit=150&scoredOnly=true`);
@@ -80,7 +80,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', managedAffiliate
     return () => {
       active = false;
     };
-  }, [sourceType]);
+  }, [sourceType, initialLiveFight]);
 
   const promoDetails = useMemo(
     () => safeArray(promoMatches).find((match) => String(getFightId(match)) === String(matchId || '')),
@@ -92,17 +92,17 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', managedAffiliate
 
     setFormData((current) => ({
       ...current,
-      matchTokens: current.matchTokens || promoDetails.matchTokens || '',
-      matchTokensUsd: current.matchTokensUsd || affiliateTokensToUsd(promoDetails.matchTokens),
-      pot: current.pot || promoDetails.pot || '',
-      potUsd: current.potUsd || affiliateTokensToUsd(promoDetails.pot),
+      matchTokens: sourceType === 'live' ? current.matchTokens : current.matchTokens || promoDetails.matchTokens || '',
+      matchTokensUsd: sourceType === 'live' ? current.matchTokensUsd : current.matchTokensUsd || affiliateTokensToUsd(promoDetails.matchTokens),
+      pot: sourceType === 'live' ? current.pot : current.pot || promoDetails.pot || '',
+      potUsd: sourceType === 'live' ? current.potUsd : current.potUsd || affiliateTokensToUsd(promoDetails.pot),
       promoterStakeUsd: current.promoterStakeUsd || affiliateTokensToUsd(current.promoterStake),
-      profit: current.profit || promoDetails.profit || '',
-      amountOverPotBudget: current.amountOverPotBudget || promoDetails.amountOverPotBudget || '',
+      profit: sourceType === 'live' ? current.profit : current.profit || promoDetails.profit || '',
+      amountOverPotBudget: sourceType === 'live' ? current.amountOverPotBudget : current.amountOverPotBudget || promoDetails.amountOverPotBudget || '',
       matchDate: current.matchDate || String(promoDetails.matchDate || '').slice(0, 10),
       matchTime: current.matchTime || String(promoDetails.matchTime || '').slice(0, 5),
     }));
-  }, [promoDetails]);
+  }, [promoDetails, sourceType]);
 
   // The default deal costs the promoter nothing: if the card fills it runs, and
   // if it does not it voids at lock and every entry is refunded. Nobody is ever

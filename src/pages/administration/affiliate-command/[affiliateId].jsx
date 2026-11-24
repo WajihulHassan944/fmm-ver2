@@ -2,11 +2,33 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import AffiliateDashboard from '@/Components/Affiliates/AffiliateDashboard';
+import AffiliatePromotion from '@/Components/Affiliates/AffiliateAllFightPromotion';
+import AffiliateMoney from '@/Components/Affiliates/AffiliateMoney';
+import AffiliateLeague from '@/Components/Affiliates/AffiliateLeague/AffiliateLeague';
+import AffiliateProfile from '@/Components/Affiliates/AffiliateProfile';
+import PastPromotions from '@/Components/Affiliates/PastPromotions/PastPromotions';
+import AffiliateAccountSettings from '@/Components/Affiliates/AffiliateAccountSettings';
+import AffiliateGuide from '@/Components/Affiliates/AffiliateGuide';
+import FullCards from '@/pages/promoter/full-cards';
+import { AffiliateCommandContext } from '@/Components/Affiliates/AffiliateCommandContext';
 import AdminPrivateRoute from '@/Components/PrivateRoute/PrivateRouteAdmin';
 import { adminHeaders } from '@/Utils/authFetch';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
-function AffiliateCommand({ affiliateId }) {
+const workspaces = {
+  promotions: AffiliatePromotion,
+  earnings: AffiliateMoney,
+  league: AffiliateLeague,
+  profile: AffiliateProfile,
+  archive: PastPromotions,
+  'payment-settings': AffiliateAccountSettings,
+  playbook: AffiliateGuide,
+  'how-it-works': AffiliateGuide,
+  'full-cards': FullCards,
+};
+
+function AffiliateCommand({ affiliateId, section }) {
+  const Workspace = Object.hasOwn(workspaces, section) ? workspaces[section] : null;
   const [affiliate, setAffiliate] = useState(null);
   const [error, setError] = useState('');
 
@@ -44,14 +66,16 @@ function AffiliateCommand({ affiliateId }) {
         {affiliate && (
           <>
             <p>Owner support for {[affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || affiliate.playerName || 'this affiliate'}</p>
-            <Link className="admin-action-primary" href={`/owner?affiliate=${encodeURIComponent(affiliateId)}`}>
-              View full affiliate workspace
-            </Link>
+            {Workspace && <Link href={`/administration/affiliate-command/${encodeURIComponent(affiliateId)}`}>Back to Affiliate Command Center</Link>}
           </>
         )}
         {!affiliate && <p role={error ? 'alert' : 'status'}>{error || 'Loading Affiliate Command Center 3.0…'}</p>}
       </div>
-      {affiliate && <AffiliateDashboard managedAffiliate={affiliate} />}
+      {affiliate && (
+        <AffiliateCommandContext.Provider value={affiliate}>
+          {Workspace ? <Workspace key={section} /> : <AffiliateDashboard managedAffiliate={affiliate} />}
+        </AffiliateCommandContext.Provider>
+      )}
     </>
   );
 }
@@ -62,7 +86,7 @@ export default function AffiliateCommandPage() {
 
   return (
     <AdminPrivateRoute>
-      <AffiliateCommand key={affiliateId} affiliateId={affiliateId} />
+      <AffiliateCommand key={affiliateId} affiliateId={affiliateId} section={typeof query.section === 'string' ? query.section : ''} />
     </AdminPrivateRoute>
   );
 }

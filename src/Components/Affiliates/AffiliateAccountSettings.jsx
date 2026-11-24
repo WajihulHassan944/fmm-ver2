@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import Link, { useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaDollarSign, FaSave, FaShieldAlt, FaTimes, FaUserFriends, FaWallet } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
@@ -19,8 +18,7 @@ const PAYMENT_METHODS = [
 ];
 
 const AffiliateAccountSettings = () => {
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
-  const authLoading = useSelector((state) => state.affiliateAuth.loading);
+  const { affiliate, authLoading, ownerAccount } = useAffiliateCommandAccount();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [paymentValues, setPaymentValues] = useState({ Venmo: '', CashApp: '', PayPal: '' });
   const [savingPayment, setSavingPayment] = useState(false);
@@ -45,6 +43,7 @@ const AffiliateAccountSettings = () => {
 
   const savePayment = async (event) => {
     event.preventDefault();
+    if (ownerAccount) return;
     if (savingPayment || !affiliate?._id) return;
     const paymentValue = paymentValues[selectedPaymentMethod]?.trim() || '';
     if (!selectedPaymentMethod || !paymentValue) {
@@ -75,6 +74,7 @@ const AffiliateAccountSettings = () => {
 
   const confirmPayout = async (event) => {
     event.preventDefault();
+    if (ownerAccount) return;
     if (requestingPayout || !affiliate?._id) return;
     const amount = Number(payoutAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -183,14 +183,14 @@ const AffiliateAccountSettings = () => {
                       </label>
                     ))}
                   </div>
-                  <button type="submit" className="theme-btn theme-btn-primary" disabled={savingPayment}><FaSave /> {savingPayment ? 'Saving payment…' : 'Save payment method'}</button>
+                  <button type="submit" className="theme-btn theme-btn-primary" disabled={Boolean(ownerAccount) || savingPayment}><FaSave /> {savingPayment ? 'Saving payment…' : 'Save payment method'}</button>
                 </form>
 
                 <article className="affiliate-settings-card affiliate-payout-settings-card">
                   <div className="affiliate-settings-card-heading"><FaDollarSign /><span><small>Affiliate balance</small><h2>Request a payout</h2></span></div>
                   <div className="affiliate-payout-balance"><span>Available balance</span><strong>{balance.toLocaleString()}</strong><small>Affiliate credits</small></div>
                   <p>Requests are queued for administrator review. Your existing payout endpoint and amount validation remain intact.</p>
-                  <button type="button" className="theme-btn theme-btn-secondary" disabled={balance <= 0} onClick={() => setIsPayoutOpen(true)}><FaDollarSign /> Request a payout</button>
+                  <button type="button" className="theme-btn theme-btn-secondary" disabled={Boolean(ownerAccount) || balance <= 0} onClick={() => setIsPayoutOpen(true)}><FaDollarSign /> Request a payout</button>
                 </article>
               </div>
             </section>
@@ -210,7 +210,7 @@ const AffiliateAccountSettings = () => {
               <div className="affiliate-settings-card-heading"><FaDollarSign /><span><small>Affiliate payout</small><h2>Request funds</h2></span></div>
               <p>Your current balance is <strong>{balance.toLocaleString()}</strong>.</p>
               <label className="affiliate-settings-control"><span>Requested amount</span><input type="number" min="1" step="0.01" max={balance || undefined} value={payoutAmount} onChange={(event) => setPayoutAmount(event.target.value)} placeholder="0.00" autoFocus required /></label>
-              <div className="affiliate-settings-modal-actions"><button type="button" className="theme-btn theme-btn-secondary" onClick={() => setIsPayoutOpen(false)} disabled={requestingPayout}>Cancel</button><button type="submit" className="theme-btn theme-btn-primary" disabled={requestingPayout}>{requestingPayout ? 'Submitting…' : 'Confirm payout'}</button></div>
+              <div className="affiliate-settings-modal-actions"><button type="button" className="theme-btn theme-btn-secondary" onClick={() => setIsPayoutOpen(false)} disabled={requestingPayout}>Cancel</button><button type="submit" className="theme-btn theme-btn-primary" disabled={Boolean(ownerAccount) || requestingPayout}>{requestingPayout ? 'Submitting…' : 'Confirm payout'}</button></div>
             </form>
           </div>
         )}

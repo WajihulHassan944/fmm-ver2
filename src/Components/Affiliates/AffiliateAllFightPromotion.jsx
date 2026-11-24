@@ -1,6 +1,6 @@
 import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import Head from 'next/head';
-import Link from 'next/link';
+import Link, { useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
@@ -13,7 +13,7 @@ import ShareQrCode from '@/Components/Common/ShareQrCode';
 const safeNumber = (value) => Number(value || 0).toLocaleString();
 
 export default function AffiliateAllFightPromotion() {
-  const affiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
+  const { affiliate } = useAffiliateCommandAccount();
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
   const dispatch = useDispatch();

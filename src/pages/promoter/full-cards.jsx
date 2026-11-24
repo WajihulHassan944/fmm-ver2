@@ -1,3 +1,4 @@
+import { affiliateCommandRead, useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -17,12 +18,13 @@ const emptyBout = (index = 0) => ({ boutLabel: index === 0 ? 'MAIN EVENT' : inde
 const emptyCard = { eventName: '', organizationName: '', eventPoster: '', promotionLogo: '', eventDate: '', startTime: '', venue: '', location: '', description: '', fullCardPrize: 0, fullCardPrizeUsd: '', bouts: [emptyBout(0)] };
 
 export default function FullCardPromoterDesk() {
+  const { ownerAccount } = useAffiliateCommandAccount();
   const [cards, setCards] = useState([]); const [permission, setPermission] = useState(null);
   const [form, setForm] = useState(emptyCard); const [editingId, setEditingId] = useState('');
   const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [message, setMessage] = useState('');
   const [qr, setQr] = useState('');
   const [publishedCard, setPublishedCard] = useState(null);
-  const load = async ({ preserveMessage = false } = {}) => { setLoading(true); if (!preserveMessage) setMessage(''); try { const data = await fullCardRequest('/api/affiliates/me/full-cards', { kind: 'affiliate' }); setCards(data.cards || []); setPermission(data.permission || {}); } catch (e) { setMessage(e.message); } finally { setLoading(false); } };
+  const load = async ({ preserveMessage = false } = {}) => { setLoading(true); if (!preserveMessage) setMessage(''); try { const request = affiliateCommandRead('/api/affiliates/me/full-cards', ownerAccount); const data = await fullCardRequest(request.path, { headers: request.headers }); setCards(data.cards || []); setPermission(data.permission || {}); } catch (e) { setMessage(e.message); } finally { setLoading(false); } };
   useEffect(() => { load(); }, []);
   const updateBout = (index, key, value) => setForm((old) => ({ ...old, bouts: old.bouts.map((bout, i) => {
     if (i !== index) return bout;
@@ -31,9 +33,10 @@ export default function FullCardPromoterDesk() {
     return { ...bout, [key]: value };
   }) }));
   const move = (index, delta) => setForm((old) => { const bouts = [...old.bouts]; const target = index + delta; if (target < 0 || target >= bouts.length) return old; [bouts[index], bouts[target]] = [bouts[target], bouts[index]]; return { ...old, bouts }; });
-  const image = async (event, setter) => { try { setMessage('Uploading image…'); setter(await uploadFullCardImage(event.target.files?.[0])); setMessage('Image uploaded.'); } catch (e) { setMessage(e.message); } };
+  const image = async (event, setter) => { if (ownerAccount) return; try { setMessage('Uploading image…'); setter(await uploadFullCardImage(event.target.files?.[0])); setMessage('Image uploaded.'); } catch (e) { setMessage(e.message); } };
   const valid = useMemo(() => form.eventName && form.eventDate && form.bouts.length && form.bouts.every((b) => b.fighterAName && b.fighterBName), [form]);
   const save = async (publish = false) => {
+    if (ownerAccount) return;
     if (!valid) return setMessage('Add the event name, date, and both fighters for every bout.');
     setSaving(true); setMessage('');
     try {
@@ -78,7 +81,7 @@ export default function FullCardPromoterDesk() {
       {publishedCard && <section className="full-card-notice" aria-live="polite"><h2>{publishedCard.eventName} is published</h2><p>Share this link with fans. It opens your full card and includes your promoter code.</p><input aria-label="Your full card promotional link" readOnly value={publishedCard.shareUrl} onFocus={(event) => event.target.select()} style={{ width: '100%', padding: 12 }} /><button type="button" onClick={() => copyLink(publishedCard.shareUrl)}><FaCopy /> Copy promotional link</button> <a href={publishedCard.shareUrl} target="_blank" rel="noopener noreferrer">Open full card</a></section>}
       {!loading && cards.some(isPublished) && <section className="full-card-notice" aria-label="Quick links for published cards"><h2>Already published? Get your link here</h2><p>Your saved cards are below. You do not need to publish them again.</p>{cards.filter(isPublished).map((card) => <div key={card.id} style={{ marginTop: 12 }}><strong>{card.eventName}</strong><div><button type="button" onClick={() => copyLink(card.shareUrl)}><FaCopy /> Copy {card.eventName} promotional link</button> <a href={card.shareUrl} target="_blank" rel="noopener noreferrer">Open card</a></div></div>)}</section>}
       {!loading && !permission && <section className="full-card-locked"><h2>Promoter access</h2><p>Full Card tools are available to approved FANTASY MMADNESS promoters through a private invitation.</p></section>}
-      {permission && <>
+      {permission && !ownerAccount && <>
         <section className="full-card-builder">
           <header><b>01</b><div><p>EVENT DETAILS</p><h2>{editingId ? 'Edit Full Card' : 'Create Full Card'}</h2></div><button type="button" onClick={() => { setEditingId(''); setForm(emptyCard); }}>New card</button></header>
           <div className="full-card-fields">

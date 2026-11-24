@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link, { affiliateCommandHref, useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import { useRouter } from 'next/router';
 import { FaBullhorn, FaCog, FaCrown, FaHistory, FaIdBadge, FaInfoCircle, FaLayerGroup, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
@@ -19,12 +19,13 @@ const ITEMS = [
 
 const AffiliateExperienceNav = () => {
   const router = useRouter();
+  const { ownerAccount } = useAffiliateCommandAccount();
 
   return (
     <nav className="affiliate-experience-nav" aria-label="Affiliate workspace">
       <div className="theme-container affiliate-experience-nav-inner">
         {ITEMS.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href} className={router.pathname === href ? 'is-active' : ''}>
+          <Link key={href} href={href} className={(ownerAccount ? router.asPath.split('#')[0] === affiliateCommandHref(ownerAccount._id, href) : router.pathname === href) ? 'is-active' : ''}>
             <Icon aria-hidden="true" />
             <span>{label}</span>
           </Link>
