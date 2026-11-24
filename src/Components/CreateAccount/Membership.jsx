@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MembershipCheckout from './MembershipCheckout';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { userHeaders } from '@/Utils/authFetch';
 
 const Membership = ({ email }) => {
@@ -49,8 +49,9 @@ const handleSelectPlan = async (plan) => {
 
             if (response.ok) {
                 toast.success('You have successfully subscribed to the Free membership plan.');
-                router.push('/home');
-                router.refresh();
+                const next = String(router.query.next || router.query.returnTo || '').trim();
+                const safeNext = next.startsWith('/') && !next.startsWith('//') && !/[\\\u0000-\u001f\u007f]/.test(next);
+                window.location.assign(safeNext ? next : '/UserDashboard');
 
               } else {
                 toast.error('Failed to subscribe to the Free membership plan');
