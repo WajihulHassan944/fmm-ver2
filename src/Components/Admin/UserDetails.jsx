@@ -2,6 +2,7 @@ import { affiliateProfileImage, AFFILIATE_LOGO } from '@/Utils/affiliateProfileI
 import React, { useEffect, useState } from 'react';
 import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
+import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
 import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
 
@@ -48,23 +49,24 @@ const UserDetails = ({ user, affiliates = [] }) => {
 
   const handleApprove = async () => {
     try {
-      const response = await fetch(`https://fantasymmadness-game-server-three.vercel.app/affiliates/${user._id}/verify`, {
+      const response = await fetch(`${PUBLIC_API_BASE_URL}/affiliates/${affiliateId}/verify`, {
         method: 'POST',
         headers: adminHeaders({
           'Content-Type': 'application/json',
         }),
       });
 
+      const result = await response.json().catch(() => ({}));
       if (response.ok) {
         alert('User verified successfully');
         setIsVerified(true);
         setShowEmailTemplate(true);
       } else {
-        alert('Failed to verify user');
+        alert(result.message || result.error || `Failed to approve affiliate (HTTP ${response.status}).`);
       }
     } catch (error) {
       console.error('Error verifying user:', error);
-      alert('An error occurred while verifying the user');
+      alert(`Affiliate approval request failed: ${error?.message || 'Network error'}`);
     }
   };
 
