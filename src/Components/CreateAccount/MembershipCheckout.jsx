@@ -40,6 +40,13 @@ const splitName = (name = '') => {
   return { firstName: pieces.shift() || '', lastName: pieces.join(' ') || '' };
 };
 
+function getCheckoutReturnPath(value) {
+  if (!value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u001f\u007f]/.test(value)) return '';
+  const path = new URL(value, 'https://www.fantasymmadness.com');
+  if (path.pathname.startsWith('//') || /^\/(checkout|auth|login|CreateAccount)(\/|$)/i.test(path.pathname)) return '';
+  return path.pathname + path.search + path.hash;
+}
+
 export default function MembershipCheckout() {
   const router = useRouter();
   const user = useSelector((state) => state?.user?.user || state?.user || null);
@@ -64,8 +71,17 @@ export default function MembershipCheckout() {
   const idempotencyKey = useRef('');
   const returnOrder = String(router.query.order || '').trim();
   const checkoutReturnStatus = String(router.query.status || '').trim().toLowerCase();
-  const requestedReturnTo = String(router.query.returnTo || '').trim();
-  const safeReturnTo = requestedReturnTo.startsWith('/') && !requestedReturnTo.startsWith('//') ? requestedReturnTo : '/';
+  const [previousPage, setPreviousPage] = useState('');
+  const requestedReturnTo = String(router.query.returnTo || router.query.next || '').trim();
+  const safeReturnTo = getCheckoutReturnPath(requestedReturnTo) || previousPage || '/UserDashboard';
+  const retryUrl = `/checkout?product=${isFmPlus ? 'fm-plus&plan=pass' : 'fm-coins'}&returnTo=${encodeURIComponent(safeReturnTo)}`;
+
+  useEffect(() => {
+    if (checkoutReturnStatus || !document.referrer) return;
+    const previous = new URL(document.referrer);
+    if (previous.origin !== window.location.origin) return;
+    setPreviousPage(getCheckoutReturnPath(previous.pathname + previous.search + previous.hash));
+  }, [checkoutReturnStatus]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -207,11 +223,11 @@ export default function MembershipCheckout() {
       setReturnCountdown(remaining);
       if (remaining <= 0) {
         window.clearInterval(timer);
-        router.replace(safeReturnTo);
+        window.location.replace(safeReturnTo);
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [paymentResult?.state, router, safeReturnTo]);
+  }, [paymentResult?.state, safeReturnTo]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -238,7 +254,7 @@ export default function MembershipCheckout() {
           email: form.email,
           billing: { ...form, ...name },
           opaqueData,
-          returnUrl: `${window.location.origin}/checkout?product=${isFmPlus ? 'fm-plus' : 'fm-coins'}&status=return${safeReturnTo !== '/' ? `&returnTo=${encodeURIComponent(safeReturnTo)}` : ''}`,
+          returnUrl: `${window.location.origin}/checkout?product=${isFmPlus ? 'fm-plus' : 'fm-coins'}&returnTo=${encodeURIComponent(safeReturnTo)}`,
         }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -293,7 +309,7 @@ export default function MembershipCheckout() {
           </header>
 
           {checkoutReturnStatus === 'cancelled' ? <section className="fm-checkout-card fm-payment-result is-cancelled">
-            <FaArrowLeft /><h2>PAYMENT CANCELLED</h2><p>No payment was charged or credited. Your selection is still available if you want to try again.</p><Link href={`/checkout?product=${isFmPlus ? 'fm-plus&plan=pass' : 'fm-coins'}`}>RETURN TO CHECKOUT</Link>
+            <FaArrowLeft /><h2>PAYMENT CANCELLED</h2><p>No payment was charged or credited. Your selection is still available if you want to try again.</p><Link href={retryUrl}>RETURN TO CHECKOUT</Link>
           </section> : (checkoutReturnStatus === 'return' || paymentResult?.state === 'success') ? <section className={`fm-checkout-card fm-payment-result is-${paymentResult?.state || 'checking'}`}>
             {paymentResult?.state === 'success' ? <FaCheck /> : <FaShieldAlt />}
             <h2>{paymentResult?.state === 'success' ? 'PAYMENT CONFIRMED' : paymentResult?.state === 'failed' ? 'PAYMENT NEEDS ATTENTION' : paymentResult?.state === 'pending' ? 'PAYMENT IS PROCESSING' : 'VERIFYING PAYMENT'}</h2>
@@ -306,7 +322,9 @@ export default function MembershipCheckout() {
             {paymentResult?.state === 'success' && returnCountdown !== null && returnCountdown > 0 ? (
               <small className="fm-checkout-autoreturn">Taking you back in {returnCountdown}…</small>
             ) : null}
-            <Link href={paymentResult?.state === 'success' ? safeReturnTo : `/checkout?product=${isFmPlus ? 'fm-plus&plan=pass' : 'fm-coins'}`}>{paymentResult?.state === 'success' ? (safeReturnTo === '/' ? 'RETURN HOME' : 'CONTINUE NOW') : 'RETURN TO CHECKOUT'}</Link>
+            {paymentResult?.state === 'success'
+              ? <a href={safeReturnTo}>{safeReturnTo.startsWith('/fight/') ? 'BACK TO FIGHT' : 'CONTINUE NOW'}</a>
+              : <Link href={retryUrl}>RETURN TO CHECKOUT</Link>}
           </section> : <form onSubmit={submit}>
             {isFmPlus ? (
               <section className="fm-checkout-card fm-plus-products">
