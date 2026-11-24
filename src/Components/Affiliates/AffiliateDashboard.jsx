@@ -363,6 +363,12 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
           affiliateId={promoMatchDetails.affiliateId}
           initialMatch={promoMatchDetails.initialMatch}
           managedAffiliate={managedAffiliate}
+          onUnpublished={(id) => {
+            setAffiliatePromotedFights((items) => items.filter((item) => String(getFightId(item)) !== String(id)));
+            setRecentLiveCampaigns((items) => Object.fromEntries(Object.entries(items).filter(([, campaign]) => String(campaign.matchId) !== String(id))));
+            setPromoMatchDetails({ matchId: null, affiliateId: null, initialMatch: null });
+            setPublishedCount((count) => count + 1);
+          }}
         />
       </div>
     );
@@ -503,8 +509,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
             <section className="xp-page-section" id="available-fights">
               <ExperienceSectionHeading
                 eyebrow="Current fight inventory"
-                title="Fights featured on the website"
-                description="See the five homepage fight slots. For open fights, set your entry price and prize, then share with your league."
+                title="Upcoming fights featured on the website"
+                description="Pick an upcoming fight from the homepage, set your entry price and prize, and share with your league."
               />
 
               {campaignLookup === 'error' && (

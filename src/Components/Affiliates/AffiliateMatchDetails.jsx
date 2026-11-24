@@ -44,7 +44,7 @@ const isSameFightId = (match, targetId) => {
   ].some((candidate) => normalizeId(candidate) === id);
 };
 
-const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, managedAffiliate }) => {
+const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, managedAffiliate, onUnpublished }) => {
   const [showUsersPlayed, setShowUsersPlayed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [posterImage, setPosterImage] = useState('');
@@ -228,22 +228,25 @@ const actualProfit = extraActualProfit / 2;
   }
 
   const handleDeleteFight = async (id) => {
-    if (managedAffiliate && !window.confirm('Delete this affiliate’s fight promotion?')) return;
+    if (managedAffiliate && !window.confirm('Unpublish this affiliate campaign? It will be saved as a draft.')) return;
+    const endpoint = managedAffiliate
+      ? `/api/admin/affiliates/${encodeURIComponent(affiliateId)}/campaigns/${encodeURIComponent(id)}/unpublish`
+      : `/api/matches/${encodeURIComponent(id)}?affiliateId=${encodeURIComponent(affiliateId)}`;
     try {
-      const response = await fetch(`${API_BASE}/api/matches/${id}?affiliateId=${affiliateId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        method: managedAffiliate ? 'POST' : 'DELETE',
         headers: campaignHeaders(),
       });
-
-      if (response.ok) {
-        alert("Promotion Deleted");
-        window.location.reload();
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || 'The promotion could not be removed.');
+      if (managedAffiliate && onUnpublished) {
+        toast.success(result.message);
+        onUnpublished(id);
       } else {
-        const failure = await response.json().catch(() => ({}));
-        alert(failure.message || 'The promotion could not be deleted.');
+        window.location.reload();
       }
     } catch (error) {
-      console.error('Error deleting match:', error);
+      toast.error(error.message || 'The promotion could not be removed.');
     }
   };
 
@@ -498,7 +501,7 @@ const handleSave = async (blobUrl) => {
                 <FaChartLine /><span><strong>Open dashboard</strong><small>Review fight leaderboard and campaign performance.</small></span>
               </button>
               <button type="button" className="affiliate-campaign-action is-danger" onClick={() => handleDeleteFight(campaignMatchId)}>
-                <FaTrash /><span><strong>Delete fight</strong><small>Remove this promotion using the existing delete workflow.</small></span>
+                <FaTrash /><span><strong>{managedAffiliate ? 'Unpublish campaign' : 'Delete fight'}</strong><small>{managedAffiliate ? 'Remove an unused campaign from public view and keep it as a draft.' : 'Remove this promotion.'}</small></span>
               </button>
             </div>
           </section>

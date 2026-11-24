@@ -6,6 +6,10 @@ import { getFightId, getFightStatus } from '@/Utils/fightExperience';
 const HOMEPAGE_FEED = '/api/public/homepage/promoted-fights';
 const SCHEDULE_FEED = '/api/public/prediction-fights';
 
+function isPastCoverFight(fight) {
+  return getFightStatus({ ...fight, matchShadowStatus: undefined, matchShadowOpenStatus: undefined }) === 'past';
+}
+
 function canPromoteCoverFight(fight) {
   const source = [fight.sourceType, fight.matchType, fight.collection].join(' ');
   const status = String(fight.matchStatus || fight.status || '');
@@ -15,7 +19,7 @@ function canPromoteCoverFight(fight) {
     && String(fight.matchBy || '').toLowerCase() !== 'affiliate'
     && fight.entryOpen !== false && !fight.prizesSettledAt && !fight.settledAt
     && !/draft|cancel|void|refund|settled/i.test(status)
-    && getFightStatus({ ...fight, matchShadowStatus: undefined, matchShadowOpenStatus: undefined }) !== 'past';
+    && !isPastCoverFight(fight);
 }
 
 async function readFeed(path, limit) {
@@ -53,7 +57,7 @@ export default async function handler(req, res) {
     combatFights: schedule.value || [],
     promotedFights: homepage.value || [],
     wrestlingFights: (wrestling.value || []).map(normalizeWrestlingPromotion),
-  }).flatMap((fight, index) => fight ? [{ ...normalizePublicFightRows([fight])[0], homepageSlot: index + 1 }] : []);
+  }).flatMap((fight, index) => fight && !isPastCoverFight(fight) ? [{ ...normalizePublicFightRows([fight])[0], homepageSlot: index + 1 }] : []);
   if (!items.length && schedule.status === 'rejected') {
     return res.status(502).json({ message: 'The upcoming fight schedule could not be loaded.' });
   }

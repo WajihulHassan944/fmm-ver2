@@ -27,6 +27,7 @@ const selectNumericValue = (event) => event.currentTarget.select();
 const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight, managedAffiliate, onPublished }) => {
   const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const affiliate = managedAffiliate || signedInAffiliate;
+  const isPreview = typeof window !== 'undefined' && /^fmm-ver2-[a-z0-9-]+\.vercel\.app$/i.test(window.location.hostname);
   const [promoMatches, setPromoMatches] = useState(() => initialLiveFight ? [initialLiveFight] : []);
   const [loading, setLoading] = useState(!initialLiveFight);
   const [loadError, setLoadError] = useState('');
@@ -180,6 +181,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isPreview) return;
 
     const url = `${API_BASE}/addMatch`;
     const matchDetails = promoMatches.find((match) => String(getFightId(match)) === String(matchId || ''));
@@ -448,7 +450,8 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
           </aside>
         )}
 
-        <button type="submit" className="theme-btn theme-btn-primary affiliate-create-submit" disabled={buttonText !== 'Publish fight promotion'}>
+        {isPreview && <p role="status">Preview only. Campaigns can be published from the live site.</p>}
+        <button type="submit" className="theme-btn theme-btn-primary affiliate-create-submit" disabled={isPreview || buttonText !== 'Publish fight promotion'}>
           <FaSave /> {buttonText}
         </button>
       </form>
