@@ -176,7 +176,7 @@
   margin-top: 26px;
 }
 
-.affiliate-campaign-hero-meta span {
+.affiliate-campaign-hero-meta > span {
   align-items: center;
   background: rgba(1, 4, 8, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -189,6 +189,36 @@
   min-height: 36px;
   padding: 0 12px;
   text-transform: uppercase;
+}
+
+.affiliate-campaign-hero-meta > .affiliate-campaign-entry {
+  flex-wrap: wrap;
+  column-gap: 7px;
+  row-gap: 2px;
+  font-family: inherit;
+  font-size: 12px;
+  padding-block: 5px;
+  text-transform: none;
+}
+
+.affiliate-campaign-entry .fm-coin {
+  flex-shrink: 0;
+}
+
+.affiliate-campaign-entry small {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-card-actions {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.affiliate-dashboard-experience-page .xp-affiliate-card-actions .xp-copy-promo {
+  gap: 6px;
+  padding: 0 10px !important;
+  white-space: nowrap;
 }
 
 .affiliate-campaign-hero-meta svg {

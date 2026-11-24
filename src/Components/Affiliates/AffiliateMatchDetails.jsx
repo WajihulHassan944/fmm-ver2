@@ -554,7 +554,11 @@ const handleSave = async (blobUrl) => {
           </p>
           <div className="affiliate-campaign-hero-meta">
             <span><FaTrophy /> {fightCategory}</span>
-            <span><FaCoins /> {Number(match.matchTokens || 0).toLocaleString()} FM COINS entry · {formatFMCoinUsd(match.matchTokens)} USD value</span>
+            <span className="affiliate-campaign-entry">
+              <FaCoins size="sm" motion="static" />
+              <b>{Number(match.matchTokens || 0).toLocaleString()} FM COINS entry</b>
+              <small>{formatFMCoinUsd(match.matchTokens)} USD value</small>
+            </span>
             <span><FaClock /> {scheduledDate}</span>
           </div>
         </div>

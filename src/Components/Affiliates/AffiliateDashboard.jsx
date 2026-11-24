@@ -677,9 +677,13 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                                 type="button"
                                 className="xp-copy-promo"
                                 onClick={(event) => handleCopy(event, match)}
-                                aria-label="Copy public promotion link"
+                                aria-label={copiedId === fightId ? 'Public promotion link copied' : 'Copy public promotion link'}
                               >
-                                {copiedId === fightId ? <FaCheck /> : <FaCopy />}
+                                {copiedId === fightId ? (
+                                  <><FaCheck aria-hidden="true" /> Link copied</>
+                                ) : (
+                                  <><FaCopy aria-hidden="true" /> Copy link</>
+                                )}
                               </button>
                             </div>
                           </div>
