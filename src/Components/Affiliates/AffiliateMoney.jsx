@@ -103,89 +103,100 @@ const AffiliateMoney = () => {
       <section className="xp-affiliate-hero affiliate-money-hero">
         <div className="xp-affiliate-hero-grid" aria-hidden="true" />
         <div className="theme-container">
-          <p className="xp-eyebrow"><FaCoins /> Promoter earnings</p>
-          <h1>What your cards <span>actually paid.</span></h1>
-          <p className="affiliate-money-lede">Credited earnings come from the settlement ledger. Live referral estimates are shown separately until the fight settles.</p>
+          <h1>Earnings &amp; payouts</h1>
+          <p className="affiliate-money-lede">Track campaign earnings, manage your payment method, and review payouts.</p>
         </div>
       </section>
 
       <main className="xp-page-main">
         <div className="theme-container">
           {error && (
-            <div className="affiliate-money-notice is-error">
-              <FaExclamationTriangle /> {error}
-              <button type="button" onClick={load}>Try again</button>
-              <Link href="/AffiliateDashboard#available-fights">Browse upcoming fights</Link>
+            <div className="affiliate-money-notice is-error" role="status">
+              <div><FaExclamationTriangle aria-hidden="true" /> <span>{error}</span></div>
+              <button className="theme-btn theme-btn-secondary" type="button" disabled={loading} onClick={load}>Try again</button>
             </div>
           )}
 
           <section className="affiliate-money-summary">
             <article className="is-primary">
               <span>Balance</span>
-              <strong>{balance == null ? '—' : coins(balance)}</strong>
-              <small>{data ? `${coins(summary.pendingPayouts)} in pending payouts` : 'Pending payout totals unavailable'}</small>
+              <strong>{balance == null ? '—' : coins(balance)}{balance != null && <em>FM COINS</em>}</strong>
+              <small>{data ? `${coins(summary.pendingPayouts)} FM COINS pending` : 'Pending payouts unavailable'}</small>
             </article>
             <article>
               <span>Lifetime earned</span>
-              <strong>{data ? coins(summary.lifetimeEarned) : '—'}</strong>
+              <strong>{data ? coins(summary.lifetimeEarned) : '—'}{data && <em>FM COINS</em>}</strong>
               <small>{data ? `Across ${summary.fightsSettled || 0} settled fights` : 'Settlement totals unavailable'}</small>
             </article>
             <article>
               <span>Paid out</span>
-              <strong>{data ? coins(summary.paidOut) : '—'}</strong>
+              <strong>{data ? coins(summary.paidOut) : '—'}{data && <em>FM COINS</em>}</strong>
               <small>{data ? `${payouts.filter((p) => p.status === 'paid').length} completed payouts` : 'Payout totals unavailable'}</small>
             </article>
             <article>
               <span>Your split</span>
               <strong>{data ? `${summary.splitPct || 50}%` : '—'}</strong>
-              <small>Owner fight referrals share platform proceeds; promoted cards keep their existing pot split.</small>
+              <small>Share of eligible owner-fight referral proceeds.</small>
             </article>
+          </section>
+
+          <section className="xp-page-section affiliate-money-payout" aria-labelledby="affiliate-payout-title">
+            <div>
+              <h2 id="affiliate-payout-title">Request a payout</h2>
+              <p>
+                {ownerAccount
+                  ? 'The affiliate can request a payout from their own account.'
+                  : 'Choose an amount and make sure your payment method is up to date.'}
+              </p>
+              <Link href="/AffiliateAccountSettings" className="theme-btn theme-btn-secondary">
+                {ownerAccount ? 'View payment settings' : 'Manage payment settings'}
+              </Link>
+            </div>
+            {ownerAccount ? (
+              <div className="affiliate-money-payout-state"><strong>Owner view</strong><span>Payout requests are read-only here.</span></div>
+            ) : (
+              <form onSubmit={requestPayout}>
+                <label htmlFor="affiliate-payout-amount">Payout amount <small>FM COINS</small></label>
+                <input
+                  id="affiliate-payout-amount"
+                  type="number"
+                  min="1"
+                  max={requestable || 1}
+                  step="1"
+                  value={amount}
+                  onChange={(event) => setAmount(event.target.value)}
+                  placeholder="0"
+                  disabled={loading || !data || requestable <= 0 || requesting}
+                />
+                <p className="affiliate-money-inline-note">
+                  {loading ? 'Checking available balance…'
+                    : !data ? 'Payout availability could not be verified.'
+                    : requestable > 0 ? `${coins(requestable)} FM COINS available. Requests are deducted from your balance.`
+                    : summary.pendingPayouts > 0 ? 'A payout request is already pending.'
+                    : 'No balance is available to request.'}
+                </p>
+                <button type="submit" className="theme-btn theme-btn-primary" disabled={loading || !data || requestable <= 0 || requesting}>
+                  {requesting ? 'Requesting…' : 'Request payout'} <FaArrowRight aria-hidden="true" />
+                </button>
+                {notice && <p className="affiliate-money-inline-note" role="status">{notice}</p>}
+              </form>
+            )}
           </section>
 
           <section className="xp-page-section">
             <p className="xp-eyebrow">Owner fight referrals</p>
-            <h2>Players your fight links brought in</h2>
+            <h2>Fight referrals</h2>
+            {!loading && !referrals && !referralError && <p>{data ? 'No referrals recorded yet.' : 'Referral activity is unavailable.'}</p>}
             {referralError && <p role="alert">{referralError}</p>}
             {referrals && <><p>{coins(referrals.signups)} signups · {coins(referrals.verifiedSignups)} verified · {coins(referrals.participatingPlayers)} participating players · {coins(referrals.paidEntries)} paid entries</p>
               <p><strong>{coins(referrals.earnedCoins)} FM COINS credited</strong> from settled owner fights. Open-fight amounts below are estimates; voided or refunded entries earn nothing.</p>
               {(referrals.fights || []).map((fight) => <p key={fight.fightId}><strong>{fight.label}</strong> · {coins(fight.paidEntries)} paid entries · {fight.settled ? `${coins(fight.earnedCoins)} FM COINS credited` : fight.voided ? 'Voided — no commission' : `${coins(fight.estimatedCoins)} FM COINS estimated if settled`}</p>)}</>}
           </section>
 
-          <section className="xp-page-section affiliate-money-payout">
-            <div>
-              <p className="xp-eyebrow">Cash out</p>
-              <h2>Request a payout</h2>
-              <p>
-                Requests come off your balance immediately so the same FM COINS cannot be requested
-                twice. {requestable > 0
-                  ? `You have ${coins(requestable)} clear right now.`
-                  : 'Nothing is clear to request at the moment.'}
-              </p>
-            </div>
-            <form onSubmit={requestPayout}>
-              <label htmlFor="affiliate-payout-amount">Amount</label>
-              <input
-                id="affiliate-payout-amount"
-                type="number"
-                min="1"
-                max={requestable || 1}
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder={String(requestable || 0)}
-                disabled={Boolean(ownerAccount) || requestable <= 0 || requesting}
-              />
-              <button type="submit" className="theme-btn theme-btn-primary" disabled={Boolean(ownerAccount) || requestable <= 0 || requesting}>
-                {requesting ? 'Requesting…' : 'Request payout'} <FaArrowRight />
-              </button>
-              {notice && <p className="affiliate-money-inline-note">{notice}</p>}
-            </form>
-          </section>
-
           <section className="xp-page-section">
-            <p className="xp-eyebrow">Per fight</p>
-            <h2>Earnings breakdown</h2>
+            <h2>Earnings by fight</h2>
             <p className="affiliate-money-section-note">
-              Promoted card earnings include your fixed cut and surplus share. Owner-fight referrals split the platform’s proceeds attributable to your entries at the same {summary.splitPct || 50}% rate.
+              Amounts are shown in FM COINS after the fight settles.
             </p>
 
             {loading ? (
@@ -225,8 +236,8 @@ const AffiliateMoney = () => {
             ) : (
               <div className="affiliate-money-empty">
                 <FaCoins />
-                <strong>No settled cards yet.</strong>
-                <span>Earnings land here the moment a card you promoted is settled.</span>
+                <strong>{data ? 'No settled fights yet' : 'Earnings details unavailable'}</strong>
+                {data && <span>Settled campaign earnings will appear here.</span>}
                 <Link href="/AffiliateDashboard#available-fights" className="theme-btn theme-btn-secondary">Browse upcoming fights</Link>
               </div>
             )}
@@ -239,11 +250,9 @@ const AffiliateMoney = () => {
           </section>
 
           <section className="xp-page-section">
-            <p className="xp-eyebrow">Money at risk</p>
-            <h2>Your stakes and profit zones</h2>
+            <h2>Existing prize stakes</h2>
             <p className="affiliate-money-section-note">
-              On a staked card you cover the pot up front. Until the gauge fills you are underwater;
-              past it, every coin is split with the platform and half is yours.
+              Track entries and prize funding for campaigns with an existing stake.
             </p>
 
             {loading ? (
@@ -271,8 +280,7 @@ const AffiliateMoney = () => {
             ) : (
               <div className="affiliate-money-empty">
                 <FaBolt />
-                <strong>Nothing staked right now.</strong>
-                <span>Stake a shadow card and its fill gauge appears here.</span>
+                <strong>{data ? 'No existing prize stakes' : 'Prize stake history unavailable'}</strong>
               </div>
             )}
           </section>
@@ -305,7 +313,7 @@ const AffiliateMoney = () => {
             ) : (
               <div className="affiliate-money-empty">
                 <FaHistory />
-                <strong>No payouts requested yet.</strong>
+                <strong>{data ? 'No payouts requested yet' : 'Payout history unavailable'}</strong>
               </div>
             )}
           </section>

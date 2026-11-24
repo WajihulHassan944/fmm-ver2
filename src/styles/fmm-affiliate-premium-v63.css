@@ -429,3 +429,102 @@
 @media (prefers-reduced-motion: reduce) {
   .xp-affiliate-fight-card { transition: none !important; }
 }
+
+/* Earnings and payouts */
+.affiliate-money-page .affiliate-money-summary > article {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+  padding: clamp(15px, 2vw, 24px);
+}
+
+.affiliate-money-page .affiliate-money-summary > article > span {
+  color: #afbdcf;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.affiliate-money-page .affiliate-money-summary strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  color: #f8fafc;
+  font-size: clamp(23px, 2.3vw, 34px);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.affiliate-money-page .affiliate-money-summary strong em {
+  color: #ffda7b;
+  font-size: 11px;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.affiliate-money-page :is(.affiliate-money-summary small, .affiliate-money-inline-note, .affiliate-money-section-note) {
+  color: #a9b6c7;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.affiliate-money-page .affiliate-money-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  background: #221b21;
+  border: 1px solid #62404a;
+  border-radius: 12px;
+}
+
+.affiliate-money-page .affiliate-money-notice > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.affiliate-money-page .affiliate-money-payout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .9fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.affiliate-money-page .affiliate-money-payout h2 { margin: 0 0 8px; }
+.affiliate-money-page .affiliate-money-payout h2 + p { margin: 0 0 16px; }
+
+.affiliate-money-page .affiliate-money-payout :is(form, .affiliate-money-payout-state) {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--aff-line, #2a3441);
+  border-radius: 12px;
+  background: #0a111b;
+}
+
+.affiliate-money-page .affiliate-money-payout form label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.affiliate-money-page .affiliate-money-payout input { width: 100%; min-height: 46px; }
+.affiliate-money-page .affiliate-money-payout form p { margin: 0; }
+.affiliate-money-page .affiliate-money-payout-state span { color: #a9b6c7; }
+
+.affiliate-money-page .affiliate-money-table-wrap { overflow-x: auto; }
+.affiliate-money-page .affiliate-money-table { width: 100%; border-collapse: collapse; }
+.affiliate-money-page .affiliate-money-table :is(th, td) { padding: 11px; text-align: left; }
+.affiliate-money-page .affiliate-money-table td small { display: block; }
+.affiliate-money-page .affiliate-money-empty { display: grid; justify-items: start; gap: 8px; padding-block: 12px; }
+
+@media (max-width: 760px) {
+  .affiliate-money-page .affiliate-money-payout { grid-template-columns: 1fr; }
+}
