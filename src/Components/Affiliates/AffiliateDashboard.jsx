@@ -15,6 +15,7 @@ import {
   AFFILIATE_AVATAR_FALLBACK,
   getFightCategory,
   getFightId,
+  getPublicFightDuplicateKey,
   getFightRounds,
   formatFightDate,
   getFighterImage,
@@ -277,7 +278,14 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
     () => {
       const rows = dedupeAffiliateFightRows([...safeArray(affiliatePromotedFights), ...legacyPromotedFights]);
       // A shared Shadow template can appear in multiple affiliate portfolios.
-      return managedAffiliate ? rows.filter((fight) => !isShadowLikeFight(fight)) : rows;
+      const seen = new Set();
+      return rows.filter((fight) => {
+        if (managedAffiliate && isShadowLikeFight(fight)) return false;
+        const key = isShadowLikeFight(fight) ? getFightId(fight) : getPublicFightDuplicateKey(fight);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     },
     [affiliatePromotedFights, legacyPromotedFights, managedAffiliate],
   );
@@ -495,8 +503,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
             <section className="xp-page-section" id="available-fights">
               <ExperienceSectionHeading
                 eyebrow="Current fight inventory"
-                title="Upcoming fights you can promote"
-                description="Pick a fight, set your entry price and prize, then share the campaign with your league."
+                title="Fights featured on the website"
+                description="See the five homepage fight slots. For open fights, set your entry price and prize, then share with your league."
               />
 
               {campaignLookup === 'error' && (
@@ -538,8 +546,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                                 Open campaign <FaArrowRight />
                               </button>
                             ) : (
-                              <button type="button" className="theme-btn theme-btn-primary" disabled={campaignLookup !== 'ready'} onClick={() => setSelectedLiveFight(match)}>
-                                {campaignLookup === 'loading' ? 'Checking campaign…' : 'Set up campaign'} <FaArrowRight />
+                              <button type="button" className="theme-btn theme-btn-primary" disabled={campaignLookup !== 'ready' || match.canPromote === false} onClick={() => setSelectedLiveFight(match)}>
+                                {match.canPromote === false ? 'Promotion unavailable' : campaignLookup === 'loading' ? 'Checking campaign…' : 'Set up campaign'} <FaArrowRight />
                               </button>
                             )}
                           </div>
