@@ -91,6 +91,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
 
   const [shadowMatchId, setShadowMatchId] = useState(null);
   const [publishedCount, setPublishedCount] = useState(0);
+  const [recentLiveCampaigns, setRecentLiveCampaigns] = useState({});
+  const [campaignLookup, setCampaignLookup] = useState('loading');
   const [selectedLiveFight, setSelectedLiveFight] = useState(null);
   const campaignDialog = useRef(null);
   const [homepageFights, setHomepageFights] = useState([]);
@@ -135,12 +137,6 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
       document.getElementById('affiliate-business-suite')?.scrollIntoView();
     }
   }, [affiliate]);
-
-  useEffect(() => {
-    if (publishedCount > 0) {
-      document.getElementById('live-campaign-room')?.scrollIntoView();
-    }
-  }, [publishedCount]);
 
   useEffect(() => {
     if (shadowMatchId || promoMatchDetails.matchId) {
@@ -219,21 +215,46 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
       return undefined;
     }
 
-    let active = true;
+    const controller = new AbortController();
+    setCampaignLookup('loading');
     const fetchAffiliatePromotedFights = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights?limit=500&includeShadow=true`);
+        const response = await fetch(`${API_BASE}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights?limit=500&includeShadow=true`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error(`Promoted fights failed with ${response.status}`);
-        const payload = await response.json();
-        if (active) setAffiliatePromotedFights(dedupeAffiliateFightRows(extractAffiliatePromotedRows(payload)));
+        const rows = dedupeAffiliateFightRows(extractAffiliatePromotedRows(await response.json()));
+        // Older promoted-fight responses omit the original live fight ID.
+        // Read it from each campaign's own record, never infer it from names.
+        const pending = rows.filter((row) => !isShadowLikeFight(row) && !row.sourceLiveMatchId && getFightId(row));
+        const sourceById = new Map();
+        for (let index = 0; index < pending.length; index += 8) {
+          await Promise.all(pending.slice(index, index + 8).map(async (row) => {
+            const id = String(getFightId(row));
+            const detail = await fetch(`${API_BASE}/api/matches/${encodeURIComponent(id)}`, { signal: controller.signal });
+            if (!detail.ok) throw new Error('A campaign could not be checked.');
+            const { sourceLiveMatchId } = await detail.json();
+            if (sourceLiveMatchId) sourceById.set(id, sourceLiveMatchId);
+          }));
+        }
+        if (!controller.signal.aborted) {
+          setAffiliatePromotedFights(rows.map((row) => ({
+            ...row,
+            sourceLiveMatchId: row.sourceLiveMatchId || sourceById.get(String(getFightId(row))),
+          })));
+          setCampaignLookup('ready');
+        }
       } catch (error) {
-        console.info('Affiliate promoted fights endpoint unavailable:', error.message);
-        if (active) setAffiliatePromotedFights([]);
+        if (!controller.signal.aborted) {
+          console.info('Affiliate promoted fights could not be checked:', error.message);
+          setCampaignLookup('error');
+        }
       }
     };
 
     fetchAffiliatePromotedFights();
-    return () => { active = false; };
+    return () => controller.abort();
   }, [affiliate?._id, shadowMatchId, publishedCount]);
 
   const affiliateId = affiliate?._id ? String(affiliate._id) : '';
@@ -260,6 +281,18 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
     },
     [affiliatePromotedFights, legacyPromotedFights, managedAffiliate],
   );
+
+  const campaignBySource = useMemo(() => {
+    const map = new Map(Object.entries(recentLiveCampaigns));
+    for (const campaign of affiliatePromotedFights) {
+      const source = campaign.sourceLiveMatchId;
+      const sourceId = String(source?._id || source || '');
+      if (sourceId && !map.get(sourceId)?.initialMatch) {
+        map.set(sourceId, { matchId: getFightId(campaign), initialMatch: campaign });
+      }
+    }
+    return map;
+  }, [affiliatePromotedFights, recentLiveCampaigns]);
 
   const totalPromotions = liveMatches.filter(
     (match) => String(match?.affiliateId || '') === affiliateId,
@@ -390,7 +423,11 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
             sourceType="live"
             initialLiveFight={selectedLiveFight}
             managedAffiliate={managedAffiliate}
-            onPublished={() => {
+            onPublished={(matchId) => {
+              if (matchId) {
+                const sourceId = String(getFightId(selectedLiveFight));
+                setRecentLiveCampaigns((current) => ({ ...current, [sourceId]: { matchId, initialMatch: null } }));
+              }
               campaignDialog.current?.close();
               setPublishedCount((count) => count + 1);
             }}
@@ -462,6 +499,12 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                 description="Pick a fight, set your entry price and prize, then share the campaign with your league."
               />
 
+              {campaignLookup === 'error' && (
+                <div>
+                  <p role="alert">Could not check which fights you’ve already promoted.</p>
+                  <button type="button" className="theme-btn theme-btn-secondary" onClick={() => setPublishedCount((count) => count + 1)}>Retry campaign check</button>
+                </div>
+              )}
               {liveInventoryStatus === 'loading' ? (
                 <p role="status">Loading upcoming website fights…</p>
               ) : liveInventoryStatus === 'error' ? (
@@ -476,8 +519,10 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                     {livePromotionFights.slice(liveStartIndex, liveStartIndex + MAX_CARDS).map((match, index) => {
                       const fightId = getFightId(match);
                       const displayIndex = liveStartIndex + index;
+                      const campaign = campaignBySource.get(String(fightId));
                       return (
                         <article className="xp-affiliate-fight-card is-live-source" key={fightId || displayIndex}>
+                          {campaign && <div className="xp-affiliate-live-badge"><i /> Promoted</div>}
                           <div className="xp-affiliate-fight-media">
                             <figure><img src={getFighterImage(match, 'A', displayIndex)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
                             <span>VS</span>
@@ -488,9 +533,15 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                             <p>{formatFightDate(match, { short: true })}</p>
                             <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
                             <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Live fight promotion'}</span></div>
-                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => setSelectedLiveFight(match)}>
-                              Set up campaign <FaArrowRight />
-                            </button>
+                            {campaign ? (
+                              <button type="button" className="theme-btn theme-btn-secondary" onClick={() => setPromoMatchDetails({ ...campaign, affiliateId })}>
+                                Open campaign <FaArrowRight />
+                              </button>
+                            ) : (
+                              <button type="button" className="theme-btn theme-btn-primary" disabled={campaignLookup !== 'ready'} onClick={() => setSelectedLiveFight(match)}>
+                                {campaignLookup === 'loading' ? 'Checking campaign…' : 'Set up campaign'} <FaArrowRight />
+                              </button>
+                            )}
                           </div>
                         </article>
                       );
@@ -508,6 +559,84 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                 </>
               ) : (
                 <ExperienceEmptyState title="No upcoming fights are open for promotion" description="New website fights appear here when they open. You can create a campaign from a scored template in the meantime." action={{ href: '#scored-shadow-templates', label: 'Browse scored templates' }} />
+              )}
+            </section>
+
+            <section className="xp-page-section" id="live-campaign-room">
+              <ExperienceSectionHeading
+                eyebrow="Live campaign room"
+                title="Promoted fights"
+                description="Open campaign details or copy the existing public promotion link for your audience."
+                action={{ href: workspaceHref('/past-promotions'), label: 'View campaign archive' }}
+              />
+
+              {promotedFights.length ? (
+                <>
+                  <div className="xp-affiliate-fight-grid">
+                    {promotedFights.slice(promotedStartIndex, promotedStartIndex + MAX_CARDS).map((match, index) => {
+                      const fightId = getFightId(match);
+                      const displayIndex = promotedStartIndex + index;
+                      return (
+                        <article
+                          className="xp-affiliate-fight-card is-promoted"
+                          key={fightId || displayIndex}
+                          onClick={() => setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match })}
+                        >
+                          <div className="xp-affiliate-live-badge"><i /> Live promotion</div>
+                          <div className="xp-affiliate-fight-media">
+                            <figure><img src={getFighterImage(match, 'A', displayIndex + 2)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
+                            <span>VS</span>
+                            <figure><img src={getFighterImage(match, 'B', displayIndex + 2)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
+                            <i>{getFightCategory(match)}</i>
+                          </div>
+                          <div className="xp-affiliate-fight-copy">
+                            <p>Campaign {String(displayIndex + 1).padStart(2, '0')}</p>
+                            <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
+                            <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Fight promotion'}</span></div>
+                            <div className="xp-affiliate-card-actions">
+                              <button
+                                type="button"
+                                className="theme-btn theme-btn-primary"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match });
+                                }}
+                              >
+                                Open campaign <FaChartLine />
+                              </button>
+                              <button
+                                type="button"
+                                className="xp-copy-promo"
+                                onClick={(event) => handleCopy(event, match)}
+                                aria-label={copiedId === fightId ? 'Public promotion link copied' : 'Copy public promotion link'}
+                              >
+                                {copiedId === fightId ? (
+                                  <><FaCheck aria-hidden="true" /> Link copied</>
+                                ) : (
+                                  <><FaCopy aria-hidden="true" /> Copy link</>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  {renderPagination({
+                    startIndex: promotedStartIndex,
+                    total: promotedFights.length,
+                    label: 'Promoted fight',
+                    onPrevious: () => setPromotedStartIndex((current) => Math.max(0, current - MAX_CARDS)),
+                    onNext: () => setPromotedStartIndex((current) => (
+                      current + MAX_CARDS < promotedFights.length ? current + MAX_CARDS : current
+                    )),
+                  })}
+                </>
+              ) : (
+                <ExperienceEmptyState
+                  title="No live promotions yet"
+                  description="Select a shadow template above to create your first active campaign."
+                />
               )}
             </section>
 
@@ -627,84 +756,6 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                 <ExperienceEmptyState
                   title="No new templates are available"
                   description="Approved templates that have not yet been promoted will appear here."
-                />
-              )}
-            </section>
-
-            <section className="xp-page-section" id="live-campaign-room">
-              <ExperienceSectionHeading
-                eyebrow="Live campaign room"
-                title="Promoted fights"
-                description="Open campaign details or copy the existing public promotion link for your audience."
-                action={{ href: workspaceHref('/past-promotions'), label: 'View campaign archive' }}
-              />
-
-              {promotedFights.length ? (
-                <>
-                  <div className="xp-affiliate-fight-grid">
-                    {promotedFights.slice(promotedStartIndex, promotedStartIndex + MAX_CARDS).map((match, index) => {
-                      const fightId = getFightId(match);
-                      const displayIndex = promotedStartIndex + index;
-                      return (
-                        <article
-                          className="xp-affiliate-fight-card is-promoted"
-                          key={fightId || displayIndex}
-                          onClick={() => setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match })}
-                        >
-                          <div className="xp-affiliate-live-badge"><i /> Live promotion</div>
-                          <div className="xp-affiliate-fight-media">
-                            <figure><img src={getFighterImage(match, 'A', displayIndex + 2)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
-                            <span>VS</span>
-                            <figure><img src={getFighterImage(match, 'B', displayIndex + 2)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
-                            <i>{getFightCategory(match)}</i>
-                          </div>
-                          <div className="xp-affiliate-fight-copy">
-                            <p>Campaign {String(displayIndex + 1).padStart(2, '0')}</p>
-                            <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
-                            <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Fight promotion'}</span></div>
-                            <div className="xp-affiliate-card-actions">
-                              <button
-                                type="button"
-                                className="theme-btn theme-btn-primary"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  setPromoMatchDetails({ matchId: fightId, affiliateId: affiliate._id, initialMatch: match });
-                                }}
-                              >
-                                Open campaign <FaChartLine />
-                              </button>
-                              <button
-                                type="button"
-                                className="xp-copy-promo"
-                                onClick={(event) => handleCopy(event, match)}
-                                aria-label={copiedId === fightId ? 'Public promotion link copied' : 'Copy public promotion link'}
-                              >
-                                {copiedId === fightId ? (
-                                  <><FaCheck aria-hidden="true" /> Link copied</>
-                                ) : (
-                                  <><FaCopy aria-hidden="true" /> Copy link</>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                  {renderPagination({
-                    startIndex: promotedStartIndex,
-                    total: promotedFights.length,
-                    label: 'Promoted fight',
-                    onPrevious: () => setPromotedStartIndex((current) => Math.max(0, current - MAX_CARDS)),
-                    onNext: () => setPromotedStartIndex((current) => (
-                      current + MAX_CARDS < promotedFights.length ? current + MAX_CARDS : current
-                    )),
-                  })}
-                </>
-              ) : (
-                <ExperienceEmptyState
-                  title="No live promotions yet"
-                  description="Select a shadow template above to create your first active campaign."
                 />
               )}
             </section>

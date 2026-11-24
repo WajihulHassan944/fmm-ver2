@@ -206,8 +206,12 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
     data.append('promoterStake', '0');
     data.append('potTarget', economics.free ? 0 : economics.pot);
     data.append('autoRefundIfShort', economics.free ? false : true);
-    if (sourceType === 'live') data.append('sourceLiveMatchId', matchDetails._id);
-    else data.append('shadowFightId', matchDetails._id);
+    if (sourceType === 'live') {
+      data.append('sourceLiveMatchId', matchDetails._id);
+      data.append('publishRequestId', `affiliate-live:${affiliate._id}:${matchDetails._id}`);
+    } else {
+      data.append('shadowFightId', matchDetails._id);
+    }
     data.append('affiliateId', affiliate._id);
     if (managedAffiliate) data.append('matchBy', 'affiliate');
     data.append('pot', formData.pot);
@@ -259,7 +263,9 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
 
         // Notify only this promoter's league. Keep the legacy platform-wide
         // `notify` switch off so one affiliate cannot email every FMM account.
-        if (publishedFightId && !managedAffiliate) {
+        if (responseData.duplicatePrevented) {
+          confirmation = 'This fight is already promoted. Your existing campaign is ready to open.';
+        } else if (publishedFightId && !managedAffiliate) {
           try {
             const noticeResponse = await fetch(`${API_BASE}/api/affiliates/me/promotions/${encodeURIComponent(publishedFightId)}/announce`, {
               method: 'POST',
@@ -276,7 +282,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
         }
 
         alert(confirmation);
-        onPublished();
+        onPublished(publishedFightId);
       } else {
         const problem = await response.json().catch(() => ({}));
         if (response.status === 401 || response.status === 403) {
