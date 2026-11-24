@@ -1,14 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
-import AffiliateDashboard from '@/Components/Affiliates/AffiliateDashboard';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
 import { getAffiliateNameSlug } from '@/Utils/affiliatePublicLink';
 import { getFightCategory, getFightRounds, safeArray } from '@/Utils/fightExperience';
 
-import { PUBLIC_API_BASE_URL as API_BASE } from '@/Utils/publicApi';
+const API_BASE = 'https://fantasymmadness-game-server-three.vercel.app';
 
 const normalizeIdentifier = (value) => decodeURIComponent(String(value || '')).trim().toLowerCase();
 const slugifyIdentifier = (value) => normalizeIdentifier(value)
@@ -26,8 +24,6 @@ const matchesAffiliateIdentifier = (affiliate, identifier) => {
 
 const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   const router = useRouter();
-  const signedInAffiliate = useSelector((state) => state.affiliateAuth?.userAffiliate);
-  const ownsProfile = Boolean(affiliate?._id && signedInAffiliate?._id && String(affiliate._id) === String(signedInAffiliate._id));
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null });
 
   const visiblePromotions = useMemo(() => {
@@ -39,8 +35,6 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       )
     ));
   }, [affiliate, promoMatches]);
-
-  if (ownsProfile) return <AffiliateDashboard />;
 
   if (!affiliate) {
     return <div className="public-promo-loading is-error">This affiliate profile is not currently available.</div>;
@@ -75,10 +69,7 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
             <img src={affiliate.profileUrl} alt={affiliateName} />
             <span><p className="xp-eyebrow"><FaBullhorn /> Creator fight room</p><h2>{affiliateName}&apos;s campaigns</h2><small><FaUsers /> {memberCount} league members</small></span>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            <button type="button" className="theme-btn theme-btn-primary" onClick={() => router.push('/AffiliateDashboard')}>Affiliate back office <FaArrowRight /></button>
-            <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
-          </div>
+          <button type="button" className="theme-btn theme-btn-secondary" onClick={() => router.push('/upcomingfights')}>Explore all fights <FaArrowRight /></button>
         </header>
 
         {visiblePromotions.length ? (
