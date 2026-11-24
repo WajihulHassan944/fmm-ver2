@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import AffiliateDashboard from '@/Components/Affiliates/AffiliateDashboard';
 import { FaArrowLeft, FaArrowRight, FaBullhorn, FaTrophy, FaUsers } from 'react-icons/fa';
 import { FMCoin as FaCoins } from '@/Components/Common/FMCoin';
 import PromoTwo from '@/Components/Affiliates/PromoTwo';
@@ -24,6 +26,8 @@ const matchesAffiliateIdentifier = (affiliate, identifier) => {
 
 const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
   const router = useRouter();
+  const signedInAffiliate = useSelector((state) => state.affiliateAuth?.userAffiliate);
+  const ownsProfile = Boolean(affiliate?._id && signedInAffiliate?._id && String(affiliate._id) === String(signedInAffiliate._id));
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null });
 
   const visiblePromotions = useMemo(() => {
@@ -35,6 +39,8 @@ const AffiliateAllPromos = ({ affiliate, promoMatches }) => {
       )
     ));
   }, [affiliate, promoMatches]);
+
+  if (ownsProfile) return <AffiliateDashboard />;
 
   if (!affiliate) {
     return <div className="public-promo-loading is-error">This affiliate profile is not currently available.</div>;
