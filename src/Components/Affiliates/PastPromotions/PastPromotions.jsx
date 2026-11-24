@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
-import Link, { useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
+import Link, { affiliateCommandHref, useAffiliateCommandAccount } from '@/Components/Affiliates/AffiliateCommandContext';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   FaArrowLeft,
@@ -28,7 +28,7 @@ const FIGHTS_PER_PAGE = 6;
 
 const PastPromotions = () => {
   const dispatch = useDispatch();
-  const { affiliate, authLoading } = useAffiliateCommandAccount();
+  const { affiliate, authLoading, ownerAccount } = useAffiliateCommandAccount();
   const matches = useSelector((state) => state.matches.data);
   const matchStatus = useSelector((state) => state.matches.status);
 
@@ -73,6 +73,27 @@ const PastPromotions = () => {
   }, []);
 
   const affiliateId = String(affiliate?._id || '');
+  const workspaceHref = (href) => ownerAccount ? affiliateCommandHref(affiliateId, href) : href;
+  const [finishedCampaigns, setFinishedCampaigns] = useState([]);
+
+  useEffect(() => {
+    if (!affiliateId) return undefined;
+    const controller = new AbortController();
+    fetch(`${API_BASE}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights?limit=100&includeShadow=true`, {
+      signal: controller.signal,
+    }).then(async (response) => {
+      if (!response.ok) return;
+      const { items } = await response.json();
+      if (!controller.signal.aborted) {
+        setFinishedCampaigns(safeArray(items).filter((fight) => (
+          fight.prizesSettledAt || fight.settledAt || /^(finished|completed|final|result|closed)$/i.test(String(fight.matchStatus || fight.status || '').trim())
+        )).map((fight) => ({ ...fight, _resultId: getFightId(fight) })));
+      }
+    }).catch(() => {
+      // The older archive records can still be loaded independently.
+    });
+    return () => controller.abort();
+  }, [affiliateId]);
 
   const promotedFights = useMemo(() => {
     const allMatches = safeArray(matches);
@@ -96,8 +117,9 @@ const PastPromotions = () => {
       return items;
     }, []);
 
-    return sortFights(completed, 'desc');
-  }, [affiliateId, matches, promoMatches]);
+    const byResult = new Map([...completed, ...finishedCampaigns].map((fight) => [String(fight._resultId), fight]));
+    return sortFights([...byResult.values()], 'desc');
+  }, [affiliateId, matches, promoMatches, finishedCampaigns]);
 
   const totalPages = Math.max(1, Math.ceil(promotedFights.length / FIGHTS_PER_PAGE));
   const visibleFights = promotedFights.slice((page - 1) * FIGHTS_PER_PAGE, page * FIGHTS_PER_PAGE);
@@ -132,8 +154,8 @@ const PastPromotions = () => {
           description="Review completed affiliate fight cards, reopen available results, and maintain a polished record of every campaign your league has promoted."
           backgroundImage="/images/fmm-pages/premium-arena-banner.webp"
           actions={[
-            { href: '/AffiliateDashboard', label: 'Affiliate dashboard' },
-            { href: '/affiliate-league', label: 'League manager', variant: 'secondary' },
+            { href: workspaceHref('/AffiliateDashboard'), label: 'Affiliate dashboard' },
+            { href: workspaceHref('/affiliate-league'), label: 'League manager', variant: 'secondary' },
           ]}
           stats={[
             { value: promotedFights.length, label: 'Completed campaigns', icon: FaHistory },
@@ -149,16 +171,16 @@ const PastPromotions = () => {
               <ExperienceSectionHeading
                 eyebrow="Completed campaign cards"
                 title="Promotion history"
-                description="The existing shadow-fight records are matched with closed affiliate fights, preserving the original campaign history logic."
+                description="Review previous campaigns and open their official results."
               />
 
               {loadingPromotions || (matchStatus === 'loading' && !safeArray(matches).length) ? (
                 <div className="xp-loading-grid"><div className="xp-loading-card" /><div className="xp-loading-card" /><div className="xp-loading-card" /></div>
-              ) : promotionError ? (
+              ) : promotionError && !visibleFights.length ? (
                 <ExperienceEmptyState
                   title="Promotion history unavailable"
                   description={promotionError}
-                  action={{ href: '/AffiliateDashboard', label: 'Return to dashboard' }}
+                  action={{ href: workspaceHref('/AffiliateDashboard#available-fights'), label: 'Browse upcoming fights' }}
                 />
               ) : visibleFights.length ? (
                 <div className="affiliate-past-promotion-grid">
@@ -200,7 +222,7 @@ const PastPromotions = () => {
                 <ExperienceEmptyState
                   title="No past promoted fights"
                   description="Completed affiliate promotions will appear here once their corresponding fight is closed."
-                  action={{ href: '/AffiliateDashboard', label: 'Create a promotion' }}
+                  action={{ href: workspaceHref('/AffiliateDashboard#available-fights'), label: 'Browse upcoming fights' }}
                 />
               )}
 

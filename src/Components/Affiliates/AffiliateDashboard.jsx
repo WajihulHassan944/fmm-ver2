@@ -15,12 +15,12 @@ import {
   getFightCategory,
   getFightId,
   getFightRounds,
-  getFightStatus,
+  formatFightDate,
   getFighterImage,
   safeArray,
   useImageFallback,
 } from '@/Utils/fightExperience';
-import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL, safeFetchJson } from '@/Utils/publicApi';
+import { fetchPublicFights, normalizePublicFightRows, PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import { formatTokenAmount, formatWrestlingDate, getWrestlerImage, safeWrestlingArray, wrestlingRequest } from '@/Utils/proWrestling';
 
 const MAX_CARDS = 5;
@@ -42,17 +42,6 @@ const isApprovedAffiliateTemplate = (match = {}) => {
   if (!hasCompleteStats(match?.BoxingMatch) && !hasCompleteStats(match?.MMAMatch)) return false;
   return true;
 };
-
-const isPromotableLiveFight = (match = {}) => (
-  !isShadowLikeFight(match)
-  && getFightStatus(match) !== 'past'
-  && !match?.prizesSettledAt && !match?.settledAt
-  && !/draft|cancel|void|refund|settled/i.test(String(match?.matchStatus || match?.status || ''))
-  && !match?.affiliateId
-  && String(match?.matchBy || '').toLowerCase() !== 'affiliate'
-  && !match?.sourceShadowId
-  && !match?.sourceLiveMatchId
-);
 
 const isPromotedByAffiliate = (match = {}, affiliateId = '') => {
   if (!affiliateId) return false;
@@ -100,27 +89,28 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
   const matchStatus = useSelector((state) => state.matches.status);
 
   const [shadowMatchId, setShadowMatchId] = useState(null);
+  const [campaignPublished, setCampaignPublished] = useState(false);
   const [selectedLiveFight, setSelectedLiveFight] = useState(null);
   const [homepageFights, setHomepageFights] = useState([]);
   const [liveInventoryStatus, setLiveInventoryStatus] = useState('loading');
 
+  const [inventoryAttempt, setInventoryAttempt] = useState(0);
   useEffect(() => {
-    let active = true;
-    Promise.allSettled([
-      safeFetchJson('/api/public/homepage/promoted-fights', { limit: 24 }),
-      safeFetchJson('/api/public/prediction-fights', { limit: 100 }),
-    ]).then(([promoted, scheduled]) => {
-      if (!active) return;
-      const rows = [promoted, scheduled].flatMap((result) => result.status === 'fulfilled' ? extractAffiliatePromotedRows(result.value) : []);
-      setHomepageFights(dedupeAffiliateFightRows(rows).filter(isPromotableLiveFight).sort((a, b) => {
-        const slot = (fight) => Number(fight.homepageSlot) > 0 ? Number(fight.homepageSlot) : Infinity;
-        return (slot(a) - slot(b)) || Number(Boolean(b.homepagePromoted)) - Number(Boolean(a.homepagePromoted));
-      }));
-      setLiveInventoryStatus(promoted.status === 'rejected' && scheduled.status === 'rejected' ? 'error' : 'ready');
-    });
-    return () => { active = false; };
-  }, []);
-  const [promotionSourceType, setPromotionSourceType] = useState('shadow');
+    const controller = new AbortController();
+    setLiveInventoryStatus('loading');
+    fetch('/api/affiliate-fight-inventory', { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('The upcoming fight feed could not be loaded.');
+        const { items } = await response.json();
+        if (controller.signal.aborted) return;
+        setHomepageFights(safeArray(items));
+        setLiveInventoryStatus('ready');
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setLiveInventoryStatus('error');
+      });
+    return () => controller.abort();
+  }, [inventoryAttempt]);
   const [promoMatchDetails, setPromoMatchDetails] = useState({ matchId: null, affiliateId: null, initialMatch: null });
   const [promoMatches, setPromoMatches] = useState([]);
   const [affiliatePromotedFights, setAffiliatePromotedFights] = useState([]);
@@ -138,6 +128,13 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
       document.getElementById('affiliate-business-suite')?.scrollIntoView();
     }
   }, [affiliate]);
+
+  useEffect(() => {
+    if (campaignPublished && !shadowMatchId) {
+      document.getElementById('live-campaign-room')?.scrollIntoView();
+      setCampaignPublished(false);
+    }
+  }, [campaignPublished, shadowMatchId]);
 
   useEffect(() => {
     if (shadowMatchId || promoMatchDetails.matchId) {
@@ -336,7 +333,10 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
           sourceType={promotionSourceType}
           initialLiveFight={promotionSourceType === 'live' ? selectedLiveFight : null}
           managedAffiliate={managedAffiliate}
-          onPublished={() => setShadowMatchId(null)}
+          onPublished={() => {
+            setShadowMatchId(null);
+            setCampaignPublished(true);
+          }}
         />
       </div>
     );
@@ -365,7 +365,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
           <div className="theme-container affiliate-command-ribbon-inner">
             <span><i /> Affiliate command online</span>
             <nav>
-              <a href="#shadow-templates">Fight inventory</a>
+              <a href="#available-fights">Fight inventory</a>
               <a href="#live-campaign-room">Live campaigns</a>
               <Link href={workspaceHref('/promoter/full-cards')}>Full Card Promoter</Link>
               <Link href={workspaceHref('/affiliate-money')}>Money desk</Link>
@@ -385,8 +385,8 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                   grow your league, and manage every active campaign from one fight-night workspace.
                 </p>
                 <div className="xp-affiliate-hero-actions">
-                  <a href="#shadow-templates" className="theme-btn theme-btn-primary">
-                    Create a promotion <FaPlus />
+                  <a href="#available-fights" className="theme-btn theme-btn-primary">
+                    Choose an upcoming fight <FaPlus />
                   </a>
                   <Link href={workspaceHref('/affiliate-league')} className="theme-btn theme-btn-secondary">
                     Manage league
@@ -418,6 +418,71 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
               <div><FaBullhorn /><span><strong>{totalPromotions}</strong><small>Total promotions</small></span></div>
             </section>
 
+            <section className="xp-page-section" id="available-fights">
+              <ExperienceSectionHeading
+                eyebrow="Current fight inventory"
+                title="Upcoming fights you can promote"
+                description="Pick a fight, set your entry price and prize, then share the campaign with your league."
+              />
+
+              {liveInventoryStatus === 'loading' ? (
+                <p role="status">Loading upcoming website fights…</p>
+              ) : liveInventoryStatus === 'error' ? (
+                <div>
+                  <p role="alert">The upcoming fight feed could not be loaded.</p>
+                  <button type="button" className="theme-btn theme-btn-secondary" onClick={() => setInventoryAttempt((attempt) => attempt + 1)}>Retry upcoming fights</button>
+                  <a href="#scored-shadow-templates" className="theme-btn theme-btn-secondary">Browse scored templates</a>
+                </div>
+              ) : livePromotionFights.length ? (
+                <>
+                  <div className="xp-affiliate-fight-grid">
+                    {livePromotionFights.slice(liveStartIndex, liveStartIndex + MAX_CARDS).map((match, index) => {
+                      const fightId = getFightId(match);
+                      const displayIndex = liveStartIndex + index;
+                      return (
+                        <article className="xp-affiliate-fight-card is-live-source" key={fightId || displayIndex}>
+                          <div className="xp-affiliate-fight-media">
+                            <figure><img src={getFighterImage(match, 'A', displayIndex)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
+                            <span>VS</span>
+                            <figure><img src={getFighterImage(match, 'B', displayIndex)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
+                            <i>{getFightCategory(match)}</i>
+                          </div>
+                          <div className="xp-affiliate-fight-copy">
+                            <p>{formatFightDate(match, { short: true })}</p>
+                            <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
+                            <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Live fight promotion'}</span></div>
+                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
+                              setSelectedLiveFight(match);
+                              setPromotionSourceType('live');
+                              setShadowMatchId(fightId);
+                            }}>
+                              Set up campaign <FaArrowRight />
+                            </button>
+                            {managedAffiliate && (
+                              <Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: fightId, launchTitle: match.matchName } }}>
+                                Prepare affiliate email
+                              </Link>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  {renderPagination({
+                    startIndex: liveStartIndex,
+                    total: livePromotionFights.length,
+                    label: 'Live fight',
+                    onPrevious: () => setLiveStartIndex((current) => Math.max(0, current - MAX_CARDS)),
+                    onNext: () => setLiveStartIndex((current) => (
+                      current + MAX_CARDS < livePromotionFights.length ? current + MAX_CARDS : current
+                    )),
+                  })}
+                </>
+              ) : (
+                <ExperienceEmptyState title="No upcoming fights are open for promotion" description="New website fights appear here when they open. You can create a campaign from a scored template in the meantime." action={{ href: '#scored-shadow-templates', label: 'Browse scored templates' }} />
+              )}
+            </section>
+
             <section id="affiliate-business-suite" className="affiliate-business-suite" aria-labelledby="affiliate-business-suite-title">
               <header className="affiliate-business-suite-heading">
                 <div>
@@ -429,9 +494,9 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
               </header>
 
               <div className="affiliate-business-suite-grid">
-                <a href="#shadow-templates" className="is-red">
+                <a href="#available-fights" className="is-red">
                   <FaBullhorn />
-                  <span><small>Promote</small><strong>Create a fight campaign</strong><em>Open an approved template, configure the prize and publish.</em></span>
+                  <span><small>Promote</small><strong>Create a fight campaign</strong><em>Choose an upcoming fight, set your entry price and prize, and publish.</em></span>
                   <FaArrowRight />
                 </a>
                 <Link href={workspaceHref('/AffiliatePromotion')} className="is-blue">
@@ -475,67 +540,6 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
                   <FaArrowRight />
                 </Link>
               </div>
-            </section>
-
-            <section className="xp-page-section" id="shadow-templates">
-              <ExperienceSectionHeading
-                eyebrow="Current fight inventory"
-                title="Promote a live fight"
-                description="Create an affiliate campaign from a scheduled or live fight. These fights remain live records and do not become Shadow templates."
-              />
-
-              {liveInventoryStatus === 'loading' ? (
-                <p role="status">Loading upcoming website fights…</p>
-              ) : liveInventoryStatus === 'error' ? (
-                <p role="alert">The website fight feed could not be loaded. Refresh to try again.</p>
-              ) : livePromotionFights.length ? (
-                <>
-                  <div className="xp-affiliate-fight-grid">
-                    {livePromotionFights.slice(liveStartIndex, liveStartIndex + MAX_CARDS).map((match, index) => {
-                      const fightId = getFightId(match);
-                      const displayIndex = liveStartIndex + index;
-                      return (
-                        <article className="xp-affiliate-fight-card is-live-source" key={fightId || displayIndex}>
-                          <div className="xp-affiliate-fight-media">
-                            <figure><img src={getFighterImage(match, 'A', displayIndex)} alt={match?.matchFighterA || 'Fighter A'} loading="lazy" decoding="async" /></figure>
-                            <span>VS</span>
-                            <figure><img src={getFighterImage(match, 'B', displayIndex)} alt={match?.matchFighterB || 'Fighter B'} loading="lazy" decoding="async" /></figure>
-                            <i>{getFightCategory(match)}</i>
-                          </div>
-                          <div className="xp-affiliate-fight-copy">
-                            <p>Live fight</p>
-                            <h3>{match?.matchFighterA || 'Fighter A'} <span>VS</span> {match?.matchFighterB || 'Fighter B'}</h3>
-                            <div><span>{getFightRounds(match)}</span><span>{match?.matchName || 'Live fight promotion'}</span></div>
-                            <button type="button" className="theme-btn theme-btn-primary" onClick={() => {
-                              setSelectedLiveFight(match);
-                              setPromotionSourceType('live');
-                              setShadowMatchId(fightId);
-                            }}>
-                              Promote live fight <FaArrowRight />
-                            </button>
-                            {managedAffiliate && (
-                              <Link href={{ pathname: '/administration/AffiliateUsers', query: { launchFight: fightId, launchTitle: match.matchName } }}>
-                                Prepare affiliate email
-                              </Link>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                  {renderPagination({
-                    startIndex: liveStartIndex,
-                    total: livePromotionFights.length,
-                    label: 'Live fight',
-                    onPrevious: () => setLiveStartIndex((current) => Math.max(0, current - MAX_CARDS)),
-                    onNext: () => setLiveStartIndex((current) => (
-                      current + MAX_CARDS < livePromotionFights.length ? current + MAX_CARDS : current
-                    )),
-                  })}
-                </>
-              ) : (
-                <ExperienceEmptyState title="No live fights are available" description="Scheduled and live fights will appear here when they are ready to promote." />
-              )}
             </section>
 
             <section className="xp-page-section" id="scored-shadow-templates">

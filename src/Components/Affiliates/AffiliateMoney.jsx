@@ -53,6 +53,7 @@ const AffiliateMoney = () => {
   useEffect(() => { load(); }, [load]);
 
   const summary = data?.summary || {};
+  const balance = data?.summary?.balance ?? ownerAccount?.tokens;
   const earnings = data?.earnings || [];
   const stakes = data?.stakes || [];
   const payouts = data?.payouts || [];
@@ -114,28 +115,29 @@ const AffiliateMoney = () => {
             <div className="affiliate-money-notice is-error">
               <FaExclamationTriangle /> {error}
               <button type="button" onClick={load}>Try again</button>
+              <Link href="/AffiliateDashboard#available-fights">Browse upcoming fights</Link>
             </div>
           )}
 
           <section className="affiliate-money-summary">
             <article className="is-primary">
               <span>Balance</span>
-              <strong>{loading ? '—' : coins(summary.balance)}</strong>
-              <small>{coins(summary.pendingPayouts)} in pending payouts</small>
+              <strong>{balance == null ? '—' : coins(balance)}</strong>
+              <small>{data ? `${coins(summary.pendingPayouts)} in pending payouts` : 'Pending payout totals unavailable'}</small>
             </article>
             <article>
               <span>Lifetime earned</span>
-              <strong>{loading ? '—' : coins(summary.lifetimeEarned)}</strong>
-              <small>Across {summary.fightsSettled || 0} settled fights</small>
+              <strong>{data ? coins(summary.lifetimeEarned) : '—'}</strong>
+              <small>{data ? `Across ${summary.fightsSettled || 0} settled fights` : 'Settlement totals unavailable'}</small>
             </article>
             <article>
               <span>Paid out</span>
-              <strong>{loading ? '—' : coins(summary.paidOut)}</strong>
-              <small>{payouts.filter((p) => p.status === 'paid').length} completed payouts</small>
+              <strong>{data ? coins(summary.paidOut) : '—'}</strong>
+              <small>{data ? `${payouts.filter((p) => p.status === 'paid').length} completed payouts` : 'Payout totals unavailable'}</small>
             </article>
             <article>
               <span>Your split</span>
-              <strong>{loading ? '—' : `${summary.splitPct || 50}%`}</strong>
+              <strong>{data ? `${summary.splitPct || 50}%` : '—'}</strong>
               <small>Owner fight referrals share platform proceeds; promoted cards keep their existing pot split.</small>
             </article>
           </section>
@@ -225,7 +227,7 @@ const AffiliateMoney = () => {
                 <FaCoins />
                 <strong>No settled cards yet.</strong>
                 <span>Earnings land here the moment a card you promoted is settled.</span>
-                <Link href="/AffiliateDashboard" className="theme-btn theme-btn-secondary">Promote a fight</Link>
+                <Link href="/AffiliateDashboard#available-fights" className="theme-btn theme-btn-secondary">Browse upcoming fights</Link>
               </div>
             )}
 

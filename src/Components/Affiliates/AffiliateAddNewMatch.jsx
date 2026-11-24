@@ -253,7 +253,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
     data.append('matchFighterB', matchDetails.matchFighterB);
     data.append('matchDescription', matchDetails.matchDescription);
     appendIfPresent('matchVideoUrl', matchDetails.matchVideoUrl);
-    data.append('matchType', 'SHADOW');
+    data.append('matchType', sourceType === 'live' ? 'LIVE' : 'SHADOW');
     data.append('maxRounds', matchDetails.maxRounds);
     data.append('notify', false);
     if (sourceType === 'shadow' && matchDetails.BoxingMatch) data.append('BoxingMatch', JSON.stringify(matchDetails.BoxingMatch));
@@ -292,9 +292,7 @@ const AffiliateAddNewMatch = ({ matchId, sourceType = 'shadow', initialLiveFight
         }
 
         alert(confirmation);
-        console.log(responseData.data || publishedFightId);
-        if (managedAffiliate) onPublished();
-        else window.location.assign('/AffiliateDashboard#promoted-fights');
+        onPublished();
       } else {
         const problem = await response.json().catch(() => ({}));
         if (response.status === 401 || response.status === 403) {

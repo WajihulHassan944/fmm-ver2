@@ -95,7 +95,7 @@ export default function AffiliateAllFightPromotion() {
           </section>
 
           <section className="affiliate-promotion-command-grid">
-            <Link href="/AffiliateDashboard#shadow-templates"><FaBullhorn /><span><small>Create</small><strong>Promote a fight</strong><em>Choose an approved fight template and launch a campaign.</em></span></Link>
+            <Link href="/AffiliateDashboard#available-fights"><FaBullhorn /><span><small>Create</small><strong>Promote a fight</strong><em>Pick an upcoming fight and set up your campaign.</em></span></Link>
             <Link href="/promoter/full-cards"><FaUsers /><span><small>Full cards</small><strong>Build an event</strong><em>Group selected bouts into one promoter experience.</em></span></Link>
             <Link href="/past-promotions"><FaHistory /><span><small>History</small><strong>Past promotions</strong><em>Review completed campaigns and their player activity.</em></span></Link>
             <Link href="/affiliate-money"><FaCoins /><span><small>Earnings</small><strong>Money desk</strong><em>Review commissions, balances and payout history.</em></span></Link>
