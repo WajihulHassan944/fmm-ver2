@@ -122,7 +122,13 @@ const EditMatch = ({ matchId, isShadow }) => {
     const name = getCombatFighterName(fighter);
     if (side === 'A') {
       setSelectedFighterA(fighter);
-      setFormData((current) => ({ ...current, fighterAId: id, matchFighterA: name, fighterAImage: getCombatFighterImage(fighter) || null }));
+      setFormData((current) => {
+        const oldName = current.matchFighterA || '';
+        const title = current.matchName || '';
+        const autoTitle = oldName && current.matchFighterB && title.includes(oldName) && title.includes(current.matchFighterB);
+        return { ...current, fighterAId: id, matchFighterA: name, fighterAImage: getCombatFighterImage(fighter) || null,
+          matchName: autoTitle ? title.replace(oldName, name) : title };
+      });
     } else {
       setSelectedFighterB(fighter);
       setFormData((current) => {
@@ -242,6 +248,16 @@ const EditMatch = ({ matchId, isShadow }) => {
       return;
     }
 
+    if (name === 'matchFighterA') {
+      setFormData((current) => {
+        const oldName = current.matchFighterA || '';
+        const title = current.matchName || '';
+        const autoTitle = oldName && current.matchFighterB && title.includes(oldName) && title.includes(current.matchFighterB);
+        return { ...current, matchFighterA: value, fighterAId: value === oldName ? current.fighterAId : '',
+          matchName: autoTitle ? title.replace(oldName, value) : title };
+      });
+      return;
+    }
     setFormData((current) => ({ ...current, [name]: files ? files[0] : value }));
   };
 
