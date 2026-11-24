@@ -2,11 +2,11 @@
 import { getAffiliateCampaignShareUrl } from '@/Utils/affiliatePublicLink';
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState, useRef }  from 'react';
+import { useEffect, useState } from 'react';
 import AffiliateFightLeaderboard from './AffiliateFightLeaderboard';
 import ShareQrCode from '../Common/ShareQrCode';
 import { fetchMatches } from '../../Redux/matchSlice';
-import QRCode from 'qrcode';
+import { buildAffiliateCampaignPoster, saveFightSocialPoster } from '@/Utils/fightSocialPoster';
 import dynamic from "next/dynamic";
 const ReactMediaRecorder = dynamic(
   () => import("react-media-recorder").then((mod) => mod.ReactMediaRecorder),
@@ -47,7 +47,8 @@ const isSameFightId = (match, targetId) => {
 const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, managedAffiliate }) => {
   const [showUsersPlayed, setShowUsersPlayed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
-  const canvasRef = useRef(null);
+  const [posterImage, setPosterImage] = useState('');
+  const [posterError, setPosterError] = useState('');
   const dispatch = useDispatch();
   const signedInAffiliate = useSelector((state) => state.affiliateAuth.userAffiliate);
   const affiliate = managedAffiliate || signedInAffiliate;
@@ -66,9 +67,6 @@ const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, mana
  const [isOpenPodcast, setOpenPodcast] = useState(false);
  const [isRecording, setIsRecording] = useState(false);
  const [requiredUsers, setRequiredUsers] = useState(null);
-  const imageData = {
-    logoImage: "https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743079917/home/rtr4tmlkw82rmk1kywuc.webp"
-  };
   const [backgroundImgVar, setBackgroundImgVar] = useState("https://res.cloudinary.com/dqi6vk2vn/image/upload/v1743561422/home/qf8hkfqxlaobsriijvmj.png");
 
   const userPredictions = Array.isArray(match?.userPredictions) ? match.userPredictions : [];
@@ -173,129 +171,45 @@ const actualProfit = extraActualProfit / 2;
     };
   }, [matchId, reduxMatch, initialMatch]);
 
+  const campaignPoster = match?.fightPosterImage || match?.fightPosterMobileImage;
+  const campaignBackground = match?.promotionBackground;
+  const sourceFightId = match?.sourceLiveMatchId?._id || match?.sourceLiveMatchId;
+
   useEffect(() => {
-    if (!match) return; // Exit if match is not available yet
+    if (!promotionUrl) return undefined;
+    const controller = new AbortController();
+    setPosterImage('');
+    setPosterError('');
 
-    const canvas = canvasRef.current;
-    if (!canvas) return; // Check if canvas is available
-    const ctx = canvas.getContext('2d');
-
-    // Initialize images
-    const backgroundImage = new Image();
-    backgroundImage.crossOrigin = "anonymous";
-    backgroundImage.src = backgroundImgVar;
-
-    const logoImage = new Image();
-    logoImage.crossOrigin = "anonymous";
-    logoImage.src = imageData.logoImage;
-
-    const fighterOneImage = new Image();
-    fighterOneImage.crossOrigin = "anonymous";
-    fighterOneImage.src = fighterAImage;
-
-    const fighterTwoImage = new Image();
-    fighterTwoImage.crossOrigin = "anonymous";
-    fighterTwoImage.src = fighterBImage;
-
-    let imagesLoaded = 0;
-    const totalImages = match.promotionBackground ? 2 : 4; // Adjust based on rendering flow
-
-    const handleImageLoad = () => {
-        imagesLoaded += 1;
-        if (imagesLoaded === totalImages) {
-            // Draw background image
-            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
-            if (match.promotionBackground) {
-                // Apply dark overlay for custom background
-                ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw logo
-                ctx.drawImage(logoImage, 10, 10, 60, 60);
-
-                // Generate QR code
-                QRCode.toDataURL(promotionUrl, { width: 60, margin: 2 }, (err, qrImageUrl) => {
-                    if (!err) {
-                        const qrImage = new Image();
-                        qrImage.src = qrImageUrl;
-                        qrImage.onload = () => {
-                            ctx.drawImage(qrImage, (canvas.width / 2) - 30, 225, 60, 60); // Center QR code below URL
-                        };
-                    }
-                });
-            } else {
-                // Render all elements when no custom background
-                ctx.fillStyle = "rgba(0, 0, 0, 0.0)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw logo
-                ctx.drawImage(logoImage, 10, 10, 60, 60);
-
-                // Draw text for website URL
-                ctx.font = 'bold 18px UFCSans, Arial, sans-serif';
-                ctx.fillStyle = '#FFFFFF';
-                ctx.textAlign = 'center';
-                ctx.fillText(`fantasymmadness.com`, canvas.width / 2, 40);
-
-                // Draw date and time
-       //         ctx.fillStyle = '#FF4500';
-       //        ctx.fillText(
-       //          `${match.matchDate.split('T')[0]} ${new Date(`1970-01-01T${match.matchTime}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`,
-       //        canvas.width / 2, 65
-       //   );
-
-                // Draw fighters with shadow effect
-                const drawImageWithShadow = (image, x, y, name) => {
-                    const radius = 45;
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(x, y, radius, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                    ctx.shadowBlur = 0;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
-
-                    const circleDiameter = radius * 2;
-                    ctx.drawImage(image, x - radius, y - radius, circleDiameter * 1.2, circleDiameter);
-
-                    ctx.restore();
-
-                    ctx.font = 'bold 16px UFCSans, Arial, sans-serif';
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillText(name, x, y + radius + 25);
-                };
-
-                drawImageWithShadow(fighterOneImage, 110, 140, fighterAName);
-                drawImageWithShadow(fighterTwoImage, 380, 140, fighterBName);
-
-                // Generate QR code
-                QRCode.toDataURL(promotionUrl, { width: 60, margin: 2 }, (err, qrImageUrl) => {
-                    if (!err) {
-                        const qrImage = new Image();
-                        qrImage.src = qrImageUrl;
-                        qrImage.onload = () => {
-                            ctx.drawImage(qrImage, (canvas.width / 2) - 30, 225, 60, 60);
-                        };
-                    }
-                });
-            }
+    async function preparePoster() {
+      let poster = campaignPoster;
+      if (!poster && sourceFightId) {
+        try {
+          const response = await fetch(`${API_BASE}/api/public/fights/${encodeURIComponent(sourceFightId)}`, { signal: controller.signal });
+          if (response.ok) {
+            const { fight } = await response.json();
+            poster = fight?.fightPosterImage || fight?.fightPosterMobileImage || fight?.promotionBackground;
+          }
+        } catch (error) {
+          if (error.name === 'AbortError') return;
         }
-    };
-
-    // Attach onload events
-    backgroundImage.onload = handleImageLoad;
-    logoImage.onload = handleImageLoad;
-
-    if (!match.promotionBackground) {
-        fighterOneImage.onload = handleImageLoad;
-        fighterTwoImage.onload = handleImageLoad;
+      }
+      poster ||= campaignBackground;
+      if (!poster) {
+        if (!controller.signal.aborted) setPosterError('No fight poster is available for this campaign.');
+        return;
+      }
+      try {
+        const image = await buildAffiliateCampaignPoster({ poster, url: promotionUrl });
+        if (!controller.signal.aborted) setPosterImage(image);
+      } catch (error) {
+        if (!controller.signal.aborted) setPosterError(error.message);
+      }
     }
-}, [match, affiliate, backgroundImgVar, fighterAImage, fighterBImage, fighterAName, fighterBName]);
+
+    preparePoster();
+    return () => controller.abort();
+  }, [campaignBackground, campaignPoster, promotionUrl, sourceFightId]);
 
   if (!match && detailLoading) {
     return <div className="affiliate-campaign-loading">Loading campaign details…</div>;
@@ -371,15 +285,6 @@ const actualProfit = extraActualProfit / 2;
   // Function to close the modal
   const closeModal = () => {
     setIsModalOpen(false);
-  };
-
-  const downloadImage = () => {
-    const canvas = canvasRef.current;
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = 'promotional-image.png';
-    link.click();
   };
 
 const handleSave = async (blobUrl) => {
@@ -652,14 +557,17 @@ const handleSave = async (blobUrl) => {
             </header>
             <div className="affiliate-campaign-creative-layout">
               <div className="affiliate-campaign-canvas-shell">
-                <canvas ref={canvasRef} width={500} height={300} />
-                <span><FaCheckCircle /> QR-enabled campaign artwork</span>
+                {posterImage ? (
+                  <img src={posterImage} alt={`${fighterAName} vs ${fighterBName} fight poster with affiliate QR code`} />
+                ) : (
+                  <p role={posterError ? 'alert' : 'status'}>{posterError || 'Preparing your fight poster…'}</p>
+                )}
               </div>
               <div className="affiliate-campaign-creative-copy">
                 <h3>Take the fight to your audience.</h3>
                 <p>Download the generated promotion graphic, publish it across your channels, and let fans scan directly into the campaign.</p>
                 <div>
-                  <button type="button" className="theme-btn theme-btn-primary" onClick={downloadImage}><FaDownload /> Download image</button>
+                  <button type="button" className="theme-btn theme-btn-primary" disabled={!posterImage} onClick={() => saveFightSocialPoster(posterImage, campaignMatchId)}><FaDownload /> Download poster</button>
                   <button type="button" className="theme-btn theme-btn-secondary" onClick={openModal}><FaInfoCircle /> View instructions</button>
                   {!match.matchPromotionalVideoUrl && (
                     <button

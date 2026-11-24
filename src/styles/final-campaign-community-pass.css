@@ -621,34 +621,12 @@
   position: relative;
 }
 
-.affiliate-campaign-canvas-shell canvas {
+.affiliate-campaign-canvas-shell img {
   border-radius: 10px;
   display: block;
   height: auto;
   max-width: 100%;
   width: 100%;
-}
-
-.affiliate-campaign-canvas-shell > span {
-  align-items: center;
-  background: rgba(2, 5, 9, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  bottom: 22px;
-  color: rgba(255, 255, 255, 0.72);
-  display: inline-flex;
-  font-family: var(--ff-display, Impact, sans-serif);
-  font-size: 9px;
-  gap: 7px;
-  left: 22px;
-  min-height: 32px;
-  padding: 0 10px;
-  position: absolute;
-  text-transform: uppercase;
-}
-
-.affiliate-campaign-canvas-shell > span svg {
-  color: #57df89;
 }
 
 .affiliate-campaign-creative-copy h3 {

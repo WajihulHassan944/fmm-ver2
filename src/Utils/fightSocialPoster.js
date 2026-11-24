@@ -198,3 +198,29 @@ export function saveFightSocialPoster(image, fightId) {
   link.download = `fantasy-mmadness-${String(fightId || 'fight').replace(/[^a-z0-9-]/gi, '')}.png`;
   document.body.appendChild(link); link.click(); link.remove();
 }
+
+// Keep the event artwork in its original proportions and reserve a footer for
+// the campaign marks so the QR never covers fight details or sponsor artwork.
+export async function buildAffiliateCampaignPoster({ poster, url }) {
+  const [art, logo, qr] = await Promise.all([
+    loadImage(poster),
+    loadImage(LOGO),
+    QRCode.toDataURL(url, { width: 192, margin: 4, errorCorrectionLevel: 'M' }).then(loadImage),
+  ]);
+  if (!art || !logo || !qr) throw new Error('The campaign poster could not be loaded.');
+
+  const canvas = document.createElement('canvas');
+  canvas.width = WIDTH;
+  const artHeight = Math.round(WIDTH * art.naturalHeight / art.naturalWidth);
+  const footer = 224;
+  canvas.height = artHeight + footer;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#090c17';
+  ctx.fillRect(0, 0, WIDTH, canvas.height);
+  ctx.drawImage(art, 0, 0, WIDTH, artHeight);
+  const logoWidth = 72;
+  const logoHeight = Math.round(logoWidth * logo.naturalHeight / logo.naturalWidth);
+  ctx.drawImage(logo, 24, artHeight + (footer - logoHeight) / 2, logoWidth, logoHeight);
+  ctx.drawImage(qr, WIDTH - 208, artHeight + 16, 192, 192);
+  return canvas.toDataURL('image/png');
+}
