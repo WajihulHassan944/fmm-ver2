@@ -1,3 +1,4 @@
+import { getAffiliatePreview } from '@/Utils/authFetch';
 import { getAdminToken as readAdminToken } from './authFetch';
 
 export const API_BASE = String(process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://fantasymmadness-game-server-three.vercel.app').trim().replace(/\/+$/, '');
@@ -85,7 +86,7 @@ const recoverAdminSession = (accessToken) => {
   const next = window.location.pathname + window.location.search;
   window.location.assign(`/administration/login?reason=session-expired&next=${encodeURIComponent(next)}`);
 };
-export const getAffiliateToken = () => (typeof window === 'undefined' ? '' : window.localStorage.getItem('affiliateAuthToken') || '');
+export const getAffiliateToken = () => (typeof window === 'undefined' ? '' : getAffiliatePreview()?.token || window.localStorage.getItem('affiliateAuthToken') || '');
 
 export class WrestlingApiError extends Error {
   constructor(message, { status = 500, code = 'WRESTLING_REQUEST_FAILED', details = null, payload = null } = {}) {

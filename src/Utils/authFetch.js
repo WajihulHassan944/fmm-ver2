@@ -25,7 +25,18 @@ const bearer = (token, extra) => (token ? { ...extra, Authorization: `Bearer ${t
 
 export const getAdminToken = () => read('adminAuthToken') || read('adminToken');
 export const getUserToken = () => read('authToken');
-export const getAffiliateToken = () => read('affiliateAuthToken') || read('authToken');
+export function getAffiliatePreview() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const token = window.sessionStorage.getItem('previewToken');
+    const context = JSON.parse(window.sessionStorage.getItem('previewContext') || 'null');
+    return token && context?.type === 'affiliate' ? { ...context, token } : null;
+  } catch {
+    return null;
+  }
+}
+
+export const getAffiliateToken = () => getAffiliatePreview()?.token || read('affiliateAuthToken') || read('authToken');
 
 export const adminHeaders = (extra) => bearer(getAdminToken(), extra);
 export const userHeaders = (extra) => bearer(getUserToken(), extra);

@@ -41,7 +41,14 @@ function AffiliateCommand({ affiliateId }) {
     <>
       <div className="theme-container" style={{ paddingBlock: 16 }}>
         <Link href="/administration/AffiliateUsers">Back to Affiliates</Link>
-        {affiliate && <p>Owner support for {[affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || affiliate.playerName || 'this affiliate'}</p>}
+        {affiliate && (
+          <>
+            <p>Owner support for {[affiliate.firstName, affiliate.lastName].filter(Boolean).join(' ') || affiliate.playerName || 'this affiliate'}</p>
+            <Link className="admin-action-primary" href={`/owner?affiliate=${encodeURIComponent(affiliateId)}`}>
+              View full affiliate workspace
+            </Link>
+          </>
+        )}
         {!affiliate && <p role={error ? 'alert' : 'status'}>{error || 'Loading Affiliate Command Center 3.0…'}</p>}
       </div>
       {affiliate && <AffiliateDashboard managedAffiliate={affiliate} />}

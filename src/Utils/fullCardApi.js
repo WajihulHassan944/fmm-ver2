@@ -1,9 +1,10 @@
+import { getAffiliateToken } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 
 export const getStoredToken = (kind = 'player') => {
   if (typeof window === 'undefined') return '';
   if (kind === 'admin') return window.localStorage.getItem('adminAuthToken') || window.localStorage.getItem('adminToken') || '';
-  if (kind === 'affiliate') return window.localStorage.getItem('affiliateAuthToken') || window.localStorage.getItem('authToken') || '';
+  if (kind === 'affiliate') return getAffiliateToken();
   return window.localStorage.getItem('authToken') || '';
 };
 

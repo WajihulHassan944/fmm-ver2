@@ -59,11 +59,14 @@ const OwnerCheck = () => {
   const [useEmailInstead, setUseEmailInstead] = useState(false);
   const [viewAsQuery, setViewAsQuery] = useState('');
   const [viewAsResults, setViewAsResults] = useState(null);
+  const [selectedAffiliate, setSelectedAffiliate] = useState('');
 
   useEffect(() => {
     try {
       setToken(window.localStorage.getItem(TOKEN_KEY) || '');
       setDeviceKey(window.localStorage.getItem(DEVICE_KEY) || '');
+      const affiliate = new URLSearchParams(window.location.search).get('affiliate');
+      if (affiliate && /^[0-9a-f]{24}$/i.test(affiliate)) setSelectedAffiliate(affiliate);
     } catch (e) { /* ignore */ }
   }, []);
 
@@ -198,7 +201,19 @@ const OwnerCheck = () => {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload?.token) { setNotice(payload?.message || 'Could not start the preview.'); return; }
-      const destination = targetType === 'affiliate' ? '/AffiliateDashboard' : '/';
+      if (targetType === 'affiliate') {
+        window.sessionStorage.setItem('previewContext', JSON.stringify({
+          id: target.id,
+          name: payload.target?.name || target.name || 'Affiliate',
+          type: 'affiliate',
+          backOffice: Boolean(selectedAffiliate),
+        }));
+        window.sessionStorage.setItem('previewToken', payload.token);
+        window.location.assign('/AffiliateDashboard');
+        return;
+      }
+
+      const destination = '/';
       const query = new URLSearchParams({
         preview: payload.token,
         as: payload.target?.name || target.name,
@@ -316,6 +331,16 @@ const OwnerCheck = () => {
             </button>
           </div>
         </div>
+
+        {selectedAffiliate && (
+          <div style={card}>
+            <h2 style={{ marginTop: 0 }}>Affiliate Command Center 3.0</h2>
+            <p>Walk through the selected affiliate’s workspace in read-only mode.</p>
+            <button type="button" onClick={() => viewAs({ id: selectedAffiliate }, 'affiliate')} disabled={busy} style={button(busy)}>
+              Open full affiliate workspace
+            </button>
+          </div>
+        )}
 
         {!deviceKey && (
           <div style={{ ...card, border: '1px solid rgba(242,181,68,.45)' }}>

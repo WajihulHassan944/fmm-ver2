@@ -1,3 +1,4 @@
+import { getAffiliatePreview } from '@/Utils/authFetch';
 import "@/styles/split/globals.css";
 import React from "react";
 import "@/styles/upcomingfightsuser.css";
@@ -375,6 +376,20 @@ function AppContent({ children }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isExactMobile, setIsExactMobile] = useState(false);
+  const [affiliatePreview, setAffiliatePreview] = useState(null);
+
+  useEffect(() => {
+    setAffiliatePreview(getAffiliatePreview());
+  }, [router.pathname]);
+
+  const exitAffiliatePreview = () => {
+    window.sessionStorage.removeItem('previewToken');
+    window.sessionStorage.removeItem('previewContext');
+    const destination = affiliatePreview?.backOffice
+      ? `/administration/affiliate-command/${encodeURIComponent(affiliatePreview.id)}`
+      : '/owner';
+    window.location.replace(destination);
+  };
   const isPlaying = useSelector((state) => state.music.isPlaying);
   const seekPosition = useSelector((state) => state.music.seekPosition);
   const howlerRef = useRef(null);
@@ -766,6 +781,13 @@ function AppContent({ children }) {
         </div>
       )}
 
+      {renderLegacyExperience && affiliatePreview && (
+        <div role="status" style={{ padding: '12px 20px', color: '#fff', background: '#28201a' }}>
+          <strong>Viewing {affiliatePreview.name}’s affiliate workspace</strong>
+          {' · Read-only walkthrough '}
+          <button type="button" onClick={exitAffiliatePreview}>Exit walkthrough</button>
+        </div>
+      )}
       {renderLegacyExperience && <main className={mainClassName}>
         {useRouteExperienceFrame ? (
           <RouteExperienceFrame pathname={router.pathname}>
