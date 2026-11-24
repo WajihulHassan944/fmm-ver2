@@ -111,6 +111,12 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
   const [wrestlingLoading, setWrestlingLoading] = useState(false);
 
   useEffect(() => {
+    if (affiliate && window.location.hash === '#affiliate-business-suite') {
+      document.getElementById('affiliate-business-suite')?.scrollIntoView();
+    }
+  }, [affiliate]);
+
+  useEffect(() => {
     if (shadowMatchId || promoMatchDetails.matchId) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -389,7 +395,7 @@ const AffiliateDashboard = ({ managedAffiliate }) => {
               <div><FaBullhorn /><span><strong>{totalPromotions}</strong><small>Total promotions</small></span></div>
             </section>
 
-            <section className="affiliate-business-suite" aria-labelledby="affiliate-business-suite-title">
+            <section id="affiliate-business-suite" className="affiliate-business-suite" aria-labelledby="affiliate-business-suite-title">
               <header className="affiliate-business-suite-heading">
                 <div>
                   <p className="xp-eyebrow"><FaTools /> Affiliate business suite</p>

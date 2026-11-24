@@ -643,7 +643,7 @@ const AffiliateUsers = () => {
                 <tr key={user._id}>
                   <td className="admin-select-column"><input type="checkbox" aria-label={`Select ${user.firstName || 'affiliate'} for email`} checked={selectedAffiliateIds.includes(user._id)} disabled={!isValidEmail(user.email)} onChange={() => toggleAffiliate(user._id)} /></td>
                   <td>
-                    <Link className="admin-person-cell" href={`/administration/affiliate-command/${encodeURIComponent(user._id)}`} aria-label={`Open ${user.firstName || user.playerName || 'affiliate'}’s Command Center 3.0`}>
+                    <Link className="admin-person-cell" href={`/owner?affiliate=${encodeURIComponent(user._id)}`} aria-label={`Open ${user.firstName || user.playerName || 'affiliate'}’s Command Center 3.0`}>
                       <img src={affiliateProfileImage(user.profileUrl)} onError={(event) => { if (!event.currentTarget.src.endsWith(FALLBACK_AVATAR)) event.currentTarget.src = FALLBACK_AVATAR; }} alt={`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'} />
                       <span>
                         <strong>{`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Affiliate'}</strong>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { buildPublicApiUrl } from '@/Utils/publicApi';
 
 // Owner Check — read-only. Deliberately a standalone page with its own door and
@@ -60,6 +60,7 @@ const OwnerCheck = () => {
   const [viewAsQuery, setViewAsQuery] = useState('');
   const [viewAsResults, setViewAsResults] = useState(null);
   const [selectedAffiliate, setSelectedAffiliate] = useState('');
+  const attemptedAffiliate = useRef(null);
 
   useEffect(() => {
     try {
@@ -191,7 +192,7 @@ const OwnerCheck = () => {
     } finally { setBusy(false); }
   };
 
-  const viewAs = async (target, targetType) => {
+  const viewAs = useCallback(async (target, targetType) => {
     setBusy(true); setNotice('');
     try {
       const response = await fetch(buildPublicApiUrl('/api/owner/preview/token'), {
@@ -209,7 +210,7 @@ const OwnerCheck = () => {
           backOffice: Boolean(selectedAffiliate),
         }));
         window.sessionStorage.setItem('previewToken', payload.token);
-        window.location.assign('/AffiliateDashboard');
+        window.location.assign('/AffiliateDashboard#affiliate-business-suite');
         return;
       }
 
@@ -223,7 +224,17 @@ const OwnerCheck = () => {
     } catch (error) {
       setNotice('Could not reach the server.');
     } finally { setBusy(false); }
-  };
+  }, [token, selectedAffiliate]);
+
+  useEffect(() => {
+    if (!token || !selectedAffiliate) {
+      attemptedAffiliate.current = null;
+      return;
+    }
+    if (attemptedAffiliate.current === selectedAffiliate) return;
+    attemptedAffiliate.current = selectedAffiliate;
+    viewAs({ id: selectedAffiliate }, 'affiliate');
+  }, [token, selectedAffiliate, viewAs]);
 
   const recheck = async () => {
     setBusy(true);

@@ -127,9 +127,10 @@ const UserDetails = ({ user, affiliates = [] }) => {
         </div>
 
         {affiliateId && (
-          <Link className="admin-action-primary" href={`/administration/affiliate-command/${encodeURIComponent(affiliateId)}`}>
-            Open Command Center 3.0
-          </Link>
+          <div className="admin-row-actions">
+            <Link href={`/owner?affiliate=${encodeURIComponent(affiliateId)}`}>Open Command Center 3.0</Link>
+            <Link href={`/administration/affiliate-command/${encodeURIComponent(affiliateId)}`}>Manage affiliate fights</Link>
+          </div>
         )}
 
         {!isVerified && (

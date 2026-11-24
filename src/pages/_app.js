@@ -785,7 +785,7 @@ function AppContent({ children }) {
         <div role="status" style={{ padding: '12px 20px', color: '#fff', background: '#28201a' }}>
           <strong>Viewing {affiliatePreview.name}’s affiliate workspace</strong>
           {' · Read-only walkthrough '}
-          <button type="button" onClick={exitAffiliatePreview}>Exit walkthrough</button>
+          <button type="button" onClick={exitAffiliatePreview}>{affiliatePreview.backOffice ? 'Return to owner fight controls' : 'Exit walkthrough'}</button>
         </div>
       )}
       {renderLegacyExperience && <main className={mainClassName}>
