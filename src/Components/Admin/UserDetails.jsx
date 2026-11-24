@@ -4,7 +4,7 @@ import { FaCheck, FaEnvelope, FaPhone, FaUsers } from 'react-icons/fa';
 import { adminHeaders } from '@/Utils/authFetch';
 import { PUBLIC_API_BASE_URL } from '@/Utils/publicApi';
 import ShareQrCode from '@/Components/Common/ShareQrCode';
-import { getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
+import { getAffiliateFightShareUrl, getAffiliatePublicIdentifier } from '@/Utils/affiliatePublicLink';
 
 const FALLBACK_AVATAR = AFFILIATE_LOGO;
 
@@ -24,13 +24,24 @@ const UserDetails = ({ user, affiliates = [] }) => {
   const [buttonText, setButtonText] = useState('Send Email');
   const [isVerified, setIsVerified] = useState(user.verified);
   const [userDetails, setUserDetails] = useState([]);
+  const [campaigns, setCampaigns] = useState(null);
+  const [campaignError, setCampaignError] = useState('');
+  useEffect(() => {
+    let active = true;
+    setCampaigns(null); setCampaignError('');
+    fetch(`${PUBLIC_API_BASE_URL}/api/affiliate/${encodeURIComponent(affiliateId)}/promoted-fights?limit=500&includeShadow=true`, { headers: adminHeaders() })
+      .then(async r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(p => { const rows = Array.isArray(p) ? p : p.items || p.data || p.promotedFights || p.fights; if (!Array.isArray(rows)) throw new Error('Unexpected campaign response'); if (active) setCampaigns(rows); })
+      .catch(e => { if (active) setCampaignError(e.message); });
+    return () => { active = false; };
+  }, [affiliateId]);
 
   useEffect(() => {
-    fetch('https://fantasymmadness-game-server-three.vercel.app/users', { headers: adminHeaders() })
+    fetch(`${PUBLIC_API_BASE_URL}/users`, { headers: adminHeaders() })
       .then((response) => response.json())
       .then((data) => {
         const matchedUsers = (user.usersJoined || []).map((affiliateUser) => {
-          const matchedUser = data.find((registeredUser) => registeredUser._id === affiliateUser.userId);
+          const matchedUser = (Array.isArray(data) ? data : data.users || data.items || data.data || []).find((registeredUser) => registeredUser._id === affiliateUser.userId);
           return {
             ...matchedUser,
             joinedAt: affiliateUser.joinedAt,
@@ -146,10 +157,28 @@ const UserDetails = ({ user, affiliates = [] }) => {
         </label>
         <div className="admin-row-actions">
           <button type="button" disabled={!affiliateUrl} onClick={() => copyAffiliateValue(affiliateUrl, 'Affiliate link')}>Copy link</button>
-          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">Open affiliate page</a>}
+          {affiliateUrl && <a href={affiliateUrl} target="_blank" rel="noopener noreferrer">Open public fan page</a>}
         </div>
         <p role="status">{copyStatus}</p>
         <ShareQrCode key={affiliateId} url={affiliateUrl} label={user.playerName || user.firstName || 'Affiliate'} fileName={`affiliate-${affiliateId}-qr`} />
+      </section>
+
+      <section className="admin-table-panel" style={{ padding: 20, marginBottom: 20 }}>
+        <h3>Affiliate business overview</h3>
+        <div className="admin-affiliate-profile-meta">
+          <div><small>Account balance (FM COINS)</small><strong>{user.tokens ?? 'Unavailable'}</strong></div>
+          <div><small>Full Card Promoter</small><strong>{user.canCreateFullCards && !user.promoterSuspendedAt ? 'Approved' : 'Not approved'}</strong></div>
+          <div><small>League referrals</small><strong>{Array.isArray(user.usersJoined) ? user.usersJoined.length : 'Unavailable'}</strong></div>
+        </div>
+        <h3>Promoted fights and share kits</h3>
+        {campaignError ? <p role="alert">Campaigns could not be loaded: {campaignError}</p> : campaigns === null ? <p>Loading campaigns…</p> : !campaigns.length ? <p>No promoted fights returned.</p> : campaigns.map((fight, i) => {
+          const id = fight._id || fight.id;
+          const url = id ? getAffiliateFightShareUrl(user, id) : '';
+          return <details key={id || i} style={{ marginBottom: 12 }}><summary>{fight.matchName || [fight.matchFighterA, fight.matchFighterB].filter(Boolean).join(' vs ') || 'Fight'} — {fight.matchStatus || fight.status || 'Status unavailable'}</summary>{url && <><p><a href={url} target="_blank" rel="noopener noreferrer">Open tracked fight link</a></p><button type="button" onClick={() => copyAffiliateValue(url, 'Fight link')}>Copy fight link</button><ShareQrCode url={url} label={user.firstName || 'Affiliate'} fileName={`affiliate-${affiliateId}-${id}`} /></>}</details>;
+        })}
+        <h3>Payout history</h3>
+        {Array.isArray(user.payouts) ? user.payouts.length ? user.payouts.map((p, i) => <p key={p._id || i}>{p.amount ?? 'Unavailable'} FM COINS — {p.status || 'Status unavailable'}</p>) : <p>No payout requests recorded.</p> : <p>Payout history not returned by account service.</p>}
+        <a href="/administration/payouts">Open owner payout desk</a>
       </section>
 
       <section className="admin-table-panel admin-affiliate-members-panel">
