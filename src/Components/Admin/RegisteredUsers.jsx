@@ -43,7 +43,7 @@ const RegisteredUsers = () => {
     setUsersLoading(true);
     setUsersError('');
     try {
-      const response = await fetch('https://fantasymmadness-game-server-three.vercel.app/users', {
+      const response = await fetch(buildPublicApiUrl('/users'), {
         headers: adminJsonHeaders(),
         cache: 'no-store',
       });
