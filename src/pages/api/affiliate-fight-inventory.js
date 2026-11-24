@@ -23,7 +23,9 @@ export function getPromotableWebsiteFights(featured, scheduled) {
       && String(fight.matchBy || '').toLowerCase() !== 'affiliate'
       && fight.entryOpen !== false && !fight.prizesSettledAt && !fight.settledAt
       && !/draft|cancel|void|refund|settled/i.test(status)
-      && getFightStatus(fight) !== 'past';
+      // A live record can still carry the Shadow workflow's default "closed".
+      // Public entry availability and the live status determine its eligibility.
+      && getFightStatus({ ...fight, matchShadowStatus: undefined, matchShadowOpenStatus: undefined }) !== 'past';
   }).sort((left, right) => {
     const slot = (fight) => Number(fight.homepageSlot) > 0 ? Number(fight.homepageSlot) : Infinity;
     return (slot(left) - slot(right))
@@ -67,5 +69,27 @@ export default async function handler(req, res) {
     return res.status(502).json({ message: 'The upcoming fight schedule could not be loaded.' });
   }
   res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
-  return res.status(200).json({ items });
+  return res.status(200).json({ items: items.map((fight) => ({
+    _id: getFightId(fight),
+    homepagePromoted: fight.homepagePromoted,
+    homepageSlot: fight.homepageSlot,
+    matchStatus: fight.matchStatus,
+    matchType: fight.matchType,
+    matchName: fight.matchName,
+    matchCategory: fight.matchCategory,
+    matchCategoryTwo: fight.matchCategoryTwo,
+    matchDate: fight.matchDate,
+    matchDateKey: fight.matchDateKey,
+    matchTime: fight.matchTime,
+    matchDescription: fight.matchDescription,
+    matchVideoUrl: fight.matchVideoUrl,
+    maxRounds: fight.maxRounds,
+    matchFighterA: fight.matchFighterA,
+    matchFighterB: fight.matchFighterB,
+    fighterAId: fight.fighterAId?._id || fight.fighterAId?.id || (typeof fight.fighterAId === 'string' ? fight.fighterAId : undefined),
+    fighterBId: fight.fighterBId?._id || fight.fighterBId?.id || (typeof fight.fighterBId === 'string' ? fight.fighterBId : undefined),
+    fighterAImage: fight.resolvedFighterAImage || fight.fighterAImage,
+    fighterBImage: fight.resolvedFighterBImage || fight.fighterBImage,
+    promotionBackground: fight.promotionBackground,
+  })) });
 }
