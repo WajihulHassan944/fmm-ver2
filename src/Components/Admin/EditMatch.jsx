@@ -242,6 +242,15 @@ const EditMatch = ({ matchId, isShadow }) => {
       return;
     }
 
+    if (name === 'matchFighterB') {
+      setFormData((current) => {
+        const oldName = current.matchFighterB || '';
+        const title = current.matchName || '';
+        const isFightTitle = oldName && current.matchFighterA && title.includes(oldName) && title.includes(current.matchFighterA);
+        return { ...current, matchFighterB: value, matchName: isFightTitle ? title.replace(oldName, value) : title };
+      });
+      return;
+    }
     setFormData((current) => ({ ...current, [name]: files ? files[0] : value }));
   };
 
