@@ -241,21 +241,36 @@ const EditMatch = ({ matchId, isShadow }) => {
 
   // Fighter photos belong to the shared library. Save them through the same
   // working endpoint as Fighter Library, without calling the broken editMatch upload.
-  const saveLibraryPhoto = async (side) => {
+  const saveFighterPhoto = async (side) => {
     const id = side === 'A' ? formData.fighterAId : formData.fighterBId;
     const file = side === 'A' ? formData.fighterAImage : formData.fighterBImage;
-    if (!id) return alert('Select an existing fighter from the Fighter Library first.');
+    if (!isShadow && !id) return alert('Select an existing fighter from the Fighter Library first.');
     if (!(file instanceof File)) return alert('Choose a new photo first.');
     if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return alert('Choose an image smaller than 5 MB.');
     setPhotoSaving(side);
     try {
       const payload = new FormData();
       payload.append('image', file);
+      if (isShadow) {
+        const response = await fetch(`${API_BASE}/api/admin/shadow/${matchId}/photos/${side}`, {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: payload,
+        });
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.message || 'The photo upload failed.');
+        }
+        const { imageUrl } = await response.json();
+        setFormData((current) => ({ ...current, [`fighter${side}Image`]: imageUrl }));
+        alert('Photo saved to this Shadow Fight.');
+        return;
+      }
       await combatFightersApi.update(id, payload);
       alert('Fighter Library photo saved. Refresh the fight page to see the updated image.');
       window.location.reload();
     } catch (error) {
-      alert('Fighter Library photo could not be saved: ' + (error?.message || 'Unknown error'));
+      alert(`${isShadow ? 'Shadow Fight' : 'Fighter Library'} photo could not be saved: ${error?.message || 'Unknown error'}`);
     } finally { setPhotoSaving(''); }
   };
 
@@ -422,15 +437,15 @@ const EditMatch = ({ matchId, isShadow }) => {
             </div>
             <label className="admin-edit-promotion-upload">
               <img src={fighterAPreview} alt="Fighter A photo preview" style={{ objectFit: 'contain' }} />
-              <div><strong><FaImage /> Replace Fighter A photo</strong><small>Choose a photo, then save the fight.</small></div>
+              <div><strong><FaImage /> Replace Fighter A photo</strong><small>{isShadow ? 'Choose a photo, then save it to this Shadow Fight.' : 'Choose a photo, then save the fight.'}</small></div>
               <input type="file" accept="image/*" name="fighterAImage" onChange={handleChange} />
-              <button type="button" disabled={Boolean(photoSaving)} onClick={() => saveLibraryPhoto('A')}>{photoSaving === 'A' ? 'Saving photo…' : 'Save photo to Fighter Library'}</button>
+              <button type="button" disabled={Boolean(photoSaving)} onClick={() => saveFighterPhoto('A')}>{photoSaving === 'A' ? 'Saving photo…' : isShadow ? 'Save photo to Shadow Fight' : 'Save photo to Fighter Library'}</button>
             </label>
             <label className="admin-edit-promotion-upload">
               <img src={fighterBPreview} alt="Fighter B photo preview" style={{ objectFit: 'contain' }} />
-              <div><strong><FaImage /> Replace Fighter B photo</strong><small>Choose a photo, then save the fight.</small></div>
+              <div><strong><FaImage /> Replace Fighter B photo</strong><small>{isShadow ? 'Choose a photo, then save it to this Shadow Fight.' : 'Choose a photo, then save the fight.'}</small></div>
               <input type="file" accept="image/*" name="fighterBImage" onChange={handleChange} />
-              <button type="button" disabled={Boolean(photoSaving)} onClick={() => saveLibraryPhoto('B')}>{photoSaving === 'B' ? 'Saving photo…' : 'Save photo to Fighter Library'}</button>
+              <button type="button" disabled={Boolean(photoSaving)} onClick={() => saveFighterPhoto('B')}>{photoSaving === 'B' ? 'Saving photo…' : isShadow ? 'Save photo to Shadow Fight' : 'Save photo to Fighter Library'}</button>
             </label>
             <label><span>Legacy fighter A name</span><input type="text" name="matchFighterA" value={formData.matchFighterA} onChange={handleChange} /></label>
             <label><span>Legacy fighter B name</span><input type="text" name="matchFighterB" value={formData.matchFighterB} onChange={handleChange} /></label>
@@ -471,7 +486,7 @@ const EditMatch = ({ matchId, isShadow }) => {
         )}
 
         <section className="admin-edit-form-section">
-          <header><span><FaUsers /></span><div><small>Fighter library artwork</small><h4>Linked fighter images</h4><p>Fighter images are now reused from the Combat Fighter Library. Update fighter photos there instead of uploading one-off images per fight.</p></div></header>
+          <header><span><FaUsers /></span><div><small>Fighter library artwork</small><h4>Linked fighter images</h4><p>{isShadow ? 'This Shadow Fight can use its own photos. The Fighter Library provides the default images.' : 'Fighter images are now reused from the Combat Fighter Library. Update fighter photos there instead of uploading one-off images per fight.'}</p></div></header>
           <div className="admin-edit-media-grid">
             <article className="admin-edit-upload-card is-red admin-edit-linked-fighter-card">
               <span>Fighter A image</span>
