@@ -44,6 +44,57 @@ const isSameFightId = (match, targetId) => {
   ].some((candidate) => normalizeId(candidate) === id);
 };
 
+function AffiliatePromotionKit({ fighterA, fighterB, date, category, url }) {
+  const title = fighterA + ' vs ' + fighterB;
+  const tags = [fighterA, fighterB, category].map(value => '#' + String(value || '').replace(/[^a-zA-Z0-9]/g, '')).filter(value => value.length > 1).join(' ');
+  const hashtags = '#FANTASYMMADNESS #FightNight ' + tags;
+  const intro = title + (date ? ' | ' + date : '');
+  const action = 'Make your predictions and compete with fight fans on FANTASY MMADNESS.';
+  const templates = [
+    ['Facebook', intro + '\n' + action + '\nJoin my league: ' + url + '\n' + hashtags],
+    ['Instagram', intro + '\nWho you got? ' + action + '\nUse my link in bio or scan the poster QR: ' + url + '\n' + hashtags],
+    ['TikTok', 'Who you got? ' + intro + '\nPredict the fight: ' + url + '\n' + hashtags],
+    ['X / Twitter', title + ' — who you got? Predict the fight: ' + url + ' #FANTASYMMADNESS'],
+    ['YouTube', 'Title: ' + title + ' | Fight Predictions\nDescription: ' + intro + '\n' + action + '\nJoin my league: ' + url + '\n' + hashtags],
+    ['WhatsApp', intro + '\n' + action + '\nJoin my league: ' + url],
+    ['Email', 'Subject: Predict ' + title + '\n\nHello,\n' + intro + '\n' + action + '\nJoin my league: ' + url],
+    ['SEO & discovery', 'Title: ' + title + ' | FANTASY MMADNESS\nDescription: ' + intro + '. ' + action + '\nKeywords: ' + [fighterA, fighterB, category, 'fight predictions', 'FANTASY MMADNESS'].join(', ') + '\nHashtags: ' + hashtags + '\nCampaign link: ' + url],
+  ];
+  const [edits, setEdits] = useState({});
+  const valueFor = (name, original) => edits[name] ?? original;
+  const copy = async (value) => {
+    try { await navigator.clipboard.writeText(value); toast.success('Copied to clipboard'); }
+    catch { toast.error('Copy unavailable. Select the text to copy manually.'); }
+  };
+  const download = () => {
+    const blob = new Blob([templates.map(([name, original]) => name + '\n' + valueFor(name, original)).join('\n\n')], { type: 'text/plain;charset=utf-8' });
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = 'fantasy-mmadness-promotion-kit.txt';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
+  return (
+    <section className="affiliate-campaign-panel affiliate-campaign-creative-panel">
+      <header><div><p className="xp-eyebrow">Ready-to-share marketing</p><h2>Your fight promotion kit</h2></div><FaBullhorn /></header>
+      <p>{intro} — personalize these captions or copy them as provided. Each includes your existing campaign link.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '16px' }}>
+        {templates.map(([name, original]) => (
+          <article key={name} style={{ padding: '14px', border: '1px solid #394354', borderRadius: '12px', minWidth: 0 }}>
+            <h3>{name}</h3>
+            <textarea aria-label={name + ' promotional content'} rows={6} value={valueFor(name, original)} onChange={event => setEdits(previous => ({ ...previous, [name]: event.target.value }))} style={{ width: '100%', boxSizing: 'border-box', background: '#101620', color: '#fff', border: '1px solid #394354', borderRadius: '8px', padding: '10px', resize: 'vertical' }} />
+            <button type="button" className="theme-btn theme-btn-secondary" onClick={() => copy(valueFor(name, original))}><FaCopy /> Copy post</button>
+          </article>
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '16px' }}>
+        <button type="button" className="theme-btn theme-btn-primary" onClick={download}><FaDownload /> Download promotion text kit</button>
+      </div>
+    </section>
+  );
+}
+
 const AffiliateMatchDetails = ({ matchId, affiliateId, initialMatch = null, managedAffiliate, onUnpublished }) => {
   const [showUsersPlayed, setShowUsersPlayed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
@@ -588,6 +639,8 @@ const handleSave = async (blobUrl) => {
               </div>
             </div>
           </section>
+
+          {promotionUrl && <AffiliatePromotionKit key={JSON.stringify([campaignMatchId, fighterAName, fighterBName, scheduledDate, fightCategory, promotionUrl])} fighterA={fighterAName} fighterB={fighterBName} date={scheduledDate} category={fightCategory} url={promotionUrl} />}
 
           {isOpenPodcast && (
             <section className="affiliate-campaign-panel affiliate-campaign-recorder-panel">
